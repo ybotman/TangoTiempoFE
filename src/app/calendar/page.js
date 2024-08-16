@@ -1,65 +1,83 @@
-"use client";
+"use client"; // Add this line at the top
+
+import { useState } from 'react';
+import { useRegions } from '@/hooks/useRegions';
+import { useEvents } from '@/hooks/useEvents';
+import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
+import UserStateRole from '@/components/UI/UserStateRole';
 
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { useState, useEffect } from 'react';
-import { transformEvents } from '@/utils/transformEvents';
-import UserStateRole from '@/components/UI/UserStateRole';
-import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
 
+import { AppBar, Toolbar, Typography, Button, Select, MenuItem } from '@mui/material';
+import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 
+const CalendarPage = () => {
+  const regions = useRegions();
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const { dateRange, handleDatesSet } = useFullCalenderDateRange();
+  const events = useEvents(selectedRegion, dateRange);
 
-export default function CalendarPage() {
-  const [events, setEvents] = useState([]);
+  // Define the selectedEvent state
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  useEffect(() => {
-    console.log("API URL:", process.env.NEXT_PUBLIC_TANGO_API_URL);
-
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/eventsAll`);
-
-        if (response.ok) {
-          const events = await response.json();
-          console.log("Fetched Data:", events);
-
-          // Transform the data before setting it in state
-          const formattedEvents = transformEvents(events);
-          setEvents(formattedEvents);
-        } else {
-          console.error('Failed to fetch events:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-
-    fetchEvents();
-  }, []);
+  const handleEventClick = (clickInfo) => {
+    setSelectedEvent(clickInfo.event);
+  };
 
   return (
     <div>
-      {/* Toolbar with menu items */}
-      <AppBar position="static">
+      <img
+        src="/TangoTiempo4.jpg"
+        alt="Tango Tiempo"
+        style={{ width: '100%', height: 'auto' }}
+      />
+
+      <AppBar position="static" sx={{ backgroundColor: 'black' }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             My Calendar
           </Typography>
-          <Button color="inherit">Organizer</Button>
-          <Button color="inherit">2</Button>
-          <Button color="inherit">3</Button>
-          <UserStateRole />  {/* User state role icon */}
+          <Select
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            style={{ color: 'white' }}
+            displayEmpty
+          >
+            <MenuItem value="">
+              <em>Select a Region</em>
+            </MenuItem>
+            {regions.map((region) => (
+              <MenuItem key={region._id} value={region.regionName}>
+                {region.regionName}
+              </MenuItem>
+            ))}
+          </Select>
+          <Button color="inherit">Menu Item 1</Button>
+          <Button color="inherit">Menu Item 2</Button>
+          <UserStateRole />
         </Toolbar>
       </AppBar>
 
-      {/* Calendar component */}
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={events}
+        datesSet={handleDatesSet}
+        nextDayThreshold="04:00:00"
+        eventClick={handleEventClick}  // Handle event clicks
       />
+
+      {selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          open={Boolean(selectedEvent)}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
     </div>
   );
-  //End of Return
 }
+
+export default CalendarPage;
