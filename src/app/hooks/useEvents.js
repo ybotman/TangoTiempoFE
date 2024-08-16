@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { transformEvents } from '@/utils/transformEvents';
 
-export function useEvents(selectedRegion) {
+export function useEvents(selectedRegion, selectedOrganizers) {
     const [events, setEvents] = useState([]);
-    console.log('useEvents', selectedRegion)
+    console.log('useEvents', selectedRegion, selectedOrganizers);
+
     useEffect(() => {
         const getEvents = async () => {
             const start = new Date().toISOString();
@@ -19,7 +20,15 @@ export function useEvents(selectedRegion) {
                         end,
                     },
                 });
-                const transformedEvents = transformEvents(response.data);
+                let transformedEvents = transformEvents(response.data);
+
+                // Apply organizer filter on the client side
+                if (selectedOrganizers.length > 0) {
+                    transformedEvents = transformedEvents.filter(event =>
+                        selectedOrganizers.includes(event.organizerId)
+                    );
+                }
+
                 setEvents(transformedEvents);
             } catch (error) {
                 console.error('Error fetching events:', error);
@@ -29,7 +38,7 @@ export function useEvents(selectedRegion) {
         if (selectedRegion) {
             getEvents();
         }
-    }, [selectedRegion]);
+    }, [selectedRegion, selectedOrganizers]);
 
     return events;
 }
