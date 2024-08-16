@@ -1,10 +1,14 @@
-"use client"; // Add this line at the top
+"use client";
 
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useState, useEffect } from 'react';
-import { transformEvents } from '@/utils/transformEvents';  // Ensure this path is correct
+import { transformEvents } from '@/utils/transformEvents';
+import UserStateRole from '@/components/UI/UserStateRole';
+import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
+
+
 
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
@@ -18,7 +22,7 @@ export default function CalendarPage() {
 
         if (response.ok) {
           const events = await response.json();
-          console.log("Fetched Data:", events);  // Log the fetched data
+          console.log("Fetched Data:", events);
 
           // Transform the data before setting it in state
           const formattedEvents = transformEvents(events);
@@ -36,7 +40,20 @@ export default function CalendarPage() {
 
   return (
     <div>
-      <h1>My Calendar</h1>
+      {/* Toolbar with menu items */}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            My Calendar
+          </Typography>
+          <Button color="inherit">Organizer</Button>
+          <Button color="inherit">2</Button>
+          <Button color="inherit">3</Button>
+          <UserStateRole />  {/* User state role icon */}
+        </Toolbar>
+      </AppBar>
+
+      {/* Calendar component */}
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -44,4 +61,5 @@ export default function CalendarPage() {
       />
     </div>
   );
+  //End of Return
 }

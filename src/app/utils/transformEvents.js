@@ -1,7 +1,6 @@
-// /src/app/utils/transformEvents.js
 
 export function transformEvents(events) {
-    return data.map(event => ({
+    return events.map(event => ({
         title: event.title,           // Use the 'title' field from the API
         start: event.startDate,       // Map 'startDate' to 'start'
         end: event.endDate,           // Map 'endDate' to 'end'
