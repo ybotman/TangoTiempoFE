@@ -37,10 +37,10 @@ const CalendarPage = () => {
       <AppBar position="static" sx={{ backgroundColor: 'black' }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            My Calendar
+            Welcome:
           </Typography>
           <Select
-            value={selectedRegion}
+            value={selectedRegion || ""}
             onChange={(e) => setSelectedRegion(e.target.value)}
             style={{ color: 'white' }}
             displayEmpty
@@ -78,6 +78,6 @@ const CalendarPage = () => {
       )}
     </div>
   );
-}
+};
 
 export default CalendarPage;
