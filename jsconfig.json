@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "./src/app/*"
+      ]
+    }
+  }
+}
+/* {
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/components/*": [
+        "src/app/components/*"
+      ],
+      "@/pages/*": [
+        "src/app/pages/*"
+      ],
+      "@/styles/*": [
+        "src/app/styles/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+/*
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/components/*": [
+        "src/app/components/*"
+      ],
+      "@/pages/*": [
+        "src/app/pages/*"
+      ],
+      "@/styles/*": [
+        "src/app/styles/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+
+
+orgig
+
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  }
+}
+
+*/
