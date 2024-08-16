@@ -4,9 +4,11 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useState, useEffect } from 'react';
+import { transformEvents } from '@/utils/transformEvents';  // Ensure this path is correct
 
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
+
   useEffect(() => {
     console.log("API URL:", process.env.NEXT_PUBLIC_TANGO_API_URL);
 
@@ -14,11 +16,13 @@ export default function CalendarPage() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/eventsAll`);
 
-        // Check if the response is okay and parse JSON
         if (response.ok) {
-          const data = await response.json();
-          console.log("Fetched Data:", data);  // Log the fetched data
-          setEvents(data);
+          const events = await response.json();
+          console.log("Fetched Data:", events);  // Log the fetched data
+
+          // Transform the data before setting it in state
+          const formattedEvents = transformEvents(events);
+          setEvents(formattedEvents);
         } else {
           console.error('Failed to fetch events:', response.statusText);
         }
@@ -29,7 +33,6 @@ export default function CalendarPage() {
 
     fetchEvents();
   }, []);
-
 
   return (
     <div>
