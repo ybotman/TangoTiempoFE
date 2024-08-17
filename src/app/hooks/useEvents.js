@@ -38,5 +38,32 @@ export function useEvents(selectedRegion, selectedOrganizers) {
         }
     }, [selectedRegion, selectedOrganizers]);
 
-    return events;
+    const addEvent = async (newEvent) => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/events`, newEvent);
+            setEvents([...events, transformEvents([response.data])]);
+        } catch (error) {
+            console.error('Error adding event:', error);
+        }
+    };
+
+    const updateEvent = async (updatedEvent) => {
+        try {
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/events/${{ eventId }}`, updatedEvent);
+            setEvents(events.map(event => (event._id === updatedEvent._id ? transformEvents([response.data]) : event)));
+        } catch (error) {
+            console.error('Error updating event:', error);
+        }
+    };
+
+    const deleteEvent = async (eventId) => {
+        try {
+            await axios.delete(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/events/${eventId}`);
+            setEvents(events.filter(event => event._id !== eventId));
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    };
+
+    return { events, addEvent, updateEvent, deleteEvent };
 }

@@ -1,0 +1,170 @@
+/* General Calendar Styles */
+.fc {
+    background-color: white;
+    /* Calendar background color */
+    color: #333;
+    /* Default text color */
+    font-family: Arial, sans-serif;
+    /* Default font */
+}
+
+/* Toolbar and Navigation */
+.fc-toolbar {
+    background-color: #f5f5f5;
+    /* Toolbar background */
+    border-bottom: 1px solid #ddd;
+    /* Toolbar border */
+}
+
+.fc-toolbar-title {
+    font-size: 18px;
+    /* Title font size */
+    color: #333;
+    /* Title color */
+}
+
+.fc-button {
+    background-color: #007bff;
+    /* Button background */
+    color: white;
+    /* Button text color */
+    border: none;
+    /* Remove button border */
+    padding: 5px 10px;
+    /* Button padding */
+}
+
+.fc-button:hover {
+    background-color: #0056b3;
+    /* Button hover background */
+}
+
+.fc-button.fc-button-primary:disabled {
+    background-color: #ccc;
+    /* Disabled button background */
+    color: #666;
+    /* Disabled button text color */
+}
+
+/* Date Numbers and Days */
+.fc-daygrid-day-number,
+.fc-timegrid-slot-label,
+.fc-list-day-cushion {
+    color: black;
+    /* Date numbers color */
+    font-weight: bold;
+    /* Date numbers font weight */
+}
+
+.fc-day-sat,
+.fc-day-sun {
+    background-color: #f8f8f8;
+    /* Weekend background color */
+}
+
+.fc-daygrid-day.fc-day-today {
+    background-color: #e6f7ff;
+    /* Today's date background */
+    border: 1px solid #1890ff;
+    /* Today's date border */
+}
+
+/* Events */
+.fc-event {
+    background-color: #fdfdfd;
+    /* Event background */
+    border: 1px solid #2828a7;
+    /* Event border */
+    color: white;
+    /* Event text color */
+    padding: 5px;
+    /* Event padding */
+    border-radius: 3px;
+    /* Event border radius */
+}
+
+.fc-event:hover {
+    background-color: #218838;
+    /* Event hover background */
+    cursor: pointer;
+    /* Cursor change on hover */
+}
+
+/* Event Time and Title */
+.fc-event-time,
+.fc-event-title {
+    color: rgb(110, 38, 38);
+    /* Event time and title color */
+    font-weight: bold;
+    /* Event time and title font weight */
+}
+
+/* Day Headers (e.g., Sun, Mon, etc.) */
+.fc-col-header-cell {
+    background-color: #f5f5f5;
+    /* Header background color */
+    color: #c21111;
+    /* Header text color */
+    border-bottom: 1px solid #ddd;
+    /* Header border */
+}
+
+/* List View Styles */
+.fc-list-event {
+    background-color: #28a745;
+    /* List event background */
+    border: 1px solid #28a745;
+    /* List event border */
+    color: white;
+    /* List event text color */
+}
+
+.fc-list-event:hover {
+    background-color: #218838;
+    /* List event hover background */
+}
+
+/* TimeGrid (Week/Day) Styles */
+.fc-timegrid-axis-cushion {
+    background-color: #f5f5f5;
+    /* Time grid background */
+    color: #333;
+    /* Time grid text color */
+}
+
+.fc-timegrid-event {
+    background-color: #007bff;
+    /* Time grid event background */
+    border: 1px solid #007bff;
+    /* Time grid event border */
+}
+
+.fc-timegrid-event:hover {
+    background-color: #0056b3;
+    /* Time grid event hover background */
+}
+
+/* Miscellaneous */
+.fc-scrollgrid {
+    border: 1px solid #ddd;
+    /* Calendar border */
+}
+
+.fc-popover {
+    background-color: #fff;
+    /* Popover background */
+    border: 1px solid #ddd;
+    /* Popover border */
+}
+
+.fc-popover-header {
+    background-color: #007bff;
+    /* Popover header background */
+    color: white;
+    /* Popover header text color */
+}
+
+.fc-popover-body {
+    background-color: #f9f9f9;
+    /* Popover body background */
+}

@@ -8,6 +8,8 @@ import UserStateRole from '@/components/UI/UserStateRole';
 import useOrganizers from '@/hooks/useOrganizers'; // Import the organizers hook
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 
 import {
@@ -17,22 +19,32 @@ import {
 } from '@mui/material';
 
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
+import '@/styles/calendarStyles.css';
 
 const CalendarPage = () => {
   const regions = useRegions();
   const organizers = useOrganizers();
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const { dateRange, handleDatesSet } = useFullCalenderDateRange();
   const events = useEvents(selectedRegion, dateRange);
-  // Current Role state
   const [currentRole, setCurrentRole] = useState('anonomous');
 
 
-  // Filter events based on selected organizers
-  const filteredEvents = selectedOrganizers.length
-    ? events.filter(event => selectedOrganizers.includes(event.organizerID))
-    : events;
+  // Filter events post API pull
+
+  const filteredEvents = Array.isArray(events) ? events.filter(event => {
+    const isOrganizerMatch = selectedOrganizers.length
+      ? selectedOrganizers.includes(event.organizerID)
+      : true;
+
+    const isCategoryMatch = selectedCategories.length
+      ? selectedCategories.includes(event.categoryFirst)
+      : true;
+
+    return isOrganizerMatch && isCategoryMatch;
+  }) : [];
 
   // Define the selectedEvent state
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -87,14 +99,15 @@ const CalendarPage = () => {
             displayEmpty
             renderValue={(selected) => selected.length ? organizers.filter(o => selected.includes(o._id)).map(o => o.organizerName).join(', ') : 'Select Organizers'}
           >
-            <MenuItem value="">
-              <em>All Organizers</em>
-            </MenuItem>
-            {organizers.map((organizer) => (
-              <MenuItem key={organizer._id} value={organizer._id}>
-                {organizer.organizerName}
-              </MenuItem>
-            ))}
+            {organizers && organizers.length > 0 ? (
+              organizers.map((organizer) => (
+                <MenuItem key={organizer._id} value={organizer._id}>
+                  {organizer.organizerName}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>No Organizers Available</MenuItem>
+            )}
           </Select>
 
           {selectedOrganizers.length > 0 && (
@@ -108,12 +121,19 @@ const CalendarPage = () => {
       </AppBar>
 
       <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={filteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
-        eventClick={handleEventClick}  // Handle event clicks
+        eventClick={handleEventClick}
+        height="auto"  // Ensure the calendar height adjusts appropriately
+        contentHeight="auto"
+        headerToolbar={{
+          left: 'prev,today,next',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,listWeek'
+        }}
       />
 
       {selectedEvent && (
