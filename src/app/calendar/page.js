@@ -80,35 +80,21 @@ const CalendarPage = () => {
               </MenuItem>
             ))}
           </Select>
-
           <Select
             multiple
             value={selectedOrganizers}
             onChange={handleOrganizerChange}
+            renderValue={() => 'Select Organizers'}  // Always show placeholder text
             style={{ color: 'white' }}
             displayEmpty
-            renderValue={(selected) =>
-              selected.length
-                ? organizers
-                  .filter((o) => selected.includes(o._id))
-                  .map((o) => o.organizerName)
-                  .join(', ')
-                : 'Select Organizers'
-            }
           >
-            {organizers.length > 0 ? (
-              organizers.map((organizer) => (
-                <MenuItem key={organizer._id} value={organizer._id}>
-                  {organizer.organizerName}
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem disabled>No Organizers Available</MenuItem>
-            )}
+            {organizers.map((organizer) => (
+              <MenuItem key={organizer._id} value={organizer._id}>
+                <Checkbox checked={selectedOrganizers.includes(organizer._id)} />
+                <ListItemText primary={organizer.organizerName} />
+              </MenuItem>
+            ))}
           </Select>
-          <Button color="inherit" sx={{ marginLeft: '10px' }}>
-            Reset Organizers
-          </Button>
 
           <UserStateRole currentRole={currentRole} setCurrentRole={setCurrentRole} />
         </Toolbar>
