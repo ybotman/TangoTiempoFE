@@ -1,15 +1,15 @@
 "use client"; // Add this line at the top
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
 import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
-//import UserStateRole from '@/components/UI/UserStateRole';
 import useOrganizers from '@/hooks/useOrganizers';
 import { filterEvents } from '@/utils/filterEvents';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
-//import CalendarBar from '@/components/UI/CalendarBar';
+import SiteHeader from '@/components/UI/SiteHeader';
+
 
 import '@/styles/calendarStyles.css';
 
@@ -19,17 +19,6 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
-import ViewListIcon from '@mui/icons-material/ViewList';
-
-
-
-import {
-  AppBar, Toolbar, Typography,
-  Button, Select, MenuItem,
-  Checkbox, ListItemText
-} from '@mui/material';
 
 const CalendarPage = () => {
   const regions = useRegions();
@@ -54,6 +43,7 @@ const CalendarPage = () => {
 
   return (
     <div>
+      <SiteHeader />
       <SiteMenuBar
         selectedRegion={selectedRegion}
         setSelectedRegion={setSelectedRegion}
