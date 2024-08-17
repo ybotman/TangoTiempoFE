@@ -26,7 +26,7 @@ const UserStateRole = ({ currentRole, setCurrentRole }) => {
                 break;
         }
         setCurrentRole(newRole);
-        console.log('Current Role:', newRole); // Log the current role
+        console.log('Current Role:', newRole);
     };
 
     const getCurrentIcon = () => {

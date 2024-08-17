@@ -17,29 +17,15 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     Welcome:
                 </Typography>
-                <Select
-                    value={selectedRegion || ""}
-                    onChange={(e) => setSelectedRegion(e.target.value)}
-                    style={{ color: 'white' }}
-                    displayEmpty
-                >
-                    <MenuItem value="">
-                        <em>Select a Region</em>
-                    </MenuItem>
+                {/* Region Selection */}
+                <Select value={selectedRegion || ""} onChange={(e) => setSelectedRegion(e.target.value)} style={{ color: 'white' }} displayEmpty>
+                    <MenuItem value=""><em>Select a Region</em></MenuItem>
                     {regions.map((region) => (
-                        <MenuItem key={region._id} value={region.regionName}>
-                            {region.regionName}
-                        </MenuItem>
+                        <MenuItem key={region._id} value={region.regionName}>{region.regionName}</MenuItem>
                     ))}
                 </Select>
-                <Select
-                    multiple
-                    value={selectedOrganizers}
-                    onChange={handleOrganizerChange}
-                    renderValue={() => 'Select Organizers'}  // Always show placeholder text
-                    style={{ color: 'white' }}
-                    displayEmpty
-                >
+                {/* Organizer Selection */}
+                <Select multiple value={selectedOrganizers} onChange={handleOrganizerChange} renderValue={() => 'Select Organizers'} style={{ color: 'white' }} displayEmpty>
                     {organizers.map((organizer) => (
                         <MenuItem key={organizer._id} value={organizer._id}>
                             <Checkbox checked={selectedOrganizers.includes(organizer._id)} />
@@ -47,6 +33,7 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                         </MenuItem>
                     ))}
                 </Select>
+                {/* User State Role */}
                 <UserStateRole currentRole={currentRole} setCurrentRole={setCurrentRole} />
             </Toolbar>
         </AppBar>
