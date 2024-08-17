@@ -1,6 +1,6 @@
 "use client"; // Add this line at the top
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
 import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
-import '@/styles/calendarStyles.css';
+//import '@/styles/calendarStyles.css';
 
 const CalendarPage = () => {
   const regions = useRegions();
@@ -28,23 +28,11 @@ const CalendarPage = () => {
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const { dateRange, handleDatesSet } = useFullCalenderDateRange();
-  const events = useEvents(selectedRegion, dateRange);
   const [currentRole, setCurrentRole] = useState('anonomous');
+  const events = useEvents(selectedRegion, dateRange);
 
 
   // Filter events post API pull
-
-  const filteredEvents = Array.isArray(events) ? events.filter(event => {
-    const isOrganizerMatch = selectedOrganizers.length
-      ? selectedOrganizers.includes(event.organizerID)
-      : true;
-
-    const isCategoryMatch = selectedCategories.length
-      ? selectedCategories.includes(event.categoryFirst)
-      : true;
-
-    return isOrganizerMatch && isCategoryMatch;
-  }) : [];
 
   // Define the selectedEvent state
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -61,6 +49,33 @@ const CalendarPage = () => {
     setSelectedOrganizers([]);
   };
 
+  const applyFilter = true; // Set this to true to enable filtering
+  console.log('Prep filteredEvents:', events); // Check the value of events
+  console.log('Prep filteredEvents, Is events an array?', Array.isArray(events));
+
+  const filteredEvents = events;
+  console.log('')
+  /*
+  ?
+    (applyFilter ? events.filter(event => {
+      const isOrganizerMatch = selectedOrganizers.length
+        ? selectedOrganizers.includes(event.ownerOrganizerID)
+        : true;
+
+      const isCategoryMatch = selectedCategories.length
+        ? selectedCategories.includes(event.categoryFirst)
+        : true;
+      console.log(`Array.isArray(events)`, Array.isArray(events))
+      console.log(`Event: ${event.title}`);
+      console.log(`Organizer Match: ${isOrganizerMatch}`);
+      console.log(`Category Match: ${isCategoryMatch}`);
+
+      return isOrganizerMatch && isCategoryMatch;
+    }) : events)
+    : [];
+*/
+
+  console.log('About to return Filtered Events:', events);
   return (
     <div>
       <img
@@ -77,7 +92,7 @@ const CalendarPage = () => {
           <Select
             value={selectedRegion || ""}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            style={{ color: 'white' }}
+            style={{ color: 'lightGrey' }}
             displayEmpty
           >
             <MenuItem value="">
@@ -127,7 +142,7 @@ const CalendarPage = () => {
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
-        height="auto"  // Ensure the calendar height adjusts appropriately
+        height="auto"
         contentHeight="auto"
         headerToolbar={{
           left: 'prev,today,next',

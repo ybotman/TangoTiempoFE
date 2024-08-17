@@ -1,12 +1,18 @@
-// src/hooks/useEvents.js
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { transformEvents } from '@/utils/transformEvents';
 
-export function useEvents(selectedRegion, selectedOrganizers) {
+export function useEvents(selectedRegion) {  // Removed selectedOrganizers
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
+        console.log('Events state has been updated:', events);
+    }, [events]);
+
+    useEffect(() => {
+        console.log('useEvents>useEffect>Selected Region:', selectedRegion);
+
+        /* get the events */
         const getEvents = async () => {
             const start = new Date().toISOString();
             const end = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString();
@@ -19,15 +25,17 @@ export function useEvents(selectedRegion, selectedOrganizers) {
                         end,
                     },
                 });
+                console.log('getEvents API Response:', response.data);
+
+                // Ensure it's always an array
+                const eventsArray = response.data.events || [];
+
                 let transformedEvents = transformEvents(response.data);
+                console.log('getEvents transformedEvents:', transformedEvents);
 
-                if (selectedOrganizers.length > 0) {
-                    transformedEvents = transformedEvents.filter(event =>
-                        selectedOrganizers.includes(event.organizerId)
-                    );
-                }
-
+                // Removed the filtering by selectedOrganizers
                 setEvents(transformedEvents);
+                console.log('Events after setting:', transformedEvents);
             } catch (error) {
                 console.error('Error fetching events:', error);
             }
@@ -36,7 +44,7 @@ export function useEvents(selectedRegion, selectedOrganizers) {
         if (selectedRegion) {
             getEvents();
         }
-    }, [selectedRegion, selectedOrganizers]);
+    }, [selectedRegion]);  // Removed selectedOrganizers dependency
 
     const addEvent = async (newEvent) => {
         try {
@@ -49,7 +57,7 @@ export function useEvents(selectedRegion, selectedOrganizers) {
 
     const updateEvent = async (updatedEvent) => {
         try {
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/events/${{ eventId }}`, updatedEvent);
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/events/${updatedEvent._id}`, updatedEvent);
             setEvents(events.map(event => (event._id === updatedEvent._id ? transformEvents([response.data]) : event)));
         } catch (error) {
             console.error('Error updating event:', error);

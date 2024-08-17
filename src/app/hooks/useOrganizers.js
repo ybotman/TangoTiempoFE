@@ -9,6 +9,7 @@ const useOrganizers = () => {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/organizersActive`);
                 setOrganizers(response.data);
+                console.log('getORg', response)
             } catch (error) {
                 console.error('Error fetching organizers:', error);
             }
@@ -32,6 +33,7 @@ const useOrganizers = () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/organizers`, newOrganizer);
             setOrganizers(prevOrganizers => [...prevOrganizers, response.data]);
+
         } catch (error) {
             console.error('Error adding organizer:', error);
         }

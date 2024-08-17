@@ -5,6 +5,7 @@ import axios from 'axios';
 export function useRegions() {
     const [regions, setRegions] = useState([]);
 
+
     useEffect(() => {
         const getRegions = async () => {
             try {
