@@ -6,13 +6,19 @@ export function transformEvents(events) {
         end: event.endDate,           // Map 'endDate' to 'end'
         extendedProps: {              // Any additional data you want to pass along
             description: event.eventDescription,
-            category: event.categoryFirst,
-            image: event.eventImage,
+            standardsTitle: event.standardsTitle,
+            categoryFirst: event.categoryFirst,
+            categorySecond: event.categorySecond,
+            categoryThird: event.categoryThird,
+            eventImage: event.eventImage,
             location: event.locationID,
             cost: event.cost,
             region: event.region,
             active: event.active,
             recurrence: event.recurrenceRule,
+            ownerOrganizerID: event.ownerOrganizerID,
+            eventOrganizerID: event.eventOrganizerID,
+            altOrganizerID: event.altOrganizerID,
         }
     }));
 }

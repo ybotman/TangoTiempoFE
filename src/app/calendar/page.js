@@ -5,7 +5,11 @@ import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
 import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
 import UserStateRole from '@/components/UI/UserStateRole';
-import useOrganizers from '@/hooks/useOrganizers'; // Import the organizers hook
+import useOrganizers from '@/hooks/useOrganizers';
+import { filterEvents } from '@/utils/filterEvents';
+import EventDetailsModal from '@/components/Modals/EventDetailsModal';
+import '@/styles/calendarStyles.css';
+
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -18,24 +22,15 @@ import {
   Checkbox, ListItemText
 } from '@mui/material';
 
-import EventDetailsModal from '@/components/Modals/EventDetailsModal';
-//import '@/styles/calendarStyles.css';
-
 const CalendarPage = () => {
   const regions = useRegions();
   const organizers = useOrganizers();
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const { dateRange, handleDatesSet } = useFullCalenderDateRange();
   const [currentRole, setCurrentRole] = useState('anonomous');
-  const events = useEvents(selectedRegion, dateRange);
-
-
-  // Filter events post API pull
-
-  // Define the selectedEvent state
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const events = useEvents(selectedRegion);
 
   const handleEventClick = (clickInfo) => {
     setSelectedEvent(clickInfo.event);
@@ -49,33 +44,14 @@ const CalendarPage = () => {
     setSelectedOrganizers([]);
   };
 
-  const applyFilter = true; // Set this to true to enable filtering
-  console.log('Prep filteredEvents:', events); // Check the value of events
-  console.log('Prep filteredEvents, Is events an array?', Array.isArray(events));
+  const filteredEvents = filterEvents(events, selectedOrganizers);
 
-  const filteredEvents = events;
-  console.log('')
-  /*
-  ?
-    (applyFilter ? events.filter(event => {
-      const isOrganizerMatch = selectedOrganizers.length
-        ? selectedOrganizers.includes(event.ownerOrganizerID)
-        : true;
+  console.log('return selectedOrganizers:', selectedOrganizers);
+  console.log('return selectedRegion:', selectedRegion);
+  console.log('return organizers:', organizers);
+  console.log('return events:', events);
+  console.log('return filteredEvents:', filteredEvents);
 
-      const isCategoryMatch = selectedCategories.length
-        ? selectedCategories.includes(event.categoryFirst)
-        : true;
-      console.log(`Array.isArray(events)`, Array.isArray(events))
-      console.log(`Event: ${event.title}`);
-      console.log(`Organizer Match: ${isOrganizerMatch}`);
-      console.log(`Category Match: ${isCategoryMatch}`);
-
-      return isOrganizerMatch && isCategoryMatch;
-    }) : events)
-    : [];
-*/
-
-  console.log('About to return Filtered Events:', events);
   return (
     <div>
       <img
@@ -105,16 +81,22 @@ const CalendarPage = () => {
             ))}
           </Select>
 
-          {/* Dropdown for selecting organizers */}
           <Select
             multiple
             value={selectedOrganizers}
             onChange={handleOrganizerChange}
             style={{ color: 'white' }}
             displayEmpty
-            renderValue={(selected) => selected.length ? organizers.filter(o => selected.includes(o._id)).map(o => o.organizerName).join(', ') : 'Select Organizers'}
+            renderValue={(selected) =>
+              selected.length
+                ? organizers
+                  .filter((o) => selected.includes(o._id))
+                  .map((o) => o.organizerName)
+                  .join(', ')
+                : 'Select Organizers'
+            }
           >
-            {organizers && organizers.length > 0 ? (
+            {organizers.length > 0 ? (
               organizers.map((organizer) => (
                 <MenuItem key={organizer._id} value={organizer._id}>
                   {organizer.organizerName}
@@ -124,14 +106,11 @@ const CalendarPage = () => {
               <MenuItem disabled>No Organizers Available</MenuItem>
             )}
           </Select>
+          <Button color="inherit" sx={{ marginLeft: '10px' }}>
+            Reset Organizers
+          </Button>
 
-          {selectedOrganizers.length > 0 && (
-            <Button onClick={resetOrganizers} color="inherit" sx={{ marginLeft: '10px' }}>
-              Reset Organizers
-            </Button>
-          )}
           <UserStateRole currentRole={currentRole} setCurrentRole={setCurrentRole} />
-
         </Toolbar>
       </AppBar>
 

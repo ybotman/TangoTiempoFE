@@ -8,42 +8,16 @@ const useOrganizers = () => {
         const getOrganizers = async () => {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/organizersActive`);
+                console.log('Full API response:', response.data);
                 setOrganizers(response.data);
-                console.log('getORg', response)
             } catch (error) {
                 console.error('Error fetching organizers:', error);
             }
         };
-
         getOrganizers();
     }, []);
 
-    const updateOrganizer = async (organizer) => {
-        try {
-            const response = await axios.put(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/organizers/${organizer._id}`, organizer);
-            setOrganizers(prevOrganizers =>
-                prevOrganizers.map(org => org._id === organizer._id ? response.data : org)
-            );
-        } catch (error) {
-            console.error('Error updating organizer:', error);
-        }
-    };
-
-    const addOrganizer = async (newOrganizer) => {
-        try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/organizers`, newOrganizer);
-            setOrganizers(prevOrganizers => [...prevOrganizers, response.data]);
-
-        } catch (error) {
-            console.error('Error adding organizer:', error);
-        }
-    };
-
-    return {
-        organizers,
-        updateOrganizer,
-        addOrganizer
-    };
+    return organizers;
 };
 
 export default useOrganizers;
