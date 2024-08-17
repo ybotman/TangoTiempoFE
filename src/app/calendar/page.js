@@ -25,6 +25,9 @@ const CalendarPage = () => {
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const { dateRange, handleDatesSet } = useFullCalenderDateRange();
   const events = useEvents(selectedRegion, dateRange);
+  // Current Role state
+  const [currentRole, setCurrentRole] = useState('anonomous');
+
 
   // Filter events based on selected organizers
   const filteredEvents = selectedOrganizers.length
@@ -99,7 +102,8 @@ const CalendarPage = () => {
               Reset Organizers
             </Button>
           )}
-          <UserStateRole />
+          <UserStateRole currentRole={currentRole} setCurrentRole={setCurrentRole} />
+
         </Toolbar>
       </AppBar>
 

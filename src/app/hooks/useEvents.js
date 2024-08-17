@@ -5,7 +5,6 @@ import { transformEvents } from '@/utils/transformEvents';
 
 export function useEvents(selectedRegion, selectedOrganizers) {
     const [events, setEvents] = useState([]);
-    console.log('useEvents', selectedRegion, selectedOrganizers);
 
     useEffect(() => {
         const getEvents = async () => {
@@ -22,7 +21,6 @@ export function useEvents(selectedRegion, selectedOrganizers) {
                 });
                 let transformedEvents = transformEvents(response.data);
 
-                // Apply organizer filter on the client side
                 if (selectedOrganizers.length > 0) {
                     transformedEvents = transformedEvents.filter(event =>
                         selectedOrganizers.includes(event.organizerId)
