@@ -5,10 +5,9 @@ import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
 import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
 import useOrganizers from '@/hooks/useOrganizers';
-//import { useRole } from '@/components/UI/UserStateRole';
-//import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { filterEvents } from '@/utils/filterEvents';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
+import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import SiteHeader from '@/components/UI/SiteHeader';
 
@@ -37,7 +36,7 @@ const CalendarPage = () => {
   const handleDateClick = (clickInfo) => {
     setSelectedDate(clickInfo.date); // Set the selected date from the clicked date
     console.log('Date clicked:', clickInfo.date)//, 'By Role: ', currentRole);
-    //setCreateModalOpen(true); // Open the create event modal
+    setCreateModalOpen(true); // Open the create event modal
   };
 
   const handleEventClick = (clickInfo) => {
@@ -56,9 +55,6 @@ const CalendarPage = () => {
   };
 
   //CRUD Event Handles
-  const handleCreateEvent = (newEvent) => {
-    // Logic to create the event via API
-  };
 
   const handleUpdateEvent = (updatedEvent) => {
     // Logic to update the event via API
@@ -112,7 +108,9 @@ const CalendarPage = () => {
         <EventCRUDModal
           open={isCreateModalOpen}
           onClose={() => setCreateModalOpen(false)}
-          selectedDate={selectedDate} // Pass the selected date to the modal
+          selectedDate={selectedDate}
+          selectedRegion={selectedRegion}
+        //onCreate={handleEventCreated}
         />
       )}
     </div>
