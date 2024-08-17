@@ -20,11 +20,16 @@ import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 
 const CalendarPage = () => {
   const regions = useRegions();
-  const organizers = useOrganizers(); // Fetch the organizers
+  const organizers = useOrganizers();
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const { dateRange, handleDatesSet } = useFullCalenderDateRange();
   const events = useEvents(selectedRegion, dateRange);
+
+  // Filter events based on selected organizers
+  const filteredEvents = selectedOrganizers.length
+    ? events.filter(event => selectedOrganizers.includes(event.organizerID))
+    : events;
 
   // Define the selectedEvent state
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -34,23 +39,12 @@ const CalendarPage = () => {
   };
 
   const handleOrganizerChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedOrganizers(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    setSelectedOrganizers(event.target.value);
   };
 
-  // Function to reset organizer filter
-  const resetOrganizerFilter = () => {
+  const resetOrganizers = () => {
     setSelectedOrganizers([]);
   };
-
-  // Filter events by selected organizers
-  const filteredEvents = events.filter(event =>
-    selectedOrganizers.length === 0 || selectedOrganizers.includes(event.organizerName)
-  );
 
   return (
     <div>
@@ -86,26 +80,25 @@ const CalendarPage = () => {
             multiple
             value={selectedOrganizers}
             onChange={handleOrganizerChange}
+            style={{ color: 'white' }}
             displayEmpty
-            style={{ color: 'white', marginLeft: '10px' }}
-            renderValue={(selected) =>
-              selected.length === 0 ? <em>All Organizers</em> : selected.join(', ')
-            }
+            renderValue={(selected) => selected.length ? organizers.filter(o => selected.includes(o._id)).map(o => o.organizerName).join(', ') : 'Select Organizers'}
           >
-            <MenuItem value={[]}>
+            <MenuItem value="">
               <em>All Organizers</em>
             </MenuItem>
             {organizers.map((organizer) => (
               <MenuItem key={organizer._id} value={organizer._id}>
-                <Checkbox checked={selectedOrganizers.indexOf(organizer._id) > -1} />
-                <ListItemText primary={organizer.name} />
+                {organizer.organizerName}
               </MenuItem>
             ))}
           </Select>
 
-          <Button onClick={resetOrganizerFilter} color="inherit" sx={{ marginLeft: '10px' }}>
-            Reset Organizers
-          </Button>
+          {selectedOrganizers.length > 0 && (
+            <Button onClick={resetOrganizers} color="inherit" sx={{ marginLeft: '10px' }}>
+              Reset Organizers
+            </Button>
+          )}
           <UserStateRole />
         </Toolbar>
       </AppBar>
@@ -113,7 +106,7 @@ const CalendarPage = () => {
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        events={filteredEvents}  // Use filtered events here
+        events={filteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}  // Handle event clicks
