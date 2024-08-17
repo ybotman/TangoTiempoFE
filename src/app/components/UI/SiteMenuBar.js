@@ -1,5 +1,4 @@
-// src/components/UI/SiteMenuBar.js
-import React from 'react';
+import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -9,8 +8,9 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import UserStateRole from '@/components/UI/UserStateRole';
 
-
 const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrganizers, handleOrganizerChange, organizers }) => {
+    const [currentRole, setCurrentRole] = useState('anonomous');
+
     return (
         <AppBar position="static" sx={{ backgroundColor: 'black' }}>
             <Toolbar>
@@ -47,7 +47,7 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                         </MenuItem>
                     ))}
                 </Select>
-                <UserStateRole />
+                <UserStateRole currentRole={currentRole} setCurrentRole={setCurrentRole} />
             </Toolbar>
         </AppBar>
     );
