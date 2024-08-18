@@ -84,8 +84,12 @@ const CalendarPage = () => {
   const filteredEvents = filterEvents(events, selectedOrganizers);
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
-    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Default to lightGrey if no match
-    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Example logic for text color
+    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // For dots
+    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Text color
+    displayEventTime: true,  // Ensures the time is shown (optional)
+    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Match border color
+    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Background color for the entire event
+    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Text color for the entire event
   }));
 
   return (
