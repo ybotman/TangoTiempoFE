@@ -22,3 +22,31 @@
     color: #333;
     /* Title color */
 }
+
+/* Add this to your styles file */
+.category-filter {
+    display: flex;
+    gap: 10px;
+    /* Space between buttons */
+    padding: 10px;
+}
+
+.category-button {
+    background-color: #007bff;
+    /* Blue background */
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.category-button.active {
+    background-color: #0056b3;
+    /* Darker blue for active state */
+}
+
+.category-button:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+}

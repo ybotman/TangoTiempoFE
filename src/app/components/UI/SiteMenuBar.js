@@ -7,8 +7,9 @@ import ListItemText from '@mui/material/ListItemText';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import UserStateRole from '@/components/UI/UserStateRole';
+import CategoryFilter from '@/components/UI/CategoryFilter';  // Import CategoryFilter
 
-const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrganizers, handleOrganizerChange, organizers }) => {
+const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrganizers, handleOrganizerChange, organizers, selectedCategories, handleCategoryChange, categories }) => {
     const [currentRole, setCurrentRole] = useState('anonomous');
 
     return (
@@ -17,6 +18,15 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     Welcome:
                 </Typography>
+
+                {/* Category Filter */}
+                <CategoryFilter
+                    selectedCategories={selectedCategories}
+                    handleCategoryChange={handleCategoryChange}
+                    categories={categories}
+                />
+
+
                 {/* Region Selection */}
                 <Select value={selectedRegion || ""} onChange={(e) => setSelectedRegion(e.target.value)} style={{ color: 'white' }} displayEmpty>
                     <MenuItem value=""><em>Select a Region</em></MenuItem>
@@ -24,6 +34,8 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                         <MenuItem key={region._id} value={region.regionName}>{region.regionName}</MenuItem>
                     ))}
                 </Select>
+
+
                 {/* Organizer Selection */}
                 <Select multiple value={selectedOrganizers} onChange={handleOrganizerChange} renderValue={() => 'Select Organizers'} style={{ color: 'white' }} displayEmpty>
                     {organizers.map((organizer) => (
@@ -33,6 +45,8 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                         </MenuItem>
                     ))}
                 </Select>
+
+
                 {/* User State Role */}
                 <UserStateRole currentRole={currentRole} setCurrentRole={setCurrentRole} />
             </Toolbar>
