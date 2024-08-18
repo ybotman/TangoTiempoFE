@@ -29,6 +29,7 @@ const CalendarPage = () => {
   const regions = useRegions();
   const organizers = useOrganizers();
   const [categories, setCategories] = useState([]);
+  const [activeCategories, setActiveCategories] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -52,12 +53,9 @@ const CalendarPage = () => {
     fetchCategories();
   }, []);
 
-  const handleCategoryChange = (categoryId) => {
-    setSelectedCategories((prevSelected) =>
-      prevSelected.includes(categoryId)
-        ? prevSelected.filter((id) => id !== categoryId)
-        : [...prevSelected, categoryId]
-    );
+
+  const handleCategoryChange = (updatedCategories) => {
+    setActiveCategories(updatedCategories);
   };
 
   const handleDateClick = (clickInfo) => {
@@ -81,7 +79,8 @@ const CalendarPage = () => {
     console.log('OrgChange:', event.target.value);
   };
 
-  const filteredEvents = filterEvents(events, selectedOrganizers);
+  //const filteredEvents = filterEvents(events, selectedOrganizers);
+  const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
     backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // For dots
@@ -103,7 +102,7 @@ const CalendarPage = () => {
         selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
         organizers={organizers}
-        selectedCategories={selectedCategories}
+        activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
       />

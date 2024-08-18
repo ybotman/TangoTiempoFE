@@ -11,6 +11,7 @@ import CategoryFilter from '@/components/UI/CategoryFilter';  // Import Category
 
 const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrganizers, handleOrganizerChange, organizers, selectedCategories, handleCategoryChange, categories }) => {
     const [currentRole, setCurrentRole] = useState('anonomous');
+    const [activeCategories, setActiveCategories] = useState([]);
 
     return (
         <AppBar position="static" sx={{ backgroundColor: 'black' }}>
@@ -24,6 +25,7 @@ const SiteMenuBar = ({ selectedRegion, setSelectedRegion, regions, selectedOrgan
                     selectedCategories={selectedCategories}
                     handleCategoryChange={handleCategoryChange}
                     categories={categories}
+                    activeCategories={activeCategories}
                 />
 
 
