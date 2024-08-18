@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
+import React from 'react';
 
 import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
@@ -33,8 +34,8 @@ const CalendarPage = () => {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const { dateRange, handleDatesSet } = useFullCalenderDateRange();
+  // const [selectedCategories, setSelectedCategories] = useState([]);
+  const { handleDatesSet } = useFullCalenderDateRange();
   const events = useEvents(selectedRegion);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -69,10 +70,7 @@ const CalendarPage = () => {
     console.log('Event clicked:', clickInfo.event.title);
   };
 
-  const handleCreateModalClose = () => {
-    setCreateModalOpen(false);
-    setSelectedDate(null);
-  };
+
 
   const handleOrganizerChange = (event) => {
     setSelectedOrganizers(event.target.value);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 import { categoryColors } from '@/utils/categoryColors';
 
 const CategoryFilter = ({ categories, handleCategoryChange }) => {
@@ -39,6 +40,10 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
                         style={{
                             backgroundColor: activeCategories.includes(category.CategoryName) ? categoryColors[category.CategoryName] : 'lightGrey',
                             color: activeCategories.includes(category.CategoryName) && category.CategoryName === 'Milonga' ? 'white' : 'black',
+                            padding: '0px 5px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            margin: '0px', // Adjust spacing between buttons
                         }}
                         className={`category-button ${activeCategories.includes(category.CategoryName) ? 'active' : ''}`}
                         onClick={() => handleButtonClick(category.CategoryName)}
@@ -51,6 +56,14 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
             )}
         </div>
     );
+};
+
+// Add PropTypes validation
+CategoryFilter.propTypes = {
+    categories: PropTypes.arrayOf(PropTypes.shape({
+        CategoryName: PropTypes.string.isRequired,
+    })).isRequired,
+    handleCategoryChange: PropTypes.func.isRequired,
 };
 
 export default CategoryFilter;
