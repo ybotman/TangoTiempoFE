@@ -1,0 +1,24 @@
+/* General Calendar Styles */
+.fc {
+    background-color: white;
+    /* Calendar background color */
+    color: #333;
+    /* Default text color */
+    font-family: Arial, sans-serif;
+    /* Default font */
+}
+
+/* Toolbar and Navigation */
+.fc-toolbar {
+    background-color: #f5f5f5;
+    /* Toolbar background */
+    border-bottom: 1px solid #ddd;
+    /* Toolbar border */
+}
+
+.fc-toolbar-title {
+    font-size: 18px;
+    /* Title font size */
+    color: #333;
+    /* Title color */
+}

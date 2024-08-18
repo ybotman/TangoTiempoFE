@@ -12,7 +12,7 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import SiteHeader from '@/components/UI/SiteHeader';
 
 
-import '@/styles/calendarStyles.css';
+import '@/styles/calendarStyles2.css';
 
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
