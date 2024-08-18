@@ -50,3 +50,17 @@
     background-color: #0056b3;
     /* Darker blue on hover */
 }
+
+/* Assuming this is in your global or relevant CSS file */
+.full-height-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Full viewport height */
+}
+
+.calendar-wrapper {
+    flex-grow: 1;
+    /* Ensures the calendar takes up the remaining space */
+    overflow: hidden;
+}

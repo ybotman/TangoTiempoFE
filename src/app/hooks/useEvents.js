@@ -18,7 +18,7 @@ export function useEvents(selectedRegion) {
 
             try {
                 console.log('Making API request:', { region: selectedRegion, start, end });
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/eventsRegion`, {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/eventsRegion`, {
                     params: {
                         region: selectedRegion,
                         start,

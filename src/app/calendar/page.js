@@ -43,7 +43,7 @@ const CalendarPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_TANGO_API_URL}/api/categories`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -115,8 +115,9 @@ const CalendarPage = () => {
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
-        height="auto"
-        contentHeight="auto"
+        //height="100%"
+        //contentHeight="100%"
+        //expandRows={true}
         headerToolbar={{
           left: 'prev,today,next',
           center: 'title',
