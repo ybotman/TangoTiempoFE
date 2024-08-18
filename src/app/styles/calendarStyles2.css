@@ -27,7 +27,7 @@
 .category-filter {
     display: flex;
     gap: 10px;
-    /* Space between buttons */
+
     padding: 10px;
 }
 

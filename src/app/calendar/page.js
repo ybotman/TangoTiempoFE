@@ -13,8 +13,7 @@ import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import SiteHeader from '@/components/UI/SiteHeader';
-import CategoryFilter from '@/components/UI/CategoryFilter';
-
+import { categoryColors } from '@/utils/categoryColors';
 
 import '@/styles/calendarStyles2.css';
 
@@ -82,18 +81,12 @@ const CalendarPage = () => {
     console.log('OrgChange:', event.target.value);
   };
 
-
-
-  const categoryColors = {
-    Festival: 'purple',
-    Milonga: 'blue',
-    Practica: 'cyan',
-    Class: 'darkGrey',
-    Workshop: 'lightgreen',
-    Trip: 'yellow',
-  };
-
   const filteredEvents = filterEvents(events, selectedOrganizers);
+  const coloredFilteredEvents = filteredEvents.map(event => ({
+    ...event,
+    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Default to lightGrey if no match
+    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Example logic for text color
+  }));
 
   return (
     <div>
@@ -114,8 +107,7 @@ const CalendarPage = () => {
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        events={filteredEvents}
-        eventColor={categoryColors}
+        events={coloredFilteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}

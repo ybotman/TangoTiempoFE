@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-const categoryColors = {
-    Festival: 'purple',
-    Milonga: 'blue',
-    Practica: 'cyan',
-    Class: 'darkGrey',
-    Workshop: 'lightgreen',
-    Trip: 'yellow',
-};
-
+import { categoryColors } from '@/utils/categoryColors';
 
 const CategoryFilter = ({ categories, handleCategoryChange }) => {
     const [activeCategories, setActiveCategories] = useState([]);
