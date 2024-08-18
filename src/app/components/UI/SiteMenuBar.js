@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import Select from '@mui/material/Select';
@@ -23,12 +22,11 @@ const SiteMenuBar = ({
     categories
 }) => {
     const [currentRole, setCurrentRole] = useState('anonymous');
-    const [activeCategories] = useState([]);
 
     return (
         <AppBar position="static" sx={{ backgroundColor: 'black' }}>
-            <Toolbar sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                <Box sx={{ width: '100%', display: 'right', justifyContent: 'space-between', mb: 1 }}>
+            <Toolbar sx={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
 
                     <UserStateRole
                         currentRole={currentRole} setCurrentRole={setCurrentRole} />
@@ -49,7 +47,7 @@ const SiteMenuBar = ({
                         multiple
                         value={selectedOrganizers}
                         onChange={handleOrganizerChange}
-                        renderValue={() => 'Fitler Organizers'}
+                        renderValue={() => 'Filter Organizers'}
                         style={{ color: 'white', marginLeft: '10px' }}
                         displayEmpty
                     >
@@ -58,7 +56,7 @@ const SiteMenuBar = ({
                                 <Checkbox checked={selectedOrganizers.includes(organizer._id)} />
                                 <ListItemText primary={organizer.organizerName} />
                             </MenuItem>
-                        ))}åå
+                        ))}
                     </Select>
 
                 </Box>
@@ -68,10 +66,7 @@ const SiteMenuBar = ({
                         selectedCategories={selectedCategories}
                         handleCategoryChange={handleCategoryChange}
                         categories={categories}
-                        activeCategories={activeCategories}
-                        sx={{ flexGrow: 1 }}
                     />
-
                 </Box>
             </Toolbar>
         </AppBar>
