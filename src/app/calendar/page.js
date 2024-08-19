@@ -34,7 +34,6 @@ const CalendarPage = () => {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  // const [selectedCategories, setSelectedCategories] = useState([]);
   const { handleDatesSet } = useFullCalenderDateRange();
   const events = useEvents(selectedRegion);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -77,7 +76,6 @@ const CalendarPage = () => {
     console.log('OrgChange:', event.target.value);
   };
 
-  //const filteredEvents = filterEvents(events, selectedOrganizers);
   const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
@@ -113,9 +111,6 @@ const CalendarPage = () => {
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
-        //height="100%"
-        //contentHeight="100%"
-        //expandRows={true}
         headerToolbar={{
           left: 'prev,today,next',
           center: 'title',

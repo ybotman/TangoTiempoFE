@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, MenuItem } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import '@/styles/customDatePicker.css';
 import axios from 'axios';
 
 const modalStyle = {
@@ -111,23 +112,24 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     multiline
                     rows={4}
                 />
-
+                Starting:
                 <DatePicker
                     selected={startDate}
                     onChange={(date) => setStartDate(date)}
                     showTimeSelect
                     dateFormat="Pp"
                     placeholderText="Start Date"
-                    className="form-control"
+                    className="custom-datepicker"
                 />
-
+                Ending:
                 <DatePicker
                     selected={endDate}
                     onChange={(date) => setEndDate(date)}
                     showTimeSelect
                     dateFormat="Pp"
                     placeholderText="End Date"
-                    className="form-control"
+                    className="custom-datepicker"
+
                 />
 
                 <TextField
