@@ -1,0 +1,66 @@
+/* General Calendar Styles */
+.fc {
+    background-color: white;
+    /* Calendar background color */
+    color: #333;
+    /* Default text color */
+    font-family: Arial, sans-serif;
+    /* Default font */
+}
+
+/* Toolbar and Navigation */
+.fc-toolbar {
+    background-color: #f5f5f5;
+    /* Toolbar background */
+    border-bottom: 1px solid #ddd;
+    /* Toolbar border */
+}
+
+.fc-toolbar-title {
+    font-size: 18px;
+    /* Title font size */
+    color: #333;
+    /* Title color */
+}
+
+/* Add this to your styles file */
+.category-filter {
+    display: flex;
+    gap: 10px;
+
+    padding: 10px;
+}
+
+.category-button {
+    background-color: #007bff;
+    /* Blue background */
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.category-button.active {
+    background-color: #0056b3;
+    /* Darker blue for active state */
+}
+
+.category-button:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+}
+
+/* Assuming this is in your global or relevant CSS file */
+.full-height-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Full viewport height */
+}
+
+.calendar-wrapper {
+    flex-grow: 1;
+    /* Ensures the calendar takes up the remaining space */
+    overflow: hidden;
+}
