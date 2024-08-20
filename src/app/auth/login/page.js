@@ -6,7 +6,7 @@ import { Box, Typography, Container, Paper } from '@mui/material';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
 
-const SignUpPage = () => {
+const LoginPage = () => {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,15 +25,15 @@ const SignUpPage = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleGoogleSignUp = async () => {
+  const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
 
     try {
       const result = await signInWithPopup(auth, provider);
-      console.log('User signed up:', result.user);
+      console.log('User logged in:', result.user);
       router.push('/calendar');  // Redirect to the calendar page
     } catch (error) {
-      console.error('Error during sign up:', error);
+      console.error('Error during sign in:', error);
     }
   };
 
@@ -51,7 +51,7 @@ const SignUpPage = () => {
             </Typography>
             <Box
               component="img"
-              src="/web_light_rd_SU@4x.png"
+              src="/web_light_rd_ctn@1x.png"
               alt="Go to Calendar"
               sx={{ cursor: 'pointer', mt: 2 }}
               onClick={() => router.push('/calendar')}
@@ -67,17 +67,17 @@ const SignUpPage = () => {
       <Paper elevation={3} sx={{ padding: 4, marginTop: 8 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography component="h1" variant="h5" gutterBottom>
-            Sign Up
+            Log In
           </Typography>
           <Typography variant="body2" color="textSecondary" align="center" paragraph>
-            Sign up with your Google account to start organizing and managing Tango events.
+            Log in with your Google account to access your Tango events calendar.
           </Typography>
           <Box
             component="img"
-            src="/web_light_rd_SU@1x.png"
-            alt="Sign up with Google"
+            src="/web_light_rd_ctn@1x.png"
+            alt="Log in with Google"
             sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
-            onClick={handleGoogleSignUp}
+            onClick={handleGoogleSignIn}
           />
         </Box>
       </Paper>
@@ -85,4 +85,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default LoginPage;
