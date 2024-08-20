@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import FaceIcon from '@mui/icons-material/Face';
-import IconButton from '@mui/material/IconButton';
+import React from 'react';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Link from 'next/link';
+import { Box } from '@mui/material';
 
 const UserStateRole = () => {
-    const [icon, setIcon] = useState('person');
-
-    const handleIconClick = () => {
-        setIcon(icon === 'person' ? 'face' : 'person');
-    };
-
-    return (
-        <IconButton onClick={handleIconClick}>
-            {icon === 'person' ?
-                <PersonIcon sx={{ color: 'lightgrey' }} /> :
-                <FaceIcon sx={{ color: 'green' }} />}
-        </IconButton>
-    );
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Stack direction="row" spacing={1}>
+        <Link href="/auth/login" passHref>
+          <Button variant="contained" color="primary" size="small">
+            Log In
+          </Button>
+        </Link>
+        <Link href="/auth/signup" passHref>
+          <Button variant="contained" color="secondary" size="small">
+            Sign Up
+          </Button>
+        </Link>
+      </Stack>
+    </Box>
+  );
 };
 
 export default UserStateRole;
