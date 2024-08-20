@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -31,7 +29,6 @@ yarn-debug.log*
 yarn-error.log*
 
 package-lock.json
-=======
 # Logs
 logs
 *.log
@@ -162,5 +159,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
->>>>>>> new-origin/main
 .github/workflows
+
+# Node
+package-lock.json
+
+# misc
+.DS_Store

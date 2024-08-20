@@ -1,71 +1,60 @@
-import React from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import FaceIcon from '@mui/icons-material/Face';
-import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { IconButton, Tooltip } from '@mui/material';
+"use client";
 
-const UserStateRole = ({ currentRole, setCurrentRole }) => {
-    const handleRoleClick = () => {
-        let newRole;
-        switch (currentRole) {
-            case 'anonomous':
-                newRole = 'User';
-                break;
-            case 'User':
-                newRole = 'Organizer';
-                break;
-            case 'Organizer':
-                newRole = 'RegionalAdmin';
-                break;
-            case 'RegionalAdmin':
-                newRole = 'anonomous';
-                break;
-            default:
-                newRole = 'anonomous';
-                break;
-        }
-        setCurrentRole(newRole);
-        console.log('Current Role:', newRole);
-    };
+import React, { useEffect, useState } from 'react';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Link from 'next/link';
+import { Box, Typography } from '@mui/material';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '@/utils/firebase';
 
-    const getCurrentIcon = () => {
-        switch (currentRole) {
-            case 'anonomous':
-                return <PersonIcon />;
-            case 'User':
-                return <FaceIcon />;
-            case 'Organizer':
-                return <SupervisedUserCircleIcon />;
-            case 'RegionalAdmin':
-                return <AdminPanelSettingsIcon />;
-            default:
-                return <PersonIcon />;
-        }
-    };
+const UserStateRole = () => {
+  const [user, setUser] = useState(null);
 
-    const getTooltipTitle = () => {
-        switch (currentRole) {
-            case 'anonomous':
-                return 'Anonymous';
-            case 'User':
-                return 'User';
-            case 'Organizer':
-                return 'Organizer';
-            case 'RegionalAdmin':
-                return 'Regional Admin';
-            default:
-                return 'Anonymous';
-        }
-    };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
 
-    return (
-        <Tooltip title={getTooltipTitle()}>
-            <IconButton onClick={handleRoleClick} color="inherit">
-                {getCurrentIcon()}
-            </IconButton>
-        </Tooltip>
-    );
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);  // Clear user state on logout
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      {user ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body1" color="textPrimary">
+            {user.displayName || user.email}
+          </Typography>
+          <Button variant="outlined" color="inherit" size="small" onClick={handleLogout}>
+            Log Out
+          </Button>
+        </Stack>
+      ) : (
+        <Stack direction="row" spacing={1}>
+          <Link href="/auth/login" passHref>
+            <Button variant="contained" color="primary" size="small">
+              Log In
+            </Button>
+          </Link>
+          <Link href="/auth/signup" passHref>
+            <Button variant="contained" color="secondary" size="small">
+              Sign Up
+            </Button>
+          </Link>
+        </Stack>
+      )}
+    </Box>
+  );
 };
 
 export default UserStateRole;
