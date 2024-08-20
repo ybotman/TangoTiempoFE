@@ -24,6 +24,8 @@
 .env.test.local
 .env.production.local
 
+azure-static-web-apps*.yml
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
