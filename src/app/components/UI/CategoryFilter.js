@@ -7,7 +7,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
 
     useEffect(() => {
         if (categories && categories.length > 0) {
-            const initialCategories = categories.map(c => c.CategoryName);
+            const initialCategories = categories.map(c => c.categoryName);
             setActiveCategories(initialCategories);
             handleCategoryChange(initialCategories);
         }
@@ -36,22 +36,22 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
             {categories && categories.length > 0 ? (
                 categories.map((category) => (
                     <button
-                        key={category.CategoryName}
+                        key={category.categoryName}
                         style={{
-                            backgroundColor: activeCategories.includes(category.CategoryName) ? categoryColors[category.CategoryName] : 'lightGrey',
-                            color: activeCategories.includes(category.CategoryName) && category.CategoryName === 'Milonga' ? 'white' : 'black',
+                            backgroundColor: activeCategories.includes(category.categoryName) ? categoryColors[category.categoryName] : 'lightGrey',
+                            color: activeCategories.includes(category.categoryName) && category.categoryName === 'Milonga' ? 'white' : 'black',
                             padding: '5px 5px',
                             border: 'none',
                             borderRadius: '4px',
                             margin: '3px',
                         }}
-                        className={`category-button ${activeCategories.includes(category.CategoryName) ? 'active' : ''}`}
-                        onClick={() => handleButtonClick(category.CategoryName)}
+                        className={`category-button ${activeCategories.includes(category.categoryName) ? 'active' : ''}`}
+                        onClick={() => handleButtonClick(category.categoryName)}
                     // need to move to.... but issue without handleButtonClick...
-                    //onClick={() => handleCategoryChange(category.CategoryName)}
+                    //onClick={() => handleCategoryChange(category.categoryName)}
 
                     >
-                        {category.CategoryName}
+                        {category.categoryName}
                     </button>
                 ))
             ) : (
@@ -64,7 +64,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
 // Add PropTypes validation
 CategoryFilter.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.shape({
-        CategoryName: PropTypes.string.isRequired,
+        categoryName: PropTypes.string.isRequired,
     })).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
 };

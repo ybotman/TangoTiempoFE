@@ -52,13 +52,13 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
             categoryThird,
             startDate,
             endDate,
-            region: selectedRegion,
+            calcuatedRegion: selectedRegion,
             cost,
             recurrenceRule,
             standardsTitle: '',
             ownerOrganizerID: '6442ccb5f88a6c48aa30be35',
-            eventOrganizerID: '6442ccb5f88a6c48aa30be35',
-            altOrganizerID: '6442ccb5f88a6c48aa30be35',
+            grantedOrganizerID: '6442ccb5f88a6c48aa30be35',
+            alternateOrganizerID: '6442ccb5f88a6c48aa30be35',
             eventImage: 'https://example.com/image.jpg',
             locationID: '6449ee6895174c52123afd4c',
             active: true,
@@ -141,8 +141,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     margin="normal"
                 >
                     {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.CategoryName}>
-                            {category.CategoryName}
+                        <MenuItem key={category._id} value={category.categoryName}>
+                            {category.categoryName}
                         </MenuItem>
                     ))}
                 </TextField>
@@ -156,8 +156,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     margin="normal"
                 >
                     {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.CategoryName}>
-                            {category.CategoryName}
+                        <MenuItem key={category._id} value={category.categoryName}>
+                            {category.categoryName}
                         </MenuItem>
                     ))}
                 </TextField>
@@ -171,8 +171,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     margin="normal"
                 >
                     {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.CategoryName}>
-                            {category.CategoryName}
+                        <MenuItem key={category._id} value={category.categoryName}>
+                            {category.categoryName}
                         </MenuItem>
                     ))}
                 </TextField>

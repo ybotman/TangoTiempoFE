@@ -13,12 +13,12 @@ export function transformEvents(events) {
             eventImage: event.eventImage,
             location: event.locationID,
             cost: event.cost,
-            region: event.region,
+            calcuatedRegion: event.calcuatedRegion,
             active: event.active,
             recurrence: event.recurrenceRule,
             ownerOrganizerID: event.ownerOrganizerID,
-            eventOrganizerID: event.eventOrganizerID,
-            altOrganizerID: event.altOrganizerID,
+            grantedOrganizerID: event.grantedOrganizerID,
+            alternateOrganizerID: event.alternateOrganizerID,
         }
     }));
 }

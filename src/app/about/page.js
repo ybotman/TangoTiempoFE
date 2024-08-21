@@ -31,9 +31,9 @@ export default function About() {
 
                 <h4>2. Region-Specific Filtering</h4>
                 <ul>
-                    <li><strong>Dynamic Filtering:</strong> The app supports filtering events by region.</li>
-                    <li><strong>Region Selection:</strong> Users can select their region from a dropdown, updating the calendar to display only relevant events.</li>
-                    <li><strong>Default Region:</strong> The default region is set to “BOS” (Boston), but users can change this as needed.</li>
+                    <li><strong>Dynamic Filtering:</strong> The app supports filtering events by calcuatedRegion.</li>
+                    <li><strong>Region Selection:</strong> Users can select their calcuatedRegion from a dropdown, updating the calendar to display only relevant events.</li>
+                    <li><strong>Default Region:</strong> The default calcuatedRegion is set to “BOS” (Boston), but users can change this as needed.</li>
                 </ul>
 
                 <h4>3. Category Filters</h4>
