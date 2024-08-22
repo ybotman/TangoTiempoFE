@@ -42,16 +42,17 @@ const CalendarPage = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
+      console.log('xxxxx -> fetchCategores axios.get:', `${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`)
+
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
-        console.log('xxxxx -> fetchCategores axios.get:', `${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`)
-        console.log('xxxxx -> fetchCategores response:', response)
+
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
     };
-
+    console.log('xxxxx -> fetchCategores response:', response)
     fetchCategories();
   }, []);
 
