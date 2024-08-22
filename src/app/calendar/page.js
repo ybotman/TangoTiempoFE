@@ -44,6 +44,8 @@ const CalendarPage = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
+        console.log('xxxxx -> fetchCategores axios.get:', `${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`)
+        console.log('xxxxx -> fetchCategores response:', response)
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
