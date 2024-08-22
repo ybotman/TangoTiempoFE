@@ -7,9 +7,12 @@ export function useRegions() {
 
 
     useEffect(() => {
+        console.log('useEffect regions');
         const getRegions = async () => {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/regions`);
+                console.log('API Base URL:', process.env.NEXT_PUBLIC_AZ_TANGO_API_URL);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/activeRegions`);
+                console.log('-->', response)
                 setRegions(response.data);
             } catch (error) {
                 console.error('Error fetching regions:', error);
