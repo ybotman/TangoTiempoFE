@@ -42,11 +42,9 @@ const CalendarPage = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const forceURL = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net';
-      console.log('Using forced URL for axios.get:', `${forceURL}/api/categories`);
 
       try {
-        const response = await axios.get(`${forceURL}/api/categories`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
