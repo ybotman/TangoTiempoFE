@@ -3,9 +3,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     // Define public environment variables
-    env: {
-        AZ_TANGO_API_URL: process.env.NEXT_PUBLIC_AZ_TANGO_API_URL,
-    },
+    //   env: {
+    //       AZ_TANGO_API_URL: process.env.NEXT_PUBLIC_AZ_TANGO_API_URL,
+    //   },
 
     // Webpack configuration for custom logging
     webpack: (config, { buildId, dev, isServer }) => {
