@@ -45,7 +45,8 @@ const CalendarPage = () => {
       console.log('xxxxx -> fetchCategores axios.get:', `${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`)
 
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
+        forceURL = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net'
+        const response = await axios.get(`${process.env.forceURL}/api/categories`);
 
         setCategories(response.data);
       } catch (error) {
