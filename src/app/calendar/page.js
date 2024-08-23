@@ -125,6 +125,7 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={coloredFilteredEvents}
+        //        events={coloredFilteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}

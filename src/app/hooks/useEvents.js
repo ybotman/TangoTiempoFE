@@ -23,7 +23,8 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
             const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsAllAll'
 
             try {
-                console.log('Making API request:', { selectedRegion, selectedDivision, selectedCity, start, end });
+                console.log('Making Events API request:', { selectedRegion, selectedDivision, selectedCity, start, end });
+                console.log('but forcedApi', forcedAPI)
                 const response = await axios.get(forcedAPI)
                 /*               const response = await axios.get(`${process.env.
                                    NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsByLocation`, {
@@ -36,6 +37,7 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
                                    },
             });
                    */
+                console.log('Events API : Response', response)
                 let transformedEvents = transformEvents(response.data);
                 setEvents(transformedEvents);
                 console.log('Events after setting:', transformedEvents);
