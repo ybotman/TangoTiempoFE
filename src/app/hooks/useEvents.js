@@ -19,25 +19,23 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
         const getEvents = async () => {
             const start = new Date().toISOString();
             const end = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString();
-
-            const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsByCalcuatedLocations'
+            const active = true;  // Assuming you want active events only; adjust as needed.
 
             try {
                 console.log('Making Events API request:', { selectedRegion, selectedDivision, selectedCity, start, end });
-                console.log('but forcedApi', forcedAPI)
-                const response = await axios.get(forcedAPI)
-                /*               const response = await axios.get(`${process.env.
-                                   NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsByLocation`, {
-                                   params: {
-                                       region: selectedRegion,
-                                       division: selectedDivision,
-                                       city: selectedCity,
-                                       start,
-                                       end,
-                                   },
-            });
-                   */
-                console.log('Events API : Response', response)
+
+                const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsByCalcuatedLocations', {
+                    params: {
+                        calculatedRegionName: selectedRegion,
+                        calculatedDivisionName: selectedDivision || undefined,
+                        calculatedCityName: selectedCity || undefined,
+                        start,
+                        end,
+                        active,
+                    },
+                });
+
+                console.log('Events API : Response', response);
                 let transformedEvents = transformEvents(response.data);
                 console.log('Events API : after transformed', transformedEvents);
                 setEvents(transformedEvents);
