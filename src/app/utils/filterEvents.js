@@ -8,7 +8,7 @@ export const filterEvents = (events, activeCategories) => {
 
     // If no active categories are selected, return all events
     if (activeCategories.length === 0) {
-        console.log('No active categories selected. Returning all events:', events);
+        //       console.log('No active categories selected. Returning all events:', events);
         return events;
     }
 

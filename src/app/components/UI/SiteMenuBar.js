@@ -16,20 +16,20 @@ const SiteMenuBar = ({
     categories }) => {
 
     const handleRegionChange = (event) => {
-        console.log("Region changed:", event.target.value);
+        //   console.log("Region changed:", event.target.value);
         setSelectedRegion(event.target.value);
         setSelectedDivision(''); // Reset division and city when region changes
         setSelectedCity('');
     };
 
     const handleDivisionChange = (event) => {
-        console.log("Division changed:", event.target.value);
+        //   console.log("Division changed:", event.target.value);
         setSelectedDivision(event.target.value);
         setSelectedCity(''); // Reset city when division changes
     };
 
     const handleCityChange = (event) => {
-        console.log("City changed:", event.target.value);
+        //   console.log("City changed:", event.target.value);
         setSelectedCity(event.target.value);
     };
 

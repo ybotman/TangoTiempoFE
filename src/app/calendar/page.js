@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { useEffect } from 'react';
-//import axios from 'axios';
 import React from 'react';
 
-import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
+import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
 import useCategories from '@/hooks/useCategories'
@@ -33,14 +32,23 @@ const CalendarPage = () => {
   const [activeCategories, setActiveCategories] = useState([]);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const { handleDatesSet } = useFullCalenderDateRange();
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  //const { calendarStart, calendarEnd, handleDatesSet } = useFullCalendarDateRange();
+
+  const { dateRange, handleDatesSet } = useFullCalendarDateRange();
+  const calendarStart = dateRange.firstCalDt;
+  const calendarEnd = dateRange.lastCalDt;
+
+  useEffect(() => {
+    console.log("Calendar Start Date:", calendarStart);
+    console.log("Calendar End Date:", calendarEnd);
+  }, [calendarStart, calendarEnd]);
 
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const events = useEvents(selectedRegion, selectedDivision, selectedCity);
+  const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
 
   const handleCategoryChange = (updatedCategories) => {
     setActiveCategories(updatedCategories);
@@ -62,16 +70,10 @@ const CalendarPage = () => {
     console.log('OrgChange:', event.target.value);
   };
 
-  console.log("Initial State:", { selectedRegion, selectedDivision, selectedCity });
   useEffect(() => {
-    console.log("Use Effect Initial State in page.js:", { selectedRegion, selectedDivision, selectedCity, activeCategories });
-  }, []);
-
-  useEffect(() => {
-    console.log("State Updated in page.js - Region:", selectedRegion);
-    console.log("State Updated in page.js - Division:", selectedDivision);
-    console.log("State Updated in page.js - City:", selectedCity);
-  }, [selectedRegion, selectedDivision, selectedCity, activeCategories]);
+    console.log("Calendar Start Date:", calendarStart);
+    console.log("Calendar End Date:", calendarEnd);
+  }, [calendarStart, calendarEnd]);
 
 
   const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);

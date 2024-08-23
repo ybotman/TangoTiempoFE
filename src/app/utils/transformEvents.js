@@ -1,5 +1,5 @@
 export function transformEvents(events) {
-    console.log('TransformEvent received:', events)
+    //  console.log('TransformEvent received:', events)
 
     return events.map(event => ({
         title: event.title,           // Use the 'title' field from the API
