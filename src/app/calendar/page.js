@@ -33,16 +33,10 @@ const CalendarPage = () => {
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-  //const { calendarStart, calendarEnd, handleDatesSet } = useFullCalendarDateRange();
 
   const { dateRange, handleDatesSet } = useFullCalendarDateRange();
   const calendarStart = dateRange.firstCalDt;
   const calendarEnd = dateRange.lastCalDt;
-
-  useEffect(() => {
-    console.log("Calendar Start Date:", calendarStart);
-    console.log("Calendar End Date:", calendarEnd);
-  }, [calendarStart, calendarEnd]);
 
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
@@ -50,8 +44,9 @@ const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
 
-  const handleCategoryChange = (updatedCategories) => {
-    setActiveCategories(updatedCategories);
+  const handleCategoryChange = (activeCategories) => {
+    console.log("handleCategoryChange: Updated Categories:", activeCategories);
+    setActiveCategories(activeCategories);
   };
 
   const handleDateClick = (clickInfo) => {
@@ -70,13 +65,9 @@ const CalendarPage = () => {
     console.log('OrgChange:', event.target.value);
   };
 
-  useEffect(() => {
-    console.log("Calendar Start Date:", calendarStart);
-    console.log("Calendar End Date:", calendarEnd);
-  }, [calendarStart, calendarEnd]);
 
+  const filteredEvents = filterEvents(events, activeCategories);
 
-  const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
     backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
@@ -86,6 +77,15 @@ const CalendarPage = () => {
     eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
     eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
   }));
+
+  useEffect(() => {
+    console.log('Filtered Events:', filteredEvents, activeCategories);
+  }, [filteredEvents], activeCategories);
+
+  useEffect(() => {
+    console.log("Calendar Start Date:", calendarStart);
+    console.log("Calendar End Date:", calendarEnd);
+  }, [calendarStart, calendarEnd]);
 
   return (
     <div>

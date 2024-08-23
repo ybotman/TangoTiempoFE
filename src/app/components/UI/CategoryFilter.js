@@ -13,7 +13,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
         }
     }, [categories]);
 
-    const handleButtonClick = (categoryName) => {
+    const handleCategoryButtonClick = (categoryName) => {
         let newActiveCategories;
 
         if (activeCategories.includes(categoryName)) {
@@ -46,7 +46,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
                             margin: '3px',
                         }}
                         className={`category-button ${activeCategories.includes(category.categoryName) ? 'active' : ''}`}
-                        onClick={() => handleButtonClick(category.categoryName)}
+                        onClick={() => handleCategoryButtonClick(category.categoryName)}
                     >
                         {category.categoryName}
                     </button>
