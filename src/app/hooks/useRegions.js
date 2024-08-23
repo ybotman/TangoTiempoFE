@@ -10,8 +10,8 @@ export function useRegions() {
         console.log('useEffect regions');
         const getRegions = async () => {
             try {
-                console.log('API Base URL:', process.env.NEXT_PUBLIC_AZ_TANGO_API_URL);
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/activeRegions`);
+                console.log('API Base URL:', process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/activeRegions`);
                 console.log('-->', response)
                 setRegions(response.data);
             } catch (error) {

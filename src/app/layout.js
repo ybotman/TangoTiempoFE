@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function Layout({ children }) {
   console.log('-->layout.js')
-  console.log('API URL:', process.env.NEXT_PUBLIC_AZ_TANGO_API_URL);
+  console.log('API URL:', process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
   return (
     <>
       <html lang="en">

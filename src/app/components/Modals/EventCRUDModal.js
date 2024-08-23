@@ -31,7 +31,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
                 setCategories(response.data); // Assuming response.data is an array of categories
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -67,7 +67,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
         };
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/createEvent`, eventData);
+            await axios.post(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/createEvent`, eventData);
             console.log('Event created successfully');
             if (onCreate) {
                 onCreate();
