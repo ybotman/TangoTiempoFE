@@ -20,17 +20,22 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
             const start = new Date().toISOString();
             const end = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString();
 
+            const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsAllAll'
+
             try {
                 console.log('Making API request:', { selectedRegion, selectedDivision, selectedCity, start, end });
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsByLocation`, {
-                    params: {
-                        region: selectedRegion,
-                        division: selectedDivision,
-                        city: selectedCity,
-                        start,
-                        end,
-                    },
-                });
+                const response = await axios.get(forcedAPI)
+                /*               const response = await axios.get(`${process.env.
+                                   NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsByLocation`, {
+                                   params: {
+                                       region: selectedRegion,
+                                       division: selectedDivision,
+                                       city: selectedCity,
+                                       start,
+                                       end,
+                                   },
+            });
+                   */
                 let transformedEvents = transformEvents(response.data);
                 setEvents(transformedEvents);
                 console.log('Events after setting:', transformedEvents);

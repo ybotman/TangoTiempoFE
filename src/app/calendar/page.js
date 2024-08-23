@@ -45,7 +45,6 @@ const CalendarPage = () => {
   const events = useEvents(selectedRegion, selectedDivision, selectedCity);
 
 
-  //        const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/regions');
 
   const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/categories'
 
