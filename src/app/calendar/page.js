@@ -39,12 +39,20 @@ const CalendarPage = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
+  //        const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/regions');
+
+  const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/categories'
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/regions');
-        //     const response = await axios.get(`${process.env.BASE_URL}/api/categories`);
+        console.log("fetchCategories axios request: ", forcedAPI)
+
+        const response = await axios.get(forcedAPI);
+
+        //const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
+
+        console.log("fetchCategories axios.get response:", response)
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -80,12 +88,12 @@ const CalendarPage = () => {
   const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
-    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // For dots
-    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Text color
-    displayEventTime: true,  // Ensures the time is shown (optional)
-    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Match border color
-    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Background color for the entire event
-    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Text color for the entire event
+    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
+    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
+    displayEventTime: true,
+    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
+    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
+    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
   }));
 
   return (

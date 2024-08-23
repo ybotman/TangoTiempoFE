@@ -36,7 +36,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
             {categories && categories.length > 0 ? (
                 categories.map((category) => (
                     <button
-                        key={category.categoryName}
+                        key={category._id}  // Use _id as the unique key
                         style={{
                             backgroundColor: activeCategories.includes(category.categoryName) ? categoryColors[category.categoryName] : 'lightGrey',
                             color: activeCategories.includes(category.categoryName) && category.categoryName === 'Milonga' ? 'white' : 'black',
@@ -47,9 +47,6 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
                         }}
                         className={`category-button ${activeCategories.includes(category.categoryName) ? 'active' : ''}`}
                         onClick={() => handleButtonClick(category.categoryName)}
-                    // need to move to.... but issue without handleButtonClick...
-                    //onClick={() => handleCategoryChange(category.categoryName)}
-
                     >
                         {category.categoryName}
                     </button>
