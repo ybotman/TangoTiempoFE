@@ -1,15 +1,25 @@
 // src/utils/filterEvents.js
 
 
-export const filterEvents = (events, selectedOrganizers, activeCategories) => {
+export const filterEvents = (events, activeCategories) => {
     if (!Array.isArray(events)) return [];
 
-    console.log('filterEvents received:', events, selectedOrganizers, activeCategories);
+    console.log('filterEvents received:', events, activeCategories);
 
-    // Simply return all events, bypassing any filters
-    return events;
+    // If no active categories are selected, return all events
+    if (activeCategories.length === 0) {
+        console.log('No active categories selected. Returning all events:', events);
+        return events;
+    }
+
+    // Filter events based on active categories
+    const filteredEvents = events.filter(event => {
+        return activeCategories.includes(event.extendedProps.categoryFirst);
+    });
+
+    console.log('Filtered events to be returned:', filteredEvents);
+    return filteredEvents;
 };
-
 /*  old with filters
 export const filterEvents = (events, selectedOrganizers, activeCategories) => {
     if (!Array.isArray(events)) return [];

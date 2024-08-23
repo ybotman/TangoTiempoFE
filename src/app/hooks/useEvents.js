@@ -20,7 +20,7 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
             const start = new Date().toISOString();
             const end = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString();
 
-            const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsAllAll'
+            const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsByCalcuatedLocations'
 
             try {
                 console.log('Making Events API request:', { selectedRegion, selectedDivision, selectedCity, start, end });

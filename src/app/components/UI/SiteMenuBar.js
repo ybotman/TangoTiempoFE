@@ -5,13 +5,13 @@ import CategoryFilter from '@/components/UI/CategoryFilter';
 
 const SiteMenuBar = ({
     regions,
-    selectedRegion,
+    selectedRegion = "",
     setSelectedRegion,
-    selectedDivision,
+    selectedDivision = "",
     setSelectedDivision,
-    selectedCity,
+    selectedCity = "",
     setSelectedCity,
-    selectedCategories,
+    selectedCategories = "",
     handleCategoryChange,
     categories }) => {
 
@@ -36,7 +36,7 @@ const SiteMenuBar = ({
     return (
         <div>
             {/* Region Dropdown */}
-            <select value={selectedRegion} onChange={handleRegionChange}>
+            <select value={selectedRegion || ""} onChange={handleRegionChange}>
                 <option value="">Select Region</option>
                 {regions.map(region => (
                     <option key={region.regionName} value={region.regionName}>
@@ -47,7 +47,7 @@ const SiteMenuBar = ({
 
             {/* Division Dropdown */}
             {selectedRegion && (
-                <select value={selectedDivision} onChange={handleDivisionChange}>
+                <select value={selectedDivision || ""} onChange={handleDivisionChange}>
                     <option value="">Select Division</option>
                     {regions.find(region => region.regionName === selectedRegion)
                         .divisions.map(division => (
@@ -60,7 +60,7 @@ const SiteMenuBar = ({
 
             {/* City Dropdown */}
             {selectedDivision && (
-                <select value={selectedCity} onChange={handleCityChange}>
+                <select value={selectedCity || ""} onChange={handleCityChange}>
                     <option value="">Select City</option>
                     {regions.find(region => region.regionName === selectedRegion)
                         .divisions.find(division => division.divisionName === selectedDivision)
