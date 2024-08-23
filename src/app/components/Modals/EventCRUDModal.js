@@ -10,10 +10,13 @@ const modalStyle = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 600, // Increased width
+    width: '90%', // Adjust for mobile responsiveness
+    maxWidth: '600px', // Set a maximum width for larger screens
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 6, // Increased padding
+    p: 3, // Reduced padding for better space on mobile
+    maxHeight: '90vh', // Allow for better scrolling on mobile
+    overflowY: 'auto', // Make modal content scrollable on overflow
 };
 
 const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate, onUpdate, onDelete }) => {
@@ -32,7 +35,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
         const fetchCategories = async () => {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
-                setCategories(response.data); // Assuming response.data is an array of categories
+                setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }
@@ -112,7 +115,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     multiline
                     rows={4}
                 />
-                Starting:
+
+                <Typography variant="body2">Starting:</Typography>
                 <DatePicker
                     selected={startDate}
                     onChange={(date) => setStartDate(date)}
@@ -121,7 +125,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     placeholderText="Start Date"
                     className="custom-datepicker"
                 />
-                Ending:
+
+                <Typography variant="body2">Ending:</Typography>
                 <DatePicker
                     selected={endDate}
                     onChange={(date) => setEndDate(date)}
@@ -129,7 +134,6 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     dateFormat="Pp"
                     placeholderText="End Date"
                     className="custom-datepicker"
-
                 />
 
                 <TextField

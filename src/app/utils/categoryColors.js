@@ -1,8 +1,9 @@
 export const categoryColors = {
-    Festival: 'purple',
+    Festival: 'green',
     Milonga: 'blue',
     Practica: 'cyan',
-    Class: 'darkGrey',
+    Class: 'lightPink',
     Workshop: 'lightgreen',
     Trip: 'yellow',
+    Virtual: 'white'
 };

@@ -3,11 +3,26 @@ import PropTypes from 'prop-types'; // Import PropTypes
 import { categoryColors } from '@/utils/categoryColors';
 
 const CategoryFilter = ({ categories, handleCategoryChange }) => {
+    // Define the desired order of categories
+    const categoryOrder = ['Milonga', 'Practica', 'Festival', 'Workshop', 'Class', 'Virtual', 'Trip'];
+
+    // Define default selected categories
+    const defaultSelectedCategories = ['Milonga', 'Practica', 'Workshop', 'Festival'];
+
     const [activeCategories, setActiveCategories] = useState([]);
 
     useEffect(() => {
         if (categories && categories.length > 0) {
-            const initialCategories = categories.map(c => c.categoryName);
+            // Sort categories based on the defined order
+            const sortedCategories = categories.sort((a, b) => {
+                return categoryOrder.indexOf(a.categoryName) - categoryOrder.indexOf(b.categoryName);
+            });
+
+            // Set default selected categories
+            const initialCategories = sortedCategories
+                .filter(category => defaultSelectedCategories.includes(category.categoryName))
+                .map(category => category.categoryName);
+
             setActiveCategories(initialCategories);
             handleCategoryChange(initialCategories);
         }
