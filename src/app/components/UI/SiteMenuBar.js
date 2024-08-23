@@ -1,25 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import CategoryFilter from '@/components/UI/CategoryFilter';
-import { useEvents } from '@/hooks/useEvents';
 
-const SiteMenuBar = ({ regions, selectedCategories, handleCategoryChange, categories }) => {
-    const [selectedRegion, setSelectedRegion] = useState('');
-    const [selectedDivision, setSelectedDivision] = useState('');
-    const [selectedCity, setSelectedCity] = useState('');
-
-    const events = useEvents(selectedRegion, selectedDivision, selectedCity);
+const SiteMenuBar = ({
+    regions,
+    selectedRegion,
+    setSelectedRegion,
+    selectedDivision,
+    setSelectedDivision,
+    selectedCity,
+    setSelectedCity,
+    selectedCategories,
+    handleCategoryChange,
+    categories }) => {
 
     const handleRegionChange = (event) => {
+        console.log("Region changed:", event.target.value);
         setSelectedRegion(event.target.value);
         setSelectedDivision(''); // Reset division and city when region changes
         setSelectedCity('');
     };
 
     const handleDivisionChange = (event) => {
+        console.log("Division changed:", event.target.value);
         setSelectedDivision(event.target.value);
         setSelectedCity(''); // Reset city when division changes
+    };
+
+    const handleCityChange = (event) => {
+        console.log("City changed:", event.target.value);
+        setSelectedCity(event.target.value);
     };
 
     return (
@@ -49,7 +60,7 @@ const SiteMenuBar = ({ regions, selectedCategories, handleCategoryChange, catego
 
             {/* City Dropdown */}
             {selectedDivision && (
-                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}>
+                <select value={selectedCity} onChange={handleCityChange}>
                     <option value="">Select City</option>
                     {regions.find(region => region.regionName === selectedRegion)
                         .divisions.find(division => division.divisionName === selectedDivision)
@@ -61,7 +72,8 @@ const SiteMenuBar = ({ regions, selectedCategories, handleCategoryChange, catego
                 </select>
             )}
 
-            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+            {/* Category Filter */}
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <CategoryFilter
                     selectedCategories={selectedCategories}
                     handleCategoryChange={handleCategoryChange}
@@ -84,9 +96,16 @@ SiteMenuBar.propTypes = {
             })).isRequired,
         })).isRequired,
     })).isRequired,
+    selectedRegion: PropTypes.string.isRequired,
+    setSelectedRegion: PropTypes.func.isRequired,
+    selectedDivision: PropTypes.string.isRequired,
+    setSelectedDivision: PropTypes.func.isRequired,
+    selectedCity: PropTypes.string.isRequired,
+    setSelectedCity: PropTypes.func.isRequired,
     selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
     categories: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
+
 
 export default SiteMenuBar;

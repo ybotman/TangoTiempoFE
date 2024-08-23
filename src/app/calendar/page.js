@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useEffect } from 'react';
-import axios from 'axios';
+//import axios from 'axios';
 import React from 'react';
 
 import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
+import useCategories from '@/hooks/useCategories'
 import useOrganizers from '@/hooks/useOrganizers';
 import { filterEvents } from '@/utils/filterEvents';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
@@ -26,16 +27,13 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 
 const CalendarPage = () => {
-  //const { currentRole, setCurrentRole } = useRole();
   const regions = useRegions();
   const organizers = useOrganizers();
-  const [categories, setCategories] = useState([]);
+  const categories = useCategories();
   const [activeCategories, setActiveCategories] = useState([]);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { handleDatesSet } = useFullCalenderDateRange();
-  //old const events = useEvents(selectedRegion);
-
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
 
   const [selectedRegion, setSelectedRegion] = useState(null);
@@ -43,30 +41,6 @@ const CalendarPage = () => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const events = useEvents(selectedRegion, selectedDivision, selectedCity);
-
-
-
-  const forcedAPI = 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/categories'
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        console.log("fetchCategories axios request: ", forcedAPI)
-
-        const response = await axios.get(forcedAPI);
-
-        //const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
-
-        console.log("fetchCategories axios.get response:", response)
-        setCategories(response.data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-    fetchCategories();
-
-  }, []);
-
 
   const handleCategoryChange = (updatedCategories) => {
     setActiveCategories(updatedCategories);
@@ -83,12 +57,22 @@ const CalendarPage = () => {
     console.log('Event clicked:', clickInfo.event.title);
   };
 
-
-
   const handleOrganizerChange = (event) => {
     setSelectedOrganizers(event.target.value);
     console.log('OrgChange:', event.target.value);
   };
+
+  console.log("Initial State:", { selectedRegion, selectedDivision, selectedCity });
+  useEffect(() => {
+    console.log("Use Effect Initial State in page.js:", { selectedRegion, selectedDivision, selectedCity, activeCategories });
+  }, []);
+
+  useEffect(() => {
+    console.log("State Updated in page.js - Region:", selectedRegion);
+    console.log("State Updated in page.js - Division:", selectedDivision);
+    console.log("State Updated in page.js - City:", selectedCity);
+  }, [selectedRegion, selectedDivision, selectedCity, activeCategories]);
+
 
   const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);
   const coloredFilteredEvents = filteredEvents.map(event => ({
@@ -125,7 +109,6 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={coloredFilteredEvents}
-        //        events={coloredFilteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}

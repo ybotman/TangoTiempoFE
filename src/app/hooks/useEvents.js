@@ -39,8 +39,9 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
                    */
                 console.log('Events API : Response', response)
                 let transformedEvents = transformEvents(response.data);
+                console.log('Events API : after transformed', transformedEvents);
                 setEvents(transformedEvents);
-                console.log('Events after setting:', transformedEvents);
+
             } catch (error) {
                 console.error('Error fetching events:', error);
             }
