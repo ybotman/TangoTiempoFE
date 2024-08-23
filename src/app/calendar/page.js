@@ -31,13 +31,19 @@ const CalendarPage = () => {
   const organizers = useOrganizers();
   const [categories, setCategories] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
-  const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { handleDatesSet } = useFullCalenderDateRange();
-  const events = useEvents(selectedRegion);
+  //old const events = useEvents(selectedRegion);
+
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [selectedDivision, setSelectedDivision] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const events = useEvents(selectedRegion, selectedDivision, selectedCity);
+
 
   //        const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/regions');
 
@@ -103,6 +109,10 @@ const CalendarPage = () => {
       <SiteMenuBar
         selectedRegion={selectedRegion}
         setSelectedRegion={setSelectedRegion}
+        selectedDivision={selectedDivision}
+        setSelectedDivision={setSelectedDivision}
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
         regions={regions}
         selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}

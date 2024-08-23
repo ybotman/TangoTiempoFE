@@ -2,17 +2,13 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { transformEvents } from '@/utils/transformEvents';
 
-export function useEvents(selectedRegion, selectedDivision, selectedCity) {
+export function useEvents(selectedRegion) {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        console.log("Selected Region:", selectedRegion);
-        console.log("Selected Division:", selectedDivision);
-        console.log("Selected City:", selectedCity);
-
         if (!selectedRegion) {
-            console.log('No region selected, skipping API call.');
-            setEvents([]);  // Clear events if no region is selected
+            console.log('No calcuatedRegion selected, skipping API call.');
+            setEvents([]);  // Clear events if no calcuatedRegion is selected
             return;
         }
 
@@ -21,12 +17,12 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
             const end = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString();
 
             try {
-                console.log('Making API request:', { selectedRegion, selectedDivision, selectedCity, start, end });
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsByLocation`, {
+                console.log('Making API request:', { calcuatedRegion: selectedRegion, start, end });
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsRegion`, {
+
+                    //  const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsAll`, {
                     params: {
-                        region: selectedRegion,
-                        division: selectedDivision,
-                        city: selectedCity,
+                        calcuatedRegion: selectedRegion,
                         start,
                         end,
                     },
@@ -40,7 +36,7 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity) {
         };
 
         getEvents();
-    }, [selectedRegion, selectedDivision, selectedCity]);
+    }, [selectedRegion]);
 
     return events; // Ensure you're returning just the events array
 }
