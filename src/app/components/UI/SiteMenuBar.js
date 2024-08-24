@@ -1,40 +1,99 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MenuIcon from '@mui/icons-material/Menu';
+// Remove the direct import of useRouter
+import dynamic from 'next/dynamic';
 import CategoryFilter from '@/components/UI/CategoryFilter';
+
+// Dynamically load the useRouter hook only on the client-side
+const DynamicRouter = dynamic(() => import('next/router').then(mod => mod.useRouter), { ssr: false });
 
 const SiteMenuBar = ({
     regions,
-    selectedRegion = "",
+    selectedRegion,
     setSelectedRegion,
-    selectedDivision = "",
+    selectedDivision,
     setSelectedDivision,
-    selectedCity = "",
+    selectedCity,
     setSelectedCity,
-    selectedCategories = "",
+    selectedCategories,
     handleCategoryChange,
-    categories }) => {
+    categories,
+    organizers,
+    selectedOrganizer,
+    handleOrganizerChange
+}) => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Only call useRouter if the component is mounted
+    const router = isMounted ? DynamicRouter() : null;
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleSelectOrganizers = () => {
+        handleMenuClose();
+        handleOrganizerChange(selectedOrganizer);
+    };
+
+    const handleRequestForm = () => {
+        handleMenuClose();
+        // Handle request form logic here (TBD)
+    };
+
+    const handleAbout = () => {
+        handleMenuClose();
+        if (router) {
+            router.push('/about');
+        }
+    };
 
     const handleRegionChange = (event) => {
-        //   console.log("Region changed:", event.target.value);
         setSelectedRegion(event.target.value);
-        setSelectedDivision(''); // Reset division and city when region changes
+        setSelectedDivision('');
         setSelectedCity('');
     };
 
     const handleDivisionChange = (event) => {
-        //   console.log("Division changed:", event.target.value);
         setSelectedDivision(event.target.value);
-        setSelectedCity(''); // Reset city when division changes
+        setSelectedCity('');
     };
 
     const handleCityChange = (event) => {
-        //   console.log("City changed:", event.target.value);
         setSelectedCity(event.target.value);
     };
 
+    if (!isMounted) return null;
+
     return (
         <div>
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleMenuOpen}>
+                <MenuIcon />
+            </IconButton>
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+            >
+                <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
+                <MenuItem onClick={handleRequestForm}>Request Form</MenuItem>
+                <MenuItem onClick={handleAbout}>About</MenuItem>
+            </Menu>
+
             {/* Region Dropdown */}
             <select value={selectedRegion || ""} onChange={handleRegionChange}>
                 <option value="">Select Region</option>
@@ -72,6 +131,18 @@ const SiteMenuBar = ({
                 </select>
             )}
 
+            {/* Organizer Dropdown */}
+            {selectedRegion && organizers.length > 0 && (
+                <select value={selectedOrganizer || ""} onChange={(e) => handleOrganizerChange(e.target.value)}>
+                    <option value="">Select Organizer</option>
+                    {organizers.map(organizer => (
+                        <option key={organizer._id} value={organizer._id}>
+                            {organizer.name}
+                        </option>
+                    ))}
+                </select>
+            )}
+
             {/* Category Filter */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <CategoryFilter
@@ -105,7 +176,9 @@ SiteMenuBar.propTypes = {
     selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
     categories: PropTypes.arrayOf(PropTypes.object).isRequired,
+    organizers: PropTypes.arrayOf(PropTypes.object).isRequired,
+    selectedOrganizer: PropTypes.string.isRequired,
+    handleOrganizerChange: PropTypes.func.isRequired,
 };
-
 
 export default SiteMenuBar;

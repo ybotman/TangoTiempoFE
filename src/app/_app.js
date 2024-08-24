@@ -1,1 +1,2 @@
-// /_app.js
+// _app.js
+/* legacy for old next? */

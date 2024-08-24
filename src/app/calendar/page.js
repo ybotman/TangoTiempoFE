@@ -27,7 +27,6 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 const CalendarPage = () => {
   const regions = useRegions();
-  const organizers = useOrganizers();
   const categories = useCategories();
   const [activeCategories, setActiveCategories] = useState([]);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
@@ -43,6 +42,7 @@ const CalendarPage = () => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+  const organizers = useOrganizers(selectedRegion);
 
   const handleCategoryChange = (activeCategories) => {
     console.log("handleCategoryChange: Updated Categories:", activeCategories);
@@ -99,9 +99,9 @@ const CalendarPage = () => {
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         regions={regions}
+        organizers={organizers}
         selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
-        organizers={organizers}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
