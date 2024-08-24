@@ -3,17 +3,32 @@ import PropTypes from 'prop-types'; // Import PropTypes
 import { categoryColors } from '@/utils/categoryColors';
 
 const CategoryFilter = ({ categories, handleCategoryChange }) => {
+    // Define the desired order of categories
+    const categoryOrder = ['Milonga', 'Practica', 'Festival', 'Workshop', 'Class', 'Virtual', 'Trip'];
+
+    // Define default selected categories
+    const defaultSelectedCategories = ['Milonga', 'Practica', 'Workshop', 'Festival'];
+
     const [activeCategories, setActiveCategories] = useState([]);
 
     useEffect(() => {
         if (categories && categories.length > 0) {
-            const initialCategories = categories.map(c => c.CategoryName);
+            // Sort categories based on the defined order
+            const sortedCategories = categories.sort((a, b) => {
+                return categoryOrder.indexOf(a.categoryName) - categoryOrder.indexOf(b.categoryName);
+            });
+
+            // Set default selected categories
+            const initialCategories = sortedCategories
+                .filter(category => defaultSelectedCategories.includes(category.categoryName))
+                .map(category => category.categoryName);
+
             setActiveCategories(initialCategories);
             handleCategoryChange(initialCategories);
         }
     }, [categories]);
 
-    const handleButtonClick = (categoryName) => {
+    const handleCategoryButtonClick = (categoryName) => {
         let newActiveCategories;
 
         if (activeCategories.includes(categoryName)) {
@@ -36,22 +51,19 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
             {categories && categories.length > 0 ? (
                 categories.map((category) => (
                     <button
-                        key={category.CategoryName}
+                        key={category._id}  // Use _id as the unique key
                         style={{
-                            backgroundColor: activeCategories.includes(category.CategoryName) ? categoryColors[category.CategoryName] : 'lightGrey',
-                            color: activeCategories.includes(category.CategoryName) && category.CategoryName === 'Milonga' ? 'white' : 'black',
+                            backgroundColor: activeCategories.includes(category.categoryName) ? categoryColors[category.categoryName] : 'lightGrey',
+                            color: activeCategories.includes(category.categoryName) && category.categoryName === 'Milonga' ? 'white' : 'black',
                             padding: '5px 5px',
                             border: 'none',
                             borderRadius: '4px',
                             margin: '3px',
                         }}
-                        className={`category-button ${activeCategories.includes(category.CategoryName) ? 'active' : ''}`}
-                        onClick={() => handleButtonClick(category.CategoryName)}
-                    // need to move to.... but issue without handleButtonClick...
-                    //onClick={() => handleCategoryChange(category.CategoryName)}
-
+                        className={`category-button ${activeCategories.includes(category.categoryName) ? 'active' : ''}`}
+                        onClick={() => handleCategoryButtonClick(category.categoryName)}
                     >
-                        {category.CategoryName}
+                        {category.categoryName}
                     </button>
                 ))
             ) : (
@@ -64,7 +76,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
 // Add PropTypes validation
 CategoryFilter.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.shape({
-        CategoryName: PropTypes.string.isRequired,
+        categoryName: PropTypes.string.isRequired,
     })).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
 };

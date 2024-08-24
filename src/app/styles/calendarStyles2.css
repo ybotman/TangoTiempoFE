@@ -64,3 +64,11 @@
     /* Ensures the calendar takes up the remaining space */
     overflow: hidden;
 }
+
+/* Attempt to override any specific styles */
+.fc-toolbar h2.fc-toolbar-title {
+    font-size: 14px;
+    /* Adjust font size */
+    color: #333;
+    /* Keep the existing text color */
+}

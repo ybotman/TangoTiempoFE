@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, MenuItem } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, MenuItem, Grid } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/customDatePicker.css';
-import axios from 'axios';
+import { useCreateEvent } from '@/hooks/useEvents'; // Import the useCreateEvent hook
 
 const modalStyle = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 600, // Increased width
+    width: '90%',
+    maxWidth: '600px',
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 6, // Increased padding
+    p: 3,
+    maxHeight: '90vh',
+    overflowY: 'auto',
 };
 
-const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate, onUpdate, onDelete }) => {
+const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate }) => {
+    const createEvent = useCreateEvent(); // Use the createEvent function
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [categoryFirst, setCategoryFirst] = useState('');
@@ -31,8 +35,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
-                setCategories(response.data); // Assuming response.data is an array of categories
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
+                setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }
@@ -52,13 +56,13 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
             categoryThird,
             startDate,
             endDate,
-            region: selectedRegion,
+            calculatedRegion: selectedRegion,
             cost,
             recurrenceRule,
             standardsTitle: '',
             ownerOrganizerID: '6442ccb5f88a6c48aa30be35',
-            eventOrganizerID: '6442ccb5f88a6c48aa30be35',
-            altOrganizerID: '6442ccb5f88a6c48aa30be35',
+            grantedOrganizerID: '',
+            alternateOrganizerID: '',
             eventImage: 'https://example.com/image.jpg',
             locationID: '6449ee6895174c52123afd4c',
             active: true,
@@ -67,7 +71,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
         };
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/createEvent`, eventData);
+            await createEvent(eventData); // Use the createEvent function
             console.log('Event created successfully');
             if (onCreate) {
                 onCreate();
@@ -112,7 +116,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     multiline
                     rows={4}
                 />
-                Starting:
+
+                <Typography variant="body2">Starting:</Typography>
                 <DatePicker
                     selected={startDate}
                     onChange={(date) => setStartDate(date)}
@@ -121,7 +126,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     placeholderText="Start Date"
                     className="custom-datepicker"
                 />
-                Ending:
+
+                <Typography variant="body2">Ending:</Typography>
                 <DatePicker
                     selected={endDate}
                     onChange={(date) => setEndDate(date)}
@@ -129,69 +135,80 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     dateFormat="Pp"
                     placeholderText="End Date"
                     className="custom-datepicker"
-
                 />
 
-                <TextField
-                    fullWidth
-                    select
-                    label="Primary Category"
-                    value={categoryFirst}
-                    onChange={(e) => setCategoryFirst(e.target.value)}
-                    margin="normal"
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.CategoryName}>
-                            {category.CategoryName}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Primary Category"
+                            value={categoryFirst}
+                            onChange={(e) => setCategoryFirst(e.target.value)}
+                            margin="normal"
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category.categoryName}>
+                                    {category.categoryName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Secondary Category"
+                            value={categorySecond}
+                            onChange={(e) => setCategorySecond(e.target.value)}
+                            margin="normal"
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category.categoryName}>
+                                    {category.categoryName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Tertiary Category"
+                            value={categoryThird}
+                            onChange={(e) => setCategoryThird(e.target.value)}
+                            margin="normal"
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category.categoryName}>
+                                    {category.categoryName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                </Grid>
 
-                <TextField
-                    fullWidth
-                    select
-                    label="Secondary Category"
-                    value={categorySecond}
-                    onChange={(e) => setCategorySecond(e.target.value)}
-                    margin="normal"
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.CategoryName}>
-                            {category.CategoryName}
-                        </MenuItem>
-                    ))}
-                </TextField>
-
-                <TextField
-                    fullWidth
-                    select
-                    label="Tertiary Category"
-                    value={categoryThird}
-                    onChange={(e) => setCategoryThird(e.target.value)}
-                    margin="normal"
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.CategoryName}>
-                            {category.CategoryName}
-                        </MenuItem>
-                    ))}
-                </TextField>
-
-                <TextField
-                    fullWidth
-                    label="Cost"
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                    margin="normal"
-                />
-
-                <TextField
-                    fullWidth
-                    label="Recurrence Rule"
-                    value={recurrenceRule}
-                    onChange={(e) => setRecurrenceRule(e.target.value)}
-                    margin="normal"
-                />
+                <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            label="Cost"
+                            value={cost}
+                            onChange={(e) => setCost(e.target.value)}
+                            margin="normal"
+                            inputProps={{ maxLength: 10 }}
+                        />
+                    </Grid>
+                    <Grid item xs={8}>
+                        <TextField
+                            fullWidth
+                            label="Recurrence Rule"
+                            value={recurrenceRule}
+                            onChange={(e) => setRecurrenceRule(e.target.value)}
+                            margin="normal"
+                        />
+                    </Grid>
+                </Grid>
 
                 <Button onClick={handleSave} variant="contained" color="primary" sx={{ mt: 2 }}>
                     Save

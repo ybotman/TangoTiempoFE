@@ -1,17 +1,17 @@
 // src/hooks/useFullCalendarDateRange.js
 import { useState } from 'react';
 
-export function useFullCalenderDateRange() {
-    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+export function useFullCalendarDateRange() {
+    const [dateRange, setDateRange] = useState({ firstCalDt: '', lastCalDt: '' });
 
     const handleDatesSet = (dateInfo) => {
-        console.log('useFullCalenderDateRange.handleDatesSet')
-        console.log('--> Start Date:', dateInfo.startStr);  // Log start date
-        console.log('--> End Date:', dateInfo.endStr);      // Log end date
+        console.log('useFullCalendarDateRange.handleDatesSet')
+        console.log('--> Calendar earliest Date:', dateInfo.startStr);
+        console.log('--> Calendar latest Date:', dateInfo.endStr);
 
         setDateRange({
-            start: dateInfo.startStr,
-            end: dateInfo.endStr,
+            firstCalDt: dateInfo.startStr,
+            lastCalDt: dateInfo.endStr,
         });
     };
 

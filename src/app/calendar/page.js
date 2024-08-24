@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useEffect } from 'react';
-import axios from 'axios';
 import React from 'react';
 
-import { useFullCalenderDateRange } from '@/hooks/useFullCalendarDateRange';
+import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
 import { useEvents } from '@/hooks/useEvents';
+import useCategories from '@/hooks/useCategories'
 import useOrganizers from '@/hooks/useOrganizers';
 import { filterEvents } from '@/utils/filterEvents';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
@@ -26,36 +26,27 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 
 const CalendarPage = () => {
-  //const { currentRole, setCurrentRole } = useRole();
   const regions = useRegions();
-  const organizers = useOrganizers();
-  const [categories, setCategories] = useState([]);
+  const categories = useCategories();
   const [activeCategories, setActiveCategories] = useState([]);
-  const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const { handleDatesSet } = useFullCalenderDateRange();
-  const events = useEvents(selectedRegion);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
+  const { dateRange, handleDatesSet } = useFullCalendarDateRange();
+  const calendarStart = dateRange.firstCalDt;
+  const calendarEnd = dateRange.lastCalDt;
+
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [selectedDivision, setSelectedDivision] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+  const organizers = useOrganizers(selectedRegion);
 
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AZ_TANGO_API_URL}/api/categories`);
-        setCategories(response.data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-
-  const handleCategoryChange = (updatedCategories) => {
-    setActiveCategories(updatedCategories);
+  const handleCategoryChange = (activeCategories) => {
+    console.log("handleCategoryChange: Updated Categories:", activeCategories);
+    setActiveCategories(activeCategories);
   };
 
   const handleDateClick = (clickInfo) => {
@@ -69,23 +60,32 @@ const CalendarPage = () => {
     console.log('Event clicked:', clickInfo.event.title);
   };
 
-
-
   const handleOrganizerChange = (event) => {
     setSelectedOrganizers(event.target.value);
     console.log('OrgChange:', event.target.value);
   };
 
-  const filteredEvents = filterEvents(events, selectedOrganizers, activeCategories);
+
+  const filteredEvents = filterEvents(events, activeCategories);
+
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
-    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // For dots
-    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Text color
-    displayEventTime: true,  // Ensures the time is shown (optional)
-    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Match border color
-    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey', // Background color for the entire event
-    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', // Text color for the entire event
+    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
+    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
+    displayEventTime: true,
+    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
+    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
+    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
   }));
+
+  useEffect(() => {
+    console.log('Filtered Events:', filteredEvents, activeCategories);
+  }, [filteredEvents], activeCategories);
+
+  useEffect(() => {
+    console.log("Calendar Start Date:", calendarStart);
+    console.log("Calendar End Date:", calendarEnd);
+  }, [calendarStart, calendarEnd]);
 
   return (
     <div>
@@ -94,10 +94,14 @@ const CalendarPage = () => {
       <SiteMenuBar
         selectedRegion={selectedRegion}
         setSelectedRegion={setSelectedRegion}
+        selectedDivision={selectedDivision}
+        setSelectedDivision={setSelectedDivision}
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
         regions={regions}
+        organizers={organizers}
         selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
-        organizers={organizers}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}

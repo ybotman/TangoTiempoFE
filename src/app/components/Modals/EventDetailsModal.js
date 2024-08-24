@@ -55,7 +55,7 @@ const EventDetailsModal = ({ event, open, onClose }) => {
                     <strong style={{ color: 'black' }}>Description:</strong> {event.extendedProps.description}<br />
                     <strong style={{ color: 'black' }}>Location:</strong> {event.extendedProps.location}<br />
                     <strong style={{ color: 'black' }}>Cost:</strong> {event.extendedProps.cost}<br />
-                    <strong style={{ color: 'black' }}>Region:</strong> {event.extendedProps.region}<br />
+                    <strong style={{ color: 'black' }}>Region:</strong> {event.extendedProps.calcuatedRegion}<br />
                     <strong style={{ color: 'black' }}>Recurrence:</strong> {event.extendedProps.recurrence}<br />
                     <strong style={{ color: 'black' }}>Categories:</strong> {`${event.extendedProps.categoryFirst || ''}, ${event.extendedProps.categorySecond || ''}, ${event.extendedProps.categoryThird || ''}`.replace(/, ,/g, '')}
                 </Typography>

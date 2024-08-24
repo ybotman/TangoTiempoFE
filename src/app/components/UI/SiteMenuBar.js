@@ -1,88 +1,173 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Checkbox from '@mui/material/Checkbox';
-import ListItemText from '@mui/material/ListItemText';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import UserStateRole from '@/components/UI/UserStateRole';
-import CategoryFilter from '@/components/UI/CategoryFilter';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MenuIcon from '@mui/icons-material/Menu';
+import dynamic from 'next/dynamic';
+import CategoryFilter from '@/components/UI/CategoryFilter';
+
+const DynamicRouter = dynamic(() => import('next/router').then(mod => mod.useRouter), { ssr: false });
 
 const SiteMenuBar = ({
+    regions,
     selectedRegion,
     setSelectedRegion,
-    regions,
-    selectedOrganizers,
-    handleOrganizerChange,
-    organizers,
+    selectedDivision,
+    setSelectedDivision,
+    selectedCity,
+    setSelectedCity,
     selectedCategories,
     handleCategoryChange,
-    categories
+    categories,
+    organizers,
+    selectedOrganizer,
+    handleOrganizerChange
 }) => {
-    const [currentRole, setCurrentRole] = useState('anonymous');
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const router = isMounted ? DynamicRouter() : null;
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleSelectOrganizers = () => {
+        handleMenuClose();
+        handleOrganizerChange(selectedOrganizer);
+    };
+
+    const handleRequestForm = () => {
+        handleMenuClose();
+        // Handle request form logic here (TBD)
+    };
+
+    const handleAbout = () => {
+        handleMenuClose();
+        if (router) {
+            router.push('/about');
+        }
+    };
+
+    const handleRegionChange = (event) => {
+        setSelectedRegion(event.target.value);
+        setSelectedDivision('');
+        setSelectedCity('');
+    };
+
+    const handleDivisionChange = (event) => {
+        setSelectedDivision(event.target.value);
+        setSelectedCity('');
+    };
+
+    const handleCityChange = (event) => {
+        setSelectedCity(event.target.value);
+    };
+
+    if (!isMounted) return null;
 
     return (
-        <AppBar position="static" sx={{ backgroundColor: 'black' }}>
-            <Toolbar sx={{ flexDirection: 'column', alignItems: 'flex-end' }}>
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+        <div>
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleMenuOpen}>
+                <MenuIcon />
+            </IconButton>
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+            >
+                {/* Conditionally render the "Select Organizers" menu item */}
+                {selectedRegion && (
+                    <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
+                )}
+                <MenuItem onClick={handleRequestForm}>Request Form</MenuItem>
+                <MenuItem onClick={handleAbout}>About</MenuItem>
+            </Menu>
 
-                    <UserStateRole
-                        currentRole={currentRole} setCurrentRole={setCurrentRole} />
+            {/* Region Dropdown */}
+            <select value={selectedRegion || ""} onChange={handleRegionChange}>
+                <option value="">Select Region</option>
+                {regions.map(region => (
+                    <option key={region.regionName} value={region.regionName}>
+                        {region.regionName}
+                    </option>
+                ))}
+            </select>
 
-                    <Select
-                        value={selectedRegion || ""}
-                        onChange={(e) => setSelectedRegion(e.target.value)}
-                        style={{ color: 'white', marginLeft: '10px' }}
-                        displayEmpty
-                    >
-                        <MenuItem value=""><em>Select Region</em></MenuItem>
-                        {regions.map((region) => (
-                            <MenuItem key={region._id} value={region.regionName}>{region.regionName}</MenuItem>
+            {/* Division Dropdown */}
+            {selectedRegion && (
+                <select value={selectedDivision || ""} onChange={handleDivisionChange}>
+                    <option value="">Select Division</option>
+                    {regions.find(region => region.regionName === selectedRegion)
+                        .divisions.map(division => (
+                            <option key={division.divisionName} value={division.divisionName}>
+                                {division.divisionName}
+                            </option>
                         ))}
-                    </Select>
+                </select>
+            )}
 
-                    <Select
-                        multiple
-                        value={selectedOrganizers}
-                        onChange={handleOrganizerChange}
-                        renderValue={() => 'Filter Organizers'}
-                        style={{ color: 'white', marginLeft: '10px' }}
-                        displayEmpty
-                    >
-                        {organizers.map((organizer) => (
-                            <MenuItem key={organizer._id} value={organizer._id}>
-                                <Checkbox checked={selectedOrganizers.includes(organizer._id)} />
-                                <ListItemText primary={organizer.organizerName} />
-                            </MenuItem>
+            {/* City Dropdown */}
+            {selectedDivision && (
+                <select value={selectedCity || ""} onChange={handleCityChange}>
+                    <option value="">Select City</option>
+                    {regions.find(region => region.regionName === selectedRegion)
+                        .divisions.find(division => division.divisionName === selectedDivision)
+                        .majorCities.map(city => (
+                            <option key={city._id} value={city.cityName}>
+                                {city.cityName}
+                            </option>
                         ))}
-                    </Select>
+                </select>
+            )}
 
-                </Box>
 
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-                    <CategoryFilter
-                        selectedCategories={selectedCategories}
-                        handleCategoryChange={handleCategoryChange}
-                        categories={categories}
-                    />
-                </Box>
-            </Toolbar>
-        </AppBar>
+            {/* Category Filter */}
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                <CategoryFilter
+                    selectedCategories={selectedCategories}
+                    handleCategoryChange={handleCategoryChange}
+                    categories={categories}
+                />
+            </Box>
+        </div>
     );
 };
 
 SiteMenuBar.propTypes = {
-    selectedRegion: PropTypes.string,
+    regions: PropTypes.arrayOf(PropTypes.shape({
+        regionCode: PropTypes.string.isRequired,
+        regionName: PropTypes.string.isRequired,
+        divisions: PropTypes.arrayOf(PropTypes.shape({
+            divisionName: PropTypes.string.isRequired,
+            majorCities: PropTypes.arrayOf(PropTypes.shape({
+                cityName: PropTypes.string.isRequired,
+                _id: PropTypes.string.isRequired,
+            })).isRequired,
+        })).isRequired,
+    })).isRequired,
+    selectedRegion: PropTypes.string.isRequired,
     setSelectedRegion: PropTypes.func.isRequired,
-    regions: PropTypes.arrayOf(PropTypes.object).isRequired,
-    selectedOrganizers: PropTypes.arrayOf(PropTypes.string).isRequired,
-    handleOrganizerChange: PropTypes.func.isRequired,
-    organizers: PropTypes.arrayOf(PropTypes.object).isRequired,
+    selectedDivision: PropTypes.string.isRequired,
+    setSelectedDivision: PropTypes.func.isRequired,
+    selectedCity: PropTypes.string.isRequired,
+    setSelectedCity: PropTypes.func.isRequired,
     selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
     categories: PropTypes.arrayOf(PropTypes.object).isRequired,
+    organizers: PropTypes.arrayOf(PropTypes.object).isRequired,
+    selectedOrganizer: PropTypes.string.isRequired,
+    handleOrganizerChange: PropTypes.func.isRequired,
 };
 
 export default SiteMenuBar;
