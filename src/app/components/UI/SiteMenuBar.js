@@ -5,11 +5,9 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-// Remove the direct import of useRouter
 import dynamic from 'next/dynamic';
 import CategoryFilter from '@/components/UI/CategoryFilter';
 
-// Dynamically load the useRouter hook only on the client-side
 const DynamicRouter = dynamic(() => import('next/router').then(mod => mod.useRouter), { ssr: false });
 
 const SiteMenuBar = ({
@@ -34,7 +32,6 @@ const SiteMenuBar = ({
         setIsMounted(true);
     }, []);
 
-    // Only call useRouter if the component is mounted
     const router = isMounted ? DynamicRouter() : null;
 
     const handleMenuOpen = (event) => {
@@ -89,7 +86,10 @@ const SiteMenuBar = ({
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
             >
-                <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
+                {/* Conditionally render the "Select Organizers" menu item */}
+                {selectedRegion && (
+                    <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
+                )}
                 <MenuItem onClick={handleRequestForm}>Request Form</MenuItem>
                 <MenuItem onClick={handleAbout}>About</MenuItem>
             </Menu>
@@ -131,17 +131,6 @@ const SiteMenuBar = ({
                 </select>
             )}
 
-            {/* Organizer Dropdown */}
-            {selectedRegion && organizers.length > 0 && (
-                <select value={selectedOrganizer || ""} onChange={(e) => handleOrganizerChange(e.target.value)}>
-                    <option value="">Select Organizer</option>
-                    {organizers.map(organizer => (
-                        <option key={organizer._id} value={organizer._id}>
-                            {organizer.name}
-                        </option>
-                    ))}
-                </select>
-            )}
 
             {/* Category Filter */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
