@@ -5,7 +5,6 @@ import { transformEvents } from '@/utils/transformEvents';
 export function useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
     const [events, setEvents] = useState([]);
 
-
     useEffect(() => {
 
         if (!selectedRegion) {
@@ -48,4 +47,19 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
     }, [selectedRegion, selectedDivision, selectedCity]);
 
     return events; // Ensure you're returning just the events array
+}
+
+export function useCreateEvent() {
+    const createEvent = async (eventData) => {
+        try {
+            const response = await axios.post('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/events', eventData);
+            console.log('Event created successfully:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error creating event:', error);
+            throw error;
+        }
+    };
+
+    return createEvent;
 }

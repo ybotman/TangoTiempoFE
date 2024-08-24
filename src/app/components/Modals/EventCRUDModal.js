@@ -3,23 +3,24 @@ import { Modal, Box, Typography, TextField, Button, MenuItem, Grid } from '@mui/
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/customDatePicker.css';
-import axios from 'axios';
+import { useCreateEvent } from '@/hooks/useEvents'; // Import the useCreateEvent hook
 
 const modalStyle = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '90%', // Adjust for mobile responsiveness
-    maxWidth: '600px', // Set a maximum width for larger screens
+    width: '90%',
+    maxWidth: '600px',
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 3, // Reduced padding for better space on mobile
-    maxHeight: '90vh', // Allow for better scrolling on mobile
-    overflowY: 'auto', // Make modal content scrollable on overflow
+    p: 3,
+    maxHeight: '90vh',
+    overflowY: 'auto',
 };
 
-const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate, onUpdate, onDelete }) => {
+const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate }) => {
+    const createEvent = useCreateEvent(); // Use the createEvent function
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [categoryFirst, setCategoryFirst] = useState('');
@@ -55,13 +56,13 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
             categoryThird,
             startDate,
             endDate,
-            calcuatedRegion: selectedRegion,
+            calculatedRegion: selectedRegion,
             cost,
             recurrenceRule,
             standardsTitle: '',
             ownerOrganizerID: '6442ccb5f88a6c48aa30be35',
-            grantedOrganizerID: '6442ccb5f88a6c48aa30be35',
-            alternateOrganizerID: '6442ccb5f88a6c48aa30be35',
+            grantedOrganizerID: '',
+            alternateOrganizerID: '',
             eventImage: 'https://example.com/image.jpg',
             locationID: '6449ee6895174c52123afd4c',
             active: true,
@@ -70,7 +71,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
         };
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/createEvent`, eventData);
+            await createEvent(eventData); // Use the createEvent function
             console.log('Event created successfully');
             if (onCreate) {
                 onCreate();
@@ -136,7 +137,6 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     className="custom-datepicker"
                 />
 
-                {/* Categories Row */}
                 <Grid container spacing={2}>
                     <Grid item xs={4}>
                         <TextField
@@ -188,7 +188,6 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     </Grid>
                 </Grid>
 
-                {/* Cost and Recurrence Row */}
                 <Grid container spacing={2}>
                     <Grid item xs={4}>
                         <TextField
@@ -197,7 +196,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                             value={cost}
                             onChange={(e) => setCost(e.target.value)}
                             margin="normal"
-                            inputProps={{ maxLength: 10 }} // Limit to 10 characters
+                            inputProps={{ maxLength: 10 }}
                         />
                     </Grid>
                     <Grid item xs={8}>
