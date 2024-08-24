@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, MenuItem } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, MenuItem, Grid } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/customDatePicker.css';
@@ -136,66 +136,80 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate,
                     className="custom-datepicker"
                 />
 
-                <TextField
-                    fullWidth
-                    select
-                    label="Primary Category"
-                    value={categoryFirst}
-                    onChange={(e) => setCategoryFirst(e.target.value)}
-                    margin="normal"
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.categoryName}>
-                            {category.categoryName}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                {/* Categories Row */}
+                <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Primary Category"
+                            value={categoryFirst}
+                            onChange={(e) => setCategoryFirst(e.target.value)}
+                            margin="normal"
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category.categoryName}>
+                                    {category.categoryName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Secondary Category"
+                            value={categorySecond}
+                            onChange={(e) => setCategorySecond(e.target.value)}
+                            margin="normal"
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category.categoryName}>
+                                    {category.categoryName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Tertiary Category"
+                            value={categoryThird}
+                            onChange={(e) => setCategoryThird(e.target.value)}
+                            margin="normal"
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category.categoryName}>
+                                    {category.categoryName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                </Grid>
 
-                <TextField
-                    fullWidth
-                    select
-                    label="Secondary Category"
-                    value={categorySecond}
-                    onChange={(e) => setCategorySecond(e.target.value)}
-                    margin="normal"
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.categoryName}>
-                            {category.categoryName}
-                        </MenuItem>
-                    ))}
-                </TextField>
-
-                <TextField
-                    fullWidth
-                    select
-                    label="Tertiary Category"
-                    value={categoryThird}
-                    onChange={(e) => setCategoryThird(e.target.value)}
-                    margin="normal"
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category._id} value={category.categoryName}>
-                            {category.categoryName}
-                        </MenuItem>
-                    ))}
-                </TextField>
-
-                <TextField
-                    fullWidth
-                    label="Cost"
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                    margin="normal"
-                />
-
-                <TextField
-                    fullWidth
-                    label="Recurrence Rule"
-                    value={recurrenceRule}
-                    onChange={(e) => setRecurrenceRule(e.target.value)}
-                    margin="normal"
-                />
+                {/* Cost and Recurrence Row */}
+                <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                        <TextField
+                            fullWidth
+                            label="Cost"
+                            value={cost}
+                            onChange={(e) => setCost(e.target.value)}
+                            margin="normal"
+                            inputProps={{ maxLength: 10 }} // Limit to 10 characters
+                        />
+                    </Grid>
+                    <Grid item xs={8}>
+                        <TextField
+                            fullWidth
+                            label="Recurrence Rule"
+                            value={recurrenceRule}
+                            onChange={(e) => setRecurrenceRule(e.target.value)}
+                            margin="normal"
+                        />
+                    </Grid>
+                </Grid>
 
                 <Button onClick={handleSave} variant="contained" color="primary" sx={{ mt: 2 }}>
                     Save

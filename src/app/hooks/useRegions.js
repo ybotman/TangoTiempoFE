@@ -10,6 +10,8 @@ export function useRegions() {
         console.log('useEffect regions');
         const getRegions = async () => {
             try {
+                //const response = await axios.get('http://localhost:3001/api/regions');
+
                 const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/regions');
                 //         console.log('API Base URL:', process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
                 //         const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/activeRegions`);

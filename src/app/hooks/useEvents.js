@@ -8,7 +8,6 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
 
     useEffect(() => {
 
-
         if (!selectedRegion) {
             console.log('No region selected, skipping API call.');
             setEvents([]);  // Clear events if no region is selected
@@ -23,7 +22,8 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
             try {
                 console.log('Making Events API request:', { selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, active });
 
-                const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/eventsByCalcuatedLocations', {
+                //const response = await axios.get('http://localhost:3001/api/events/byCalculatedLocations', {
+                const response = await axios.get('https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/events/byCalculatedLocations', {
                     params: {
                         calculatedRegionName: selectedRegion,
                         calculatedDivisionName: selectedDivision || undefined,
