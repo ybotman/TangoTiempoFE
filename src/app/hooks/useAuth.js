@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
+import axios from 'axios';
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -27,6 +28,23 @@ export const useAuth = () => {
 
     try {
       const result = await signInWithPopup(auth, provider);
+      const firebaseUserId = result.user.uid;
+      
+      // Assign the default role "user" in MongoDB via the backend
+      const roleResponse = await axios.post(
+        process.env.NEXT_PUBLIC_TangoTiempoBE_URL 
+          ? `${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/userlogin` 
+          : 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogin',
+        {
+          firebaseUserId: firebaseUserId,
+          role: 'user',
+        }
+      );
+
+      if (roleResponse.status !== 201) {
+        throw new Error('Failed to assign role in backend');
+      }
+
       setUser(result.user);
       setLoading(false);
       return result.user;
