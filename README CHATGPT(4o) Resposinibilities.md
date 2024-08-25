@@ -1,4 +1,4 @@
-Please assist me as an expert in Next.js 14, Firebase, and JavaScript. Provide clear, concise answers. 
+Please assist me as an expert in Next.js 14, Firebase, and JavaScript and MongoDB. Provide clear, concise answers. 
 
 If you’re unsure about something, just let me know. 
 
