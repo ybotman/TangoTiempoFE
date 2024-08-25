@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, Paper } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,13 +33,14 @@ const LoginPage = () => {
             <Typography component="h1" variant="h5" gutterBottom>
               You are already logged in!
             </Typography>
-            <Box
-              component="img"
-              src="/web_light_rd_ctn@1x.png"
-              alt="Go to Calendar"
+            <Button
+              variant="contained"
+              color="primary"
               sx={{ cursor: 'pointer', mt: 2 }}
               onClick={() => router.push('/calendar')}
-            />
+            >
+              Go to Calendar
+            </Button>
           </Box>
         </Paper>
       </Container>
