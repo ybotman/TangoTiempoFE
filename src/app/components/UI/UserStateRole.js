@@ -1,32 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Link from 'next/link';
 import { Box, Typography } from '@mui/material';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '@/utils/firebase';
+import { useAuth } from '@/hooks/useAuth';  // Import useAuth hook
 
 const UserStateRole = () => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);  // Clear user state on logout
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
+  const { user, loading, error, logOut } = useAuth(); // Use logOut from useAuth
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -35,7 +17,7 @@ const UserStateRole = () => {
           <Typography variant="body1" color="textPrimary">
             {user.displayName || user.email}
           </Typography>
-          <Button variant="outlined" color="inherit" size="small" onClick={handleLogout}>
+          <Button variant="outlined" color="inherit" size="small" onClick={logOut}>
             Log Out
           </Button>
         </Stack>

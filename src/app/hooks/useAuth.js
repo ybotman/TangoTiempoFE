@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
 
 export const useAuth = () => {
@@ -17,7 +17,6 @@ export const useAuth = () => {
   }, []);
 
   const signUpWithGoogle = async () => {
-    // Check if the user is already signed in
     if (user) {
       setError('You are already signed in.');
       return null;
@@ -30,7 +29,7 @@ export const useAuth = () => {
       const result = await signInWithPopup(auth, provider);
       setUser(result.user);
       setLoading(false);
-      return result.user; // Return the user for further processing
+      return result.user;
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -38,5 +37,16 @@ export const useAuth = () => {
     }
   };
 
-  return { user, loading, error, signUpWithGoogle };
+  // New logOut function
+  const logOut = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);  // Clear user state on logout
+    } catch (err) {
+      setError(err.message);
+      console.error('Error logging out:', err);
+    }
+  };
+
+  return { user, loading, error, signUpWithGoogle, logOut };
 };
