@@ -37,16 +37,36 @@ export const useAuth = () => {
     }
   };
 
-  // New logOut function
+  const logInWithGoogle = async () => {
+    if (user) {
+      setError('You are already logged in.');
+      return null;
+    }
+
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+      setLoading(false);
+      return result.user;
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      return null;
+    }
+  };
+
   const logOut = async () => {
     try {
       await signOut(auth);
-      setUser(null);  // Clear user state on logout
+      setUser(null);
     } catch (err) {
       setError(err.message);
       console.error('Error logging out:', err);
     }
   };
 
-  return { user, loading, error, signUpWithGoogle, logOut };
+  return { user, loading, error, signUpWithGoogle, logInWithGoogle, logOut };
 };

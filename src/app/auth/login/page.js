@@ -1,44 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, Paper } from '@mui/material';
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/utils/firebase';
+import { useAuth } from '@/hooks/useAuth';
 
 const LoginPage = () => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        setLoading(false);
-      } else {
-        setUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { user, loading, error, logInWithGoogle } = useAuth();
 
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      console.log('User logged in:', result.user);
+    const result = await logInWithGoogle();
+    if (result) {
       router.push('/calendar');  // Redirect to the calendar page
-    } catch (error) {
-      console.error('Error during sign in:', error);
     }
   };
 
   if (loading) {
     return <Typography>Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography>Error: {error}</Typography>;
   }
 
   if (user) {
