@@ -43,6 +43,9 @@ export const useAuth = () => {
         }
     };
 
+    // BUG: If user signs up with and account that is already signed up,
+    // mongodb throws firebaseuserid duplication error.
+    // Solution: Check if user exists in mongodb after signing up.
     const signUpWithGoogle = async () => {
         if (user) {
             setError('You are already signed in.');
