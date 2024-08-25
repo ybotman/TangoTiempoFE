@@ -1,44 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, Paper } from '@mui/material';
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/utils/firebase';
+import { useAuth } from '@/hooks/useAuth';
 
 const SignUpPage = () => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, error, signUpWithGoogle } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        setLoading(false);
-      } else {
-        setUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleGoogleSignUp = async () => {
-    const provider = new GoogleAuthProvider();
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      console.log('User signed up:', result.user);
+  const handleSignUp = async () => {
+    const result = await signUpWithGoogle();
+    if (result) {
       router.push('/calendar');  // Redirect to the calendar page
-    } catch (error) {
-      console.error('Error during sign up:', error);
     }
   };
 
   if (loading) {
     return <Typography>Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography>Error: {error}</Typography>;
   }
 
   if (user) {
@@ -77,7 +60,7 @@ const SignUpPage = () => {
             src="/web_light_rd_SU@1x.png"
             alt="Sign up with Google"
             sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
-            onClick={handleGoogleSignUp}
+            onClick={handleSignUp}
           />
         </Box>
       </Paper>
