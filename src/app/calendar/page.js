@@ -6,7 +6,7 @@ import React from 'react';
 
 import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, setEvents } from '@/hooks/useEvents';
 import useCategories from '@/hooks/useCategories'
 import useOrganizers from '@/hooks/useOrganizers';
 import { filterEvents } from '@/utils/filterEvents';
@@ -41,8 +41,16 @@ const CalendarPage = () => {
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
-  const organizers = useOrganizers(selectedRegion);
+  //const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+  const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+
+  const handleEventCreated = async () => {
+    try {
+      await refreshEvents(); // Manually trigger a refresh of the events
+    } catch (error) {
+      console.error('Error refreshing events after creation:', error);
+    }
+  }; const organizers = useOrganizers(selectedRegion);
 
   const handleCategoryChange = (activeCategories) => {
     console.log("handleCategoryChange: Updated Categories:", activeCategories);
@@ -136,7 +144,7 @@ const CalendarPage = () => {
           onClose={() => setCreateModalOpen(false)}
           selectedDate={selectedDate}
           selectedRegion={selectedRegion}
-        //onCreate={handleEventCreated}
+          onCreate={handleEventCreated}
         />
       )}
     </div>

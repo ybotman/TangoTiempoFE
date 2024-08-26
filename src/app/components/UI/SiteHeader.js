@@ -5,7 +5,7 @@ const SiteHeader = () => {
     return (
         <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
             <Image
-                src="/TangoTiempo4.jpg"
+                src="/TangoTiempoColorFull.png"
                 alt="Tango Tiempo"
                 width={1200} // specify a width
                 height={600} // specify a height

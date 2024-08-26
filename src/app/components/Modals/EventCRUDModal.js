@@ -3,7 +3,8 @@ import { Modal, Box, Typography, TextField, Button, MenuItem, Grid } from '@mui/
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/customDatePicker.css';
-import { useCreateEvent } from '@/hooks/useEvents'; // Import the useCreateEvent hook
+import { useCreateEvent } from '@/hooks/useEvents';
+import useCategories from '@/hooks/useCategories';
 
 const modalStyle = {
     position: 'absolute',
@@ -21,6 +22,7 @@ const modalStyle = {
 
 const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate }) => {
     const createEvent = useCreateEvent(); // Use the createEvent function
+    const categories = useCategories(); // Use the useCategories hook
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [categoryFirst, setCategoryFirst] = useState('');
@@ -30,22 +32,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate 
     const [endDate, setEndDate] = useState(selectedDate || new Date());
     const [cost, setCost] = useState('');
     const [recurrenceRule, setRecurrenceRule] = useState('');
-    const [categories, setCategories] = useState([]);
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/categories`);
-                setCategories(response.data);
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-            }
-        };
-
-        if (open) {
-            fetchCategories();
-        }
-    }, [open]);
 
     const handleSave = async () => {
         const eventData = {
@@ -56,15 +43,21 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate 
             categoryThird,
             startDate,
             endDate,
-            calculatedRegion: selectedRegion,
+            calculatedRegionName: 'Northeast', // Added calculatedRegionName
+            calculatedDivisionName: 'New England', // Added calculatedDivisionName
+            calculatedCityName: 'Boston', // Added calculatedCityName
+            locationID: '66c8bc4c6b597390419b9187', // Added locationID
+            locationName: 'Fake Tango Venue', // Added locationName
             cost,
             recurrenceRule,
             standardsTitle: '',
             ownerOrganizerID: '6442ccb5f88a6c48aa30be35',
-            grantedOrganizerID: '',
-            alternateOrganizerID: '',
+            grantedOrganizerID: '6442ccb5f88a6c48aa30be35',
+            alternateOrganizerID: '6442ccb5f88a6c48aa30be35',
+            ownerOrganizerName: 'Your Organizer Name',
+            regionID: '6442ccb5f88a6c48aa30be35',
+            regionName: 'Northeast',
             eventImage: 'https://example.com/image.jpg',
-            locationID: '6449ee6895174c52123afd4c',
             active: true,
             featured: false,
             expiresAt: '2026-09-16T00:00:00.000+00:00',
@@ -82,6 +75,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate 
 
         onClose();
     };
+
 
     return (
         <Modal

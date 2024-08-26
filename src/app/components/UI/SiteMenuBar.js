@@ -11,13 +11,7 @@ import CategoryFilter from '@/components/UI/CategoryFilter';
 const DynamicRouter = dynamic(() => import('next/router').then(mod => mod.useRouter), { ssr: false });
 
 const SiteMenuBar = ({
-    regions,
-    selectedRegion,
-    setSelectedRegion,
-    selectedDivision,
-    setSelectedDivision,
-    selectedCity,
-    setSelectedCity,
+    regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
     selectedCategories,
     handleCategoryChange,
     categories,
