@@ -44,6 +44,8 @@ const CalendarPage = () => {
   //const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
   const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
 
+  console.log("***--->>  page.js EnvVariable:", process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
+
   const handleEventCreated = async () => {
     try {
       await refreshEvents(); // Manually trigger a refresh of the events

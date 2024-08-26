@@ -5,6 +5,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/customDatePicker.css';
 import { useCreateEvent } from '@/hooks/useEvents';
 import useCategories from '@/hooks/useCategories';
+import PropTypes from 'prop-types';
+import { validateEvent } from '@/utils/EventCreateRules'; // Import validation function
+
 
 const modalStyle = {
     position: 'absolute',
@@ -74,6 +77,8 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate 
         }
 
         onClose();
+
+
     };
 
 
