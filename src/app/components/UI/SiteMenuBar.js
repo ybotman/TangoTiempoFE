@@ -6,6 +6,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import dynamic from 'next/dynamic';
+import UserStateRole from './UserStateRole';
 import CategoryFilter from '@/components/UI/CategoryFilter';
 
 const DynamicRouter = dynamic(() => import('next/router').then(mod => mod.useRouter), { ssr: false });
@@ -71,70 +72,76 @@ const SiteMenuBar = ({
     if (!isMounted) return null;
 
     return (
-        <div>
-            <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleMenuOpen}>
-                <MenuIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-            >
-                {/* Conditionally render the "Select Organizers" menu item */}
-                {selectedRegion && (
-                    <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
-                )}
-                <MenuItem onClick={handleRequestForm}>Request Form</MenuItem>
-                <MenuItem onClick={handleAbout}>About</MenuItem>
-            </Menu>
+        <Box sx={{ width: '100%', padding: '0 0' }}>
+            {/* Top row with main menu items and user state */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleMenuOpen}>
+                        <MenuIcon />
+                    </IconButton>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                    >
+                        {selectedRegion && (
+                            <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
+                        )}
+                        <MenuItem onClick={handleRequestForm}>Request Form</MenuItem>
+                        <MenuItem onClick={handleAbout}>About</MenuItem>
+                    </Menu>
 
-            {/* Region Dropdown */}
-            <select value={selectedRegion || ""} onChange={handleRegionChange}>
-                <option value="">Select Region</option>
-                {regions.map(region => (
-                    <option key={region.regionName} value={region.regionName}>
-                        {region.regionName}
-                    </option>
-                ))}
-            </select>
-
-            {/* Division Dropdown */}
-            {selectedRegion && (
-                <select value={selectedDivision || ""} onChange={handleDivisionChange}>
-                    <option value="">Select Division</option>
-                    {regions.find(region => region.regionName === selectedRegion)
-                        .divisions.map(division => (
-                            <option key={division.divisionName} value={division.divisionName}>
-                                {division.divisionName}
+                    {/* Region Dropdown */}
+                    <select value={selectedRegion || ""} onChange={handleRegionChange}>
+                        <option value="">Select Region</option>
+                        {regions.map(region => (
+                            <option key={region.regionName} value={region.regionName}>
+                                {region.regionName}
                             </option>
                         ))}
-                </select>
-            )}
+                    </select>
 
-            {/* City Dropdown */}
-            {selectedDivision && (
-                <select value={selectedCity || ""} onChange={handleCityChange}>
-                    <option value="">Select City</option>
-                    {regions.find(region => region.regionName === selectedRegion)
-                        .divisions.find(division => division.divisionName === selectedDivision)
-                        .majorCities.map(city => (
-                            <option key={city._id} value={city.cityName}>
-                                {city.cityName}
-                            </option>
-                        ))}
-                </select>
-            )}
+                    {/* Division Dropdown */}
+                    {selectedRegion && (
+                        <select value={selectedDivision || ""} onChange={handleDivisionChange}>
+                            <option value="">Select Division</option>
+                            {regions.find(region => region.regionName === selectedRegion)
+                                .divisions.map(division => (
+                                    <option key={division.divisionName} value={division.divisionName}>
+                                        {division.divisionName}
+                                    </option>
+                                ))}
+                        </select>
+                    )}
 
+                    {/* City Dropdown */}
+                    {selectedDivision && (
+                        <select value={selectedCity || ""} onChange={handleCityChange}>
+                            <option value="">Select City</option>
+                            {regions.find(region => region.regionName === selectedRegion)
+                                .divisions.find(division => division.divisionName === selectedDivision)
+                                .majorCities.map(city => (
+                                    <option key={city._id} value={city.cityName}>
+                                        {city.cityName}
+                                    </option>
+                                ))}
+                        </select>
+                    )}
+                </Box>
 
-            {/* Category Filter */}
-            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                {/* UserStateRole positioned at the top right */}
+                <UserStateRole />
+            </Box>
+
+            {/* Bottom row with Category Filter */}
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2 }}>
                 <CategoryFilter
                     selectedCategories={selectedCategories}
                     handleCategoryChange={handleCategoryChange}
                     categories={categories}
                 />
             </Box>
-        </div>
+        </Box>
     );
 };
 

@@ -1,70 +1,41 @@
+"use client";
+
 import React from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import FaceIcon from '@mui/icons-material/Face';
-import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { IconButton, Tooltip } from '@mui/material';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Link from 'next/link';
+import { Box, Typography } from '@mui/material';
+import { useAuth } from '@/hooks/useAuth';  // Import useAuth hook
 
-const UserStateRole = ({ currentRole, setCurrentRole }) => {
-    const handleRoleClick = () => {
-        let newRole;
-        switch (currentRole) {
-            case 'anonomous':
-                newRole = 'User';
-                break;
-            case 'User':
-                newRole = 'Organizer';
-                break;
-            case 'Organizer':
-                newRole = 'RegionalAdmin';
-                break;
-            case 'RegionalAdmin':
-                newRole = 'anonomous';
-                break;
-            default:
-                newRole = 'anonomous';
-                break;
-        }
-        setCurrentRole(newRole);
-        console.log('Current Role:', newRole);
-    };
-
-    const getCurrentIcon = () => {
-        switch (currentRole) {
-            case 'anonomous':
-                return <PersonIcon />;
-            case 'User':
-                return <FaceIcon />;
-            case 'Organizer':
-                return <SupervisedUserCircleIcon />;
-            case 'RegionalAdmin':
-                return <AdminPanelSettingsIcon />;
-            default:
-                return <PersonIcon />;
-        }
-    };
-
-    const getTooltipTitle = () => {
-        switch (currentRole) {
-            case 'anonomous':
-                return 'Anonymous';
-            case 'User':
-                return 'User';
-            case 'Organizer':
-                return 'Organizer';
-            case 'RegionalAdmin':
-                return 'Regional Admin';
-            default:
-                return 'Anonymous';
-        }
-    };
+const UserStateRole = () => {
+    const { user, role, loading, error, logOut } = useAuth(); // Use logOut from useAuth
 
     return (
-        <Tooltip title={getTooltipTitle()}>
-            <IconButton onClick={handleRoleClick} color="inherit">
-                {getCurrentIcon()}
-            </IconButton>
-        </Tooltip>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {user ? (
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="body1" color="textPrimary">
+                        {user.displayName || user.email} ({role})
+                    </Typography>
+                    <Button variant="outlined" color="inherit" size="small" onClick={logOut}>
+                        Log Out
+                    </Button>
+                </Stack>
+            ) : (
+                <Stack direction="row" spacing={1}>
+                    <Link href="/auth/login" passHref>
+                        <Button variant="contained" color="primary" size="small">
+                            Log In
+                        </Button>
+                    </Link>
+                    <Link href="/auth/signup" passHref>
+                        <Button variant="contained" color="secondary" size="small">
+                            Sign Up
+                        </Button>
+                    </Link>
+                </Stack>
+            )}
+        </Box>
     );
 };
 
