@@ -37,7 +37,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate 
     const handleSave = async () => {
         const eventData = {
             title,
-            eventDescription: description,
+            description,
             categoryFirst,
             categorySecond,
             categoryThird,

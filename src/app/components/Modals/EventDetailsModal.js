@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Button, Grid, CardMedia } from '@mui/material';
 import { Close } from '@mui/icons-material';
 
@@ -53,10 +54,12 @@ const EventDetailsModal = ({ event, open, onClose }) => {
                 )}
                 <Typography id="event-details-modal-description" sx={textStyle}>
                     <strong style={{ color: 'black' }}>Description:</strong> {event.extendedProps.description}<br />
-                    <strong style={{ color: 'black' }}>Location:</strong> {event.extendedProps.location}<br />
+                    <strong style={{ color: 'black' }}>Location:</strong> {event.extendedProps.locationName}<br />
                     <strong style={{ color: 'black' }}>Cost:</strong> {event.extendedProps.cost}<br />
-                    <strong style={{ color: 'black' }}>Region:</strong> {event.extendedProps.calcuatedRegion}<br />
-                    <strong style={{ color: 'black' }}>Recurrence:</strong> {event.extendedProps.recurrence}<br />
+                    <strong style={{ color: 'black' }}>Region:</strong> {event.extendedProps.calculatedRegionName}<br />
+                    <strong style={{ color: 'black' }}>Division:</strong> {event.extendedProps.calculatedDivisionName}<br />
+                    <strong style={{ color: 'black' }}>City:</strong> {event.extendedProps.calculatedCityName}<br />
+                    <strong style={{ color: 'black' }}>Recurrence:</strong> {event.extendedProps.recurrenceRule}<br />
                     <strong style={{ color: 'black' }}>Categories:</strong> {`${event.extendedProps.categoryFirst || ''}, ${event.extendedProps.categorySecond || ''}, ${event.extendedProps.categoryThird || ''}`.replace(/, ,/g, '')}
                 </Typography>
                 <Box sx={{ mt: 3, textAlign: 'right' }}>
@@ -67,6 +70,27 @@ const EventDetailsModal = ({ event, open, onClose }) => {
             </Box>
         </Modal>
     );
+};
+
+EventDetailsModal.propTypes = {
+    event: PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        extendedProps: PropTypes.shape({
+            eventImage: PropTypes.string,
+            description: PropTypes.string,
+            locationName: PropTypes.string,
+            cost: PropTypes.string,
+            calculatedRegionName: PropTypes.string,
+            calculatedDivisionName: PropTypes.string,
+            calculatedCityName: PropTypes.string,
+            recurrenceRule: PropTypes.string,
+            categoryFirst: PropTypes.string,
+            categorySecond: PropTypes.string,
+            categoryThird: PropTypes.string,
+        }).isRequired,
+    }).isRequired,
+    open: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
 };
 
 export default EventDetailsModal;
