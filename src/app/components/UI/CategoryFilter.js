@@ -53,7 +53,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
                     <button
                         key={category._id}  // Use _id as the unique key
                         style={{
-                            backgroundColor: activeCategories.includes(category.categoryName) ? categoryColors[category.categoryName] : 'lightGrey',
+                            backgroundColor: activeCategories.includes(category.categoryName) ? categoryColors[category.categoryName] : 'white',
                             color: activeCategories.includes(category.categoryName) && category.categoryName === 'Milonga' ? 'white' : 'black',
                             padding: '5px 5px',
                             border: 'none',

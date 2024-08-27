@@ -5,5 +5,5 @@ export const categoryColors = {
     Class: 'lightPink',
     Workshop: 'lightgreen',
     Trip: 'yellow',
-    Virtual: 'white'
+    Virtual: 'lightGray'
 };
