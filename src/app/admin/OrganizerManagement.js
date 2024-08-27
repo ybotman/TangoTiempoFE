@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Modal, TextField, Select, MenuItem, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, Modal, TextField, Select, MenuItem, CircularProgress, Switch } from '@mui/material';
 import axios from 'axios';
 
 function ManageOrganizers() {
@@ -56,6 +56,7 @@ function ManageOrganizers() {
                 publicEmail: "",
                 loginId: "",
                 paymentTier: "free",
+                activeFlag: true, // Ensure this is initialized
             }
         );
         setOpen(true);
@@ -92,10 +93,21 @@ function ManageOrganizers() {
         }
     };
 
+    const handleToggleActive = async (organizerId, activeFlag) => {
+        try {
+            const response = await axios.put(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers/${organizerId}`,
+                { activeFlag }
+            );
+            setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));
+        } catch (error) {
+            console.error('Error updating active flag:', error);
+        }
+    };
+
     if (loading) {
         return <CircularProgress />;
     }
-
     return (
         <Box sx={{ padding: 2 }}>
             <Typography variant="h6">Manage Organizers</Typography>
@@ -103,8 +115,25 @@ function ManageOrganizers() {
                 Create / Add Organizer
             </Button>
             {organizers.map((organizer) => (
-                <Box key={organizer._id} sx={{ marginBottom: 2 }}>
-                    <Typography variant="subtitle1">{organizer.name}</Typography>
+                <Box key={organizer._id} sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
+                    <Typography variant="subtitle1" sx={{ flex: 1 }}>{organizer.name}</Typography>
+                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
+                        {
+                            regions
+                                .flatMap(region =>
+                                    region.divisions.flatMap(division =>
+                                        division.majorCities.filter(city => city._id === organizer.organizerCity)
+                                    )
+                                )
+                                .map(city => city.cityName)
+                        }
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ marginRight: 1 }}>Active:</Typography>
+                    <Switch
+                        checked={organizer.activeFlag}
+                        onChange={(e) => handleToggleActive(organizer._id, e.target.checked)}
+                        color="primary"
+                    />
                     <Button size="small" onClick={() => handleOpen(organizer)}>View / Edit</Button>
                 </Box>
             ))}
@@ -120,6 +149,7 @@ function ManageOrganizers() {
                         <Typography id="modal-title" variant="h6" sx={{ marginBottom: 2 }}>
                             {isCreating ? "Create Organizer" : "Edit Organizer"}
                         </Typography>
+                        {/* Add form fields for editing/creating an organizer here */}
                         <TextField
                             label="Name"
                             name="name"
