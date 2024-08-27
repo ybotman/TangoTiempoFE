@@ -123,7 +123,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Name"
                             name="name"
-                            value={selectedOrganizer.name}
+                            value={selectedOrganizer.name || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -131,7 +131,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Short Name"
                             name="shortName"
-                            value={selectedOrganizer.shortName}
+                            value={selectedOrganizer.shortName || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -139,7 +139,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Firebase ID"
                             name="firebaseUserId"
-                            value={selectedOrganizer.firebaseUserId}
+                            value={selectedOrganizer.firebaseUserId || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -176,7 +176,7 @@ function ManageOrganizers() {
                         <TextField
                             label="URL"
                             name="url"
-                            value={selectedOrganizer.url}
+                            value={selectedOrganizer.url || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -184,7 +184,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Description"
                             name="description"
-                            value={selectedOrganizer.description}
+                            value={selectedOrganizer.description || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -192,7 +192,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Phone"
                             name="phone"
-                            value={selectedOrganizer.phone}
+                            value={selectedOrganizer.phone || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -200,7 +200,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Public Email"
                             name="publicEmail"
-                            value={selectedOrganizer.publicEmail}
+                            value={selectedOrganizer.publicEmail || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
@@ -208,7 +208,7 @@ function ManageOrganizers() {
                         <TextField
                             label="Login ID"
                             name="loginId"
-                            value={selectedOrganizer.loginId}
+                            value={selectedOrganizer.loginId || ""}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
