@@ -18,14 +18,14 @@ function AdminPage() {
         <Box sx={{ width: '100%' }}>
             <Tabs value={activeTab} onChange={handleChange} centered>
                 <Tab label="Manage Regions" />
-                <Tab label="Manage Locations" />
                 <Tab label="Manage Organizers" />
+                <Tab label="Manage Locations" />
                 <Tab label="Manage User Logins" />
             </Tabs>
             <Box sx={{ padding: 2 }}>
                 {activeTab === 0 && <RegionManagement />}
-                {activeTab === 1 && <LocationManagement />}
-                {activeTab === 2 && <OrganizerManagement />}
+                {activeTab === 1 && <OrganizerManagement />}
+                {activeTab === 2 && <LocationManagement />}
                 {activeTab === 3 && <UserLoginManagement />}
             </Box>
         </Box>

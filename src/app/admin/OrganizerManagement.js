@@ -7,11 +7,10 @@ import axios from 'axios';
 function ManageOrganizers() {
     const [organizers, setOrganizers] = useState([]);
     const [regions, setRegions] = useState([]);
-    const [selectedRegion, setSelectedRegion] = useState(null);
-    const [selectedDivision, setSelectedDivision] = useState(null);
     const [selectedOrganizer, setSelectedOrganizer] = useState(null);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     useEffect(() => {
         async function fetchInitialData() {
@@ -32,40 +31,38 @@ function ManageOrganizers() {
         fetchInitialData();
     }, []);
 
-    const handleRegionChange = (regionId) => {
-        setSelectedOrganizer({ ...selectedOrganizer, organizerRegion: regionId });
-        const region = regions.find(r => r._id === regionId);
-        setSelectedRegion(region);
-        setSelectedDivision(null); // Clear division and city selections
-        setSelectedOrganizer({ ...selectedOrganizer, organizerDivision: "", organizerCity: "" });
+    const handleCityChange = (cityId, divisionId, regionId) => {
+        setSelectedOrganizer({
+            ...selectedOrganizer,
+            organizerCity: cityId,
+            organizerDivision: divisionId,
+            organizerRegion: regionId
+        });
     };
 
-    const handleDivisionChange = (divisionId) => {
-        setSelectedOrganizer({ ...selectedOrganizer, organizerDivision: divisionId });
-        const division = selectedRegion.divisions.find(d => d._id === divisionId);
-        setSelectedDivision(division);
-        setSelectedOrganizer({ ...selectedOrganizer, organizerCity: "" }); // Clear city selection
-    };
-
-    const handleCityChange = (cityId) => {
-        setSelectedOrganizer({ ...selectedOrganizer, organizerCity: cityId });
-    };
-
-    const handleOpen = (organizer) => {
-        setSelectedOrganizer(organizer);
-        const region = regions.find(r => r._id === organizer.organizerRegion);
-        setSelectedRegion(region);
-        if (region) {
-            const division = region.divisions.find(d => d._id === organizer.organizerDivision);
-            setSelectedDivision(division);
-        }
+    const handleOpen = (organizer = null) => {
+        setIsCreating(organizer === null);
+        setSelectedOrganizer(
+            organizer || {
+                name: "",
+                shortName: "",
+                firebaseUserId: "",
+                organizerCity: "",
+                organizerDivision: "",
+                organizerRegion: "",
+                url: "",
+                description: "",
+                phone: "",
+                publicEmail: "",
+                loginId: "",
+                paymentTier: "free",
+            }
+        );
         setOpen(true);
     };
 
     const handleClose = () => {
         setSelectedOrganizer(null);
-        setSelectedRegion(null);
-        setSelectedDivision(null);
         setOpen(false);
     };
 
@@ -76,14 +73,22 @@ function ManageOrganizers() {
 
     const handleSave = async () => {
         try {
-            const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers/${selectedOrganizer._id}`,
-                selectedOrganizer
-            );
-            setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));
+            if (isCreating) {
+                const response = await axios.post(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers`,
+                    selectedOrganizer
+                );
+                setOrganizers([...organizers, response.data]);
+            } else {
+                const response = await axios.put(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers/${selectedOrganizer._id}`,
+                    selectedOrganizer
+                );
+                setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));
+            }
             handleClose();
         } catch (error) {
-            console.error('Error updating organizer:', error);
+            console.error(`Error ${isCreating ? 'creating' : 'updating'} organizer:`, error);
         }
     };
 
@@ -94,6 +99,9 @@ function ManageOrganizers() {
     return (
         <Box sx={{ padding: 2 }}>
             <Typography variant="h6">Manage Organizers</Typography>
+            <Button variant="contained" color="primary" onClick={() => handleOpen()} sx={{ mb: 2 }}>
+                Create / Add Organizer
+            </Button>
             {organizers.map((organizer) => (
                 <Box key={organizer._id} sx={{ marginBottom: 2 }}>
                     <Typography variant="subtitle1">{organizer.name}</Typography>
@@ -110,7 +118,7 @@ function ManageOrganizers() {
                 >
                     <Box sx={{ width: 360, bgcolor: 'background.paper', margin: 'auto', padding: 2 }}>
                         <Typography id="modal-title" variant="h6" sx={{ marginBottom: 2 }}>
-                            Edit Organizer
+                            {isCreating ? "Create Organizer" : "Edit Organizer"}
                         </Typography>
                         <TextField
                             label="Name"
@@ -137,48 +145,33 @@ function ManageOrganizers() {
                             margin="dense"
                         />
                         <Select
-                            label="Region"
-                            name="organizerRegion"
-                            value={selectedOrganizer.organizerRegion || ""}
-                            onChange={(e) => handleRegionChange(e.target.value)}
-                            fullWidth
-                            margin="dense"
-                        >
-                            {regions.map(region => (
-                                <MenuItem key={region._id} value={region._id}>
-                                    {region.regionName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        <Select
-                            label="Division"
-                            name="organizerDivision"
-                            value={selectedOrganizer.organizerDivision || ""}
-                            onChange={(e) => handleDivisionChange(e.target.value)}
-                            fullWidth
-                            margin="dense"
-                            disabled={!selectedRegion}
-                        >
-                            {selectedRegion?.divisions.map(division => (
-                                <MenuItem key={division._id} value={division._id}>
-                                    {division.divisionName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        <Select
                             label="City"
                             name="organizerCity"
                             value={selectedOrganizer.organizerCity || ""}
-                            onChange={(e) => handleCityChange(e.target.value)}
+                            onChange={(e) => {
+                                const selectedCity = e.target.value;
+                                const region = regions.find(region =>
+                                    region.divisions.some(division =>
+                                        division.majorCities.some(city => city._id === selectedCity)
+                                    )
+                                );
+                                const division = region.divisions.find(division =>
+                                    division.majorCities.some(city => city._id === selectedCity)
+                                );
+                                handleCityChange(selectedCity, division._id, region._id);
+                            }}
                             fullWidth
                             margin="dense"
-                            disabled={!selectedDivision}
                         >
-                            {selectedDivision?.majorCities.map(city => (
-                                <MenuItem key={city._id} value={city._id}>
-                                    {city.cityName}
-                                </MenuItem>
-                            ))}
+                            {regions.flatMap(region =>
+                                region.divisions.flatMap(division =>
+                                    division.majorCities.map(city => (
+                                        <MenuItem key={city._id} value={city._id}>
+                                            {city.cityName}
+                                        </MenuItem>
+                                    ))
+                                )
+                            )}
                         </Select>
                         <TextField
                             label="URL"
@@ -220,16 +213,20 @@ function ManageOrganizers() {
                             fullWidth
                             margin="dense"
                         />
-                        <TextField
+                        <Select
                             label="Payment Tier"
                             name="paymentTier"
-                            value={selectedOrganizer.paymentTier}
+                            value={selectedOrganizer.paymentTier || "free"}
                             onChange={handleInputChange}
                             fullWidth
                             margin="dense"
-                        />
+                        >
+                            <MenuItem value="free">Free</MenuItem>
+                            <MenuItem value="basic">Basic</MenuItem>
+                            <MenuItem value="premium">Premium</MenuItem>
+                        </Select>
                         <Button onClick={handleSave} variant="contained" size="small" sx={{ mt: 2 }}>
-                            Save
+                            {isCreating ? "Create" : "Save"}
                         </Button>
                     </Box>
                 </Modal>
@@ -237,4 +234,5 @@ function ManageOrganizers() {
         </Box>
     );
 }
+
 export default ManageOrganizers;
