@@ -44,7 +44,7 @@ const CalendarPage = () => {
   //const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
   const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
 
-  console.log("***--->>  page.js EnvVariable:", process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
+  console.log("***--->>  page.js NEXT_PUBLIC_TangoTiempoBE_URL:", process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
   console.log("***--->>  page.js NEXT_PUBLIC_POC_MESSAGE:", process.env.NEXT_PUBLIC_POC_MESSAGE);
 
 
