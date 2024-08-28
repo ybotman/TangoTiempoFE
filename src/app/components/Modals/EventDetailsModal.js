@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Button, Grid, CardMedia } from '@mui/material';
 import { Close } from '@mui/icons-material';
@@ -27,6 +27,19 @@ const textStyle = {
 };
 
 const EventDetailsModal = ({ event, open, onClose }) => {
+    const [isImageValid, setIsImageValid] = useState(true);
+
+    useEffect(() => {
+        if (event?.extendedProps?.eventImage) {
+            const img = new Image();
+            img.src = event.extendedProps.eventImage;
+            img.onload = () => setIsImageValid(true);
+            img.onerror = () => setIsImageValid(false);
+        } else {
+            setIsImageValid(false);
+        }
+    }, [event]);
+
     if (!event) return null;
 
     return (
@@ -43,7 +56,7 @@ const EventDetailsModal = ({ event, open, onClose }) => {
                     </Typography>
                     <Button onClick={onClose} startIcon={<Close />} />
                 </Grid>
-                {event.extendedProps.eventImage && (
+                {isImageValid ? (
                     <CardMedia
                         component="img"
                         height="200"
@@ -51,6 +64,10 @@ const EventDetailsModal = ({ event, open, onClose }) => {
                         alt={event.title}
                         sx={{ borderRadius: '8px', mb: 2 }}
                     />
+                ) : (
+                    <Typography variant="subtitle1" color="error" sx={{ mb: 2 }}>
+                        Image Broken
+                    </Typography>
                 )}
                 <Typography id="event-details-modal-description" sx={textStyle}>
                     <strong style={{ color: 'black' }}>Description:</strong> {event.extendedProps.description}<br />

@@ -41,7 +41,6 @@ jobs:
         env:
           NEXT_PUBLIC_TangoTiempoBE_URL: ${{ secrets.NEXT_PUBLIC_TangoTiempoBE_URL }}
           NEXT_PUBLIC_POC_MESSAGE: ${{ secrets.NEXT_PUBLIC_POC_MESSAGE }}
-
     
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

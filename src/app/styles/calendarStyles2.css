@@ -72,3 +72,26 @@
     color: #333;
     /* Keep the existing text color */
 }
+
+/* Month/Week View */
+.fc-event {
+    background-image: var(--fc-event-background-image);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: white;
+}
+
+/* List View */
+.fc-list-item .fc-list-item-title {
+    display: flex;
+    align-items: center;
+}
+
+.fc-list-item img {
+    margin-right: 10px;
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
