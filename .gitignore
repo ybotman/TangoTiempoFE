@@ -141,6 +141,9 @@ dist
 # Serverless directories
 .serverless/
 
+# archive directories
+.archive/
+
 # FuseBox cache
 .fusebox/
 
