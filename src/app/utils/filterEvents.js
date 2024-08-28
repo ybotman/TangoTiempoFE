@@ -5,7 +5,7 @@ export const filterEvents = (events, activeCategories) => {
     console.log('filterEvents received activeCategories:', activeCategories);
 
     if (activeCategories.length === 0) {
-        console.log('No active categories selected. Returning all post-api events:', events);
+        console.log('No active categories selected. Defaulting.', events);
         return events;
     }
 
