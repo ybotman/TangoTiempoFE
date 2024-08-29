@@ -22,7 +22,7 @@ axios.get(apiUrl)
         }));
 
         // Log the transformed data or use it in your application
-        console.log('Transformed Events:', transformedEvents);
+        //console.log('Transformed Events:', transformedEvents);
 
         // Example: Insert into your calendar or database
         transformedEvents.forEach(event => {

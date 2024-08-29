@@ -27,9 +27,9 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
                 },
             });
 
-            console.log('Events API : Response', response);
+            //console.log('Events API : Response', response);
             let transformedEvents = transformEvents(response.data);
-            console.log('Events API : after transformed', transformedEvents);
+            //console.log('Events API : after transformed', transformedEvents);
             setEvents(transformedEvents);
 
         } catch (error) {

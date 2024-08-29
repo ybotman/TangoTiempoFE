@@ -94,12 +94,12 @@ const CalendarPage = () => {
   }));
 
   useEffect(() => {
-    console.log('Filtered Events:', filteredEvents, activeCategories);
+    //console.log('Filtered Events:', filteredEvents, activeCategories);
   }, [filteredEvents], activeCategories);
 
   useEffect(() => {
-    console.log("Calendar Start Date:", calendarStart);
-    console.log("Calendar End Date:", calendarEnd);
+    //console.log("Calendar Start Date:", calendarStart);
+    //console.log("Calendar End Date:", calendarEnd);
   }, [calendarStart, calendarEnd]);
 
   return (

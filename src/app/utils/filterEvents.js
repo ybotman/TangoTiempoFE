@@ -1,11 +1,11 @@
 export const filterEvents = (events, activeCategories) => {
     if (!Array.isArray(events)) return [];
 
-    console.log('filterEvents received events:', events);
-    console.log('filterEvents received activeCategories:', activeCategories);
+    //console.log('filterEvents received events:', events);
+    //console.log('filterEvents received activeCategories:', activeCategories);
 
     if (activeCategories.length === 0) {
-        console.log('No active categories selected. Defaulting.', events);
+        //console.log('No active categories selected. Defaulting.', events);
         return events;
     }
 
@@ -20,6 +20,6 @@ export const filterEvents = (events, activeCategories) => {
         );
     });
 
-    console.log('Filtered events to be returned:', filteredEvents);
+    //console.log('Filtered events to be returned:', filteredEvents);
     return filteredEvents;
 };
