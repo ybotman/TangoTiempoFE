@@ -22,7 +22,7 @@ jobs:
           submodules: true
           lfs: false
 
-      # Optionally, set up Node.js 20.x
+      # Set up Node.js 20.x
       - name: Set up Node.js 20.x
         uses: actions/setup-node@v3
         with:
@@ -39,9 +39,10 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "" # Built app content directory - optional
         env:
-          NEXT_PUBLIC_TangoTiempoBE_URL: ${{ secrets.NEXT_PUBLIC_TangoTiempoBE_URL }}
-          NEXT_PUBLIC_POC_MESSAGE: ${{ secrets.NEXT_PUBLIC_POC_MESSAGE }}
-    
+          # Only include critical build-time variables here
+          # Avoid including runtime variables that should be controlled by Azure
+          NEXT_PUBLIC_BUILD_TIME_VARIABLE: ${{ secrets.NEXT_PUBLIC_BUILD_TIME_VARIABLE }}
+
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
@@ -53,4 +54,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROUD_MUD_0788D6F0F }}
           action: "close"
-          app_location: "." 
+          app_location: "."
