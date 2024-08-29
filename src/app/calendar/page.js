@@ -46,6 +46,7 @@ const CalendarPage = () => {
 
   console.log("***--->>  page.js NEXT_PUBLIC_TangoTiempoBE_URL:", process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
   console.log("***--->>  page.js NEXT_PUBLIC_POC_MESSAGE:", process.env.NEXT_PUBLIC_POC_MESSAGE);
+  console.log("***--->>  page.js NEXT_PUBLIC_BUILD_VERSION:", process.env.NEXT_PUBLIC_BUILD_VERSION);
 
 
 

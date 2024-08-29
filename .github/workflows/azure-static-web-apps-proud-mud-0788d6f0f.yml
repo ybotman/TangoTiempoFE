@@ -14,7 +14,10 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
-
+    
+    env:
+      BUILD_VERSION: v1.0.${{ github.run_number }}
+      NEXT_PUBLIC_BUILD_VERSION: v1.0.${{ github.run_number }}
     steps:
       # Checkout the code
       - uses: actions/checkout@v3
