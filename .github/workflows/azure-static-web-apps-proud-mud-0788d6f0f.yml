@@ -38,10 +38,6 @@ jobs:
           app_location: "/" # App source code path
           api_location: "" # Api source code path - optional
           output_location: "" # Built app content directory - optional
-        env:
-          # Only include critical build-time variables here
-          # Avoid including runtime variables that should be controlled by Azure
-          NEXT_PUBLIC_BUILD_TIME_VARIABLE: ${{ secrets.NEXT_PUBLIC_BUILD_TIME_VARIABLE }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
