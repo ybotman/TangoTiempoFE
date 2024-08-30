@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, Paper } from '@mui/material';
@@ -9,15 +9,17 @@ import { useAuth } from '@/hooks/useAuth';
 const SignUpPage = () => {
     const router = useRouter();
     const { user, loading, error, signUpWithGoogle } = useAuth();
+    const [isRedirecting, setIsRedirecting] = useState(false);  // New state for redirecting
 
     const handleSignUp = async () => {
+        setIsRedirecting(true);  // Trigger redirecting state
         const result = await signUpWithGoogle();
         if (result) {
             router.push('/calendar');  // Redirect to the calendar page
         }
     };
 
-    if (loading) {
+    if (loading || isRedirecting) {  // Show loading if in redirecting state
         return <Typography>Loading...</Typography>;
     }
 
