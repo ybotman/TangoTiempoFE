@@ -49,38 +49,50 @@ export const useAuth = () => {
         }
     };
 
-    // BUG: If user signs up with and account that is already signed up,
-    // mongodb throws firebaseuserid duplication error.
-    // Solution: Check if user exists in mongodb after signing up.
     const signUpWithGoogle = async () => {
         if (user) {
             setError('You are already signed in.');
             return null;
         }
-
+    
         setLoading(true);
         const provider = new GoogleAuthProvider();
-
+    
         try {
             signUpOngoing.current = true;
             const result = await signInWithPopup(auth, provider);
             const firebaseUserId = result.user.uid;
-
-            const roleResponse = await axios.post(
-                process.env.NEXT_PUBLIC_TangoTiempoBE_URL
-                    ? `${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/userlogins/`
-                    : 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogins/',
-                {
-                    firebaseUserId: firebaseUserId,
+    
+            try {
+                // Check if the user already exists in the backend
+                await axios.get(
+                    process.env.NEXT_PUBLIC_TangoTiempoBE_URL
+                        ? `${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/userlogins/firebase/${firebaseUserId}`
+                        : `https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogins/firebase/${firebaseUserId}`
+                );
+                // If no error is thrown, the user already exists, and no need to create a new one
+            } catch (error) {
+                // If the user does not exist, the GET request will throw an error, so we proceed with the POST request
+                if (error.response && error.response.status === 404) {
+                    const roleResponse = await axios.post(
+                        process.env.NEXT_PUBLIC_TangoTiempoBE_URL
+                            ? `${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/userlogins/`
+                            : 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogins/',
+                        {
+                            firebaseUserId: firebaseUserId,
+                        }
+                    );
+    
+                    if (roleResponse.status !== 201) {
+                        throw new Error('Failed to assign role in backend');
+                    }
+                } else {
+                    throw error;  // Re-throw unexpected errors
                 }
-            );
-
-            if (roleResponse.status !== 201) {
-                throw new Error('Failed to assign role in backend');
             }
-
+    
             signUpOngoing.current = false;
-
+    
             setUser(result.user);
             await fetchUserRole(firebaseUserId);  // Fetch and set the user's role after signup
             setLoading(false);
@@ -92,6 +104,7 @@ export const useAuth = () => {
             return null;
         }
     };
+    
 
     const logInWithGoogle = async () => {
         if (user) {
