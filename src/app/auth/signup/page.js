@@ -8,18 +8,20 @@ import { useAuth } from '@/hooks/useAuth';
 
 const SignUpPage = () => {
     const router = useRouter();
-    const { user, loading, error, signUpWithGoogle } = useAuth();
-    const [isRedirecting, setIsRedirecting] = useState(false);  // New state for redirecting
+    const { user, loading, error, authenticateWithGoogle } = useAuth();
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
-    const handleSignUp = async () => {
-        setIsRedirecting(true);  // Trigger redirecting state
-        const result = await signUpWithGoogle();
+    const handleGoogleSignUp = async () => {
+        setIsRedirecting(true);
+        const result = await authenticateWithGoogle();
         if (result) {
-            router.push('/calendar');  // Redirect to the calendar page
+            router.push('/calendar');
+        } else {
+            setIsRedirecting(false);
         }
     };
 
-    if (loading || isRedirecting) {  // Show loading if in redirecting state
+    if (loading || isRedirecting) {
         return <Typography>Loading...</Typography>;
     }
 
@@ -64,7 +66,7 @@ const SignUpPage = () => {
                         src="/web_light_rd_SU@1x.png"
                         alt="Sign up with Google"
                         sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
-                        onClick={handleSignUp}
+                        onClick={handleGoogleSignUp}
                     />
                 </Box>
             </Paper>
