@@ -49,7 +49,7 @@ export const useAuth = () => {
         }
     };
 
-    const signUpWithGoogle = async () => {
+    const authenticateWithGoogle = async () => {
         if (user) {
             setError('You are already signed in.');
             return null;
@@ -104,29 +104,6 @@ export const useAuth = () => {
             return null;
         }
     };
-    
-
-    const logInWithGoogle = async () => {
-        if (user) {
-            setError('You are already logged in.');
-            return null;
-        }
-
-        setLoading(true);
-        const provider = new GoogleAuthProvider();
-
-        try {
-            const result = await signInWithPopup(auth, provider);
-            setUser(result.user);
-            await fetchUserRole(result.user.uid);  // Fetch and set the user's role after login
-            setLoading(false);
-            return result.user;
-        } catch (err) {
-            setError(err.message);
-            setLoading(false);
-            return null;
-        }
-    };
 
     const logOut = async () => {
         try {
@@ -139,5 +116,5 @@ export const useAuth = () => {
         }
     };
 
-    return { user, role, loading, error, signUpWithGoogle, logInWithGoogle, logOut };
+    return { user, role, loading, error, authenticateWithGoogle, logOut };
 };
