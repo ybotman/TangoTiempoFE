@@ -13,7 +13,7 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
-    environment: 'TESTING'
+    environment: TESTING
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,7 +42,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
-    environment: 'TESTING'
+    environment: TESTING
     steps:
       - name: Set Environment Variables
         run: echo "NEXT_PUBLIC_BE_URL=${{ secrets.NEXT_PUBLIC_BE_URL }}" >> $GITHUB_ENV
