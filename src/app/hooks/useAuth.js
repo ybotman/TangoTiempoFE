@@ -49,7 +49,7 @@ export const useAuth = () => {
         }
     };
 
-    const signUpWithGoogle = async () => {
+    const authenticateWithGoogle = async () => {
         if (user) {
             setError('You are already signed in.');
             return null;
@@ -104,6 +104,7 @@ export const useAuth = () => {
             return null;
         }
     };
+<<<<<<< HEAD
 
 
     const logInWithGoogle = async () => {
@@ -127,6 +128,8 @@ export const useAuth = () => {
             return null;
         }
     };
+=======
+>>>>>>> 7bd32d5ea297832b9403d5f8871634a505219c02
 
     const logOut = async () => {
         try {
@@ -139,5 +142,5 @@ export const useAuth = () => {
         }
     };
 
-    return { user, role, loading, error, signUpWithGoogle, logInWithGoogle, logOut };
+    return { user, role, loading, error, authenticateWithGoogle, logOut };
 };

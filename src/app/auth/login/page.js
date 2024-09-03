@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, Paper } from '@mui/material';
@@ -8,16 +8,20 @@ import { useAuth } from '@/hooks/useAuth';
 
 const LoginPage = () => {
     const router = useRouter();
-    const { user, loading, error, logInWithGoogle } = useAuth();
+    const { user, loading, error, authenticateWithGoogle } = useAuth();
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
-    const handleGoogleSignIn = async () => {
-        const result = await logInWithGoogle();
+    const handleGoogleLogIn = async () => {
+        setIsRedirecting(true);
+        const result = await authenticateWithGoogle();
         if (result) {
-            router.push('/calendar');  // Redirect to the calendar page
+            router.push('/calendar');
+        } else {
+            setIsRedirecting(false);
         }
     };
 
-    if (loading) {
+    if (loading || isRedirecting) {
         return <Typography>Loading...</Typography>;
     }
 
@@ -62,7 +66,7 @@ const LoginPage = () => {
                         src="/web_light_rd_ctn@1x.png"
                         alt="Log in with Google"
                         sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
-                        onClick={handleGoogleSignIn}
+                        onClick={handleGoogleLogIn}
                     />
                 </Box>
             </Paper>
