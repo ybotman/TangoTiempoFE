@@ -7,7 +7,6 @@ const useCategories = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`);
 
                 setCategories(response.data);

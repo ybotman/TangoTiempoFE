@@ -6,7 +6,7 @@ import React from 'react';
 
 import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
-import { useEvents, setEvents } from '@/hooks/useEvents';
+import { useEvents } from '@/hooks/useEvents';
 import useCategories from '@/hooks/useCategories'
 import useOrganizers from '@/hooks/useOrganizers';
 import { filterEvents } from '@/utils/filterEvents';
@@ -44,8 +44,6 @@ const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   //const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
   const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
-
-  console.log("***--->>  page.js NEXT_PUBLIC_BE_URL:", process.env.NEXT_PUBLIC_BE_URL);
 
   const handleEventCreated = async () => {
     try {
