@@ -32,11 +32,8 @@ export const useAuth = () => {
 
     const fetchUserRole = async (firebaseUserId) => {
         try {
-            const response = await axios.get(
-                process.env.NEXT_PUBLIC_BE_URL
-                    ? `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
-                    : `https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogins/firebase/${firebaseUserId}`
-            );
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
+
             if (response.status === 200) {
                 setRole(response.data.role);  // Set the role from the backend response
             } else {
@@ -65,23 +62,18 @@ export const useAuth = () => {
 
             try {
                 // Check if the user already exists in the backend
-                await axios.get(
-                    process.env.NEXT_PUBLIC_BE_URL
-                        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
-                        : `https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogins/firebase/${firebaseUserId}`
-                );
+                await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
+
                 // If no error is thrown, the user already exists, and no need to create a new one
             } catch (error) {
                 // If the user does not exist, the GET request will throw an error, so we proceed with the POST request
                 if (error.response && error.response.status === 404) {
-                    const roleResponse = await axios.post(
-                        process.env.NEXT_PUBLIC_BE_URL
-                            ? `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`
-                            : 'https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/userlogins/',
-                        {
-                            firebaseUserId: firebaseUserId,
-                        }
-                    );
+                    const roleResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`)
+                    /* ugh
+                                        {
+                                            firebaseUserId: firebaseUserId,
+                                            }
+                    */
 
                     if (roleResponse.status !== 201) {
                         throw new Error('Failed to assign role in backend');
@@ -104,7 +96,6 @@ export const useAuth = () => {
             return null;
         }
     };
-
 
     const logInWithGoogle = async () => {
         if (user) {
