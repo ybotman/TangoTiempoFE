@@ -16,8 +16,8 @@ function ManageOrganizers() {
         async function fetchInitialData() {
             try {
                 const [organizerResponse, regionResponse] = await Promise.all([
-                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers/all`),
-                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/regions`)
+                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/organizers/all`),
+                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/regions`)
                 ]);
                 setOrganizers(organizerResponse.data);
                 setRegions(regionResponse.data);
@@ -76,13 +76,13 @@ function ManageOrganizers() {
         try {
             if (isCreating) {
                 const response = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/organizers`,
                     selectedOrganizer
                 );
                 setOrganizers([...organizers, response.data]);
             } else {
                 const response = await axios.put(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers/${selectedOrganizer._id}`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/organizers/${selectedOrganizer._id}`,
                     selectedOrganizer
                 );
                 setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));
@@ -96,7 +96,7 @@ function ManageOrganizers() {
     const handleToggleActive = async (organizerId, activeFlag) => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/organizers/${organizerId}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/organizers/${organizerId}`,
                 { activeFlag }
             );
             setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));
