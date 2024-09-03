@@ -16,8 +16,8 @@ function ManageLocations() {
         async function fetchInitialData() {
             try {
                 const [locationResponse, regionResponse] = await Promise.all([
-                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/locations/all`),
-                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/regions`)
+                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/all`),
+                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions`)
                 ]);
                 setLocations(locationResponse.data);
                 setRegions(regionResponse.data);
@@ -78,13 +78,13 @@ function ManageLocations() {
         try {
             if (isCreating) {
                 const response = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/locations`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/api/locations`,
                     selectedLocation
                 );
                 setLocations([...locations, response.data]);
             } else {
                 const response = await axios.put(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/locations/${selectedLocation._id}`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/locations/${selectedLocation._id}`,
                     selectedLocation
                 );
                 setLocations(locations.map(loc => (loc._id === response.data._id ? response.data : loc)));
@@ -98,7 +98,7 @@ function ManageLocations() {
     const handleToggleActive = async (locationId, activeFlag) => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/locations/${locationId}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/locations/${locationId}`,
                 { activeFlag }
             );
             setLocations(locations.map(loc => (loc._id === response.data._id ? response.data : loc)));

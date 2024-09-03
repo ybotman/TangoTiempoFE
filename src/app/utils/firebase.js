@@ -1,16 +1,10 @@
-
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBbyJuxuCIY-BwzLPItpQbtegAkAMo755o",
-    authDomain: "tangotiempo-257ff.firebaseapp.com",
-    projectId: "tangotiempo-257ff",
-    storageBucket: "tangotiempo-257ff.appspot.com",
-    messagingSenderId: "685681979859",
-    appId: "1:685681979859:web:6609aa591ea8917166bf26",
-    measurementId: "G-8DED6NXCJ8",
-};
+// Decode the Base64 encoded JSON string from the environment variable
+const decodedFirebaseConfig = JSON.parse(
+  Buffer.from(process.env.NEXT_PUBLIC_FIREBASE_JSON, 'base64').toString('utf-8')
+);
 
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(decodedFirebaseConfig);
 export const auth = getAuth(app);

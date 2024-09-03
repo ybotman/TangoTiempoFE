@@ -11,7 +11,7 @@ function RegionManagement() {
     useEffect(() => {
         async function fetchRegions() {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/regions`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/regions`);
                 console.log("API Response:", response.data); // Check if it's an array
                 setRegions(response.data);
                 setLoading(false);
@@ -28,7 +28,7 @@ function RegionManagement() {
         try {
             const region = regions.find(region => region._id === regionId);
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/regions/region/${regionId}/active`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/regions/region/${regionId}/active`,
                 { active: !region.active }
             );
             setRegions(response.data);
@@ -42,7 +42,7 @@ function RegionManagement() {
             const region = regions.find(region => region._id === regionId);
             const division = region.divisions.find(division => division._id === divisionId);
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/regions/region/${regionId}/division/${divisionId}/active`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/regions/region/${regionId}/division/${divisionId}/active`,
                 { active: !division.active }
             );
             setRegions(response.data);
@@ -57,7 +57,7 @@ function RegionManagement() {
             const division = region.divisions.find(division => division._id === divisionId);
             const city = division.majorCities.find(city => city._id === cityId);
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/regions/region/${regionId}/division/${divisionId}/city/${cityId}/active`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/regions/region/${regionId}/division/${divisionId}/city/${cityId}/active`,
                 { active: !city.active }
             );
             setRegions(response.data);

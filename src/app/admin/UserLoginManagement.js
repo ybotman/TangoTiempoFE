@@ -13,7 +13,7 @@ function ManageUserLogins() {
     useEffect(() => {
         async function fetchUserLogins() {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/userlogins/all`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/userlogins/all`);
                 setUserLogins(response.data);
                 setLoading(false);
             } catch (error) {
@@ -66,7 +66,7 @@ function ManageUserLogins() {
     const handleSave = async () => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/userLogins/${selectedUserLogin._id}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/userLogins/${selectedUserLogin._id}`,
                 selectedUserLogin
             );
             setUserLogins(userLogins.map(ul => (ul._id === response.data._id ? response.data : ul)));
@@ -79,7 +79,7 @@ function ManageUserLogins() {
     const handleToggleActive = async (userLoginId, active) => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/userLogins/${userLoginId}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/userLogins/${userLoginId}`,
                 { active }
             );
             setUserLogins(userLogins.map(ul => (ul._id === response.data._id ? response.data : ul)));
