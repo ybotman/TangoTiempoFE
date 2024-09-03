@@ -14,7 +14,7 @@ const useOrganizers = (calculatedRegion) => {
 
             try {
                 const response = await axios.get(
-                    process.env.NEXT_PUBLIC_TangoTiempoBE_URL ? `${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/organizers` : `https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/organizers`,
+                    process.env.NEXT_PUBLIC_BE_URL ? `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers` : `https://tangotiempobe-g3c0ebh2b6asbbd6.eastus-01.azurewebsites.net/api/organizers`,
                     {
                         params: {
                             activeCalculatedRegion: region

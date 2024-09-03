@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function Layout({ children }) {
   console.log('-->layout.js')
-  console.log('BE API URL:', process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
+  console.log('BE API URL:', process.env.NEXT_PUBLIC_BE_URL);
   console.log('Images API URL:', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
 
   return (

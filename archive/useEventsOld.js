@@ -18,9 +18,8 @@ export function useEvents(selectedRegion) {
 
             try {
                 console.log('Making API request:', { calcuatedRegion: selectedRegion, start, end });
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsRegion`, {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/eventsRegion`, {
 
-                    //  const response = await axios.get(`${process.env.NEXT_PUBLIC_TangoTiempoBE_URL}/api/eventsAll`, {
                     params: {
                         calcuatedRegion: selectedRegion,
                         start,

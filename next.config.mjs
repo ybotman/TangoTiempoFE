@@ -4,13 +4,13 @@
 const nextConfig = {
     // Define public environment variables
     //   env: {
-    //       TangoTiempoBE_URL: process.env.NEXT_PUBLIC_TangoTiempoBE_URL,
+    //       TangoTiempoBE_URL: process.env.NEXT_PUBLIC_BE_URL,
     //   },
 
     // Webpack configuration for custom logging
     webpack: (config, { buildId, dev, isServer }) => {
         // Log the public environment variables
-        console.log('NEXT_PUBLIC_TangoTiempoBE_URL:', process.env.NEXT_PUBLIC_TangoTiempoBE_URL);
+        console.log('NEXT_PUBLIC_BE_URL:', process.env.NEXT_PUBLIC_BE_URL);
 
         // Log build-specific information
         console.log('Build ID:', buildId);
@@ -18,7 +18,7 @@ const nextConfig = {
         console.log('Server Build:', isServer);
 
         // Check for missing environment variables and log a warning
-        if (!process.env.NEXT_PUBLIC_TangoTiempoBE_URL) {
+        if (!process.env.NEXT_PUBLIC_BE_URL) {
             console.warn('Warning: TangoTiempoBE_URL is not defined!');
         }
 

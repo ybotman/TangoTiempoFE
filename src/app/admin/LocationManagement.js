@@ -16,8 +16,8 @@ function ManageLocations() {
         async function fetchInitialData() {
             try {
                 const [locationResponse, regionResponse] = await Promise.all([
-                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/locations/all`),
-                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/regions`)
+                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/locations/all`),
+                    axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/regions`)
                 ]);
                 setLocations(locationResponse.data);
                 setRegions(regionResponse.data);
@@ -78,7 +78,7 @@ function ManageLocations() {
         try {
             if (isCreating) {
                 const response = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/locations`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/locations`,
                     selectedLocation
                 );
                 setLocations([...locations, response.data]);
