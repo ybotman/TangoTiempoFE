@@ -76,7 +76,7 @@ function ManageOrganizers() {
         try {
             if (isCreating) {
                 const response = await axios.post(
-                    `${process.env.NEXT_PUBLIC_BE_URL}/organizers`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
                     selectedOrganizer
                 );
                 setOrganizers([...organizers, response.data]);
@@ -96,7 +96,7 @@ function ManageOrganizers() {
     const handleToggleActive = async (organizerId, activeFlag) => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_BE_URL}/organizers/${organizerId}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
                 { activeFlag }
             );
             setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));

@@ -15,6 +15,7 @@ function ManageUserLogins() {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/all`);
                 setUserLogins(response.data);
+                console.log('featchUserLogins', response.data);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching user logins:', error);
@@ -36,10 +37,10 @@ function ManageUserLogins() {
                     defaultedCity: ""
                 },
                 localOrganizerInfo: {
-                    organizerId: "", //, { type: mongoose.Schema.Types.ObjectId, ref: 'Organizers', required: true },
-                    allowedCities: "", // [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cities' }],
-                    allowedDivisions: "", // [{ type: mongoose.Schema.Types.ObjectId, ref: 'Divisions' }],
-                    allowedRegions: "", // [{ type: mongoose.Schema.Types.ObjectId, ref: 'Regions' }]
+                    organizerId: "",
+                    allowedCities: "",
+                    allowedDivisions: "",
+                    allowedRegions: "",
                 },
 
                 localAdminInfo: {
