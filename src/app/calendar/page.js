@@ -26,7 +26,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 
 const CalendarPage = () => {
-  console.log('--------  CalendarPage Function and useStates');
+  console.log('**CalendarPage Functions and useStates');
   const regions = useRegions();
   const categories = useCategories();
   const [activeCategories, setActiveCategories] = useState([]);
@@ -42,7 +42,6 @@ const CalendarPage = () => {
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  //const events = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
   const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
 
   const handleEventCreated = async () => {
@@ -54,7 +53,6 @@ const CalendarPage = () => {
   }; const organizers = useOrganizers(selectedRegion);
 
   const handleCategoryChange = (activeCategories) => {
-    console.log("handleCategoryChange: Updated Categories:", activeCategories);
     setActiveCategories(activeCategories);
   };
 
@@ -88,11 +86,11 @@ const CalendarPage = () => {
   }));
 
   useEffect(() => {
-    console.log('Use effect Filtered Events:', filteredEvents, activeCategories);
+    console.log('UseEffect Filtered Events:', filteredEvents, activeCategories);
   }, [filteredEvents], activeCategories);
 
   useEffect(() => {
-    console.log("Calendar Start Date:", calendarStart);
+    console.log("UseEffect Calendar start/end startate:", calendarStart);
   }, [calendarStart, calendarEnd]);
 
   return (

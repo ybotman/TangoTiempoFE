@@ -1,33 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-import dynamic from 'next/dynamic';
 import UserStateRole from './UserStateRole';
 import CategoryFilter from '@/components/UI/CategoryFilter';
-
-const DynamicRouter = dynamic(() => import('next/router').then(mod => mod.useRouter), { ssr: false });
 
 const SiteMenuBar = ({
     regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
     selectedCategories,
     handleCategoryChange,
     categories,
-    organizers,
     selectedOrganizer,
     handleOrganizerChange
 }) => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    const router = isMounted ? DynamicRouter() : null;
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -42,17 +31,6 @@ const SiteMenuBar = ({
         handleOrganizerChange(selectedOrganizer);
     };
 
-    const handleRequestForm = () => {
-        handleMenuClose();
-        // Handle request form logic here (TBD)
-    };
-
-    const handleAbout = () => {
-        handleMenuClose();
-        if (router) {
-            router.push('/about');
-        }
-    };
 
     const handleRegionChange = (event) => {
         setSelectedRegion(event.target.value);
@@ -68,8 +46,6 @@ const SiteMenuBar = ({
     const handleCityChange = (event) => {
         setSelectedCity(event.target.value);
     };
-
-    if (!isMounted) return null;
 
     return (
         <Box sx={{ width: '100%', padding: '0 0' }}>
@@ -87,8 +63,9 @@ const SiteMenuBar = ({
                         {selectedRegion && (
                             <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
                         )}
-                        <MenuItem onClick={handleRequestForm}>Request Form</MenuItem>
-                        <MenuItem onClick={handleAbout}>About</MenuItem>
+                        <MenuItem >Admin Page</MenuItem>
+                        <MenuItem >Request Form</MenuItem>
+                        <MenuItem >About</MenuItem>
                     </Menu>
 
                     {/* Region Dropdown */}

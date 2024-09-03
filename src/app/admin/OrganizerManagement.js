@@ -16,8 +16,8 @@ function ManageOrganizers() {
         async function fetchInitialData() {
             try {
                 const [organizerResponse, regionResponse] = await Promise.all([
-                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/organizers/all`),
-                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/regions`)
+                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/all`),
+                    axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions`)
                 ]);
                 setOrganizers(organizerResponse.data);
                 setRegions(regionResponse.data);
@@ -82,7 +82,7 @@ function ManageOrganizers() {
                 setOrganizers([...organizers, response.data]);
             } else {
                 const response = await axios.put(
-                    `${process.env.NEXT_PUBLIC_BE_URL}/organizers/${selectedOrganizer._id}`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${selectedOrganizer._id}`,
                     selectedOrganizer
                 );
                 setOrganizers(organizers.map(org => (org._id === response.data._id ? response.data : org)));

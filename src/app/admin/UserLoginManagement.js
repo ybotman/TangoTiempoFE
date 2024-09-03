@@ -13,7 +13,7 @@ function ManageUserLogins() {
     useEffect(() => {
         async function fetchUserLogins() {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/userlogins/all`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/all`);
                 setUserLogins(response.data);
                 setLoading(false);
             } catch (error) {
@@ -36,10 +36,10 @@ function ManageUserLogins() {
                     defaultedCity: ""
                 },
                 localOrganizerInfo: {
-                    organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organizers', required: true },
-                    allowedCities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cities' }],
-                    allowedDivisions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Divisions' }],
-                    allowedRegions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Regions' }]
+                    organizerId: "", //, { type: mongoose.Schema.Types.ObjectId, ref: 'Organizers', required: true },
+                    allowedCities: "", // [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cities' }],
+                    allowedDivisions: "", // [{ type: mongoose.Schema.Types.ObjectId, ref: 'Divisions' }],
+                    allowedRegions: "", // [{ type: mongoose.Schema.Types.ObjectId, ref: 'Regions' }]
                 },
 
                 localAdminInfo: {
@@ -66,7 +66,7 @@ function ManageUserLogins() {
     const handleSave = async () => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_BE_URL}/userLogins/${selectedUserLogin._id}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/${selectedUserLogin._id}`,
                 selectedUserLogin
             );
             setUserLogins(userLogins.map(ul => (ul._id === response.data._id ? response.data : ul)));
@@ -79,7 +79,7 @@ function ManageUserLogins() {
     const handleToggleActive = async (userLoginId, active) => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_BE_URL}/userLogins/${userLoginId}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/${userLoginId}`,
                 { active }
             );
             setUserLogins(userLogins.map(ul => (ul._id === response.data._id ? response.data : ul)));

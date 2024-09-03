@@ -7,7 +7,6 @@ export function useEvents(selectedRegion) {
 
     useEffect(() => {
         if (!selectedRegion) {
-            console.log('No calcuatedRegion selected, skipping API call.');
             setEvents([]);  // Clear events if no calcuatedRegion is selected
             return;
         }
