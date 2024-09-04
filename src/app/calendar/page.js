@@ -6,10 +6,14 @@ import React from 'react';
 
 import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, setEvents } from '@/hooks/useEvents';
+
 import useCategories from '@/hooks/useCategories'
 import useOrganizers from '@/hooks/useOrganizers';
 import { filterEvents } from '@/utils/filterEvents';
+
+import { transformEvents } from '@/utils/transformEvents';
+
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
@@ -24,7 +28,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 
-import { Button, ButtonGroup, IconButton } from '@mui/material';
+import { ButtonGroup, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
@@ -51,7 +55,9 @@ const CalendarPage = () => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+
   const calendarRef = useRef(null);  // Define calendarRef
+  const organizers = useOrganizers(selectedRegion);
 
 
   const handleEventCreated = async () => {
@@ -60,7 +66,7 @@ const CalendarPage = () => {
     } catch (error) {
       console.error('Error refreshing events after creation:', error);
     }
-  }; const organizers = useOrganizers(selectedRegion);
+  };
 
   const handleCategoryChange = (activeCategories) => {
     setActiveCategories(activeCategories);
@@ -98,7 +104,11 @@ const CalendarPage = () => {
   };
 
 
-  const filteredEvents = filterEvents(events, activeCategories);
+  console.log('Page Events:', events);
+  const tranformedEvents = transformEvents(events);
+
+  console.log('Page transformEvents:', tranformedEvents);
+  const filteredEvents = filterEvents(tranformedEvents, activeCategories);
 
   const coloredFilteredEvents = filteredEvents.map(event => ({
     ...event,
@@ -109,23 +119,13 @@ const CalendarPage = () => {
     eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
     eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
   }));
+  console.log('Page coloredFilteredEvents:', coloredFilteredEvents);
 
-  const renderToolbarButtons = () => {
-    return (
-      <ButtonGroup variant="outlined" aria-label="outlined button group">
-        <Button onClick={() => calendarRef.current.getApi().prev()}>Prev</Button>
-        <Button onClick={() => calendarRef.current.getApi().today()}>Today</Button>
-        <Button onClick={() => calendarRef.current.getApi().next()}>Next</Button>
-      </ButtonGroup>
-    );
-  };
 
   useEffect(() => {
-    console.log('UseEffect Filtered Events:', filteredEvents, activeCategories);
   }, [filteredEvents], activeCategories);
 
   useEffect(() => {
-    console.log("UseEffect Calendar start/end startate:", calendarStart);
   }, [calendarStart, calendarEnd]);
 
   return (
@@ -185,6 +185,7 @@ const CalendarPage = () => {
         dateClick={handleDateClick}
         ref={calendarRef}
         headerToolbar={false}
+        scrollTime="17:00:00"
       />
 
       {selectedEvent && (
