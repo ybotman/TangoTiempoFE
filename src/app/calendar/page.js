@@ -1,6 +1,6 @@
 "use client"; // Add this line at the top
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useEffect } from 'react';
 import React from 'react';
 
@@ -24,6 +24,14 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 
+import { Button, ButtonGroup, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import TodayIcon from '@mui/icons-material/Today';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import ListIcon from '@mui/icons-material/List';
+
 
 const CalendarPage = () => {
   console.log('**CalendarPage Functions and useStates');
@@ -43,6 +51,8 @@ const CalendarPage = () => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+  const calendarRef = useRef(null);  // Define calendarRef
+
 
   const handleEventCreated = async () => {
     try {
@@ -54,6 +64,21 @@ const CalendarPage = () => {
 
   const handleCategoryChange = (activeCategories) => {
     setActiveCategories(activeCategories);
+  };
+
+  const handlePrev = () => {
+    const calendarApi = calendarRef.current.getApi();
+    calendarApi.prev();
+  };
+
+  const handleNext = () => {
+    const calendarApi = calendarRef.current.getApi();
+    calendarApi.next();
+  };
+
+  const handleToday = () => {
+    const calendarApi = calendarRef.current.getApi();
+    calendarApi.today();
   };
 
   const handleDateClick = (clickInfo) => {
@@ -85,6 +110,16 @@ const CalendarPage = () => {
     eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
   }));
 
+  const renderToolbarButtons = () => {
+    return (
+      <ButtonGroup variant="outlined" aria-label="outlined button group">
+        <Button onClick={() => calendarRef.current.getApi().prev()}>Prev</Button>
+        <Button onClick={() => calendarRef.current.getApi().today()}>Today</Button>
+        <Button onClick={() => calendarRef.current.getApi().next()}>Next</Button>
+      </ButtonGroup>
+    );
+  };
+
   useEffect(() => {
     console.log('UseEffect Filtered Events:', filteredEvents, activeCategories);
   }, [filteredEvents], activeCategories);
@@ -112,6 +147,33 @@ const CalendarPage = () => {
         handleCategoryChange={handleCategoryChange}
         categories={categories}
       />
+      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '20px' }}>
+        {/* Navigation buttons with icons */}
+        <ButtonGroup variant="outlined" aria-label="outlined button group">
+          <IconButton onClick={handlePrev}>
+            <ArrowBackIcon />
+          </IconButton>
+          <IconButton onClick={handleToday}>
+            <TodayIcon />
+          </IconButton>
+          <IconButton onClick={handleNext}>
+            <ArrowForwardIcon />
+          </IconButton>
+        </ButtonGroup>
+
+        {/* View switching buttons with icons */}
+        <ButtonGroup variant="outlined" aria-label="outlined button group">
+          <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
+            <CalendarMonthIcon />
+          </IconButton>
+          <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
+            <ViewWeekIcon />
+          </IconButton>
+          <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+            <ListIcon />
+          </IconButton>
+        </ButtonGroup>
+      </div>
 
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -121,11 +183,8 @@ const CalendarPage = () => {
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
-        headerToolbar={{
-          left: 'prev,today,next',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,listWeek',
-        }}
+        ref={calendarRef}
+        headerToolbar={false}
       />
 
       {selectedEvent && (
