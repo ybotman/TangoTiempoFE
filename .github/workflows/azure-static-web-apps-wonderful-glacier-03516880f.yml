@@ -13,8 +13,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     name: Build and Test Job
-    environment:
-      name: 'TESTING'
+    environment: TESTING
     env:
       NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
       NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}

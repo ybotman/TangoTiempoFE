@@ -10,8 +10,30 @@ on:
       - PROD
 
 jobs:
+  build_and_test_job:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    name: Build and Test Job
+    environment: PRODUCTION
+    env:
+      NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
+      NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     environment: PRODUCTION
