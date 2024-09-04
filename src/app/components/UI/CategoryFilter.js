@@ -48,7 +48,7 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
                             style={{
                                 backgroundColor: isActive ? categoryColors[category.categoryName] : 'white',
                                 color: isMilonga && isActive ? 'white' : isActive ? 'black' : 'grey',
-                                padding: '5px 5px',
+                                padding: '2px 2px',
                                 border: isActive ? 'none' : '1px solid grey',
                                 borderRadius: '4px',
                                 margin: '3px',
