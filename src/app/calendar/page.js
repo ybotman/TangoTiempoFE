@@ -86,6 +86,7 @@ const CalendarPage = () => {
   }));
 
   useEffect(() => {
+    console.log('DEPLOOYED!!!')
     console.log('UseEffect Filtered Events:', filteredEvents, activeCategories);
   }, [filteredEvents], activeCategories);
 
