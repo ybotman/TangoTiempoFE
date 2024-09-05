@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export const useAuth = () => {
     const [user, setUser] = useState(null);
-    const [role, setRole] = useState(null);  // New state for user role
+    const [roles, setRoles] = useState([]);  // Updated to manage multiple roles
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,13 +16,13 @@ export const useAuth = () => {
             if (currentUser) {
                 setUser(currentUser);
 
-                // If user is signing up, set the flag and skip fetching user role
+                // If user is signing up, set the flag and skip fetching user roles
                 if (!signUpOngoing.current) {
-                    await fetchUserRole(currentUser.uid);  // Fetch user role after setting the user
+                    await fetchUserRoles(currentUser.uid);  // Fetch user roles
                 }
             } else {
                 setUser(null);
-                setRole(null);
+                setRoles([]);  // Clear roles on logout
             }
             setLoading(false);
         });
@@ -30,19 +30,19 @@ export const useAuth = () => {
         return () => unsubscribe();
     }, []);
 
-    const fetchUserRole = async (firebaseUserId) => {
+    const fetchUserRoles = async (firebaseUserId) => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
 
             if (response.status === 200) {
-                setRole(response.data.role);  // Set the role from the backend response
+                setRoles(response.data.roleIds.map(role => role.roleName));  // Set the list of role names
             } else {
-                setRole(null);
+                setRoles([]);
             }
         } catch (err) {
-            console.error('Error fetching user role:', err);
-            setError('Failed to fetch user role');
-            setRole(null);
+            console.error('Error fetching user roles:', err);
+            setError('Failed to fetch user roles');
+            setRoles([]);
         }
     };
 
@@ -74,7 +74,7 @@ export const useAuth = () => {
                             firebaseUserId: firebaseUserId, 
                         });
 
-                    if (roleResponse.status !== 201) {
+                    if (roleResponse.status !== 204) {
                         throw new Error('Failed to assign role in backend');
                     }
                 } else {
@@ -85,7 +85,7 @@ export const useAuth = () => {
             signUpOngoing.current = false;
 
             setUser(result.user);
-            await fetchUserRole(firebaseUserId);  // Fetch and set the user's role after signup
+            await fetchUserRoles(firebaseUserId);  // Fetch and set the user's roles after signup
             setLoading(false);
             return result.user;
         } catch (err) {
@@ -100,12 +100,12 @@ export const useAuth = () => {
         try {
             await signOut(auth);
             setUser(null);
-            setRole(null);  // Clear role state on logout
+            setRoles([]);  // Clear roles on logout
         } catch (err) {
             setError(err.message);
             console.error('Error logging out:', err);
         }
     };
 
-    return { user, role, loading, error, authenticateWithGoogle, logOut };
+    return { user, roles, loading, error, authenticateWithGoogle, logOut };
 };
