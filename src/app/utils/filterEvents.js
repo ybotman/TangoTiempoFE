@@ -1,22 +1,29 @@
-export const filterEvents = (events, activeCategories) => {
+export const filterEvents = (events, activeCategories, selectedOrganizers) => {
     if (!Array.isArray(events)) return [];
 
-    if (activeCategories.length === 0) {
-        //console.log('No active categories selected. Defaulting.', events);
+    // If no categories or organizers are selected, return all events
+    if (activeCategories.length === 0 && selectedOrganizers.length === 0) {
         return events;
     }
 
-    // Filter events based on any matching category (categoryFirst, categorySecond, or categoryThird)
+    // Filter events based on any matching category or organizer
     const filteredEvents = events.filter(event => {
-        const { categoryFirst, categorySecond, categoryThird } = event.extendedProps || {};
+        const { categoryFirst, categorySecond, categoryThird, organizerId } = event.extendedProps || {};
 
-        return (
+        const matchesCategory = (
+            activeCategories.length === 0 ||
             activeCategories.includes(categoryFirst) ||
             activeCategories.includes(categorySecond) ||
             activeCategories.includes(categoryThird)
         );
+
+        const matchesOrganizer = (
+            selectedOrganizers.length === 0 ||
+            selectedOrganizers.includes(organizerId)
+        );
+
+        return matchesCategory && matchesOrganizer;
     });
 
-    //console.log('Filtered events to be returned:', filteredEvents);
     return filteredEvents;
 };
