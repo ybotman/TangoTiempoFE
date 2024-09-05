@@ -6,17 +6,15 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import UserStateRole from './UserStateRole';
-import CategoryFilter from '@/components/UI/CategoryFilter';
+import PostFilter from '@/components/UI/PostFilter';
+import useOrganizers from '@/hooks/useOrganizers';  // Import the organizer hook
 
 const SiteMenuBar = ({
     regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
-    selectedCategories,
-    handleCategoryChange,
-    categories,
-    selectedOrganizer,
-    handleOrganizerChange
+    selectedCategories, handleCategoryChange, categories, selectedOrganizer, handleOrganizerChange
 }) => {
     const [anchorEl, setAnchorEl] = useState(null);
+    const organizers = useOrganizers(selectedRegion);  // Fetch organizers based on the selected region
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -26,16 +24,11 @@ const SiteMenuBar = ({
         setAnchorEl(null);
     };
 
-    const handleSelectOrganizers = () => {
-        handleMenuClose();
-        handleOrganizerChange(selectedOrganizer);
-    };
-
-
     const handleRegionChange = (event) => {
         setSelectedRegion(event.target.value);
         setSelectedDivision('');
         setSelectedCity('');
+        handleOrganizerChange('');  // Reset organizer when the region changes
     };
 
     const handleDivisionChange = (event) => {
@@ -61,11 +54,11 @@ const SiteMenuBar = ({
                         onClose={handleMenuClose}
                     >
                         {selectedRegion && (
-                            <MenuItem onClick={handleSelectOrganizers}>Select Organizers</MenuItem>
+                            <MenuItem>Select Organizers</MenuItem>
                         )}
-                        <MenuItem >Admin Page</MenuItem>
-                        <MenuItem >Request Form</MenuItem>
-                        <MenuItem >About</MenuItem>
+                        <MenuItem>Admin Page</MenuItem>
+                        <MenuItem>Request Form</MenuItem>
+                        <MenuItem>About</MenuItem>
                     </Menu>
 
                     {/* Region Dropdown */}
@@ -104,18 +97,31 @@ const SiteMenuBar = ({
                                 ))}
                         </select>
                     )}
+
+                    {/* Organizer Dropdown - Only visible if region is selected */}
+                    {selectedRegion && organizers.length > 0 && (
+                        <select value={selectedOrganizer || ""} onChange={(e) => handleOrganizerChange(e.target.value)}>
+                            <option value="">Select Organizer</option>
+                            <option value="none">None</option>
+                            {organizers.map(org => (
+                                <option key={org._id} value={org._id}>
+                                    {org.shortName}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                 </Box>
 
-                {/* UserStateRole positioned at the top right */}
                 <UserStateRole />
             </Box>
 
             {/* Bottom row with Category Filter */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2 }}>
-                <CategoryFilter
+                <PostFilter
                     selectedCategories={selectedCategories}
                     handleCategoryChange={handleCategoryChange}
                     categories={categories}
+                    selectedOrganizer={selectedOrganizer}
                 />
             </Box>
         </Box>
@@ -143,7 +149,6 @@ SiteMenuBar.propTypes = {
     selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
     categories: PropTypes.arrayOf(PropTypes.object).isRequired,
-    organizers: PropTypes.arrayOf(PropTypes.object).isRequired,
     selectedOrganizer: PropTypes.string.isRequired,
     handleOrganizerChange: PropTypes.func.isRequired,
 };

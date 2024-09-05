@@ -2,25 +2,32 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
 
-const CategoryFilter = ({ categories, handleCategoryChange }) => {
+const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer }) => {
     const categoryOrder = ['Milonga', 'Practica', 'Festival', 'Workshop', 'Class', 'Virtual', 'Trip'];
     const defaultSelectedCategories = ['Milonga', 'Practica', 'Workshop', 'Festival'];
     const [activeCategories, setActiveCategories] = useState([]);
 
     useEffect(() => {
         if (categories && categories.length > 0) {
-            const sortedCategories = categories.sort((a, b) => {
-                return categoryOrder.indexOf(a.categoryName) - categoryOrder.indexOf(b.categoryName);
-            });
+            // Filter categories based on selected organizer if provided
+            const filteredCategories = categories.filter(category =>
+                selectedOrganizer ? category.organizerId === selectedOrganizer : true
+            );
 
+            // Sort the categories based on pre-defined order
+            const sortedCategories = filteredCategories.sort((a, b) =>
+                categoryOrder.indexOf(a.categoryName) - categoryOrder.indexOf(b.categoryName)
+            );
+
+            // Set initial categories based on default selections
             const initialCategories = sortedCategories
                 .filter(category => defaultSelectedCategories.includes(category.categoryName))
                 .map(category => category.categoryName);
 
             setActiveCategories(initialCategories);
-            handleCategoryChange(initialCategories);
+            handleCategoryChange(initialCategories);  // Trigger parent change
         }
-    }, [categories]);
+    }, [categories, selectedOrganizer]);  // Run effect when categories or organizer changes
 
     const handleCategoryButtonClick = (categoryName) => {
         let newActiveCategories;
@@ -32,15 +39,15 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
         }
 
         setActiveCategories(newActiveCategories);
-        handleCategoryChange(newActiveCategories);
+        handleCategoryChange(newActiveCategories);  // Trigger parent change
     };
 
     return (
         <div className="category-filter">
             {categories && categories.length > 0 ? (
                 categories.map((category) => {
-                    const isMilonga = category.categoryName === 'Milonga';
                     const isActive = activeCategories.includes(category.categoryName);
+                    const isMilonga = category.categoryName === 'Milonga';
 
                     return (
                         <button
@@ -68,11 +75,12 @@ const CategoryFilter = ({ categories, handleCategoryChange }) => {
     );
 };
 
-CategoryFilter.propTypes = {
+PostFilter.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.shape({
         categoryName: PropTypes.string.isRequired,
     })).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
+    selectedOrganizer: PropTypes.string,  // Optional prop for selected organizer
 };
 
-export default CategoryFilter;
+export default PostFilter;

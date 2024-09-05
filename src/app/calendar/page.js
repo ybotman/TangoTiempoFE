@@ -99,14 +99,18 @@ const CalendarPage = () => {
     console.log('Event clicked:', clickInfo.event.title);
   };
 
-  const handleOrganizerChange = (event) => {
-    setSelectedOrganizers(event.target.value);
-    console.log('OrgChange:', event.target.value);
+  const handleOrganizerChange = (value) => {
+    if (value === "none") {
+      setSelectedOrganizers([]);  // No organizer filter applied
+    } else {
+      setSelectedOrganizers([value]);  // Filter by selected organizer
+    }
+    console.log('OrgChange:', value);
   };
 
-
   const tranformedEvents = transformEvents(events);
-  const filteredEvents = filterEvents(tranformedEvents, activeCategories);
+  const filteredEvents = filterEvents(tranformedEvents, activeCategories, selectedOrganizers);
+
   const coloredFilteredEvents = filteredEvents.map(event => {
     console.log('Event categoryFirst:', event.extendedProps.categoryFirst); // Check if categoryFirst exists
     const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
