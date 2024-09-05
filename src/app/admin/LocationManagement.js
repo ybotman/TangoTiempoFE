@@ -84,7 +84,7 @@ function ManageLocations() {
                 setLocations([...locations, response.data]);
             } else {
                 const response = await axios.put(
-                    `${process.env.NEXT_PUBLIC_BE_URL}/locations/${selectedLocation._id}`,
+                    `${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${selectedLocation._id}`,
                     selectedLocation
                 );
                 setLocations(locations.map(loc => (loc._id === response.data._id ? response.data : loc)));
@@ -98,7 +98,7 @@ function ManageLocations() {
     const handleToggleActive = async (locationId, activeFlag) => {
         try {
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_BE_URL}/locations/${locationId}`,
+                `${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationId}`,
                 { activeFlag }
             );
             setLocations(locations.map(loc => (loc._id === response.data._id ? response.data : loc)));
