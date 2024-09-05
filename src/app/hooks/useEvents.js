@@ -9,10 +9,8 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
             setEvents([]);
             return;
         }
-        const active = true;
-
         try {
-            console.log('useEvents-> Making Events API request:', { selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, active });
+            //          console.log('useEvents-> Making Events API request:', { selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, active });
 
             const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`, {
                 params: {
@@ -25,7 +23,6 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
                 }
             });
 
-            console.log('useEvents-> Events fetched:', response.data);
             setEvents(response.data);  // This line sets the fetched events to the state
         } catch (error) {
             console.error('useEvents-> Error fetching events:', error);

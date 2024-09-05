@@ -9,18 +9,27 @@ export const categoryColors = {
     Virtual: 'lightGray'
 };
 
+
 // Function to filter events based on active categories and apply colors
 export const coloredFilteredEvents = (events, activeCategories) => {
+    console.log('categporu colors')
     if (!Array.isArray(events)) return [];
 
-    // If no active categories are selected, return all events
-    if (activeCategories.length === 0) {
-        return events;
-    }
+    // Filter events based on active categories
+    const filteredEvents = activeCategories.length === 0
+        ? events  // If no active categories, return all events
+        : events.filter(event => activeCategories.includes(event.categoryFirst));
 
-    // Filter events based on active categories and apply colors
-    return events.map(event => ({
-        ...event,
-        backgroundColor: categoryColors[event.categoryFirst] || 'defaultColor',
-    })).filter(event => activeCategories.includes(event.categoryFirst));
+    // Apply colors to the filtered events
+    const coloredEvents = filteredEvents.map(event => {
+        const categoryColor = categoryColors[event.categoryFirst] || 'lightGrey'; // Default color
+        return {
+            ...event,
+            backgroundColor: categoryColor,  // Set background to the category color
+            textColor: categoryColor,        // Set text color to match the background (for debugging, you can change this)
+        };
+    });
+
+    console.log('Colored events:', coloredEvents); // Debugging log to check colored events
+    return coloredEvents;
 };

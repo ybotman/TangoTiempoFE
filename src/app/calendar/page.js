@@ -6,7 +6,7 @@ import React from 'react';
 
 import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
 import { useRegions } from '@/hooks/useRegions';
-import { useEvents, setEvents } from '@/hooks/useEvents';
+import { useEvents } from '@/hooks/useEvents';
 
 import useCategories from '@/hooks/useCategories'
 import useOrganizers from '@/hooks/useOrganizers';
@@ -38,7 +38,7 @@ import ListIcon from '@mui/icons-material/List';
 
 
 const CalendarPage = () => {
-  console.log('**CalendarPage Functions and useStates');
+
   const regions = useRegions();
   const categories = useCategories();
   const [activeCategories, setActiveCategories] = useState([]);
@@ -54,9 +54,10 @@ const CalendarPage = () => {
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
+  const { events, refreshEvents } =
+    useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
 
-  const calendarRef = useRef(null);  // Define calendarRef
+  const calendarRef = useRef(null);
   const organizers = useOrganizers(selectedRegion);
 
 
@@ -104,29 +105,40 @@ const CalendarPage = () => {
   };
 
 
-  console.log('Page Events:', events);
   const tranformedEvents = transformEvents(events);
-
-  console.log('Page transformEvents:', tranformedEvents);
   const filteredEvents = filterEvents(tranformedEvents, activeCategories);
+  const coloredFilteredEvents = filteredEvents.map(event => {
+    console.log('Event categoryFirst:', event.extendedProps.categoryFirst); // Check if categoryFirst exists
+    const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
 
-  const coloredFilteredEvents = filteredEvents.map(event => ({
-    ...event,
-    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
-    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
-    displayEventTime: true,
-    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
-    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
-    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
-  }));
-  console.log('Page coloredFilteredEvents:', coloredFilteredEvents);
+    return {
+      ...event,
+      backgroundColor: categoryColor,
+      textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
+      displayEventTime: true,
+      borderColor: categoryColor,
+      eventBackgroundColor: categoryColor,
+      eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'grey' : 'black',
+    };
+  });
+  useEffect(() => {
+  }, [filteredEvents], [calendarStart, calendarEnd], activeCategories);
 
 
   useEffect(() => {
-  }, [filteredEvents], activeCategories);
+    console.log('CalendarPage re-rendered due to selectedRegion or related state change', {
+      selectedRegion,
+      selectedDivision,
+      selectedCity,
+      calendarStart,
+      calendarEnd
+    });
+  }, [selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd]);
 
   useEffect(() => {
-  }, [calendarStart, calendarEnd]);
+    console.log('Events changed:', events);
+  }, [events]);
+
 
   return (
     <div>
