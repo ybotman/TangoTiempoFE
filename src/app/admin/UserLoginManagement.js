@@ -98,14 +98,30 @@ function ManageUserLogins() {
             <Typography variant="h6">Manage User Logins</Typography>
             {userLogins.map((userLogin) => (
                 <Box key={userLogin._id} sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                    <Typography variant="subtitle1" sx={{ flex: 1 }}>{userLogin.localUserInfo.loginUserName}</Typography>
-                    <Typography variant="subtitle1" sx={{ flex: 1 }}>{userLogin.localUserInfo.firstName} {userLogin.localUserInfo.lastName}</Typography>
-                    <Typography variant="subtitle1" sx={{ marginRight: 1 }}>Active:</Typography>
+                    {/* Firebase UID */}
+                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
+                        Firebase ID: {userLogin._id}  {/* Assuming _id is the Firebase ID */}
+                    </Typography>
+
+                    {/* User login information */}
+                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
+                        {userLogin.localUserInfo.loginUserName}
+                    </Typography>
+
+                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
+                        {userLogin.localUserInfo.firstName} {userLogin.localUserInfo.lastName}
+                    </Typography>
+
+                    <Typography variant="subtitle1" sx={{ marginRight: 1 }}>
+                        Active:
+                    </Typography>
+
                     <Switch
                         checked={userLogin.active}
                         onChange={(e) => handleToggleActive(userLogin._id, e.target.checked)}
                         color="primary"
                     />
+
                     <Button size="small" onClick={() => handleOpen(userLogin)}>View / Edit</Button>
                 </Box>
             ))}

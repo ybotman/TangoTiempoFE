@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { transformEvents } from '@/utils/transformEvents';
 
 export function useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
     const [events, setEvents] = useState([]);
@@ -10,14 +9,12 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
             setEvents([]);
             return;
         }
-        const active = true;
-
         try {
-            console.log('Making Events API request:', { selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, active });
+            //          console.log('useEvents-> Making Events API request:', { selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, active });
 
-
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/CalculatedLocations`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`, {
                 params: {
+                    active: true,  // Correct assignment of value
                     calculatedRegionName: selectedRegion,
                     calculatedDivisionName: selectedDivision || undefined,
                     calculatedCityName: selectedCity || undefined,
@@ -26,11 +23,10 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
                 }
             });
 
-            let transformedEvents = transformEvents(response.data);
-            setEvents(transformedEvents);
-
+            setEvents(response.data);  // This line sets the fetched events to the state
         } catch (error) {
-            console.error('Error fetching events:', error);
+            console.error('useEvents-> Error fetching events:', error);
+            setEvents([]);  // Clear events on error
         }
     };
 
