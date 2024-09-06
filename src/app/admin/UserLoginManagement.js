@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { React, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Typography, Button, Modal, Select, MenuItem, Checkbox, ListItemText, FormControl, InputLabel, Alert } from '@mui/material';
 
@@ -81,7 +81,7 @@ const ManageUserLogins = () => {
                 : user
             )
           );
-          
+
           console.log('Roles updated successfully');
           setOpenModal(false);
         }
@@ -129,14 +129,14 @@ const ManageUserLogins = () => {
           <Typography id="edit-roles-modal" variant="h6" mb={2}>
             Edit Roles for {currentUser?.firebaseUserInfo.displayName}
           </Typography>
-          
+
           {/* Error message if roles are not selected */}
           {errorMessage && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {errorMessage}
             </Alert>
           )}
-          
+
           <FormControl fullWidth>
             <InputLabel id="roles-label">Roles</InputLabel>
             <Select
