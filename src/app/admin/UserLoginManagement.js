@@ -1,183 +1,166 @@
-"use client";
-
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Modal, TextField, CircularProgress, Switch } from '@mui/material';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Box, Typography, Button, Modal, Select, MenuItem, Checkbox, ListItemText, FormControl, InputLabel, Alert } from '@mui/material';
 
-function ManageUserLogins() {
-    const [userLogins, setUserLogins] = useState([]);
-    const [selectedUserLogin, setSelectedUserLogin] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [open, setOpen] = useState(false);
+/**
+ * Component to manage and display user login information with roles.
+ */
+const ManageUserLogins = () => {
+  const [userLogins, setUserLogins] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedUserRoles, setSelectedUserRoles] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-    useEffect(() => {
-        async function fetchUserLogins() {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/all`);
-                setUserLogins(response.data);
-                console.log('featchUserLogins', response.data);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching user logins:', error);
-                setLoading(false);
-            }
-        }
-
-        fetchUserLogins();
-    }, []);
-
-    const handleOpen = (userLogin = null) => {
-        setSelectedUserLogin(
-            userLogin || {
-                localUserInfo: {
-                    loginUserName: "",
-                    firstName: "",
-                    lastName: "",
-                    icon: "",
-                    defaultedCity: ""
-                },
-                localOrganizerInfo: {
-                    organizerId: "",
-                    allowedCities: "",
-                    allowedDivisions: "",
-                    allowedRegions: "",
-                },
-
-                localAdminInfo: {
-                    adminRegions: [],
-                    adminDivisions: [],
-                    adminCities: []
-                },
-                active: true,
-            }
-        );
-        setOpen(true);
+  // Fetch user logins when the component loads
+  useEffect(() => {
+    const fetchUserLogins = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/all`);
+        setUserLogins(response.data);
+      } catch (error) {
+        console.error('Error fetching user logins:', error);
+      }
     };
 
-    const handleClose = () => {
-        setSelectedUserLogin(null);
-        setOpen(false);
+    fetchUserLogins();
+  }, []);
+
+  // Fetch all available roles from the API
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/roles`);
+        setRoles(response.data);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      }
     };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setSelectedUserLogin({ ...selectedUserLogin, [name]: value });
-    };
+    fetchRoles();
+  }, []);
 
-    const handleSave = async () => {
-        try {
-            const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/${selectedUserLogin._id}`,
-                selectedUserLogin
-            );
-            setUserLogins(userLogins.map(ul => (ul._id === response.data._id ? response.data : ul)));
-            handleClose();
-        } catch (error) {
-            console.error('Error updating user login:', error);
-        }
-    };
+  // Open modal and set the current user and roles
+  const handleEditClick = (user) => {
+    setCurrentUser(user);
+    const userRoles = user.roleIds.map(role => role._id);
+    setSelectedUserRoles(userRoles);
+    setErrorMessage(''); // Clear previous error message
+    setOpenModal(true);
+  };
 
-    const handleToggleActive = async (userLoginId, active) => {
-        try {
-            const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/${userLoginId}`,
-                { active }
-            );
-            setUserLogins(userLogins.map(ul => (ul._id === response.data._id ? response.data : ul)));
-        } catch (error) {
-            console.error('Error updating active flag:', error);
-        }
-    };
+  // Handle role selection change
+  const handleRoleChange = (event) => {
+    setSelectedUserRoles(event.target.value);
+  };
 
-    if (loading) {
-        return <CircularProgress />;
+  // Handle apply button click to update roles via PUT request
+  const handleApply = async () => {
+    if (selectedUserRoles.length === 0) {
+      setErrorMessage('You must select at least one role.');
+      return;
     }
 
-    return (
-        <Box sx={{ padding: 2 }}>
-            <Typography variant="h6">Manage User Logins</Typography>
-            {userLogins.map((userLogin) => (
-                <Box key={userLogin._id} sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                    {/* Firebase UID */}
-                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
-                        Firebase ID: {userLogin._id}  {/* Assuming _id is the Firebase ID */}
-                    </Typography>
+    if (currentUser) {
+      try {
+        const response = await axios.put(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/${currentUser.firebaseUserId}/roles`,
+          { roleIds: selectedUserRoles }
+        );
 
-                    {/* User login information */}
-                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
-                        {userLogin.localUserInfo.loginUserName}
-                    </Typography>
+        if (response.status === 200) {
+          const updatedRoleIds = response.data.updatedRoles; // The returned role objects
+          const updatedRoleIdsWithNames = updatedRoleIds.map(roleId => ({ _id: roleId, roleName: roles.find(r => r._id === roleId)?.roleName }));
+          console.log('Updated roles:', updatedRoleIdsWithNames);
+          // Update user roles in the same format as the API
+          setUserLogins(prevLogins =>
+            prevLogins.map(user =>
+              user.firebaseUserId === currentUser.firebaseUserId
+                ? { ...user, roleIds: updatedRoleIdsWithNames }
+                : user
+            )
+          );
+          
+          console.log('Roles updated successfully');
+          setOpenModal(false);
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 400) {
+          console.error('Error updating roles:', error.response.data.message);
+        } else {
+          console.error('Unexpected error:', error);
+        }
+      }
+    }
+  };
 
-                    <Typography variant="subtitle1" sx={{ flex: 1 }}>
-                        {userLogin.localUserInfo.firstName} {userLogin.localUserInfo.lastName}
-                    </Typography>
+  return (
+    <Box>
+      {userLogins.length > 0 ? (
+        userLogins.map((login) => (
+          <Box key={login.firebaseUserInfo.email} mb={3} display="flex" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h5">
+                {login.firebaseUserInfo.displayName}
+              </Typography>
+              <Typography variant="body1">
+                Email: {login.firebaseUserInfo.email}
+              </Typography>
+              <Typography variant="body1">
+                Roles: {login.roleIds.map(role => role.roleName).join(', ')}
+              </Typography>
+            </Box>
+            <Button variant="outlined" onClick={() => handleEditClick(login)}>Edit</Button>
+          </Box>
+        ))
+      ) : (
+        <Typography variant="body1">No user logins available.</Typography>
+      )}
 
-                    <Typography variant="subtitle1" sx={{ marginRight: 1 }}>
-                        Active:
-                    </Typography>
-
-                    <Switch
-                        checked={userLogin.active}
-                        onChange={(e) => handleToggleActive(userLogin._id, e.target.checked)}
-                        color="primary"
-                    />
-
-                    <Button size="small" onClick={() => handleOpen(userLogin)}>View / Edit</Button>
-                </Box>
-            ))}
-
-            {selectedUserLogin && (
-                <Modal
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="modal-title"
-                    aria-describedby="modal-description"
-                >
-                    <Box sx={{ width: 360, bgcolor: 'background.paper', margin: 'auto', padding: 2 }}>
-                        <Typography id="modal-title" variant="h6" sx={{ marginBottom: 2 }}>
-                            Edit User Login
-                        </Typography>
-                        <TextField
-                            label="Login User Name"
-                            name="loginUserName"
-                            value={selectedUserLogin.localUserInfo.loginUserName || ""}
-                            onChange={(e) => handleInputChange({ ...e, name: 'localUserInfo.loginUserName' })}
-                            fullWidth
-                            margin="dense"
-                        />
-                        <TextField
-                            label="First Name"
-                            name="firstName"
-                            value={selectedUserLogin.localUserInfo.firstName || ""}
-                            onChange={(e) => handleInputChange({ ...e, name: 'localUserInfo.firstName' })}
-                            fullWidth
-                            margin="dense"
-                        />
-                        <TextField
-                            label="Last Name"
-                            name="lastName"
-                            value={selectedUserLogin.localUserInfo.lastName || ""}
-                            onChange={(e) => handleInputChange({ ...e, name: 'localUserInfo.lastName' })}
-                            fullWidth
-                            margin="dense"
-                        />
-                        <TextField
-                            label="Icon"
-                            name="icon"
-                            value={selectedUserLogin.localUserInfo.icon || ""}
-                            onChange={(e) => handleInputChange({ ...e, name: 'localUserInfo.icon' })}
-                            fullWidth
-                            margin="dense"
-                        />
-                        {/* Additional fields for Organizer and Admin Info */}
-                        <Button onClick={handleSave} variant="contained" size="small" sx={{ mt: 2 }}>
-                            Save
-                        </Button>
-                    </Box>
-                </Modal>
-            )}
+      {/* Modal for editing roles */}
+      <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        aria-labelledby="edit-roles-modal"
+        aria-describedby="edit-roles-for-user"
+      >
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, borderRadius: 2, boxShadow: 24, width: '400px' }}>
+          <Typography id="edit-roles-modal" variant="h6" mb={2}>
+            Edit Roles for {currentUser?.firebaseUserInfo.displayName}
+          </Typography>
+          
+          {/* Error message if roles are not selected */}
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
+          
+          <FormControl fullWidth>
+            <InputLabel id="roles-label">Roles</InputLabel>
+            <Select
+              labelId="roles-label"
+              multiple
+              value={selectedUserRoles}
+              onChange={handleRoleChange}
+              renderValue={(selected) => selected.map(id => roles.find(role => role._id === id)?.roleName).join(', ')}
+            >
+              {roles.map((role) => (
+                <MenuItem key={role._id} value={role._id}>
+                  <Checkbox checked={selectedUserRoles.indexOf(role._id) > -1} />
+                  <ListItemText primary={role.roleName} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Box mt={3} display="flex" justifyContent="flex-end">
+            <Button variant="contained" onClick={handleApply}>Apply</Button>
+          </Box>
         </Box>
-    );
-}
+      </Modal>
+    </Box>
+  );
+};
 
 export default ManageUserLogins;
