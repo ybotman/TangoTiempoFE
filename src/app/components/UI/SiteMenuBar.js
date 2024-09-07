@@ -16,6 +16,8 @@ const SiteMenuBar = ({
     console.log("Props in PostFilter: ", { categories, activeCategories, handleCategoryChange });
     const [anchorEl, setAnchorEl] = useState(null);
     const organizers = useOrganizers(selectedRegion);  // Fetch organizers based on the selected region
+    const [sortedCategories, setSortedCategories] = useState(categories);  // Define state for sorted categories
+
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -23,6 +25,12 @@ const SiteMenuBar = ({
 
     const handleMenuClose = () => {
         setAnchorEl(null);
+    };
+
+    const handleSortedCategories = (sortedCategories) => {
+        // Update state with sorted categories
+        console.log('Received sorted categories:', sortedCategories); // this is good and working
+        setSortedCategories(sortedCategories);
     };
 
     const handleRegionChange = (event) => {
@@ -121,8 +129,9 @@ const SiteMenuBar = ({
                 <PostFilter
                     activeCategories={activeCategories}
                     handleCategoryChange={handleCategoryChange}
-                    categories={categories}
+                    categories={categories} // was sorted categories and is not workoing
                     selectedOrganizer={selectedOrganizer}
+                    handleSortedCategories={handleSortedCategories}
                 />
             </Box>
         </Box>
