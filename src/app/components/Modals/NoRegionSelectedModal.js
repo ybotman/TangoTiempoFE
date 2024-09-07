@@ -6,11 +6,17 @@ const modalStyle = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: '90%',  // Adjust width for mobile
+    maxWidth: '400px',  // Max width for larger screens
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
-    p: 4,
+    p: 3,  // Adjust padding for mobile
+    borderRadius: '8px',  // Rounded corners for mobile design
+    '@media (max-width: 600px)': {  // Media query for smaller screens
+        width: '95%',
+        p: 2,  // Reduce padding for smaller screens
+    },
 };
 
 const NoRegionSelectedModal = ({ open, onClose }) => {
@@ -22,24 +28,22 @@ const NoRegionSelectedModal = ({ open, onClose }) => {
             aria-describedby="no-region-modal-description"
         >
             <Box sx={modalStyle}>
-                <Typography id="no-region-modal-title" variant="h6" component="h2">
+                <Typography id="no-region-modal-title" variant="h6" component="h2" align="center">
                     No Region Selected
                 </Typography>
-                <Typography id="no-region-modal-description" sx={{ mt: 2 }}>
-                    Select a region first, or
-                    sign-up/in to have you defaults
+                <Typography id="no-region-modal-description" sx={{ mt: 2 }} align="center">
+                    Please select a region, or sign-in for your defualts.
                 </Typography>
-                <Button onClick={onClose} variant="contained" sx={{ mt: 2 }}>
-                    Close
-                </Button>
-                <Button variant="text" sx={{ mt: 2 }}>
-                    Help
-                </Button>
-                <Button variant="text" sx={{ mt: 2 }}>
-                    SignUp
-                </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <Button onClick={onClose} variant="contained" color="primary">
+                        Close
+                    </Button>
+                    <Button onClick={onClose} variant="text" color="primary">
+                        Help
+                    </Button>
+                </Box>
             </Box>
-        </Modal >
+        </Modal>
     );
 };
 
