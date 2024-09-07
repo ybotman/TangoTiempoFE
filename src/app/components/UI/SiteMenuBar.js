@@ -16,7 +16,8 @@ const SiteMenuBar = ({
     console.log("Props in PostFilter: ", { categories, activeCategories, handleCategoryChange });
     const [anchorEl, setAnchorEl] = useState(null);
     const organizers = useOrganizers(selectedRegion);  // Fetch organizers based on the selected region
-    const [sortedCategories, setSortedCategories] = useState(categories);  // Define state for sorted categories
+    const [sortedCategories, setSortedCategories] = useState(categories);  // Define state for sorted categories sort not wo
+    //  const [setSortedCategories] = useState(categories);  // Define state for sorted categories
 
 
     const handleMenuOpen = (event) => {
