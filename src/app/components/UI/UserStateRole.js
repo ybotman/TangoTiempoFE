@@ -6,18 +6,30 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 const UserStateRole = () => {
-    const { user, roles, loading, error, logOut } = useAuth(); // Get roles instead of role
+    const { user, roles, loading, error, logOut, setRoles } = useAuth(); // Add setRoles function
     const [selectedRole, setSelectedRole] = useState('');
 
     // Set the initial selected role when roles are loaded
     useEffect(() => {
-        if (roles && roles.length > 0) {
-            setSelectedRole(roles[0]); // Set the first role as default
+        if (roles && roles.length > 0 && !selectedRole) {  // Only set if no role is already selected
+            setSelectedRole(roles[0].roleName); // Set the first roleName as default
+            console.log("Initial role set to:", roles[0].roleName);  // Log initial role
         }
-    }, [roles]);
+    }, [roles, selectedRole]);
 
     const handleRoleChange = (event) => {
-        setSelectedRole(event.target.value);
+        const newRole = event.target.value;
+        console.log("Role changed to:", newRole);  // Log new role change
+        setSelectedRole(newRole);
+
+        // Update the role in useAuth (assuming role names are passed back globally)
+        const updatedRoles = roles.map(role => {
+            if (role.roleName === newRole) {
+                return { ...role, selected: true };  // Mark the selected role as active
+            }
+            return role;
+        });
+        setRoles(updatedRoles); // Update roles globally
     };
 
     return (
@@ -39,8 +51,8 @@ const UserStateRole = () => {
                             label="Role"
                         >
                             {roles.map((role) => (
-                                <MenuItem key={role} value={role}>
-                                    {role}
+                                <MenuItem key={role.roleId} value={role.roleName}>
+                                    {role.roleName}
                                 </MenuItem>
                             ))}
                         </Select>

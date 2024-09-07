@@ -13,7 +13,7 @@ const SiteMenuBar = ({
     regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
     activeCategories, handleCategoryChange, categories, selectedOrganizer, handleOrganizerChange
 }) => {
-    console.log("Props in PostFilter: ", { categories, activeCategories, handleCategoryChange });
+    //console.log("Props in PostFilter: ", { categories, activeCategories, handleCategoryChange });
     const [anchorEl, setAnchorEl] = useState(null);
     const organizers = useOrganizers(selectedRegion);  // Fetch organizers based on the selected region
     const [sortedCategories, setSortedCategories] = useState(categories);  // Define state for sorted categories sort not wo
@@ -30,7 +30,7 @@ const SiteMenuBar = ({
 
     const handleSortedCategories = (sortedCategories) => {
         // Update state with sorted categories
-        console.log('Received sorted categories:', sortedCategories); // this is good and working
+        //console.log('Received sorted categories:', sortedCategories); // this is good and working
         setSortedCategories(sortedCategories);
     };
 

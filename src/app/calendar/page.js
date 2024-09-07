@@ -24,9 +24,21 @@ import { useAuth } from '@/hooks/useAuth';  // Import for role handling
 
 const CalendarPage = () => {
   const { user, roles } = useAuth(); // Extract user and roles from authentication
-  const selectedRole = roles[0] || ""; // Assume first role if available
+  const selectedRole = roles[0] || "isAnonymous"; // Assume first role if available
+  const isAnonymous = selectedRole === "isAnonymous"; // Check if the user is a Regional Organizer
   const isRegionalOrganizer = selectedRole === "RegionalOrganizer"; // Check if the user is a Regional Organizer
-
+  const isRegionalAdmin = selectedRole === "RegionalAdmin"; // Check if the user is a Regional Organizer
+  const isSystemOwner = selectedRole === "SystemOwner";
+  const isNamedUser = selectedRole === "NamedUser";
+  console.log("ROLE:", selectedRole);
+  console.log({
+    user: !!user,  // Converts the `user` object to a boolean (true if not null, false if null)
+    AU: isAnonymous,
+    NU: isNamedUser,
+    RO: isRegionalOrganizer,
+    RA: isRegionalAdmin,
+    SO: isSystemOwner
+  });
   const {
     regions,
     categories,

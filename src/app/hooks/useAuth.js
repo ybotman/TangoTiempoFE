@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export const useAuth = () => {
     const [user, setUser] = useState(null);
-    const [roles, setRoles] = useState([]);  // Updated to manage multiple roles
+    const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,7 +16,6 @@ export const useAuth = () => {
             if (currentUser) {
                 setUser(currentUser);
 
-                // If user is signing up, set the flag and skip fetching user roles
                 if (!signUpOngoing.current) {
                     await fetchUserRoles(currentUser.uid);  // Fetch user roles
                 }
@@ -30,69 +29,35 @@ export const useAuth = () => {
         return () => unsubscribe();
     }, []);
 
+    // Google Authentication function
+    const authenticateWithGoogle = async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            console.log('Google Sign-in successful:', user);
+            return user;
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+            setError(error.message);
+        }
+    };
+
     const fetchUserRoles = async (firebaseUserId) => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
-
             if (response.status === 200) {
-                setRoles(response.data.roleIds.map(role => role.roleName));  // Set the list of role names
+                const mappedRoles = response.data.roleIds.map(role => ({
+                    roleId: role._id,
+                    roleName: role.roleName,
+                }));
+                setRoles(mappedRoles);
             } else {
                 setRoles([]);
             }
         } catch (err) {
-            console.error('Error fetching user roles:', err);
             setError('Failed to fetch user roles');
             setRoles([]);
-        }
-    };
-
-    const authenticateWithGoogle = async () => {
-        if (user) {
-            setError('You are already signed in.');
-            return null;
-        }
-
-        setLoading(true);
-        const provider = new GoogleAuthProvider();
-
-        try {
-            signUpOngoing.current = true;
-            const result = await signInWithPopup(auth, provider);
-            const firebaseUserId = result.user.uid;
-
-            try {
-                // Check if the user already exists in the backend
-                await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
-
-                // If no error is thrown, the user already exists, and no need to create a new one
-            } catch (error) {
-                // If the user does not exist, the GET request will throw an error, so we proceed with the POST request
-                if (error.response && error.response.status === 404) {
-                    const roleResponse = await axios.post(
-                        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`, 
-                        { 
-                            firebaseUserId: firebaseUserId, 
-                        });
-
-                    if (roleResponse.status !== 204) {
-                        throw new Error('Failed to assign role in backend');
-                    }
-                } else {
-                    throw error;  // Re-throw unexpected errors
-                }
-            }
-
-            signUpOngoing.current = false;
-
-            setUser(result.user);
-            await fetchUserRoles(firebaseUserId);  // Fetch and set the user's roles after signup
-            setLoading(false);
-            return result.user;
-        } catch (err) {
-            setError(err.message);
-            setLoading(false);
-            signUpOngoing.current = false;
-            return null;
         }
     };
 
@@ -100,12 +65,12 @@ export const useAuth = () => {
         try {
             await signOut(auth);
             setUser(null);
-            setRoles([]);  // Clear roles on logout
+            setRoles([]);
+            console.log("User logged out.");
         } catch (err) {
             setError(err.message);
-            console.error('Error logging out:', err);
         }
     };
 
-    return { user, roles, loading, error, authenticateWithGoogle, logOut };
+    return { user, roles, setRoles, loading, error, logOut, authenticateWithGoogle };
 };

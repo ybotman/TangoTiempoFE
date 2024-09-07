@@ -1,6 +1,6 @@
 export const filterEvents = (events, selectedCategories, selectedOrganizers) => {
     // Log the initial parameters being passed
-    console.log('Const filtered events:', { selectedCategories, selectedOrganizers, events });
+    //console.log('Const filtered events:', { selectedCategories, selectedOrganizers, events });
 
     // Check if events is an array
     if (!Array.isArray(events)) {
@@ -17,7 +17,7 @@ export const filterEvents = (events, selectedCategories, selectedOrganizers) => 
     // Log each event's categories and organizers before filtering
     events.forEach(event => {
         const { categoryFirst, categorySecond, categoryThird, organizerId } = event.extendedProps || {};
-        console.log('Event being evaluated:', { categoryFirst, categorySecond, categoryThird, organizerId });
+        // console.log('Event being evaluated:', { categoryFirst, categorySecond, categoryThird, organizerId });
     });
 
     // Filter events based on any matching category or organizer
@@ -39,13 +39,13 @@ export const filterEvents = (events, selectedCategories, selectedOrganizers) => 
         );
 
         // Log the result of each event check
-        console.log('Event matches category:', matchesCategory, 'Event matches organizer:', matchesOrganizer);
+        // console.log('Event matches category:', matchesCategory, 'Event matches organizer:', matchesOrganizer);
 
         return matchesCategory && matchesOrganizer;
     });
 
     // Log the final filtered events
-    console.log('Filtered events result:', filteredEvents);
+    // console.log('Filtered events result:', filteredEvents);
 
     return filteredEvents;
 };

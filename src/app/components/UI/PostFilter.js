@@ -22,7 +22,7 @@ const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer, handl
                 return (indexA === -1 ? categoryOrder.length : indexA) - (indexB === -1 ? categoryOrder.length : indexB);
             });
 
-            console.log('Final sorted categories:', sortedCategories);
+            //console.log('Final sorted categories:', sortedCategories);
             handleSortedCategories(sortedCategories);
 
             // Set initial categories based on default selections
