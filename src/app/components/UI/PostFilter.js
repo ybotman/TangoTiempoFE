@@ -4,10 +4,13 @@ import { categoryColors } from '@/utils/categoryColors';
 
 const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer }) => {
     const categoryOrder = ['Milonga', 'Practica', 'Festival', 'Workshop', 'Class', 'Virtual', 'Trip'];
-    const defaultSelectedCategories = ['Milonga', 'Practica', 'Workshop', 'Festival'];
+    const defaultactiveCategories = ['Milonga', 'Practica', 'Workshop', 'Festival'];
     const [activeCategories, setActiveCategories] = useState([]);
 
+    console.log('PostFilter useEffect triggered', { activeCategories, selectedOrganizer });
+
     useEffect(() => {
+        console.log(('PostFilter UseEffect'))
         if (categories && categories.length > 0) {
             // Filter categories based on selected organizer if provided
             const filteredCategories = categories.filter(category =>
@@ -21,11 +24,11 @@ const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer }) => 
 
             // Set initial categories based on default selections
             const initialCategories = sortedCategories
-                .filter(category => defaultSelectedCategories.includes(category.categoryName))
+                .filter(category => defaultactiveCategories.includes(category.categoryName))
                 .map(category => category.categoryName);
 
             setActiveCategories(initialCategories);
-            handleCategoryChange(initialCategories);  // Trigger parent change
+            handleCategoryChange(initialCategories);
         }
     }, [categories, selectedOrganizer]);  // Run effect when categories or organizer changes
 
@@ -39,7 +42,7 @@ const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer }) => 
         }
 
         setActiveCategories(newActiveCategories);
-        handleCategoryChange(newActiveCategories);  // Trigger parent change
+        handleCategoryChange(newActiveCategories);
     };
 
     return (

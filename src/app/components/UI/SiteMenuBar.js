@@ -11,8 +11,9 @@ import useOrganizers from '@/hooks/useOrganizers';  // Import the organizer hook
 
 const SiteMenuBar = ({
     regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
-    selectedCategories, handleCategoryChange, categories, selectedOrganizer, handleOrganizerChange
+    activeCategories, handleCategoryChange, categories, selectedOrganizer, handleOrganizerChange
 }) => {
+    console.log("Props in PostFilter: ", { categories, activeCategories, handleCategoryChange });
     const [anchorEl, setAnchorEl] = useState(null);
     const organizers = useOrganizers(selectedRegion);  // Fetch organizers based on the selected region
 
@@ -118,7 +119,7 @@ const SiteMenuBar = ({
             {/* Bottom row with Category Filter */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2 }}>
                 <PostFilter
-                    selectedCategories={selectedCategories}
+                    activeCategories={activeCategories}
                     handleCategoryChange={handleCategoryChange}
                     categories={categories}
                     selectedOrganizer={selectedOrganizer}
@@ -146,7 +147,7 @@ SiteMenuBar.propTypes = {
     setSelectedDivision: PropTypes.func.isRequired,
     selectedCity: PropTypes.string.isRequired,
     setSelectedCity: PropTypes.func.isRequired,
-    selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
+    activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
     handleCategoryChange: PropTypes.func.isRequired,
     categories: PropTypes.arrayOf(PropTypes.object).isRequired,
     selectedOrganizer: PropTypes.string.isRequired,
