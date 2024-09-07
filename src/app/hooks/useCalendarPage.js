@@ -15,6 +15,7 @@ export const useCalendarPage = () => {
     const [selectedOrganizers, setSelectedOrganizers] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+    const [isNoRegionSelectedModalOpen, setNoRegionSelectedModalOpen] = useState(false);  // New state for NoRegionSelected modal
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [selectedDivision, setSelectedDivision] = useState(null);
     const [selectedCity, setSelectedCity] = useState(null);
@@ -24,10 +25,12 @@ export const useCalendarPage = () => {
 
     const calendarRef = useRef(null);
 
-    // Get user and roles for role-based checks
     const { user, roles } = useAuth();
     const selectedRole = roles[0] || "";
     const isRegionalOrganizer = selectedRole === "RegionalOrganizer";
+
+    // Boolean to track if a region has been selected
+    const regionSelected = !!selectedRegion;
 
     const handleDatesSet = (rangeInfo) => {
         setCalendarStart(rangeInfo.start);
@@ -44,7 +47,6 @@ export const useCalendarPage = () => {
     };
 
     const handleCategoryChange = (newCategories) => {
-        console.log('handleCategoryChange called with:', newCategories);
         setActiveCategories(newCategories);
     };
 
@@ -63,24 +65,26 @@ export const useCalendarPage = () => {
         calendarApi.today();
     };
 
-    // Modify handleDateClick to check role
+    // Modify handleDateClick to check region selection and role
     const handleDateClick = (clickInfo) => {
-        if (isRegionalOrganizer) {
+        if (!regionSelected) {
+            setNoRegionSelectedModalOpen(true); // Open modal if no region is selected
+        } else if (isRegionalOrganizer) {
             setSelectedDate(clickInfo.date);
-            setCreateModalOpen(true); // Only allow opening CRUD modal for Regional Organizers
-        } else {
-            console.log("User is not authorized to create events");
+            setCreateModalOpen(true);
         }
     };
 
-    // Modify handleEventClick to check role
+    // Modify handleEventClick to check region selection and role
     const handleEventClick = (clickInfo) => {
-        setSelectedEvent(clickInfo.event);
-
-        if (isRegionalOrganizer) {
-            setCreateModalOpen(true); // Allow editing for Regional Organizers
+        if (!regionSelected) {
+            setNoRegionSelectedModalOpen(true); // Open modal if no region is selected
         } else {
-            console.log("User can only view event details");
+            setSelectedEvent(clickInfo.event);
+
+            if (isRegionalOrganizer) {
+                setCreateModalOpen(true); // Allow editing for Regional Organizers
+            }
         }
     };
 
@@ -92,15 +96,9 @@ export const useCalendarPage = () => {
         }
     };
 
-    console.log('events Data', selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
     const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
-    console.log('events', events);
     const transformedEvents = transformEvents(events);
-    console.log('transformEvents', transformedEvents);
-    console.log('enteringfitlerEvent', transformedEvents, activeCategories);
-
     const filteredEvents = filterEvents(transformedEvents, activeCategories, selectedOrganizers);
-    console.log('filteredEvents', filteredEvents);
 
     const coloredFilteredEvents = filteredEvents.map(event => {
         const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
@@ -119,6 +117,7 @@ export const useCalendarPage = () => {
         selectedOrganizers,
         selectedEvent,
         isCreateModalOpen,
+        isNoRegionSelectedModalOpen,  // Return state for NoRegionSelected modal
         selectedRegion,
         selectedDivision,
         selectedCity,
@@ -134,16 +133,18 @@ export const useCalendarPage = () => {
         setSelectedCity,
         setSelectedDate,
         setCreateModalOpen,
+        setNoRegionSelectedModalOpen,  // Add setter for modal
         refreshEvents,
         handleCategoryChange,
         handleDatesSet,
         handlePrev,
         handleNext,
         handleToday,
-        handleDateClick, // Updated to be role-aware
-        handleEventClick, // Updated to be role-aware
+        handleDateClick,
+        handleEventClick,
         handleEventCreated,
         handleOrganizerChange,
-        coloredFilteredEvents
+        coloredFilteredEvents,
+        regionSelected  // Return the boolean for region selection
     };
 };

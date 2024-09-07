@@ -18,6 +18,7 @@ import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
+import NoRegionSelectedModal from '@/components/Modals/NoRegionSelectedModal';  // Import modal
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import { useAuth } from '@/hooks/useAuth';  // Import for role handling
 
@@ -33,6 +34,7 @@ const CalendarPage = () => {
     selectedOrganizers,
     selectedEvent,
     isCreateModalOpen,
+    isNoRegionSelectedModalOpen,  // Boolean for region modal
     selectedRegion,
     selectedDivision,
     selectedCity,
@@ -44,16 +46,17 @@ const CalendarPage = () => {
     setSelectedCity,
     setCreateModalOpen,
     setSelectedEvent,
+    setNoRegionSelectedModalOpen,  // Close modal function
     handleDatesSet,
     handleEventCreated,
     handleCategoryChange,
     handlePrev,
     handleNext,
     handleToday,
-    handleDateClick,  // Already role-aware from useCalendarPage.js
-    handleEventClick, // Already role-aware from useCalendarPage.js
+    handleDateClick,
+    handleEventClick,
     handleOrganizerChange,
-    coloredFilteredEvents
+    coloredFilteredEvents,
   } = useCalendarPage();
 
   return (
@@ -135,6 +138,14 @@ const CalendarPage = () => {
             onClose={() => setSelectedEvent(null)}
           />
         )
+      )}
+
+      {/* Show NoRegionSelectedModal when no region is selected */}
+      {isNoRegionSelectedModalOpen && (
+        <NoRegionSelectedModal
+          open={isNoRegionSelectedModalOpen}
+          onClose={() => setNoRegionSelectedModalOpen(false)}
+        />
       )}
     </div>
   );
