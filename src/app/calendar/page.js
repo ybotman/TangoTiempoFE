@@ -19,9 +19,13 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
+import { useAuth } from '@/hooks/useAuth';  // Import for role handling
 
 const CalendarPage = () => {
-  console.log('CalendarPage cont:')
+  const { user, roles } = useAuth(); // Extract user and roles from authentication
+  const selectedRole = roles[0] || ""; // Assume first role if available
+  const isRegionalOrganizer = selectedRole === "RegionalOrganizer"; // Check if the user is a Regional Organizer
+
   const {
     regions,
     categories,
@@ -46,8 +50,8 @@ const CalendarPage = () => {
     handlePrev,
     handleNext,
     handleToday,
-    handleDateClick,
-    handleEventClick,
+    handleDateClick,  // Already role-aware from useCalendarPage.js
+    handleEventClick, // Already role-aware from useCalendarPage.js
     handleOrganizerChange,
     coloredFilteredEvents
   } = useCalendarPage();
@@ -103,32 +107,34 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={coloredFilteredEvents}
-        datesSet={handleDatesSet}  // Pass the handleDatesSet here
+        datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
-        eventClick={handleEventClick}
-        dateClick={handleDateClick}
+        eventClick={handleEventClick}  // Use role-aware event click from useCalendarPage
+        dateClick={handleDateClick}  // Use role-aware date click from useCalendarPage
         ref={calendarRef}
         headerToolbar={false}
         scrollTime="17:00:00"
       />
 
-      {selectedEvent && (
-        <EventDetailsModal
-          event={selectedEvent}
-          open={Boolean(selectedEvent)}
-          onClose={() => setSelectedEvent(null)}
-        />
-      )}
-
-
-      {isCreateModalOpen && (
-        <EventCRUDModal
-          open={isCreateModalOpen}
-          onClose={() => setCreateModalOpen(false)}
-          selectedDate={selectedDate}
-          selectedRegion={selectedRegion}
-          onCreate={handleEventCreated}
-        />
+      {/* Conditionally render modals based on role */}
+      {isRegionalOrganizer ? (
+        isCreateModalOpen && (
+          <EventCRUDModal
+            open={isCreateModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            selectedDate={selectedDate}
+            selectedRegion={selectedRegion}
+            onCreate={handleEventCreated}
+          />
+        )
+      ) : (
+        selectedEvent && (
+          <EventDetailsModal
+            event={selectedEvent}
+            open={Boolean(selectedEvent)}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )
       )}
     </div>
   );

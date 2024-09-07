@@ -6,6 +6,7 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import useOrganizers from '@/hooks/useOrganizers';
 import { useRegions } from '@/hooks/useRegions';
+import { useAuth } from '@/hooks/useAuth';  // Import for role handling
 
 export const useCalendarPage = () => {
     const regions = useRegions();
@@ -23,13 +24,16 @@ export const useCalendarPage = () => {
 
     const calendarRef = useRef(null);
 
+    // Get user and roles for role-based checks
+    const { user, roles } = useAuth();
+    const selectedRole = roles[0] || "";
+    const isRegionalOrganizer = selectedRole === "RegionalOrganizer";
+
     const handleDatesSet = (rangeInfo) => {
         setCalendarStart(rangeInfo.start);
         setCalendarEnd(rangeInfo.end);
         console.log('Dates Set: ', rangeInfo.start, rangeInfo.end);
     };
-
-    //  const organizers = useOrganizers(selectedRegion);
 
     const handleEventCreated = async () => {
         try {
@@ -59,13 +63,25 @@ export const useCalendarPage = () => {
         calendarApi.today();
     };
 
+    // Modify handleDateClick to check role
     const handleDateClick = (clickInfo) => {
-        setSelectedDate(clickInfo.date);
-        setCreateModalOpen(true);
+        if (isRegionalOrganizer) {
+            setSelectedDate(clickInfo.date);
+            setCreateModalOpen(true); // Only allow opening CRUD modal for Regional Organizers
+        } else {
+            console.log("User is not authorized to create events");
+        }
     };
 
+    // Modify handleEventClick to check role
     const handleEventClick = (clickInfo) => {
         setSelectedEvent(clickInfo.event);
+
+        if (isRegionalOrganizer) {
+            setCreateModalOpen(true); // Allow editing for Regional Organizers
+        } else {
+            console.log("User can only view event details");
+        }
     };
 
     const handleOrganizerChange = (value) => {
@@ -76,16 +92,15 @@ export const useCalendarPage = () => {
         }
     };
 
-    console.log('events Data', selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd)
+    console.log('events Data', selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
     const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
-    console.log('events', events)
+    console.log('events', events);
     const transformedEvents = transformEvents(events);
-    console.log('transformEvents', transformedEvents)
-    console.log('enteringfitlerEvent', transformedEvents, activeCategories)
+    console.log('transformEvents', transformedEvents);
+    console.log('enteringfitlerEvent', transformedEvents, activeCategories);
 
     const filteredEvents = filterEvents(transformedEvents, activeCategories, selectedOrganizers);
-    console.log('filteredEvents', filteredEvents)
-
+    console.log('filteredEvents', filteredEvents);
 
     const coloredFilteredEvents = filteredEvents.map(event => {
         const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
@@ -125,11 +140,10 @@ export const useCalendarPage = () => {
         handlePrev,
         handleNext,
         handleToday,
-        handleDateClick,
-        handleEventClick,
+        handleDateClick, // Updated to be role-aware
+        handleEventClick, // Updated to be role-aware
         handleEventCreated,
         handleOrganizerChange,
-
         coloredFilteredEvents
     };
 };
