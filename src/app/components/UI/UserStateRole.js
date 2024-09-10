@@ -6,15 +6,15 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 const UserStateRole = () => {
-    const { user, roles, loading, error, logOut } = useAuth(); // Get roles instead of role
+    const { user, loading, error, logOut } = useAuth(); // Get roles instead of role
     const [selectedRole, setSelectedRole] = useState('');
 
     // Set the initial selected role when roles are loaded
     useEffect(() => {
-        if (roles && roles.length > 0) {
-            setSelectedRole(roles[0]); // Set the first role as default
+        if (user && user.roles && user.roles.length > 0) {
+            setSelectedRole(user.roles[0].roleName); // Set the first role as default
         }
-    }, [roles]);
+    }, [user]);
 
     const handleRoleChange = (event) => {
         setSelectedRole(event.target.value);
@@ -38,9 +38,9 @@ const UserStateRole = () => {
                             onChange={handleRoleChange}
                             label="Role"
                         >
-                            {roles.map((role) => (
-                                <MenuItem key={role} value={role}>
-                                    {role}
+                            {user.roles.map((role) => (
+                                <MenuItem key={role._id} value={role.roleName}>
+                                    {role.roleName}
                                 </MenuItem>
                             ))}
                         </Select>

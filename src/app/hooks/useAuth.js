@@ -5,7 +5,6 @@ import axios from 'axios';
 
 export const useAuth = () => {
     const [user, setUser] = useState(null);
-    const [roles, setRoles] = useState([]);  // Updated to manage multiple roles
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,15 +13,12 @@ export const useAuth = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
-                setUser(currentUser);
-
-                // If user is signing up, set the flag and skip fetching user roles
+                // If user is signing up, set the flag and skip fetching user data
                 if (!signUpOngoing.current) {
-                    await fetchUserRoles(currentUser.uid);  // Fetch user roles
+                    await fetchSetUserData(currentUser);
                 }
             } else {
                 setUser(null);
-                setRoles([]);  // Clear roles on logout
             }
             setLoading(false);
         });
@@ -30,19 +26,23 @@ export const useAuth = () => {
         return () => unsubscribe();
     }, []);
 
-    const fetchUserRoles = async (firebaseUserId) => {
+    const fetchSetUserData = async (currentUser) => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${currentUser.uid}`);
 
             if (response.status === 200) {
-                setRoles(response.data.roleIds.map(role => role.roleName));  // Set the list of role names
-            } else {
-                setRoles([]);
+                setUser({
+                    ...currentUser,
+                    roles: response.data.roleIds,
+                    firstName: response.data.localUserInfo.firstName,
+                    lastName: response.data.localUserInfo.lastName,
+                    phoneNumber: response.data.localUserInfo.phoneNumber,
+                    photoUrl: response.data.localUserInfo.photoUrl
+                });
             }
         } catch (err) {
             console.error('Error fetching user roles:', err);
             setError('Failed to fetch user roles');
-            setRoles([]);
         }
     };
 
@@ -85,12 +85,12 @@ export const useAuth = () => {
             } catch (error) {
                 if (error.response && error.response.status === 404) {
                     // User does not exist, create a new one with POST request
-                    const roleResponse = await axios.post(
+                    const response = await axios.post(
                         `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
                         userData
                     );
     
-                    if (roleResponse.status !== 204) {
+                    if (response.status !== 204) {
                         throw new Error('Failed to create user in backend');
                     }
                 } else {
@@ -99,8 +99,7 @@ export const useAuth = () => {
             }
     
             signUpOngoing.current = false;
-            setUser(result.user);
-            await fetchUserRoles(firebaseUserId);  // Fetch and set the user's roles after signup
+            await fetchSetUserData(result.user);  // Fetch and set the user's roles after signup
             setLoading(false);
             return result.user;
         } catch (err) {
@@ -115,12 +114,11 @@ export const useAuth = () => {
         try {
             await signOut(auth);
             setUser(null);
-            setRoles([]);  // Clear roles on logout
         } catch (err) {
             setError(err.message);
             console.error('Error logging out:', err);
         }
     };
 
-    return { user, roles, loading, error, authenticateWithGoogle, logOut };
+    return { user, loading, error, authenticateWithGoogle, logOut };
 };
