@@ -6,28 +6,35 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import useOrganizers from '@/hooks/useOrganizers';
 import { useRegions } from '@/hooks/useRegions';
-import { useAuth } from '@/hooks/useAuth';  // Import for role handling
+import { useActiveRole } from '@/hooks/useActiveRole';
+//import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarPage = () => {
+    // Use the new useActiveRole hook
+    const {
+        selectedRole,
+        isAnonymous,
+        isRegionalOrganizer,
+        isRegionalAdmin,
+        isSystemOwner,
+        isNamedUser
+    } = useActiveRole();  // Handle role-based logic here
+
     const regions = useRegions();
     const categories = useCategories();
     const [activeCategories, setActiveCategories] = useState([]);
     const [selectedOrganizers, setSelectedOrganizers] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-    const [isNoRegionSelectedModalOpen, setNoRegionSelectedModalOpen] = useState(false);  // New state for NoRegionSelected modal
+    const [isNoRegionSelectedModalOpen, setNoRegionSelectedModalOpen] = useState(false);
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [selectedDivision, setSelectedDivision] = useState(null);
     const [selectedCity, setSelectedCity] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [calendarStart, setCalendarStart] = useState(null);
     const [calendarEnd, setCalendarEnd] = useState(null);
-
     const calendarRef = useRef(null);
 
-    const { user, roles } = useAuth();
-    const selectedRole = roles[0] || "";
-    const isRegionalOrganizer = selectedRole === "RegionalOrganizer";
 
     // Boolean to track if a region has been selected
     const regionSelected = !!selectedRegion;

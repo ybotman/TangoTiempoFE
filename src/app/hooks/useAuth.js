@@ -5,7 +5,8 @@ import axios from 'axios';
 
 export const useAuth = () => {
     const [user, setUser] = useState(null);
-    const [roles, setRoles] = useState([]);
+    const [availableRoles, setAvailableRoles] = useState([]);  // Updated name for clarity
+    const [selectedRole, setSelectedRole] = useState('');  // Manage selected role globally
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -15,19 +16,40 @@ export const useAuth = () => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 setUser(currentUser);
-
                 if (!signUpOngoing.current) {
-                    await fetchUserRoles(currentUser.uid);  // Fetch user roles
+                    await fetchUserRoles(currentUser.uid);
                 }
             } else {
                 setUser(null);
-                setRoles([]);  // Clear roles on logout
+                setAvailableRoles([]);
+                setSelectedRole('');  // Reset role on logout
             }
             setLoading(false);
         });
 
         return () => unsubscribe();
     }, []);
+
+    const fetchUserRoles = async (firebaseUserId) => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
+            if (response.status === 200) {
+                const mappedRoles = response.data.roleIds.map(role => ({
+                    roleId: role._id,
+                    roleName: role.roleName,
+                }));
+                setAvailableRoles(mappedRoles);
+                setSelectedRole(mappedRoles[0]?.roleName || "");  // Automatically select the first role
+            } else {
+                setAvailableRoles([]);
+                setSelectedRole('');
+            }
+        } catch (err) {
+            setError('Failed to fetch user roles');
+            setAvailableRoles([]);
+            setSelectedRole('');
+        }
+    };
 
     // Google Authentication function
     const authenticateWithGoogle = async () => {
@@ -43,34 +65,26 @@ export const useAuth = () => {
         }
     };
 
-    const fetchUserRoles = async (firebaseUserId) => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
-            if (response.status === 200) {
-                const mappedRoles = response.data.roleIds.map(role => ({
-                    roleId: role._id,
-                    roleName: role.roleName,
-                }));
-                setRoles(mappedRoles);
-            } else {
-                setRoles([]);
-            }
-        } catch (err) {
-            setError('Failed to fetch user roles');
-            setRoles([]);
-        }
-    };
-
     const logOut = async () => {
         try {
             await signOut(auth);
             setUser(null);
-            setRoles([]);
-            console.log("User logged out.");
+            setAvailableRoles([]);
+            setSelectedRole('');  // Reset role on logout
         } catch (err) {
             setError(err.message);
         }
     };
 
-    return { user, roles, setRoles, loading, error, logOut, authenticateWithGoogle };
+    return {
+        user,
+        availableRoles,
+        setAvailableRoles,
+        selectedRole,
+        setSelectedRole,
+        loading,
+        error,
+        logOut,
+        authenticateWithGoogle
+    };
 };

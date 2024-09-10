@@ -18,27 +18,32 @@ import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
-import NoRegionSelectedModal from '@/components/Modals/NoRegionSelectedModal';  // Import modal
+import NoRegionSelectedModal from '@/components/Modals/NoRegionSelectedModal';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
-import { useAuth } from '@/hooks/useAuth';  // Import for role handling
+import { useActiveRole } from '@/hooks/useActiveRole';
+
 
 const CalendarPage = () => {
-  const { user, roles } = useAuth(); // Extract user and roles from authentication
-  const selectedRole = roles[0] || "isAnonymous"; // Assume first role if available
-  const isAnonymous = selectedRole === "isAnonymous"; // Check if the user is a Regional Organizer
-  const isRegionalOrganizer = selectedRole === "RegionalOrganizer"; // Check if the user is a Regional Organizer
-  const isRegionalAdmin = selectedRole === "RegionalAdmin"; // Check if the user is a Regional Organizer
-  const isSystemOwner = selectedRole === "SystemOwner";
-  const isNamedUser = selectedRole === "NamedUser";
-  console.log("ROLE:", selectedRole);
+  // role stuff :
+  // Get the role logic from useActiveRole
+  const {
+    selectedRole,
+    isAnonymous,
+    isRegionalOrganizer,
+    isRegionalAdmin,
+    isSystemOwner,
+    isNamedUser
+  } = useActiveRole();  // Use the custom hook to get roles and booleans
+
   console.log({
-    user: !!user,  // Converts the `user` object to a boolean (true if not null, false if null)
+    AR: selectedRole,
     AU: isAnonymous,
     NU: isNamedUser,
     RO: isRegionalOrganizer,
     RA: isRegionalAdmin,
     SO: isSystemOwner
   });
+
   const {
     regions,
     categories,
@@ -46,7 +51,7 @@ const CalendarPage = () => {
     selectedOrganizers,
     selectedEvent,
     isCreateModalOpen,
-    isNoRegionSelectedModalOpen,  // Boolean for region modal
+    isNoRegionSelectedModalOpen,
     selectedRegion,
     selectedDivision,
     selectedCity,
@@ -58,7 +63,7 @@ const CalendarPage = () => {
     setSelectedCity,
     setCreateModalOpen,
     setSelectedEvent,
-    setNoRegionSelectedModalOpen,  // Close modal function
+    setNoRegionSelectedModalOpen,
     handleDatesSet,
     handleEventCreated,
     handleCategoryChange,
