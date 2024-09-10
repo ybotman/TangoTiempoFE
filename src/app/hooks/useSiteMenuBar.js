@@ -3,7 +3,7 @@ import useOrganizers from '@/hooks/useOrganizers';  // Import the organizer hook
 import { useAuth } from '@/hooks/useAuth';  // Import the useAuth hook for role-based logic
 
 export const useSiteMenuBar = ({
-    regions, setSelectedRegion, setSelectedDivision, setSelectedCity, handleOrganizerChange
+    setSelectedRegion, setSelectedDivision, setSelectedCity, handleOrganizerChange
 }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [sortedCategories, setSortedCategories] = useState([]);
