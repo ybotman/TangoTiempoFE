@@ -20,7 +20,8 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import NoRegionSelectedModal from '@/components/Modals/NoRegionSelectedModal';
-import { useCalendarPage } from '@/hooks/useCalendarPage';
+import RegionalOrgDateClickModal from '@/components/Modals/RegionalOrgDateClickModal';
+import { useCalendarPage } from '@/hooks/useCalendarPage';  // Make sure this hook is import
 import { useAuth } from '@/hooks/useAuth';
 
 
@@ -48,6 +49,8 @@ const CalendarPage = () => {
     selectedEvent,
     isCreateModalOpen,
     isNoRegionSelectedModalOpen,
+    isRegionalOrgDateClickModalOpen,  // Ensure this is correctly referenced
+    setRegionalOrgDateClickModalOpen,
     selectedRegion,
     selectedDivision,
     selectedCity,
@@ -153,11 +156,21 @@ const CalendarPage = () => {
         )
       )}
 
-      {/* Show NoRegionSelectedModal when no region is selected */}
+
+      {/* RegionalOrgDateClickModal */}
+      {isRegionalOrgDateClickModalOpen && (
+        <RegionalOrgDateClickModal
+          open={isRegionalOrgDateClickModalOpen}
+          onClose={() => setRegionalOrgDateClickModalOpen(false)}  // Close modal
+          selectedDate={selectedDate}
+        />
+      )}
+
+      {/* NoRegionSelectedModal */}
       {isNoRegionSelectedModalOpen && (
         <NoRegionSelectedModal
           open={isNoRegionSelectedModalOpen}
-          onClose={() => setNoRegionSelectedModalOpen(false)}
+          onClose={() => setNoRegionSelectedModalOpen(false)}  // Close modal
         />
       )}
     </div>

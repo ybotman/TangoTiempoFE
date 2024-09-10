@@ -15,7 +15,7 @@ const SiteMenuBar = ({
     activeCategories, handleCategoryChange, categories, selectedOrganizer, handleOrganizerChange
 }) => {
     const {
-        anchorEl, handleMenuOpen, handleMenuClose, sortedCategories, handleSortedCategories,
+        anchorEl, handleMenuOpen, handleMenuClose, handleSortedCategories,
         organizers, selectedRole, availableRoles, user, logOut,
         handleRegionChange, handleDivisionChange, handleCityChange, handleRoleChange
     } = useSiteMenuBar({

@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import useOrganizers from '@/hooks/useOrganizers';  // Import the organizer hook
-import { useAuth } from '@/hooks/useAuth';  // Import the useAuth hook for role-based logic
+import useOrganizers from '@/hooks/useOrganizers';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useSiteMenuBar = ({
     setSelectedRegion, setSelectedDivision, setSelectedCity, handleOrganizerChange
 }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [sortedCategories, setSortedCategories] = useState([]);
-    const organizers = useOrganizers();  // Fetch organizers
-    const { user, selectedRole, setSelectedRole, availableRoles, logOut } = useAuth();  // Destructure role logic
+    const [isNoRegionSelectedModalOpen, setNoRegionSelectedModalOpen] = useState(false); // Add state for modal
+    const organizers = useOrganizers();
+    const { user, selectedRole, setSelectedRole, availableRoles, logOut } = useAuth();
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -23,10 +24,15 @@ export const useSiteMenuBar = ({
     };
 
     const handleRegionChange = (event) => {
-        setSelectedRegion(event.target.value);
-        setSelectedDivision('');
-        setSelectedCity('');
-        handleOrganizerChange('');  // Reset organizer when the region changes
+        const region = event.target.value;
+        if (!region) {
+            setNoRegionSelectedModalOpen(true);  // Open modal if no region selected
+        } else {
+            setSelectedRegion(region);
+            setSelectedDivision('');
+            setSelectedCity('');
+            handleOrganizerChange('');
+        }
     };
 
     const handleDivisionChange = (event) => {
@@ -39,7 +45,7 @@ export const useSiteMenuBar = ({
     };
 
     const handleRoleChange = (event) => {
-        setSelectedRole(event.target.value);  // Change the role when selected from the dropdown
+        setSelectedRole(event.target.value);
     };
 
     return {
@@ -47,6 +53,8 @@ export const useSiteMenuBar = ({
         setAnchorEl,
         sortedCategories,
         setSortedCategories,
+        isNoRegionSelectedModalOpen, // Return modal state
+        setNoRegionSelectedModalOpen, // Return modal setter
         organizers,
         user,
         selectedRole,

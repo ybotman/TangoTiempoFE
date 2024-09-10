@@ -23,6 +23,7 @@ export const useCalendarPage = () => {
     const [selectedOrganizers, setSelectedOrganizers] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+    const [isRegionalOrgDateClickModalOpen, setRegionalOrgDateClickModalOpen] = useState(false);
     const [isNoRegionSelectedModalOpen, setNoRegionSelectedModalOpen] = useState(false);
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [selectedDivision, setSelectedDivision] = useState(null);
@@ -31,6 +32,7 @@ export const useCalendarPage = () => {
     const [calendarStart, setCalendarStart] = useState(null);
     const [calendarEnd, setCalendarEnd] = useState(null);
     const calendarRef = useRef(null);
+
 
     useEffect(() => {
         console.log("Selected Role in useCalendarPage:", selectedRole);
@@ -72,13 +74,18 @@ export const useCalendarPage = () => {
         calendarApi.today();
     };
 
-    // Modify handleDateClick to check region selection and role
+
+    // Handle date click event
     const handleDateClick = (clickInfo) => {
-        if (!regionSelected) {
-            setNoRegionSelectedModalOpen(true); // Open modal if no region is selected
-        } else if (isRegionalOrganizer) {
-            setSelectedDate(clickInfo.date);
-            setCreateModalOpen(true);
+        if (selectedRole === 'RegionalOrganizer') {  // Check if the user is a Regional Organizer
+            if (!selectedRegion) {  // Check if a region is selected
+                setNoRegionSelectedModalOpen(true);  // Open NoRegionSelectedModal if no region selected
+            } else {
+                setSelectedDate(clickInfo.dateStr);  // Set selected date
+                setRegionalOrgDateClickModalOpen(true);  // Open RegionalOrgDateClickModal
+            }
+        } else {
+            console.log('User is not a Regional Organizer.');
         }
     };
 
