@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button, Stack, Box, Typography, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -9,8 +7,8 @@ const UserStateRole = () => {
 
     const handleRoleChange = (event) => {
         const newRole = event.target.value;
+        console.log("Role changed to:", newRole);  // Debugging
         setSelectedRole(newRole);  // Update global selected role
-        console.log("Role changed to:", newRole);
     };
 
     return (

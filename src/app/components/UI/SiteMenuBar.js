@@ -1,54 +1,31 @@
-import React, { useState } from 'react';
+"use client";  // Mark it as a client component
+
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-import UserStateRole from './UserStateRole';
+import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';  // Import the new hook
 import PostFilter from '@/components/UI/PostFilter';
-import useOrganizers from '@/hooks/useOrganizers';  // Import the organizer hook
 
 const SiteMenuBar = ({
     regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
     activeCategories, handleCategoryChange, categories, selectedOrganizer, handleOrganizerChange
 }) => {
-    //console.log("Props in PostFilter: ", { categories, activeCategories, handleCategoryChange });
-    const [anchorEl, setAnchorEl] = useState(null);
-    const organizers = useOrganizers(selectedRegion);  // Fetch organizers based on the selected region
-    const [sortedCategories, setSortedCategories] = useState(categories);  // Define state for sorted categories sort not wo
-    //  const [setSortedCategories] = useState(categories);  // Define state for sorted categories
+    const {
+        anchorEl, handleMenuOpen, handleMenuClose, sortedCategories, handleSortedCategories,
+        organizers, selectedRole, availableRoles, user, logOut,
+        handleRegionChange, handleDivisionChange, handleCityChange, handleRoleChange
+    } = useSiteMenuBar({
+        regions, setSelectedRegion, setSelectedDivision, setSelectedCity, handleOrganizerChange
+    });
 
-
-    const handleMenuOpen = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleSortedCategories = (sortedCategories) => {
-        // Update state with sorted categories
-        //console.log('Received sorted categories:', sortedCategories); // this is good and working
-        setSortedCategories(sortedCategories);
-    };
-
-    const handleRegionChange = (event) => {
-        setSelectedRegion(event.target.value);
-        setSelectedDivision('');
-        setSelectedCity('');
-        handleOrganizerChange('');  // Reset organizer when the region changes
-    };
-
-    const handleDivisionChange = (event) => {
-        setSelectedDivision(event.target.value);
-        setSelectedCity('');
-    };
-
-    const handleCityChange = (event) => {
-        setSelectedCity(event.target.value);
-    };
+    // Ensure that the component re-renders when selectedRole changes
+    useEffect(() => {
+        console.log("Selected Role changed:", selectedRole);  // Debug to ensure role change is being logged
+    }, [selectedRole]);  // This effect runs every time `selectedRole` changes
 
     return (
         <Box sx={{ width: '100%', padding: '0 0' }}>
@@ -63,11 +40,18 @@ const SiteMenuBar = ({
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                     >
-                        {selectedRegion && (
-                            <MenuItem>Select Organizers</MenuItem>
+                        {/* Conditionally show menu items based on role */}
+                        {selectedRole === 'NamedUser' && <MenuItem>User Settings (TBD)</MenuItem>}
+                        {selectedRole === 'RegionalOrganizer' && <MenuItem>Organizer Settings (TBD)</MenuItem>}
+                        {selectedRole === 'RegionalAdmin' && (
+                            <>
+                                <MenuItem>Add Organizer (TBD)</MenuItem>
+                                <MenuItem>Add Locations (TBD)</MenuItem>
+                            </>
                         )}
-                        <MenuItem>Admin Page</MenuItem>
-                        <MenuItem>Request Form</MenuItem>
+                        {selectedRole === 'SystemOwner' && <MenuItem>Admin Dashboard</MenuItem>}
+                        {/* Always available items */}
+                        <MenuItem>Organizer Request</MenuItem>
                         <MenuItem>About</MenuItem>
                     </Menu>
 
@@ -108,7 +92,7 @@ const SiteMenuBar = ({
                         </select>
                     )}
 
-                    {/* Organizer Dropdown - Only visible if region is selected */}
+                    {/* Organizer Dropdown */}
                     {selectedRegion && organizers.length > 0 && (
                         <select value={selectedOrganizer || ""} onChange={(e) => handleOrganizerChange(e.target.value)}>
                             <option value="">Select Organizer</option>
@@ -122,7 +106,19 @@ const SiteMenuBar = ({
                     )}
                 </Box>
 
-                <UserStateRole />
+                {/* Role Dropdown - User can switch roles */}
+                {user && availableRoles.length > 0 && (
+                    <Box sx={{ marginLeft: 2 }}>
+                        <select value={selectedRole} onChange={handleRoleChange}>
+                            {availableRoles.map(role => (
+                                <option key={role.roleId} value={role.roleName}>
+                                    {role.roleName}
+                                </option>
+                            ))}
+                        </select>
+                        <button onClick={logOut}>Log Out</button>
+                    </Box>
+                )}
             </Box>
 
             {/* Bottom row with Category Filter */}
@@ -130,7 +126,7 @@ const SiteMenuBar = ({
                 <PostFilter
                     activeCategories={activeCategories}
                     handleCategoryChange={handleCategoryChange}
-                    categories={categories} // was sorted categories and is not workoing
+                    categories={categories}
                     selectedOrganizer={selectedOrganizer}
                     handleSortedCategories={handleSortedCategories}
                 />

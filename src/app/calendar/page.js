@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -20,29 +21,24 @@ import EventDetailsModal from '@/components/Modals/EventDetailsModal';
 import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import NoRegionSelectedModal from '@/components/Modals/NoRegionSelectedModal';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
-import { useActiveRole } from '@/hooks/useActiveRole';
+import { useAuth } from '@/hooks/useAuth';
 
 
 const CalendarPage = () => {
-  // role stuff :
-  // Get the role logic from useActiveRole
+
   const {
     selectedRole,
-    isAnonymous,
     isRegionalOrganizer,
-    isRegionalAdmin,
-    isSystemOwner,
-    isNamedUser
-  } = useActiveRole();  // Use the custom hook to get roles and booleans
+    //   isRegionalAdmin,
+    //   isSystemOwner,
+    //   isNamedUser
+    // other roles ybotman
+  } = useAuth();  // Use the custom hook to get roles and booleans
 
-  console.log({
-    AR: selectedRole,
-    AU: isAnonymous,
-    NU: isNamedUser,
-    RO: isRegionalOrganizer,
-    RA: isRegionalAdmin,
-    SO: isSystemOwner
-  });
+  useEffect(() => {
+    console.log("Selected Role:", selectedRole);  // Logs when the role changes
+  }, [selectedRole]);
+
 
   const {
     regions,

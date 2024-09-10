@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
 
-const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer, handleSortedCategories }) => {
+const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer }) => {   //, handleSortedCategories  ybotman to add back!
     const categoryOrder = ['Milonga', 'Practica', 'Festival', 'Workshop', 'Class', 'Virtual', 'Trip'];
     const defaultactiveCategories = ['Milonga', 'Practica', 'Workshop', 'Festival'];
     const [activeCategories, setActiveCategories] = useState([]);
@@ -23,7 +23,7 @@ const PostFilter = ({ categories, handleCategoryChange, selectedOrganizer, handl
             });
 
             //console.log('Final sorted categories:', sortedCategories);
-            handleSortedCategories(sortedCategories);
+            //          handleSortedCategories(sortedCategories);
 
             // Set initial categories based on default selections
             const initialCategories = sortedCategories

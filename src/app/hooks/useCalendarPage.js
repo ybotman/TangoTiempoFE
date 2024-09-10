@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { filterEvents } from '@/utils/filterEvents';
 import { transformEvents } from '@/utils/transformEvents';
@@ -6,19 +6,16 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import useOrganizers from '@/hooks/useOrganizers';
 import { useRegions } from '@/hooks/useRegions';
-import { useActiveRole } from '@/hooks/useActiveRole';
-//import { useAuth } from '@/hooks/useAuth';
+//import { useActiveRole } from '@/hooks/useActiveRole';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarPage = () => {
     // Use the new useActiveRole hook
     const {
         selectedRole,
-        isAnonymous,
         isRegionalOrganizer,
-        isRegionalAdmin,
-        isSystemOwner,
-        isNamedUser
-    } = useActiveRole();  // Handle role-based logic here
+
+    } = useAuth();  // Handle role-based logic here
 
     const regions = useRegions();
     const categories = useCategories();
@@ -35,6 +32,9 @@ export const useCalendarPage = () => {
     const [calendarEnd, setCalendarEnd] = useState(null);
     const calendarRef = useRef(null);
 
+    useEffect(() => {
+        console.log("Selected Role in useCalendarPage:", selectedRole);
+    }, [selectedRole]);
 
     // Boolean to track if a region has been selected
     const regionSelected = !!selectedRegion;
