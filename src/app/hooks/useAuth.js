@@ -59,31 +59,46 @@ export const useAuth = () => {
             signUpOngoing.current = true;
             const result = await signInWithPopup(auth, provider);
             const firebaseUserId = result.user.uid;
-
+            const { displayName, phoneNumber, photoURL } = result.user;
+    
+            // Derive firstName and lastName from displayName
+            let firstName = '';
+            let lastName = '';
+            if (displayName) {
+                const nameParts = displayName.split(' ');
+                firstName = nameParts[0] || '';
+                lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            }
+    
+            // Prepare user data object
+            const userData = {
+                firebaseUserId
+            };
+            if (firstName) userData.firstName = firstName;
+            if (lastName) userData.lastName = lastName;
+            if (phoneNumber) userData.phoneNumber = phoneNumber;
+            if (photoURL) userData.photoUrl = photoURL;
+    
             try {
                 // Check if the user already exists in the backend
                 await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`);
-
-                // If no error is thrown, the user already exists, and no need to create a new one
             } catch (error) {
-                // If the user does not exist, the GET request will throw an error, so we proceed with the POST request
                 if (error.response && error.response.status === 404) {
+                    // User does not exist, create a new one with POST request
                     const roleResponse = await axios.post(
-                        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`, 
-                        { 
-                            firebaseUserId: firebaseUserId, 
-                        });
-
+                        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
+                        userData
+                    );
+    
                     if (roleResponse.status !== 204) {
-                        throw new Error('Failed to assign role in backend');
+                        throw new Error('Failed to create user in backend');
                     }
                 } else {
-                    throw error;  // Re-throw unexpected errors
+                    throw error;
                 }
             }
-
+    
             signUpOngoing.current = false;
-
             setUser(result.user);
             await fetchUserRoles(firebaseUserId);  // Fetch and set the user's roles after signup
             setLoading(false);
@@ -94,7 +109,7 @@ export const useAuth = () => {
             signUpOngoing.current = false;
             return null;
         }
-    };
+    };    
 
     const logOut = async () => {
         try {
