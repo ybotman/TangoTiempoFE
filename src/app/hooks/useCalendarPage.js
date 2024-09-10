@@ -6,14 +6,15 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import useOrganizers from '@/hooks/useOrganizers';
 import { useRegions } from '@/hooks/useRegions';
-//import { useActiveRole } from '@/hooks/useActiveRole';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarPage = () => {
-    // Use the new useActiveRole hook
     const {
         selectedRole,
         isRegionalOrganizer,
+        isNamedUser,
+        isSystemOwner,
+        isAnonymous,
 
     } = useAuth();  // Handle role-based logic here
 
@@ -34,12 +35,14 @@ export const useCalendarPage = () => {
     const calendarRef = useRef(null);
 
 
+    // Ensure that the component re-renders when selectedRole changes
     useEffect(() => {
-        console.log("Selected Role in useCalendarPage:", selectedRole);
+        console.log("Selected Role changed:", selectedRole);
     }, [selectedRole]);
 
     // Boolean to track if a region has been selected
-    const regionSelected = !!selectedRegion;
+    //const regionSelected = !!selectedRegion;
+    const isRegionSelected = !!selectedRegion;
 
     const handleDatesSet = (rangeInfo) => {
         setCalendarStart(rangeInfo.start);
@@ -77,8 +80,9 @@ export const useCalendarPage = () => {
 
     // Handle date click event
     const handleDateClick = (clickInfo) => {
-        if (selectedRole === 'RegionalOrganizer') {  // Check if the user is a Regional Organizer
-            if (!selectedRegion) {  // Check if a region is selected
+        console.log('handleDateClick role', selectedRole);
+        if (isRegionalOrganizer) {
+            if (!isRegionSelected) {  // Check if a region is selected
                 setNoRegionSelectedModalOpen(true);  // Open NoRegionSelectedModal if no region selected
             } else {
                 setSelectedDate(clickInfo.dateStr);  // Set selected date
@@ -91,7 +95,7 @@ export const useCalendarPage = () => {
 
     // Modify handleEventClick to check region selection and role
     const handleEventClick = (clickInfo) => {
-        if (!regionSelected) {
+        if (!isRegionSelected) {
             setNoRegionSelectedModalOpen(true); // Open modal if no region is selected
         } else {
             setSelectedEvent(clickInfo.event);
@@ -159,6 +163,6 @@ export const useCalendarPage = () => {
         handleEventCreated,
         handleOrganizerChange,
         coloredFilteredEvents,
-        regionSelected  // Return the boolean for region selection
+        isRegionSelected  // Return the boolean for region selection
     };
 };

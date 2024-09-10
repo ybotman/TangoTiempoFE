@@ -9,6 +9,9 @@ import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';  // Import the new hook
 import PostFilter from '@/components/UI/PostFilter';
+//import RoleContext from '@/Context/RoleContext';  // Import the context
+
+
 
 const SiteMenuBar = ({
     regions, selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity,
@@ -24,8 +27,8 @@ const SiteMenuBar = ({
 
     // Ensure that the component re-renders when selectedRole changes
     useEffect(() => {
-        console.log("Selected Role changed:", selectedRole);  // Debug to ensure role change is being logged
-    }, [selectedRole]);  // This effect runs every time `selectedRole` changes
+        console.log("Selected Role changed:", selectedRole);
+    }, [selectedRole]);
 
     return (
         <Box sx={{ width: '100%', padding: '0 0' }}>
