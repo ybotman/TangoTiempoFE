@@ -131,17 +131,6 @@ export const useAuth = () => {
     }
   };
 
-  console.log("Returning", {
-    user,
-    availibleRoles,
-    selectedRole,
-    AN: isAnonymous,
-    RO: isRegionalOrganizer,
-    RA: isRegionalAdmin,
-    SO: isSystemOwner,
-    NU: isNamedUser,
-  });
-
   return {
     user,
     availibleRoles,

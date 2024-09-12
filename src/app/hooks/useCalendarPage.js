@@ -89,7 +89,7 @@ export const useCalendarPage = () => {
     }
   };
 
-  //    console.log('events Data', selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd)/
+      console.log('events Data', selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd)
   const { events, refreshEvents } = useEvents(
     selectedRegion,
     selectedDivision,
@@ -97,17 +97,17 @@ export const useCalendarPage = () => {
     calendarStart,
     calendarEnd
   );
-  //    console.log('events', events)
+      console.log('events', events)
   const transformedEvents = transformEvents(events);
-  //   console.log('transformEvents', transformedEvents)
-  //   console.log('enteringfitlerEvent', transformedEvents, activeCategories)
+     console.log('transformEvents', transformedEvents)
+     console.log('enteringfitlerEvent', transformedEvents, activeCategories)
 
   const filteredEvents = filterEvents(
     transformedEvents,
     activeCategories,
     selectedOrganizers
   );
-  // console.log('filteredEvents', filteredEvents)
+   console.log('filteredEvents', filteredEvents)
 
   const coloredFilteredEvents = filteredEvents.map((event) => {
     const categoryColor =
@@ -121,16 +121,6 @@ export const useCalendarPage = () => {
     };
   });
 
-  console.log("Returning", {
-    user,
-    availibleRoles,
-    selectedRole,
-    AN: isAnonymous,
-    RO: isRegionalOrganizer,
-    RA: isRegionalAdmin,
-    SO: isSystemOwner,
-    NU: isNamedUser,
-  });
 
   return {
     regions,

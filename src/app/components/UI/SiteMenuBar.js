@@ -54,17 +54,6 @@ const SiteMenuBar = ({
     setAnchorEl("");
   };
 
-  console.log("Returning", {
-    user,
-    availibleRoles,
-    selectedRole,
-    AN: isAnonymous,
-    RO: isRegionalOrganizer,
-    RA: isRegionalAdmin,
-    SO: isSystemOwner,
-    NU: isNamedUser,
-  });
-
   return (
     <Box sx={{ width: "100%", padding: "0 0" }}>
       {/* Top row with main menu items and user state */}
