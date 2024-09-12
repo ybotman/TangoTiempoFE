@@ -49,6 +49,7 @@ export const useSiteMenuBar = () => {
     setSelectedCity(event.target.value);
   };
 
+  /*  
   console.log("Returning", {
     user,
     availibleRoles,
@@ -59,6 +60,8 @@ export const useSiteMenuBar = () => {
     SO: isSystemOwner,
     NU: isNamedUser,
   });
+*/
+
   return {
     user,
     availibleRoles,
