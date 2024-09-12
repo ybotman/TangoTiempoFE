@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useOrganizers from '@/hooks/useOrganizers';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -9,7 +9,29 @@ export const useSiteMenuBar = ({
     const [sortedCategories, setSortedCategories] = useState([]);
     const [isNoRegionSelectedModalOpen, setNoRegionSelectedModalOpen] = useState(false); // Add state for modal
     const organizers = useOrganizers();
-    const { user, selectedRole, setSelectedRole, availableRoles, logOut } = useAuth();
+    const {
+        user,
+        selectedRole,
+        setSelectedRole,
+        availableRoles,
+        logOut,
+        isAnonymous,
+        isRegionalOrganizer,
+        isRegionalAdmin,
+        isSystemOwner,
+        isNamedUser
+    } = useAuth();
+
+    useEffect(() => {
+        console.log('useEffect returning', {
+            selectedRole,
+            AN: isAnonymous,
+            RO: isRegionalOrganizer,
+            RA: isRegionalAdmin,
+            SO: isSystemOwner,
+            NU: isNamedUser
+        });
+    }, [isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser, selectedRole]);
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -48,6 +70,15 @@ export const useSiteMenuBar = ({
         setSelectedRole(event.target.value);
     };
 
+    console.log('useSiteMenuBar returning', {
+        selectedRole,
+        AN: isAnonymous,
+        RO: isRegionalOrganizer,
+        RA: isRegionalAdmin,
+        SO: isSystemOwner,
+        NU: isNamedUser
+    });
+
     return {
         anchorEl,
         setAnchorEl,
@@ -57,9 +88,13 @@ export const useSiteMenuBar = ({
         setNoRegionSelectedModalOpen, // Return modal setter
         organizers,
         user,
-        selectedRole,
         availableRoles,
         logOut,
+        isNamedUser,            // Ensure this is returned
+        isRegionalOrganizer,     // Ensure this is returned
+        isRegionalAdmin,         // Ensure this is returned
+        isSystemOwner,
+        selectedRole,
         handleMenuOpen,
         handleMenuClose,
         handleSortedCategories,

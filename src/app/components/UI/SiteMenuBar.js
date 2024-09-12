@@ -1,13 +1,13 @@
 "use client";  // Mark it as a client component
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';  // Import the new hook
+import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';  // Import the hook
 import PostFilter from '@/components/UI/PostFilter';
 
 const SiteMenuBar = ({
@@ -16,16 +16,20 @@ const SiteMenuBar = ({
 }) => {
     const {
         anchorEl, handleMenuOpen, handleMenuClose, handleSortedCategories,
-        organizers, selectedRole, availableRoles, user, logOut,
+        organizers, availableRoles, user, logOut, selectedRole, isAnonymous, isNamedUser, isRegionalOrganizer, isRegionalAdmin, isSystemOwner,
         handleRegionChange, handleDivisionChange, handleCityChange, handleRoleChange
     } = useSiteMenuBar({
         regions, setSelectedRegion, setSelectedDivision, setSelectedCity, handleOrganizerChange
     });
 
-    // Ensure that the component re-renders when selectedRole changes
-    useEffect(() => {
-        console.log("Selected Role changed:", selectedRole);  // Debug to ensure role change is being logged
-    }, [selectedRole]);  // This effect runs every time `selectedRole` changes
+    console.log('SiteMenuBar knows:', {
+        selectedRole,
+        AN: isAnonymous,
+        RO: isRegionalOrganizer,
+        RA: isRegionalAdmin,
+        SO: isSystemOwner,
+        NU: isNamedUser
+    });
 
     return (
         <Box sx={{ width: '100%', padding: '0 0' }}>
@@ -40,16 +44,16 @@ const SiteMenuBar = ({
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                     >
-                        {/* Conditionally show menu items based on role */}
-                        {selectedRole === 'NamedUser' && <MenuItem>User Settings (TBD)</MenuItem>}
-                        {selectedRole === 'RegionalOrganizer' && <MenuItem>Organizer Settings (TBD)</MenuItem>}
-                        {selectedRole === 'RegionalAdmin' && (
+                        {/* Conditionally show menu items based on role booleans */}
+                        {isNamedUser && <MenuItem>User Settings (TBD)</MenuItem>}
+                        {isRegionalOrganizer && <MenuItem>Organizer Settings (TBD)</MenuItem>}
+                        {isRegionalAdmin && (
                             <>
                                 <MenuItem>Add Organizer (TBD)</MenuItem>
                                 <MenuItem>Add Locations (TBD)</MenuItem>
                             </>
                         )}
-                        {selectedRole === 'SystemOwner' && <MenuItem>Admin Dashboard</MenuItem>}
+                        {isSystemOwner && <MenuItem>Admin Dashboard</MenuItem>}
                         {/* Always available items */}
                         <MenuItem>Organizer Request</MenuItem>
                         <MenuItem>About</MenuItem>
@@ -109,7 +113,7 @@ const SiteMenuBar = ({
                 {/* Role Dropdown - User can switch roles */}
                 {user && availableRoles.length > 0 && (
                     <Box sx={{ marginLeft: 2 }}>
-                        <select value={selectedRole} onChange={handleRoleChange}>
+                        <select onChange={handleRoleChange}>
                             {availableRoles.map(role => (
                                 <option key={role.roleId} value={role.roleName}>
                                     {role.roleName}

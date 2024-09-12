@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useEffect } from 'react';
+//import { useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -22,25 +22,10 @@ import EventCRUDModal from '@/components/Modals/EventCRUDModal';
 import NoRegionSelectedModal from '@/components/Modals/NoRegionSelectedModal';
 import RegionalOrgDateClickModal from '@/components/Modals/RegionalOrgDateClickModal';
 import { useCalendarPage } from '@/hooks/useCalendarPage';  // Make sure this hook is import
-import { useAuth } from '@/hooks/useAuth';
+//import { useAuth } from '@/hooks/useAuth';
 
 
 const CalendarPage = () => {
-
-  const {
-    selectedRole,
-    isRegionalOrganizer,
-    //   isRegionalAdmin,
-    //   isSystemOwner,
-    //   isNamedUser
-    // other roles ybotman
-  } = useAuth();  // Use the custom hook to get roles and booleans
-
-  useEffect(() => {
-    console.log("Selected Role:", selectedRole);  // Logs when the role changes
-  }, [selectedRole]);
-
-
   const {
     regions,
     categories,
@@ -48,6 +33,7 @@ const CalendarPage = () => {
     selectedOrganizers,
     selectedEvent,
     isCreateModalOpen,
+    isRegionalOrganizer,
     isNoRegionSelectedModalOpen,
     isRegionalOrgDateClickModalOpen,  // Ensure this is correctly referenced
     setRegionalOrgDateClickModalOpen,
@@ -155,7 +141,6 @@ const CalendarPage = () => {
           />
         )
       )}
-
 
       {/* RegionalOrgDateClickModal */}
       {isRegionalOrgDateClickModalOpen && (

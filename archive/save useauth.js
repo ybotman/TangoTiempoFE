@@ -1,32 +1,37 @@
-"use client";
+"use client";  // Add this to ensure it's treated as a client component
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
 import axios from 'axios';
 
+
 export const useAuth = () => {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [user, setUser] = useState(null);
     const [availableRoles, setAvailableRoles] = useState([]);
-    const [selectedRole, setSelectedRoleState] = useState('Unknown');
-    const [isAnonymous, setIsAnonymous] = useState(false);
-    const [isRegionalOrganizer, setIsRegionalOrganizer] = useState(false);
-    const [isRegionalAdmin, setIsRegionalAdmin] = useState(false);
-    const [isSystemOwner, setIsSystemOwner] = useState(false);
-    const [isNamedUser, setIsNamedUser] = useState(false);
-    // const { selectedRole, isAnonymous, isRegionalOrganizer, isNamedUser } = useAuth();
+    const [selectedRole, setSelectedRoleState] = useState('Unkown');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const isAnonymous = selectedRole === "isAnonymous";
+    const isRegionalOrganizer = selectedRole === "RegionalOrganizer";
+    const isRegionalAdmin = selectedRole === "RegionalAdmin";
+    const isSystemOwner = selectedRole === "SystemOwner";
+    const isNamedUser = selectedRole === "NamedUser";
+
+
+    const signUpOngoing = useRef(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 setUser(currentUser);
-                await fetchUserRoles(currentUser.uid);  // Fetch roles on login
+                if (!signUpOngoing.current) {
+                    await fetchUserRoles(currentUser.uid);  // Fetch roles on login
+                }
             } else {
                 setUser(null);
                 setAvailableRoles([]);
-                resetRoleBooleans();  // Reset all roles when no user
+                setSelectedRoleState('');
             }
             setLoading(false);
         });
@@ -43,38 +48,21 @@ export const useAuth = () => {
                     roleName: role.roleName,
                 }));
                 setAvailableRoles(mappedRoles);
-                setSelectedRole(mappedRoles[0]?.roleName || "");  // Automatically select the first role
+                setSelectedRoleState(mappedRoles[0]?.roleName || "");  // Automatically select the first role
             } else {
                 setAvailableRoles([]);
-                resetRoleBooleans();
+                setSelectedRoleState('');
             }
         } catch (err) {
             setError('Failed to fetch user roles');
-            resetRoleBooleans();
+            setAvailableRoles([]);
+            setSelectedRoleState('');
         }
     };
 
     const setSelectedRole = (newRole) => {
-        // React will batch the updates
+        console.log("User requested role:", newRole);
         setSelectedRoleState(newRole);
-        updateRoleBooleans(newRole);  // Ensure the boolean flags update immediately
-    };
-
-    const updateRoleBooleans = (roleName) => {
-        setIsNamedUser(roleName === 'NamedUser');
-        setIsRegionalOrganizer(roleName === 'RegionalOrganizer');
-        setIsRegionalAdmin(roleName === 'RegionalAdmin');
-        setIsSystemOwner(roleName === 'SystemOwner');
-        setIsAnonymous(roleName === 'Anonymous');
-
-    };
-
-    const resetRoleBooleans = () => {
-        setIsNamedUser(false);
-        setIsRegionalOrganizer(false);
-        setIsRegionalAdmin(false);
-        setIsSystemOwner(false);
-        setIsAnonymous(false);
     };
 
     const authenticateWithGoogle = async () => {
@@ -82,8 +70,10 @@ export const useAuth = () => {
         try {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
+            console.log('Google Sign-in successful:', user);
             return user;
         } catch (error) {
+            console.error('Google sign-in error:', error);
             setError(error.message);
         }
     };
@@ -93,24 +83,16 @@ export const useAuth = () => {
             await signOut(auth);
             setUser(null);
             setAvailableRoles([]);
-            resetRoleBooleans();  // Reset role booleans on logout
+            setSelectedRoleState('');  // Reset role on logout
         } catch (err) {
             setError(err.message);
         }
     };
-    console.log('useAuth returning', {
-        user, availableRoles,
-        selectedRole,
-        AN: isAnonymous,
-        RO: isRegionalOrganizer,
-        RA: isRegionalAdmin,
-        SO: isSystemOwner,
-        NU: isNamedUser
-    });
 
     return {
         user,
         availableRoles,
+        setAvailableRoles,
         selectedRole,
         setSelectedRole,
         isAnonymous,
@@ -121,12 +103,9 @@ export const useAuth = () => {
         loading,
         error,
         logOut,
-        authenticateWithGoogle,
+        authenticateWithGoogle  // Google authentication
     };
 };
-
-
-
 
 /* previous version
 import { useState, useEffect, useRef } from 'react';

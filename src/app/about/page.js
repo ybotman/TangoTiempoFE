@@ -1,15 +1,10 @@
+'use cleint';
+
+import React
+    from 'react';
 import styles from '@/styles/About.module.css';
 console.log("Loaded component: AboutPage", __filename);
 
-export const metadata = {
-    title: 'About Us',
-    description: 'Learn more about our company',
-    openGraph: {
-        title: 'About Us',
-        description: 'Learn more about our company',
-        url: 'http://localhost:3000/about',
-    },
-};
 
 export default function About() {
     return (
