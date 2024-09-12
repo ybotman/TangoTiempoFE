@@ -1,27 +1,27 @@
 "use client";
 
-import React from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import { ButtonGroup, IconButton } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import TodayIcon from '@mui/icons-material/Today';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
-import ListIcon from '@mui/icons-material/List';
+import React from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
+import interactionPlugin from "@fullcalendar/interaction";
+import { ButtonGroup, IconButton } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import TodayIcon from "@mui/icons-material/Today";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import ViewWeekIcon from "@mui/icons-material/ViewWeek";
+import ListIcon from "@mui/icons-material/List";
 
-import SiteHeader from '@/components/UI/SiteHeader';
-import SiteMenuBar from '@/components/UI/SiteMenuBar';
-import EventDetailsModal from '@/components/Modals/EventDetailsModal';
-import EventCRUDModal from '@/components/Modals/EventCRUDModal';
-import { useCalendarPage } from '@/hooks/useCalendarPage';
+import SiteHeader from "@/components/UI/SiteHeader";
+import SiteMenuBar from "@/components/UI/SiteMenuBar";
+import EventDetailsModal from "@/components/Modals/EventDetailsModal";
+import EventCRUDModal from "@/components/Modals/EventCRUDModal";
+import { useCalendarPage } from "@/hooks/useCalendarPage";
 
 const CalendarPage = () => {
-  console.log('CalendarPage cont:')
+  console.log("CalendarPage cont:");
   const {
     regions,
     categories,
@@ -49,7 +49,7 @@ const CalendarPage = () => {
     handleDateClick,
     handleEventClick,
     handleOrganizerChange,
-    coloredFilteredEvents
+    coloredFilteredEvents,
   } = useCalendarPage();
 
   return (
@@ -71,7 +71,13 @@ const CalendarPage = () => {
         handleCategoryChange={handleCategoryChange}
         categories={categories}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '20px' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          margin: "20px",
+        }}
+      >
         {/* Navigation buttons */}
         <ButtonGroup variant="outlined" aria-label="outlined button group">
           <IconButton onClick={handlePrev}>
@@ -87,13 +93,23 @@ const CalendarPage = () => {
 
         {/* View switching buttons */}
         <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
+          <IconButton
+            onClick={() =>
+              calendarRef.current.getApi().changeView("dayGridMonth")
+            }
+          >
             <CalendarMonthIcon />
           </IconButton>
-          <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
+          <IconButton
+            onClick={() =>
+              calendarRef.current.getApi().changeView("timeGridWeek")
+            }
+          >
             <ViewWeekIcon />
           </IconButton>
-          <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+          <IconButton
+            onClick={() => calendarRef.current.getApi().changeView("listWeek")}
+          >
             <ListIcon />
           </IconButton>
         </ButtonGroup>
@@ -103,7 +119,7 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={coloredFilteredEvents}
-        datesSet={handleDatesSet}  // Pass the handleDatesSet here
+        datesSet={handleDatesSet} // Pass the handleDatesSet here
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
@@ -119,7 +135,6 @@ const CalendarPage = () => {
           onClose={() => setSelectedEvent(null)}
         />
       )}
-
 
       {isCreateModalOpen && (
         <EventCRUDModal

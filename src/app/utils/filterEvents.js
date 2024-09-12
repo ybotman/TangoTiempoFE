@@ -1,16 +1,16 @@
 export const filterEvents = (events, selectedCategories, selectedOrganizers) => {
     // Log the initial parameters being passed
-    console.log('Const filtered events:', { selectedCategories, selectedOrganizers, events });
+   // console.log('Const filtered events:', { selectedCategories, selectedOrganizers, events });
 
     // Check if events is an array
     if (!Array.isArray(events)) {
-        console.log('Events is not an array, returning empty array');
+   //     console.log('Events is not an array, returning empty array');
         return [];
     }
 
     // If no categories or organizers are selected, return all events
     if (selectedCategories.length === 0 && selectedOrganizers.length === 0) {
-        console.log('No categories or organizers selected, returning all events');
+   //     console.log('No categories or organizers selected, returning all events');
         return events;
     }
 
@@ -39,7 +39,7 @@ export const filterEvents = (events, selectedCategories, selectedOrganizers) => 
         );
 
         // Log the result of each event check
-        console.log('Event matches category:', matchesCategory, 'Event matches organizer:', matchesOrganizer);
+  //      console.log('Event matches category:', matchesCategory, 'Event matches organizer:', matchesOrganizer);
 
         return matchesCategory && matchesOrganizer;
     });
