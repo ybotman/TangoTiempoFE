@@ -40,6 +40,8 @@ out/
 .dynamodb/
 .vscode-test/
 
+archive/
+
 # Coverage directories used by tools like istanbul, nyc, etc.
 coverage/
 *.lcov

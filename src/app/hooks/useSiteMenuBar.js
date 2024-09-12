@@ -49,6 +49,22 @@ export const useSiteMenuBar = () => {
     setSelectedCity(event.target.value);
   };
 
+<<<<<<< HEAD
+=======
+  /*  
+  console.log("Returning", {
+    user,
+    availibleRoles,
+    selectedRole,
+    AN: isAnonymous,
+    RO: isRegionalOrganizer,
+    RA: isRegionalAdmin,
+    SO: isSystemOwner,
+    NU: isNamedUser,
+  });
+*/
+
+>>>>>>> 4a899778630e7618aaeba60279f7e754de6bc869
   return {
     user,
     availibleRoles,

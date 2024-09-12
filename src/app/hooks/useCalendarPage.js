@@ -1,27 +1,24 @@
 import { useState, useRef } from "react";
 import { useEvents } from "@/hooks/useEvents";
-import { filterEvents } from "@/utils/filterEvents";
+import { usePostFilter } from "@/hooks/usePostFilter";
 import { transformEvents } from "@/utils/transformEvents";
 import { categoryColors } from "@/utils/categoryColors";
+
 import useCategories from "@/hooks/useCategories";
-import useOrganizers from "@/hooks/useOrganizers";
 import { useRegions } from "@/hooks/useRegions";
-import { useAuth } from "@/hooks/useAuth";
 
 export const useCalendarPage = () => {
   const regions = useRegions();
   const categories = useCategories();
-  const [activeCategories, setActiveCategories] = useState([]);
-  const [selectedOrganizers, setSelectedOrganizers] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const [selectedOrganizer, setSelectedOrganizer] = useState(null); // Placeholder for future filtering
+  const [selectedTags, setSelectedTags] = useState([]); // Placeholder for future filtering
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [calendarStart, setCalendarStart] = useState(null);
   const [calendarEnd, setCalendarEnd] = useState(null);
 
+<<<<<<< HEAD
   const calendarRef = useRef(null);
 
   const {
@@ -90,6 +87,8 @@ export const useCalendarPage = () => {
   };
 
       console.log('events Data', selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd)
+=======
+>>>>>>> 4a899778630e7618aaeba60279f7e754de6bc869
   const { events, refreshEvents } = useEvents(
     selectedRegion,
     selectedDivision,
@@ -97,19 +96,31 @@ export const useCalendarPage = () => {
     calendarStart,
     calendarEnd
   );
+<<<<<<< HEAD
       console.log('events', events)
   const transformedEvents = transformEvents(events);
      console.log('transformEvents', transformedEvents)
      console.log('enteringfitlerEvent', transformedEvents, activeCategories)
+=======
 
-  const filteredEvents = filterEvents(
+  // Transform the fetched events
+  const transformedEvents = transformEvents(events);
+>>>>>>> 4a899778630e7618aaeba60279f7e754de6bc869
+
+  // Use the post filter to filter based on active categories (and future organizers/tags)
+  const { filteredEvents, handleCategoryChange } = usePostFilter(
     transformedEvents,
-    activeCategories,
-    selectedOrganizers
+    categories,
+    selectedOrganizer,
+    selectedTags
   );
+<<<<<<< HEAD
    console.log('filteredEvents', filteredEvents)
+=======
+>>>>>>> 4a899778630e7618aaeba60279f7e754de6bc869
 
-  const coloredFilteredEvents = filteredEvents.map((event) => {
+  // Ensure postFilteredEvents is always an array before mapping
+  const coloredFilteredEvents = (filteredEvents || []).map((event) => {
     const categoryColor =
       categoryColors[event.extendedProps.categoryFirst] || "lightGrey";
     return {
@@ -121,47 +132,30 @@ export const useCalendarPage = () => {
     };
   });
 
+<<<<<<< HEAD
+=======
+  // Handle other logic (e.g., region, division, city, etc.)
+  const handleRegionChange = (value) => {
+    setSelectedRegion(value);
+    setSelectedDivision("");
+    setSelectedCity("");
+  };
+>>>>>>> 4a899778630e7618aaeba60279f7e754de6bc869
 
   return {
     regions,
     categories,
-    activeCategories,
-    selectedOrganizers,
-    selectedEvent,
-    isCreateModalOpen,
+    selectedOrganizer, // Add to future filtering
+    selectedTags, // Add to future filtering
     selectedRegion,
     selectedDivision,
     selectedCity,
-    selectedDate,
-    isAnonymous,
-    isRegionalOrganizer,
-    isRegionalAdmin,
-    isSystemOwner,
-    isNamedUser,
-    selectedRole,
-    setSelectedRole,
     calendarStart,
     calendarEnd,
     events,
-    organizers: useOrganizers(selectedRegion),
-    calendarRef,
-    setSelectedEvent,
-    setSelectedRegion,
-    setSelectedDivision,
-    setSelectedCity,
-    setSelectedDate,
-    setCreateModalOpen,
+    coloredFilteredEvents,
     refreshEvents,
     handleCategoryChange,
-    handleDatesSet,
-    handlePrev,
-    handleNext,
-    handleToday,
-    handleDateClick,
-    handleEventClick,
-    handleEventCreated,
-    handleOrganizerChange,
-
-    coloredFilteredEvents,
+    handleRegionChange,
   };
 };
