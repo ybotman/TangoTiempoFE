@@ -6,10 +6,17 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import useOrganizers from '@/hooks/useOrganizers';
 import { useRegions } from '@/hooks/useRegions';
-//import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';  // Import the hook
+//import { useActiveRole } from '@/hooks/useActiveRole';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useCalendarPage = () => {
+    // Use the new useActiveRole hook
+    const {
+        selectedRole,
+        isRegionalOrganizer,
+
+    } = useAuth();  // Handle role-based logic here
+
     const regions = useRegions();
     const categories = useCategories();
     const [activeCategories, setActiveCategories] = useState([]);
@@ -34,17 +41,13 @@ export const useCalendarPage = () => {
         isNamedUser
     } = useAuth();
 
+    // Ensure that the component re-renders when selectedRole changes
     useEffect(() => {
-        console.log('useEffect returning', {
-            selectedRole,
-            AN: isAnonymous,
-            RO: isRegionalOrganizer,
-            RA: isRegionalAdmin,
-            SO: isSystemOwner,
-            NU: isNamedUser
-        });
-    }, [isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser, selectedRole]);
+        console.log("Selected Role in useCalendarPage:", selectedRole);
+    }, [selectedRole]);
 
+    // Boolean to track if a region has been selected
+    const regionSelected = !!selectedRegion;
 
     const handleDatesSet = (rangeInfo) => {
         setCalendarStart(rangeInfo.start);
@@ -92,19 +95,9 @@ export const useCalendarPage = () => {
 
     // Handle date click event and log any true roles
     const handleDateClick = (clickInfo) => {
-        console.log('Date Clicked:', clickInfo.dateStr);
-
-        console.log('handleDateClick:', {
-            selectedRole,
-            AN: isAnonymous,
-            RO: isRegionalOrganizer,
-            RA: isRegionalAdmin,
-            SO: isSystemOwner,
-            NU: isNamedUser
-        });
-        if (isRegionalOrganizer) {  // Check if the user is a Regional Organizer
-            if (!selectedRegion) {
-                //              setNoRegionSelectedModalOpen(true);  // Open NoRegionSelectedModal if no region selected
+        if (selectedRole === 'RegionalOrganizer') {  // Check if the user is a Regional Organizer
+            if (!selectedRegion) {  // Check if a region is selected
+                setNoRegionSelectedModalOpen(true);  // Open NoRegionSelectedModal if no region selected
             } else {
                 setSelectedDate(clickInfo.dateStr);  // Set selected date
                 //              setRegionalOrgDateClickModalOpen(true);  // Open RegionalOrgDateClickModal
@@ -115,8 +108,8 @@ export const useCalendarPage = () => {
     };
 
     const handleEventClick = (clickInfo) => {
-        if (!selectedRegion) {
-            //        setNoRegionSelectedModalOpen(true); // Open modal if no region is selected
+        if (!regionSelected) {
+            setNoRegionSelectedModalOpen(true); // Open modal if no region is selected
         } else {
             setSelectedEvent(clickInfo.event);
             if (isRegionalOrganizer) {
@@ -187,6 +180,6 @@ export const useCalendarPage = () => {
         handleEventCreated,
         handleOrganizerChange,
         coloredFilteredEvents,
-        regionSelected,  // Return the boolean for region selection
+        regionSelected  // Return the boolean for region selection
     };
 };
