@@ -37,6 +37,11 @@ const SiteMenuBar = ({
     selectedCity,
     handleCityChange,
     organizers,
+    isNamedUser,
+    isRegionalOrganizer,
+    isRegionalAdmin,
+    isSystemOwner,
+    isAnonymous,
   } = useSiteMenuBar();
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -49,6 +54,17 @@ const SiteMenuBar = ({
     setAnchorEl("");
   };
 
+  console.log("Returning", {
+    user,
+    availibleRoles,
+    selectedRole,
+    AN: isAnonymous,
+    RO: isRegionalOrganizer,
+    RA: isRegionalAdmin,
+    SO: isSystemOwner,
+    NU: isNamedUser,
+  });
+
   return (
     <Box sx={{ width: "100%", padding: "0 0" }}>
       {/* Top row with main menu items and user state */}
@@ -60,6 +76,7 @@ const SiteMenuBar = ({
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
+          {/* Hamburger Menu */}
           <IconButton
             edge="start"
             color="inherit"
@@ -73,11 +90,17 @@ const SiteMenuBar = ({
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            {selectedRegion && <MenuItem>Select Organizers</MenuItem>}
-            <MenuItem>Admin Page</MenuItem>
-            <MenuItem>Request Form</MenuItem>
+            {/* Conditional menu items based on roles */}
+            {isNamedUser && <MenuItem>User Settings</MenuItem>}
+            {isRegionalOrganizer && <MenuItem>Organizer Settings</MenuItem>}
+            {isRegionalOrganizer && <MenuItem>Location Management</MenuItem>}
+            {isRegionalAdmin && <MenuItem>Add Organizers</MenuItem>}
+            {isRegionalAdmin && <MenuItem>Manage Locations</MenuItem>}
+            {isSystemOwner && <MenuItem>Full Menu Access (All Roles)</MenuItem>}
+            {isAnonymous && <MenuItem>Login/Signup Options</MenuItem>}
             <MenuItem>About</MenuItem>
           </Menu>
+
           {/* Region Dropdown */}
           <select value={selectedRegion || ""} onChange={handleRegionChange}>
             <option value="">Select Region</option>
@@ -87,6 +110,7 @@ const SiteMenuBar = ({
               </option>
             ))}
           </select>
+
           {/* Division Dropdown */}
           {selectedRegion && (
             <select
@@ -106,6 +130,7 @@ const SiteMenuBar = ({
                 ))}
             </select>
           )}
+
           {/* City Dropdown */}
           {selectedDivision && (
             <select value={selectedCity || ""} onChange={handleCityChange}>
@@ -122,6 +147,7 @@ const SiteMenuBar = ({
                 ))}
             </select>
           )}
+
           {/* Organizer Dropdown */}
           {selectedRegion && organizers.length > 0 && (
             <select
@@ -138,6 +164,7 @@ const SiteMenuBar = ({
             </select>
           )}
         </Box>
+
         {/* User State and Role Dropdown */}
         {user ? (
           <Stack direction="row" spacing={1} alignItems="center">
@@ -189,6 +216,7 @@ const SiteMenuBar = ({
           </Stack>
         )}
       </Box>
+
       {/* Bottom row with Category Filter */}
       <Box
         sx={{

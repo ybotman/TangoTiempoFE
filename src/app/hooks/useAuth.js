@@ -16,7 +16,7 @@ export const useAuth = () => {
   const [isRegionalOrganizer, setIsRegionalOrganizer] = useState(false);
   const [isRegionalAdmin, setIsRegionalAdmin] = useState(false);
   const [isSystemOwner, setIsSystemOwner] = useState(false);
-  const [isNamedUser, setIsNamedUser] = useState(false); // Track the selected role
+  const [isNamedUser, setIsNamedUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,6 +40,11 @@ export const useAuth = () => {
     return () => unsubscribe();
   }, []);
 
+  // Call updateRoleBooleans every time selectedRole changes
+  useEffect(() => {
+    updateRoleBooleans(selectedRole);
+  }, [selectedRole]); // Watch for changes in selectedRole
+
   const fetchUserRoles = async (firebaseUserId) => {
     try {
       const response = await axios.get(
@@ -47,9 +52,11 @@ export const useAuth = () => {
       );
 
       if (response.status === 200) {
-        setAvailibleRoles(response.data.roleIds.map((role) => role.roleName)); // Set the list of role names
-        setSelectedRole(response.data.roleIds[0]?.roleName || "");
-        updateRoleBooleans(response.data.roleIds[0]?.roleName || "");
+        const roles = response.data.roleIds.map((role) => role.roleName);
+        setAvailibleRoles(roles); // Set available roles
+
+        const initialRole = roles[0] || ""; // Set the first role as selectedRole by default
+        setSelectedRole(initialRole);
       } else {
         setAvailibleRoles([]);
       }
@@ -59,6 +66,7 @@ export const useAuth = () => {
     }
   };
 
+  // Update boolean values based on selected role
   const updateRoleBooleans = (roleName) => {
     setIsNamedUser(roleName === "NamedUser");
     setIsRegionalOrganizer(roleName === "RegionalOrganizer");
@@ -87,6 +95,7 @@ export const useAuth = () => {
         );
       } catch (error) {
         if (error.response && error.response.status === 404) {
+          // If user not found, create the user in the backend
           const roleResponse = await axios.post(
             `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
             { firebaseUserId }
