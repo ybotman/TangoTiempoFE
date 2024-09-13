@@ -1,3 +1,5 @@
+//FE/src/app/components/UI/SiteMenuBar.js
+
 import React from "react";
 import PropTypes from "prop-types";
 import {

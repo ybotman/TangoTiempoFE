@@ -1,3 +1,5 @@
+//FE/src/app/hooks/useSiteMenuBar.js
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import useOrganizers from "@/hooks/useOrganizers";

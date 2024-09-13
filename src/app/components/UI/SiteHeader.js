@@ -1,3 +1,5 @@
+//FE/src/app/components/UI/SiteHeader.js
+
 import React from 'react';
 import Image from 'next/image';
 

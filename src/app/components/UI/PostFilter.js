@@ -1,34 +1,20 @@
+//FE/src/app/components/UI/PostFilter.js
 import React from "react";
 import PropTypes from "prop-types";
 import { categoryColors } from "@/utils/categoryColors";
-import { usePostFilter } from "@/hooks/usePostFilter";
 
 const PostFilter = ({
-  events,
-  categories,
+  activeCategories = [],
+  categories = [],
+  handleCategoryChange,
   selectedOrganizer,
-  selectedTags,
-  setFilteredEvents,
 }) => {
-  const { activeCategories, handleCategoryChange } = usePostFilter(
-    events,
-    categories,
-    selectedOrganizer,
-    selectedTags
-  );
-
-  React.useEffect(() => {
-    if (typeof setFilteredEvents === "function" && activeCategories.length) {
-      setFilteredEvents(activeCategories);
-    }
-  }, [activeCategories, setFilteredEvents]);
-
   return (
     <div className="category-filter">
       {categories && categories.length > 0 ? (
         categories.map((category) => {
-          const isActive = activeCategories.includes(category.categoryName);
-          return (
+           const isActive = activeCategories.includes(category.categoryName);  // Safeguarded by default value
+         return (
             <button
               key={category._id}
               style={{
@@ -61,10 +47,9 @@ PostFilter.propTypes = {
       categoryName: PropTypes.string.isRequired,
     })
   ).isRequired,
-  events: PropTypes.array.isRequired,
+  activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  handleCategoryChange: PropTypes.func.isRequired,
   selectedOrganizer: PropTypes.string,
-  selectedTags: PropTypes.array, // Prepare for tags filter
-  setFilteredEvents: PropTypes.func.isRequired,
 };
 
 export default PostFilter;

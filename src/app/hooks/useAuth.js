@@ -1,3 +1,5 @@
+//FE/src/app/hooks/useAuth.js
+
 import { useState, useEffect, useRef } from "react";
 import {
   GoogleAuthProvider,

@@ -1,4 +1,5 @@
 // src/hooks/useFullCalendarDateRange.js
+
 import { useState } from "react";
 
 export function useFullCalendarDateRange() {
