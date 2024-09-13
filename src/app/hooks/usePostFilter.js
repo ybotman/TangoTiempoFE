@@ -1,5 +1,6 @@
 //FE/src/app/hooks/usePostFilter.js
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 
 export const usePostFilter = (
   events,
@@ -29,20 +30,15 @@ export const usePostFilter = (
     });
   };
 
-  // Filter events based on active categories, organizers, and tags
-  const filterEvents = (
-    events,
-    selectedCategories,
-    selectedOrganizers,
-    selectedTags
-  ) => {
+  // Memoize filteredEvents to prevent unnecessary computations and infinite loops
+  const filteredEvents = useMemo(() => {
     if (!Array.isArray(events)) return [];
 
     // Ensure selectedOrganizers and selectedTags are arrays
-    selectedOrganizers = Array.isArray(selectedOrganizers)
+    const organizers = Array.isArray(selectedOrganizers)
       ? selectedOrganizers
       : [];
-    selectedTags = Array.isArray(selectedTags) ? selectedTags : [];
+    const tags = Array.isArray(selectedTags) ? selectedTags : [];
 
     // Apply filters only if there are values present
     return events.filter((event) => {
@@ -51,43 +47,31 @@ export const usePostFilter = (
         categorySecond,
         categoryThird,
         organizerId,
-        tags,
+        tags: eventTags,
       } = event.extendedProps || {};
 
       // Category filter
       const matchesCategory =
-        !selectedCategories ||
-        selectedCategories.length === 0 ||
-        selectedCategories.includes(categoryFirst) ||
-        selectedCategories.includes(categorySecond) ||
-        selectedCategories.includes(categoryThird);
+        !activeCategories ||
+        activeCategories.length === 0 ||
+        activeCategories.includes(categoryFirst) ||
+        activeCategories.includes(categorySecond) ||
+        activeCategories.includes(categoryThird);
 
       // Organizer filter
       const matchesOrganizer =
-        selectedOrganizers.length === 0 ||
+        organizers.length === 0 ||
         organizerId === undefined ||
-        selectedOrganizers.includes(organizerId);
+        organizers.includes(organizerId);
 
       // Tags filter
       const matchesTags =
-        selectedTags.length === 0 ||
-        (tags && selectedTags.some((tag) => tags.includes(tag)));
+        tags.length === 0 ||
+        (eventTags && tags.some((tag) => eventTags.includes(tag)));
 
       return matchesCategory && matchesOrganizer && matchesTags;
     });
-  };
-
-  const [filteredEvents, setFilteredEvents] = useState([]);
-
-  useEffect(() => {
-    const filtered = filterEvents(
-      events,
-      activeCategories,
-      selectedOrganizers,
-      selectedTags
-    );
-    setFilteredEvents(filtered);
-  }, [activeCategories, selectedOrganizers, selectedTags]);
+  }, [events, activeCategories, selectedOrganizers, selectedTags]);
 
   return {
     activeCategories,
