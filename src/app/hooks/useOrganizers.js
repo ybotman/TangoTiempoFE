@@ -24,6 +24,7 @@ const useOrganizers = (calculatedRegion) => {
                 setOrganizers(response.data);
             } catch (error) {
                 console.error('Error fetching organizers:', error);
+                                setOrganizers([]);
             }
         };
 

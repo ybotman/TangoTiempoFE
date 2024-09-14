@@ -19,10 +19,8 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import PostFilter from "@/components/UI/PostFilter";
 import { AuthContext } from '@/contexts/AuthContext';
-import { useAuth } from '@/hooks/useAuth'; // added as per chatgtp but not sure if needed as its not being read
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
-import { CalendarContext } from '@/contexts/CalendarContext'; // added as per chatgtp but not its not being read
 
 const SiteMenuBar = ({
   regions,
@@ -32,9 +30,16 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
+    console.log('SiteMenuBar rendering');
+ 
   const { user, availibleRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
+  console.log('AuthContext values:', { user, logOut, selectedRole });
+ 
   const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
+   console.log('RegionsContext values:', { selectedRegion, selectedDivision, selectedCity });
+ 
   const { organizers } = useContext(PostFilterContext);
+    console.log('PostFilterContext values:', { organizers });
 
   const [anchorEl, setAnchorEl] = useState(null);
 
