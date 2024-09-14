@@ -1,4 +1,4 @@
-//FE/src/app/hooks/useCategories.js
+//app/hooks/useCategories.js
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';

@@ -1,8 +1,8 @@
-//FE/src/app/calendar/page.js
+// app/calendar/page.js
 
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -18,20 +18,23 @@ import ListIcon from "@mui/icons-material/List";
 
 import SiteHeader from "@/components/UI/SiteHeader";
 import SiteMenuBar from "@/components/UI/SiteMenuBar";
-//import { useSiteMenuBar } from "@/hooks/useSiteMenuBar";
+import { CalendarContext } from '@/contexts/CalendarContext';
+import { RegionsContext } from '@/contexts/RegionsContext';
+import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { useCalendarPage } from "@/hooks/useCalendarPage";
 import EventDetailsModal from "@/components/Modals/EventDetailsModal";
 import EventCRUDModal from "@/components/Modals/EventCRUDModal";
 
 const CalendarPage = () => {
   console.log("CalendarPage cont:");
+  const { datesSet, setDatesSet } = useContext(CalendarContext);
+  const { regions } = useContext(RegionsContext);
+  const { selectedOrganizers, selectedCategories } = useContext(PostFilterContext);
+
   const {
-    regions,
     categories,
     activeCategories,
-    selectedOrganizers,
-    selectedEvent,
-    isCreateModalOpen,
+    handleCategoryChange,
     selectedRegion,
     selectedDivision,
     selectedCity,
@@ -44,7 +47,6 @@ const CalendarPage = () => {
     setSelectedEvent,
     handleDatesSet,
     handleEventCreated,
-    handleCategoryChange,
     handleRegionChange,
     handlePrev,
     handleNext,
@@ -132,6 +134,14 @@ const CalendarPage = () => {
         scrollTime="17:00:00"
       />
 
+    </div>
+  );
+};
+
+export default CalendarPage;
+
+/*
+
       {selectedEvent && (
         <EventDetailsModal
           event={selectedEvent}
@@ -149,8 +159,5 @@ const CalendarPage = () => {
           onCreate={handleEventCreated}
         />
       )}
-    </div>
-  );
-};
-
-export default CalendarPage;
+      
+      */

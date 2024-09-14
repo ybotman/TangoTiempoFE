@@ -1,4 +1,4 @@
-//FE/src/app/hooks/useEvents.js
+//app/hooks/useEvents.js// app/hooks/useEvents.js
 
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -30,7 +30,7 @@ export function useEvents(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`,
         {
           params: {
-            active: true, // Correct assignment of value
+            active: true,
             calculatedRegionName: selectedRegion,
             calculatedDivisionName: selectedDivision || undefined,
             calculatedCityName: selectedCity || undefined,
@@ -40,7 +40,7 @@ export function useEvents(
         }
       );
 
-      setEvents(response.data); // This line sets the fetched events to the state
+      setEvents(response.data);
     } catch (error) {
       console.error("useEvents-> Error fetching events:", error);
       setEvents([]);

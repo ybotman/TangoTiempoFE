@@ -1,4 +1,4 @@
-//FE/src/app/admin/LocationManagement.js
+//app/admin/LocationManagement.js
 
 
 "use client";

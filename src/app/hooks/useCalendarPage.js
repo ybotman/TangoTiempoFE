@@ -1,38 +1,42 @@
-//FE/src/app/hooks/useCalendarPage.js
-import { useState } from "react";
+//app/hooks/useCalendarPage.js
+// app/hooks/useCalendarPage.js
+
+import { useState, useContext } from "react";
 import { useEvents } from "@/hooks/useEvents";
 import { usePostFilter } from "@/hooks/usePostFilter";
 import { transformEvents } from "@/utils/transformEvents";
 import { categoryColors } from "@/utils/categoryColors";
 import useCategories from "@/hooks/useCategories";
+import { CalendarContext } from '@/contexts/CalendarContext';
+import { RegionsContext } from '@/contexts/RegionsContext';
+import { PostFilterContext } from '@/contexts/PostFilterContext';
 
-export const useCalendarPage = (
-  selectedRegion,
-  selectedDivision,
-  selectedCity
-) => {
+export const useCalendarPage = () => {
   const categories = useCategories();
-  const [selectedOrganizers, setSelectedOrganizers] = useState([]); // Initialized as empty array
-  const [selectedTags, setSelectedTags] = useState([]); // Initialized as empty array
-  const [calendarStart, setCalendarStart] = useState(null);
-  const [calendarEnd, setCalendarEnd] = useState(null);
+  const { selectedRegion, selectedDivision, selectedCity } = useContext(RegionsContext);
+  const { selectedOrganizers, setSelectedOrganizers, selectedCategories, setSelectedCategories } = useContext(PostFilterContext);
+  const { datesSet, setDatesSet } = useContext(CalendarContext);
 
-  // Move handleDatesSet and date range state here
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
   const handleDatesSet = (dateInfo) => {
     console.log("useCalendarPage.handleDatesSet");
     console.log("--> Calendar earliest Date:", dateInfo.startStr);
     console.log("--> Calendar latest Date:", dateInfo.endStr);
 
-    setCalendarStart(dateInfo.startStr);
-    setCalendarEnd(dateInfo.endStr);
+    setDatesSet({
+      start: dateInfo.startStr,
+      end: dateInfo.endStr,
+    });
   };
 
   const { events, refreshEvents } = useEvents(
     selectedRegion,
     selectedDivision,
     selectedCity,
-    calendarStart,
-    calendarEnd
+    datesSet?.start,
+    datesSet?.end
   );
 
   // Transform the fetched events
@@ -44,7 +48,7 @@ export const useCalendarPage = (
       transformedEvents,
       categories,
       selectedOrganizers,
-      selectedTags
+      [] // Ignoring tags for now
     );
 
   // Ensure filteredEvents is always an array before mapping
@@ -60,6 +64,42 @@ export const useCalendarPage = (
     };
   });
 
+  const handleEventCreated = (newEvent) => {
+    console.log("New event created:", newEvent);
+    refreshEvents();
+  };
+
+  const handleRegionChange = (value) => {
+    console.log("handleRegionChange:", value);
+    // Assume setSelectedRegion is available from context
+  };
+
+  const handlePrev = () => {
+    // Implement navigation to previous period
+    calendarRef.current.getApi().prev();
+  };
+
+  const handleNext = () => {
+    // Implement navigation to next period
+    calendarRef.current.getApi().next();
+  };
+
+  const handleToday = () => {
+    // Implement navigation to today
+    calendarRef.current.getApi().today();
+  };
+
+  const handleDateClick = (arg) => {
+    console.log("Date clicked:", arg.dateStr);
+    setCreateModalOpen(true);
+    // Set selectedDate in context or state if needed
+  };
+
+  const handleEventClick = (clickInfo) => {
+    console.log("Event clicked:", clickInfo.event);
+    setSelectedEvent(clickInfo.event);
+  };
+
   return {
     categories,
     activeCategories,
@@ -67,11 +107,22 @@ export const useCalendarPage = (
     handleDatesSet, // Return handleDatesSet
     selectedOrganizers,
     setSelectedOrganizers,
-    selectedTags,
-    calendarStart,
-    calendarEnd,
+    selectedCategories,
+    setSelectedCategories,
+    datesSet,
     events,
     coloredFilteredEvents,
     refreshEvents,
+    selectedEvent,
+    setSelectedEvent,
+    isCreateModalOpen,
+    setCreateModalOpen,
+    handleEventCreated,
+    handleRegionChange,
+    handlePrev,
+    handleNext,
+    handleToday,
+    handleDateClick,
+    handleEventClick,
   };
 };

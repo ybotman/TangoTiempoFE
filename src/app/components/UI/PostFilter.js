@@ -1,7 +1,11 @@
-//FE/src/app/components/UI/PostFilter.js
-import React from "react";
+//app/components/UI/PostFilter.js// app/components/UI/PostFilter.js
+
+"use client";
+
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import { categoryColors } from "@/utils/categoryColors";
+import { PostFilterContext } from '@/contexts/PostFilterContext';
 
 const PostFilter = ({
   activeCategories = [],
@@ -14,7 +18,7 @@ const PostFilter = ({
     <div className="category-filter">
       {categories && categories.length > 0 ? (
         categories.map((category) => {
-           const isActive = activeCategories.includes(category.categoryName);  // Safeguarded by default value
+           const isActive = activeCategories.includes(category.categoryName);
          return (
             <button
               key={category._id}

@@ -39,6 +39,9 @@ out/
 .fusebox/
 .dynamodb/
 .vscode-test/
+Tangols
+combine_js.sh
+TangoTiempo.data
 
 archive/
 

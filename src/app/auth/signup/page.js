@@ -1,4 +1,4 @@
-//FE/src/app/auth/signup/page.js
+//app/auth/signup/page.js
 
 "use client";
 

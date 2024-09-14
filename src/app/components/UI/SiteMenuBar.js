@@ -1,6 +1,8 @@
-//FE/src/app/components/UI/SiteMenuBar.js
+// app/components/UI/SiteMenuBar.js
 
-import React from "react";
+"use client";
+
+import React, { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -16,7 +18,11 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import PostFilter from "@/components/UI/PostFilter";
-import { useSiteMenuBar } from "@/hooks/useSiteMenuBar";
+import { AuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth'; // added as per chatgtp but not sure if needed as its not being read
+import { RegionsContext } from '@/contexts/RegionsContext';
+import { PostFilterContext } from '@/contexts/PostFilterContext';
+import { CalendarContext } from '@/contexts/CalendarContext'; // added as per chatgtp but not its not being read
 
 const SiteMenuBar = ({
   regions,
@@ -26,34 +32,43 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-  const {
-    user,
-    availibleRoles,
-    logOut,
-    selectedRole,
-    handleRoleChange,
-    selectedRegion,
-    handleRegionChange,
-    selectedDivision,
-    handleDivisionChange,
-    selectedCity,
-    handleCityChange,
-    organizers,
-    isNamedUser,
-    isRegionalOrganizer,
-    isRegionalAdmin,
-    isSystemOwner,
-    isAnonymous,
-  } = useSiteMenuBar();
+  const { user, availibleRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
+  const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
+  const { organizers } = useContext(PostFilterContext);
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-    setAnchorEl("");
+    setAnchorEl(null);
+  };
+
+  const handleRoleChange = (event) => {
+    setSelectedRole(event.target.value);
+  };
+
+  const handleRegionChange = (event) => {
+    const value = event.target.value;
+    console.log("handleRegionChange:", value);
+    setSelectedRegion(value);
+    setSelectedDivision("");
+    setSelectedCity("");
+  };
+
+  const handleDivisionChange = (event) => {
+    const value = event.target.value;
+    console.log("handleDivisionChange:", value);
+    setSelectedDivision(value);
+    setSelectedCity("");
+  };
+
+  const handleCityChange = (event) => {
+    const value = event.target.value;
+    console.log("handleCityChange:", value);
+    setSelectedCity(value);
   };
 
   return (
@@ -82,13 +97,13 @@ const SiteMenuBar = ({
             onClose={handleMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {isNamedUser && <MenuItem>User Settings</MenuItem>}
-            {isRegionalOrganizer && <MenuItem>Organizer Settings</MenuItem>}
-            {isRegionalOrganizer && <MenuItem>Location Management</MenuItem>}
-            {isRegionalAdmin && <MenuItem>Add Organizers</MenuItem>}
-            {isRegionalAdmin && <MenuItem>Manage Locations</MenuItem>}
-            {isSystemOwner && <MenuItem>Full Menu Access (All Roles)</MenuItem>}
-            {isAnonymous && <MenuItem>Login/Signup Options</MenuItem>}
+            {availibleRoles.includes("NamedUser") && <MenuItem>User Settings</MenuItem>}
+            {availibleRoles.includes("RegionalOrganizer") && <MenuItem>Organizer Settings</MenuItem>}
+            {availibleRoles.includes("RegionalOrganizer") && <MenuItem>Location Management</MenuItem>}
+            {availibleRoles.includes("RegionalAdmin") && <MenuItem>Add Organizers</MenuItem>}
+            {availibleRoles.includes("RegionalAdmin") && <MenuItem>Manage Locations</MenuItem>}
+            {availibleRoles.includes("SystemOwner") && <MenuItem>Full Menu Access (All Roles)</MenuItem>}
+            {availibleRoles.includes("Anonymous") && <MenuItem>Login/Signup Options</MenuItem>}
             <MenuItem>About</MenuItem>
           </Menu>
 
@@ -169,10 +184,11 @@ const SiteMenuBar = ({
                 id="role-select"
                 value={selectedRole}
                 onChange={handleRoleChange}
+                label="Role"
               >
-                {availibleRoles.map((availibleRoles) => (
-                  <MenuItem key={availibleRoles} value={availibleRoles}>
-                    {availibleRoles}
+                {availibleRoles.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
                   </MenuItem>
                 ))}
               </Select>
@@ -229,10 +245,29 @@ const SiteMenuBar = ({
 };
 
 SiteMenuBar.propTypes = {
-
+  regions: PropTypes.arrayOf(
+    PropTypes.shape({
+      regionName: PropTypes.string.isRequired,
+      divisions: PropTypes.arrayOf(
+        PropTypes.shape({
+          divisionName: PropTypes.string.isRequired,
+          majorCities: PropTypes.arrayOf(
+            PropTypes.shape({
+              _id: PropTypes.string.isRequired,
+              cityName: PropTypes.string.isRequired,
+            })
+          ).isRequired,
+        })
+      ).isRequired,
+    })
+  ).isRequired,
   activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   handleCategoryChange: PropTypes.func.isRequired,
-  categories: PropTypes.arrayOf(PropTypes.object).isRequired,
+  categories: PropTypes.arrayOf(
+    PropTypes.shape({
+      categoryName: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   selectedOrganizer: PropTypes.string.isRequired,
   handleOrganizerChange: PropTypes.func.isRequired,
 };
