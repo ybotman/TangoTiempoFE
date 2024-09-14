@@ -1,4 +1,4 @@
-// FE/src/app/contexts/CalendarContext.js
+//app/contexts/CalendarContext.js
 
 
 "use client";

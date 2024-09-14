@@ -1,4 +1,4 @@
-// FE/src/app/contexts/RegionsContext.js
+//app/contexts/RegionsContext.js
 
 "use client";
 

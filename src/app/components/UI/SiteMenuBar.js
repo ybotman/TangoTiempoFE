@@ -1,4 +1,4 @@
-// app/components/UI/SiteMenuBar.js
+// src/app/components/UI/SiteMenuBar.js
 
 "use client";
 
@@ -21,6 +21,7 @@ import PostFilter from "@/components/UI/PostFilter";
 import { AuthContext } from '@/contexts/AuthContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
+import { RoleContext } from '@/contexts/RoleContext'; // Import RoleContext
 
 const SiteMenuBar = ({
   regions,
@@ -30,16 +31,14 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-    console.log('SiteMenuBar rendering');
- 
+  console.log('SiteMenuBar rendering');
   const { user, availableRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
-  console.log('AuthContext values:', { user, logOut, selectedRole });
- 
+  console.log('AuthContext values:', { user, availableRoles, logOut, selectedRole, setSelectedRole });
   const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
-   console.log('RegionsContext values:', { selectedRegion, selectedDivision, selectedCity });
- 
+  console.log('RegionsContext values:', { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity });
   const { organizers } = useContext(PostFilterContext);
-    console.log('PostFilterContext values:', { organizers });
+  console.log('PostFilterContext values:', { organizers });
+  const { roles, selectRole } = useContext(RoleContext); // Consume RoleContext
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -52,7 +51,8 @@ const SiteMenuBar = ({
   };
 
   const handleRoleChange = (event) => {
-    setSelectedRole(event.target.value);
+    selectRole(event.target.value);
+    console.log('Role changed to:', event.target.value);
   };
 
   const handleRegionChange = (event) => {
@@ -160,8 +160,8 @@ const SiteMenuBar = ({
           )}
 
           {/* Organizer Dropdown */}
-           {selectedRegion && organizers && organizers.length > 0 && (
-           <select
+          {selectedRegion && organizers && organizers.length > 0 && (
+            <select
               value={selectedOrganizer || ""}
               onChange={(e) => handleOrganizerChange(e.target.value)}
             >
@@ -191,7 +191,7 @@ const SiteMenuBar = ({
                 onChange={handleRoleChange}
                 label="Role"
               >
-                {availableRoles.map((role) => (
+                {roles.map((role) => (
                   <MenuItem key={role} value={role}>
                     {role}
                   </MenuItem>

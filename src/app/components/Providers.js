@@ -1,6 +1,6 @@
 // src/app/components/Providers.js
 
-'use client';
+"use client";
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { RegionsProvider } from '@/contexts/RegionsContext';
 import { CalendarProvider } from '@/contexts/CalendarContext';
 import { PostFilterProvider } from '@/contexts/PostFilterContext';
+import { RoleProvider } from '@/contexts/RoleContext';
 
 const Providers = ({ children }) => {
   return (
@@ -15,7 +16,9 @@ const Providers = ({ children }) => {
       <RegionsProvider>
         <CalendarProvider>
           <PostFilterProvider>
-            {children}
+            <RoleProvider>
+              {children}
+            </RoleProvider>
           </PostFilterProvider>
         </CalendarProvider>
       </RegionsProvider>

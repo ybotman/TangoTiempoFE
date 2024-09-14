@@ -1,4 +1,4 @@
-// src/app/contexts/AuthContext.js
+//app/contexts/AuthContext.js
 
 'use client';
 
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [isSystemOwner, setIsSystemOwner] = useState(false);
   const [isNamedUser, setIsNamedUser] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState('  ');
   const signUpOngoing = useRef(false);
 
   console.log('AuthProvider rendering', user, selectedRole, isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser);
