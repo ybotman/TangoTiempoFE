@@ -18,17 +18,17 @@ export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [availableRoles, setavailableRoles] = useState([]);
-  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isRegionalOrganizer, setIsRegionalOrganizer] = useState(false);
   const [isRegionalAdmin, setIsRegionalAdmin] = useState(false);
   const [isSystemOwner, setIsSystemOwner] = useState(false);
   const [isNamedUser, setIsNamedUser] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const signUpOngoing = useRef(false);
 
-  console.log('AuthProvider rendering', user, isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser);
+  console.log('AuthProvider rendering', user, selectedRole, isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {

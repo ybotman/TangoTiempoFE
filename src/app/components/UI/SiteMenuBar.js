@@ -160,8 +160,8 @@ const SiteMenuBar = ({
           )}
 
           {/* Organizer Dropdown */}
-          {selectedRegion && organizers.length > 0 && (
-            <select
+           {selectedRegion && organizers && organizers.length > 0 && (
+           <select
               value={selectedOrganizer || ""}
               onChange={(e) => handleOrganizerChange(e.target.value)}
             >
