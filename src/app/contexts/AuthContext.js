@@ -134,10 +134,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout Function
-  const logout = () => {
-    return signOut(auth);
-  };
 
+const logOut = async () => {
+  try {
+    await signOut(auth);
+    console.log('User signed out successfully');
+    // Optional: Reset other state variables if necessary
+    setUser(null);
+    //setAvailableRoles([]);
+    setSelectedRole('');
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+};
   // Context Value
   const value = {
     user,
@@ -151,7 +160,7 @@ export const AuthProvider = ({ children }) => {
     isNamedUser,
     loading,
     error,
-    logout,
+    logOut,
     authenticateWithGoogle,
     login,
   };

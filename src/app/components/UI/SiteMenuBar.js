@@ -177,56 +177,56 @@ const SiteMenuBar = ({
         </Box>
 
         {/* User State and Role Dropdown */}
-        {user ? (
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body1" color="textPrimary">
-              {user.displayName || user.email}
-            </Typography>
-            <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
-              <InputLabel id="role-select-label">Role</InputLabel>
-              <Select
-                labelId="role-select-label"
-                id="role-select"
-                value={selectedRole}
-                onChange={handleRoleChange}
-                label="Role"
-              >
-                {roles.map((role) => (
-                  <MenuItem key={role} value={role}>
-                    {role}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button
-              variant="outlined"
-              color="inherit"
-              size="small"
-              onClick={logOut}
-            >
-              Log Out
-            </Button>
-          </Stack>
-        ) : (
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              href="/auth/login"
-            >
-              Log In
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              href="/auth/signup"
-            >
-              Sign Up
-            </Button>
-          </Stack>
-        )}
+         {user ? (
+  <Stack direction="row" spacing={1} alignItems="center">
+    <Typography variant="body1" color="textPrimary">
+      {user.displayName || user.email}
+    </Typography>
+    <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+      <InputLabel id="role-select-label">Role</InputLabel>
+      <Select
+        labelId="role-select-label"
+        id="role-select"
+        value={selectedRole}
+        onChange={handleRoleChange}
+        label="Role"
+      >
+        {roles.map((role) => (
+          <MenuItem key={role} value={role}>
+            {role}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+    <Button
+      variant="outlined"
+      color="inherit"
+      size="small"
+      onClick={logOut} // Correctly invoking logOut
+    >
+      Log Out
+    </Button>
+  </Stack>
+) : (
+  <Stack direction="row" spacing={1}>
+    <Button
+      variant="contained"
+      color="primary"
+      size="small"
+      href="/auth/login"
+    >
+      Log In
+    </Button>
+    <Button
+      variant="contained"
+      color="secondary"
+      size="small"
+      href="/auth/signup"
+    >
+      Sign Up
+    </Button>
+  </Stack>
+)}
       </Box>
 
       {/* Bottom row with Category Filter */}
