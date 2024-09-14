@@ -17,7 +17,7 @@ console.log('AuthContext created');
 export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
-  const [availibleRoles, setAvailibleRoles] = useState([]);
+  const [availableRoles, setavailableRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isRegionalOrganizer, setIsRegionalOrganizer] = useState(false);
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         setUser(null);
-        setAvailibleRoles([]); // Clear roles on logout
+        setavailableRoles([]); // Clear roles on logout
       }
       setLoading(false);
     });
@@ -59,16 +59,16 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         const roles = response.data.roleIds.map((role) => role.roleName);
-        setAvailibleRoles(roles); // Set available roles
+        setavailableRoles(roles); // Set available roles
 
         const initialRole = roles[0] || ""; // Set the first role as selectedRole by default
         setSelectedRole(initialRole);
       } else {
-        setAvailibleRoles([]);
+        setavailableRoles([]);
       }
     } catch (err) {
       setError("Failed to fetch user roles");
-      setAvailibleRoles([]);
+      setavailableRoles([]);
     }
   };
 
@@ -141,7 +141,7 @@ export const AuthProvider = ({ children }) => {
   // Context Value
   const value = {
     user,
-    availibleRoles,
+    availableRoles,
     selectedRole,
     setSelectedRole,
     isAnonymous,

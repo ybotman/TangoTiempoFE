@@ -9,7 +9,7 @@ import { RegionsContext } from "@/contexts/RegionsContext";
 export const useSiteMenuBar = () => {
   const {
     user,
-    availibleRoles,
+    availableRoles,
     logOut,
     selectedRole,
     setSelectedRole,
@@ -55,7 +55,7 @@ export const useSiteMenuBar = () => {
 
   return {
     user,
-    availibleRoles,
+    availableRoles,
     logOut,
     selectedRole,
     setSelectedRole,

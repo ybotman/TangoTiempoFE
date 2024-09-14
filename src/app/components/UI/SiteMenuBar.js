@@ -32,7 +32,7 @@ const SiteMenuBar = ({
 }) => {
     console.log('SiteMenuBar rendering');
  
-  const { user, availibleRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
+  const { user, availableRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
   console.log('AuthContext values:', { user, logOut, selectedRole });
  
   const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
@@ -102,13 +102,13 @@ const SiteMenuBar = ({
             onClose={handleMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {availibleRoles.includes("NamedUser") && <MenuItem>User Settings</MenuItem>}
-            {availibleRoles.includes("RegionalOrganizer") && <MenuItem>Organizer Settings</MenuItem>}
-            {availibleRoles.includes("RegionalOrganizer") && <MenuItem>Location Management</MenuItem>}
-            {availibleRoles.includes("RegionalAdmin") && <MenuItem>Add Organizers</MenuItem>}
-            {availibleRoles.includes("RegionalAdmin") && <MenuItem>Manage Locations</MenuItem>}
-            {availibleRoles.includes("SystemOwner") && <MenuItem>Full Menu Access (All Roles)</MenuItem>}
-            {availibleRoles.includes("Anonymous") && <MenuItem>Login/Signup Options</MenuItem>}
+            {availableRoles.includes("NamedUser") && <MenuItem>User Settings</MenuItem>}
+            {availableRoles.includes("RegionalOrganizer") && <MenuItem>Organizer Settings</MenuItem>}
+            {availableRoles.includes("RegionalOrganizer") && <MenuItem>Location Management</MenuItem>}
+            {availableRoles.includes("RegionalAdmin") && <MenuItem>Add Organizers</MenuItem>}
+            {availableRoles.includes("RegionalAdmin") && <MenuItem>Manage Locations</MenuItem>}
+            {availableRoles.includes("SystemOwner") && <MenuItem>Full Menu Access (All Roles)</MenuItem>}
+            {availableRoles.includes("Anonymous") && <MenuItem>Login/Signup Options</MenuItem>}
             <MenuItem>About</MenuItem>
           </Menu>
 
@@ -191,7 +191,7 @@ const SiteMenuBar = ({
                 onChange={handleRoleChange}
                 label="Role"
               >
-                {availibleRoles.map((role) => (
+                {availableRoles.map((role) => (
                   <MenuItem key={role} value={role}>
                     {role}
                   </MenuItem>
