@@ -229,23 +229,7 @@ const SiteMenuBar = ({
 };
 
 SiteMenuBar.propTypes = {
-  regions: PropTypes.arrayOf(
-    PropTypes.shape({
-      regionCode: PropTypes.string.isRequired,
-      regionName: PropTypes.string.isRequired,
-      divisions: PropTypes.arrayOf(
-        PropTypes.shape({
-          divisionName: PropTypes.string.isRequired,
-          majorCities: PropTypes.arrayOf(
-            PropTypes.shape({
-              cityName: PropTypes.string.isRequired,
-              _id: PropTypes.string.isRequired,
-            })
-          ).isRequired,
-        })
-      ).isRequired,
-    })
-  ).isRequired,
+
   activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   handleCategoryChange: PropTypes.func.isRequired,
   categories: PropTypes.arrayOf(PropTypes.object).isRequired,

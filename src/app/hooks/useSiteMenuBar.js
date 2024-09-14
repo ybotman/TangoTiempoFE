@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import useOrganizers from "@/hooks/useOrganizers";
+import { useRegions } from "@/hooks/useRegions"; // Import useRegions
 
 export const useSiteMenuBar = () => {
   // Use authentication hook to manage user and roles
@@ -20,14 +21,15 @@ export const useSiteMenuBar = () => {
     selectedRole,
     setSelectedRole,
   } = useAuth();
+  // State variables
 
-  // Manage region, division, and city
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedDivision, setSelectedDivision] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-
+const [selectedRegion, setSelectedRegion] = useState("");
+const [selectedDivision, setSelectedDivision] = useState("");
+const [selectedCity, setSelectedCity] = useState("");
   // Organizers based on selected region
-  const organizers = useOrganizers(selectedRegion);
+  const organizers = useOrganizers('Northeast');  //ybotman fix!
+   const regions = useRegions(); // Now regions is defined here
+
 
   // Handle role change
   const handleRoleChange = (event) => {
@@ -35,46 +37,44 @@ export const useSiteMenuBar = () => {
     setSelectedRole(event.target.value);
   };
 
-  // Handle region, division, and city changes
-  const handleRegionChange = (event) => {
-    setSelectedRegion(event.target.value);
-    setSelectedDivision("");
-    setSelectedCity("");
-  };
+    // Handlers
+const handleRegionChange = (event) => {
+  const value = event.target.value;
+  console.log("handleRegionChange:", value);
+  setSelectedRegion(value);
+  setSelectedDivision("");
+  setSelectedCity("");
+};
 
-  const handleDivisionChange = (event) => {
-    setSelectedDivision(event.target.value);
-    setSelectedCity("");
-  };
+const handleDivisionChange = (event) => {
+  const value = event.target.value;
+  console.log("handleDivisionChange:", value);
+  setSelectedDivision(value);
+  setSelectedCity("");
+};
 
-  const handleCityChange = (event) => {
-    setSelectedCity(event.target.value);
-  };
+const handleCityChange = (event) => {
+  const value = event.target.value;
+  console.log("handleCityChange:", value);
+  setSelectedCity(value);
+};
+  
 
-
+  
   return {
     user,
     availibleRoles,
     loading,
     error,
     logOut,
-    isAnonymous,
-    isRegionalOrganizer,
-    isRegionalAdmin,
-    isSystemOwner,
-    isNamedUser,
+    regions,
+    selectedRegion, selectedDivision, selectedCity,
+    handleRegionChange, handleDivisionChange, handleCityChange,
+    isAnonymous, isRegionalOrganizer,isRegionalAdmin, isSystemOwner,isNamedUser,
     selectedRole,
     setSelectedRole,
-    selectedRegion,
-    setSelectedRegion,
-    selectedDivision,
-    setSelectedDivision,
-    selectedCity,
-    setSelectedCity,
     organizers,
     handleRoleChange,
-    handleRegionChange,
-    handleDivisionChange,
-    handleCityChange,
+
   };
 };

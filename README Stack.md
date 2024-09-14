@@ -3,7 +3,7 @@
 ### Frontend
 - **React.js**: The primary library used for building the user interface. 
 - **Next.js**: Used for server-side rendering and static site generation, optimizing performance and SEO.
-- **MUI (Material-UI)**: A popular React UI framework used for implementing the design and layout with Material Design components.
+- **MUI (Material-UI)**: Heavily reliant on the  React UI framework used for implementing the design and layout with Material Design components.
 - **FullCalendar**: A powerful and customizable JavaScript library used for displaying the calendar view and managing event scheduling.
 - **Axios/Fetch API**: For making HTTP requests to the backend API.
 
@@ -15,8 +15,6 @@
 - **Firebase**: Used for user authentication, real-time database, and role-based access control.
 
 ### Deployment and CI/CD
-- **Vercel**: Platform for deploying the Next.js frontend.
-- **Heroku**: Platform for deploying the Node.js backend.
 - **GitHub Actions**: Used for Continuous Integration (CI) and Continuous Deployment (CD) pipelines.
 
 ### Testing
@@ -25,7 +23,6 @@
 
 ### State Management
 - **React Context API**: Used for managing global state across the application.
-- **Redux/Zustand**: Considered for more complex state management needs, especially as the app scales.
 
 ### Version Control
 - **Git**: Version control system used to track changes in the codebase.

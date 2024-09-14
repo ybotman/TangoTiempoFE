@@ -18,9 +18,10 @@ import ListIcon from "@mui/icons-material/List";
 
 import SiteHeader from "@/components/UI/SiteHeader";
 import SiteMenuBar from "@/components/UI/SiteMenuBar";
+//import { useSiteMenuBar } from "@/hooks/useSiteMenuBar";
+import { useCalendarPage } from "@/hooks/useCalendarPage";
 import EventDetailsModal from "@/components/Modals/EventDetailsModal";
 import EventCRUDModal from "@/components/Modals/EventCRUDModal";
-import { useCalendarPage } from "@/hooks/useCalendarPage";
 
 const CalendarPage = () => {
   console.log("CalendarPage cont:");
@@ -34,7 +35,6 @@ const CalendarPage = () => {
     selectedRegion,
     selectedDivision,
     selectedCity,
-    selectedDate,
     organizers,
     calendarRef,
     setSelectedRegion,
@@ -45,6 +45,7 @@ const CalendarPage = () => {
     handleDatesSet,
     handleEventCreated,
     handleCategoryChange,
+    handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,
@@ -66,6 +67,7 @@ const CalendarPage = () => {
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         regions={regions}
+        handleRegionChange={handleRegionChange}
         organizers={organizers}
         selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
@@ -121,7 +123,7 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={coloredFilteredEvents}
-        datesSet={handleDatesSet} // Pass the handleDatesSet here
+        datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}

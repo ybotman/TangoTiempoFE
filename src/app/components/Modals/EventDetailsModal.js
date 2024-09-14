@@ -1,3 +1,5 @@
+//FE/src/app/components/Modals/EventDetailsModal.js
+
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Button, Grid, CardMedia } from '@mui/material';

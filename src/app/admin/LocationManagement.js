@@ -1,3 +1,6 @@
+//FE/src/app/admin/LocationManagement.js
+
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
