@@ -1,7 +1,7 @@
 //app/hooks/useCalendarPage.js
-// app/hooks/useCalendarPage.js
 
-import { useState, useContext } from "react";
+
+import { useState, useContext, useRef } from "react";
 import { useEvents } from "@/hooks/useEvents";
 import { usePostFilter } from "@/hooks/usePostFilter";
 import { transformEvents } from "@/utils/transformEvents";
@@ -11,14 +11,18 @@ import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
 
+
 export const useCalendarPage = () => {
   const categories = useCategories();
-  const { selectedRegion, selectedDivision, selectedCity } = useContext(RegionsContext);
+  const { selectedRegion, selectedDivision, selectedCity, setSelectedRegion, setSelectedDivision, setSelectedCity } = useContext(RegionsContext);
   const { selectedOrganizers, setSelectedOrganizers, selectedCategories, setSelectedCategories } = useContext(PostFilterContext);
   const { datesSet, setDatesSet } = useContext(CalendarContext);
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
+  const calendarRef = useRef(null); // Define calendarRef
+;
 
   const handleDatesSet = (dateInfo) => {
     console.log("useCalendarPage.handleDatesSet");
@@ -100,6 +104,7 @@ export const useCalendarPage = () => {
     setSelectedEvent(clickInfo.event);
   };
 
+
   return {
     categories,
     activeCategories,
@@ -124,5 +129,6 @@ export const useCalendarPage = () => {
     handleToday,
     handleDateClick,
     handleEventClick,
+    calendarRef, // Return calendarRef
   };
 };

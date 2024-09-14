@@ -38,6 +38,7 @@ const EventCRUDModal = ({ open, onClose, selectedDate, selectedRegion, onCreate 
 
 
     const handleSave = async () => {
+        console.log('* * * * I AM DEFAULTING REGIONS AND LOCTIONS!  FIX FIX FIX via handleSave');
         const eventData = {
             title,
             description,

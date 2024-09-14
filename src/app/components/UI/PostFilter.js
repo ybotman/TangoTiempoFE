@@ -11,9 +11,8 @@ const PostFilter = ({
   activeCategories = [],
   categories = [],
   handleCategoryChange,
-  selectedOrganizer,
 }) => {
-  console.log('selectedOrg:', selectedOrganizer);
+
   return (
     <div className="category-filter">
       {categories && categories.length > 0 ? (

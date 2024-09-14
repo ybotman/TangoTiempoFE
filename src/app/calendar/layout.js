@@ -7,7 +7,7 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { regions } = useContext(RegionsContext);
+  const { regions,selectedRegion } = useContext(RegionsContext);
 
   useEffect(() => {
     if (user?.displayName) {
@@ -15,7 +15,7 @@ const RootLayout = ({ children }) => {
     }
 
     if (regions?.length > 0) {
-      console.log('Region Name:', regions[0].regionName);
+      console.log('Selected Region:', selectedRegion);
     }
   }, [user, regions]);
 

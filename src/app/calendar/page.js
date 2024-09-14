@@ -60,7 +60,6 @@ const CalendarPage = () => {
   return (
     <div>
       <SiteHeader />
-
       <SiteMenuBar
         selectedRegion={selectedRegion}
         setSelectedRegion={setSelectedRegion}
@@ -120,7 +119,6 @@ const CalendarPage = () => {
           </IconButton>
         </ButtonGroup>
       </div>
-
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -133,7 +131,6 @@ const CalendarPage = () => {
         headerToolbar={false}
         scrollTime="17:00:00"
       />
-
     </div>
   );
 };

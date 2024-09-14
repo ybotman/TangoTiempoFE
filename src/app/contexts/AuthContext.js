@@ -11,9 +11,11 @@ import axios from 'axios';
 // Create Auth Context
 export const AuthContext = createContext();
 
+console.log('AuthContext created');
 
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
+
   const [user, setUser] = useState(null);
   const [availibleRoles, setAvailibleRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
@@ -24,9 +26,9 @@ export const AuthProvider = ({ children }) => {
   const [isNamedUser, setIsNamedUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const signUpOngoing = useRef(false);
 
+  console.log('AuthProvider rendering', user, isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
