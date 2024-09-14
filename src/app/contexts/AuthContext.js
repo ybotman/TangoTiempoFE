@@ -11,6 +11,7 @@ import axios from 'axios';
 // Create Auth Context
 export const AuthContext = createContext();
 
+
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
