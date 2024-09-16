@@ -10,9 +10,7 @@ export const categoryColors = {
 };
 
 
-// Function to filter events based on active categories and apply colors
 export const coloredFilteredEvents = (events, activeCategories) => {
-    console.log('categporu colors')
     if (!Array.isArray(events)) return [];
 
     // Filter events based on active categories
@@ -30,6 +28,6 @@ export const coloredFilteredEvents = (events, activeCategories) => {
         };
     });
 
-    console.log('Colored events:', coloredEvents); // Debugging log to check colored events
+  //  console.log('Colored events:', coloredEvents); // Debugging log to check colored events
     return coloredEvents;
 };

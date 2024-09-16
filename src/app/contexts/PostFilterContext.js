@@ -7,7 +7,7 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 import useOrganizers from '@/hooks/useOrganizers';
 
 export const PostFilterContext = createContext();
-console.log('PostFilterContext created');
+//console.log('PostFilterContext created');
 
 export const PostFilterProvider = ({ children }) => {
     const { selectedRegion } = useContext(RegionsContext);
@@ -15,7 +15,7 @@ export const PostFilterProvider = ({ children }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const organizers = useOrganizers(selectedRegion); // Fetch organizers based on selectedRegion
 
-  console.log('PostFilterProvider rendering. selectedOrganizers:', selectedOrganizers, 'selectedCategories:', selectedCategories);
+ // console.log('PostFilterProvider rendering. selectedOrganizers:', selectedOrganizers, 'selectedCategories:', selectedCategories);
   
   return (
     <PostFilterContext.Provider value={{

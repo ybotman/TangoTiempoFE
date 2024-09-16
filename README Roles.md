@@ -1,4 +1,4 @@
-User Roles and Permissions
+TangoTiempo appliction : User Roles and Permissions
 
 Tango Tiempo supports a robust role-based access control system, allowing for different levels of access and functionality based on user roles. Below are the available roles and their respective permissions:
 
@@ -61,3 +61,108 @@ Permissions Summary
 |---------------------|-------------|----------------|---------------|-------------------|--------------|----------------|-----------------|
 
 
+## Role: Everyone
+**Hamburger Menu:**
+- About
+- Help
+- Information
+
+**Calendar Navigation:**
+- Full
+
+**Event Click:**
+- View event details (read-only for Anonymous, view-only for others)
+
+**Date Click:**
+- Navigate to day view
+
+**Event Details:**
+- View only (Anonymous, others see read-only)
+
+
+## Role: Anonymous User
+**Hamburger Menu:**
+- Login/Sign Up
+- Message
+
+**Calendar Navigation:**
+- Full
+
+**Event Click:**
+- View event details (read-only)
+
+**Date Click:**
+- Navigate to day view
+
+**Event Details:**
+- View only
+
+
+## Role: Named User
+**Hamburger Menu:**
+- User Settings
+- Request to Regional Organizer (if not already a Regional Organizer)
+- Message
+- Logout
+
+**Calendar Navigation:**
+- Full
+
+**Event Click:**
+- View event details (with Add Comment/Photo option)
+
+**Date Click:**
+- Navigate to day view
+
+**Event Details:**
+- Can add comments or photos
+
+
+## Role: Regional Organizer
+**Hamburger Menu:**
+- Manage Events
+- Location Management
+- Ads Management
+- Contact Regional Admin
+- Contact Other Regional Organizer
+- Logout
+
+**Calendar Navigation:**
+- Full
+
+**Event Click:**
+- Hover Menu (Edit, Delete, View); Click leads to Edit Event
+
+**Date Click:**
+- Hover menu: Add Event or Cancel
+
+**Event Details:**
+- Can edit, delete, or view events
+
+
+## Role: Regional Admin
+**Hamburger Menu:**
+- All Organizer Management
+- Merge Locations
+- Regional Event Management
+- Logout
+
+**Calendar Navigation:**
+- Full
+
+**Event Click:**
+- View event details
+
+**Date Click:**
+- Navigate to day view
+
+**Event Details:**
+- View only
+
+
+## Role: System Owner
+**Hamburger Menu:**
+- System Settings
+- Region Management
+- Full Event Management
+- User Management​⬤

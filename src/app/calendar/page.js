@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useContext } from "react";
+import React, { useState, useContext } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -22,17 +22,22 @@ import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { useCalendarPage } from "@/hooks/useCalendarPage";
-import EventDetailsModal from "@/components/Modals/EventDetailsModal";
-import EventCRUDModal from "@/components/Modals/EventCRUDModal";
+import CalendarSubMenu from "@/components/UI/CalendarSubMenu";  
+
+//import EventDetailsModal from "@/components/Modals/EventDetailsModal";
+//import EventCRUDModal from "@/components/Modals/EventCRUDModal";
 
 const CalendarPage = () => {
-  console.log("CalendarPage cont:");
   const { datesSet, setDatesSet } = useContext(CalendarContext);
   const { regions } = useContext(RegionsContext);
   const { selectedOrganizers, selectedCategories } = useContext(PostFilterContext);
-
+  //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const {
+        menuAnchor,
+    menuItems,
     categories,
+    handleMenuAction,
+    handleMenuClose,
     activeCategories,
     handleCategoryChange,
     selectedRegion,
@@ -43,7 +48,6 @@ const CalendarPage = () => {
     setSelectedRegion,
     setSelectedDivision,
     setSelectedCity,
-    setCreateModalOpen,
     setSelectedEvent,
     handleDatesSet,
     handleEventCreated,
@@ -83,7 +87,7 @@ const CalendarPage = () => {
           margin: "20px",
         }}
       >
-        {/* Navigation buttons */}
+
         <ButtonGroup variant="outlined" aria-label="outlined button group">
           <IconButton onClick={handlePrev}>
             <ArrowBackIcon />
@@ -96,7 +100,6 @@ const CalendarPage = () => {
           </IconButton>
         </ButtonGroup>
 
-        {/* View switching buttons */}
         <ButtonGroup variant="outlined" aria-label="outlined button group">
           <IconButton
             onClick={() =>
@@ -119,6 +122,8 @@ const CalendarPage = () => {
           </IconButton>
         </ButtonGroup>
       </div>
+
+
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -131,30 +136,17 @@ const CalendarPage = () => {
         headerToolbar={false}
         scrollTime="17:00:00"
       />
+            {/* SubMenu */}
+      <CalendarSubMenu
+        menuAnchor={menuAnchor}
+        handleClose={handleMenuClose}
+        menuItems={menuItems}
+        onActionSelected={handleMenuAction}
+      />
+
     </div>
   );
 };
 
 export default CalendarPage;
 
-/*
-
-      {selectedEvent && (
-        <EventDetailsModal
-          event={selectedEvent}
-          open={Boolean(selectedEvent)}
-          onClose={() => setSelectedEvent(null)}
-        />
-      )}
-
-      {isCreateModalOpen && (
-        <EventCRUDModal
-          open={isCreateModalOpen}
-          onClose={() => setCreateModalOpen(false)}
-          selectedDate={selectedDate}
-          selectedRegion={selectedRegion}
-          onCreate={handleEventCreated}
-        />
-      )}
-      
-      */

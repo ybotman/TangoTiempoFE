@@ -17,17 +17,18 @@ console.log('RoleProvider rendering : selectedRole:', selectedRole);
   useEffect(() => {
     if (availableRoles && availableRoles.length > 0) {
       setRoles(availableRoles);
-      // Optionally set a default role
-      // setSelectedRole(availableRoles[0].roleName);
+        setSelectedRole('RegionalOrganizer');
+        console.warn('Forced selectedRole to RegionalOrganizer for testing');
     }
   }, [availableRoles]);
 
-  const selectRole = (role) => {
+
+   const selectRole = (role) => {
     if (roles.includes(role)) {
-      setSelectedRole(role);
+        setSelectedRole(role);
     }
   };
-
+    
   return (
     <RoleContext.Provider value={{ roles, selectedRole, selectRole }}>
       {children}

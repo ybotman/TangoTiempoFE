@@ -1,7 +1,10 @@
 //app/hooks/useSiteMenuBar.js
 // app/hooks/useSiteMenuBar.js
 
-import { useState, useContext } from "react";
+import {
+//  useState,
+  useContext
+} from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useOrganizers } from "@/hooks/useOrganizers";
 import { RegionsContext } from "@/contexts/RegionsContext";

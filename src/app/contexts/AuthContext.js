@@ -7,28 +7,24 @@ import PropTypes from 'prop-types';
 import { onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
 import axios from 'axios';
+//import { listOfAllRoles } from '@/utils/masterData';
 
 // Create Auth Context
 export const AuthContext = createContext();
 
-console.log('AuthContext created');
+//console.log('AuthContext created');
 
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
-  const [availableRoles, setavailableRoles] = useState([]);
+  const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const [isRegionalOrganizer, setIsRegionalOrganizer] = useState(false);
-  const [isRegionalAdmin, setIsRegionalAdmin] = useState(false);
-  const [isSystemOwner, setIsSystemOwner] = useState(false);
-  const [isNamedUser, setIsNamedUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('  ');
   const signUpOngoing = useRef(false);
 
-  console.log('AuthProvider rendering', user, selectedRole, isAnonymous, isRegionalOrganizer, isRegionalAdmin, isSystemOwner, isNamedUser);
+   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -39,50 +35,49 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         setUser(null);
-        setavailableRoles([]); // Clear roles on logout
+        setAvailableRoles([]); // Clear roles on logout
       }
       setLoading(false);
     });
-
+          console.warn('Force setting role to RegionalOrganizer');
+          setAvailableRoles(['RegionalOrganizer']);
+          setSelectedRole('RegionalOrganizer');
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    updateRoleBooleans(selectedRole);
-  }, [selectedRole]);
+//  useEffect(() => {
+//    updateRoleBooleans(selectedRole);
+//  }, [selectedRole]);
 
-  const fetchUserRoles = async (firebaseUserId) => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
-      );
+const fetchUserRoles = async (firebaseUserId) => {
+  try {
+    //console.log('Fetching user roles for UID:', firebaseUserId);
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
+    );
 
-      if (response.status === 200) {
-        const roles = response.data.roleIds.map((role) => role.roleName);
-        setavailableRoles(roles); // Set available roles
+    if (response.status === 200) {
+      //console.log('Fetched roles:', response.data.roleIds);
+      const roles = response.data.roleIds.map((role) => role.roleName);
+      setAvailableRoles(roles); 
 
-        const initialRole = roles[0] || ""; // Set the first role as selectedRole by default
-        setSelectedRole(initialRole);
-      } else {
-        setavailableRoles([]);
-      }
-    } catch (err) {
-      setError("Failed to fetch user roles");
-      setavailableRoles([]);
+      const initialRole = roles[0] || "";
+      setSelectedRole(initialRole);
+    } else {
+      console.warn('Unexpected response status:', response.status);
+      setAvailableRoles([]);
+      setSelectedRole('');
     }
-  };
-
-  // Update boolean values based on selected role
-  const updateRoleBooleans = (roleName) => {
-    setIsNamedUser(roleName === "NamedUser");
-    setIsRegionalOrganizer(roleName === "RegionalOrganizer");
-    setIsRegionalAdmin(roleName === "RegionalAdmin");
-    setIsSystemOwner(roleName === "SystemOwner");
-    setIsAnonymous(roleName === "Anonymous");
-  };
+  } catch (err) {
+    console.error('Failed to fetch user roles:', err);
+    setError("Failed to fetch user roles");
+    setAvailableRoles([]);
+    setSelectedRole('');
+  }
+};
 
   // Authenticate with Google
-  const authenticateWithGoogle = async () => {
+   const authenticateWithGoogle = async () => {
     if (user) {
       setError("You are already signed in.");
       return null;
@@ -93,16 +88,20 @@ export const AuthProvider = ({ children }) => {
 
     try {
       signUpOngoing.current = true;
+      console.log('Initiating Google sign-in...');
       const result = await signInWithPopup(auth, provider);
+      console.log('Google sign-in successful:', result);
       const firebaseUserId = result.user.uid;
 
       try {
+        console.log('Fetching user roles from backend...');
         await axios.get(
           `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
         );
       } catch (error) {
+        console.error('Error fetching user from backend:', error);
         if (error.response && error.response.status === 404) {
-          // If user not found, create the user in the backend
+          console.log('User not found in backend. Creating new user...');
           const roleResponse = await axios.post(
             `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
             { firebaseUserId }
@@ -121,7 +120,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return result.user;
     } catch (err) {
-      setError(err.message);
+      console.error('Error in authenticateWithGoogle:', err);
+      setError(err.message || 'An unexpected error occurred.');
       setLoading(false);
       signUpOngoing.current = false;
       return null;
@@ -141,23 +141,18 @@ const logOut = async () => {
     console.log('User signed out successfully');
     // Optional: Reset other state variables if necessary
     setUser(null);
-    //setAvailableRoles([]);
+    setAvailableRoles([]);
     setSelectedRole('');
   } catch (error) {
     console.error('Error signing out:', error);
   }
 };
-  // Context Value
+  // Context Valu
   const value = {
     user,
     availableRoles,
     selectedRole,
     setSelectedRole,
-    isAnonymous,
-    isRegionalOrganizer,
-    isRegionalAdmin,
-    isSystemOwner,
-    isNamedUser,
     loading,
     error,
     logOut,

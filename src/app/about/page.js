@@ -1,5 +1,5 @@
 import styles from '@/styles/About.module.css';
-console.log("Loaded component: AboutPage", __filename);
+import React from 'react';
 
 export const metadata = {
     title: 'About Us',

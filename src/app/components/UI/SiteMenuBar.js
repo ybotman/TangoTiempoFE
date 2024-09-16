@@ -31,14 +31,15 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-  console.log('SiteMenuBar rendering');
+  //console.log(' -->>> SiteMenuBar rendering');
   const { user, availableRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
-  console.log('AuthContext values:', { user, availableRoles, logOut, selectedRole, setSelectedRole });
+  //console.log(' -->>> AuthContext values:', { user, availableRoles, logOut, selectedRole, setSelectedRole });
   const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
-  console.log('RegionsContext values:', { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity });
+ // console.log(' -->>> RegionsContext values:', { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity });
   const { organizers } = useContext(PostFilterContext);
-  console.log('PostFilterContext values:', { organizers });
-  const { roles, selectRole } = useContext(RoleContext); // Consume RoleContext
+ // console.log(' -->>> PostFilterContext values:', { organizers });
+  const { roles, selectRole } = useContext(RoleContext); 
+ // console.log(' -->>> RoleContext values:', { roles, selectRole });
 
   const [anchorEl, setAnchorEl] = useState(null);
 

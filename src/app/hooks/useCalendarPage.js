@@ -1,5 +1,4 @@
-//app/hooks/useCalendarPage.js
-
+// app/hooks/useCalendarPage.js
 
 import { useState, useContext, useRef } from "react";
 import { useEvents } from "@/hooks/useEvents";
@@ -10,25 +9,25 @@ import useCategories from "@/hooks/useCategories";
 import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
+import { RoleContext } from '@/contexts/RoleContext';
+import { listOfAllRoles } from '@/utils/masterData';
 
 
 export const useCalendarPage = () => {
+  const [menuAnchor, setMenuAnchor] = useState(null); // To track submenu position
+  const [menuItems, setMenuItems] = useState([]); // Menu items based on the role
+  const [clickedDate, setClickedDate] = useState(null); // Date or event clicked
   const categories = useCategories();
-  const { selectedRegion, selectedDivision, selectedCity, setSelectedRegion, setSelectedDivision, setSelectedCity } = useContext(RegionsContext);
+  const { selectedRegion, selectedDivision, selectedCity } = useContext(RegionsContext);
+  const { selectedRole } = useContext(RoleContext);
   const { selectedOrganizers, setSelectedOrganizers, selectedCategories, setSelectedCategories } = useContext(PostFilterContext);
   const { datesSet, setDatesSet } = useContext(CalendarContext);
-
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
 
-  const calendarRef = useRef(null); // Define calendarRef
-;
+  const calendarRef = useRef(null);
 
   const handleDatesSet = (dateInfo) => {
-    console.log("useCalendarPage.handleDatesSet");
-    console.log("--> Calendar earliest Date:", dateInfo.startStr);
-    console.log("--> Calendar latest Date:", dateInfo.endStr);
-
     setDatesSet({
       start: dateInfo.startStr,
       end: dateInfo.endStr,
@@ -75,7 +74,7 @@ export const useCalendarPage = () => {
 
   const handleRegionChange = (value) => {
     console.log("handleRegionChange:", value);
-    // Assume setSelectedRegion is available from context
+    refreshEvents();
   };
 
   const handlePrev = () => {
@@ -95,15 +94,86 @@ export const useCalendarPage = () => {
 
   const handleDateClick = (arg) => {
     console.log("Date clicked:", arg.dateStr);
-    setCreateModalOpen(true);
-    // Set selectedDate in context or state if needed
+    setClickedDate(arg.dateStr); // Store the clicked date
+
+
+    if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
+      // For Regional Organizer, show date-related options
+      setMenuItems([
+        { label: 'Change Date', action: 'changeDate' },
+        { label: 'Add Single Event', action: 'addSingleEvent' },
+        { label: 'Add Repeating Event', action: 'addRepeatingEvent' },
+      ]);
+      setMenuAnchor({
+        mouseX: arg.jsEvent.clientX,
+        mouseY: arg.jsEvent.clientY,
+      });
+    }
+
+    if (selectedRole === listOfAllRoles.NAMED_USER && new Date(arg.dateStr) < new Date()) {
+      // If Named User and date is in the past
+      setMenuItems([
+        { label: 'View Details', action: 'viewDetails' },
+        { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
+      ]);
+      setMenuAnchor({
+        mouseX: arg.jsEvent.clientX,
+        mouseY: arg.jsEvent.clientY,
+      });
+    }
+
+    // Add other role-based conditions as needed...
   };
 
-  const handleEventClick = (clickInfo) => {
-    console.log("Event clicked:", clickInfo.event);
-    setSelectedEvent(clickInfo.event);
+  const handleEventClick = (arg) => {
+    console.log("Event clicked:", arg.event.title);
+
+    if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
+      // For Regional Organizer, show event-related options
+      setMenuItems([
+        { label: 'Edit Event', action: 'editEvent' },
+        { label: 'Delete Event', action: 'deleteEvent' },
+        { label: 'View Event', action: 'viewEvent' },
+        { label: 'Add Photos', action: 'addPhotos' },
+      ]);
+      setMenuAnchor({
+        mouseX: arg.jsEvent.clientX,
+        mouseY: arg.jsEvent.clientY,
+      });
+    }
+
+    if (selectedRole === listOfAllRoles.NAMED_USER && new Date(arg.event.start) < new Date()) {
+      // For Named User, show limited event-related options if event is in the past
+      setMenuItems([
+        { label: 'View Details', action: 'viewDetails' },
+        { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
+      ]);
+      setMenuAnchor({
+        mouseX: arg.jsEvent.clientX,
+        mouseY: arg.jsEvent.clientY,
+      });
+    }
+
+    if (selectedRole === listOfAllRoles.EVERYONE) {
+      // Everyone can only view details
+      setMenuItems([
+        { label: 'View Event Details', action: 'viewDetails' },
+      ]);
+      setMenuAnchor({
+        mouseX: arg.jsEvent.clientX,
+        mouseY: arg.jsEvent.clientY,
+      });
+    }
   };
 
+  const handleMenuAction = (action) => {
+    console.log(`Action selected: ${action}`);
+    setMenuAnchor(null);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
 
   return {
     categories,
@@ -130,5 +200,9 @@ export const useCalendarPage = () => {
     handleDateClick,
     handleEventClick,
     calendarRef, // Return calendarRef
+    handleMenuAction,
+    handleMenuClose,
+    menuAnchor,
+    menuItems
   };
 };
