@@ -1,9 +1,11 @@
+//src/app/about/page.js
+
 import styles from '@/styles/About.module.css';
 import React from 'react';
 
 export const metadata = {
     title: 'About Us',
-    description: 'Learn more about our company',
+    description: 'we are the Bomb',
     openGraph: {
         title: 'About Us',
         description: 'Learn more about our company',

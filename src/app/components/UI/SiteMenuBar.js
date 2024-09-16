@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import {
   Box,
   IconButton,
-  Menu,
+  Menu, Divider,
   MenuItem,
   Button,
   Stack,
@@ -21,7 +21,9 @@ import PostFilter from "@/components/UI/PostFilter";
 import { AuthContext } from '@/contexts/AuthContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
-import { RoleContext } from '@/contexts/RoleContext'; // Import RoleContext
+import { RoleContext } from '@/contexts/RoleContext';
+import FAQModal from '@/components/Modals/FAQModal'; // Import the help modal
+import { listOfAllRoles } from "@/utils/masterData"; 
 
 const SiteMenuBar = ({
   regions,
@@ -31,24 +33,28 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-  //console.log(' -->>> SiteMenuBar rendering');
-  const { user, availableRoles, logOut, selectedRole, setSelectedRole } = useContext(AuthContext);
-  //console.log(' -->>> AuthContext values:', { user, availableRoles, logOut, selectedRole, setSelectedRole });
+  const { user, availableRoles, logOut, selectedRole } = useContext(AuthContext);
   const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
- // console.log(' -->>> RegionsContext values:', { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity });
   const { organizers } = useContext(PostFilterContext);
- // console.log(' -->>> PostFilterContext values:', { organizers });
-  const { roles, selectRole } = useContext(RoleContext); 
- // console.log(' -->>> RoleContext values:', { roles, selectRole });
-
+  const { roles, selectRole } = useContext(RoleContext);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [FAQModalOpen, setFAQModalOpen] = useState(false);
 
-  const handleMenuOpen = (event) => {
+  // Renamed handleMenu to handleHamburgerMenu
+  const handleHamburgerMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  const handleHamburgerMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const openFAQModal = () => {
+    setFAQModalOpen(true);
+  };
+
+  const closeFAQModal = () => {
+    setFAQModalOpen(false);
   };
 
   const handleRoleChange = (event) => {
@@ -93,26 +99,25 @@ const SiteMenuBar = ({
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={handleMenuOpen}
+            onClick={handleHamburgerMenuOpen}
           >
             <MenuIcon />
           </IconButton>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
+            onClose={handleHamburgerMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {availableRoles.includes("NamedUser") && <MenuItem>User Settings</MenuItem>}
-            {availableRoles.includes("RegionalOrganizer") && <MenuItem>Organizer Settings</MenuItem>}
-            {availableRoles.includes("RegionalOrganizer") && <MenuItem>Location Management</MenuItem>}
-            {availableRoles.includes("RegionalAdmin") && <MenuItem>Add Organizers</MenuItem>}
-            {availableRoles.includes("RegionalAdmin") && <MenuItem>Manage Locations</MenuItem>}
-            {availableRoles.includes("SystemOwner") && <MenuItem>Full Menu Access (All Roles)</MenuItem>}
-            {availableRoles.includes("Anonymous") && <MenuItem>Login/Signup Options</MenuItem>}
-            <MenuItem>About</MenuItem>
+            {selectedRole === listOfAllRoles.NAMED_USER && <MenuItem>User Settings</MenuItem>}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Organizer Settings</MenuItem>}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Location Management</MenuItem>}
+            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && <MenuItem>Add Organizers</MenuItem>}
+            <Divider />
+            <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
+            <MenuItem>About TangoTiempo</MenuItem>
+            <MenuItem>Help</MenuItem>
           </Menu>
-
           {/* Region Dropdown */}
           <select value={selectedRegion || ""} onChange={handleRegionChange}>
             <option value="">Select Region</option>
@@ -122,7 +127,6 @@ const SiteMenuBar = ({
               </option>
             ))}
           </select>
-
           {/* Division Dropdown */}
           {selectedRegion && (
             <select
@@ -142,7 +146,6 @@ const SiteMenuBar = ({
                 ))}
             </select>
           )}
-
           {/* City Dropdown */}
           {selectedDivision && (
             <select value={selectedCity || ""} onChange={handleCityChange}>
@@ -159,7 +162,6 @@ const SiteMenuBar = ({
                 ))}
             </select>
           )}
-
           {/* Organizer Dropdown */}
           {selectedRegion && organizers && organizers.length > 0 && (
             <select
@@ -176,60 +178,58 @@ const SiteMenuBar = ({
             </select>
           )}
         </Box>
-
         {/* User State and Role Dropdown */}
-         {user ? (
-  <Stack direction="row" spacing={1} alignItems="center">
-    <Typography variant="body1" color="textPrimary">
-      {user.displayName || user.email}
-    </Typography>
-    <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
-      <InputLabel id="role-select-label">Role</InputLabel>
-      <Select
-        labelId="role-select-label"
-        id="role-select"
-        value={selectedRole}
-        onChange={handleRoleChange}
-        label="Role"
-      >
-        {roles.map((role) => (
-          <MenuItem key={role} value={role}>
-            {role}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-    <Button
-      variant="outlined"
-      color="inherit"
-      size="small"
-      onClick={logOut} // Correctly invoking logOut
-    >
-      Log Out
-    </Button>
-  </Stack>
-) : (
-  <Stack direction="row" spacing={1}>
-    <Button
-      variant="contained"
-      color="primary"
-      size="small"
-      href="/auth/login"
-    >
-      Log In
-    </Button>
-    <Button
-      variant="contained"
-      color="secondary"
-      size="small"
-      href="/auth/signup"
-    >
-      Sign Up
-    </Button>
-  </Stack>
-)}
+        {user ? (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body1" color="textPrimary">
+              {user.displayName || user.email}
+            </Typography>
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+              <InputLabel id="role-select-label">Role</InputLabel>
+              <Select
+                labelId="role-select-label"
+                id="role-select"
+                value={selectedRole}
+                onChange={handleRoleChange}
+                label="Role"
+              >
+                {roles.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              onClick={logOut}
+            >
+              Log Out
+            </Button>
+          </Stack>
+        ) : (
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              href="/auth/login"
+            >
+              Log In
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              href="/auth/signup"
+            >
+              Sign Up
+            </Button>
+          </Stack>
+        )}
       </Box>
-
       {/* Bottom row with Category Filter */}
       <Box
         sx={{
@@ -246,6 +246,8 @@ const SiteMenuBar = ({
           selectedOrganizer={selectedOrganizer}
         />
       </Box>
+      {/* Help Modal */}
+      <FAQModal open={FAQModalOpen} handleClose={closeFAQModal} />
     </Box>
   );
 };
