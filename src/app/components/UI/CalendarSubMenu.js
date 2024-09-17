@@ -4,7 +4,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Menu, MenuItem } from '@mui/material';
 
-const CalendarSubMenu = ({ menuAnchor, handleClose, menuItems, onActionSelected }) => {
+const CalendarSubMenu = ({
+  menuAnchor,
+  handleClose,
+  menuItems,
+  onActionSelected,
+}) => {
   return (
     <Menu
       open={!!menuAnchor}
@@ -28,7 +33,7 @@ const CalendarSubMenu = ({ menuAnchor, handleClose, menuItems, onActionSelected 
 CalendarSubMenu.propTypes = {
   menuAnchor: PropTypes.shape({
     mouseX: PropTypes.number,
-    mouseY: PropTypes.number
+    mouseY: PropTypes.number,
   }),
   handleClose: PropTypes.func.isRequired,
   menuItems: PropTypes.arrayOf(

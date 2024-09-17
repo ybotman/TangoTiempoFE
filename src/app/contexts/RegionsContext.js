@@ -1,6 +1,6 @@
 //app/contexts/RegionsContext.js
 
-"use client";
+'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
 import { useRegions } from '@/hooks/useRegions';
@@ -12,8 +12,8 @@ console.log('RegionsContext created');
 export const RegionsProvider = ({ children }) => {
   const regionsData = useRegions(); // Custom hook to fetch regions
   const [regions, setRegions] = useState([]);
-  const [selectedRegion, setSelectedRegion] = useState('');  // Name of the selected region
-  const [selectedRegionID, setSelectedRegionID] = useState('');  // ID of the selected region
+  const [selectedRegion, setSelectedRegion] = useState(''); // Name of the selected region
+  const [selectedRegionID, setSelectedRegionID] = useState(''); // ID of the selected region
   const [selectedDivision, setSelectedDivision] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
@@ -31,11 +31,11 @@ export const RegionsProvider = ({ children }) => {
         selectedRegion,
         setSelectedRegion,
         selectedRegionID,
-        setSelectedRegionID,  // Add setter for the region ID
+        setSelectedRegionID, // Add setter for the region ID
         selectedDivision,
         setSelectedDivision,
         selectedCity,
-        setSelectedCity
+        setSelectedCity,
       }}
     >
       {children}

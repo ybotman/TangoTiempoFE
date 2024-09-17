@@ -1,10 +1,10 @@
 //app/components/UI/PostFilter.js// app/components/UI/PostFilter.js
 
-"use client";
+'use client';
 
-import React, { useContext } from "react";
-import PropTypes from "prop-types";
-import { categoryColors } from "@/utils/categoryColors";
+import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
+import { categoryColors } from '@/utils/categoryColors';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
 
 const PostFilter = ({
@@ -12,26 +12,25 @@ const PostFilter = ({
   categories = [],
   handleCategoryChange,
 }) => {
-
   return (
     <div className="category-filter">
       {categories && categories.length > 0 ? (
         categories.map((category) => {
-           const isActive = activeCategories.includes(category.categoryName);
-         return (
+          const isActive = activeCategories.includes(category.categoryName);
+          return (
             <button
               key={category._id}
               style={{
                 backgroundColor: isActive
                   ? categoryColors[category.categoryName]
-                  : "white",
-                color: isActive ? "black" : "grey",
-                padding: "2px 2px",
-                border: isActive ? "none" : "1px solid grey",
-                borderRadius: "4px",
-                margin: "3px",
+                  : 'white',
+                color: isActive ? 'black' : 'grey',
+                padding: '2px 2px',
+                border: isActive ? 'none' : '1px solid grey',
+                borderRadius: '4px',
+                margin: '3px',
               }}
-              className={`category-button ${isActive ? "active" : ""}`}
+              className={`category-button ${isActive ? 'active' : ''}`}
               onClick={() => handleCategoryChange(category.categoryName)}
             >
               {category.categoryName}

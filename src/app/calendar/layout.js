@@ -1,13 +1,13 @@
 'use client'; // Enable client-side rendering
 
-import {React, useContext, useEffect } from 'react';
+import { React, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types'; // Import prop-types
 import { AuthContext } from '@/contexts/AuthContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { regions,selectedRegion } = useContext(RegionsContext);
+  const { regions, selectedRegion } = useContext(RegionsContext);
 
   useEffect(() => {
     if (user?.displayName) {
@@ -19,11 +19,7 @@ const RootLayout = ({ children }) => {
     }
   }, [user, regions]);
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
 
 // Define prop types for validation

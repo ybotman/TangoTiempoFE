@@ -16,8 +16,7 @@ export const defaultTestLocationID = {
 };
 
 export const defaultTestOrganizer = {
-            ownerOrganizerID: '6442ccb5f88a6c48aa30be35',
-            grantedOrganizerID: '6442ccb5f88a6c48aa30be35',
-    alternateOrganizerID: '6442ccb5f88a6c48aa30be35'
-            
+  ownerOrganizerID: '6442ccb5f88a6c48aa30be35',
+  grantedOrganizerID: '6442ccb5f88a6c48aa30be35',
+  alternateOrganizerID: '6442ccb5f88a6c48aa30be35',
 };

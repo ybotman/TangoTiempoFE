@@ -1,13 +1,14 @@
 // src/app/components/UI/SiteMenuBar.js
 
-"use client";
+'use client';
 
-import React, { useContext, useState } from "react";
-import PropTypes from "prop-types";
+import React, { useContext, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   IconButton,
-  Menu, Divider,
+  Menu,
+  Divider,
   MenuItem,
   Button,
   Stack,
@@ -15,15 +16,15 @@ import {
   FormControl,
   InputLabel,
   Select,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import PostFilter from "@/components/UI/PostFilter";
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import PostFilter from '@/components/UI/PostFilter';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import FAQModal from '@/components/Modals/FAQModal'; // Import the help modal
-import { listOfAllRoles } from "@/utils/masterData"; 
+import { listOfAllRoles } from '@/utils/masterData';
 
 const SiteMenuBar = ({
   regions,
@@ -33,8 +34,16 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-   const { user, availableRoles, logOut, selectedRole } = useContext(AuthContext);
-  const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
+  const { user, availableRoles, logOut, selectedRole } =
+    useContext(AuthContext);
+  const {
+    selectedRegion,
+    setSelectedRegion,
+    selectedDivision,
+    setSelectedDivision,
+    selectedCity,
+    setSelectedCity,
+  } = useContext(RegionsContext);
   const { organizers } = useContext(PostFilterContext);
   const { roles, selectRole } = useContext(RoleContext);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -64,36 +73,36 @@ const SiteMenuBar = ({
 
   const handleRegionChange = (event) => {
     const value = event.target.value;
-    console.log("handleRegionChange:", value);
+    console.log('handleRegionChange:', value);
     setSelectedRegion(value);
-    setSelectedDivision("");
-    setSelectedCity("");
+    setSelectedDivision('');
+    setSelectedCity('');
   };
 
   const handleDivisionChange = (event) => {
     const value = event.target.value;
-    console.log("handleDivisionChange:", value);
+    console.log('handleDivisionChange:', value);
     setSelectedDivision(value);
-    setSelectedCity("");
+    setSelectedCity('');
   };
 
   const handleCityChange = (event) => {
     const value = event.target.value;
-    console.log("handleCityChange:", value);
+    console.log('handleCityChange:', value);
     setSelectedCity(value);
   };
 
   return (
-    <Box sx={{ width: "100%", padding: "0 0" }}>
+    <Box sx={{ width: '100%', padding: '0 0' }}>
       {/* Top row with main menu items and user state */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {/* Hamburger Menu */}
           <IconButton
             edge="start"
@@ -109,17 +118,25 @@ const SiteMenuBar = ({
             onClose={handleHamburgerMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {selectedRole === listOfAllRoles.NAMED_USER && <MenuItem>User Settings</MenuItem>}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Organizer Settings</MenuItem>}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Location Management</MenuItem>}
-            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && <MenuItem>Add Organizers</MenuItem>}
+            {selectedRole === listOfAllRoles.NAMED_USER && (
+              <MenuItem>User Settings</MenuItem>
+            )}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+              <MenuItem>Organizer Settings</MenuItem>
+            )}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+              <MenuItem>Location Management</MenuItem>
+            )}
+            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
+              <MenuItem>Add Organizers</MenuItem>
+            )}
             <Divider />
             <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
             <MenuItem>About TangoTiempo</MenuItem>
             <MenuItem>Help</MenuItem>
           </Menu>
           {/* Region Dropdown */}
-          <select value={selectedRegion || ""} onChange={handleRegionChange}>
+          <select value={selectedRegion || ''} onChange={handleRegionChange}>
             <option value="">Select Region</option>
             {regions.map((region) => (
               <option key={region.regionName} value={region.regionName}>
@@ -130,7 +147,7 @@ const SiteMenuBar = ({
           {/* Division Dropdown */}
           {selectedRegion && (
             <select
-              value={selectedDivision || ""}
+              value={selectedDivision || ''}
               onChange={handleDivisionChange}
             >
               <option value="">Select Division</option>
@@ -148,7 +165,7 @@ const SiteMenuBar = ({
           )}
           {/* City Dropdown */}
           {selectedDivision && (
-            <select value={selectedCity || ""} onChange={handleCityChange}>
+            <select value={selectedCity || ''} onChange={handleCityChange}>
               <option value="">Select City</option>
               {regions
                 .find((region) => region.regionName === selectedRegion)
@@ -165,7 +182,7 @@ const SiteMenuBar = ({
           {/* Organizer Dropdown */}
           {selectedRegion && organizers && organizers.length > 0 && (
             <select
-              value={selectedOrganizer || ""}
+              value={selectedOrganizer || ''}
               onChange={(e) => handleOrganizerChange(e.target.value)}
             >
               <option value="">Select Organizer</option>
@@ -233,9 +250,9 @@ const SiteMenuBar = ({
       {/* Bottom row with Category Filter */}
       <Box
         sx={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
           marginTop: 2,
         }}
       >

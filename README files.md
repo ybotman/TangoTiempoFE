@@ -1,151 +1,147 @@
 1. ./layout.js
 
-	•	Role: Defines the overall layout for the application, wrapping pages and components with common UI elements.
-	•	Features: Likely includes shared components such as headers, footers, and navigation.
+   • Role: Defines the overall layout for the application, wrapping pages and components with common UI elements.
+   • Features: Likely includes shared components such as headers, footers, and navigation.
 
 2. ./calendar
 
-	•	Leave blank for now.
+   • Leave blank for now.
 
 3. ./calendar/page.js
 
-	•	Role: The main Page.  Returns the Header, SiteMenuBar, Calendar, and footer eventually
-	•	Features: Displays the calendar, manages event rendering, and user interaction with events.
+   • Role: The main Page. Returns the Header, SiteMenuBar, Calendar, and footer eventually
+   • Features: Displays the calendar, manages event rendering, and user interaction with events.
 
 4. ./page.js
 
-	•	Role: The redirect to @/calendar/page
-
+   • Role: The redirect to @/calendar/page
 
 5. ./auth
 
-	•	Directory for all firebase auth code.
+   • Directory for all firebase auth code.
 
 6. ./auth/signup
 
-	•	the firebase sign up page directory
+   • the firebase sign up page directory
 
 7. ./auth/signup/page.js
 
-	•	Role: Handles the user signup page.
-	•	Features: Displays the signup form, validates user input, and communicates with the backend to create new user accounts.
+   • Role: Handles the user signup page.
+   • Features: Displays the signup form, validates user input, and communicates with the backend to create new user accounts.
 
 8. ./auth/signup/pageSignUpPage.cy.js
 
-	•	Role: Cypress test for the signup page.
-	•	Features: Tests the signup functionality to ensure it works as expected in end-to-end testing.
+   • Role: Cypress test for the signup page.
+   • Features: Tests the signup functionality to ensure it works as expected in end-to-end testing.
 
 9. ./auth/login
 
-	•	the firebase login up page directory
+   • the firebase login up page directory
 
 10. ./auth/login/page.js
 
-	•	Role: Displays the login page.
-	•	Features: Renders the login form and handles authentication logic.
+    • Role: Displays the login page.
+    • Features: Renders the login form and handles authentication logic.
 
+11. ./utils
 
-17. ./utils
+    • Role: Contains utility functions used across the application.
+    • Features: General purpose scripts and helpers.
 
-	•	Role: Contains utility functions used across the application.
-	•	Features: General purpose scripts and helpers.
+12. ./utils/transformEvents.js
 
+    • Role: Transforms event data into a usable format for display.
+    • Features: Processes raw event data from the API or backend into a format suitable for FullCalendar.
 
-20. ./utils/transformEvents.js
+13. ./utils/categoryColors.js
 
-	•	Role: Transforms event data into a usable format for display.
-	•	Features: Processes raw event data from the API or backend into a format suitable for  FullCalendar.
+    • Role: Returns colors based on categories.
+    • Features: Provides color codes for different event categories to style the UI consistently.
 
-21. ./utils/categoryColors.js
+14. ./utils/firebase.js
 
-	•	Role: Returns colors based on categories.
-	•	Features: Provides color codes for different event categories to style the UI consistently.
+    • Role: Handles Firebase configuration and services.
+    • Features: Manages Firebase authentication and database interaction.
 
-22. ./utils/firebase.js
+15. ./utils/EventCreateRules.js
 
-	•	Role: Handles Firebase configuration and services.
-	•	Features: Manages Firebase authentication and database interaction.
+    • Role: Defines rules for event creation. Currently empty.
+    • Features: Ensures that newly created events follow specific business logic and validation.
 
-23. ./utils/EventCreateRules.js
+16. ./utils/images.js
 
-	•	Role: Defines rules for event creation.  Currently empty.
-	•	Features: Ensures that newly created events follow specific business logic and validation.
+    • Role: Manages image processing. Currenty empty.
+    • Features: Handles image uploads, resizing, and optimization.
 
-24. ./utils/images.js
+17. ./components/UI
 
-	•	Role: Manages image processing. Currenty empty.
-	•	Features: Handles image uploads, resizing, and optimization.
+    • all UI components
 
+18. ./components/UI/SiteHeader.js
 
-27. ./components/UI
+    • Role: Renders the main site header.
+    • Features: Image header, branding, BuyMeCoffee, etc
 
-	•	all UI components
+19. ./components/UI/SiteMenuBar.js
 
-28. ./components/UI/SiteHeader.js
+    • Role: Provides the site’s navigation menu, RegionsSelection (For event calling API), hamburger, auth login/logout, Post filters UI (category, tags(later), organzier).
+    • Features: Contains menu items for navigating between pages or sections.
 
-	•	Role: Renders the main site header.
-	•	Features:  Image header,  branding, BuyMeCoffee, etc
+20. ./components/UI/PostFilter.js
 
-29. ./components/UI/SiteMenuBar.js
+    • Role: Post API pull, Filters events or posts based on categories and organizers.
+    • Features: Allows users to apply filters to displayed content.
 
-	•	Role: Provides the site’s navigation menu, RegionsSelection (For event calling API),  hamburger, auth login/logout, Post filters UI (category, tags(later), organzier).
-	•	Features: Contains menu items for navigating between pages or sections.
+21. ./components/Modals
 
-30. ./components/UI/PostFilter.js
+    • the Modals. there will be much more here.
 
-	•	Role: Post API pull, Filters events or posts based on categories and organizers.
-	•	Features: Allows users to apply filters to displayed content.
+22. ./components/Modals/EventDetailsModal.js
 
-31. ./components/Modals
+    • Role: Displays detailed event information.
+    • Features: Pop-up modal showing event details like time, description, and participants.
 
-	•	the Modals. there will be much more here.
+23. ./components/Modals/EventCRUDModal.js
 
-32. ./components/Modals/EventDetailsModal.js
+    • Role: Handles event create, update, delete operations. Not working.
+    • Features: Modal for managing events with create, edit, and delete functionalities.
 
-	•	Role: Displays detailed event information.
-	•	Features: Pop-up modal showing event details like time, description, and participants.
+24. ./hooks/useRegions.js
 
-33. ./components/Modals/EventCRUDModal.js
+    • Role: Custom hook for fetching and managing region data.
+    • Features: Provides region-related logic for the app, possibly including data fetching and state management.
 
-	•	Role: Handles event create, update, delete operations.  Not working.
-	•	Features: Modal for managing events with create, edit, and delete functionalities.
+25. ./hooks/usePostFilter.js
 
-34. ./hooks/useRegions.js
+    • Role: Custom hook for handling post API call event filtering.
+    • Features: Manages the logic for filtering posts/events based on various criteria like categories tags and organizers.
 
-	•	Role: Custom hook for fetching and managing region data.
-	•	Features: Provides region-related logic for the app, possibly including data fetching and state management.
+26. ./hooks/useCalendarPage.js
 
-35. ./hooks/usePostFilter.js
+    • Role: Custom hook for managing the state of the calendar page. datesSet from the calendar are sent to the API with region info.
+    • Features: Handles event fetching, calendar data transformations, and filtering. Call the Event API for region/divsion/city selction
 
-	•	Role: Custom hook for handling post API call event filtering.
-	•	Features: Manages the logic for filtering posts/events based on various criteria like categories tags and organizers.
+27. ./hooks/useAuth.js
 
-36. ./hooks/useCalendarPage.js
+    • Role: Custom hook for handling authentication state.
+    • Features: Manages login, logout, and session handling logic.
 
-	•	Role: Custom hook for managing the state of the calendar page.  datesSet from the calendar are sent to the API with region info.
-	•	Features: Handles event fetching, calendar data transformations, and filtering. Call the Event API for region/divsion/city selction
+28. ./hooks/useSiteMenuBar.js
 
-37. ./hooks/useAuth.js
+    • Role: Manages state and interactions for the site’s menu bar.
+    • Features: Includes logic for handling active states, user roles, and navigation.
 
-	•	Role: Custom hook for handling authentication state.
-	•	Features: Manages login, logout, and session handling logic.
+29. ./hooks/useOrganizers.js
 
-38. ./hooks/useSiteMenuBar.js
+    • Role: Custom hook for managing organizer data.
+    • Features: Fetches and provides data related to event organizers.
 
-	•	Role: Manages state and interactions for the site’s menu bar.
-	•	Features: Includes logic for handling active states, user roles, and navigation.
+30. ./hooks/useEvents.js
 
-39. ./hooks/useOrganizers.js
+    • Role: Fetches and manages event data.
+    • Features: Provides event data, likely including fetching from an API and transforming the data for use.
 
-	•	Role: Custom hook for managing organizer data.
-	•	Features: Fetches and provides data related to event organizers.
+31. ./hooks/useCategories.js
 
-40. ./hooks/useEvents.js
-
-	•	Role: Fetches and manages event data.
-	•	Features: Provides event data, likely including fetching from an API and transforming the data for use.
-
-41. ./hooks/useCategories.js
-
-	•	Role: Manages event category data.
-	•	Features: Fetches categories and provides category data for filtering events.
+    • Role: Manages event category data.
+    • Features: Fetches categories and provides category data for filtering events.

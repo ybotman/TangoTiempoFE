@@ -1,7 +1,6 @@
 //app/contexts/CalendarContext.js
 
-
-"use client";
+'use client';
 
 import React, { createContext, useState } from 'react';
 import PropTypes from 'prop-types';

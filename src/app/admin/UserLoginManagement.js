@@ -1,6 +1,18 @@
 import { React, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Typography, Button, Modal, Select, MenuItem, Checkbox, ListItemText, FormControl, InputLabel, Alert } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Modal,
+  Select,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  FormControl,
+  InputLabel,
+  Alert,
+} from '@mui/material';
 
 /**
  * Component to manage and display user login information with roles.
@@ -17,7 +29,9 @@ const ManageUserLogins = () => {
   useEffect(() => {
     const fetchUserLogins = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/all`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userLogins/all`
+        );
         setUserLogins(response.data);
       } catch (error) {
         console.error('Error fetching user logins:', error);
@@ -31,7 +45,9 @@ const ManageUserLogins = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/roles`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/roles`
+        );
         setRoles(response.data);
       } catch (error) {
         console.error('Error fetching roles:', error);
@@ -44,7 +60,7 @@ const ManageUserLogins = () => {
   // Open modal and set the current user and roles
   const handleEditClick = (user) => {
     setCurrentUser(user);
-    const userRoles = user.roleIds.map(role => role._id);
+    const userRoles = user.roleIds.map((role) => role._id);
     setSelectedUserRoles(userRoles);
     setErrorMessage(''); // Clear previous error message
     setOpenModal(true);
@@ -71,11 +87,14 @@ const ManageUserLogins = () => {
 
         if (response.status === 200) {
           const updatedRoleIds = response.data.updatedRoles; // The returned role objects
-          const updatedRoleIdsWithNames = updatedRoleIds.map(roleId => ({ _id: roleId, roleName: roles.find(r => r._id === roleId)?.roleName }));
+          const updatedRoleIdsWithNames = updatedRoleIds.map((roleId) => ({
+            _id: roleId,
+            roleName: roles.find((r) => r._id === roleId)?.roleName,
+          }));
           console.log('Updated roles:', updatedRoleIdsWithNames);
           // Update user roles in the same format as the API
-          setUserLogins(prevLogins =>
-            prevLogins.map(user =>
+          setUserLogins((prevLogins) =>
+            prevLogins.map((user) =>
               user.firebaseUserId === currentUser.firebaseUserId
                 ? { ...user, roleIds: updatedRoleIdsWithNames }
                 : user
@@ -99,7 +118,13 @@ const ManageUserLogins = () => {
     <Box>
       {userLogins.length > 0 ? (
         userLogins.map((login) => (
-          <Box key={login.firebaseUserInfo.email} mb={3} display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            key={login.firebaseUserInfo.email}
+            mb={3}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Box>
               <Typography variant="h5">
                 {login.firebaseUserInfo.displayName}
@@ -108,10 +133,12 @@ const ManageUserLogins = () => {
                 Email: {login.firebaseUserInfo.email}
               </Typography>
               <Typography variant="body1">
-                Roles: {login.roleIds.map(role => role.roleName).join(', ')}
+                Roles: {login.roleIds.map((role) => role.roleName).join(', ')}
               </Typography>
             </Box>
-            <Button variant="outlined" onClick={() => handleEditClick(login)}>Edit</Button>
+            <Button variant="outlined" onClick={() => handleEditClick(login)}>
+              Edit
+            </Button>
           </Box>
         ))
       ) : (
@@ -125,7 +152,19 @@ const ManageUserLogins = () => {
         aria-labelledby="edit-roles-modal"
         aria-describedby="edit-roles-for-user"
       >
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, borderRadius: 2, boxShadow: 24, width: '400px' }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            p: 4,
+            borderRadius: 2,
+            boxShadow: 24,
+            width: '400px',
+          }}
+        >
           <Typography id="edit-roles-modal" variant="h6" mb={2}>
             Edit Roles for {currentUser?.firebaseUserInfo.displayName}
           </Typography>
@@ -144,18 +183,26 @@ const ManageUserLogins = () => {
               multiple
               value={selectedUserRoles}
               onChange={handleRoleChange}
-              renderValue={(selected) => selected.map(id => roles.find(role => role._id === id)?.roleName).join(', ')}
+              renderValue={(selected) =>
+                selected
+                  .map((id) => roles.find((role) => role._id === id)?.roleName)
+                  .join(', ')
+              }
             >
               {roles.map((role) => (
                 <MenuItem key={role._id} value={role._id}>
-                  <Checkbox checked={selectedUserRoles.indexOf(role._id) > -1} />
+                  <Checkbox
+                    checked={selectedUserRoles.indexOf(role._id) > -1}
+                  />
                   <ListItemText primary={role.roleName} />
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
           <Box mt={3} display="flex" justifyContent="flex-end">
-            <Button variant="contained" onClick={handleApply}>Apply</Button>
+            <Button variant="contained" onClick={handleApply}>
+              Apply
+            </Button>
           </Box>
         </Box>
       </Modal>

@@ -1,7 +1,7 @@
 //app/hooks/useEvents.js// app/hooks/useEvents.js
 
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export function useEvents(
   selectedRegion,
@@ -18,7 +18,7 @@ export function useEvents(
       return;
     }
     try {
-      console.log("useEvents-> Making Events API request:", {
+      console.log('useEvents-> Making Events API request:', {
         selectedRegion,
         selectedDivision,
         selectedCity,
@@ -42,7 +42,7 @@ export function useEvents(
 
       setEvents(response.data);
     } catch (error) {
-      console.error("useEvents-> Error fetching events:", error);
+      console.error('useEvents-> Error fetching events:', error);
       setEvents([]);
     }
   };
@@ -67,10 +67,10 @@ export function useCreateEvent() {
         `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`,
         eventData
       );
-      console.log("Event created successfully:", response.data);
+      console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error('Error creating event:', error);
       throw error;
     }
   };

@@ -1,66 +1,72 @@
 // app/hooks/useCalendarPage.js
 
-import { useState, useContext, useRef } from "react";
-import { useEvents } from "@/hooks/useEvents";
-import { usePostFilter } from "@/hooks/usePostFilter";
-import { transformEvents } from "@/utils/transformEvents";
-import { categoryColors } from "@/utils/categoryColors";
-import useCategories from "@/hooks/useCategories";
+import { useState, useContext, useRef } from 'react';
+import { useEvents } from '@/hooks/useEvents';
+import { usePostFilter } from '@/hooks/usePostFilter';
+import { transformEvents } from '@/utils/transformEvents';
+import { categoryColors } from '@/utils/categoryColors';
+import useCategories from '@/hooks/useCategories';
 import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 
-
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null); // To track submenu position
   const [menuItems, setMenuItems] = useState([]); // Menu items based on the role
   const [clickedDate, setClickedDate] = useState(null); // Date or event clicked
   const categories = useCategories();
-    const { 
-      selectedRegion,
-      selectedRegionID, // Access region ID
-    setSelectedRegion, 
-    selectedDivision, 
-    setSelectedDivision, 
-    selectedCity, 
-    setSelectedCity 
-    } = useContext(RegionsContext);
-  console.log("useCalPage -> åSelected Region:", selectedRegion);
+  const {
+    selectedRegion,
+    selectedRegionID, // Access region ID
+    setSelectedRegion,
+    selectedDivision,
+    setSelectedDivision,
+    selectedCity,
+    setSelectedCity,
+  } = useContext(RegionsContext);
+  console.log('useCalPage -> åSelected Region:', selectedRegion);
 
   const { selectedRole } = useContext(RoleContext);
-  const { selectedOrganizers, setSelectedOrganizers, selectedCategories, setSelectedCategories } = useContext(PostFilterContext);
+  const {
+    selectedOrganizers,
+    setSelectedOrganizers,
+    selectedCategories,
+    setSelectedCategories,
+  } = useContext(PostFilterContext);
   const { datesSet, setDatesSet } = useContext(CalendarContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
 
   const calendarRef = useRef(null);
-const handleRegionChange = (event) => {
-  const selectedValue = event.target.value; // Extract the selected value (region ID)
-  
-  if (!selectedValue) {
-    console.error("No region selected");
-    return;
-  }
+  const handleRegionChange = (event) => {
+    const selectedValue = event.target.value; // Extract the selected value (region ID)
 
-  const selectedRegion = regions.find(region => region._id === selectedValue); // Lookup the region based on ID
+    if (!selectedValue) {
+      console.error('No region selected');
+      return;
+    }
 
-  if (selectedRegion) {
-    console.log("Region Selected:", selectedRegion);
+    const selectedRegion = regions.find(
+      (region) => region._id === selectedValue
+    ); // Lookup the region based on ID
 
-    // Set the selected region object and its ID in the context
-    setSelectedRegion(selectedRegion);  // Pass the entire region object to the context
-    setSelectedDivision('');  // Reset division
-    setSelectedCity('');      // Reset city
+    if (selectedRegion) {
+      console.log('Region Selected:', selectedRegion);
 
-    // Optionally refresh events based on the new region
-    refreshEvents();
-  } else {
-    console.error("Region not found for selected value:", selectedValue);
-  }
-};
-  
+      // Set the selected region object and its ID in the context
+      setSelectedRegion(selectedRegion); // Pass the entire region object to the context
+      setSelectedDivision(''); // Reset division
+      setSelectedCity(''); // Reset city
+
+      // Optionally refresh events based on the new region
+      refreshEvents();
+    } else {
+      console.error('Region not found for selected value:', selectedValue);
+    }
+  };
+
   const handleDatesSet = (dateInfo) => {
     setDatesSet({
       start: dateInfo.startStr,
@@ -91,18 +97,18 @@ const handleRegionChange = (event) => {
   // Ensure filteredEvents is always an array before mapping
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
     const categoryColor =
-      categoryColors[event.extendedProps.categoryFirst] || "lightGrey";
+      categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
     return {
       ...event,
       backgroundColor: categoryColor,
       textColor:
-        event.extendedProps.categoryFirst === "Milonga" ? "white" : "black",
+        event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
       borderColor: categoryColor,
     };
   });
 
   const handleEventCreated = (newEvent) => {
-    console.log("New event created:", newEvent);
+    console.log('New event created:', newEvent);
     refreshEvents();
   };
 
@@ -122,9 +128,8 @@ const handleRegionChange = (event) => {
   };
 
   const handleDateClick = (arg) => {
-    console.log("Date clicked:", arg.dateStr);
+    console.log('Date clicked:', arg.dateStr);
     setClickedDate(arg.dateStr); // Store the clicked date
-
 
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
       // For Regional Organizer, show date-related options
@@ -139,7 +144,10 @@ const handleRegionChange = (event) => {
       });
     }
 
-    if (selectedRole === listOfAllRoles.NAMED_USER && new Date(arg.dateStr) < new Date()) {
+    if (
+      selectedRole === listOfAllRoles.NAMED_USER &&
+      new Date(arg.dateStr) < new Date()
+    ) {
       // If Named User and date is in the past
       setMenuItems([
         { label: 'View Details', action: 'viewDetails' },
@@ -155,7 +163,7 @@ const handleRegionChange = (event) => {
   };
 
   const handleEventClick = (arg) => {
-    console.log("Event clicked:", arg.event.title);
+    console.log('Event clicked:', arg.event.title);
 
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
       // For Regional Organizer, show event-related options
@@ -171,7 +179,10 @@ const handleRegionChange = (event) => {
       });
     }
 
-    if (selectedRole === listOfAllRoles.NAMED_USER && new Date(arg.event.start) < new Date()) {
+    if (
+      selectedRole === listOfAllRoles.NAMED_USER &&
+      new Date(arg.event.start) < new Date()
+    ) {
       // For Named User, show limited event-related options if event is in the past
       setMenuItems([
         { label: 'View Details', action: 'viewDetails' },
@@ -185,9 +196,7 @@ const handleRegionChange = (event) => {
 
     if (selectedRole === listOfAllRoles.EVERYONE) {
       // Everyone can only view details
-      setMenuItems([
-        { label: 'View Event Details', action: 'viewDetails' },
-      ]);
+      setMenuItems([{ label: 'View Event Details', action: 'viewDetails' }]);
       setMenuAnchor({
         mouseX: arg.jsEvent.clientX,
         mouseY: arg.jsEvent.clientY,
@@ -195,15 +204,14 @@ const handleRegionChange = (event) => {
     }
   };
 
-const handleMenuAction = (action) => {
-  console.log(`Action selected: ${action}`);
-  setMenuAnchor(null);
+  const handleMenuAction = (action) => {
+    console.log(`Action selected: ${action}`);
+    setMenuAnchor(null);
 
-  if (action === 'addSingleEvent') {
-    setCreateModalOpen(true); // Open the CreateSingleEvent modal
-  }
-
-};
+    if (action === 'addSingleEvent') {
+      setCreateModalOpen(true); // Open the CreateSingleEvent modal
+    }
+  };
 
   const handleMenuClose = () => {
     setMenuAnchor(null);
@@ -227,7 +235,7 @@ const handleMenuAction = (action) => {
     isCreateModalOpen,
     setCreateModalOpen,
     handleEventCreated,
-handleRegionChange,
+    handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,
@@ -237,6 +245,6 @@ handleRegionChange,
     handleMenuAction,
     handleMenuClose,
     menuAnchor,
-    menuItems
+    menuItems,
   };
 };

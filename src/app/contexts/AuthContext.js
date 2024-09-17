@@ -4,7 +4,13 @@
 
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
 import { auth } from '@/utils/firebase';
 import axios from 'axios';
 //import { listOfAllRoles } from '@/utils/masterData';
@@ -16,7 +22,6 @@ export const AuthContext = createContext();
 
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
-
   const [user, setUser] = useState(null);
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState('');
@@ -24,7 +29,6 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState('  ');
   const signUpOngoing = useRef(false);
 
-   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -39,47 +43,47 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     });
-          console.warn('Force setting role to RegionalOrganizer');
-          setAvailableRoles(['RegionalOrganizer']);
-          setSelectedRole('RegionalOrganizer');
+    console.warn('Force setting role to RegionalOrganizer');
+    setAvailableRoles(['RegionalOrganizer']);
+    setSelectedRole('RegionalOrganizer');
     return () => unsubscribe();
   }, []);
 
-//  useEffect(() => {
-//    updateRoleBooleans(selectedRole);
-//  }, [selectedRole]);
+  //  useEffect(() => {
+  //    updateRoleBooleans(selectedRole);
+  //  }, [selectedRole]);
 
-const fetchUserRoles = async (firebaseUserId) => {
-  try {
-    //console.log('Fetching user roles for UID:', firebaseUserId);
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
-    );
+  const fetchUserRoles = async (firebaseUserId) => {
+    try {
+      //console.log('Fetching user roles for UID:', firebaseUserId);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
+      );
 
-    if (response.status === 200) {
-      //console.log('Fetched roles:', response.data.roleIds);
-      const roles = response.data.roleIds.map((role) => role.roleName);
-      setAvailableRoles(roles); 
+      if (response.status === 200) {
+        //console.log('Fetched roles:', response.data.roleIds);
+        const roles = response.data.roleIds.map((role) => role.roleName);
+        setAvailableRoles(roles);
 
-      const initialRole = roles[0] || "";
-      setSelectedRole(initialRole);
-    } else {
-      console.warn('Unexpected response status:', response.status);
+        const initialRole = roles[0] || '';
+        setSelectedRole(initialRole);
+      } else {
+        console.warn('Unexpected response status:', response.status);
+        setAvailableRoles([]);
+        setSelectedRole('');
+      }
+    } catch (err) {
+      console.error('Failed to fetch user roles:', err);
+      setError('Failed to fetch user roles');
       setAvailableRoles([]);
       setSelectedRole('');
     }
-  } catch (err) {
-    console.error('Failed to fetch user roles:', err);
-    setError("Failed to fetch user roles");
-    setAvailableRoles([]);
-    setSelectedRole('');
-  }
-};
+  };
 
   // Authenticate with Google
-   const authenticateWithGoogle = async () => {
+  const authenticateWithGoogle = async () => {
     if (user) {
-      setError("You are already signed in.");
+      setError('You are already signed in.');
       return null;
     }
 
@@ -107,7 +111,7 @@ const fetchUserRoles = async (firebaseUserId) => {
             { firebaseUserId }
           );
           if (roleResponse.status !== 204) {
-            throw new Error("Failed to assign role in backend");
+            throw new Error('Failed to assign role in backend');
           }
         } else {
           throw error;
@@ -135,18 +139,18 @@ const fetchUserRoles = async (firebaseUserId) => {
 
   // Logout Function
 
-const logOut = async () => {
-  try {
-    await signOut(auth);
-    console.log('User signed out successfully');
-    // Optional: Reset other state variables if necessary
-    setUser(null);
-    setAvailableRoles([]);
-    setSelectedRole('');
-  } catch (error) {
-    console.error('Error signing out:', error);
-  }
-};
+  const logOut = async () => {
+    try {
+      await signOut(auth);
+      console.log('User signed out successfully');
+      // Optional: Reset other state variables if necessary
+      setUser(null);
+      setAvailableRoles([]);
+      setSelectedRole('');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
   // Context Valu
   const value = {
     user,

@@ -7,7 +7,9 @@ export const useCalendarContext = () => {
   console.log('useCalendarContext');
   const context = useContext(CalendarContext);
   if (!context) {
-    throw new Error('useCalendarContext must be used within a CalendarProvider');
+    throw new Error(
+      'useCalendarContext must be used within a CalendarProvider'
+    );
   }
   return context;
 };

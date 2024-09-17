@@ -1,6 +1,6 @@
 // src/app/components/Providers.js
 
-"use client";
+'use client';
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -16,9 +16,7 @@ const Providers = ({ children }) => {
       <RegionsProvider>
         <CalendarProvider>
           <PostFilterProvider>
-            <RoleProvider>
-              {children}
-            </RoleProvider>
+            <RoleProvider>{children}</RoleProvider>
           </PostFilterProvider>
         </CalendarProvider>
       </RegionsProvider>

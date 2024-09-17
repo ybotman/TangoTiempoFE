@@ -33,22 +33,31 @@ const FAQModal = ({ open, handleClose }) => {
           <Typography>
             <strong>How can I become a Regional Organizer?</strong>
           </Typography>
-          <Typography>Contact your Regional Admin to request access.</Typography>
+          <Typography>
+            Contact your Regional Admin to request access.
+          </Typography>
 
           <Typography sx={{ mt: 2 }}>
             <strong>How can I become a Regional Admin?</strong>
           </Typography>
-          <Typography>Regional Admins are appointed by System Admins. Contact your organization.</Typography>
+          <Typography>
+            Regional Admins are appointed by System Admins. Contact your
+            organization.
+          </Typography>
 
           <Typography sx={{ mt: 2 }}>
             <strong>How can I sign up?</strong>
           </Typography>
-          <Typography>Go to the Login/Signup section to create an account.</Typography>
+          <Typography>
+            Go to the Login/Signup section to create an account.
+          </Typography>
 
           <Typography sx={{ mt: 2 }}>
             <strong>Do we sell your information?</strong>
           </Typography>
-          <Typography>No, we do not sell or share your information with third parties.</Typography>
+          <Typography>
+            No, we do not sell or share your information with third parties.
+          </Typography>
         </Box>
         <Button onClick={handleClose} variant="contained" sx={{ mt: 3 }}>
           Close

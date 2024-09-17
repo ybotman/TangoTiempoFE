@@ -1,8 +1,9 @@
 {
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
-    "[javascript]": {
-        "editor.defaultFormatter": "dsznajder.es7-react-js-snippets"
-    },
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "[javascript]": {
     "editor.defaultFormatter": "dsznajder.es7-react-js-snippets"
+  },
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+  "editor.formatOnType": true
 }
