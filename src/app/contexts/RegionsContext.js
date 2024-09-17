@@ -6,6 +6,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import { useRegions } from '@/hooks/useRegions';
 import PropTypes from 'prop-types';
 
+
 export const RegionsContext = createContext();
 console.log('RegionsContext created');
 
@@ -23,6 +24,8 @@ export const RegionsProvider = ({ children }) => {
       setRegions(regionsData);
     }
   }, [regionsData]);
+
+  console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
   return (
     <RegionsContext.Provider
       value={{

@@ -1,8 +1,8 @@
-// src/app/components/UI/SiteMenuBar.js
+// SiteMenuBar.js
 
 'use client';
 
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -19,78 +19,37 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import PostFilter from '@/components/UI/PostFilter';
-import { AuthContext } from '@/contexts/AuthContext';
-import { RegionsContext } from '@/contexts/RegionsContext';
-import { PostFilterContext } from '@/contexts/PostFilterContext';
-import { RoleContext } from '@/contexts/RoleContext';
-import FAQModal from '@/components/Modals/FAQModal'; // Import the help modal
-import { listOfAllRoles } from '@/utils/masterData';
+import FAQModal from '@/components/Modals/FAQModal';
+import { useSiteMenuBar } from '@/hooks/useSiteMenuBar'; // Import the custom hook
 
 const SiteMenuBar = ({
-  regions,
   activeCategories,
   handleCategoryChange,
   categories,
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-  const { user, availableRoles, logOut, selectedRole } =
-    useContext(AuthContext);
   const {
+    anchorEl,
+    FAQModalOpen,
     selectedRegion,
-    setSelectedRegion,
     selectedDivision,
-    setSelectedDivision,
     selectedCity,
-    setSelectedCity,
-  } = useContext(RegionsContext);
-  const { organizers } = useContext(PostFilterContext);
-  const { roles, selectRole } = useContext(RoleContext);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [FAQModalOpen, setFAQModalOpen] = useState(false);
-
-  // Renamed handleMenu to handleHamburgerMenu
-  const handleHamburgerMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleHamburgerMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const openFAQModal = () => {
-    setFAQModalOpen(true);
-  };
-
-  const closeFAQModal = () => {
-    setFAQModalOpen(false);
-  };
-
-  const handleRoleChange = (event) => {
-    selectRole(event.target.value);
-    console.log('Role changed to:', event.target.value);
-  };
-
-  const handleRegionChange = (event) => {
-    const value = event.target.value;
-    console.log('handleRegionChange:', value);
-    setSelectedRegion(value);
-    setSelectedDivision('');
-    setSelectedCity('');
-  };
-
-  const handleDivisionChange = (event) => {
-    const value = event.target.value;
-    console.log('handleDivisionChange:', value);
-    setSelectedDivision(value);
-    setSelectedCity('');
-  };
-
-  const handleCityChange = (event) => {
-    const value = event.target.value;
-    console.log('handleCityChange:', value);
-    setSelectedCity(value);
-  };
+    organizers,
+    regions,
+    roles,
+    selectedRole,
+    user,
+    handleHamburgerMenuOpen,
+    handleHamburgerMenuClose,
+    handleRoleChange,
+    handleRegionChange,
+    handleDivisionChange,
+    handleCityChange,
+    openFAQModal,
+    closeFAQModal,
+    logOut
+  } = useSiteMenuBar();
 
   return (
     <Box sx={{ width: '100%', padding: '0 0' }}>
@@ -118,18 +77,10 @@ const SiteMenuBar = ({
             onClose={handleHamburgerMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {selectedRole === listOfAllRoles.NAMED_USER && (
-              <MenuItem>User Settings</MenuItem>
-            )}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-              <MenuItem>Organizer Settings</MenuItem>
-            )}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-              <MenuItem>Location Management</MenuItem>
-            )}
-            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
-              <MenuItem>Add Organizers</MenuItem>
-            )}
+            {selectedRole === 'NAMED_USER' && <MenuItem>User Settings</MenuItem>}
+            {selectedRole === 'REGIONAL_ORGANIZER' && <MenuItem>Organizer Settings</MenuItem>}
+            {selectedRole === 'REGIONAL_ORGANIZER' && <MenuItem>Location Management</MenuItem>}
+            {selectedRole === 'REGIONAL_ADMIN' && <MenuItem>Add Organizers</MenuItem>}
             <Divider />
             <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
             <MenuItem>About TangoTiempo</MenuItem>
@@ -154,10 +105,7 @@ const SiteMenuBar = ({
               {regions
                 .find((region) => region.regionName === selectedRegion)
                 .divisions.map((division) => (
-                  <option
-                    key={division.divisionName}
-                    value={division.divisionName}
-                  >
+                  <option key={division.divisionName} value={division.divisionName}>
                     {division.divisionName}
                   </option>
                 ))}
@@ -169,9 +117,7 @@ const SiteMenuBar = ({
               <option value="">Select City</option>
               {regions
                 .find((region) => region.regionName === selectedRegion)
-                .divisions.find(
-                  (division) => division.divisionName === selectedDivision
-                )
+                .divisions.find((division) => division.divisionName === selectedDivision)
                 .majorCities.map((city) => (
                   <option key={city._id} value={city.cityName}>
                     {city.cityName}
@@ -181,10 +127,7 @@ const SiteMenuBar = ({
           )}
           {/* Organizer Dropdown */}
           {selectedRegion && organizers && organizers.length > 0 && (
-            <select
-              value={selectedOrganizer || ''}
-              onChange={(e) => handleOrganizerChange(e.target.value)}
-            >
+            <select value={selectedOrganizer || ''} onChange={(e) => handleOrganizerChange(e.target.value)}>
               <option value="">Select Organizer</option>
               <option value="none">None</option>
               {organizers.map((org) => (
@@ -217,45 +160,23 @@ const SiteMenuBar = ({
                 ))}
               </Select>
             </FormControl>
-            <Button
-              variant="outlined"
-              color="inherit"
-              size="small"
-              onClick={logOut}
-            >
+            <Button variant="outlined" color="inherit" size="small" onClick={logOut}>
               Log Out
             </Button>
           </Stack>
         ) : (
           <Stack direction="row" spacing={1}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              href="/auth/login"
-            >
+            <Button variant="contained" color="primary" size="small" href="/auth/login">
               Log In
             </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              href="/auth/signup"
-            >
+            <Button variant="contained" color="secondary" size="small" href="/auth/signup">
               Sign Up
             </Button>
           </Stack>
         )}
       </Box>
       {/* Bottom row with Category Filter */}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: 2,
-        }}
-      >
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2 }}>
         <PostFilter
           activeCategories={activeCategories}
           handleCategoryChange={handleCategoryChange}
