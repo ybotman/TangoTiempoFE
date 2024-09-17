@@ -18,7 +18,17 @@ export const useCalendarPage = () => {
   const [menuItems, setMenuItems] = useState([]); // Menu items based on the role
   const [clickedDate, setClickedDate] = useState(null); // Date or event clicked
   const categories = useCategories();
-  const { selectedRegion, selectedDivision, selectedCity } = useContext(RegionsContext);
+    const { 
+      selectedRegion,
+      selectedRegionID, // Access region ID
+    setSelectedRegion, 
+    selectedDivision, 
+    setSelectedDivision, 
+    selectedCity, 
+    setSelectedCity 
+    } = useContext(RegionsContext);
+  console.log("useCalPage -> åSelected Region:", selectedRegion);
+
   const { selectedRole } = useContext(RoleContext);
   const { selectedOrganizers, setSelectedOrganizers, selectedCategories, setSelectedCategories } = useContext(PostFilterContext);
   const { datesSet, setDatesSet } = useContext(CalendarContext);
@@ -26,7 +36,31 @@ export const useCalendarPage = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
 
   const calendarRef = useRef(null);
+const handleRegionChange = (event) => {
+  const selectedValue = event.target.value; // Extract the selected value (region ID)
+  
+  if (!selectedValue) {
+    console.error("No region selected");
+    return;
+  }
 
+  const selectedRegion = regions.find(region => region._id === selectedValue); // Lookup the region based on ID
+
+  if (selectedRegion) {
+    console.log("Region Selected:", selectedRegion);
+
+    // Set the selected region object and its ID in the context
+    setSelectedRegion(selectedRegion);  // Pass the entire region object to the context
+    setSelectedDivision('');  // Reset division
+    setSelectedCity('');      // Reset city
+
+    // Optionally refresh events based on the new region
+    refreshEvents();
+  } else {
+    console.error("Region not found for selected value:", selectedValue);
+  }
+};
+  
   const handleDatesSet = (dateInfo) => {
     setDatesSet({
       start: dateInfo.startStr,
@@ -69,11 +103,6 @@ export const useCalendarPage = () => {
 
   const handleEventCreated = (newEvent) => {
     console.log("New event created:", newEvent);
-    refreshEvents();
-  };
-
-  const handleRegionChange = (value) => {
-    console.log("handleRegionChange:", value);
     refreshEvents();
   };
 
@@ -166,10 +195,15 @@ export const useCalendarPage = () => {
     }
   };
 
-  const handleMenuAction = (action) => {
-    console.log(`Action selected: ${action}`);
-    setMenuAnchor(null);
-  };
+const handleMenuAction = (action) => {
+  console.log(`Action selected: ${action}`);
+  setMenuAnchor(null);
+
+  if (action === 'addSingleEvent') {
+    setCreateModalOpen(true); // Open the CreateSingleEvent modal
+  }
+
+};
 
   const handleMenuClose = () => {
     setMenuAnchor(null);
@@ -193,7 +227,7 @@ export const useCalendarPage = () => {
     isCreateModalOpen,
     setCreateModalOpen,
     handleEventCreated,
-    handleRegionChange,
+handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,

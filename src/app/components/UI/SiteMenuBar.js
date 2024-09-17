@@ -33,7 +33,7 @@ const SiteMenuBar = ({
   selectedOrganizer,
   handleOrganizerChange,
 }) => {
-  const { user, availableRoles, logOut, selectedRole } = useContext(AuthContext);
+   const { user, availableRoles, logOut, selectedRole } = useContext(AuthContext);
   const { selectedRegion, setSelectedRegion, selectedDivision, setSelectedDivision, selectedCity, setSelectedCity } = useContext(RegionsContext);
   const { organizers } = useContext(PostFilterContext);
   const { roles, selectRole } = useContext(RoleContext);

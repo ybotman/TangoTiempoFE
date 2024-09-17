@@ -64,7 +64,7 @@ export function useCreateEvent() {
   const createEvent = async (eventData) => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/CRUD`,
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`,
         eventData
       );
       console.log("Event created successfully:", response.data);

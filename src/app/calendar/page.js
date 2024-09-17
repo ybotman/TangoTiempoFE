@@ -1,8 +1,8 @@
 // app/calendar/page.js
 
 "use client";
-
-import React, { useState, useContext } from "react";
+import Head from 'next/head';
+import React, {useState, useContext } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -18,18 +18,30 @@ import ListIcon from "@mui/icons-material/List";
 
 import SiteHeader from "@/components/UI/SiteHeader";
 import SiteMenuBar from "@/components/UI/SiteMenuBar";
-import { CalendarContext } from '@/contexts/CalendarContext';
+//import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { useCalendarPage } from "@/hooks/useCalendarPage";
 import CalendarSubMenu from "@/components/UI/CalendarSubMenu";  
-
+import CreateSingleEventModal from '@/components/Modals/CreateSingleEventModal';
 //import EventDetailsModal from "@/components/Modals/EventDetailsModal";
 //import EventCRUDModal from "@/components/Modals/EventCRUDModal";
 
 const CalendarPage = () => {
-  const { datesSet, setDatesSet } = useContext(CalendarContext);
+      <Head>
+      <title>Tango Tiempo - A national Tango Events Calendar </title>
+      <meta name="description" content="Browse and find upcoming tango events in your region. Updated regularly with new listings." />
+      <meta name="keywords" content="tango, tango events, local tango calendar, tango festivals" />
+      <meta name="robots" content="index, follow" />
+      <meta property="og:title" content="Tango Tiempo - Find Local Tango Events" />
+      <meta property="og:description" content="Browse and find upcoming tango events in your region." />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://www.tangotiempo.com" />
+      </Head>
+  
+  //const { datesSet, setDatesSet } = useContext(CalendarContext);
   const { regions } = useContext(RegionsContext);
+  const [clickedDate, setClickedDate] = useState(null); // Initialize clickedDate
   const { selectedOrganizers, selectedCategories } = useContext(PostFilterContext);
   //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const {
@@ -49,6 +61,8 @@ const CalendarPage = () => {
     setSelectedDivision,
     setSelectedCity,
     setSelectedEvent,
+    isCreateModalOpen,
+    setCreateModalOpen,
     handleDatesSet,
     handleEventCreated,
     handleRegionChange,
@@ -142,6 +156,13 @@ const CalendarPage = () => {
         handleClose={handleMenuClose}
         menuItems={menuItems}
         onActionSelected={handleMenuAction}
+      />
+
+      <CreateSingleEventModal
+        open={isCreateModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        selectedDate={clickedDate}
+        selectedRegion={selectedRegion}
       />
 
     </div>

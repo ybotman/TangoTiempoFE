@@ -1,3 +1,7 @@
+-----------
+## App Overview and Features
+------------
+
 
 # Tango Tiempo - National Tango Calendar App
 
@@ -9,9 +13,10 @@ Features
 
 1. National Tango Event Calendar 
 
-	•	Multiple Views: Displays events in monthly, weekly, daily, and list formats. (Mobile in monthly view as minimal month with DateClickable for the Lower half dayList)
+	•	Multiple Views: Displays events in monthly, weekly, daily, and list formats.
 	•	Interactive Events: Users can click on events to view detailed information in a modal popup.
 	•	Category-Based Color Coding: Events are color-coded based on categories such as Milonga, Practica, Workshop, and more.
+	•	Event Submissions: Role and Region based Event submission to the calendar for national usage.
 
 2. Region-Specific Filtering  (passed to Calendar Event API)
 
@@ -38,4 +43,8 @@ Features
 		•	this is selected in the SiteMenuBar
 
 6. Firebase Authentication 
-    •	of use via google
+    •	of use via google and others providers are coming
+
+7. Mobile App  
+    •	The simples of app (SWA) will be build for better path to usage.
+
