@@ -1,41 +1,30 @@
-//app/hooks/useOrganizers.js
-
-import { useState, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import { RegionsContext } from '@/contexts/RegionsContext';
 
-const useOrganizers = (calculatedRegion) => {
+export const useOrganizers = () => {
+  const { selectedRegionID } = useContext(RegionsContext); // Get region _id from RegionsContext
   const [organizers, setOrganizers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getOrganizers = async (region) => {
-      if (!region) {
-        // If no region is provided, return early and set organizers to an empty array
-        setOrganizers([]);
-        return;
-      }
+    const fetchOrganizers = async () => {
+      if (!selectedRegionID) return; // Skip fetching if no region is selected
 
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
-          {
-            params: {
-              activeCalculatedRegion: region,
-            },
-          }
-        );
-
+        setLoading(true);
+        const response = await axios.get(`/api/organizers?regionID=${selectedRegionID}`);
         setOrganizers(response.data);
       } catch (error) {
-        console.error('Error fetching organizers:', error);
-        setOrganizers([]);
+        setError(error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    // Call getOrganizers only if calculatedRegion is available
-    getOrganizers(calculatedRegion);
-  }, [calculatedRegion]);
+    fetchOrganizers();
+  }, [selectedRegionID]); // Fetch organizers when regionID changes
 
-  return organizers;
+  return { organizers, loading, error };
 };
-
-export default useOrganizers;

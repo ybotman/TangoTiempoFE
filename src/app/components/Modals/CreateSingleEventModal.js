@@ -1,4 +1,3 @@
-// CreateSingleEventModal.js
 import React, { useState, useContext, useEffect } from 'react';
 import {
   Modal,
@@ -13,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/customDatePicker.css';
 import { useCreateEvent } from '@/hooks/useEvents';
-import useCategories from '@/hooks/useCategories';
+import useCategories from '@/hooks/useCategories'; // <-- Add this hook
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useLocations } from '@/hooks/useLocations';
 
@@ -34,24 +33,21 @@ const modalStyle = {
 const CreateSingleEventModal = ({ open, onClose, selectedDate, onCreate }) => {
   const { selectedRegion, selectedRegionID, selectedDivision, selectedCity } =
     useContext(RegionsContext);
-  console.log(
-    'CreateSingleEventModal Selected Region:2',
-    selectedRegion,
-    selectedRegionID
-  );
 
   const { locations, loading, error } = useLocations(
     selectedRegionID,
     selectedDivision?._id,
     selectedCity?._id
   );
-  console.log('Locations:', locations);
+  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState(selectedDate || new Date());
   const [endDate, setEndDate] = useState(selectedDate || new Date());
   const [cost, setCost] = useState('');
   const [location, setLocation] = useState('');
+  const [categoryFirst, setCategoryFirst] = useState(''); // <-- Add state for categoryFirst
+  const categories = useCategories(); // <-- Fetch categories using the hook
 
   const handleSave = () => {
     const eventData = {
@@ -61,6 +57,7 @@ const CreateSingleEventModal = ({ open, onClose, selectedDate, onCreate }) => {
       endDate,
       cost,
       locationId: location,
+      categoryFirst // <-- Include the selected category in event data
     };
     // Handle event creation or trigger the onCreate action
   };
@@ -152,6 +149,22 @@ const CreateSingleEventModal = ({ open, onClose, selectedDate, onCreate }) => {
               </MenuItem>
             ))
           )}
+        </TextField>
+
+        {/* Category Dropdown */}
+        <TextField
+          fullWidth
+          select
+          label="Primary Category"
+          value={categoryFirst}
+          onChange={(e) => setCategoryFirst(e.target.value)}
+          margin="normal"
+        >
+          {categories.map((category) => (
+            <MenuItem key={category._id} value={category.categoryName}>
+              {category.categoryName}
+            </MenuItem>
+          ))}
         </TextField>
 
         <Box mt={2} display="flex" justifyContent="space-between">

@@ -1,8 +1,9 @@
-// SiteMenuBar.js
+ // SiteMenuBar.js
 
 'use client';
 
 import React from 'react';
+import { listOfAllRoles } from '@/utils/masterData';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -77,15 +78,16 @@ const SiteMenuBar = ({
             onClose={handleHamburgerMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {selectedRole === 'NAMED_USER' && <MenuItem>User Settings</MenuItem>}
-            {selectedRole === 'REGIONAL_ORGANIZER' && <MenuItem>Organizer Settings</MenuItem>}
-            {selectedRole === 'REGIONAL_ORGANIZER' && <MenuItem>Location Management</MenuItem>}
-            {selectedRole === 'REGIONAL_ADMIN' && <MenuItem>Add Organizers</MenuItem>}
+            {selectedRole === listOfAllRoles.NAMED_USER && <MenuItem>User Settings</MenuItem>}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Organizer Settings</MenuItem>}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Location Management</MenuItem>}
+            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && <MenuItem>Add Organizers</MenuItem>}
             <Divider />
             <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
             <MenuItem>About TangoTiempo</MenuItem>
             <MenuItem>Help</MenuItem>
           </Menu>
+
           {/* Region Dropdown */}
           <select value={selectedRegion || ''} onChange={handleRegionChange}>
             <option value="">Select Region</option>
@@ -95,6 +97,7 @@ const SiteMenuBar = ({
               </option>
             ))}
           </select>
+
           {/* Division Dropdown */}
           {selectedRegion && (
             <select
@@ -111,6 +114,7 @@ const SiteMenuBar = ({
                 ))}
             </select>
           )}
+
           {/* City Dropdown */}
           {selectedDivision && (
             <select value={selectedCity || ''} onChange={handleCityChange}>
@@ -125,19 +129,43 @@ const SiteMenuBar = ({
                 ))}
             </select>
           )}
-          {/* Organizer Dropdown */}
+
+          {/* Organizer Dropdown (Show only if a region is selected) */}
           {selectedRegion && organizers && organizers.length > 0 && (
-            <select value={selectedOrganizer || ''} onChange={(e) => handleOrganizerChange(e.target.value)}>
-              <option value="">Select Organizer</option>
-              <option value="none">None</option>
-              {organizers.map((org) => (
-                <option key={org._id} value={org._id}>
-                  {org.shortName}
-                </option>
-              ))}
-            </select>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              <select
+                value={selectedOrganizer || ''}
+                onChange={(e) => handleOrganizerChange(e.target.value)}
+                style={{
+                  marginLeft: '20px',
+                  textAlign: 'center',
+                  backgroundColor: '#333', // Dark background
+                  color: '#fff',            // Light text
+                  fontSize: '0.85rem',       // Smaller font size
+                  padding: '8px',           // Padding for better spacing
+                  border: '1px solid #fff', // White border to make it stand out
+                  borderRadius: '4px',      // Rounded corners
+                }}
+              >
+                <option value="">Select Organizer</option>
+                <option value="none">None</option>
+                {organizers.map((org) => (
+                  <option key={org._id} value={org._id}>
+                    {org.shortName}
+                  </option>
+                ))}
+              </select>
+            </Box>
           )}
         </Box>
+
         {/* User State and Role Dropdown */}
         {user ? (
           <Stack direction="row" spacing={1} alignItems="center">
@@ -175,6 +203,7 @@ const SiteMenuBar = ({
           </Stack>
         )}
       </Box>
+
       {/* Bottom row with Category Filter */}
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2 }}>
         <PostFilter
@@ -184,6 +213,7 @@ const SiteMenuBar = ({
           selectedOrganizer={selectedOrganizer}
         />
       </Box>
+
       {/* Help Modal */}
       <FAQModal open={FAQModalOpen} handleClose={closeFAQModal} />
     </Box>
@@ -191,22 +221,6 @@ const SiteMenuBar = ({
 };
 
 SiteMenuBar.propTypes = {
-  regions: PropTypes.arrayOf(
-    PropTypes.shape({
-      regionName: PropTypes.string.isRequired,
-      divisions: PropTypes.arrayOf(
-        PropTypes.shape({
-          divisionName: PropTypes.string.isRequired,
-          majorCities: PropTypes.arrayOf(
-            PropTypes.shape({
-              _id: PropTypes.string.isRequired,
-              cityName: PropTypes.string.isRequired,
-            })
-          ).isRequired,
-        })
-      ).isRequired,
-    })
-  ).isRequired,
   activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   handleCategoryChange: PropTypes.func.isRequired,
   categories: PropTypes.arrayOf(

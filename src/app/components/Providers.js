@@ -15,9 +15,9 @@ const Providers = ({ children }) => {
     <AuthProvider>
       <RegionsProvider>
         <CalendarProvider>
-          <PostFilterProvider>
+          {/*  <PostFilterProvider> */}
             <RoleProvider>{children}</RoleProvider>
-          </PostFilterProvider>
+         {/* </PostFilterProvider> */}
         </CalendarProvider>
       </RegionsProvider>
     </AuthProvider>
