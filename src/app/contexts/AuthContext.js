@@ -43,15 +43,9 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     });
-    console.warn('Force setting role to RegionalOrganizer');
-    setAvailableRoles(['RegionalOrganizer']);
-    setSelectedRole('RegionalOrganizer');
+
     return () => unsubscribe();
   }, []);
-
-  //  useEffect(() => {
-  //    updateRoleBooleans(selectedRole);
-  //  }, [selectedRole]);
 
   const fetchUserRoles = async (firebaseUserId) => {
     try {

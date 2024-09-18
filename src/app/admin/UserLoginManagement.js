@@ -1,4 +1,5 @@
 import { React, useEffect, useState } from 'react';
+import { listOfAllRoles } from '@/utils/masterData';
 import axios from 'axios';
 import {
   Box,
@@ -175,30 +176,22 @@ const ManageUserLogins = () => {
               {errorMessage}
             </Alert>
           )}
-
-          <FormControl fullWidth>
-            <InputLabel id="roles-label">Roles</InputLabel>
-            <Select
-              labelId="roles-label"
-              multiple
-              value={selectedUserRoles}
-              onChange={handleRoleChange}
-              renderValue={(selected) =>
-                selected
-                  .map((id) => roles.find((role) => role._id === id)?.roleName)
-                  .join(', ')
-              }
-            >
-              {roles.map((role) => (
-                <MenuItem key={role._id} value={role._id}>
-                  <Checkbox
-                    checked={selectedUserRoles.indexOf(role._id) > -1}
-                  />
-                  <ListItemText primary={role.roleName} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+<FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+  <InputLabel id="role-select-label">Role</InputLabel>
+  <Select
+    labelId="role-select-label"
+    id="role-select"
+    value={selectedRole || ''}
+    onChange={handleRoleChange}
+    label="Role"
+  >
+    {Object.values(listOfAllRoles).map((role) => (
+      <MenuItem key={role} value={role}>
+        {role}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
           <Box mt={3} display="flex" justifyContent="flex-end">
             <Button variant="contained" onClick={handleApply}>
               Apply

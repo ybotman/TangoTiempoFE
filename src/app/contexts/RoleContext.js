@@ -17,8 +17,7 @@ export const RoleProvider = ({ children }) => {
   useEffect(() => {
     if (availableRoles && availableRoles.length > 0) {
       setRoles(availableRoles);
-      setSelectedRole('RegionalOrganizer');
-      console.warn('Forced selectedRole to RegionalOrganizer for testing');
+      setSelectedRole(selectedRole);
     }
   }, [availableRoles]);
 

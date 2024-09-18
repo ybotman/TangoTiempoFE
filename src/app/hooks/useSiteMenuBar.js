@@ -7,7 +7,7 @@ import { RoleContext } from '@/contexts/RoleContext';
 import PropTypes from 'prop-types';
 
 export const useSiteMenuBar = () => {
-  const { user, logOut, selectRole } = useContext(AuthContext);
+  const { user, logOut, setSelectedRole } = useContext(AuthContext);
   const {
     selectedRegion,
     setSelectedRegion,
@@ -35,9 +35,9 @@ export const useSiteMenuBar = () => {
   };
 
   // Handle role changes
-  const handleRoleChange = (event) => {
-    selectRole(event.target.value);
-  };
+const handleRoleChange = (event) => {
+  setSelectedRole(event.target.value);
+};
   const handleRegionChange = (event) => {
     const selectedRegionName = event.target.value;
     const selectedRegionData = regions.find(
