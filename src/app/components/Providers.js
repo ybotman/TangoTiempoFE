@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RegionsProvider } from '@/contexts/RegionsContext';
 import { CalendarProvider } from '@/contexts/CalendarContext';
-import { PostFilterProvider } from '@/contexts/PostFilterContext';
 import { RoleProvider } from '@/contexts/RoleContext';
 
 const Providers = ({ children }) => {
@@ -15,9 +14,9 @@ const Providers = ({ children }) => {
     <AuthProvider>
       <RegionsProvider>
         <CalendarProvider>
-          {/*  <PostFilterProvider> */}
-            <RoleProvider>{children}</RoleProvider>
-         {/* </PostFilterProvider> */}
+          <RoleProvider>
+            {children}
+          </RoleProvider>
         </CalendarProvider>
       </RegionsProvider>
     </AuthProvider>

@@ -1,11 +1,12 @@
-//app/components/UI/PostFilter.js// app/components/UI/PostFilter.js
+//app/components/UI/PostFilter.js//
+
 
 'use client';
 
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
-import { PostFilterContext } from '@/contexts/PostFilterContext';
+
 
 const PostFilter = ({
   activeCategories = [],

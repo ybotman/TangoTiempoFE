@@ -3,7 +3,6 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
-import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import PropTypes from 'prop-types';
 
@@ -20,7 +19,7 @@ export const useSiteMenuBar = () => {
     setSelectedCity,
     regions
   } = useContext(RegionsContext);
-  const { organizers } = useContext(PostFilterContext);
+  //const { organizers } = useContext(PostFilterContext);
   const { roles, selectedRole } = useContext(RoleContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -72,7 +71,7 @@ const handleRegionChange = (event) => {
     selectedRegion,
     selectedDivision,
     selectedCity,
-    organizers,
+   // organizers,
     regions,
     roles,
     selectedRole,

@@ -8,7 +8,6 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
-import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 
@@ -19,22 +18,23 @@ export const useCalendarPage = () => {
   const categories = useCategories();
   const {
     selectedRegion,
-    selectedRegionID, // Access region ID
+    selectedRegionID, 
     setSelectedRegion,
     selectedDivision,
     setSelectedDivision,
     selectedCity,
     setSelectedCity,
   } = useContext(RegionsContext);
-  console.log('useCalPage -> åSelected Region:', selectedRegion);
-
+ 
   const { selectedRole } = useContext(RoleContext);
-  const {
-    selectedOrganizers,
-    setSelectedOrganizers,
-    selectedCategories,
-    setSelectedCategories,
-  } = useContext(PostFilterContext);
+ // const {
+ //   selectedOrganizers,
+ //   setSelectedOrganizers,
+ //   selectedCategories,
+ //   setSelectedCategories,
+ // } = 
+//where will  thise come from handles is suppose
+
   const { datesSet, setDatesSet } = useContext(CalendarContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -90,7 +90,7 @@ export const useCalendarPage = () => {
     usePostFilter(
       transformedEvents,
       categories,
-      selectedOrganizers,
+ //     selectedOrganizers,
       [] // Ignoring tags for now
     );
 
@@ -222,10 +222,10 @@ export const useCalendarPage = () => {
     activeCategories,
     handleCategoryChange,
     handleDatesSet, // Return handleDatesSet
-    selectedOrganizers,
-    setSelectedOrganizers,
-    selectedCategories,
-    setSelectedCategories,
+//    selectedOrganizers,
+//    setSelectedOrganizers,
+ //   selectedCategories,
+ //   setSelectedCategories,
     datesSet,
     events,
     coloredFilteredEvents,

@@ -20,12 +20,10 @@ import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 //import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
-import { PostFilterContext } from '@/contexts/PostFilterContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import CreateSingleEventModal from '@/components/Modals/CreateSingleEventModal';
 //import EventDetailsModal from "@/components/Modals/EventDetailsModal";
-//import EventCRUDModal from "@/components/Modals/EventCRUDModal";
 
 const CalendarPage = () => {
   <Head>
@@ -54,8 +52,7 @@ const CalendarPage = () => {
   //const { datesSet, setDatesSet } = useContext(CalendarContext);
   const { regions } = useContext(RegionsContext);
   const [clickedDate, setClickedDate] = useState(null); // Initialize clickedDate
-  const { selectedOrganizers, selectedCategories } =
-    useContext(PostFilterContext);
+//  const { selectedOrganizers, selectedCategories } = now where??
   //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const {
     menuAnchor,
@@ -101,7 +98,7 @@ const CalendarPage = () => {
         regions={regions}
         handleRegionChange={handleRegionChange}
         organizers={organizers}
-        selectedOrganizers={selectedOrganizers}
+  //      selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
