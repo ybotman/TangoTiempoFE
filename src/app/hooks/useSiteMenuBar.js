@@ -17,7 +17,7 @@ export const useSiteMenuBar = () => {
     setSelectedDivision,
     selectedCity,
     setSelectedCity,
-    regions
+    regions,
   } = useContext(RegionsContext);
   //const { organizers } = useContext(PostFilterContext);
   const { roles, selectedRole } = useContext(RoleContext);
@@ -38,18 +38,20 @@ export const useSiteMenuBar = () => {
   const handleRoleChange = (event) => {
     selectRole(event.target.value);
   };
-const handleRegionChange = (event) => {
-  const selectedRegionName = event.target.value;
-  const selectedRegionData = regions.find((region) => region.regionName === selectedRegionName);
+  const handleRegionChange = (event) => {
+    const selectedRegionName = event.target.value;
+    const selectedRegionData = regions.find(
+      (region) => region.regionName === selectedRegionName
+    );
 
-  setSelectedRegion(selectedRegionName);
-  
-  // Make sure you're setting the correct ID
-  setSelectedRegionID(selectedRegionData ? selectedRegionData._id : '');  // assuming _id is the ID of the region
+    setSelectedRegion(selectedRegionName);
 
-  setSelectedDivision('');
-  setSelectedCity('');
-};
+    // Make sure you're setting the correct ID
+    setSelectedRegionID(selectedRegionData ? selectedRegionData._id : ''); // assuming _id is the ID of the region
+
+    setSelectedDivision('');
+    setSelectedCity('');
+  };
 
   const handleDivisionChange = (event) => {
     setSelectedDivision(event.target.value);
@@ -71,7 +73,7 @@ const handleRegionChange = (event) => {
     selectedRegion,
     selectedDivision,
     selectedCity,
-   // organizers,
+    // organizers,
     regions,
     roles,
     selectedRole,
@@ -84,20 +86,21 @@ const handleRegionChange = (event) => {
     handleCityChange,
     openFAQModal,
     closeFAQModal,
-    logOut
+    logOut,
   };
 };
 
 useSiteMenuBar.propTypes = {
-  activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,  // Array of active category names
-  handleCategoryChange: PropTypes.func.isRequired,                   // Function to handle category change
-  categories: PropTypes.arrayOf(                                     // Array of category objects with name property
+  activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired, // Array of active category names
+  handleCategoryChange: PropTypes.func.isRequired, // Function to handle category change
+  categories: PropTypes.arrayOf(
+    // Array of category objects with name property
     PropTypes.shape({
       categoryName: PropTypes.string.isRequired,
     })
   ).isRequired,
-  selectedOrganizer: PropTypes.string.isRequired,                    // Currently selected organizer
-  handleOrganizerChange: PropTypes.func.isRequired,                  // Function to handle organizer change
+  selectedOrganizer: PropTypes.string.isRequired, // Currently selected organizer
+  handleOrganizerChange: PropTypes.func.isRequired, // Function to handle organizer change
 };
 
 export default useSiteMenuBar;

@@ -6,7 +6,6 @@ import React, { createContext, useState, useEffect } from 'react';
 import { useRegions } from '@/hooks/useRegions';
 import PropTypes from 'prop-types';
 
-
 export const RegionsContext = createContext();
 console.log('RegionsContext created');
 

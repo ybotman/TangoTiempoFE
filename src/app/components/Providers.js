@@ -14,9 +14,7 @@ const Providers = ({ children }) => {
     <AuthProvider>
       <RegionsProvider>
         <CalendarProvider>
-          <RoleProvider>
-            {children}
-          </RoleProvider>
+          <RoleProvider>{children}</RoleProvider>
         </CalendarProvider>
       </RegionsProvider>
     </AuthProvider>

@@ -1,4 +1,4 @@
- // SiteMenuBar.js
+// SiteMenuBar.js
 
 'use client';
 
@@ -49,7 +49,7 @@ const SiteMenuBar = ({
     handleCityChange,
     openFAQModal,
     closeFAQModal,
-    logOut
+    logOut,
   } = useSiteMenuBar();
 
   return (
@@ -78,10 +78,18 @@ const SiteMenuBar = ({
             onClose={handleHamburgerMenuClose}
           >
             {/* Conditional menu items based on roles */}
-            {selectedRole === listOfAllRoles.NAMED_USER && <MenuItem>User Settings</MenuItem>}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Organizer Settings</MenuItem>}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && <MenuItem>Location Management</MenuItem>}
-            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && <MenuItem>Add Organizers</MenuItem>}
+            {selectedRole === listOfAllRoles.NAMED_USER && (
+              <MenuItem>User Settings</MenuItem>
+            )}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+              <MenuItem>Organizer Settings</MenuItem>
+            )}
+            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+              <MenuItem>Location Management</MenuItem>
+            )}
+            {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
+              <MenuItem>Add Organizers</MenuItem>
+            )}
             <Divider />
             <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
             <MenuItem>About TangoTiempo</MenuItem>
@@ -108,7 +116,10 @@ const SiteMenuBar = ({
               {regions
                 .find((region) => region.regionName === selectedRegion)
                 .divisions.map((division) => (
-                  <option key={division.divisionName} value={division.divisionName}>
+                  <option
+                    key={division.divisionName}
+                    value={division.divisionName}
+                  >
                     {division.divisionName}
                   </option>
                 ))}
@@ -121,7 +132,9 @@ const SiteMenuBar = ({
               <option value="">Select City</option>
               {regions
                 .find((region) => region.regionName === selectedRegion)
-                .divisions.find((division) => division.divisionName === selectedDivision)
+                .divisions.find(
+                  (division) => division.divisionName === selectedDivision
+                )
                 .majorCities.map((city) => (
                   <option key={city._id} value={city.cityName}>
                     {city.cityName}
@@ -147,11 +160,11 @@ const SiteMenuBar = ({
                   marginLeft: '20px',
                   textAlign: 'center',
                   backgroundColor: '#333', // Dark background
-                  color: '#fff',            // Light text
-                  fontSize: '0.85rem',       // Smaller font size
-                  padding: '8px',           // Padding for better spacing
+                  color: '#fff', // Light text
+                  fontSize: '0.85rem', // Smaller font size
+                  padding: '8px', // Padding for better spacing
                   border: '1px solid #fff', // White border to make it stand out
-                  borderRadius: '4px',      // Rounded corners
+                  borderRadius: '4px', // Rounded corners
                 }}
               >
                 <option value="">Select Organizer</option>
@@ -188,16 +201,31 @@ const SiteMenuBar = ({
                 ))}
               </Select>
             </FormControl>
-            <Button variant="outlined" color="inherit" size="small" onClick={logOut}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              onClick={logOut}
+            >
               Log Out
             </Button>
           </Stack>
         ) : (
           <Stack direction="row" spacing={1}>
-            <Button variant="contained" color="primary" size="small" href="/auth/login">
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              href="/auth/login"
+            >
               Log In
             </Button>
-            <Button variant="contained" color="secondary" size="small" href="/auth/signup">
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              href="/auth/signup"
+            >
               Sign Up
             </Button>
           </Stack>
@@ -205,7 +233,14 @@ const SiteMenuBar = ({
       </Box>
 
       {/* Bottom row with Category Filter */}
-      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: 2,
+        }}
+      >
         <PostFilter
           activeCategories={activeCategories}
           handleCategoryChange={handleCategoryChange}

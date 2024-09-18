@@ -14,7 +14,9 @@ export const useOrganizers = () => {
 
       try {
         setLoading(true);
-        const response = await axios.get(`/api/organizers?regionID=${selectedRegionID}`);
+        const response = await axios.get(
+          `/api/organizers?regionID=${selectedRegionID}`
+        );
         setOrganizers(response.data);
       } catch (error) {
         setError(error);

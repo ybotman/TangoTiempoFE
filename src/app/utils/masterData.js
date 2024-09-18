@@ -1,6 +1,5 @@
 //@utils/masterData.js
 
-
 export const listOfAllRoles = {
   NAMED_USER: 'NamedUser',
   REGIONAL_ORGANIZER: 'RegionalOrganizer',

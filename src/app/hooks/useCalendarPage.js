@@ -18,22 +18,22 @@ export const useCalendarPage = () => {
   const categories = useCategories();
   const {
     selectedRegion,
-    selectedRegionID, 
+    selectedRegionID,
     setSelectedRegion,
     selectedDivision,
     setSelectedDivision,
     selectedCity,
     setSelectedCity,
   } = useContext(RegionsContext);
- 
+
   const { selectedRole } = useContext(RoleContext);
- // const {
- //   selectedOrganizers,
- //   setSelectedOrganizers,
- //   selectedCategories,
- //   setSelectedCategories,
- // } = 
-//where will  thise come from handles is suppose
+  // const {
+  //   selectedOrganizers,
+  //   setSelectedOrganizers,
+  //   selectedCategories,
+  //   setSelectedCategories,
+  // } =
+  //where will  thise come from handles is suppose
 
   const { datesSet, setDatesSet } = useContext(CalendarContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -90,7 +90,7 @@ export const useCalendarPage = () => {
     usePostFilter(
       transformedEvents,
       categories,
- //     selectedOrganizers,
+      //     selectedOrganizers,
       [] // Ignoring tags for now
     );
 
@@ -222,10 +222,10 @@ export const useCalendarPage = () => {
     activeCategories,
     handleCategoryChange,
     handleDatesSet, // Return handleDatesSet
-//    selectedOrganizers,
-//    setSelectedOrganizers,
- //   selectedCategories,
- //   setSelectedCategories,
+    //    selectedOrganizers,
+    //    setSelectedOrganizers,
+    //   selectedCategories,
+    //   setSelectedCategories,
     datesSet,
     events,
     coloredFilteredEvents,

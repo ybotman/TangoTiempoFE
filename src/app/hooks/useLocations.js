@@ -14,7 +14,9 @@ export const useLocations = () => {
 
       try {
         setLoading(true);
-        const response = await axios.get(`/api/locations?regionID=${selectedRegionID}`);
+        const response = await axios.get(
+          `/api/locations?regionID=${selectedRegionID}`
+        );
         setLocations(response.data);
       } catch (error) {
         setError(error);

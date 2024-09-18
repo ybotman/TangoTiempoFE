@@ -52,7 +52,7 @@ const CalendarPage = () => {
   //const { datesSet, setDatesSet } = useContext(CalendarContext);
   const { regions } = useContext(RegionsContext);
   const [clickedDate, setClickedDate] = useState(null); // Initialize clickedDate
-//  const { selectedOrganizers, selectedCategories } = now where??
+  //  const { selectedOrganizers, selectedCategories } = now where??
   //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const {
     menuAnchor,
@@ -98,7 +98,7 @@ const CalendarPage = () => {
         regions={regions}
         handleRegionChange={handleRegionChange}
         organizers={organizers}
-  //      selectedOrganizers={selectedOrganizers}
+        //      selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}

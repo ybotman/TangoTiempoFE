@@ -39,7 +39,7 @@ const CreateSingleEventModal = ({ open, onClose, selectedDate, onCreate }) => {
     selectedDivision?._id,
     selectedCity?._id
   );
-  
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState(selectedDate || new Date());
@@ -57,7 +57,7 @@ const CreateSingleEventModal = ({ open, onClose, selectedDate, onCreate }) => {
       endDate,
       cost,
       locationId: location,
-      categoryFirst // <-- Include the selected category in event data
+      categoryFirst, // <-- Include the selected category in event data
     };
     // Handle event creation or trigger the onCreate action
   };
