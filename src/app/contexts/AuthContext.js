@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('  ');
+  const [error, setError] = useState(null);
   const signUpOngoing = useRef(false);
 
   useEffect(() => {
