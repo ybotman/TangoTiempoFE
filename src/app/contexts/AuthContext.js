@@ -1,4 +1,4 @@
-//app/contexts/AuthContext.js
+// app/contexts/AuthContext.js
 
 'use client';
 
@@ -13,18 +13,14 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
 import axios from 'axios';
-//import { listOfAllRoles } from '@/utils/masterData';
 
 // Create Auth Context
 export const AuthContext = createContext();
 
-//console.log('AuthContext created');
-
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [availableRoles, setAvailableRoles] = useState([]);
-  const [selectedRole, setSelectedRole] = useState('');
+  const [user, setUser] = useState(null); // Unified user state
+  const [selectedRole, setSelectedRole] = useState(''); // Preserve selectedRole
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const signUpOngoing = useRef(false);
@@ -32,14 +28,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
-
-        if (!signUpOngoing.current) {
-          await fetchUserRoles(currentUser.uid); // Fetch user roles
-        }
+        await setUserData(currentUser);
       } else {
         setUser(null);
-        setAvailableRoles([]); // Clear roles on logout
+        setSelectedRole(''); // Reset selectedRole on logout
       }
       setLoading(false);
     });
@@ -47,29 +39,38 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const fetchUserRoles = async (firebaseUserId) => {
+  // Function to fetch and set combined user data
+  const setUserData = async (firebaseUser) => {
     try {
-      //console.log('Fetching user roles for UID:', firebaseUserId);
+      const idToken = await firebaseUser.getIdToken();
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
       );
 
-      if (response.status === 200) {
-        //console.log('Fetched roles:', response.data.roleIds);
-        const roles = response.data.roleIds.map((role) => role.roleName);
-        setAvailableRoles(roles);
+      const backendInfo = response.data;
 
-        const initialRole = roles[0] || '';
-        setSelectedRole(initialRole);
-      } else {
-        console.warn('Unexpected response status:', response.status);
-        setAvailableRoles([]);
-        setSelectedRole('');
+      // Merge Firebase and backend user data
+      const mergedUser = {
+        ...firebaseUser, // Spread Firebase user properties directly
+        backendInfo,
+        roles: backendInfo.roleIds.map((role) => role.roleName) || [],
+      };
+
+      setUser(mergedUser);
+
+      // Set selectedRole to the first available role if not already set
+      if (!selectedRole && mergedUser.roles.length > 0) {
+        setSelectedRole(mergedUser.roles[0]);
       }
     } catch (err) {
-      console.error('Failed to fetch user roles:', err);
-      setError('Failed to fetch user roles');
-      setAvailableRoles([]);
+      console.error('Error fetching combined user data:', err);
+      setError('Failed to fetch user data.');
+      setUser(null);
       setSelectedRole('');
     }
   };
@@ -89,21 +90,44 @@ export const AuthProvider = ({ children }) => {
       console.log('Initiating Google sign-in...');
       const result = await signInWithPopup(auth, provider);
       console.log('Google sign-in successful:', result);
-      const firebaseUserId = result.user.uid;
+      const firebaseUser = result.user;
 
+      // Fetch or create user in backend
+      const idToken = await firebaseUser.getIdToken();
       try {
-        console.log('Fetching user roles from backend...');
+        console.log('Fetching user from backend...');
         await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUserId}`
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
         );
       } catch (error) {
         console.error('Error fetching user from backend:', error);
         if (error.response && error.response.status === 404) {
           console.log('User not found in backend. Creating new user...');
+          const displayName = firebaseUser.displayName || '';
+          const [firstName, lastName] = displayName.split(' ');
+          const userData = {
+            firebaseUserId: firebaseUser.uid,
+            firstName: firstName || '',
+            lastName: lastName || '',
+            phoneNumber: firebaseUser.phoneNumber || '',
+            photoUrl: firebaseUser.photoURL || '',
+          };
+
           const roleResponse = await axios.post(
             `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
-            { firebaseUserId }
+            userData,
+            {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
           );
+
           if (roleResponse.status !== 204) {
             throw new Error('Failed to assign role in backend');
           }
@@ -113,10 +137,9 @@ export const AuthProvider = ({ children }) => {
       }
 
       signUpOngoing.current = false;
-      setUser(result.user);
-      await fetchUserRoles(firebaseUserId); // Fetch and set the user's roles after signup
+      await setUserData(firebaseUser); // Set merged user data
       setLoading(false);
-      return result.user;
+      return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithGoogle:', err);
       setError(err.message || 'An unexpected error occurred.');
@@ -127,30 +150,39 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login with Email and Password
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
+  const login = async (email, password) => {
+    try {
+      setLoading(true);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await setUserData(result.user);
+      setLoading(false);
+      return result.user;
+    } catch (err) {
+      console.error('Error in login:', err);
+      setError(err.message || 'Login failed.');
+      setLoading(false);
+      return null;
+    }
   };
 
   // Logout Function
-
   const logOut = async () => {
     try {
       await signOut(auth);
       console.log('User signed out successfully');
-      // Optional: Reset other state variables if necessary
       setUser(null);
-      setAvailableRoles([]);
-      setSelectedRole('');
+      setSelectedRole(''); // Reset selectedRole on logout
     } catch (error) {
       console.error('Error signing out:', error);
+      setError('Failed to sign out.');
     }
   };
-  // Context Valu
+
+  // Context Value
   const value = {
     user,
-    availableRoles,
     selectedRole,
-    setSelectedRole,
+    setSelectedRole, // Provide setter for selectedRole
     loading,
     error,
     logOut,
