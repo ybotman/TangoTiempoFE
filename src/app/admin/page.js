@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Tabs, Tab, Box, Typography } from '@mui/material';
+import { Tabs, Tab, Box } from '@mui/material';
 import RegionManagement from './RegionManagement';
 import LocationManagement from './LocationManagement';
 import OrganizerManagement from './OrganizerManagement';

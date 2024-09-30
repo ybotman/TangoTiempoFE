@@ -17,7 +17,7 @@ const RootLayout = ({ children }) => {
     if (regions?.length > 0) {
       console.log('Selected Region:', selectedRegion);
     }
-  }, [user, regions]);
+  }, [user, regions, selectedRegion]);
 
   return <>{children}</>;
 };

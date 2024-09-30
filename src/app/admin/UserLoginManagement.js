@@ -176,22 +176,22 @@ const ManageUserLogins = () => {
               {errorMessage}
             </Alert>
           )}
-<FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
-  <InputLabel id="role-select-label">Role</InputLabel>
-  <Select
-    labelId="role-select-label"
-    id="role-select"
-    value={selectedRole || ''}
-    onChange={handleRoleChange}
-    label="Role"
-  >
-    {Object.values(listOfAllRoles).map((role) => (
-      <MenuItem key={role} value={role}>
-        {role}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+            <InputLabel id="role-select-label">Role</InputLabel>
+            <Select
+              labelId="role-select-label"
+              id="role-select"
+              value={selectedRole || ''}
+              onChange={handleRoleChange}
+              label="Role"
+            >
+              {Object.values(listOfAllRoles).map((role) => (
+                <MenuItem key={role} value={role}>
+                  {role}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Box mt={3} display="flex" justifyContent="flex-end">
             <Button variant="contained" onClick={handleApply}>
               Apply
