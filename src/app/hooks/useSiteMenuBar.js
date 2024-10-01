@@ -11,7 +11,6 @@ export const useSiteMenuBar = () => {
   const {
     selectedRegion,
     setSelectedRegion,
-    selectedRegionID,
     setSelectedRegionID,
     selectedDivision,
     setSelectedDivision,

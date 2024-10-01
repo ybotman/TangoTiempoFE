@@ -17,8 +17,8 @@ export const useCalendarPage = () => {
   const [clickedDate, setClickedDate] = useState(null); // Date or event clicked
   const categories = useCategories();
   const {
+    regions,
     selectedRegion,
-    selectedRegionID,
     setSelectedRegion,
     selectedDivision,
     setSelectedDivision,
@@ -220,6 +220,7 @@ export const useCalendarPage = () => {
   return {
     categories,
     activeCategories,
+    clickedDate,
     handleCategoryChange,
     handleDatesSet, // Return handleDatesSet
     //    selectedOrganizers,
@@ -231,10 +232,10 @@ export const useCalendarPage = () => {
     coloredFilteredEvents,
     refreshEvents,
     selectedEvent,
-    setSelectedEvent,
+    setSelectedEvent, // FIXME: Not used yet
     isCreateModalOpen,
     setCreateModalOpen,
-    handleEventCreated,
+    handleEventCreated, // FIXME: Not used yet
     handleRegionChange,
     handlePrev,
     handleNext,
