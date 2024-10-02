@@ -5,7 +5,7 @@
     "plugin:react/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["react", "prettier"],
+  "plugins": ["react", "prettier", "cypress"],
   "rules": {
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
@@ -16,11 +16,15 @@
   "env": {
     "browser": true,
     "node": true,
-    "es2021": true
+    "es6": true,
+    "cypress/globals": true
   },
-  "settings": {
-    "react": {
-      "version": "detect"
+  "overrides": [
+    {
+      "files": ["**/*.cy.js", "**/*.cy.jsx", "**/*.cy.ts", "**/*.cy.tsx"],
+      "env": {
+        "cypress/globals": true
+      }
     }
-  }
+  ]
 }

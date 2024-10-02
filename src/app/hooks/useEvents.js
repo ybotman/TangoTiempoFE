@@ -1,6 +1,4 @@
-//app/hooks/useEvents.js// app/hooks/useEvents.js
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 export function useEvents(
@@ -12,7 +10,7 @@ export function useEvents(
 ) {
   const [events, setEvents] = useState([]);
 
-  const getEvents = async () => {
+  const getEvents = useCallback(async () => {
     if (!selectedRegion) {
       setEvents([]);
       return;
@@ -45,10 +43,6 @@ export function useEvents(
       console.error('useEvents-> Error fetching events:', error);
       setEvents([]);
     }
-  };
-
-  useEffect(() => {
-    getEvents();
   }, [
     selectedRegion,
     selectedDivision,
@@ -56,6 +50,10 @@ export function useEvents(
     calendarStart,
     calendarEnd,
   ]);
+
+  useEffect(() => {
+    getEvents();
+  }, [getEvents]);
 
   return { events, refreshEvents: getEvents };
 }

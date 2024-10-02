@@ -11,7 +11,6 @@ export const useSiteMenuBar = () => {
   const {
     selectedRegion,
     setSelectedRegion,
-    selectedRegionID,
     setSelectedRegionID,
     selectedDivision,
     setSelectedDivision,
@@ -35,9 +34,9 @@ export const useSiteMenuBar = () => {
   };
 
   // Handle role changes
-const handleRoleChange = (event) => {
-  setSelectedRole(event.target.value);
-};
+  const handleRoleChange = (event) => {
+    setSelectedRole(event.target.value);
+  };
   const handleRegionChange = (event) => {
     const selectedRegionName = event.target.value;
     const selectedRegionData = regions.find(

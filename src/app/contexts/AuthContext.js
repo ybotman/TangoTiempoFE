@@ -63,10 +63,8 @@ export const AuthProvider = ({ children }) => {
 
       setUser(mergedUser);
 
-      // Set selectedRole to the first available role if not already set
-      if (!selectedRole && mergedUser.roles.length > 0) {
-        setSelectedRole(mergedUser.roles[0]);
-      }
+      // Set selectedRole to the first available role
+      setSelectedRole(mergedUser.roles[0] || '');
     } catch (err) {
       console.error('Error fetching combined user data:', err);
       setError('Failed to fetch user data.');

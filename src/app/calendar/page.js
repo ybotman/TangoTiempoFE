@@ -2,7 +2,7 @@
 
 'use client';
 import Head from 'next/head';
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -51,13 +51,13 @@ const CalendarPage = () => {
 
   //const { datesSet, setDatesSet } = useContext(CalendarContext);
   const { regions } = useContext(RegionsContext);
-  const [clickedDate, setClickedDate] = useState(null); // Initialize clickedDate
   //  const { selectedOrganizers, selectedCategories } = now where??
   //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const {
     menuAnchor,
     menuItems,
     categories,
+    clickedDate,
     handleMenuAction,
     handleMenuClose,
     activeCategories,
@@ -70,11 +70,9 @@ const CalendarPage = () => {
     setSelectedRegion,
     setSelectedDivision,
     setSelectedCity,
-    setSelectedEvent,
     isCreateModalOpen,
     setCreateModalOpen,
     handleDatesSet,
-    handleEventCreated,
     handleRegionChange,
     handlePrev,
     handleNext,
