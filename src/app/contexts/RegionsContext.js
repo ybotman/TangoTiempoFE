@@ -3,14 +3,13 @@
 'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
-import { useRegions } from '@/hooks/useRegions';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
 export const RegionsContext = createContext();
 console.log('RegionsContext created');
 
 export const RegionsProvider = ({ children }) => {
-  const regionsData = useRegions(); // Custom hook to fetch regions
   const [regions, setRegions] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(''); // Name of the selected region
   const [selectedRegionID, setSelectedRegionID] = useState(''); // ID of the selected region
@@ -19,12 +18,23 @@ export const RegionsProvider = ({ children }) => {
 
   // Populate regions when data is available
   useEffect(() => {
-    if (regionsData) {
-      setRegions(regionsData);
-    }
-  }, [regionsData]);
+    fetchRegions();
+    console.log('RegionsProvider useEffect');
+  }, []);
 
-  console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
+  // Fetch regions from the backend
+  const fetchRegions = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`
+      );
+      setRegions(response.data);
+    } catch (error) {
+      console.error('Error fetching regions:', error);
+    }
+  };
+
+  // console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
   return (
     <RegionsContext.Provider
       value={{
