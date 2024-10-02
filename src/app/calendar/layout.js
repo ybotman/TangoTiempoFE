@@ -11,11 +11,11 @@ const RootLayout = ({ children }) => {
 
   useEffect(() => {
     if (user?.displayName) {
-      console.log('User Name:', user.displayName);
+      // console.log('User Name:', user.displayName);
     }
 
     if (regions?.length > 0) {
-      console.log('Selected Region:', selectedRegion);
+      // console.log('Selected Region:', selectedRegion);
     }
   }, [user, regions, selectedRegion]);
 
