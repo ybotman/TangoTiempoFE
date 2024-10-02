@@ -22,7 +22,7 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
-import CreateSingleEventModal from '@/components/Modals/CreateSingleEventModal';
+import CreateEventModal from '@/components/Modals/CreateEventModal';
 //import EventDetailsModal from "@/components/Modals/EventDetailsModal";
 
 const CalendarPage = () => {
@@ -166,7 +166,7 @@ const CalendarPage = () => {
         onActionSelected={handleMenuAction}
       />
 
-      <CreateSingleEventModal
+      <CreateEventModal
         open={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         selectedDate={clickedDate}

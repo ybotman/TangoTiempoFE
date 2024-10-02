@@ -9,10 +9,18 @@
   "rules": {
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "no-unused-vars": "warn",
+    "no-undef": "error"
   },
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "es2021": true
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }
