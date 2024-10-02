@@ -1,22 +1,21 @@
 import React, { useState, useContext } from 'react';
-import {
-  Modal,
+import {   Modal,
   Box,
   Typography,
-  TextField,
   Button,
-  MenuItem,
-  Grid,
   Tabs,
   Tab,
-} from '@mui/material';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import '@/styles/customDatePicker.css';
+}
+  from '@mui/material';
+import BasicEventDetails from '@/components/Modals/EventDetailsBasic';
+import OtherEventDetails from '@/components/Modals/EventDetailsOther';
+import RepeatingEventDetails from '@/components/Modals/EventDetailsRepeating';
+import ImageEventDetails from '@/components/Modals/EventDetailsImage'; 
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useLocations } from '@/hooks/useLocations';
-import { useDropzone } from 'react-dropzone'; // Import dropzone for image upload
-import { uploadToBlob } from '@/utils/uploadEventImages'; // Your utility for uploading to Azure Blob
+import useCategories from '@/hooks/useCategories'; 
+import { useCreateEvent } from '@/hooks/useEvents'; 
+import { validateEvent } from '@/utils/EventCreateRules'; 
 
 const modalStyle = {
   position: 'absolute',
@@ -33,69 +32,36 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
-  const { selectedRegionID, selectedDivision, selectedCity } =
-    useContext(RegionsContext);
-  const { locations, loading, error } = useLocations(
-    selectedRegionID,
-    selectedDivision?._id,
-    selectedCity?._id
-  );
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState(selectedDate || new Date());
-  const [endDate, setEndDate] = useState(selectedDate || new Date());
-  const [cost, setCost] = useState('');
-  const [location, setLocation] = useState('');
-  const [categoryFirst, setCategoryFirst] = useState('');
-  const [categorySecond, setCategorySecond] = useState('');
-  const [categoryThird, setCategoryThird] = useState('');
-  const [grantedOrganizer, setGrantedOrganizer] = useState('');
-  const [imageFile, setImageFile] = useState(null);
+  const { selectedRegionID } = useContext(RegionsContext);
+  const { locations, loading: loadingLocations, error: locationsError } = useLocations(selectedRegionID);
+  const { categories, loading: loadingCategories, error: categoriesError } = useCategories(); 
+  const createEvent = useCreateEvent();
+  
+  // State variables
   const [currentTab, setCurrentTab] = useState('basic');
+  const [eventData, setEventData] = useState({
+    title: '',
+    description: '',
+    startDate: selectedDate || new Date(),
+    endDate: selectedDate || new Date(),
+    cost: '',
+    locationID: '',
+    categoryFirst: '',
+    categorySecond: '',
+    categoryThird: '',
+    grantedOrganizer: '',
+    isRepeating: false,
+    imageFile: null, // New state for image file
+  });
 
-  const handleSave = () => {
-    const eventData = {
-      title,
-      description,
-      startDate,
-      endDate,
-      cost,
-      locationId: location,
-      categoryFirst,
-      categorySecond,
-      categoryThird,
-      grantedOrganizer,
-      imageFile, // Include the image file in the event data
-    };
-    // Handle event creation or trigger the onCreate action
-    console.log('Event data to save:', eventData);
-    // Example API call to save the event
-    // await saveEvent(eventData);
+  const handleSave = async () => {
+    // Handle the event save logic
   };
-
-  const onDrop = async (acceptedFiles) => {
-    const file = acceptedFiles[0]; // Assuming only one image for the event
-    try {
-      const blobUrl = await uploadToBlob(file); // Upload to Azure Blob
-      console.log('File uploaded successfully:', blobUrl);
-      setImageFile(file); // Save the selected file
-    } catch (error) {
-      console.error('Error uploading file:', error);
-    }
-  };
-
-  // Set up the dropzone hook at the top level of the component
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="create-event-title">
+    <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Typography
-          id="create-event-title"
-          variant="h6"
-          component="h2"
-          sx={{ mb: 2 }}
-        >
+        <Typography id="create-event-title" variant="h6" component="h2" sx={{ mb: 2 }}>
           Create Single Event
         </Typography>
 
@@ -103,188 +69,28 @@ const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
         <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
-          <Tab label="Repeat" value="repeat" />
-          <Tab label="Promotion" value="promotion" />
+          <Tab label="Other" value="other" />
+          {eventData.isRepeating && <Tab label="Repeating" value="rrule" />}
         </Tabs>
 
-        {/* Conditional Rendering Based on Tab */}
+        {/* Basic Tab */}
         {currentTab === 'basic' && (
-          <Box>
-            <TextField
-              fullWidth
-              label="Event Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              margin="normal"
-              multiline
-              rows={4}
-            />
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Typography variant="body2">Starting:</Typography>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  showTimeSelect
-                  dateFormat="Pp"
-                  className="custom-datepicker"
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2">Ending:</Typography>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  showTimeSelect
-                  dateFormat="Pp"
-                  className="custom-datepicker"
-                />
-              </Grid>
-            </Grid>
-            <TextField
-              fullWidth
-              label="Cost"
-              value={cost}
-              onChange={(e) => setCost(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              select
-              label="Select Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              margin="normal"
-            >
-              {loading ? (
-                <MenuItem value="" disabled>
-                  Loading locations...
-                </MenuItem>
-              ) : error ? (
-                <MenuItem value="" disabled>
-                  Error fetching locations
-                </MenuItem>
-              ) : (
-                locations.map((loc) => (
-                  <MenuItem key={loc._id} value={loc._id}>
-                    {loc.name}
-                  </MenuItem>
-                ))
-              )}
-            </TextField>
-            <TextField
-              fullWidth
-              select
-              label="Primary Category"
-              value={categoryFirst}
-              onChange={(e) => setCategoryFirst(e.target.value)}
-              margin="normal"
-            >
-              {/* Replace with actual category data */}
-              <MenuItem value="category1">Category 1</MenuItem>
-              <MenuItem value="category2">Category 2</MenuItem>
-            </TextField>
-          </Box>
+          <BasicEventDetails eventData={eventData} setEventData={setEventData} />
         )}
 
+        {/* Image Tab */}
         {currentTab === 'image' && (
-          <Box>
-            <Typography variant="h6">Upload Event Image</Typography>
-            <div
-              {...getRootProps({ className: 'dropzone' })}
-              style={{
-                border: '1px dashed #ccc',
-                padding: '20px',
-                textAlign: 'center',
-              }}
-            >
-              <input {...getInputProps()} />
-              <p>Drag 'n' drop an image here, or click to select one</p>
-            </div>
-            {imageFile && (
-              <Typography>Selected Image: {imageFile.name}</Typography>
-            )}
-          </Box>
+          <ImageEventDetails imageFile={eventData.imageFile} setImageFile={(file) => setEventData({ ...eventData, imageFile: file })} />
         )}
 
-        {currentTab === 'repeat' && (
-          <Box>
-            <Typography variant="h6">Set Event Repetition</Typography>
-            <TextField
-              fullWidth
-              select
-              label="Repeat Frequency"
-              margin="normal"
-            >
-              <MenuItem value="none">None</MenuItem>
-              <MenuItem value="daily">Daily</MenuItem>
-              <MenuItem value="weekly">Weekly</MenuItem>
-              <MenuItem value="monthly">Monthly</MenuItem>
-            </TextField>
-            {/* Additional settings for repeat can be added here */}
-          </Box>
+        {/* Other Tab */}
+        {currentTab === 'other' && (
+          <OtherEventDetails eventData={eventData} setEventData={setEventData} />
         )}
-        {currentTab === 'promotion' && (
-          <Box>
-            <Typography variant="h6">Promotion Settings</Typography>
-            <TextField
-              fullWidth
-              label="Granted Organizer"
-              value={grantedOrganizer}
-              onChange={(e) => setGrantedOrganizer(e.target.value)}
-              margin="normal"
-            />
-            <Box mt={2}>
-              <Button variant="contained" color="primary">
-                Post to Facebook
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                style={{ marginLeft: '10px' }}
-              >
-                Post to Twitter
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                style={{ marginLeft: '10px' }}
-              >
-                Promote
-              </Button>
-            </Box>
-            <TextField
-              fullWidth
-              select
-              label="Secondary Category"
-              value={categorySecond}
-              onChange={(e) => setCategorySecond(e.target.value)}
-              margin="normal"
-            >
-              {/* Replace with actual category data */}
-              <MenuItem value="category1">Category 1</MenuItem>
-              <MenuItem value="category2">Category 2</MenuItem>
-            </TextField>
-            <TextField
-              fullWidth
-              select
-              label="Third Category"
-              value={categoryThird}
-              onChange={(e) => setCategoryThird(e.target.value)}
-              margin="normal"
-            >
-              {/* Replace with actual category data */}
-              <MenuItem value="category1">Category 1</MenuItem>
-              <MenuItem value="category2">Category 2</MenuItem>
-            </TextField>
-          </Box>
+
+        {/* Repeating Tab */}
+        {currentTab === 'rrule' && (
+          <RepeatingEventDetails eventData={eventData} setEventData={setEventData} />
         )}
 
         <Box mt={2} display="flex" justifyContent="space-between">

@@ -80,9 +80,12 @@ export const useCalendarPage = () => {
     datesSet?.start,
     datesSet?.end
   );
+  console.log('Fetched events:', events);
+  
 
   // Transform the fetched events
   const transformedEvents = transformEvents(events);
+  console.log('Transformed events:', transformedEvents);
 
   // Use the post filter to filter based on active categories (and future organizers/tags)
   const { activeCategories, filteredEvents, handleCategoryChange } =
@@ -105,6 +108,8 @@ export const useCalendarPage = () => {
       borderColor: categoryColor,
     };
   });
+  console.log('Colored filtered events:', coloredFilteredEvents); 
+
 
   const handleEventCreated = (newEvent) => {
     console.log('New event created:', newEvent);

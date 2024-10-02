@@ -37,6 +37,7 @@ export function useEvents(
           },
         }
       );
+      console.log('useEvents-> Events fetched:', response.data);
 
       setEvents(response.data);
     } catch (error) {

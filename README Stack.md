@@ -45,8 +45,6 @@
   -- import { RoleProvider } from '@/contexts/RoleContext';
   --- <AuthProvider>
   --- <RegionsProvider>
-  --- <CalendarProvider>
-  --- <PostFilterProvider>
   --- <RoleProvider>
 
 ### Version Control

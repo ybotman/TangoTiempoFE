@@ -21,13 +21,12 @@ export const RoleProvider = ({ children }) => {
     if (user && user.roles && user.roles.length > 0) {
       setRoles(user.roles);
 
-      // If selectedRole is not set or invalid, set it to the first available role
       if (!selectedRole || !user.roles.includes(selectedRole)) {
         setSelectedRole(user.roles[0]);
       }
     } else {
-      setRoles([]);
-      setSelectedRole(''); // Reset selectedRole if no roles are available
+       setRoles([]);
+      setSelectedRole(""); // Reset selectedRole if no roles are available
     }
   }, [user, selectedRole, setSelectedRole]);
 
