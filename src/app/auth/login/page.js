@@ -1,4 +1,4 @@
-//app/auth/login/page.js
+// app/auth/login/page.js
 
 'use client';
 
@@ -10,24 +10,21 @@ import { AuthContext } from '@/contexts/AuthContext';
 
 const LoginPage = () => {
   const router = useRouter();
-  const { user, loading, error, authenticateWithGoogle } =
-    useContext(AuthContext);
-  const [isRedirecting, setIsRedirecting] = useState(false);
-  console.log('LoginPage called'); // Debugging
+  const { user, error, authenticateWithGoogle } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleGoogleLogIn = async () => {
-    console.log('handleGoogleLogIn called'); // Debugging
-    setIsRedirecting(true);
+    setIsLoading(true);
     const result = await authenticateWithGoogle();
+
     if (result) {
-      console.log('Login successful, redirecting'); // Debugging
       router.push('/calendar');
     } else {
-      console.log('Login failed'); // Debugging
-      setIsRedirecting(false);
+      setIsLoading(false);
     }
   };
 
-  if (loading || isRedirecting) {
+  if (isLoading) {
     return <Typography>Loading...</Typography>;
   }
 

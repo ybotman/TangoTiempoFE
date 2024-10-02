@@ -21,7 +21,6 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Unified user state
   const [selectedRole, setSelectedRole] = useState(''); // Preserve selectedRole
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const signUpOngoing = useRef(false);
 
@@ -33,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setSelectedRole(''); // Reset selectedRole on logout
       }
-      setLoading(false);
+      // Removed setLoading(false);
     });
 
     return () => unsubscribe();
@@ -80,7 +79,7 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
 
-    setLoading(true);
+    // Removed setLoading(true);
     const provider = new GoogleAuthProvider();
 
     try {
@@ -136,12 +135,12 @@ export const AuthProvider = ({ children }) => {
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
-      setLoading(false);
+      // Removed setLoading(false);
       return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithGoogle:', err);
       setError(err.message || 'An unexpected error occurred.');
-      setLoading(false);
+      // Removed setLoading(false);
       signUpOngoing.current = false;
       return null;
     }
@@ -150,15 +149,15 @@ export const AuthProvider = ({ children }) => {
   // Login with Email and Password
   const login = async (email, password) => {
     try {
-      setLoading(true);
+      // Removed setLoading(true);
       const result = await signInWithEmailAndPassword(auth, email, password);
       await setUserData(result.user);
-      setLoading(false);
+      // Removed setLoading(false);
       return result.user;
     } catch (err) {
       console.error('Error in login:', err);
       setError(err.message || 'Login failed.');
-      setLoading(false);
+      // Removed setLoading(false);
       return null;
     }
   };
@@ -181,7 +180,6 @@ export const AuthProvider = ({ children }) => {
     user,
     selectedRole,
     setSelectedRole, // Provide setter for selectedRole
-    loading,
     error,
     logOut,
     authenticateWithGoogle,
@@ -190,7 +188,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children} {/* Removed {!loading && children} */}
     </AuthContext.Provider>
   );
 };
