@@ -10,7 +10,6 @@ export const useLocations = () => {
 
   const fetchLocations = useCallback(async () => {
     if (!selectedRegionID) return; // If no region is selected, skip fetching
-
     try {
       setLoading(true);
       const response = await axios.get(
@@ -26,7 +25,7 @@ export const useLocations = () => {
 
   useEffect(() => {
     fetchLocations();
-  }); // Whenever regionID changes, fetch new locations
+  }, [fetchLocations]); // Whenever regionID changes, fetch new locations
 
   return { locations, loading, error };
 };

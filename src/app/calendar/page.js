@@ -84,6 +84,7 @@ const CalendarPage = () => {
   return (
     <div>
       <SiteHeader />
+      {/* A lot of unnecessary arguments */}
       <SiteMenuBar
         selectedRegion={selectedRegion}
         setSelectedRegion={setSelectedRegion}
