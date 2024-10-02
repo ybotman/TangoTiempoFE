@@ -6,7 +6,6 @@ import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
-import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
@@ -35,7 +34,7 @@ export const useCalendarPage = () => {
   // } =
   //where will  thise come from handles is suppose
 
-  const { datesSet, setDatesSet } = useContext(CalendarContext);
+  const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
 

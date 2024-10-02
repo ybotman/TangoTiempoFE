@@ -18,7 +18,6 @@ import ListIcon from '@mui/icons-material/List';
 
 import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
-//import { CalendarContext } from '@/contexts/CalendarContext';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
@@ -49,7 +48,6 @@ const CalendarPage = () => {
     <meta property="og:url" content="https://www.tangotiempo.com" />
   </Head>;
 
-  //const { datesSet, setDatesSet } = useContext(CalendarContext);
   const { regions } = useContext(RegionsContext);
   //  const { selectedOrganizers, selectedCategories } = now where??
   //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
