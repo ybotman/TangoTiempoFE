@@ -8,8 +8,6 @@ import {
   Modal,
   Select,
   MenuItem,
-  Checkbox,
-  ListItemText,
   FormControl,
   InputLabel,
   Alert,
@@ -181,7 +179,6 @@ const ManageUserLogins = () => {
             <Select
               labelId="role-select-label"
               id="role-select"
-              value={selectedRole || ''}
               onChange={handleRoleChange}
               label="Role"
             >

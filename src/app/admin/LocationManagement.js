@@ -18,7 +18,7 @@ import axios from 'axios';
 
 function ManageLocations() {
   const [locations, setLocations] = useState([]);
-  const [regions, setRegions] = useState([]);
+  // const [regions, setRegions] = useState([]); // FIXME: This is not used, so it can be removed
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -27,12 +27,16 @@ function ManageLocations() {
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const [locationResponse, regionResponse] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/all`),
-          axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions`),
-        ]);
+        // FIXME: Region data is fetched and set but not used so I commented it out temporarily
+        // const [locationResponse, regionResponse] = await Promise.all([
+        //   axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/all`),
+        //   axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions`),
+        // ]);
+        const locationResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/locations/all`
+        );
         setLocations(locationResponse.data);
-        setRegions(regionResponse.data);
+        // setRegions(regionResponse.data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -43,14 +47,15 @@ function ManageLocations() {
     fetchInitialData();
   }, []);
 
-  const handleCityChange = (cityId, divisionId, regionId) => {
-    setSelectedLocation({
-      ...selectedLocation,
-      calculatedCity: cityId,
-      calculatedDivision: divisionId,
-      calculatedRegion: regionId,
-    });
-  };
+  // FIXME: This is not used, so it can be removed
+  // const handleCityChange = (cityId, divisionId, regionId) => {
+  //   setSelectedLocation({
+  //     ...selectedLocation,
+  //     calculatedCity: cityId,
+  //     calculatedDivision: divisionId,
+  //     calculatedRegion: regionId,
+  //   });
+  // };
 
   const handleOpen = (location = null) => {
     setIsCreating(location === null);
