@@ -2,15 +2,16 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, Paper } from '@mui/material';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthContext } from '@/contexts/AuthContext';
 
 const LoginPage = () => {
   const router = useRouter();
-  const { user, loading, error, authenticateWithGoogle } = useAuth();
+  const { user, loading, error, authenticateWithGoogle } =
+    useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
   console.log('LoginPage called'); // Debugging
   const handleGoogleLogIn = async () => {
