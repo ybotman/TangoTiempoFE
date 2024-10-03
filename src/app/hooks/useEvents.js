@@ -16,14 +16,6 @@ export function useEvents(
       return;
     }
     try {
-      console.log('useEvents-> Making Events API request:', {
-        selectedRegion,
-        selectedDivision,
-        selectedCity,
-        calendarStart,
-        calendarEnd,
-      });
-
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`,
         {
@@ -37,7 +29,7 @@ export function useEvents(
           },
         }
       );
-      console.log('useEvents-> Events fetched:', response.data);
+    //  console.log('useEvents-> Events fetched:', response.data);
 
       setEvents(response.data);
     } catch (error) {
