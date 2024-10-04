@@ -21,18 +21,21 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Unified user state
   const [selectedRole, setSelectedRole] = useState(''); // Preserve selectedRole
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [error, setError] = useState(null);
   const signUpOngoing = useRef(false);
 
+  // Fetch user data on mount and auth state change
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
+        setIsLoadingUser(true);
         await setUserData(currentUser);
       } else {
         setUser(null);
         setSelectedRole(''); // Reset selectedRole on logout
       }
-      // Removed setLoading(false);
+      setIsLoadingUser(false);
     });
 
     return () => unsubscribe();
@@ -41,23 +44,27 @@ export const AuthProvider = ({ children }) => {
   // Function to fetch and set combined user data
   const setUserData = async (firebaseUser) => {
     try {
-      const idToken = await firebaseUser.getIdToken();
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      let backendInfo = null;
+      // Fetch user data from backend if sign up not ongoing
+      if (!signUpOngoing.current) {
+        const idToken = await firebaseUser.getIdToken();
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
 
-      const backendInfo = response.data;
+        backendInfo = response.data;
+      }
 
       // Merge Firebase and backend user data
       const mergedUser = {
         ...firebaseUser, // Spread Firebase user properties directly
         backendInfo,
-        roles: backendInfo.roleIds.map((role) => role.roleName) || [],
+        roles: backendInfo?.roleIds.map((role) => role.roleName) || [],
       };
 
       setUser(mergedUser);
@@ -84,16 +91,16 @@ export const AuthProvider = ({ children }) => {
 
     try {
       signUpOngoing.current = true;
-      console.log('Initiating Google sign-in...');
+      setIsLoadingUser(true);
+
       const result = await signInWithPopup(auth, provider);
-      console.log('Google sign-in successful:', result);
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
       const idToken = await firebaseUser.getIdToken();
       try {
-        console.log('Fetching user from backend...');
-        await axios.get(
+        // Check if user exists in backend
+        await axios.head(
           `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
           {
             headers: {
@@ -103,6 +110,8 @@ export const AuthProvider = ({ children }) => {
         );
       } catch (error) {
         console.error('Error fetching user from backend:', error);
+
+        // If user not found, create new user
         if (error.response && error.response.status === 404) {
           console.log('User not found in backend. Creating new user...');
           const displayName = firebaseUser.displayName || '';
@@ -135,13 +144,16 @@ export const AuthProvider = ({ children }) => {
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
-      // Removed setLoading(false);
+      setIsLoadingUser(false);
+
       return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithGoogle:', err);
       setError(err.message || 'An unexpected error occurred.');
-      // Removed setLoading(false);
+
       signUpOngoing.current = false;
+      setIsLoadingUser(false);
+
       return null;
     }
   };
@@ -149,15 +161,18 @@ export const AuthProvider = ({ children }) => {
   // Login with Email and Password
   const login = async (email, password) => {
     try {
-      // Removed setLoading(true);
+      setIsLoadingUser(true);
+
       const result = await signInWithEmailAndPassword(auth, email, password);
       await setUserData(result.user);
-      // Removed setLoading(false);
+
+      setIsLoadingUser(false);
+
       return result.user;
     } catch (err) {
       console.error('Error in login:', err);
       setError(err.message || 'Login failed.');
-      // Removed setLoading(false);
+      setIsLoadingUser(false);
       return null;
     }
   };
@@ -165,13 +180,16 @@ export const AuthProvider = ({ children }) => {
   // Logout Function
   const logOut = async () => {
     try {
+      setIsLoadingUser(true);
       await signOut(auth);
       console.log('User signed out successfully');
       setUser(null);
       setSelectedRole(''); // Reset selectedRole on logout
+      setIsLoadingUser(false);
     } catch (error) {
       console.error('Error signing out:', error);
       setError('Failed to sign out.');
+      setIsLoadingUser(false);
     }
   };
 
@@ -180,6 +198,7 @@ export const AuthProvider = ({ children }) => {
     user,
     selectedRole,
     setSelectedRole, // Provide setter for selectedRole
+    isLoadingUser,
     error,
     logOut,
     authenticateWithGoogle,

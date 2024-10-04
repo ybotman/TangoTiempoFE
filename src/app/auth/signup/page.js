@@ -2,16 +2,31 @@
 
 'use client';
 
-import React, { useState, useContext } from 'react';
-import Button from '@mui/material/Button';
+import React, { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Typography, Container, Paper } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Container,
+  Paper,
+  LinearProgress,
+} from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 
 const SignUpPage = () => {
   const router = useRouter();
-  const { user, error, authenticateWithGoogle } = useContext(AuthContext);
+  const { user, isLoadingUser, error, authenticateWithGoogle } =
+    useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect to calendar if user is already signed in
+  // Also runs every time user changes, for example, when user signs in
+  useEffect(() => {
+    if (user) {
+      setIsLoading(true);
+      router.push('/calendar');
+    }
+  }, [user, router]);
 
   const handleGoogleSignUp = async () => {
     setIsLoading(true);
@@ -24,48 +39,27 @@ const SignUpPage = () => {
     }
   };
 
-  if (isLoading) {
-    return <Typography>Loading...</Typography>;
-  }
-
-  if (error) {
-    return <Typography>Error: {error}</Typography>;
-  }
-
-  if (user) {
-    router.push('/calendar');
-  }
-
   return (
-    <Container component="main" maxWidth="xs">
-      <Paper elevation={3} sx={{ padding: 4, marginTop: 8 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography component="h1" variant="h5" gutterBottom>
-            Sign Up
-          </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            align="center"
-            paragraph
-          >
-            Sign up with your Google account to start organizing and managing
-            Tango events.
-          </Typography>
+    <Container component="main" maxWidth="sm">
+      <Paper elevation={5} sx={{ p: 4, mt: 8 }}>
+        <Typography component="h1" variant="h5" gutterBottom>
+          Sign Up
+        </Typography>
+        {error ? (
+          <Typography>Error: {error}</Typography>
+        ) : isLoading || isLoadingUser ? (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress />
+          </Box>
+        ) : (
           <Box
             component="img"
             src="/web_light_rd_SU@1x.png"
-            alt="Sign up with Google"
+            alt="Sign Up with Google"
             sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
             onClick={handleGoogleSignUp}
           />
-        </Box>
+        )}
       </Paper>
     </Container>
   );
