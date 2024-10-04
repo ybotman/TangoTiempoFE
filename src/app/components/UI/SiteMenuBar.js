@@ -212,20 +212,10 @@ const SiteMenuBar = ({
           </Stack>
         ) : (
           <Stack direction="row" spacing={1}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              href="/auth/login"
-            >
+            <Button variant="outlined" size="small" href="/auth/login">
               Log In
             </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              href="/auth/signup"
-            >
+            <Button variant="contained" size="small" href="/auth/signup">
               Sign Up
             </Button>
           </Stack>

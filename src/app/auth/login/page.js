@@ -33,31 +33,7 @@ const LoginPage = () => {
   }
 
   if (user) {
-    return (
-      <Container component="main" maxWidth="xs">
-        <Paper elevation={3} sx={{ padding: 4, marginTop: 8 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Typography component="h1" variant="h5" gutterBottom>
-              You are already logged in!
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ cursor: 'pointer', mt: 2 }}
-              onClick={() => router.push('/calendar')}
-            >
-              Go to Calendar
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
-    );
+    router.push('/calendar');
   }
 
   return (
