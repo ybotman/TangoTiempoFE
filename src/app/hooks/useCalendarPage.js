@@ -7,7 +7,7 @@ import useCategories from '@/hooks/useCategories';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
-import ViewEventDetailModal from '@/components/Modals/viewEventDetailModal'; 
+import ViewEventDetailModal from '@/components/Modals/ViewEventDetailModal'; 
 
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null); 
@@ -69,41 +69,17 @@ export const useCalendarPage = () => {
     });
   };
 
-  const { events, refreshEvents } = useEvents(
-    selectedRegion,
-    selectedDivision,
-    selectedCity,
-    datesSet?.start,
-    datesSet?.end
-  );
-  // console.log('Fetched events:', events);
-
-  // Transform the fetched events
+  const { events, refreshEvents } = useEvents(selectedRegion,selectedDivision,selectedCity,datesSet?.start, datesSet?.end );
   const transformedEvents = transformEvents(events);
-  //console.log('Transformed events:', transformedEvents);
-
-  // Use the post filter to filter based on active categories (and future organizers/tags)
-  const { activeCategories, filteredEvents, handleCategoryChange } =
-    usePostFilter(
-      transformedEvents,
-      categories,
-      //     selectedOrganizers,
-      [] // Ignoring tags for now
-    );
-
-  // Ensure filteredEvents is always an array before mapping
+  const { activeCategories, filteredEvents, handleCategoryChange } =  usePostFilter(transformedEvents, categories);  // no tags or orgs for now
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
-    const categoryColor =
-      categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
+    const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
     return {
       ...event,
-      backgroundColor: categoryColor,
-      textColor:
-        event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
-      borderColor: categoryColor,
+      backgroundColor: categoryColor, textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', borderColor: categoryColor,
     };
   });
-  //console.log('Colored filtered events:', coloredFilteredEvents);
+
 
   const handleEventCreated = (newEvent) => {
     console.log('New event created:', newEvent);
@@ -135,21 +111,6 @@ export const useCalendarPage = () => {
         { label: 'Change Date', action: 'changeDate' },
         { label: 'Add Single Event', action: 'addSingleEvent' },
         { label: 'Add Repeating Event', action: 'addRepeatingEvent' },
-      ]);
-      setMenuAnchor({
-        mouseX: arg.jsEvent.clientX,
-        mouseY: arg.jsEvent.clientY,
-      });
-    }
-
-    if (
-      selectedRole === listOfAllRoles.NAMED_USER &&
-      new Date(arg.dateStr) < new Date()
-    ) {
-      // If Named User and date is in the past
-      setMenuItems([
-        { label: 'View Details', action: 'viewDetails' },
-        { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
       ]);
       setMenuAnchor({
         mouseX: arg.jsEvent.clientX,
@@ -191,16 +152,6 @@ export const useCalendarPage = () => {
         mouseY: arg.jsEvent.clientY,
       });
     }
-
-    if (selectedRole === listOfAllRoles.EVERYONE) {
-      // Everyone can only view details
-      setMenuItems([{ label: 'View Event Details', action: 'viewDetails' }]);
-      setMenuAnchor({
-        mouseX: arg.jsEvent.clientX,
-        mouseY: arg.jsEvent.clientY,
-      });
-    }
-
     setSelectedEventDetails(arg.event); // Set the event details for the modal
   };
 
@@ -218,11 +169,6 @@ export const useCalendarPage = () => {
       setCreateModalOpen(true); // Open the CreateSingleEvent modal
     }
 
-    if (action === 'viewDetails') {
-      // Open the View Event Detail modal
-      setViewDetailModalOpen(true);
-    }
-    // Add other actions as needed...
   };
 
   const handleMenuClose = () => {

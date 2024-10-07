@@ -60,6 +60,23 @@ Permissions Summary
 | **System Admin**      | ✓             | ✓                | ✓               | ✓                   | ✓              | ✓                | ✓                 |
 | --------------------- | ------------- | ---------------- | --------------- | ------------------- | -------------- | ---------------- | ----------------- |
 
+
+Here’s the table representation with bullet points for the submenu actions based on roles and interactions:
+
+Role	Interaction	Action	SubMenu
+Anonymous	DateClick	View Details	- None
+	ClickEvent	View Event	- None
+Named User	DateClick	View Details	- View Details- Add Comments
+	ClickEvent	View Event	- View Details- Add Comments
+Regional Organizer	DateClick	Change Date, Add Events	- Change Date- Add Single Event- Add Repeating Event
+	ClickEvent	Manage Event	- View Details- Edit Event- Delete Event- Add Comments
+Regional Admin	DateClick	Change Date, Add Events, Manage Organizers	- Change Date- Add Single Event- Add Repeating Event- Add Organizers
+	ClickEvent	Manage Event, Organizers	- View Details- Edit Event- Delete Event- Add Comments- Manage Organizers
+System Admin	DateClick	Change Date, Add Events, Manage Organizers, Manage Locations	- Change Date- Add Single Event- Add Repeating Event- Add Organizers- Manage Locations
+	ClickEvent	Full Event Control	- View Details- Edit Event- Delete Event- Add Comments- Manage Organizers- Manage Locations
+
+This structure outlines the role-based actions and submenus for both DateClick and ClickEvent interactions.
+
 ## Role: Everyone
 
 **Hamburger Menu:**

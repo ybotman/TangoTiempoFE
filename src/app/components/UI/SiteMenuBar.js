@@ -49,7 +49,12 @@ const SiteMenuBar = ({
     handleCityChange,
     openFAQModal,
     closeFAQModal,
+    viewEventModalOpen,
+    selectedEventDetails,
+    handleViewEventDetails,
+    closeViewEventModal,
     logOut,
+  
   } = useSiteMenuBar();
 
   return (
