@@ -22,7 +22,7 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import CreateEventModal from '@/components/Modals/CreateEventModal';
-import ViewEventDetailModal from "@/components/Modals/ViewEventDetailModal.js";
+import ViewEventDetailModal from '@/components/Modals/ViewEventDetailModal.js';
 
 const CalendarPage = () => {
   <Head>
@@ -177,7 +177,7 @@ const CalendarPage = () => {
         onClose={() => setViewDetailModalOpen(false)}
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
-       // selectedRegion={selectedRegion}
+        // selectedRegion={selectedRegion}
       />
     </div>
   );

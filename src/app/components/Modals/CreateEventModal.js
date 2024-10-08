@@ -1,21 +1,14 @@
 import React, { useState, useContext } from 'react';
-import {   Modal,
-  Box,
-  Typography,
-  Button,
-  Tabs,
-  Tab,
-}
-  from '@mui/material';
+import { Modal, Box, Typography, Button, Tabs, Tab } from '@mui/material';
 import BasicEventDetails from '@/components/Modals/EventDetailsBasic';
 import OtherEventDetails from '@/components/Modals/EventDetailsOther';
 import RepeatingEventDetails from '@/components/Modals/EventDetailsRepeating';
-import ImageEventDetails from '@/components/Modals/EventDetailsImage'; 
+import ImageEventDetails from '@/components/Modals/EventDetailsImage';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useLocations } from '@/hooks/useLocations';
-import useCategories from '@/hooks/useCategories'; 
-import { useCreateEvent } from '@/hooks/useEvents'; 
-import { validateEvent } from '@/utils/EventCreateRules'; 
+import useCategories from '@/hooks/useCategories';
+import { useCreateEvent } from '@/hooks/useEvents';
+import { validateEvent } from '@/utils/EventCreateRules';
 
 const modalStyle = {
   position: 'absolute',
@@ -33,10 +26,18 @@ const modalStyle = {
 
 const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
   const { selectedRegionID } = useContext(RegionsContext);
-  const { locations, loading: loadingLocations, error: locationsError } = useLocations(selectedRegionID);
-  const { categories, loading: loadingCategories, error: categoriesError } = useCategories(); 
+  const {
+    locations,
+    loading: loadingLocations,
+    error: locationsError,
+  } = useLocations(selectedRegionID);
+  const {
+    categories,
+    loading: loadingCategories,
+    error: categoriesError,
+  } = useCategories();
   const createEvent = useCreateEvent();
-  
+
   // State variables
   const [currentTab, setCurrentTab] = useState('basic');
   const [eventData, setEventData] = useState({
@@ -61,7 +62,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Typography id="create-event-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+        <Typography
+          id="create-event-title"
+          variant="h6"
+          component="h2"
+          sx={{ mb: 2 }}
+        >
           Create Single Event
         </Typography>
 
@@ -75,22 +81,36 @@ const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
 
         {/* Basic Tab */}
         {currentTab === 'basic' && (
-          <BasicEventDetails eventData={eventData} setEventData={setEventData} />
+          <BasicEventDetails
+            eventData={eventData}
+            setEventData={setEventData}
+          />
         )}
 
         {/* Image Tab */}
         {currentTab === 'image' && (
-          <ImageEventDetails imageFile={eventData.imageFile} setImageFile={(file) => setEventData({ ...eventData, imageFile: file })} />
+          <ImageEventDetails
+            imageFile={eventData.imageFile}
+            setImageFile={(file) =>
+              setEventData({ ...eventData, imageFile: file })
+            }
+          />
         )}
 
         {/* Other Tab */}
         {currentTab === 'other' && (
-          <OtherEventDetails eventData={eventData} setEventData={setEventData} />
+          <OtherEventDetails
+            eventData={eventData}
+            setEventData={setEventData}
+          />
         )}
 
         {/* Repeating Tab */}
         {currentTab === 'rrule' && (
-          <RepeatingEventDetails eventData={eventData} setEventData={setEventData} />
+          <RepeatingEventDetails
+            eventData={eventData}
+            setEventData={setEventData}
+          />
         )}
 
         <Box mt={2} display="flex" justifyContent="space-between">

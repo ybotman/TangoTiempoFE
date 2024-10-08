@@ -9,12 +9,12 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 
 export const useCalendarPage = () => {
-  const [menuAnchor, setMenuAnchor] = useState(null); 
-  const [menuItems, setMenuItems] = useState([]); 
-  const [clickedDate, setClickedDate] = useState(null); 
-  const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false); 
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+  const [clickedDate, setClickedDate] = useState(null);
+  const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-  const [selectedEventDetails, setSelectedEventDetails] = useState(null); 
+  const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const categories = useCategories();
 
   const {
@@ -31,7 +31,6 @@ export const useCalendarPage = () => {
 
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-
 
   const calendarRef = useRef(null);
 
@@ -51,7 +50,8 @@ export const useCalendarPage = () => {
       console.log('Region Selected:', selectedRegion);
 
       // Set the selected region object and its ID in the context
-      setSelectedRegion(selectedRegion); context
+      setSelectedRegion(selectedRegion);
+      context;
       setSelectedDivision(''); // Reset division
       setSelectedCity(''); // Reset city
 
@@ -69,17 +69,27 @@ export const useCalendarPage = () => {
     });
   };
 
-  const { events, refreshEvents } = useEvents(selectedRegion,selectedDivision,selectedCity,datesSet?.start, datesSet?.end );
+  const { events, refreshEvents } = useEvents(
+    selectedRegion,
+    selectedDivision,
+    selectedCity,
+    datesSet?.start,
+    datesSet?.end
+  );
   const transformedEvents = transformEvents(events);
-  const { activeCategories, filteredEvents, handleCategoryChange } =  usePostFilter(transformedEvents, categories);  // no tags or orgs for now
+  const { activeCategories, filteredEvents, handleCategoryChange } =
+    usePostFilter(transformedEvents, categories); // no tags or orgs for now
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
-    const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
+    const categoryColor =
+      categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
     return {
       ...event,
-      backgroundColor: categoryColor, textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black', borderColor: categoryColor,
+      backgroundColor: categoryColor,
+      textColor:
+        event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
+      borderColor: categoryColor,
     };
   });
-
 
   const handleEventCreated = (newEvent) => {
     console.log('New event created:', newEvent);
@@ -139,9 +149,7 @@ export const useCalendarPage = () => {
       });
     }
 
-    if (
-      selectedRole === listOfAllRoles.NAMED_USER) {
-
+    if (selectedRole === listOfAllRoles.NAMED_USER) {
       setMenuItems([
         { label: 'View Details', action: 'viewDetails' },
         { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
@@ -151,7 +159,6 @@ export const useCalendarPage = () => {
         mouseY: arg.jsEvent.clientY,
       });
     }
-
   };
 
   const handleMenuAction = (action) => {
@@ -171,7 +178,6 @@ export const useCalendarPage = () => {
   const handleMenuClose = () => {
     setMenuAnchor(null);
   };
-
 
   return {
     categories,

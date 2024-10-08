@@ -282,15 +282,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
                 }}
               >
                 Share on Facebook
-              </Button> 
-              <Typography variant="body2">
-              </Typography>
+              </Button>
+              <Typography variant="body2"></Typography>
             </Box>
           </Box>
 
           {/* Other Events by Organizer */}
           <Box mt={4}>
-            <Typography variant="h6">Other Events by {ownerOrganizerName}</Typography>
+            <Typography variant="h6">
+              Other Events by {ownerOrganizerName}
+            </Typography>
             <Box
               height="150px"
               bgcolor="grey.200"
@@ -300,7 +301,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
               mt={1}
               borderRadius="8px"
             >
-              <Typography variant="body2">Organizer's Events Placeholder</Typography>
+              <Typography variant="body2">
+                Organizer's Events Placeholder
+              </Typography>
             </Box>
           </Box>
         </TabPanel>

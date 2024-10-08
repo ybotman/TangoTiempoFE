@@ -54,7 +54,6 @@ const SiteMenuBar = ({
     handleViewEventDetails,
     closeViewEventModal,
     logOut,
-  
   } = useSiteMenuBar();
 
   return (

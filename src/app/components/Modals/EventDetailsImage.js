@@ -15,13 +15,18 @@ const ImageEventDetails = ({ imageFile, setImageFile }) => {
   return (
     <Box>
       <Typography variant="h6">Upload Event Image</Typography>
-      <div {...getRootProps({ className: 'dropzone' })} style={{ border: '1px dashed #ccc', padding: '20px', textAlign: 'center' }}>
+      <div
+        {...getRootProps({ className: 'dropzone' })}
+        style={{
+          border: '1px dashed #ccc',
+          padding: '20px',
+          textAlign: 'center',
+        }}
+      >
         <input {...getInputProps()} />
         <p>Drag 'n' drop an image here, or click to select one</p>
       </div>
-      {imageFile && (
-        <Typography>Selected Image: {imageFile.name}</Typography>
-      )}
+      {imageFile && <Typography>Selected Image: {imageFile.name}</Typography>}
     </Box>
   );
 };

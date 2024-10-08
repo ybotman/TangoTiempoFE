@@ -1,15 +1,17 @@
 import React from 'react';
 //import { TextField, Grid, Switch, Typography } from '@mui/material';
-import {   Modal,
+import {
+  Modal,
   Box,
   Typography,
   TextField,
- // Button,
- // MenuItem,
+  // Button,
+  // MenuItem,
   Grid,
- // Tabs,
- // Tab,
-  Switch,} from '@mui/material';
+  // Tabs,
+  // Tab,
+  Switch,
+} from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -26,7 +28,9 @@ const BasicEventDetails = ({ eventData, setEventData }) => {
         fullWidth
         label="Description"
         value={eventData.description}
-        onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+        onChange={(e) =>
+          setEventData({ ...eventData, description: e.target.value })
+        }
         multiline
       />
       <Grid container spacing={2}>
@@ -48,7 +52,9 @@ const BasicEventDetails = ({ eventData, setEventData }) => {
       <Typography>Is Repeating?</Typography>
       <Switch
         checked={eventData.isRepeating}
-        onChange={() => setEventData({ ...eventData, isRepeating: !eventData.isRepeating })}
+        onChange={() =>
+          setEventData({ ...eventData, isRepeating: !eventData.isRepeating })
+        }
       />
     </Box>
   );

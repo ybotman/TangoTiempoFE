@@ -25,8 +25,8 @@ export const RoleProvider = ({ children }) => {
         setSelectedRole(user.roles[0]);
       }
     } else {
-       setRoles([]);
-      setSelectedRole(""); // Reset selectedRole if no roles are available
+      setRoles([]);
+      setSelectedRole(''); // Reset selectedRole if no roles are available
     }
   }, [user, selectedRole, setSelectedRole]);
 

@@ -28,7 +28,7 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
       transform: 'translateX(22px)',
       '& .MuiSwitch-thumb:before': {
         backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><text x="2" y="15" font-size="14" font-family="Arial" fill="${encodeURIComponent(
-          '#fff',
+          '#fff'
         )}">#</text></svg>')`,
       },
       '& + .MuiSwitch-track': {
@@ -51,15 +51,15 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="${encodeURIComponent(
-        '#fff',
+        '#fff'
       )}" stroke-width="1" stroke="${encodeURIComponent('#fff')}" /><line x1="7" y1="3" x2="7" y2="17" stroke="${encodeURIComponent(
-        '#fff',
+        '#fff'
       )}" stroke-width="1" /><line x1="13" y1="3" x2="13" y2="17" stroke="${encodeURIComponent(
-        '#fff',
+        '#fff'
       )}" stroke-width="1" /><line x1="3" y1="7" x2="17" y2="7" stroke="${encodeURIComponent(
-        '#fff',
+        '#fff'
       )}" stroke-width="1" /><line x1="3" y1="13" x2="17" y2="13" stroke="${encodeURIComponent(
-        '#fff',
+        '#fff'
       )}" stroke-width="1" /></svg>')`, // Grid icon for month
     },
   },
@@ -70,17 +70,25 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-
-
 const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
-  const [recurrenceType, setRecurrenceType] = useState(eventData.recurrenceType || 'weekly');
-  const [recurrenceDays, setRecurrenceDays] = useState(eventData.recurrenceDays || []);
+  const [recurrenceType, setRecurrenceType] = useState(
+    eventData.recurrenceType || 'weekly'
+  );
+  const [recurrenceDays, setRecurrenceDays] = useState(
+    eventData.recurrenceDays || []
+  );
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
-  const [monthlyWeeks, setMonthlyWeeks] = useState(eventData.monthlyWeeks || []);
-  const [excludeDates, setExcludeDates] = useState(eventData.excludeDates || '');
+  const [monthlyWeeks, setMonthlyWeeks] = useState(
+    eventData.monthlyWeeks || []
+  );
+  const [excludeDates, setExcludeDates] = useState(
+    eventData.excludeDates || ''
+  );
   const [endDate, setEndDate] = useState(eventData.endDate || '');
   const [occurrences, setOccurrences] = useState(eventData.occurrences || '');
-  const [sendReminder, setSendReminder] = useState(eventData.sendReminder || false);
+  const [sendReminder, setSendReminder] = useState(
+    eventData.sendReminder || false
+  );
 
   // State to handle switching between End Date and Occurrences
   const [useEndDate, setUseEndDate] = useState(true); // Default to using End Date
@@ -103,12 +111,30 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   // Generate RRULE Text
   const generateRRule = () => {
     let rrule = `FREQ=${recurrenceType.toUpperCase()};`;
-    if (recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') {
+    if (
+      recurrenceType === 'daily' ||
+      recurrenceType === 'weekly' ||
+      recurrenceType === 'monthly'
+    ) {
       if (recurrenceType === 'weekly' && recurrenceDays.length > 0) {
         rrule += `BYDAY=${recurrenceDays.join(',')};`;
-      } else if (recurrenceType === 'monthly' && monthlyDays.length > 0 && monthlyWeeks.length > 0) {
-        const weekdaysMap = { 'Su': 'SU', 'Mo': 'MO', 'Tu': 'TU', 'We': 'WE', 'Th': 'TH', 'Fr': 'FR', 'Sa': 'SA' };
-        const byDay = monthlyWeeks.map(week => monthlyDays.map(day => `${week}${weekdaysMap[day]}`)).flat();
+      } else if (
+        recurrenceType === 'monthly' &&
+        monthlyDays.length > 0 &&
+        monthlyWeeks.length > 0
+      ) {
+        const weekdaysMap = {
+          Su: 'SU',
+          Mo: 'MO',
+          Tu: 'TU',
+          We: 'WE',
+          Th: 'TH',
+          Fr: 'FR',
+          Sa: 'SA',
+        };
+        const byDay = monthlyWeeks
+          .map((week) => monthlyDays.map((day) => `${week}${weekdaysMap[day]}`))
+          .flat();
         rrule += `BYDAY=${byDay.join(',')};`;
       }
       if (useEndDate && endDate) {
@@ -130,8 +156,14 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           label="Start Date"
           type="date"
           InputLabelProps={{ shrink: true }}
-          value={eventData.startDate ? eventData.startDate.toISOString().split('T')[0] : ''}
-          onChange={(e) => setEventData({ ...eventData, startDate: new Date(e.target.value) })}
+          value={
+            eventData.startDate
+              ? eventData.startDate.toISOString().split('T')[0]
+              : ''
+          }
+          onChange={(e) =>
+            setEventData({ ...eventData, startDate: new Date(e.target.value) })
+          }
         />
         <TextField
           label="Recurrence Type"
@@ -167,7 +199,6 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         />
       </Box>
 
-
       {/* Send Reminder Switch */}
       <Box marginTop={2}>
         <Tooltip title="Send a reminder 1 month before the end date">
@@ -196,7 +227,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
                     checked={recurrenceDays.includes(day)}
                     onChange={() => {
                       setRecurrenceDays((prev) =>
-                        prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+                        prev.includes(day)
+                          ? prev.filter((d) => d !== day)
+                          : [...prev, day]
                       );
                     }}
                   />
@@ -221,7 +254,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
                     checked={monthlyDays.includes(day)}
                     onChange={() => {
                       setMonthlyDays((prev) =>
-                        prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+                        prev.includes(day)
+                          ? prev.filter((d) => d !== day)
+                          : [...prev, day]
                       );
                     }}
                   />
@@ -241,7 +276,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
                     checked={monthlyWeeks.includes(week)}
                     onChange={() => {
                       setMonthlyWeeks((prev) =>
-                        prev.includes(week) ? prev.filter((w) => w !== week) : [...prev, week]
+                        prev.includes(week)
+                          ? prev.filter((w) => w !== week)
+                          : [...prev, week]
                       );
                     }}
                   />
@@ -266,8 +303,12 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
 
       {/* Display Generated RRULE */}
       <Box marginTop={2}>
-        <Typography variant="subtitle1" color="textSecondary">Generated RRULE:</Typography>
-        <Typography variant="body2" color="textSecondary">{generateRRule()}</Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          Generated RRULE:
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {generateRRule()}
+        </Typography>
       </Box>
 
       {/* Action Buttons */}
@@ -275,7 +316,6 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         <Button variant="contained" color="success">
           Verify
         </Button>
-
       </Box>
     </Box>
   );
