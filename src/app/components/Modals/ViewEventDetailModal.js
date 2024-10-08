@@ -270,10 +270,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
 
           {/* Social Media Interaction */}
           <Box mt={4}>
-            <Typography variant="h6">Share this event</Typography>
+            <Typography variant="h6"></Typography>
             <Box mt={1}>
               {/* Uncomment and implement when ready */}
-              {/* <Button
+              <Button
                 variant="contained"
                 color="primary"
                 startIcon={<FacebookIcon />}
@@ -282,9 +282,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
                 }}
               >
                 Share on Facebook
-              </Button> */}
+              </Button> 
               <Typography variant="body2">
-                Social media buttons will go here.
               </Typography>
             </Box>
           </Box>
