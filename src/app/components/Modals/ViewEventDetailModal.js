@@ -7,7 +7,6 @@ import {
   Tab,
   CardMedia,
   Button,
-  IconButton,
   Divider,
 } from '@mui/material';
 import {
@@ -19,7 +18,6 @@ import {
   AccessTime as AccessTimeIcon,
   Category as CategoryIcon,
 } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
 
 // Custom styles for the modal
 const modalStyle = {
@@ -215,7 +213,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
 
               {/* Directions Button */}
               {/* Uncomment and implement when ready */}
-              {/* <Button
+              <Button
                 variant="contained"
                 color="primary"
                 startIcon={<LocationOnIcon />}
@@ -226,7 +224,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
                 sx={{ mt: 2 }}
               >
                 Get Directions
-              </Button> */}
+              </Button>
             </Box>
           )}
         </TabPanel>

@@ -1,7 +1,7 @@
 // src/components/ImageEventDetails.js
 
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 
 const ImageEventDetails = ({ imageFile, setImageFile }) => {

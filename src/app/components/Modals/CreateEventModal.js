@@ -8,7 +8,7 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 import { useLocations } from '@/hooks/useLocations';
 import useCategories from '@/hooks/useCategories';
 import { useCreateEvent } from '@/hooks/useEvents';
-import { validateEvent } from '@/utils/EventCreateRules';
+//import { validateEvent } from '@/utils/EventCreateRules';
 
 const modalStyle = {
   position: 'absolute',
@@ -25,18 +25,24 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
+  console.log(onCreate);
+
   const { selectedRegionID } = useContext(RegionsContext);
   const {
     locations,
     loading: loadingLocations,
     error: locationsError,
   } = useLocations(selectedRegionID);
+  console.log(locations, loadingLocations, locationsError); // probably needed at all
   const {
     categories,
     loading: loadingCategories,
     error: categoriesError,
   } = useCategories();
+  console.log(categories, loadingCategories, categoriesError); // probably needed at all
+
   const createEvent = useCreateEvent();
+  console.log(createEvent); // needed at create?  But goes where?
 
   // State variables
   const [currentTab, setCurrentTab] = useState('basic');

@@ -15,7 +15,7 @@ import {
 import { styled } from '@mui/material/styles';
 
 // Custom MaterialUISwitch definition
-const MaterialUISwitch = styled(Switch)(({ theme }) => ({
+const MaterialUISwitch = styled(Switch)(({}) => ({
   width: 62,
   height: 34,
   padding: 7,
