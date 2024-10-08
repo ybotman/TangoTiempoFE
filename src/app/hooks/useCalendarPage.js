@@ -207,7 +207,6 @@ export const useCalendarPage = () => {
     handleMenuClose,
     menuAnchor,
     menuItems,
-    isViewDetailModalOpen,
     selectedEventDetails,
   };
 };

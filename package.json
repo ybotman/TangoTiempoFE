@@ -5,14 +5,15 @@
   "proxy": "http://localhost:3001",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next-sitemap",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prep": "prettier --write . && next lint --fix && npm run build"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
@@ -36,12 +37,22 @@
     "eslint-config-react-app": "^7.0.1",
     "firebase": "^10.13.0",
     "next": "^14.2.11",
+    "next-seo": "^6.6.0",
     "next-sitemap": "^4.2.3",
     "react": "^18.3.1",
     "react-datepicker": "^7.3.0",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "rrule": "^2.7.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx}": "eslint --cache --fix",
+    "*.{js,jsx,css,md}": "prettier --write"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

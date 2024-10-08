@@ -1,5 +1,3 @@
-// src/components/ImageEventDetails.js
-
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
@@ -24,7 +22,7 @@ const ImageEventDetails = ({ imageFile, setImageFile }) => {
         }}
       >
         <input {...getInputProps()} />
-        <p>Drag 'n' drop an image here, or click to select one</p>
+        <p>Drag &apos;n&apos; drop an image here, or click to select one</p>
       </div>
       {imageFile && <Typography>Selected Image: {imageFile.name}</Typography>}
     </Box>

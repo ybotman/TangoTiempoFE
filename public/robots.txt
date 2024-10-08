@@ -1,5 +1,9 @@
+# *
 User-agent: *
-Disallow: /admin
-Disallow: /api
+Allow: /
 
+# Host
+Host: https://www.tangotiempo.com
+
+# Sitemaps
 Sitemap: https://www.tangotiempo.com/sitemap.xml
