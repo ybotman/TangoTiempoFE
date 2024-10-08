@@ -22,7 +22,7 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import CreateEventModal from '@/components/Modals/CreateEventModal';
-import EventDetailsModal from "@/components/Modals/EventDetailsModal";
+import ViewEventDetailModal from "@/components/Modals/ViewEventDetailModal.js";
 
 const CalendarPage = () => {
   <Head>
