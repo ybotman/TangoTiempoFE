@@ -7,13 +7,13 @@ import useCategories from '@/hooks/useCategories';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
-import ViewEventDetailModal from '@/components/Modals/ViewEventDetailModal'; 
 
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null); 
   const [menuItems, setMenuItems] = useState([]); 
   const [clickedDate, setClickedDate] = useState(null); 
   const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false); 
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null); 
   const categories = useCategories();
 
@@ -31,7 +31,7 @@ export const useCalendarPage = () => {
 
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
 
   const calendarRef = useRef(null);
 
@@ -123,6 +123,7 @@ export const useCalendarPage = () => {
 
   const handleEventClick = (arg) => {
     console.log('Event clicked:', arg.event.title);
+    setSelectedEventDetails(arg.event);
 
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
       // For Regional Organizer, show event-related options
@@ -139,10 +140,8 @@ export const useCalendarPage = () => {
     }
 
     if (
-      selectedRole === listOfAllRoles.NAMED_USER &&
-      new Date(arg.event.start) < new Date()
-    ) {
-      // For Named User, show limited event-related options if event is in the past
+      selectedRole === listOfAllRoles.NAMED_USER) {
+
       setMenuItems([
         { label: 'View Details', action: 'viewDetails' },
         { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
@@ -152,7 +151,7 @@ export const useCalendarPage = () => {
         mouseY: arg.jsEvent.clientY,
       });
     }
-    setSelectedEventDetails(arg.event); // Set the event details for the modal
+
   };
 
   const handleMenuAction = (action) => {
@@ -160,24 +159,19 @@ export const useCalendarPage = () => {
     setMenuAnchor(null); // Close the menu
 
     if (action === 'viewDetails') {
-      // Open the View Event Detail modal
-      console.log('Opening View Event Detail modal');
+      console.log('setViewDetailModalOpen');
       setViewDetailModalOpen(true);
     }
 
     if (action === 'addSingleEvent') {
-      setCreateModalOpen(true); // Open the CreateSingleEvent modal
+      setCreateModalOpen(true);
     }
-
   };
 
   const handleMenuClose = () => {
     setMenuAnchor(null);
   };
 
-  const handleViewDetailModalClose = () => {
-    setViewDetailModalOpen(false); // Close the modal when done
-  };
 
   return {
     categories,
@@ -193,6 +187,8 @@ export const useCalendarPage = () => {
     setSelectedEvent,
     isCreateModalOpen,
     setCreateModalOpen,
+    isViewDetailModalOpen,
+    setViewDetailModalOpen,
     handleEventCreated,
     handleRegionChange,
     handlePrev,
@@ -207,6 +203,5 @@ export const useCalendarPage = () => {
     menuItems,
     isViewDetailModalOpen,
     selectedEventDetails,
-    handleViewDetailModalClose,
   };
 };

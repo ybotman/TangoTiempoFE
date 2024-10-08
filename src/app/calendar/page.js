@@ -70,6 +70,9 @@ const CalendarPage = () => {
     setSelectedCity,
     isCreateModalOpen,
     setCreateModalOpen,
+    isViewDetailModalOpen,
+    setViewDetailModalOpen,
+    selectedEventDetails,
     handleDatesSet,
     handleRegionChange,
     handlePrev,
@@ -95,7 +98,6 @@ const CalendarPage = () => {
         regions={regions}
         handleRegionChange={handleRegionChange}
         organizers={organizers}
-        //      selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
@@ -168,6 +170,14 @@ const CalendarPage = () => {
         onClose={() => setCreateModalOpen(false)}
         selectedDate={clickedDate}
         selectedRegion={selectedRegion}
+      />
+
+      <ViewEventDetailModal
+        open={isViewDetailModalOpen}
+        onClose={() => setViewDetailModalOpen(false)}
+        selectedDate={clickedDate}
+        eventDetails={selectedEventDetails}
+       // selectedRegion={selectedRegion}
       />
     </div>
   );
