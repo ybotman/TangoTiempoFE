@@ -39,6 +39,11 @@ out/
 .fusebox/
 .dynamodb/
 .vscode-test/
+Tangols
+combine_js.sh
+TangoTiempo.data
+
+archive/
 
 # Coverage directories used by tools like istanbul, nyc, etc.
 coverage/

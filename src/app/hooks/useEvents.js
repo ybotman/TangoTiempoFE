@@ -1,53 +1,70 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-export function useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
-    const [events, setEvents] = useState([]);
+export function useEvents(
+  selectedRegion,
+  selectedDivision,
+  selectedCity,
+  calendarStart,
+  calendarEnd
+) {
+  const [events, setEvents] = useState([]);
 
-    const getEvents = async () => {
-        if (!selectedRegion) {
-            setEvents([]);
-            return;
+  const getEvents = useCallback(async () => {
+    if (!selectedRegion) {
+      setEvents([]);
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`,
+        {
+          params: {
+            active: true,
+            calculatedRegionName: selectedRegion,
+            calculatedDivisionName: selectedDivision || undefined,
+            calculatedCityName: selectedCity || undefined,
+            start: calendarStart,
+            end: calendarEnd,
+          },
         }
-        try {
-            //          console.log('useEvents-> Making Events API request:', { selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, active });
+      );
+      //  console.log('useEvents-> Events fetched:', response.data);
 
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`, {
-                params: {
-                    active: true,  // Correct assignment of value
-                    calculatedRegionName: selectedRegion,
-                    calculatedDivisionName: selectedDivision || undefined,
-                    calculatedCityName: selectedCity || undefined,
-                    start: calendarStart,
-                    end: calendarEnd,
-                }
-            });
+      setEvents(response.data);
+    } catch (error) {
+      console.error('useEvents-> Error fetching events:', error);
+      setEvents([]);
+    }
+  }, [
+    selectedRegion,
+    selectedDivision,
+    selectedCity,
+    calendarStart,
+    calendarEnd,
+  ]);
 
-            setEvents(response.data);  // This line sets the fetched events to the state
-        } catch (error) {
-            console.error('useEvents-> Error fetching events:', error);
-            setEvents([]);  // Clear events on error
-        }
-    };
+  useEffect(() => {
+    getEvents();
+  }, [getEvents]);
 
-    useEffect(() => {
-        getEvents();
-    }, [selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd]);
-
-    return { events, refreshEvents: getEvents };
+  return { events, refreshEvents: getEvents };
 }
 
 export function useCreateEvent() {
-    const createEvent = async (eventData) => {
-        try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/CRUD`, eventData);
-            console.log('Event created successfully:', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('Error creating event:', error);
-            throw error;
-        }
-    };
+  const createEvent = async (eventData) => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`,
+        eventData
+      );
+      console.log('Event created successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating event:', error);
+      throw error;
+    }
+  };
 
-    return createEvent;
+  return createEvent;
 }

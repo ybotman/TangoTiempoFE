@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 const UserStateRole = () => {
-    const { user, roles, loading, error, logOut } = useAuth(); // Get roles instead of role
+    const { user, availibleRoles, loading, error, logOut } = useAuth(); // Get roles instead of role
     const [selectedRole, setSelectedRole] = useState('');
 
     // Set the initial selected role when roles are loaded
