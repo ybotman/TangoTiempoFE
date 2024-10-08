@@ -1,97 +1,97 @@
 /* General Calendar Styles */
 .fc {
-    background-color: white;
-    /* Calendar background color */
-    color: #333;
-    /* Default text color */
-    font-family: Arial, sans-serif;
-    /* Default font */
+  background-color: white;
+  /* Calendar background color */
+  color: #333;
+  /* Default text color */
+  font-family: Arial, sans-serif;
+  /* Default font */
 }
 
 /* Toolbar and Navigation */
 .fc-toolbar {
-    background-color: #f5f5f5;
-    /* Toolbar background */
-    border-bottom: 1px solid #ddd;
-    /* Toolbar border */
+  background-color: #f5f5f5;
+  /* Toolbar background */
+  border-bottom: 1px solid #ddd;
+  /* Toolbar border */
 }
 
 .fc-toolbar-title {
-    font-size: 18px;
-    /* Title font size */
-    color: #333;
-    /* Title color */
+  font-size: 18px;
+  /* Title font size */
+  color: #333;
+  /* Title color */
 }
 
 /* Add this to your styles file */
 .category-filter {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 
-    padding: 10px;
+  padding: 10px;
 }
 
 .category-button {
-    background-color: #007bff;
-    /* Blue background */
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
+  background-color: #007bff;
+  /* Blue background */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .category-button.active {
-    background-color: #0056b3;
-    /* Darker blue for active state */
+  background-color: #0056b3;
+  /* Darker blue for active state */
 }
 
 .category-button:hover {
-    background-color: #0056b3;
-    /* Darker blue on hover */
+  background-color: #0056b3;
+  /* Darker blue on hover */
 }
 
 /* Assuming this is in your global or relevant CSS file */
 .full-height-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* Full viewport height */
 }
 
 .calendar-wrapper {
-    flex-grow: 1;
-    /* Ensures the calendar takes up the remaining space */
-    overflow: hidden;
+  flex-grow: 1;
+  /* Ensures the calendar takes up the remaining space */
+  overflow: hidden;
 }
 
 /* Attempt to override any specific styles */
 .fc-toolbar h2.fc-toolbar-title {
-    font-size: 14px;
-    /* Adjust font size */
-    color: #333;
-    /* Keep the existing text color */
+  font-size: 14px;
+  /* Adjust font size */
+  color: #333;
+  /* Keep the existing text color */
 }
 
 /* Month/Week View */
 .fc-event {
-    background-image: var(--fc-event-background-image);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    color: white;
+  background-image: var(--fc-event-background-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: black;
 }
 
 /* List View */
 .fc-list-item .fc-list-item-title {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .fc-list-item img {
-    margin-right: 10px;
-    height: 40px;
-    width: 40px;
-    object-fit: cover;
-    border-radius: 4px;
+  margin-right: 10px;
+  height: 40px;
+  width: 40px;
+  object-fit: cover;
+  border-radius: 4px;
 }

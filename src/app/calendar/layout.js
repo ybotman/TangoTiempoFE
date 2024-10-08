@@ -1,22 +1,30 @@
-import React from "react";
-import PropTypes from "prop-types";
+'use client'; // Enable client-side rendering
 
-export const metadata = {
-  title: 'TangoTiempo',
-  description: 'TangoTiempo is a comprehensive platform designed to connect Argentine Tango enthusiasts with events, classes, and workshops across the United States. Whether you’re a beginner looking to dive into the world of tango or an experienced dancer seeking new opportunities to refine your skills, TangoTiempo offers a centralized calendar and community-driven features to support your journey. Stay informed about the latest milongas, prácticas, and festivals in your calcuatedRegion, filter events based on your preferences, and interact with organizers. With an intuitive design and robust functionality, TangoTiempo is your go-to resource for all things Argentine Tango. Explore, dance, and immerse yourself in the rich culture of Tango with TangoTiempo.',
-  icons: {
-    icon: '/TTred.png',
-  },
+import { React, useContext, useEffect } from 'react';
+import PropTypes from 'prop-types'; // Import prop-types
+import { AuthContext } from '@/contexts/AuthContext';
+import { RegionsContext } from '@/contexts/RegionsContext';
+
+const RootLayout = ({ children }) => {
+  const { user } = useContext(AuthContext);
+  const { regions, selectedRegion } = useContext(RegionsContext);
+
+  useEffect(() => {
+    if (user?.displayName) {
+      // console.log('User Name:', user.displayName);
+    }
+
+    if (regions?.length > 0) {
+      // console.log('Selected Region:', selectedRegion);
+    }
+  }, [user, regions, selectedRegion]);
+
+  return <>{children}</>;
 };
 
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-
+// Define prop types for validation
 RootLayout.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired, // Ensure that children is a valid React node
 };
+
+export default RootLayout;
