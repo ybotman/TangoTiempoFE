@@ -1,102 +1,93 @@
-"use client"; // Add this line at the top
+// app/calendar/page.js
 
-import { useState } from 'react';
-import { useEffect } from 'react';
-import React from 'react';
-
-import { useFullCalendarDateRange } from '@/hooks/useFullCalendarDateRange';
-import { useRegions } from '@/hooks/useRegions';
-import { useEvents } from '@/hooks/useEvents';
-import useCategories from '@/hooks/useCategories'
-import useOrganizers from '@/hooks/useOrganizers';
-import { filterEvents } from '@/utils/filterEvents';
-import EventDetailsModal from '@/components/Modals/EventDetailsModal';
-import EventCRUDModal from '@/components/Modals/EventCRUDModal';
-import SiteMenuBar from '@/components/UI/SiteMenuBar';
-import SiteHeader from '@/components/UI/SiteHeader';
-import { categoryColors } from '@/utils/categoryColors';
-
-import '@/styles/calendarStyles2.css';
-
+'use client';
+import Head from 'next/head';
+import React, { useContext } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
+import { ButtonGroup, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import TodayIcon from '@mui/icons-material/Today';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import ListIcon from '@mui/icons-material/List';
 
+import SiteHeader from '@/components/UI/SiteHeader';
+import SiteMenuBar from '@/components/UI/SiteMenuBar';
+import { RegionsContext } from '@/contexts/RegionsContext';
+import { useCalendarPage } from '@/hooks/useCalendarPage';
+import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
+import CreateEventModal from '@/components/Modals/CreateEventModal';
+import ViewEventDetailModal from '@/components/Modals/ViewEventDetailModal.js';
 
 const CalendarPage = () => {
-  console.log('**CalendarPage Functions and useStates');
-  const regions = useRegions();
-  const categories = useCategories();
-  const [activeCategories, setActiveCategories] = useState([]);
-  const [selectedOrganizers, setSelectedOrganizers] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  <Head>
+    <title>Tango Tiempo - A national Tango Events Calendar </title>
+    <meta
+      name="description"
+      content="Browse and find upcoming tango events in your region. Updated regularly with new listings."
+    />
+    <meta
+      name="keywords"
+      content="tango, tango events, local tango calendar, tango festivals"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta
+      property="og:title"
+      content="Tango Tiempo - Find Local Tango Events"
+    />
+    <meta
+      property="og:description"
+      content="Browse and find upcoming tango events in your region."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.tangotiempo.com" />
+  </Head>;
 
-  const { dateRange, handleDatesSet } = useFullCalendarDateRange();
-  const calendarStart = dateRange.firstCalDt;
-  const calendarEnd = dateRange.lastCalDt;
-
-  const [selectedRegion, setSelectedRegion] = useState(null);
-  const [selectedDivision, setSelectedDivision] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const { events, refreshEvents } = useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd);
-
-  const handleEventCreated = async () => {
-    try {
-      await refreshEvents(); // Manually trigger a refresh of the events
-    } catch (error) {
-      console.error('Error refreshing events after creation:', error);
-    }
-  }; const organizers = useOrganizers(selectedRegion);
-
-  const handleCategoryChange = (activeCategories) => {
-    setActiveCategories(activeCategories);
-  };
-
-  const handleDateClick = (clickInfo) => {
-    setSelectedDate(clickInfo.date); // Set the selected date from the clicked date
-    console.log('Date clicked:', clickInfo.date)//, 'By Role: ', currentRole);
-    setCreateModalOpen(true); // Open the create event modal
-  };
-
-  const handleEventClick = (clickInfo) => {
-    setSelectedEvent(clickInfo.event);
-    console.log('Event clicked:', clickInfo.event.title);
-  };
-
-  const handleOrganizerChange = (event) => {
-    setSelectedOrganizers(event.target.value);
-    console.log('OrgChange:', event.target.value);
-  };
-
-
-  const filteredEvents = filterEvents(events, activeCategories);
-
-  const coloredFilteredEvents = filteredEvents.map(event => ({
-    ...event,
-    backgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
-    textColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
-    displayEventTime: true,
-    borderColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
-    eventBackgroundColor: categoryColors[event.extendedProps.categoryFirst] || 'lightGrey',
-    eventTextColor: event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
-  }));
-
-  useEffect(() => {
-    console.log('UseEffect Filtered Events:', filteredEvents, activeCategories);
-  }, [filteredEvents], activeCategories);
-
-  useEffect(() => {
-    console.log("UseEffect Calendar start/end startate:", calendarStart);
-  }, [calendarStart, calendarEnd]);
+  const { regions } = useContext(RegionsContext);
+  //  const { selectedOrganizers, selectedCategories } = now where??
+  //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const {
+    menuAnchor,
+    menuItems,
+    categories,
+    clickedDate,
+    handleMenuAction,
+    handleMenuClose,
+    activeCategories,
+    handleCategoryChange,
+    selectedRegion,
+    selectedDivision,
+    selectedCity,
+    organizers,
+    calendarRef,
+    setSelectedRegion,
+    setSelectedDivision,
+    setSelectedCity,
+    isCreateModalOpen,
+    setCreateModalOpen,
+    isViewDetailModalOpen,
+    setViewDetailModalOpen,
+    selectedEventDetails,
+    handleDatesSet,
+    handleRegionChange,
+    handlePrev,
+    handleNext,
+    handleToday,
+    handleDateClick,
+    handleEventClick,
+    handleOrganizerChange,
+    coloredFilteredEvents,
+  } = useCalendarPage();
 
   return (
     <div>
       <SiteHeader />
-
+      {/* A lot of unnecessary arguments */}
       <SiteMenuBar
         selectedRegion={selectedRegion}
         setSelectedRegion={setSelectedRegion}
@@ -105,13 +96,54 @@ const CalendarPage = () => {
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         regions={regions}
+        handleRegionChange={handleRegionChange}
         organizers={organizers}
-        selectedOrganizers={selectedOrganizers}
         handleOrganizerChange={handleOrganizerChange}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
       />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          margin: '20px',
+        }}
+      >
+        <ButtonGroup variant="outlined" aria-label="outlined button group">
+          <IconButton onClick={handlePrev}>
+            <ArrowBackIcon />
+          </IconButton>
+          <IconButton onClick={handleToday}>
+            <TodayIcon />
+          </IconButton>
+          <IconButton onClick={handleNext}>
+            <ArrowForwardIcon />
+          </IconButton>
+        </ButtonGroup>
+
+        <ButtonGroup variant="outlined" aria-label="outlined button group">
+          <IconButton
+            onClick={() =>
+              calendarRef.current.getApi().changeView('dayGridMonth')
+            }
+          >
+            <CalendarMonthIcon />
+          </IconButton>
+          <IconButton
+            onClick={() =>
+              calendarRef.current.getApi().changeView('timeGridWeek')
+            }
+          >
+            <ViewWeekIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => calendarRef.current.getApi().changeView('listWeek')}
+          >
+            <ListIcon />
+          </IconButton>
+        </ButtonGroup>
+      </div>
 
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -121,34 +153,34 @@ const CalendarPage = () => {
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
-        headerToolbar={{
-          left: 'prev,today,next',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,listWeek',
-        }}
+        ref={calendarRef}
+        headerToolbar={false}
+        scrollTime="17:00:00"
+      />
+      {/* SubMenu */}
+      <CalendarSubMenu
+        menuAnchor={menuAnchor}
+        handleClose={handleMenuClose}
+        menuItems={menuItems}
+        onActionSelected={handleMenuAction}
       />
 
-      {selectedEvent && (
-        <EventDetailsModal
-          event={selectedEvent}
-          open={Boolean(selectedEvent)}
-          onClose={() => setSelectedEvent(null)}
-        />
-      )}
+      <CreateEventModal
+        open={isCreateModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        selectedDate={clickedDate}
+        selectedRegion={selectedRegion}
+      />
 
-      {isCreateModalOpen && (
-        <EventCRUDModal
-          open={isCreateModalOpen}
-          onClose={() => setCreateModalOpen(false)}
-          selectedDate={selectedDate}
-          selectedRegion={selectedRegion}
-          onCreate={handleEventCreated}
-        />
-      )}
+      <ViewEventDetailModal
+        open={isViewDetailModalOpen}
+        onClose={() => setViewDetailModalOpen(false)}
+        selectedDate={clickedDate}
+        eventDetails={selectedEventDetails}
+        // selectedRegion={selectedRegion}
+      />
     </div>
   );
-  //end of return
-
 };
 
 export default CalendarPage;
