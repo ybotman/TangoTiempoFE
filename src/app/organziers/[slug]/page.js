@@ -1,31 +1,69 @@
 import axios from 'axios';
 import slugify from 'slugify';
 import Head from 'next/head';
-import Image from 'next/image';
+//import Image from 'next/image';
+import DOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
 import { notFound } from 'next/navigation';
+
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
+
+// Function to sanitize your HTML
+const sanitizeHTML = (htmlString) => {
+  return purify.sanitize(htmlString);
+};
 
 // Fetch all organizers and generate static params for each
 export async function generateStaticParams() {
   try {
-    console.log('API URL:', process.env.NEXT_PUBLIC_BE_URL); // Log the API URL to verify it's correct
+    console.log('API URL:', process.env.NEXT_PUBLIC_BE_URL);
 
-    const response = await axios.get(
+    // Fetch regions
+    const regionsResponse = await axios.get(
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`
+    );
+    const regions = regionsResponse.data;
+
+    // Fetch organizers
+    const organizersResponse = await axios.get(
       `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`
     );
-    const organizers = response.data;
+    const organizers = organizersResponse.data;
 
     const paths = organizers
       .map((org) => {
-        const organizerShortName = org.shortName
-          ? slugify(org.shortName, { lower: true })
-          : 'unknown-organizer';
+        // Find the region, division, and city based on the IDs in the organizer
+        const region = regions.find((reg) => reg._id === org.organizerRegion);
+        const division = region?.divisions?.find(
+          (div) => div._id === org.organizerDivision
+        );
+        const city = division?.majorCities?.find(
+          (city) => city._id === org.organizerCity
+        );
 
-        return { slug: organizerShortName };
+        // Construct the names based on available data
+        const regionName = region
+          ? slugify(region.regionName, { lower: true })
+          : 'regionunknown';
+        const divisionName = division
+          ? slugify(division.divisionName, { lower: true })
+          : '';
+        const cityName = city ? slugify(city.cityName, { lower: true }) : '';
+
+        // Construct the slug in the format: shortName-region-division-city (if available)
+        const organizerShortName = slugify(org.shortName, { lower: true });
+        let slug = organizerShortName;
+
+        if (regionName) slug += `-${regionName}`;
+        if (divisionName) slug += `-${divisionName}`;
+        if (cityName) slug += `-${cityName}`;
+
+        return { slug };
       })
-      .filter(Boolean); // Filter out any null entries
+      .filter(Boolean); // Filter out any invalid entries
 
-    console.log('Generated paths:', paths); // Log the paths being generated
-
+    console.log('Generated paths:', paths);
     return paths;
   } catch (error) {
     console.error('Error generating static params:', error);
@@ -36,17 +74,44 @@ export async function generateStaticParams() {
 // Fetch data for a specific organizer based on the slug
 async function getOrganizerData(slug) {
   try {
-    const response = await axios.get(
+    // Fetch regions
+    const regionsResponse = await axios.get(
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`
+    );
+    const regions = regionsResponse.data;
+
+    // Fetch organizers
+    const organizersResponse = await axios.get(
       `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`
     );
-    const organizers = response.data;
+    const organizers = organizersResponse.data;
 
-    // Find the organizer matching the slug (based on shortName)
+    // Find the organizer matching the slug
     const organizer = organizers.find((org) => {
-      const organizerShortName = org.shortName
-        ? slugify(org.shortName, { lower: true })
+      const region = regions.find((reg) => reg._id === org.organizerRegion);
+      const division = region?.divisions?.find(
+        (div) => div._id === org.organizerDivision
+      );
+      const city = division?.majorCities?.find(
+        (city) => city._id === org.organizerCity
+      );
+
+      const regionName = region
+        ? slugify(region.regionName, { lower: true })
+        : 'regionunknown';
+      const divisionName = division
+        ? slugify(division.divisionName, { lower: true })
         : '';
-      return organizerShortName === slug;
+      const cityName = city ? slugify(city.cityName, { lower: true }) : '';
+
+      const organizerShortName = slugify(org.shortName, { lower: true });
+      let generatedSlug = organizerShortName;
+
+      if (regionName) generatedSlug += `-${regionName}`;
+      if (divisionName) generatedSlug += `-${divisionName}`;
+      if (cityName) generatedSlug += `-${cityName}`;
+
+      return generatedSlug === slug;
     });
 
     return organizer || null;
@@ -62,11 +127,9 @@ export default async function OrganizerProfile({ params }) {
   const organizer = await getOrganizerData(slug);
 
   if (!organizer) {
-    // Return a 404 page if no data is found
     notFound();
   }
 
-  // Define structured data for SEO and metadata
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -96,28 +159,76 @@ export default async function OrganizerProfile({ params }) {
         </script>
       </Head>
       <div>
-        <h1>{organizer.name}</h1>
-        {organizer.images[0]?.imageUrl && (
-          <Image
-            src={organizer.images[0].imageUrl}
-            alt="Organizer Image"
-            width={800}
-            height={600}
-            layout="responsive"
-          />
-        )}
+        <h3>Argentine Organizer : {organizer.name}</h3>
+        <p>Region: {organizer.organizerRegion?.name || 'N/A'}</p>
+        <p>Division: {organizer.organizerDivision?.name || 'N/A'}</p>
+        <p>City: {organizer.organizerCity?.name || 'N/A'}</p>
         <p>
-          Last updated: {new Date(organizer.lastActivity).toLocaleDateString()}
+          Website:{' '}
+          <a href={organizer.url} target="_blank" rel="noopener noreferrer">
+            {organizer.url}
+          </a>
         </p>
-        <p>City: {organizer.organizerCity?.name}</p>
-        <p>Division: {organizer.organizerDivision?.name}</p>
-        <p>
-          Website: <a href={organizer.url}>{organizer.url}</a>
-        </p>
+        <p>Here are the organizers events on region.TangoTempo.shortname</p>
         <p>Email: {organizer.publicEmail}</p>
         <p>Phone: {organizer.phone}</p>
-        <p>Description: {organizer.description}</p>
+        <p>Region: {organizer.organizerRegion?.name || 'N/A'}</p>
+        <p>Division: {organizer.organizerDivision?.name || 'N/A'}</p>
+        <p>City: {organizer.organizerCity?.name || 'N/A'}</p>
+        <p>Description:</p>
+        <div
+          dangerouslySetInnerHTML={{
+            __html: sanitizeHTML(organizer.description),
+          }}
+        />
       </div>
+      <hr
+        style={{
+          border: 'none',
+          borderTop: '4px solid #ccc',
+          margin: '20px 0',
+        }}
+      />
+      <h3>Tango Tiempo Mission:</h3>
+      <p>
+        Our mission is to create a free comprehensive and inclusive platform for
+        all Argentine Tango enthusiasts, including event organizers, DJs, and
+        bands. We aim to connect the community, promote events, and make it easy
+        for everyone to find and participate in tango activities across
+        different regions.
+      </p>
+      <hr
+        style={{
+          border: 'none',
+          borderTop: '1px solid #ccc',
+          margin: '20px 0',
+        }}
+      />
+
+      <p>
+        If you are an organizer of Argentine Tango events (or a DJ / Band), we
+        would love for you to join TangoTiempo site. It is free, and you can
+        sign up at :
+        <a
+          href="https://www.tangotiempo.com/OrganizerApply"
+          target="_blank"
+          rel="noreferrer"
+        >
+          www.tangotiempo.com/OrganizerApply
+        </a>
+        .<br /> .<br />
+        We are also looking for open and unbiased regional admins for the US
+        board review for onboarding resolving small issues, in general to help
+        us manage events and organizers in your area. If you are interested,
+        please contact us at :
+        <a
+          href="https://www.tangotiempo.com/AdminApply"
+          target="_blank"
+          rel="noreferrer"
+        >
+          www.tangotiempo.com/AdminApply
+        </a>
+      </p>
     </>
   );
 }
