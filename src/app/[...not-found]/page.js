@@ -19,8 +19,8 @@ const NotFoundPage = () => {
         Oops! Looks like we boleo-ed against the Line of Dance.
       </Typography>
       <Typography variant="h6" style={{ margin: '20px 0' }}>
-        The page you are looking for doesn&lsquo;t exist. We will go fix this soon! Let us help you get back on
-        track!
+        The page you are looking for doesn&lsquo;t exist. We will go fix this
+        soon! Let us help you get back on track!
       </Typography>
       <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
         <Link href="/calendar" passHref>
