@@ -7,3 +7,4 @@ Host: https://www.tangotiempo.com
 
 # Sitemaps
 Sitemap: https://www.tangotiempo.com/sitemap.xml
+Sitemap: https://www.tangotiempo.com/sitemap-0.xml
