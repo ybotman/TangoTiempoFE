@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import axios from 'axios';
 import slugify from 'slugify';
 import Head from 'next/head';
@@ -31,40 +33,36 @@ export async function generateStaticParams() {
     );
     const organizers = organizersResponse.data;
 
-    const paths = organizers
-      .map((org) => {
-        // Find the region, division, and city based on the IDs in the organizer
-        const region = regions.find((reg) => reg._id === org.organizerRegion);
-        const division = region?.divisions?.find(
-          (div) => div._id === org.organizerDivision
-        );
-        const city = division?.majorCities?.find(
-          (city) => city._id === org.organizerCity
-        );
+    const hierarchy = regions.map((region) => {
+      return {
+        region: region.regionName,
+        divisions: region.divisions.map((division) => {
+          return {
+            divisionName: division.divisionName,
+            cities: division.majorCities.map((city) => {
+              const cityOrganizers = organizers.filter(
+                (org) => org.organizerCity === city._id
+              );
+              return {
+                cityName: city.cityName,
+                organizers: cityOrganizers.map((org) => ({
+                  name: org.name,
+                  slug: `${slugify(org.shortName, { lower: true })}-${slugify(region.regionName, { lower: true })}-${slugify(division.divisionName, { lower: true })}-${slugify(city.cityName, { lower: true })}`,
+                })),
+              };
+            }),
+          };
+        }),
+      };
+    });
 
-        // Construct the names based on available data
-        const regionName = region
-          ? slugify(region.regionName, { lower: true })
-          : 'regionunknown';
-        const divisionName = division
-          ? slugify(division.divisionName, { lower: true })
-          : '';
-        const cityName = city ? slugify(city.cityName, { lower: true }) : '';
+    // Save the hierarchy to JSON
+    const filePath = path.join(process.cwd(), 'public', 'organizersList.json');
+    fs.writeFileSync(filePath, JSON.stringify(hierarchy, null, 2));
 
-        // Construct the slug in the format: shortName-region-division-city (if available)
-        const organizerShortName = slugify(org.shortName, { lower: true });
-        let slug = organizerShortName;
-
-        if (regionName) slug += `-${regionName}`;
-        if (divisionName) slug += `-${divisionName}`;
-        if (cityName) slug += `-${cityName}`;
-
-        return { slug };
-      })
-      .filter(Boolean); // Filter out any invalid entries
-
-    console.log('Generated paths:', paths);
-    return paths;
+    return organizers.map((org) => ({
+      slug: org.slug,
+    }));
   } catch (error) {
     console.error('Error generating static params:', error);
     return [];
@@ -159,7 +157,11 @@ export default async function OrganizerProfile({ params }) {
         </script>
       </Head>
       <div>
-        <h3>Argentine Organizer : {organizer.name}</h3>
+        <p>
+          A Tango professional/organizers/studio/teacher registered on
+          TangoTiempo.com :{' '}
+        </p>
+        <h3>Argentine Tango Organizer : {organizer.name}</h3>
         <p>Region: {organizer.organizerRegion?.name || 'N/A'}</p>
         <p>Division: {organizer.organizerDivision?.name || 'N/A'}</p>
         <p>City: {organizer.organizerCity?.name || 'N/A'}</p>

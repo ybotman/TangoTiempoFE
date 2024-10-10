@@ -1,78 +1,440 @@
 [
-  { "slug": "bostontango-northeast-new-england-boston" },
-  { "slug": "ybot-northeast-new-england-boston" },
-  { "slug": "babbs-northeast-new-england-boston" },
-  { "slug": "mit-tango-club-northeast-new-england-boston" },
-  { "slug": "ultimate-tango-northeast-new-england-boston" },
-  { "slug": "artango-northeast-new-england-boston" },
-  { "slug": "tango-society-of-boston-northeast-new-england-boston" },
-  { "slug": "hsueh-tze-lee-northeast-new-england-boston" },
-  { "slug": "milton-and-corin-northeast-new-england-boston" },
-  { "slug": "boston-tango-orchestra-northeast-new-england-boston" },
-  { "slug": "tango-dogs-northeast-new-england-boston" },
-  { "slug": "tango-affair-northeast-new-england-boston" },
-  { "slug": "adriana-pinto-northeast-new-england-boston" },
-  { "slug": "harts-tango-northeast-new-england-boston" },
-  { "slug": "providence-tango-northeast-new-england-boston" },
-  { "slug": "cape-cod-tango-northeast-new-england-boston" },
-  { "slug": "organizer-:-un-identified-na-northeast-new-england-boston" },
-  { "slug": "blue-tango-northeast-new-england-boston" },
-  { "slug": "sue-davis-northeast-new-england-boston" },
-  { "slug": "lgbtq+-tango-northeast-new-england-boston" },
-  { "slug": "david-chester-northeast-new-england-boston" },
-  { "slug": "southern-new-hampshire-tango-northeast-new-england-boston" },
-  { "slug": "misha-northeast-new-england-boston" },
-  { "slug": "customlogo-northeast-new-england-boston" },
-  { "slug": "1447086042-northeast-new-england-boston" },
   {
-    "slug": "screenshot-2018-12-27-14.22.34-northeast-new-england-boston"
+    "region": "South",
+    "divisions": [
+      {
+        "divisionName": "South Atlantic",
+        "cities": [
+          {
+            "cityName": "Atlanta",
+            "organizers": []
+          },
+          {
+            "cityName": "Miami",
+            "organizers": []
+          },
+          {
+            "cityName": "Washington, D.C.",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "East South Central",
+        "cities": [
+          {
+            "cityName": "Nashville",
+            "organizers": []
+          },
+          {
+            "cityName": "Birmingham",
+            "organizers": []
+          },
+          {
+            "cityName": "Louisville",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "West South Central",
+        "cities": [
+          {
+            "cityName": "Houston",
+            "organizers": []
+          },
+          {
+            "cityName": "Dallas",
+            "organizers": []
+          },
+          {
+            "cityName": "New Orleans",
+            "organizers": []
+          }
+        ]
+      }
+    ]
   },
-  { "slug": "alla-lakov-northeast-new-england-boston" },
-  { "slug": "harvard-tango-(ht)-northeast-new-england-boston" },
-  { "slug": "north-shore-tango-northeast-new-england-boston" },
-  { "slug": "fg-dance-academy-northeast-new-england-boston" },
-  { "slug": "boston-sunday-practica-group-northeast-new-england-boston" },
-  { "slug": "guillermo-merlo-northeast-new-england-boston" },
-  { "slug": "porttango-northeast-new-england-boston" },
-  { "slug": "emma-holder-northeast-new-england-boston" },
   {
-    "slug": "loca-tango-project-(james-oh)-northeast-new-england-boston"
+    "region": "Northeast",
+    "divisions": [
+      {
+        "divisionName": "New England",
+        "cities": [
+          {
+            "cityName": "Boston",
+            "organizers": [
+              {
+                "name": "Boston Tango Club",
+                "slug": "bostontango-northeast-new-england-boston"
+              },
+              {
+                "name": "ybotMan",
+                "slug": "ybot-northeast-new-england-boston"
+              },
+              {
+                "name": "Andi Babbs",
+                "slug": "babbs-northeast-new-england-boston"
+              },
+              {
+                "name": "MIT Tango Club",
+                "slug": "mit-tango-club-northeast-new-england-boston"
+              },
+              {
+                "name": "Ultimate Tango",
+                "slug": "ultimate-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Artango",
+                "slug": "artango-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Society of Boston",
+                "slug": "tango-society-of-boston-northeast-new-england-boston"
+              },
+              {
+                "name": "Hsueh-tze Lee",
+                "slug": "hsueh-tze-lee-northeast-new-england-boston"
+              },
+              {
+                "name": "Milton and Corin",
+                "slug": "milton-and-corin-northeast-new-england-boston"
+              },
+              {
+                "name": "Boston Tango Orchestra",
+                "slug": "boston-tango-orchestra-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Dogs",
+                "slug": "tango-dogs-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Affair",
+                "slug": "tango-affair-northeast-new-england-boston"
+              },
+              {
+                "name": "Adriana Pinto",
+                "slug": "adriana-pinto-northeast-new-england-boston"
+              },
+              {
+                "name": "HARTS Tango",
+                "slug": "harts-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Providence Tango",
+                "slug": "providence-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Cape Cod Tango",
+                "slug": "cape-cod-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Organizer : Un-Identified, N/A",
+                "slug": "organizer-:-un-identified-na-northeast-new-england-boston"
+              },
+              {
+                "name": "Blue Tango",
+                "slug": "blue-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Sue Davis",
+                "slug": "sue-davis-northeast-new-england-boston"
+              },
+              {
+                "name": "LGBTQ+ Tango",
+                "slug": "lgbtq+-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "David Chester",
+                "slug": "david-chester-northeast-new-england-boston"
+              },
+              {
+                "name": "Southern New Hampshire Tango",
+                "slug": "southern-new-hampshire-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Misha",
+                "slug": "misha-northeast-new-england-boston"
+              },
+              {
+                "name": "customLogo",
+                "slug": "customlogo-northeast-new-england-boston"
+              },
+              {
+                "name": "1447086042",
+                "slug": "1447086042-northeast-new-england-boston"
+              },
+              {
+                "name": "Screenshot 2018-12-27 14.22.34",
+                "slug": "screenshot-2018-12-27-14.22.34-northeast-new-england-boston"
+              },
+              {
+                "name": "Alla lakov",
+                "slug": "alla-lakov-northeast-new-england-boston"
+              },
+              {
+                "name": "Harvard Tango  (HT)",
+                "slug": "harvard-tango-(ht)-northeast-new-england-boston"
+              },
+              {
+                "name": "North Shore Tango",
+                "slug": "north-shore-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "FG Dance Academy",
+                "slug": "fg-dance-academy-northeast-new-england-boston"
+              },
+              {
+                "name": "Boston Sunday Practica Group",
+                "slug": "boston-sunday-practica-group-northeast-new-england-boston"
+              },
+              {
+                "name": "Guillermo Merlo",
+                "slug": "guillermo-merlo-northeast-new-england-boston"
+              },
+              {
+                "name": "PORTTANGO",
+                "slug": "porttango-northeast-new-england-boston"
+              },
+              {
+                "name": "Emma Holder",
+                "slug": "emma-holder-northeast-new-england-boston"
+              },
+              {
+                "name": "Loca Tango Project (James Oh)",
+                "slug": "loca-tango-project-(james-oh)-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Sueño Academy",
+                "slug": "tango-sueno-academy-northeast-new-england-boston"
+              },
+              {
+                "name": "Lise Brody",
+                "slug": "lise-brody-northeast-new-england-boston"
+              },
+              {
+                "name": "Andi Babbs",
+                "slug": "andi-babbs-northeast-new-england-boston"
+              },
+              {
+                "name": "Laura Grandi (de Argentina)",
+                "slug": "laura-grandi-(de-argentina)-northeast-new-england-boston"
+              },
+              {
+                "name": "Western MA Tango",
+                "slug": "western-ma-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Toby Balsley",
+                "slug": "toby-balsley-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Practica Corazón",
+                "slug": "tango-practica-corazon-northeast-new-england-boston"
+              },
+              {
+                "name": "Alicia Cruzado",
+                "slug": "alicia-cruzado-northeast-new-england-boston"
+              },
+              {
+                "name": "img-about",
+                "slug": "img-about-northeast-new-england-boston"
+              },
+              {
+                "name": "hlee12k",
+                "slug": "hlee12k-northeast-new-england-boston"
+              },
+              {
+                "name": "ht&paulo06",
+                "slug": "htandpaulo06-northeast-new-england-boston"
+              },
+              {
+                "name": "Blue Tango",
+                "slug": "blue-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Boston Tango Orchestra",
+                "slug": "boston-tango-orchestra-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Affair .com",
+                "slug": "tango-affair-.com-northeast-new-england-boston"
+              },
+              {
+                "name": "Unknown Organizer",
+                "slug": "unknown-organizer-northeast-new-england-boston"
+              },
+              {
+                "name": "Tango Dogs",
+                "slug": "tango-dogs-northeast-new-england-boston"
+              },
+              {
+                "name": "Adriana Pinto",
+                "slug": "adriana-pinto-northeast-new-england-boston"
+              },
+              {
+                "name": "La Pichuca",
+                "slug": "la-pichuca-northeast-new-england-boston"
+              },
+              {
+                "name": "HARTS Tango",
+                "slug": "harts-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Corin and Milton",
+                "slug": "corin-and-milton-northeast-new-england-boston"
+              },
+              {
+                "name": "image",
+                "slug": "image-northeast-new-england-boston"
+              },
+              {
+                "name": "Harvard Tango",
+                "slug": "harvard-tango-northeast-new-england-boston"
+              },
+              {
+                "name": "Screenshot 2020-02-21 14.08.11",
+                "slug": "screenshot-2020-02-21-14.08.11-northeast-new-england-boston"
+              },
+              {
+                "name": "BOSTON SUNNDAY PRACTICA",
+                "slug": "boston-sunnday-practica-northeast-new-england-boston"
+              },
+              {
+                "name": "FG",
+                "slug": "fg-northeast-new-england-boston"
+              },
+              {
+                "name": "NS Tango Sunday Logo",
+                "slug": "ns-tango-sunday-logo-northeast-new-england-boston"
+              },
+              {
+                "name": "l.php",
+                "slug": "l.php-northeast-new-england-boston"
+              },
+              {
+                "name": "68303698_2360292304189398_6341518684263022592_n",
+                "slug": "68303698_2360292304189398_6341518684263022592_n-northeast-new-england-boston"
+              },
+              {
+                "name": "gem_duras_5",
+                "slug": "gem_duras_5-northeast-new-england-boston"
+              },
+              {
+                "name": "IMG_1581",
+                "slug": "img_1581-northeast-new-england-boston"
+              },
+              {
+                "name": "29351722_10215784296298815_4246924963307081481_o",
+                "slug": "29351722_10215784296298815_4246924963307081481_o-northeast-new-england-boston"
+              }
+            ]
+          },
+          {
+            "cityName": "Providence",
+            "organizers": []
+          },
+          {
+            "cityName": "Hartford",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "Middle Atlantic",
+        "cities": [
+          {
+            "cityName": "New York City",
+            "organizers": []
+          },
+          {
+            "cityName": "Philadelphia",
+            "organizers": []
+          },
+          {
+            "cityName": "Newark",
+            "organizers": []
+          }
+        ]
+      }
+    ]
   },
-  { "slug": "tango-sueno-academy-northeast-new-england-boston" },
-  { "slug": "lise-brody-northeast-new-england-boston" },
-  { "slug": "andi-babbs-northeast-new-england-boston" },
-  { "slug": "laura-grandi-(de-argentina)-northeast-new-england-boston" },
-  { "slug": "western-ma-tango-northeast-new-england-boston" },
-  { "slug": "toby-balsley-northeast-new-england-boston" },
-  { "slug": "tango-practica-corazon-northeast-new-england-boston" },
-  { "slug": "alicia-cruzado-northeast-new-england-boston" },
-  { "slug": "img-about-northeast-new-england-boston" },
-  { "slug": "hlee12k-northeast-new-england-boston" },
-  { "slug": "htandpaulo06-northeast-new-england-boston" },
-  { "slug": "blue-tango-northeast-new-england-boston" },
-  { "slug": "boston-tango-orchestra-northeast-new-england-boston" },
-  { "slug": "tango-affair-.com-northeast-new-england-boston" },
-  { "slug": "unknown-organizer-northeast-new-england-boston" },
-  { "slug": "tango-dogs-northeast-new-england-boston" },
-  { "slug": "adriana-pinto-northeast-new-england-boston" },
-  { "slug": "la-pichuca-northeast-new-england-boston" },
-  { "slug": "harts-tango-northeast-new-england-boston" },
-  { "slug": "corin-and-milton-northeast-new-england-boston" },
-  { "slug": "image-northeast-new-england-boston" },
-  { "slug": "harvard-tango-northeast-new-england-boston" },
   {
-    "slug": "screenshot-2020-02-21-14.08.11-northeast-new-england-boston"
+    "region": "Midwest",
+    "divisions": [
+      {
+        "divisionName": "East North Central",
+        "cities": [
+          {
+            "cityName": "Chicago",
+            "organizers": []
+          },
+          {
+            "cityName": "Detroit",
+            "organizers": []
+          },
+          {
+            "cityName": "Cleveland",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "West North Central",
+        "cities": [
+          {
+            "cityName": "Minneapolis",
+            "organizers": []
+          },
+          {
+            "cityName": "Kansas City",
+            "organizers": []
+          },
+          {
+            "cityName": "St. Louis",
+            "organizers": []
+          }
+        ]
+      }
+    ]
   },
-  { "slug": "boston-sunnday-practica-northeast-new-england-boston" },
-  { "slug": "fg-northeast-new-england-boston" },
-  { "slug": "ns-tango-sunday-logo-northeast-new-england-boston" },
-  { "slug": "l.php-northeast-new-england-boston" },
   {
-    "slug": "68303698_2360292304189398_6341518684263022592_n-northeast-new-england-boston"
-  },
-  { "slug": "gem_duras_5-northeast-new-england-boston" },
-  { "slug": "img_1581-northeast-new-england-boston" },
-  {
-    "slug": "29351722_10215784296298815_4246924963307081481_o-northeast-new-england-boston"
+    "region": "West",
+    "divisions": [
+      {
+        "divisionName": "Mountain",
+        "cities": [
+          {
+            "cityName": "Denver",
+            "organizers": []
+          },
+          {
+            "cityName": "Phoenix",
+            "organizers": []
+          },
+          {
+            "cityName": "Salt Lake City",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "Pacific",
+        "cities": [
+          {
+            "cityName": "Los Angeles",
+            "organizers": []
+          },
+          {
+            "cityName": "San Francisco",
+            "organizers": []
+          },
+          {
+            "cityName": "Seattle",
+            "organizers": []
+          }
+        ]
+      }
+    ]
   }
 ]
