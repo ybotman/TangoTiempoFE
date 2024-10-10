@@ -2,11 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import slugify from 'slugify';
-import Head from 'next/head';
-import Image from 'next/image';
+//import Head from 'next/head';
+//import Image from 'next/image';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
-import { notFound } from 'next/navigation';
+//import { notFound } from 'next/navigation';
 
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
@@ -17,6 +17,7 @@ const staticPageGenerationTimeout =
 const sanitizeHTML = (htmlString) => {
   return purify.sanitize(htmlString);
 };
+console.log('sanitizeHTML:', sanitizeHTML);
 
 // Fetch all organizers and generate static params for each
 export async function generateStaticParams() {
@@ -78,6 +79,7 @@ export async function generateStaticParams() {
 }
 
 // Fetch data for a specific organizer based on the slug
+/*
 async function getOrganizerData(slug) {
   try {
     // Fetch regions
@@ -126,8 +128,11 @@ async function getOrganizerData(slug) {
     return null;
   }
 }
+  */
 
 // The page component
+export default async function OrganizerProfile() {
+  /*
 export default async function OrganizerProfile({ params }) {
   const { slug } = params;
   const organizer = await getOrganizerData(slug);
@@ -248,5 +253,12 @@ export default async function OrganizerProfile({ params }) {
         </a>
       </p>
     </>
+  ); */
+
+  return (
+    <div>
+      <h1>Fetching Disabled</h1>
+      <p>Data retrieval is turned off temporarily.</p>
+    </div>
   );
 }
