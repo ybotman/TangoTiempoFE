@@ -1,61 +1,5 @@
 [
   {
-    "region": "South",
-    "divisions": [
-      {
-        "divisionName": "South Atlantic",
-        "cities": [
-          {
-            "cityName": "Atlanta",
-            "organizers": []
-          },
-          {
-            "cityName": "Miami",
-            "organizers": []
-          },
-          {
-            "cityName": "Washington, D.C.",
-            "organizers": []
-          }
-        ]
-      },
-      {
-        "divisionName": "East South Central",
-        "cities": [
-          {
-            "cityName": "Nashville",
-            "organizers": []
-          },
-          {
-            "cityName": "Birmingham",
-            "organizers": []
-          },
-          {
-            "cityName": "Louisville",
-            "organizers": []
-          }
-        ]
-      },
-      {
-        "divisionName": "West South Central",
-        "cities": [
-          {
-            "cityName": "Houston",
-            "organizers": []
-          },
-          {
-            "cityName": "Dallas",
-            "organizers": []
-          },
-          {
-            "cityName": "New Orleans",
-            "organizers": []
-          }
-        ]
-      }
-    ]
-  },
-  {
     "region": "Northeast",
     "divisions": [
       {
@@ -392,6 +336,62 @@
           },
           {
             "cityName": "St. Louis",
+            "organizers": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "region": "South",
+    "divisions": [
+      {
+        "divisionName": "South Atlantic",
+        "cities": [
+          {
+            "cityName": "Atlanta",
+            "organizers": []
+          },
+          {
+            "cityName": "Miami",
+            "organizers": []
+          },
+          {
+            "cityName": "Washington, D.C.",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "East South Central",
+        "cities": [
+          {
+            "cityName": "Nashville",
+            "organizers": []
+          },
+          {
+            "cityName": "Birmingham",
+            "organizers": []
+          },
+          {
+            "cityName": "Louisville",
+            "organizers": []
+          }
+        ]
+      },
+      {
+        "divisionName": "West South Central",
+        "cities": [
+          {
+            "cityName": "Houston",
+            "organizers": []
+          },
+          {
+            "cityName": "Dallas",
+            "organizers": []
+          },
+          {
+            "cityName": "New Orleans",
             "organizers": []
           }
         ]

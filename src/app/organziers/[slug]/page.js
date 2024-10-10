@@ -3,7 +3,7 @@ import path from 'path';
 import axios from 'axios';
 import slugify from 'slugify';
 import Head from 'next/head';
-//import Image from 'next/image';
+import Image from 'next/image';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { notFound } from 'next/navigation';
@@ -157,9 +157,18 @@ export default async function OrganizerProfile({ params }) {
         </script>
       </Head>
       <div>
+        {organizer.images[0] && (
+          <Image
+            src={organizer.images[0].imageUrl}
+            alt={organizer.name}
+            width={800}
+            height={600}
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+        )}
         <p>
-          A Tango professional/organizers/studio/teacher registered on
-          TangoTiempo.com :{' '}
+          A Tango professional/organizer/studio/teacher registered on
+          TangoTiempo.com :
         </p>
         <h3>Argentine Tango Organizer : {organizer.name}</h3>
         <p>Region: {organizer.organizerRegion?.name || 'N/A'}</p>
@@ -171,12 +180,11 @@ export default async function OrganizerProfile({ params }) {
             {organizer.url}
           </a>
         </p>
-        <p>Here are the organizers events on region.TangoTempo.shortname</p>
+        <p>
+          Here are the organizer&lsquo;s events on region.TangoTempo.shortname
+        </p>
         <p>Email: {organizer.publicEmail}</p>
         <p>Phone: {organizer.phone}</p>
-        <p>Region: {organizer.organizerRegion?.name || 'N/A'}</p>
-        <p>Division: {organizer.organizerDivision?.name || 'N/A'}</p>
-        <p>City: {organizer.organizerCity?.name || 'N/A'}</p>
         <p>Description:</p>
         <div
           dangerouslySetInnerHTML={{
@@ -209,8 +217,8 @@ export default async function OrganizerProfile({ params }) {
 
       <p>
         If you are an organizer of Argentine Tango events (or a DJ / Band), we
-        would love for you to join TangoTiempo site. It is free, and you can
-        sign up at :
+        would love for you to join the TangoTiempo site. It is free, and you can
+        sign up at:
         <a
           href="https://www.tangotiempo.com/OrganizerApply"
           target="_blank"
@@ -218,11 +226,11 @@ export default async function OrganizerProfile({ params }) {
         >
           www.tangotiempo.com/OrganizerApply
         </a>
-        .<br /> .<br />
+        .<br />
         We are also looking for open and unbiased regional admins for the US
-        board review for onboarding resolving small issues, in general to help
-        us manage events and organizers in your area. If you are interested,
-        please contact us at :
+        board review for onboarding and resolving small issues, in general, to
+        help us manage events and organizers in your area. If you are
+        interested, please contact us at:
         <a
           href="https://www.tangotiempo.com/AdminApply"
           target="_blank"

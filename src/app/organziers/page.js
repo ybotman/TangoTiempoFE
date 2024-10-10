@@ -1,7 +1,14 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionSummary, AccordionDetails, Button, Typography, TextField } from '@mui/material';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+  Typography,
+  TextField,
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Link from 'next/link';
 
@@ -54,43 +61,49 @@ const OrganizerLinks = () => {
     }
 
     // Filter based on the search term
-    const filtered = organizers.map((region) => {
-      const filteredDivisions = region.divisions?.map((division) => {
-        const filteredCities = division.cities?.map((city) => {
-          const filteredCityOrganizers = city.organizers?.filter((org) =>
-            org.slug.toLowerCase().includes(term)
-          );
-          return {
-            ...city,
-            organizers: filteredCityOrganizers,
-          };
-        }).filter(city => city.organizers.length > 0);
+    const filtered = organizers
+      .map((region) => {
+        const filteredDivisions = region.divisions
+          ?.map((division) => {
+            const filteredCities = division.cities
+              ?.map((city) => {
+                const filteredCityOrganizers = city.organizers?.filter((org) =>
+                  org.slug.toLowerCase().includes(term)
+                );
+                return {
+                  ...city,
+                  organizers: filteredCityOrganizers,
+                };
+              })
+              .filter((city) => city.organizers.length > 0);
 
-        // Check if the division name matches the search term or if it has matching cities
+            // Check if the division name matches the search term or if it has matching cities
+            if (
+              division.divisionName.toLowerCase().includes(term) ||
+              filteredCities.length > 0
+            ) {
+              return {
+                ...division,
+                cities: filteredCities,
+              };
+            }
+            return null;
+          })
+          .filter((division) => division !== null);
+
+        // Check if the region name matches the search term or if it has matching divisions
         if (
-          division.divisionName.toLowerCase().includes(term) ||
-          filteredCities.length > 0
+          region.region.toLowerCase().includes(term) ||
+          filteredDivisions.length > 0
         ) {
           return {
-            ...division,
-            cities: filteredCities,
+            ...region,
+            divisions: filteredDivisions,
           };
         }
         return null;
-      }).filter(division => division !== null);
-
-      // Check if the region name matches the search term or if it has matching divisions
-      if (
-        region.region.toLowerCase().includes(term) ||
-        filteredDivisions.length > 0
-      ) {
-        return {
-          ...region,
-          divisions: filteredDivisions,
-        };
-      }
-      return null;
-    }).filter(region => region !== null);
+      })
+      .filter((region) => region !== null);
 
     setFilteredOrganizers(filtered);
   };
@@ -106,7 +119,11 @@ const OrganizerLinks = () => {
         onChange={handleSearch}
         style={{ marginBottom: '20px' }}
       />
-      <Button variant="contained" onClick={toggleExpandAll} style={{ marginBottom: '20px' }}>
+      <Button
+        variant="contained"
+        onClick={toggleExpandAll}
+        style={{ marginBottom: '20px' }}
+      >
         {Object.values(expanded).some((isOpen) => isOpen)
           ? 'Collapse All'
           : 'Open All'}
