@@ -1,7 +1,6 @@
 // SiteMenuBar.js
 
 'use client';
-
 import React from 'react';
 import { listOfAllRoles } from '@/utils/masterData';
 import PropTypes from 'prop-types';
@@ -93,6 +92,14 @@ const SiteMenuBar = ({
             <Divider />
             <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
             <MenuItem>About TangoTiempo</MenuItem>
+            <MenuItem onClick={() => (window.location.href = '/about-toby')}>
+              About Toby
+            </MenuItem>{' '}
+            {/* Link to About Toby page */}
+            <MenuItem onClick={() => (window.location.href = '/about')}>
+              About
+            </MenuItem>{' '}
+            {/* Link to About page */}
             <MenuItem>Help</MenuItem>
           </Menu>
 

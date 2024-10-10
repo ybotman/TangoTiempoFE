@@ -1,9 +1,20 @@
 {
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
+  "editor.formatOnType": true,
   "[javascript]": {
-    "editor.defaultFormatter": "dsznajder.es7-react-js-snippets"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
-  "editor.formatOnType": true
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "eslint.format.enable": true,
+  "prettier.requireConfig": true,
+  "yaml.validate": false
 }

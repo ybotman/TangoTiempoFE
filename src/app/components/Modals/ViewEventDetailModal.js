@@ -300,7 +300,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
               borderRadius="8px"
             >
               <Typography variant="body2">
-                Organizer&apos;s Events Placeholder
+                Organizer`&lsquo;s Events Placeholder
               </Typography>
             </Box>
           </Box>

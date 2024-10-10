@@ -39,11 +39,12 @@ export default function About() {
         </p>
         <h3>Features</h3>
         <h4>
-          It&apos;s free. It&apos;s easy, and it&apos;s Modern. We just want to
-          help the tango world. It&apos;s for all of US Argentine Tango.
+          It`&lsquo;s free. It`&lsquo;s easy, and it`&lsquo;s Modern. We just
+          want to help the tango world. It`&lsquo;s for all of US Argentine
+          Tango.
         </h4>
         <h4>
-          It&apos;s a Mobile app and Web Version. We hope it&apos;s highly
+          It`&lsquo;s a Mobile app and Web Version. We hope it`&lsquo;s highly
           interactive.
         </h4>
         <h4>
