@@ -10,6 +10,8 @@ import { notFound } from 'next/navigation';
 
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
+const staticPageGenerationTimeout =
+  process.env.NEXT_PUBLIC_STATIC_PAGE_GENERATION_TIMEOUT || 120;
 
 // Function to sanitize your HTML
 const sanitizeHTML = (htmlString) => {
@@ -23,13 +25,19 @@ export async function generateStaticParams() {
 
     // Fetch regions
     const regionsResponse = await axios.get(
-      `${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`,
+      {
+        timeout: staticPageGenerationTimeout * 1000, // Convert to milliseconds
+      }
     );
     const regions = regionsResponse.data;
 
     // Fetch organizers
     const organizersResponse = await axios.get(
-      `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
+      {
+        timeout: staticPageGenerationTimeout * 1000, // Convert to milliseconds
+      }
     );
     const organizers = organizersResponse.data;
 
