@@ -12,6 +12,7 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
+import GoogleAuthButton from '@/components/UI/GoogleAuthButton';
 
 const SignUpPage = () => {
   const router = useRouter();
@@ -52,13 +53,14 @@ const SignUpPage = () => {
             <LinearProgress />
           </Box>
         ) : (
-          <Box
-            component="img"
-            src="/web_light_rd_SU@1x.png"
-            alt="Sign Up with Google"
-            sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
-            onClick={handleGoogleSignUp}
-          />
+          // <Box
+          //   component="img"
+          //   src="/web_light_rd_SU@1x.png"
+          //   alt="Sign Up with Google"
+          //   sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
+          //   onClick={handleGoogleSignUp}
+          // />
+          <GoogleAuthButton onClick={handleGoogleSignUp} />
         )}
       </Paper>
     </Container>
