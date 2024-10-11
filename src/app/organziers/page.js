@@ -161,7 +161,7 @@ const OrganizerLinks = () => {
                         <ul>
                           {city.organizers?.map((organizer) => (
                             <li key={organizer.slug}>
-                              <Link href={`/organziers/${organizer.slug}`}>
+                              <Link href={`/organizers/${organizer.slug}`}>
                                 {organizer.slug}
                               </Link>
                             </li>
