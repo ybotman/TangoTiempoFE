@@ -1,8 +1,12 @@
+import Link from 'next/link';
 import styles from './page.module.css';
 
 const AboutToby = () => {
   return (
     <div className={styles.container}>
+      <Link href="/calendar" className={styles.backButton}>
+        Back to Calendar
+      </Link>
       <h1 className={styles.title}>About Toby</h1>
       <p className={styles.paragraph}>
         Welcome to my corner of the tango tangled-web! I am a passionate IT
@@ -31,7 +35,7 @@ const AboutToby = () => {
       </p>
       <h2 className={styles.subtitle}>Mission</h2>
       <p className={styles.paragraph}>
-        I belive in the power of Thoughtful Thinking. You must know your power
+        I believe in the power of Thoughtful Thinking. You must know your power
         and privledge the art of overthinking, and honor the need and right to
         not. I love toleverage technology where it makes sense and burn it to
         the ground where it does not. Deliver innovative strategies to make a

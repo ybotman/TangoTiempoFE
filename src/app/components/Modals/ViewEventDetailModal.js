@@ -33,12 +33,12 @@ function TabPanel(props) {
   );
 }
 
-function a11yProps(index) {
-  return {
-    id: `event-tab-${index}`,
-    'aria-controls': `event-tabpanel-${index}`,
-  };
-}
+//function a11yProps(index) {
+//  return {
+//    id: `event-tab-${index}`,
+//    'aria-controls': `event-tabpanel-${index}`,
+//  };
+//}
 const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const [tabValue, setTabValue] = useState(0);
 
