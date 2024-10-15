@@ -1,0 +1,42 @@
+/* ViewEventDetailModal.css */
+
+/* Modal container */
+.modalBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95%;
+  max-width: 800px;
+  background-color: #fff; /* Ensure it's a solid white background */
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+  padding: 16px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  z-index: 1000; /* Ensure modal appears above everything else */
+}
+
+/* Event image styling */
+.eventImage {
+  object-fit: cover;
+  margin-top: 16px;
+  border-radius: 8px;
+  max-width: 100%;
+}
+
+/* Placeholder for map */
+.mapPlaceholder {
+  height: 200px;
+  background-color: #e0e0e0;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* Ensure the modal backdrop is not transparent */
+.MuiBackdrop-root {
+  background-color: rgba(0, 0, 0, 0.5); /* Darken the backdrop */
+}

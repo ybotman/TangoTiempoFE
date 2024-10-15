@@ -33,16 +33,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
     loading: loadingLocations,
     error: locationsError,
   } = useLocations(selectedRegionID);
-  console.log(locations, loadingLocations, locationsError); // probably needed at all
+  //console.log(locations, loadingLocations, locationsError); // probably needed at all
   const {
     categories,
     loading: loadingCategories,
     error: categoriesError,
   } = useCategories();
-  console.log(categories, loadingCategories, categoriesError); // probably needed at all
+  //console.log(categories, loadingCategories, categoriesError); // probably needed at all
 
   const createEvent = useCreateEvent();
-  console.log(createEvent); // needed at create?  But goes where?
+  //console.log(createEvent); // needed at create?  But goes where?
 
   // State variables
   const [currentTab, setCurrentTab] = useState('basic');

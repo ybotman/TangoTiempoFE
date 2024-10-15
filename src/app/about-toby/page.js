@@ -41,7 +41,7 @@ const AboutToby = () => {
         Think Big, Deliver Small and Often.
       </p>
       <p className={`${styles.paragraph} ${styles.thinkBig}`}>
-        Let in the moment, halfway down the stairs
+        Live in the moment that is halfway down the stairs
       </p>
       <p className={`${styles.paragraph} ${styles.thinkBig}`}>
         If you are too busy to Travel, Play, and Dance, you are too busy
