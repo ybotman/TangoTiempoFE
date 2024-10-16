@@ -1,42 +1,52 @@
-/* ViewEventDetailModal.css */
-
-/* Modal container */
-.modalBox {
+.modal-wrapper {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 95%;
-  max-width: 800px;
-  background-color: #fff; /* Ensure it's a solid white background */
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+  width: 90%;
+  max-width: 600px;
+  background-color: white;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
   padding: 16px;
   max-height: 90vh;
   overflow-y: auto;
-  border-radius: 8px;
-  z-index: 1000; /* Ensure modal appears above everything else */
 }
 
-/* Event image styling */
-.eventImage {
-  object-fit: cover;
+.modal-title {
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.tab-navigation {
+  margin-bottom: 16px;
+}
+
+.tab-content {
   margin-top: 16px;
-  border-radius: 8px;
-  max-width: 100%;
 }
 
-/* Placeholder for map */
-.mapPlaceholder {
-  height: 200px;
-  background-color: #e0e0e0;
+.image-upload-container {
+  border: 1px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.selected-image {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.repeating-rules {
   margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  font-size: 1rem;
+  color: #444;
 }
 
-/* Ensure the modal backdrop is not transparent */
-.MuiBackdrop-root {
-  background-color: rgba(0, 0, 0, 0.5); /* Darken the backdrop */
+.location-details,
+.organizer-details {
+  margin-bottom: 16px;
 }

@@ -130,9 +130,44 @@ export const useCalendarPage = () => {
 
     // Add other role-based conditions as needed...
   };
-
   const handleEventClick = (arg) => {
-    console.log('Event clicked:', arg.event.title);
+    console.log('1 Event clicked:', arg.event.title);
+    //  console.log('2 Selected Event Details (raw):', arg.event);
+    const {
+      title,
+      start,
+      end,
+      extendedProps: {
+        _id,
+        description,
+        standardsTitle,
+        categoryFirst,
+        categorySecond,
+        categoryThird,
+        eventImage,
+        locationID,
+        locationName,
+        cost,
+        calculatedRegionName,
+        calculatedDivisionName,
+        calculatedCityName,
+        active,
+        canceled,
+        recurrenceRule,
+        ownerOrganizerID,
+        grantedOrganizerID,
+        alternateOrganizerID,
+        ownerOrganizerName,
+        featured,
+        expiresAt,
+        tmpCreator,
+        tmpVenueId,
+        tmpEventOrgId,
+        tmpMix,
+      },
+    } = arg.event;
+
+    // For now, setting the raw event data as a fallback
     setSelectedEventDetails(arg.event);
 
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {

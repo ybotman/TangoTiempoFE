@@ -1,173 +1,99 @@
-import React, { useState } from 'react';
-import {
-  Modal,
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  CardMedia,
-  Button,
-  Divider,
-} from '@mui/material';
-import {
-  //LocationOn as LocationOnIcon,
-  Event as EventIcon,
-  Category as CategoryIcon,
-} from '@mui/icons-material';
-import './ViewEventDetailModal.css'; // Import the CSS file
+import React, { useState, useEffect } from 'react';
+import { Modal, Box, Typography, Tabs, Tab } from '@mui/material';
+import ViewEventDetailsBasic from '@/components/Modals/ViewEventDetailsBasic';
+import ImageEventDetails from '@/components/Modals/ViewEventDetailsImage';
+import RepeatingEventDetails from '@/components/Modals/ViewEventDetailsRepeating';
+import OtherEventDetails from '@/components/Modals/ViewEventDetailsOther';
 
-// Tab Panel Component
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '90%',
+  maxWidth: '600px',
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 3,
+  maxHeight: '90vh',
+  overflowY: 'auto',
+};
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`event-tabpanel-${index}`}
-      aria-labelledby={`event-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box>{children}</Box>}
-    </div>
-  );
-}
-
-//function a11yProps(index) {
-//  return {
-//    id: `event-tab-${index}`,
-//    'aria-controls': `event-tabpanel-${index}`,
-//  };
-//}
 const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
-  const [tabValue, setTabValue] = useState(0);
+  const [currentTab, setCurrentTab] = useState('basic');
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+  // Reset the tab to 'basic' each time the modal is opened
+  useEffect(() => {
+    if (open) {
+      setCurrentTab('basic');
+    }
+  }, [open]);
 
+  useEffect(() => {
+    console.log('EventDetails (Modal):', eventDetails);
+  }, [eventDetails]);
+
+  // If eventDetails is null, don't render the modal content
   if (!eventDetails) {
-    console.log('!eventDetails');
     return null;
   }
 
-  const {
-    title,
-    eventImage,
-    categoryFirst,
-    description,
-    startDate,
-    endDate,
-    locationName,
-    locationAddress,
-    ownerOrganizerName,
-  } = eventDetails;
-
-  // Log the dates to check their validity
-  console.log('ViewEventDetailsModal Start Date:', startDate);
-  console.log('ViewEventDetailsModal End Date:', endDate);
-  console.log('Event Details:', eventDetails);
-
-  // Format dates safely
-  const formatDateTime = (date) => {
-    const parsedDate = new Date(date);
-    return isNaN(parsedDate.getTime())
-      ? 'Date not available'
-      : parsedDate.toLocaleString();
-  };
+  const eventTitle = eventDetails?.title || 'Event Details';
+  const startDate = eventDetails?._instance?.range?.start || null;
+  const endDate = eventDetails?._instance?.range?.end || null;
+  const allDay = eventDetails?.allDay || false;
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      aria-labelledby="event-details-modal-title"
-      aria-describedby="event-details-modal-description"
-      closeAfterTransition
-    >
-      <Box className="modalBox">
-        <Typography variant="h5" component="h2" id="event-details-modal-title">
-          {title}
+    <Modal open={open} onClose={onClose}>
+      <Box sx={modalStyle}>
+        {/* Display Date and Event Title */}
+        <Typography variant="h4" component="h2" sx={{ mb: 2 }}>
+          {startDate && new Date(startDate).toLocaleDateString()} - {eventTitle}
         </Typography>
 
-        {eventImage && (
-          <CardMedia
-            component="img"
-            height="200"
-            image={eventImage}
-            alt={title}
-            className="eventImage"
-          />
+        {/* Display Start Time and End Time (omit if all-day event) */}
+        {!allDay && (
+          <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+            {`Start Time: ${new Date(startDate).toLocaleTimeString()}`}
+          </Typography>
+        )}
+        {!allDay && endDate && (
+          <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+            {`End Time: ${new Date(endDate).toLocaleTimeString()}`}
+          </Typography>
         )}
 
-        {/* Tabs */}
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          variant="fullWidth"
-          sx={{ mt: 2 }}
-        >
-          <Tab label="Details" />
-          <Tab label="More" />
+        {/* Display End Date (small text) */}
+        {endDate &&
+          startDate &&
+          new Date(startDate).toLocaleDateString() !==
+            new Date(endDate).toLocaleDateString() && (
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
+            </Typography>
+          )}
+
+        {/* Tab Navigation */}
+        <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
+          <Tab label="Basic" value="basic" />
+          <Tab label="Images" value="images" />
+          <Tab label="Repeating" value="repeating" />
+          <Tab label="Other" value="other" />
         </Tabs>
 
-        {/* Tab Panels */}
-        <TabPanel value={tabValue} index={0}>
-          {/* Categories */}
-          <Box display="flex" alignItems="center" mt={1}>
-            <CategoryIcon fontSize="small" />
-            <Typography variant="body2" ml={1}>
-              {categoryFirst}
-            </Typography>
-          </Box>
-
-          {/* Description */}
-          <Box mt={2}>
-            <Typography
-              variant="body1"
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-          </Box>
-
-          {/* Date and Time */}
-          <Box display="flex" alignItems="center" mt={2}>
-            <EventIcon fontSize="small" />
-            <Typography variant="body2" ml={1}>
-              {formatDateTime(startDate)} - {formatDateTime(endDate)}
-            </Typography>
-          </Box>
-
-          {/* Location Details */}
-          {locationName && (
-            <Box mt={2}>
-              <Divider />
-              <Typography variant="h6" mt={2}>
-                Location
-              </Typography>
-              <Typography variant="body1">{locationName}</Typography>
-              {locationAddress && (
-                <Typography variant="body2" color="textSecondary">
-                  {locationAddress}
-                </Typography>
-              )}
-
-              <Box className="mapPlaceholder">
-                <Typography variant="body2">
-                  Map Placeholder for {locationAddress || locationName}
-                </Typography>
-              </Box>
-            </Box>
-          )}
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          <Typography variant="h6">Organizer</Typography>
-          <Typography variant="body1">{ownerOrganizerName}</Typography>
-        </TabPanel>
-        <Box mt={4} display="flex" justifyContent="flex-end">
-          <Button onClick={onClose} variant="contained" color="primary">
-            Close
-          </Button>
-        </Box>
+        {/* Tab Content */}
+        {currentTab === 'basic' && (
+          <ViewEventDetailsBasic eventDetails={eventDetails} />
+        )}
+        {currentTab === 'images' && (
+          <ImageEventDetails eventDetails={eventDetails} />
+        )}
+        {currentTab === 'repeating' && (
+          <RepeatingEventDetails eventDetails={eventDetails} />
+        )}
+        {currentTab === 'other' && (
+          <OtherEventDetails eventDetails={eventDetails} />
+        )}
       </Box>
     </Modal>
   );
