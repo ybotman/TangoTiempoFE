@@ -130,9 +130,10 @@ export const useCalendarPage = () => {
 
     // Add other role-based conditions as needed...
   };
-
   const handleEventClick = (arg) => {
-    console.log('Event clicked:', arg.event.title);
+    console.log('1 Event clicked:', arg.event.title);
+
+    //setting the raw event data as a fallback
     setSelectedEventDetails(arg.event);
 
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {

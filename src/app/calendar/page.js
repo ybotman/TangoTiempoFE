@@ -177,7 +177,7 @@ const CalendarPage = () => {
         onClose={() => setViewDetailModalOpen(false)}
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
-        // selectedRegion={selectedRegion}
+        selectedRegion={selectedRegion}
       />
     </div>
   );
