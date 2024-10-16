@@ -161,7 +161,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
         {endDate &&
           startDate &&
           new Date(startDate).toLocaleDateString() !==
-          new Date(endDate).toLocaleDateString() && (
+            new Date(endDate).toLocaleDateString() && (
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
               {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
             </Typography>
