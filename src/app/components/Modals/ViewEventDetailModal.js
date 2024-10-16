@@ -31,7 +31,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
 
   useEffect(() => {
     if (open) {
-      setCurrentTab('basic');
+      setCurrentTab('Basic');
       setShowFullTitle(false); // Reset title expansion when modal is reopened
     }
   }, [open]);
@@ -64,12 +64,14 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const startDate = eventDetails?._instance?.range?.start || null;
   const endDate = eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
-  const categoryFirst = eventDetails?.extendedProps?.categoryFirst || 'Category not available';
+  const categoryFirst =
+    eventDetails?.extendedProps?.categoryFirst || 'Category not available';
 
   // Function to truncate the title to 30 characters
-  const truncatedTitle = eventTitle.length > 30 && !showFullTitle
-    ? eventTitle.slice(0, 30) + '...'
-    : eventTitle;
+  const truncatedTitle =
+    eventTitle.length > 30 && !showFullTitle
+      ? eventTitle.slice(0, 30) + '...'
+      : eventTitle;
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -142,7 +144,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
 
         {endDate &&
           startDate &&
-          new Date(startDate).toLocaleDateString() !== new Date(endDate).toLocaleDateString() && (
+          new Date(startDate).toLocaleDateString() !==
+            new Date(endDate).toLocaleDateString() && (
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
               {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
             </Typography>
@@ -150,21 +153,33 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
 
         {/* Tabs */}
         <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
-          <Tab label="Basic" value="basic" />
-          {showImageTab && <Tab label="Images" value="images" />}
+          <Tab label="Basic" value="Basic" />
+          <Tab label="More" value="More" />
+          <Tab label="Images" value="Images" />
           <Tab label="Repeating" value="repeating" />
-          <Tab label="Other" value="other" />
           <Tab label="Organzier" value="Organzier" />
           <Tab label="Location" value="Location" />
         </Tabs>
 
         {/* Tab Content */}
-        {currentTab === 'basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
-        {showImageTab && currentTab === 'images' && <ViewEventDetailsImage eventDetails={eventDetails} />}
-        {currentTab === 'repeating' && <ViewEventDetailsRepeating eventDetails={eventDetails} />}
-        {currentTab === 'other' && <ViewEventDetailsOther eventDetails={eventDetails} />}
-        {currentTab === 'Organzier' && <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />}
-        {currentTab === 'Location' && <ViewEventDetailsLocationOther eventDetails={eventDetails} />}
+        {currentTab === 'Basic' && (
+          <ViewEventDetailsBasic eventDetails={eventDetails} />
+        )}
+        {currentTab === 'Images' && (
+          <ViewEventDetailsImage eventDetails={eventDetails} />
+        )}
+        {currentTab === 'repeating' && (
+          <ViewEventDetailsRepeating eventDetails={eventDetails} />
+        )}
+        {currentTab === 'More' && (
+          <ViewEventDetailsOther eventDetails={eventDetails} />
+        )}
+        {currentTab === 'Organzier' && (
+          <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />
+        )}
+        {currentTab === 'Location' && (
+          <ViewEventDetailsLocationOther eventDetails={eventDetails} />
+        )}
       </Box>
     </Modal>
   );
