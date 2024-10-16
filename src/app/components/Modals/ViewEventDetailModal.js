@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Grid } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Grid, Button } from '@mui/material';
+import NextImage from 'next/image';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ViewEventDetailsBasic from '@/components/Modals/ViewEventDetailsBasic';
-import ImageEventDetails from '@/components/Modals/ViewEventDetailsImage';
-import RepeatingEventDetails from '@/components/Modals/ViewEventDetailsRepeating';
-import OtherEventDetails from '@/components/Modals/ViewEventDetailsOther';
+import ViewEventDetailsRepeating from '@/components/Modals/ViewEventDetailsRepeating';
+import ViewEventDetailsOther from '@/components/Modals/ViewEventDetailsOther';
+import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
+import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
+import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
 
 const modalStyle = {
   position: 'absolute',
@@ -21,19 +25,37 @@ const modalStyle = {
 
 const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const [currentTab, setCurrentTab] = useState('basic');
+  const [showFullTitle, setShowFullTitle] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [showImageTab, setShowImageTab] = useState(false);
 
-  // Reset the tab to 'basic' each time the modal is opened
   useEffect(() => {
     if (open) {
       setCurrentTab('basic');
+      setShowFullTitle(false); // Reset title expansion when modal is reopened
     }
   }, [open]);
 
   useEffect(() => {
-    console.log('EventDetails (Modal):', eventDetails);
+    if (eventDetails?.extendedProps?.eventImage) {
+      const img = new Image();
+      img.src = eventDetails.extendedProps.eventImage;
+
+      img.onload = function () {
+        if (img.width > img.height) {
+          setImageSrc(eventDetails.extendedProps.eventImage);
+          setShowImageTab(true);
+        } else {
+          setImageSrc('/Submit16by9Please.jpeg');
+          setShowImageTab(true);
+        }
+      };
+    } else {
+      setImageSrc('/tangoHandsWide.jpeg');
+      setShowImageTab(true);
+    }
   }, [eventDetails]);
 
-  // If eventDetails is null, don't render the modal content
   if (!eventDetails) {
     return null;
   }
@@ -42,15 +64,29 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const startDate = eventDetails?._instance?.range?.start || null;
   const endDate = eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
+  const categoryFirst = eventDetails?.extendedProps?.categoryFirst || 'Category not available';
+
+  // Function to truncate the title to 30 characters
+  const truncatedTitle = eventTitle.length > 30 && !showFullTitle
+    ? eventTitle.slice(0, 30) + '...'
+    : eventTitle;
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        {/* Title and Date in a Grid layout */}
         <Grid container justifyContent="space-between" alignItems="center">
           <Grid item xs={8}>
-            <Typography variant="h4" component="h2">
-              {eventTitle}
+            <Typography variant="h5" component="h2">
+              {truncatedTitle}
+              {eventTitle.length > 30 && (
+                <Button
+                  size="small"
+                  onClick={() => setShowFullTitle(!showFullTitle)}
+                  sx={{ ml: 1 }}
+                >
+                  {showFullTitle ? 'Show Less' : 'Show More'}
+                </Button>
+              )}
             </Typography>
           </Grid>
           <Grid item xs={4} style={{ textAlign: 'right' }}>
@@ -60,60 +96,75 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           </Grid>
         </Grid>
 
-        {/* Time Range (only if not an all-day event) */}
+        <Typography variant="h6" color="textSecondary" gutterBottom>
+          {categoryFirst}
+        </Typography>
+
+        {/* Time Range */}
         {!allDay && startDate && endDate && (
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item>
-              <Typography variant="body1" color="textSecondary">
-                Time:{' '}
-                {new Date(startDate).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="body1" color="textSecondary">
-                {new Date(endDate).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Typography>
-            </Grid>
-          </Grid>
+          <Box display="flex" alignItems="center">
+            <Typography variant="h6" color="textSecondary">
+              Time:{' '}
+              {new Date(startDate).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Typography>
+            <ArrowForwardIcon sx={{ verticalAlign: 'middle', mx: 1 }} />
+            <Typography variant="h6" color="textSecondary">
+              {new Date(endDate).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Typography>
+          </Box>
         )}
 
-        {/* Display End Date (small text) */}
+        {imageSrc && showImageTab && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: '20px',
+            }}
+          >
+            <NextImage
+              src={imageSrc}
+              alt="Event"
+              height={100}
+              width={200}
+              layout="intrinsic"
+              objectFit="contain"
+            />
+          </Box>
+        )}
+
         {endDate &&
           startDate &&
-          new Date(startDate).toLocaleDateString() !==
-            new Date(endDate).toLocaleDateString() && (
+          new Date(startDate).toLocaleDateString() !== new Date(endDate).toLocaleDateString() && (
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
               {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
             </Typography>
           )}
 
-        {/* Tab Navigation */}
+        {/* Tabs */}
         <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
           <Tab label="Basic" value="basic" />
-          <Tab label="Images" value="images" />
+          {showImageTab && <Tab label="Images" value="images" />}
           <Tab label="Repeating" value="repeating" />
           <Tab label="Other" value="other" />
+          <Tab label="Organzier" value="Organzier" />
+          <Tab label="Location" value="Location" />
         </Tabs>
 
         {/* Tab Content */}
-        {currentTab === 'basic' && (
-          <ViewEventDetailsBasic eventDetails={eventDetails} />
-        )}
-        {currentTab === 'images' && (
-          <ImageEventDetails eventDetails={eventDetails} />
-        )}
-        {currentTab === 'repeating' && (
-          <RepeatingEventDetails eventDetails={eventDetails} />
-        )}
-        {currentTab === 'other' && (
-          <OtherEventDetails eventDetails={eventDetails} />
-        )}
+        {currentTab === 'basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
+        {showImageTab && currentTab === 'images' && <ViewEventDetailsImage eventDetails={eventDetails} />}
+        {currentTab === 'repeating' && <ViewEventDetailsRepeating eventDetails={eventDetails} />}
+        {currentTab === 'other' && <ViewEventDetailsOther eventDetails={eventDetails} />}
+        {currentTab === 'Organzier' && <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />}
+        {currentTab === 'Location' && <ViewEventDetailsLocationOther eventDetails={eventDetails} />}
       </Box>
     </Modal>
   );
