@@ -1,0 +1,73 @@
+/* Container for the page content */
+.container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Image styling */
+.organizerImage {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* Headings */
+.heading {
+  font-size: 1.5em;
+  margin-top: 20px;
+}
+
+/* Paragraph styling */
+.paragraph {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Divider styling */
+.thickDivider {
+  border: none;
+  border-top: 4px solid #ccc;
+  margin: 20px 0;
+}
+
+.thinDivider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 20px 0;
+}
+
+/* Button styling for navigation links */
+.backButton {
+  display: inline-block;
+  background-color: #0070f3;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 10px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover effect for buttons */
+.backButton:hover {
+  background-color: #005bb5;
+  color: #fff;
+}
+
+/* Link styling within text */
+.link {
+  color: #0070f3;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #005bb5;
+  text-decoration: none;
+}

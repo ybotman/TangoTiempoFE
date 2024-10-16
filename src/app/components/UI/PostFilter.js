@@ -10,10 +10,28 @@ const PostFilter = ({
   categories = [],
   handleCategoryChange,
 }) => {
+  const orderedCategories = [
+    'Milonga',
+    'Practica',
+    'Festival',
+    'Workshop',
+    'DayWorkshop',
+    'Class',
+    'Trip',
+    'Virtual',
+    'Unknown',
+  ]; // Replace with actual category names
+
+  const sortedCategories = categories.sort((a, b) => {
+    const indexA = orderedCategories.indexOf(a.categoryName);
+    const indexB = orderedCategories.indexOf(b.categoryName);
+    return indexA - indexB;
+  });
+
   return (
     <div className="category-filter">
-      {categories && categories.length > 0 ? (
-        categories.map((category) => {
+      {sortedCategories && sortedCategories.length > 0 ? (
+        sortedCategories.map((category) => {
           const isActive = activeCategories.includes(category.categoryName);
           return (
             <button

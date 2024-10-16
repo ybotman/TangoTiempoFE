@@ -7,6 +7,7 @@ export function transformEvents(events) {
     end: event.endDate, // Map 'endDate' to 'end'
     extendedProps: {
       // Any additional data
+      _id: event._id,
       description: event.description,
       standardsTitle: event.standardsTitle,
       categoryFirst: event.categoryFirst,
@@ -20,12 +21,36 @@ export function transformEvents(events) {
       calculatedDivisionName: event.calculatedDivisionName,
       calculatedCityName: event.calculatedCityName,
       active: event.active,
+      canceled: event.canceled,
       recurrenceRule: event.recurrenceRule,
       ownerOrganizerID: event.ownerOrganizerID,
       grantedOrganizerID: event.grantedOrganizerID,
       alternateOrganizerID: event.alternateOrganizerID,
       ownerOrganizerName: event.ownerOrganizerName,
       featured: event.featured,
+      expiresAt: event.expiresAt,
+      tmpCreator: event.tmpCreator,
+      tmpVenueId: event.tmpVenueId,
+      tmpEventOrgId: event.tmpEventOrgId,
+      tmpMix: event.tmpMix,
     },
   }));
 }
+
+/*
+
+  regionName: { type: String, required: true },
+  regionID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Regions",
+    required: true,
+  },
+  },
+
+
+  recurrenceRule: { type: String, required: false },
+  tmpEventOrgId: { type: String, required: false },
+  tmpUrl: { type: String, required: false },
+
+});
+*/

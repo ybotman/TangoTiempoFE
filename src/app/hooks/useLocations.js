@@ -8,12 +8,13 @@ export const useLocations = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Function to fetch locations by region ID
   const fetchLocations = useCallback(async () => {
     if (!selectedRegionID) return; // If no region is selected, skip fetching
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/locations?regionID=${selectedRegionID}` //http://localhost:3000/api/locations?regionID=66c4d99042ec462ea22484bd
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/locations?regionID=${selectedRegionID}`
       );
       setLocations(response.data);
     } catch (error) {
@@ -23,9 +24,25 @@ export const useLocations = () => {
     }
   }, [selectedRegionID]);
 
+  // Function to fetch a single location by its ID
+  const getLocationById = useCallback(async (locationID) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationID}`
+      );
+      return response.data;
+    } catch (error) {
+      setError(error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchLocations();
-  }, [fetchLocations]); // Whenever regionID changes, fetch new locations
+  }, [fetchLocations]); // Fetch locations when selectedRegionID changes
 
-  return { locations, loading, error };
+  return { locations, getLocationById, loading, error };
 };
