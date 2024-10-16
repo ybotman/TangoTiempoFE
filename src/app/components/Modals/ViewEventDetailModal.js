@@ -65,23 +65,33 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           <Grid container justifyContent="space-between" alignItems="center">
             <Grid item>
               <Typography variant="body1" color="textSecondary">
-                Time: {new Date(startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+                Time:{' '}
+                {new Date(startDate).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </Typography>
             </Grid>
             <Grid item>
               <Typography variant="body1" color="textSecondary">
-                {new Date(endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(endDate).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </Typography>
             </Grid>
           </Grid>
         )}
 
         {/* Display End Date (small text) */}
-        {endDate && startDate && new Date(startDate).toLocaleDateString() !== new Date(endDate).toLocaleDateString() && (
-          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-            {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
-          </Typography>
-        )}
+        {endDate &&
+          startDate &&
+          new Date(startDate).toLocaleDateString() !==
+            new Date(endDate).toLocaleDateString() && (
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
+            </Typography>
+          )}
 
         {/* Tab Navigation */}
         <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
@@ -92,10 +102,18 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
         </Tabs>
 
         {/* Tab Content */}
-        {currentTab === 'basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
-        {currentTab === 'images' && <ImageEventDetails eventDetails={eventDetails} />}
-        {currentTab === 'repeating' && <RepeatingEventDetails eventDetails={eventDetails} />}
-        {currentTab === 'other' && <OtherEventDetails eventDetails={eventDetails} />}
+        {currentTab === 'basic' && (
+          <ViewEventDetailsBasic eventDetails={eventDetails} />
+        )}
+        {currentTab === 'images' && (
+          <ImageEventDetails eventDetails={eventDetails} />
+        )}
+        {currentTab === 'repeating' && (
+          <RepeatingEventDetails eventDetails={eventDetails} />
+        )}
+        {currentTab === 'other' && (
+          <OtherEventDetails eventDetails={eventDetails} />
+        )}
       </Box>
     </Modal>
   );
