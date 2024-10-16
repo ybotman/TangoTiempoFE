@@ -8,6 +8,7 @@ import ViewEventDetailsMore from '@/components/Modals/ViewEventDetailsMore';
 import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
 import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
+import DOMPurify from 'dompurify'; // If needed for description sanitization
 
 const modalStyle = {
   position: 'absolute',
@@ -28,11 +29,27 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const [showFullTitle, setShowFullTitle] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [showImageTab, setShowImageTab] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const description =
+    eventDetails?.extendedProps?.description || 'No description available';
+  const sanitizedDescription = DOMPurify.sanitize(description);
+
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription);
+  };
+
+  const descriptionPreviewStyle = {
+    display: '-webkit-box',
+    WebkitLineClamp: 15,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  };
 
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
-      setShowFullTitle(false); // Reset title expansion when modal is reopened
+      setShowFullTitle(false);
     }
   }, [open]);
 
@@ -67,7 +84,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const categoryFirst =
     eventDetails?.extendedProps?.categoryFirst || 'Category not available';
 
-  // Function to truncate the title to 30 characters
   const truncatedTitle =
     eventTitle.length > 30 && !showFullTitle
       ? eventTitle.slice(0, 30) + '...'
@@ -145,7 +161,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
         {endDate &&
           startDate &&
           new Date(startDate).toLocaleDateString() !==
-            new Date(endDate).toLocaleDateString() && (
+          new Date(endDate).toLocaleDateString() && (
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
               {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
             </Typography>

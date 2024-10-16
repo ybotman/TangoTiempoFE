@@ -22,7 +22,9 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
     if (locationID) {
       getLocationById(locationID)
         .then((response) => setLocationDetails(response))
-        .catch((error) => console.error('Error fetching location details:', error));
+        .catch((error) =>
+          console.error('Error fetching location details:', error)
+        );
     }
   }, [locationID, getLocationById]);
 
@@ -30,7 +32,8 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   const renderLocationAddress = () => {
     if (!locationDetails) return 'Address not available';
 
-    const { address_1, address_2, address_3, city, state, zip } = locationDetails;
+    const { address_1, address_2, address_3, city, state, zip } =
+      locationDetails;
     return (
       <>
         <Typography variant="body1">
