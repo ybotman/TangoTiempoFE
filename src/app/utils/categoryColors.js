@@ -1,6 +1,6 @@
 // Define category colors
 export const categoryColors = {
-  Festival: 'Red',    
+  Festival: 'Red',
   Milonga: 'DodgerBlue',
   Practica: 'cyan',
   Class: 'yellow',
@@ -9,7 +9,6 @@ export const categoryColors = {
   Virtual: 'Orange',
   DayWorkshop: 'PaleGreen',
   Unknown: 'lightGrey',
-
 };
 
 export const coloredFilteredEvents = (events, activeCategories) => {

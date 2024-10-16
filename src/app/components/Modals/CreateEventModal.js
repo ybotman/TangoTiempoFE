@@ -7,7 +7,7 @@ import ImageEventDetails from '@/components/Modals/CreateEventDetailsImage';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useLocations } from '@/hooks/useLocations';
 import useCategories from '@/hooks/useCategories';
-import { useCreateEvent } from '@/hooks/useEvents';
+//import { useCreateEvent } from '@/hooks/useEvents';
 //import { validateEvent } from '@/utils/EventCreateRules';
 
 const modalStyle = {
@@ -40,8 +40,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
     error: categoriesError,
   } = useCategories();
   //console.log(categories, loadingCategories, categoriesError); // probably needed at all
-
-  const createEvent = useCreateEvent();
+  console.log(
+    selectedRegionID,
+    locations,
+    categories,
+    loadingLocations,
+    locationsError,
+    loadingCategories,
+    categoriesError
+  );
+  // const createEvent = useCreateEvent();
   //console.log(createEvent); // needed at create?  But goes where?
 
   // State variables

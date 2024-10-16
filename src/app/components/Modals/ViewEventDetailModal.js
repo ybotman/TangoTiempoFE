@@ -8,7 +8,6 @@ import ViewEventDetailsMore from '@/components/Modals/ViewEventDetailsMore';
 import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
 import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
-import DOMPurify from 'dompurify'; // If needed for description sanitization
 
 const modalStyle = {
   position: 'absolute',
@@ -29,27 +28,11 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const [showFullTitle, setShowFullTitle] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [showImageTab, setShowImageTab] = useState(false);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-
-  const description =
-    eventDetails?.extendedProps?.description || 'No description available';
-  const sanitizedDescription = DOMPurify.sanitize(description);
-
-  const toggleDescription = () => {
-    setShowFullDescription(!showFullDescription);
-  };
-
-  const descriptionPreviewStyle = {
-    display: '-webkit-box',
-    WebkitLineClamp: 15,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
-  };
 
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
-      setShowFullTitle(false);
+      setShowFullTitle(false); // Reset title expansion when modal is reopened
     }
   }, [open]);
 
@@ -68,7 +51,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
         }
       };
     } else {
-      setImageSrc('/tangoHandsWide.jpeg');
+      setImageSrc('/tangohandsWide.jpeg');
       setShowImageTab(true);
     }
   }, [eventDetails]);
@@ -81,9 +64,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const startDate = eventDetails?._instance?.range?.start || null;
   const endDate = eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
-  const categoryFirst =
-    eventDetails?.extendedProps?.categoryFirst || 'Category not available';
 
+  // Function to truncate the title to 30 characters
   const truncatedTitle =
     eventTitle.length > 30 && !showFullTitle
       ? eventTitle.slice(0, 30) + '...'
@@ -92,6 +74,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
+        {/* Title and Date */}
         <Grid container justifyContent="space-between" alignItems="center">
           <Grid item xs={8}>
             <Typography variant="h5" component="h2">
@@ -114,13 +97,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           </Grid>
         </Grid>
 
-        <Typography variant="h6" color="textSecondary" gutterBottom>
-          {categoryFirst}
-        </Typography>
-
         {/* Time Range */}
         {!allDay && startDate && endDate && (
-          <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
             <Typography variant="h6" color="textSecondary">
               Time:{' '}
               {new Date(startDate).toLocaleTimeString([], {
@@ -138,6 +117,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           </Box>
         )}
 
+        {/* Image */}
         {imageSrc && showImageTab && (
           <Box
             sx={{
@@ -150,22 +130,13 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
             <NextImage
               src={imageSrc}
               alt="Event"
-              height={100}
-              width={200}
+              height={300}
+              width={500} // Adjust as needed for higher resolution
               layout="intrinsic"
               objectFit="contain"
             />
           </Box>
         )}
-
-        {endDate &&
-          startDate &&
-          new Date(startDate).toLocaleDateString() !==
-            new Date(endDate).toLocaleDateString() && (
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-              {`Ends on: ${new Date(endDate).toLocaleDateString()}`}
-            </Typography>
-          )}
 
         {/* Tabs */}
         <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
@@ -173,7 +144,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           <Tab label="More" value="More" />
           <Tab label="Images" value="Images" />
           <Tab label="Repeating" value="repeating" />
-          <Tab label="Organzier" value="Organzier" />
+          <Tab label="Organizer" value="Organizer" />
           <Tab label="Location" value="Location" />
         </Tabs>
 
@@ -190,7 +161,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
         {currentTab === 'More' && (
           <ViewEventDetailsMore eventDetails={eventDetails} />
         )}
-        {currentTab === 'Organzier' && (
+        {currentTab === 'Organizer' && (
           <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />
         )}
         {currentTab === 'Location' && (
