@@ -4,7 +4,7 @@ import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ViewEventDetailsBasic from '@/components/Modals/ViewEventDetailsBasic';
 import ViewEventDetailsRepeating from '@/components/Modals/ViewEventDetailsRepeating';
-import ViewEventDetailsOther from '@/components/Modals/ViewEventDetailsOther';
+import ViewEventDetailsMore from '@/components/Modals/ViewEventDetailsMore';
 import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
 import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
@@ -172,7 +172,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           <ViewEventDetailsRepeating eventDetails={eventDetails} />
         )}
         {currentTab === 'More' && (
-          <ViewEventDetailsOther eventDetails={eventDetails} />
+          <ViewEventDetailsMore eventDetails={eventDetails} />
         )}
         {currentTab === 'Organzier' && (
           <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />

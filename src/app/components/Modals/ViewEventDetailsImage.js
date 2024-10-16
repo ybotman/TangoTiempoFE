@@ -1,37 +1,64 @@
 import React from 'react';
+import { Box, Typography, Button } from '@mui/material';
 import Image from 'next/image';
-import { Box, Typography } from '@mui/material';
 
-const UnderConstruction = () => {
+const ViewEventDetailsImage = ({ eventDetails }) => {
+  // Assuming eventImage is already provided in eventDetails
+  const eventImage = eventDetails?.extendedProps?.eventImage || '/path/to/placeholder.jpg';
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start', // Aligns content at the top
-        alignItems: 'center',
-        minHeight: '40vh', // Further reduced height of the container
-        padding: '10px', // Reduced padding to shrink vertical space
-        textAlign: 'center',
-        backgroundColor: '#f8f8f8',
-        paddingTop: '20px', // Smaller padding from the top
-      }}
-    >
-      <Typography variant="h5" gutterBottom>
-        Page Under Construction
+    <Box sx={{ padding: 2 }}>
+      {/* High-Resolution Image Display */}
+      <Typography variant="h6" gutterBottom>
+        Event Image
       </Typography>
-      <Image
-        src="/UnderConstruction.jpg"
-        alt="Under Construction"
-        width={250}
-        height={150}
-        style={{ maxWidth: '100%', height: 'auto' }}
-      />
-      <Typography variant="body2" sx={{ marginTop: 1 }}>
-        We are working hard to bring you this page soon.
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 2,
+        }}
+      >
+        <Image
+          src={eventImage}
+          alt="Event Image"
+          width={800}
+          height={600}
+          style={{ objectFit: 'cover', width: '100%', maxHeight: '100%' }}
+        />
+      </Box>
+
+      {/* Placeholder for Gallery */}
+      <Typography variant="h6" gutterBottom>
+        Gallery (Coming Soon)
       </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          border: '1px dashed grey',
+          padding: 2,
+          marginBottom: 2,
+        }}
+      >
+        <Typography variant="body1" color="textSecondary">
+          No additional images available.
+        </Typography>
+      </Box>
+
+      {/* Fake Add Image Button */}
+      <Button
+        variant="contained"
+        color="primary"
+        disabled
+        sx={{ width: '100%' }}
+      >
+        Add an Image (Feature Coming Soon)
+      </Button>
     </Box>
   );
 };
 
-export default UnderConstruction;
+export default ViewEventDetailsImage;
