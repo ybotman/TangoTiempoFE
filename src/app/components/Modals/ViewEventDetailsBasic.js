@@ -24,25 +24,3 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
 };
 
 export default ViewEventDetailsBasic;
-
-/*
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Typography variant="h6" component="h3">
-            Start Date
-          </Typography>
-          <Typography variant="body1" color="textSecondary">
-            {startDate ? new Date(startDate).toLocaleDateString() : 'N/A'}
-          </Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography variant="h6" component="h3">
-            End Date
-          </Typography>
-          <Typography variant="body1" color="textSecondary">
-            {endDate ? new Date(endDate).toLocaleDateString() : 'N/A'}
-          </Typography>
-        </Grid>
-      </Grid> 
-*/
