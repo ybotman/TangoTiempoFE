@@ -1,12 +1,14 @@
 // Define category colors
 export const categoryColors = {
-  Festival: 'green',
-  Milonga: 'blue',
+  Festival: 'Red',
+  Milonga: 'DodgerBlue',
   Practica: 'cyan',
-  Class: 'lightPink',
-  Workshop: 'lightgreen',
-  Trip: 'yellow',
-  Virtual: 'lightGray',
+  Class: 'yellow',
+  Workshop: 'HotPink',
+  Trip: 'yellowGreen',
+  Virtual: 'Orange',
+  DayWorkshop: 'PaleGreen',
+  Unknown: 'lightGrey',
 };
 
 export const coloredFilteredEvents = (events, activeCategories) => {
@@ -25,8 +27,8 @@ export const coloredFilteredEvents = (events, activeCategories) => {
     const categoryColor = categoryColors[event.categoryFirst] || 'lightGrey'; // Default color
     return {
       ...event,
-      backgroundColor: categoryColor, // Set background to the category color
-      textColor: categoryColor, // Set text color to match the background (for debugging, you can change this)
+      backgroundColor: categoryColor,
+      textColor: categoryColor,
     };
   });
 

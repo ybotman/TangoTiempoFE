@@ -1,5 +1,3 @@
-//FE/next.config.mjs
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Define public environment variables
@@ -24,6 +22,11 @@ const nextConfig = {
 
     // Return the modified config
     return config;
+  },
+
+  // Image configuration to allow external images
+  images: {
+    domains: ['bostontangocalendar.com'], // Allow images from this domain
   },
 
   // Any other Next.js configurations can be added here
