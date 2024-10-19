@@ -84,6 +84,33 @@ const CalendarPage = () => {
     coloredFilteredEvents,
   } = useCalendarPage();
 
+
+  // Function to determine the initial view based on screen size
+  const getInitialView = () => {
+    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
+  };
+
+  // Handle window resizing and switch between views based on screen size
+  const handleWindowResize = () => {
+    const calendarApi = calendarRef.current.getApi();
+    if (window.innerWidth >= 768) {
+      calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
+    } else {
+      calendarApi.changeView('listWeek'); // Switch to List view for smaller screens
+    }
+  };
+
+
+  // Set up window resize listener on component mount and cleanup on unmount
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowResize);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+    };
+  }, []);
+
   return (
     <div>
       <SiteHeader />
@@ -147,7 +174,8 @@ const CalendarPage = () => {
 
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
+        //        initialView="dayGridMonth"
+        initialView={getInitialView()}
         events={coloredFilteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
