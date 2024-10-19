@@ -133,33 +133,37 @@ export const useCalendarPage = () => {
   const handleEventClick = (arg) => {
     console.log('1 Event clicked:', arg.event.title);
 
-    //setting the raw event data as a fallback
+    // Setting the raw event data as a fallback
     setSelectedEventDetails(arg.event);
 
+    // Default menu option available for all roles
+    let menuOptions = [{ label: 'View Event', action: 'viewDetails' }];
+
+    // For Regional Organizer, add additional event-related options
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
-      // For Regional Organizer, show event-related options
-      setMenuItems([
+      menuOptions = [
+        ...menuOptions, // Add the common 'View Event' option
         { label: 'Edit Event', action: 'editEvent' },
         { label: 'Delete Event', action: 'deleteEvent' },
-        { label: 'View Event', action: 'viewEvent' },
         { label: 'Add Photos', action: 'addPhotos' },
-      ]);
-      setMenuAnchor({
-        mouseX: arg.jsEvent.clientX,
-        mouseY: arg.jsEvent.clientY,
-      });
+      ];
     }
 
+    // For Named User, add additional user-related options
     if (selectedRole === listOfAllRoles.NAMED_USER) {
-      setMenuItems([
+      menuOptions = [
+        ...menuOptions, // Add the common 'View Event' option
         { label: 'View Details', action: 'viewDetails' },
         { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
-      ]);
-      setMenuAnchor({
-        mouseX: arg.jsEvent.clientX,
-        mouseY: arg.jsEvent.clientY,
-      });
+      ];
     }
+
+    // Update the menu items and anchor position based on where the user clicked
+    setMenuItems(menuOptions);
+    setMenuAnchor({
+      mouseX: arg.jsEvent.clientX,
+      mouseY: arg.jsEvent.clientY,
+    });
   };
 
   const handleMenuAction = (action) => {
