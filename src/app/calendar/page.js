@@ -2,7 +2,7 @@
 
 'use client';
 import Head from 'next/head';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -84,6 +84,29 @@ const CalendarPage = () => {
     coloredFilteredEvents,
   } = useCalendarPage();
 
+  // Function to determine the initial view based on screen size
+  const getInitialView = () => {
+    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
+  };
+
+  useEffect(() => {
+    const handleWindowResize = () => {
+      const calendarApi = calendarRef.current.getApi();
+      if (window.innerWidth >= 768) {
+        calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
+      } else {
+        calendarApi.changeView('listWeek'); // Switch to List view for smaller screens
+      }
+    };
+
+    window.addEventListener('resize', handleWindowResize);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+    };
+  }, [calendarRef]); // Add calendarRef to the dependency array
+
   return (
     <div>
       <SiteHeader />
@@ -147,7 +170,8 @@ const CalendarPage = () => {
 
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
+        //        initialView="dayGridMonth"
+        initialView={getInitialView()}
         events={coloredFilteredEvents}
         datesSet={handleDatesSet}
         nextDayThreshold="04:00:00"
