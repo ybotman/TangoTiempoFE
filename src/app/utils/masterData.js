@@ -5,6 +5,7 @@ export const listOfAllRoles = {
   REGIONAL_ORGANIZER: 'RegionalOrganizer',
   REGIONAL_ADMIN: 'RegionalAdmin',
   SYSTEM_OWNER: 'SystemOwner',
+  SYTEM_ADMIN: 'SystemAdmin',
   ANONYMOUS: 'Anonymous',
 };
 

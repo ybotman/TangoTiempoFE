@@ -1,7 +1,7 @@
 // SiteMenuBar.js
 
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { listOfAllRoles } from '@/utils/masterData';
 import PropTypes from 'prop-types';
 import {
@@ -21,6 +21,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PostFilter from '@/components/UI/PostFilter';
 import FAQModal from '@/components/Modals/FAQModal';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar'; // Import the custom hook
+import ArrowRightIcon from '@mui/icons-material/ArrowRight'; // Import the arrow icon
 
 const SiteMenuBar = ({
   activeCategories,
@@ -51,6 +52,16 @@ const SiteMenuBar = ({
     logOut,
   } = useSiteMenuBar();
 
+  const [teamMenuAnchorEl, setTeamMenuAnchorEl] = useState(null); // State for opening the nested team menu
+
+  const handleTeamMenuOpen = (event) => {
+    setTeamMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleTeamMenuClose = () => {
+    setTeamMenuAnchorEl(null);
+  };
+
   return (
     <Box sx={{ width: '100%', padding: '0 0' }}>
       {/* Top row with main menu items and user state */}
@@ -71,6 +82,7 @@ const SiteMenuBar = ({
           >
             <MenuIcon />
           </IconButton>
+
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -81,25 +93,67 @@ const SiteMenuBar = ({
               <MenuItem>User Settings</MenuItem>
             )}
             {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-              <MenuItem>Organizer Settings</MenuItem>
-            )}
-            {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-              <MenuItem>Location Management</MenuItem>
+              <>
+                <MenuItem>Organizer Settings</MenuItem>
+                <MenuItem>Location Management</MenuItem>
+              </>
             )}
             {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
               <MenuItem>Add Organizers</MenuItem>
             )}
+
+            {/* Divider */}
             <Divider />
+
+            {/* FAQ */}
             <MenuItem onClick={openFAQModal}>FAQ</MenuItem>
+
+            {/* About TangoTiempo */}
             <MenuItem>About TangoTiempo</MenuItem>
-            <MenuItem onClick={() => (window.location.href = '/about-toby')}>
-              About Toby
-            </MenuItem>{' '}
-            {/* Link to About Toby page */}
-            <MenuItem onClick={() => (window.location.href = '/about')}>
-              About
-            </MenuItem>{' '}
-            {/* Link to About page */}
+
+            {/* The Team with a nested menu */}
+            <MenuItem
+              onMouseEnter={handleTeamMenuOpen}
+              onMouseLeave={handleTeamMenuClose}
+            >
+              Meet the Team
+              <ArrowRightIcon style={{ marginLeft: 'auto' }} />{' '}
+              {/* Add the arrow icon */}
+              <Menu
+                anchorEl={teamMenuAnchorEl}
+                open={Boolean(teamMenuAnchorEl)}
+                onClose={handleTeamMenuClose}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+              >
+                <MenuItem
+                  onClick={() => (window.location.href = '/about-toby')}
+                >
+                  About Toby
+                </MenuItem>
+                <MenuItem
+                  onClick={() => (window.location.href = '/about-wailing')}
+                >
+                  About Wailing
+                </MenuItem>
+                <MenuItem
+                  onClick={() => (window.location.href = '/about-tural')}
+                >
+                  About Tural
+                </MenuItem>
+              </Menu>
+            </MenuItem>
+
+            {/* Divider */}
+            <Divider />
+
+            {/* Help */}
             <MenuItem>Help</MenuItem>
           </Menu>
 
@@ -150,7 +204,7 @@ const SiteMenuBar = ({
             </select>
           )}
 
-          {/* Organizer Dropdown (Show only if a region is selected) */}
+          {/* Organizer Dropdown */}
           {selectedRegion && organizers && organizers.length > 0 && (
             <Box
               sx={{
@@ -166,12 +220,12 @@ const SiteMenuBar = ({
                 style={{
                   marginLeft: '20px',
                   textAlign: 'center',
-                  backgroundColor: '#333', // Dark background
-                  color: '#fff', // Light text
-                  fontSize: '0.85rem', // Smaller font size
-                  padding: '8px', // Padding for better spacing
-                  border: '1px solid #fff', // White border to make it stand out
-                  borderRadius: '4px', // Rounded corners
+                  backgroundColor: '#333',
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  padding: '8px',
+                  border: '1px solid #fff',
+                  borderRadius: '4px',
                 }}
               >
                 <option value="">Select Organizer</option>
