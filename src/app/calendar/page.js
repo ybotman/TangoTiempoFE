@@ -180,6 +180,15 @@ const CalendarPage = () => {
         ref={calendarRef}
         headerToolbar={false}
         scrollTime="17:00:00"
+        // Modify the height to extend the calendar
+        height="auto" // Adjust based on how much space you want the calendar to take
+        // Extend the number of events shown in list view
+        views={{
+          listWeek: {
+            eventLimit: false, // Show all events without limiting
+            listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
+          },
+        }}
       />
       {/* SubMenu */}
       <CalendarSubMenu
