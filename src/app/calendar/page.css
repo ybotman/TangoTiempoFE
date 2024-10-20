@@ -1,0 +1,7 @@
+/* Add custom CSS for mobile responsiveness */
+@media (max-width: 768px) {
+  .fc-list-event {
+    max-height: 400px; /* Adjust as necessary */
+    overflow-y: scroll;
+  }
+}
