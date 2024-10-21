@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint --fix",
     "format": "prettier --write .",
+    "test": "echo \"No tests specified\"",
     "prep": "prettier --write . && next lint --fix && npm run build",
     "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep",
     "prepare": "husky install"
