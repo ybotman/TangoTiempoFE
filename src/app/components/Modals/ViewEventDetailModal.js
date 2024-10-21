@@ -8,6 +8,7 @@ import ViewEventDetailsMore from '@/components/Modals/ViewEventDetailsMore';
 import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
 import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
+import PropTypes from 'prop-types';
 
 const modalStyle = {
   position: 'absolute',
@@ -170,6 +171,24 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
       </Box>
     </Modal>
   );
+};
+
+ViewEventDetailModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  eventDetails: PropTypes.shape({
+    title: PropTypes.string,
+    allDay: PropTypes.bool,
+    extendedProps: PropTypes.shape({
+      eventImage: PropTypes.string,
+    }),
+    _instance: PropTypes.shape({
+      range: PropTypes.shape({
+        start: PropTypes.string,
+        end: PropTypes.string,
+      }),
+    }),
+  }),
 };
 
 export default ViewEventDetailModal;

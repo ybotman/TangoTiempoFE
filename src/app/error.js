@@ -1,8 +1,7 @@
-// app/error.js
-
 'use client';
 
 import { useEffect } from 'react';
+import PropTypes from 'prop-types'; // Add PropTypes import
 
 export default function GlobalError({ error, reset }) {
   useEffect(() => {
@@ -18,3 +17,9 @@ export default function GlobalError({ error, reset }) {
     </html>
   );
 }
+
+// Define prop-types for validation
+GlobalError.propTypes = {
+  error: PropTypes.object.isRequired, // Add error prop validation
+  reset: PropTypes.func.isRequired, // Add reset prop validation
+};

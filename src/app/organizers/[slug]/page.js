@@ -9,6 +9,7 @@ import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { notFound } from 'next/navigation';
 import winston from 'winston';
+import PropTypes from 'prop-types';
 
 // Set up logging with Winston
 const logger = winston.createLogger({
@@ -290,3 +291,9 @@ export default async function OrganizerProfile({ params }) {
     </div>
   );
 }
+
+OrganizerProfile.propTypes = {
+  params: PropTypes.shape({
+    slug: PropTypes.string.isRequired,
+  }).isRequired,
+};

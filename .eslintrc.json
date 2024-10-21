@@ -9,11 +9,11 @@
   "rules": {
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
-    "react/prop-types": "error",  // Enable PropTypes linting
+    "react/prop-types": "error", // Enable PropTypes linting
     "no-unused-vars": "warn",
     "no-undef": "error",
-    "react-hooks/rules-of-hooks": "error",  // Enforce rules of hooks
-    "react-hooks/exhaustive-deps": "warn"  // Warn on missing effect dependencies
+    "react-hooks/rules-of-hooks": "error", // Enforce rules of hooks
+    "react-hooks/exhaustive-deps": "warn" // Warn on missing effect dependencies
   },
   "env": {
     "browser": true,

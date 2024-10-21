@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import DOMPurify from 'dompurify'; // Import DOMPurify for sanitizing HTML content
+import DOMPurify from 'dompurify';
+import PropTypes from 'prop-types';
 
 const ViewEventDetailsBasic = ({ eventDetails }) => {
   const [showMore, setShowMore] = useState(false);
@@ -49,6 +50,14 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
       </Typography>
     </Box>
   );
+};
+ViewEventDetailsBasic.propTypes = {
+  eventDetails: PropTypes.shape({
+    extendedProps: PropTypes.shape({
+      description: PropTypes.string,
+      cost: PropTypes.string,
+    }),
+  }),
 };
 
 export default ViewEventDetailsBasic;

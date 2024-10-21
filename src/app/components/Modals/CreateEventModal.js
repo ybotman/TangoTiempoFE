@@ -9,6 +9,7 @@ import { useLocations } from '@/hooks/useLocations';
 import useCategories from '@/hooks/useCategories';
 //import { useCreateEvent } from '@/hooks/useEvents';
 //import { validateEvent } from '@/utils/EventCreateRules';
+import PropTypes from 'prop-types';
 
 const modalStyle = {
   position: 'absolute',
@@ -138,6 +139,13 @@ const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
       </Box>
     </Modal>
   );
+};
+
+CreateEventModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  selectedDate: PropTypes.instanceOf(Date),
+  onCreate: PropTypes.func,
 };
 
 export default CreateEventModal;

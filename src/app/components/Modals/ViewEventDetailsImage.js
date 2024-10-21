@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import Image from 'next/image';
+import PropTypes from 'prop-types';
 
 const ViewEventDetailsImage = ({ eventDetails }) => {
   // Assuming eventImage is already provided in eventDetails
@@ -60,6 +61,14 @@ const ViewEventDetailsImage = ({ eventDetails }) => {
       </Button>
     </Box>
   );
+};
+
+ViewEventDetailsImage.propTypes = {
+  eventDetails: PropTypes.shape({
+    extendedProps: PropTypes.shape({
+      eventImage: PropTypes.string,
+    }),
+  }),
 };
 
 export default ViewEventDetailsImage;

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-
 const VersionsPage = () => {
   const [versionData, setVersionData] = useState(null);
 
@@ -37,8 +36,6 @@ const VersionsPage = () => {
     </div>
   );
 };
-
-
 
 VersionsPage.propTypes = {
   versionData: PropTypes.arrayOf(

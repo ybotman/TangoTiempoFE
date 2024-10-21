@@ -1,20 +1,22 @@
 import React from 'react';
 import Image from 'next/image';
 import { Box, Typography } from '@mui/material';
+import PropTypes from 'prop-types';
 
-const UnderConstruction = () => {
+const ViewEventDetailsLocationOther = () => {
+  // Changed component name
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-start', // Aligns content at the top
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        minHeight: '40vh', // Further reduced height of the container
-        padding: '10px', // Reduced padding to shrink vertical space
+        minHeight: '40vh',
+        padding: '10px',
         textAlign: 'center',
         backgroundColor: '#f8f8f8',
-        paddingTop: '20px', // Smaller padding from the top
+        paddingTop: '20px',
       }}
     >
       <Typography variant="h5" gutterBottom>
@@ -34,4 +36,17 @@ const UnderConstruction = () => {
   );
 };
 
-export default UnderConstruction;
+ViewEventDetailsLocationOther.propTypes = {
+  eventDetails: PropTypes.shape({
+    extendedProps: PropTypes.shape({
+      locationID: PropTypes.string,
+      locationName: PropTypes.string,
+      address: PropTypes.string,
+      city: PropTypes.string,
+      state: PropTypes.string,
+      zip: PropTypes.string,
+    }),
+  }),
+};
+
+export default ViewEventDetailsLocationOther; // Ensure the export matches the component name
