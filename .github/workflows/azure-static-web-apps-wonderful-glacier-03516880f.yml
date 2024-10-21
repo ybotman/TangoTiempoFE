@@ -5,19 +5,13 @@ on:
     branches:
       - TEST
   pull_request:
-    types: [opened, synchronize, reopened, closed]
     branches:
       - TEST
 
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    environment: TESTING
-    env:
-      NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
-      NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -29,6 +23,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+      # Configure Git user to avoid identity error
+      - name: Set Git User Identity
+        run: |
+          git config --global user.email "toby.balsley@gmail.com"
+          git config --global user.name "ybotman"
 
       # Install dependencies
       - name: Install dependencies
@@ -58,8 +58,6 @@ jobs:
       # Commit the version history
       - name: Commit Version History
         run: |
-          git config --global user.name "ybotman"
-          git config --global user.email "toby.balsley@gmail.com"
           git add versions.json
           git commit -m "chore: update version history for $VERSION"
           git push
