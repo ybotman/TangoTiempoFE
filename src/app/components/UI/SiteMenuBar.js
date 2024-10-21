@@ -1,9 +1,11 @@
 // SiteMenuBar.js
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+//import Image from 'next/image';
 import { listOfAllRoles } from '@/utils/masterData';
 import PropTypes from 'prop-types';
+import { Avatar } from '@mui/material';
 import {
   Box,
   IconButton,
@@ -16,12 +18,18 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import PostFilter from '@/components/UI/PostFilter';
 import FAQModal from '@/components/Modals/FAQModal';
-import { useSiteMenuBar } from '@/hooks/useSiteMenuBar'; // Import the custom hook
-import ArrowRightIcon from '@mui/icons-material/ArrowRight'; // Import the arrow icon
+import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
+//import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { RegionsContext } from '@/contexts/RegionsContext';
 
 const SiteMenuBar = ({
   activeCategories,
@@ -29,37 +37,58 @@ const SiteMenuBar = ({
   categories,
   selectedOrganizer,
   handleOrganizerChange,
+  organizers,
 }) => {
   const {
     anchorEl,
     FAQModalOpen,
-    selectedRegion,
-    selectedDivision,
-    selectedCity,
-    organizers,
-    regions,
-    roles,
     selectedRole,
     user,
+    roles,
     handleHamburgerMenuOpen,
     handleHamburgerMenuClose,
     handleRoleChange,
-    handleRegionChange,
-    handleDivisionChange,
-    handleCityChange,
     openFAQModal,
     closeFAQModal,
     logOut,
   } = useSiteMenuBar();
 
-  const [teamMenuAnchorEl, setTeamMenuAnchorEl] = useState(null); // State for opening the nested team menu
+  const {
+    regions,
+    selectedRegion,
+    setSelectedRegion,
+    //selectedDivision,
+    //    setSelectedDivision,
+    //selectedCity,
+    setSelectedCity,
+  } = useContext(RegionsContext);
 
-  const handleTeamMenuOpen = (event) => {
-    setTeamMenuAnchorEl(event.currentTarget);
-  };
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectionLevel, setSelectionLevel] = useState(1); // 1: Region, 2: Division, 3: City
+  const [localSelectedRegion, setLocalSelectedRegion] = useState(null);
+  const [localSelectedDivision, setLocalSelectedDivision] = useState(null);
+  const [setSelectedDivision, setLocalSelectedCity] = useState(null);
 
-  const handleTeamMenuClose = () => {
-    setTeamMenuAnchorEl(null);
+  // For replacing the icon with abbreviation
+  const [selectedAbbreviation, setSelectedAbbreviation] = useState(null);
+
+  // For the US map icon or the abbreviation
+  const renderRegionIcon = () => {
+    if (selectedAbbreviation) {
+      return (
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          {selectedAbbreviation}
+        </Typography>
+      );
+    } else {
+      return (
+        <Avatar
+          alt="Select Region"
+          src="/USARegions.png"
+          sx={{ width: 24, height: 24 }}
+        />
+      );
+    }
   };
 
   return (
@@ -112,97 +141,14 @@ const SiteMenuBar = ({
             <MenuItem>About TangoTiempo</MenuItem>
 
             {/* The Team with a nested menu */}
-            <MenuItem
-              onMouseEnter={handleTeamMenuOpen}
-              onMouseLeave={handleTeamMenuClose}
-            >
-              Meet the Team
-              <ArrowRightIcon style={{ marginLeft: 'auto' }} />{' '}
-              {/* Add the arrow icon */}
-              <Menu
-                anchorEl={teamMenuAnchorEl}
-                open={Boolean(teamMenuAnchorEl)}
-                onClose={handleTeamMenuClose}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-              >
-                <MenuItem
-                  onClick={() => (window.location.href = '/about-toby')}
-                >
-                  About Toby
-                </MenuItem>
-                <MenuItem
-                  onClick={() => (window.location.href = '/about-wailing')}
-                >
-                  About Wailing
-                </MenuItem>
-                <MenuItem
-                  onClick={() => (window.location.href = '/about-tural')}
-                >
-                  About Tural
-                </MenuItem>
-              </Menu>
-            </MenuItem>
-
-            {/* Divider */}
-            <Divider />
-
-            {/* Help */}
-            <MenuItem>Help</MenuItem>
+            {/* Implement your team menu logic here */}
+            {/* ... */}
           </Menu>
 
-          {/* Region Dropdown */}
-          <select value={selectedRegion || ''} onChange={handleRegionChange}>
-            <option value="">Select Region</option>
-            {regions.map((region) => (
-              <option key={region.regionName} value={region.regionName}>
-                {region.regionName}
-              </option>
-            ))}
-          </select>
-
-          {/* Division Dropdown */}
-          {selectedRegion && (
-            <select
-              value={selectedDivision || ''}
-              onChange={handleDivisionChange}
-            >
-              <option value="">Select Division</option>
-              {regions
-                .find((region) => region.regionName === selectedRegion)
-                .divisions.map((division) => (
-                  <option
-                    key={division.divisionName}
-                    value={division.divisionName}
-                  >
-                    {division.divisionName}
-                  </option>
-                ))}
-            </select>
-          )}
-
-          {/* City Dropdown */}
-          {selectedDivision && (
-            <select value={selectedCity || ''} onChange={handleCityChange}>
-              <option value="">Select City</option>
-              {regions
-                .find((region) => region.regionName === selectedRegion)
-                .divisions.find(
-                  (division) => division.divisionName === selectedDivision
-                )
-                .majorCities.map((city) => (
-                  <option key={city._id} value={city.cityName}>
-                    {city.cityName}
-                  </option>
-                ))}
-            </select>
-          )}
+          {/* Region Selection Icon */}
+          <IconButton onClick={() => setDrawerOpen(true)}>
+            {renderRegionIcon()}
+          </IconButton>
 
           {/* Organizer Dropdown */}
           {selectedRegion && organizers && organizers.length > 0 && (
@@ -211,31 +157,27 @@ const SiteMenuBar = ({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: '100%',
+                marginLeft: '20px',
               }}
             >
-              <select
-                value={selectedOrganizer || ''}
-                onChange={(e) => handleOrganizerChange(e.target.value)}
-                style={{
-                  marginLeft: '20px',
-                  textAlign: 'center',
-                  backgroundColor: '#333',
-                  color: '#fff',
-                  fontSize: '0.85rem',
-                  padding: '8px',
-                  border: '1px solid #fff',
-                  borderRadius: '4px',
-                }}
-              >
-                <option value="">Select Organizer</option>
-                <option value="none">None</option>
-                {organizers.map((org) => (
-                  <option key={org._id} value={org._id}>
-                    {org.shortName}
-                  </option>
-                ))}
-              </select>
+              <FormControl variant="outlined" size="small">
+                <InputLabel id="organizer-select-label">Organizer</InputLabel>
+                <Select
+                  labelId="organizer-select-label"
+                  id="organizer-select"
+                  value={selectedOrganizer || ''}
+                  onChange={(e) => handleOrganizerChange(e.target.value)}
+                  label="Organizer"
+                >
+                  <MenuItem value="">Select Organizer</MenuItem>
+                  <MenuItem value="none">None</MenuItem>
+                  {organizers.map((org) => (
+                    <MenuItem key={org._id} value={org._id}>
+                      {org.shortName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
           )}
         </Box>
@@ -312,6 +254,119 @@ const SiteMenuBar = ({
 
       {/* Help Modal */}
       <FAQModal open={FAQModalOpen} handleClose={closeFAQModal} />
+
+      {/* The Drawer component */}
+      <Drawer
+        anchor="bottom"
+        open={drawerOpen}
+        onClose={() => {
+          setDrawerOpen(false);
+          setSelectionLevel(1);
+          setLocalSelectedRegion(null);
+          setLocalSelectedDivision(null);
+        }}
+      >
+        <Box sx={{ width: '100%', padding: 2 }}>
+          {/* Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {selectionLevel > 1 && (
+              <IconButton
+                onClick={() => {
+                  if (selectionLevel === 2) {
+                    setSelectionLevel(1);
+                    setLocalSelectedRegion(null);
+                  } else if (selectionLevel === 3) {
+                    setSelectionLevel(2);
+                    setLocalSelectedDivision(null);
+                  }
+                }}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center' }}>
+              {selectionLevel === 1 && 'Select Region'}
+              {selectionLevel === 2 && 'Select Division'}
+              {selectionLevel === 3 && 'Select City'}
+            </Typography>
+          </Box>
+
+          {/* Content */}
+          {selectionLevel === 1 && (
+            <List>
+              {regions.map((region) => (
+                <ListItem
+                  button
+                  key={region.regionCode}
+                  onClick={() => {
+                    setLocalSelectedRegion(region);
+                    setSelectedAbbreviation(region.regionCode); // Update abbreviation
+                    setSelectedRegion(region.regionName); // Update context
+                    // Proceed to next level if divisions exist
+                    if (region.divisions && region.divisions.length > 0) {
+                      setSelectionLevel(2);
+                    } else {
+                      // No divisions, close drawer
+                      setDrawerOpen(false);
+                      setSelectionLevel(1);
+                    }
+                  }}
+                >
+                  <ListItemText primary={region.regionName} />
+                </ListItem>
+              ))}
+            </List>
+          )}
+          {selectionLevel === 2 && localSelectedRegion && (
+            <List>
+              {localSelectedRegion.divisions.map((division) => (
+                <ListItem
+                  button
+                  key={division.divisionCode}
+                  onClick={() => {
+                    setLocalSelectedDivision(division);
+                    setSelectedAbbreviation(division.divisionCode); // Update abbreviation
+                    setSelectedDivision(division.divisionName); // Update context
+                    // Proceed to next level if cities exist
+                    if (
+                      division.majorCities &&
+                      division.majorCities.length > 0
+                    ) {
+                      setSelectionLevel(3);
+                    } else {
+                      // No cities, close drawer
+                      setDrawerOpen(false);
+                      setSelectionLevel(1);
+                    }
+                  }}
+                >
+                  <ListItemText primary={division.divisionName} />
+                </ListItem>
+              ))}
+            </List>
+          )}
+          {selectionLevel === 3 && localSelectedDivision && (
+            <List>
+              {localSelectedDivision.majorCities.map((city) => (
+                <ListItem
+                  button
+                  key={city.cityCode}
+                  onClick={() => {
+                    setLocalSelectedCity(city);
+                    setSelectedAbbreviation(city.cityCode); // Update abbreviation
+                    setSelectedCity(city.cityName); // Update context
+                    // Close the drawer
+                    setDrawerOpen(false);
+                    setSelectionLevel(1);
+                  }}
+                >
+                  <ListItemText primary={city.cityName} />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Drawer>
     </Box>
   );
 };
@@ -324,8 +379,14 @@ SiteMenuBar.propTypes = {
       categoryName: PropTypes.string.isRequired,
     })
   ).isRequired,
-  selectedOrganizer: PropTypes.string.isRequired,
+  selectedOrganizer: PropTypes.string,
   handleOrganizerChange: PropTypes.func.isRequired,
+  organizers: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      shortName: PropTypes.string.isRequired,
+    })
+  ),
 };
 
 export default SiteMenuBar;
