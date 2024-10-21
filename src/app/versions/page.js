@@ -16,7 +16,7 @@ const VersionsPage = () => {
 
   return (
     <div>
-      <h1>Version History</h1>
+      <h1>The App Frontend Version History</h1>
       {versionData ? (
         <div>
           {versionData.map((entry, index) => (
