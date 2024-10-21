@@ -1,6 +1,6 @@
 {
   "name": "tangotiempo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "proxy": "http://localhost:3001",
   "scripts": {
@@ -8,13 +8,10 @@
     "build": "next build && next-sitemap",
     "start": "next start",
     "lint": "next lint --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
     "format": "prettier --write .",
     "prep": "prettier --write . && next lint --fix && npm run build",
-    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && npm run prep"
+    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
@@ -29,14 +26,13 @@
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/rrule": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
-    "@mui/icons-material": "^5.16.7",
-    "@mui/material": "^5.16.7",
-    "@mui/system": "^5.16.7",
+    "@mui/icons-material": "^6.1.4",
+    "@mui/material": "^6.1.4",
+    "@mui/system": "^6.1.4",
     "axios": "^1.7.4",
     "dayjs": "^1.11.12",
     "depcheck": "^1.4.7",
     "dompurify": "^3.1.7",
-    "eslint-config-react-app": "^7.0.1",
     "firebase": "^10.13.0",
     "jsdom": "^25.0.1",
     "next": "^14.2.11",
@@ -61,18 +57,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/react": "^16.0.1",
-    "@testing-library/user-event": "^14.5.2",
-    "cypress": "^13.14.1",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.5",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-cypress": "^3.5.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.35.0",
     "globals": "^15.9.0",
-    "jest": "^29.7.0",
+    "husky": "^8.0.0",
     "prettier": "^3.3.3"
   }
 }

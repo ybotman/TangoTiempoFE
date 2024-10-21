@@ -240,7 +240,7 @@ const SiteMenuBar = ({
 
       {/* Region Selection Drawer */}
       <Drawer
-        anchor="bottom"
+        anchor="top"
         open={regionDrawerOpen}
         onClose={() => {
           setRegionDrawerOpen(false);
@@ -356,7 +356,7 @@ const SiteMenuBar = ({
 
       {/* User Management Drawer */}
       <Drawer
-        anchor="left"
+        anchor="Right"
         open={userDrawerOpen}
         onClose={handleUserDrawerClose}
       >

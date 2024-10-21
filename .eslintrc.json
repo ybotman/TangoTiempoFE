@@ -5,26 +5,19 @@
     "plugin:react/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["react", "prettier", "cypress"],
+  "plugins": ["react", "prettier", "react-hooks"],
   "rules": {
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off",
+    "react/prop-types": "error",  // Enable PropTypes linting
     "no-unused-vars": "warn",
-    "no-undef": "error"
+    "no-undef": "error",
+    "react-hooks/rules-of-hooks": "error",  // Enforce rules of hooks
+    "react-hooks/exhaustive-deps": "warn"  // Warn on missing effect dependencies
   },
   "env": {
     "browser": true,
     "node": true,
-    "es6": true,
-    "cypress/globals": true
-  },
-  "overrides": [
-    {
-      "files": ["**/*.cy.js", "**/*.cy.jsx", "**/*.cy.ts", "**/*.cy.tsx"],
-      "env": {
-        "cypress/globals": true
-      }
-    }
-  ]
+    "es6": true
+  }
 }
