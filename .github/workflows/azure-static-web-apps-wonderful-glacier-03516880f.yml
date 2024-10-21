@@ -23,35 +23,57 @@ jobs:
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
-        id: builddeploy
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Increment the patch version
+      - name: Increment Patch Version
+        run: npm version patch
+
+      # Fetch the latest commits
+      - name: Get Commit History
+        run: git log -10 --pretty=format:"%h - %s" > commit_logs.txt
+
+      # Append the version and commit logs to a JSON file
+      - name: Append Version and Commits to JSON
+        run: |
+          VERSION=$(npm pkg get version | tr -d '"')
+          if [ -f versions.json ]; then
+            echo "Updating existing versions.json"
+          else
+            echo "Creating versions.json"
+            echo "[]" > versions.json
+          fi
+          jq --arg ver "$VERSION" --argjson commits "$(cat commit_logs.txt | jq -R . | jq -s .)" \
+            '. += [{"version": $ver, "commits": $commits}]' versions.json > temp.json && mv temp.json versions.json
+
+      # Commit the version history
+      - name: Commit Version History
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add versions.json
+          git commit -m "chore: update version history for $VERSION"
+          git push
+
+      # Build the project
+      - name: Build Project
+        run: npm run build
+
+      # Deploy to Test
+      - name: Deploy to Test
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_GLACIER_03516880F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: 'upload'
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: '/' # App source code path
-          api_location: '' # Api source code path - optional
-          output_location: '' # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    environment: TESTING
-    env:
-      NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
-      NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_GLACIER_03516880F }}
-          app_location: '/'
-          action: 'close'
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          app_location: '/' # Adjust based on your project structure
+          api_location: '' # Adjust if you have an API
+          output_location: '.next' # Built app content directory
