@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     environment: TESTING
+    permissions:
+      contents: write  # Ensure write access to repository contents for the GITHUB_TOKEN
     env:
       NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
       NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
@@ -66,4 +68,9 @@ jobs:
         run: |
           git add versions.json
           git commit -m "chore: update version history for $VERSION"
-          git push https://${{ secrets.NPM_COMMIT_GITHUB_TOKEN }}@github.com/ybotman/TangoTiempoFE.git
+
+      # Push the changes using the GITHUB_TOKEN
+      - name: Push Changes
+        run: git push https://github.com/ybotman/TangoTiempoFE.git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
