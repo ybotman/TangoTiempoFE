@@ -34,6 +34,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # Configure Git
+      - name: Configure Git
+        run: |
+          git config --global user.name "ybotman"
+          git config --global user.email "toby.balsley@gmail.com"
+
       # Increment the patch version
       - name: Increment Patch Version
         run: npm version patch
@@ -58,8 +64,6 @@ jobs:
       # Commit the version history
       - name: Commit Version History
         run: |
-          git config --global user.name "ybotman"
-          git config --global user.email "toby.balsley@gmail.com"
           git add versions.json
           git commit -m "chore: update version history for $VERSION"
-          git push https://${{ secrets.NPM_COMMIT_GITHUB_TOKEN }}@github.com/ybotman/TangoTiempoFE.git​⬤
+          git push https://${{ secrets.NPM_COMMIT_GITHUB_TOKEN }}@github.com/ybotman/TangoTiempoFE.git
