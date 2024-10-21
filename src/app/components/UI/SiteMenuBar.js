@@ -69,7 +69,7 @@ const SiteMenuBar = ({
   const [selectionLevel, setSelectionLevel] = useState(1); // 1: Region, 2: Division, 3: City
   const [localSelectedRegion, setLocalSelectedRegion] = useState(null);
   const [localSelectedDivision, setLocalSelectedDivision] = useState(null);
-  const [localSelectedCity, setLocalSelectedCity] = useState(null);
+  //const [localSelectedCity, setLocalSelectedCity] = useState(null);
 
   // State for the user management drawer
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
@@ -338,7 +338,7 @@ const SiteMenuBar = ({
                   button
                   key={city.cityCode}
                   onClick={() => {
-                    setLocalSelectedCity(city);
+                    //setLocalSelectedCity(city);
                     setSelectedAbbreviation(city.cityCode); // Update abbreviation
                     setSelectedCity(city.cityName); // Update context
                     // Close the drawer
