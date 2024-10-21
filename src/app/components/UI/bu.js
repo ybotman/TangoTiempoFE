@@ -2,8 +2,10 @@
 
 'use client';
 import React, { useState, useContext } from 'react';
-import PropTypes from 'prop-types';
+//import Image from 'next/image';
 import { listOfAllRoles } from '@/utils/masterData';
+import PropTypes from 'prop-types';
+import { Avatar } from '@mui/material';
 import {
   Box,
   IconButton,
@@ -20,19 +22,14 @@ import {
   List,
   ListItem,
   ListItemText,
-  TextField,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Avatar,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
-import { RegionsContext } from '@/contexts/RegionsContext';
 import PostFilter from '@/components/UI/PostFilter';
 import FAQModal from '@/components/Modals/FAQModal';
+import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
+//import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { RegionsContext } from '@/contexts/RegionsContext';
 
 const SiteMenuBar = ({
   activeCategories,
@@ -60,19 +57,17 @@ const SiteMenuBar = ({
     regions,
     selectedRegion,
     setSelectedRegion,
-    setSelectedDivision,
+    //selectedDivision,
+    //    setSelectedDivision,
+    //selectedCity,
     setSelectedCity,
   } = useContext(RegionsContext);
 
-  // State for the region selection drawer
-  const [regionDrawerOpen, setRegionDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectionLevel, setSelectionLevel] = useState(1); // 1: Region, 2: Division, 3: City
   const [localSelectedRegion, setLocalSelectedRegion] = useState(null);
   const [localSelectedDivision, setLocalSelectedDivision] = useState(null);
-  const [localSelectedCity, setLocalSelectedCity] = useState(null);
-
-  // State for the user management drawer
-  const [userDrawerOpen, setUserDrawerOpen] = useState(false);
+  const [setSelectedDivision, setLocalSelectedCity] = useState(null);
 
   // For replacing the icon with abbreviation
   const [selectedAbbreviation, setSelectedAbbreviation] = useState(null);
@@ -94,31 +89,6 @@ const SiteMenuBar = ({
         />
       );
     }
-  };
-
-  // User icon (person icon for unauthenticated, avatar for authenticated)
-  const renderUserIcon = () => {
-    if (user && (user.photoURL || user.displayName)) {
-      return (
-        <Avatar
-          alt={user.displayName || user.email}
-          src={user.photoURL || '/defaultAvatar.png'}
-          sx={{ width: 32, height: 32 }}
-        />
-      );
-    } else {
-      return <AccountCircleIcon sx={{ width: 32, height: 32 }} />;
-    }
-  };
-
-  // Handler for opening the user drawer
-  const handleUserIconClick = () => {
-    setUserDrawerOpen(true);
-  };
-
-  // Handler for closing the user drawer
-  const handleUserDrawerClose = () => {
-    setUserDrawerOpen(false);
   };
 
   return (
@@ -176,7 +146,7 @@ const SiteMenuBar = ({
           </Menu>
 
           {/* Region Selection Icon */}
-          <IconButton onClick={() => setRegionDrawerOpen(true)}>
+          <IconButton onClick={() => setDrawerOpen(true)}>
             {renderRegionIcon()}
           </IconButton>
 
@@ -212,10 +182,57 @@ const SiteMenuBar = ({
           )}
         </Box>
 
-        {/* User Icon */}
-        <IconButton onClick={handleUserIconClick}>
-          {renderUserIcon()}
-        </IconButton>
+        {/* User State and Role Dropdown */}
+        {user ? (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body1" color="textPrimary">
+              {user.displayName || user.email}
+            </Typography>
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+              <InputLabel id="role-select-label">Role</InputLabel>
+              <Select
+                labelId="role-select-label"
+                id="role-select"
+                value={selectedRole}
+                onChange={handleRoleChange}
+                label="Role"
+              >
+                {roles.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              onClick={logOut}
+            >
+              Log Out
+            </Button>
+          </Stack>
+        ) : (
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              href="/auth/login"
+            >
+              Log In
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              href="/auth/signup"
+            >
+              Sign Up
+            </Button>
+          </Stack>
+        )}
       </Box>
 
       {/* Bottom row with Category Filter */}
@@ -238,12 +255,12 @@ const SiteMenuBar = ({
       {/* Help Modal */}
       <FAQModal open={FAQModalOpen} handleClose={closeFAQModal} />
 
-      {/* Region Selection Drawer */}
+      {/* The Drawer component */}
       <Drawer
         anchor="bottom"
-        open={regionDrawerOpen}
+        open={drawerOpen}
         onClose={() => {
-          setRegionDrawerOpen(false);
+          setDrawerOpen(false);
           setSelectionLevel(1);
           setLocalSelectedRegion(null);
           setLocalSelectedDivision(null);
@@ -285,14 +302,12 @@ const SiteMenuBar = ({
                     setLocalSelectedRegion(region);
                     setSelectedAbbreviation(region.regionCode); // Update abbreviation
                     setSelectedRegion(region.regionName); // Update context
-                    setSelectedDivision(null);
-                    setSelectedCity(null);
                     // Proceed to next level if divisions exist
                     if (region.divisions && region.divisions.length > 0) {
                       setSelectionLevel(2);
                     } else {
                       // No divisions, close drawer
-                      setRegionDrawerOpen(false);
+                      setDrawerOpen(false);
                       setSelectionLevel(1);
                     }
                   }}
@@ -312,7 +327,6 @@ const SiteMenuBar = ({
                     setLocalSelectedDivision(division);
                     setSelectedAbbreviation(division.divisionCode); // Update abbreviation
                     setSelectedDivision(division.divisionName); // Update context
-                    setSelectedCity(null);
                     // Proceed to next level if cities exist
                     if (
                       division.majorCities &&
@@ -321,7 +335,7 @@ const SiteMenuBar = ({
                       setSelectionLevel(3);
                     } else {
                       // No cities, close drawer
-                      setRegionDrawerOpen(false);
+                      setDrawerOpen(false);
                       setSelectionLevel(1);
                     }
                   }}
@@ -342,7 +356,7 @@ const SiteMenuBar = ({
                     setSelectedAbbreviation(city.cityCode); // Update abbreviation
                     setSelectedCity(city.cityName); // Update context
                     // Close the drawer
-                    setRegionDrawerOpen(false);
+                    setDrawerOpen(false);
                     setSelectionLevel(1);
                   }}
                 >
@@ -350,122 +364,6 @@ const SiteMenuBar = ({
                 </ListItem>
               ))}
             </List>
-          )}
-        </Box>
-      </Drawer>
-
-      {/* User Management Drawer */}
-      <Drawer
-        anchor="left"
-        open={userDrawerOpen}
-        onClose={handleUserDrawerClose}
-      >
-        <Box sx={{ width: 300, padding: 2 }}>
-          {/* Header */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 2,
-            }}
-          >
-            <Typography variant="h6">User Management</Typography>
-            <Box sx={{ flexGrow: 1 }} />
-            <IconButton onClick={handleUserDrawerClose}>
-              <ArrowBackIcon />
-            </IconButton>
-          </Box>
-
-          {/* Content */}
-          {!user ? (
-            // Logged Out State
-            <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                href="/auth/login"
-                sx={{ marginBottom: 1 }}
-              >
-                Log In
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                fullWidth
-                href="/auth/signup"
-                sx={{ marginBottom: 2 }}
-              >
-                Sign Up
-              </Button>
-            </Box>
-          ) : (
-            // Logged In State
-            <Box>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Avatar
-                  alt={user.displayName || user.email}
-                  src={user.photoURL || '/defaultAvatar.png'}
-                  sx={{ width: 56, height: 56 }}
-                />
-                <Typography variant="h6">
-                  {user.displayName || user.email}
-                </Typography>
-              </Stack>
-
-              {/* Role Management */}
-              <Box sx={{ marginTop: 2 }}>
-                <Typography variant="subtitle1">Select Role:</Typography>
-                <FormControl component="fieldset">
-                  <RadioGroup
-                    value={selectedRole}
-                    onChange={(e) => handleRoleChange(e)}
-                  >
-                    {roles.map((role) => (
-                      <FormControlLabel
-                        key={role}
-                        value={role}
-                        control={<Radio />}
-                        label={role}
-                      />
-                    ))}
-                  </RadioGroup>
-                </FormControl>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  fullWidth
-                  sx={{ marginTop: 1 }}
-                  disabled
-                >
-                  Request New Role
-                </Button>
-              </Box>
-
-              {/* Admin Communication */}
-              <Box sx={{ marginTop: 2 }}>
-                <Typography variant="subtitle1">Message Admin:</Typography>
-                <TextField
-                  placeholder="Feature coming soon..."
-                  multiline
-                  rows={4}
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                />
-              </Box>
-
-              {/* Logout Button */}
-              <Button
-                variant="contained"
-                color="secondary"
-                fullWidth
-                sx={{ marginTop: 2 }}
-                onClick={logOut}
-              >
-                Log Out
-              </Button>
-            </Box>
           )}
         </Box>
       </Drawer>
