@@ -58,13 +58,13 @@ jobs:
       # Commit the version history
       - name: Commit Version History
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "YBOTMan"
+          git config --global user.email "toby.balsley@gmail.com"
           git add versions.json
           git commit -m "chore: update version history for $VERSION"
-          git push https://${{ secrets.GH_PAT }}@github.com/ybotman/TangoTiempoFE.git
+          git push https://${{ secrets.NPM_COMMIT_GITHUB_TOKEN }}@github.com/ybotman/TangoTiempoFE.git
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          NPM_COMMIT_GITHUB_TOKEN: ${{ secrets.NPM_COMMIT_GITHUB_TOKEN }}
 
       # Build the project
       - name: Build Project
