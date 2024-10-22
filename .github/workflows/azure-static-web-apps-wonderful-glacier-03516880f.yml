@@ -102,6 +102,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           app_location: '/' # Path to your application source code
           output_location: 'build' # Location where the built app will be stored
+          action: 'upload'
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
