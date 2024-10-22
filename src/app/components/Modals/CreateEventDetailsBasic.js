@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, TextField, Grid, Switch } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import PropTypes from 'prop-types';
 
 const BasicEventDetails = ({ eventData, setEventData }) => {
   return (
@@ -46,6 +47,17 @@ const BasicEventDetails = ({ eventData, setEventData }) => {
       />
     </Box>
   );
+};
+
+BasicEventDetails.propTypes = {
+  eventData: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    startDate: PropTypes.instanceOf(Date).isRequired,
+    endDate: PropTypes.instanceOf(Date).isRequired,
+    isRepeating: PropTypes.bool.isRequired,
+  }).isRequired,
+  setEventData: PropTypes.func.isRequired,
 };
 
 export default BasicEventDetails;

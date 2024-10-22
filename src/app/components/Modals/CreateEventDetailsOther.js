@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Box, TextField, Button } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const OtherEventDetails = ({ eventData, setEventData }) => {
   return (
@@ -42,6 +43,15 @@ const OtherEventDetails = ({ eventData, setEventData }) => {
       </Button>
     </Box>
   );
+};
+
+OtherEventDetails.propTypes = {
+  eventData: PropTypes.shape({
+    grantedOrganizer: PropTypes.string.isRequired,
+    categorySecond: PropTypes.string.isRequired,
+    categoryThird: PropTypes.string.isRequired,
+  }).isRequired,
+  setEventData: PropTypes.func.isRequired,
 };
 
 export default OtherEventDetails;

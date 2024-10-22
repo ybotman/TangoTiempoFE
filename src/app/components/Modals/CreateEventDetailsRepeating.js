@@ -11,8 +11,8 @@ import {
   Tooltip,
   Button,
 } from '@mui/material';
-
 import { styled } from '@mui/material/styles';
+import PropTypes from 'prop-types';
 
 // Custom MaterialUISwitch definition
 const MaterialUISwitch = styled(Switch)(() => ({
@@ -319,6 +319,21 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       </Box>
     </Box>
   );
+};
+
+RepeatingEventDetails.propTypes = {
+  eventData: PropTypes.shape({
+    recurrenceType: PropTypes.string,
+    recurrenceDays: PropTypes.arrayOf(PropTypes.string),
+    monthlyDays: PropTypes.arrayOf(PropTypes.string),
+    monthlyWeeks: PropTypes.arrayOf(PropTypes.string),
+    excludeDates: PropTypes.string,
+    endDate: PropTypes.string,
+    occurrences: PropTypes.string,
+    sendReminder: PropTypes.bool,
+    startDate: PropTypes.instanceOf(Date),
+  }).isRequired,
+  setEventData: PropTypes.func.isRequired,
 };
 
 export default RepeatingEventDetails;

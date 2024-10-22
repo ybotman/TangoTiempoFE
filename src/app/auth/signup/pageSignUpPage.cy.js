@@ -1,3 +1,5 @@
+/* global describe, it, cy */
+
 import React from 'react';
 import SignUpPage from './page';
 
