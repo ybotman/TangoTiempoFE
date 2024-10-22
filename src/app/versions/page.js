@@ -3,47 +3,80 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-const VersionsPage = () => {
-  const [versionData, setVersionData] = useState(null);
+const VersionPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [versionData, setVersionData] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch the version history from the static JSON file
-    fetch('/versions.json')
-      .then((res) => res.json())
-      .then((data) => setVersionData(data));
+    const fetchData = async () => {
+      try {
+        const res = await fetch('public/versions.json');
+
+        // Check if the response is JSON
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Response is not JSON");
+        }
+
+        const data = await res.json();
+
+        // Filter out entries that do not have a valid version
+        const filteredData = data.filter(
+          (item) => item.version && item.version.trim() !== ""
+        );
+
+        setVersionData(filteredData);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch version data:', err.message);
+        setError(`Error fetching version data: ${err.message}`);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div>
-      <h1>The App Frontend Version History</h1>
-      {versionData ? (
-        <div>
-          {versionData.map((entry, index) => (
-            <div key={index}>
-              <h2>Version: {entry.version}</h2>
-              <h3>Commit History:</h3>
-              <ul>
-                {entry.commits.map((commit, i) => (
-                  <li key={i}>{commit}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>Loading version history...</p>
-      )}
+      <h1>Version History</h1>
+      <ul>
+        {versionData.map((version, index) => (
+          <li key={index}>
+            <strong>Version: </strong>{version.version || 'N/A'} <br />
+            <strong>Branch: </strong>{version.branch || 'N/A'}
+            <ul>
+              {version.commits && version.commits.length > 0 ? (
+                version.commits.map((commit, i) => <li key={i}>{commit}</li>)
+              ) : (
+                <li>No commits available</li>
+              )}
+            </ul>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-VersionsPage.propTypes = {
-  versionData: PropTypes.arrayOf(
+// PropTypes validation
+VersionPage.propTypes = {
+  versions: PropTypes.arrayOf(
     PropTypes.shape({
       version: PropTypes.string.isRequired,
-      commits: PropTypes.arrayOf(PropTypes.string).isRequired,
+      branch: PropTypes.string,
+      commits: PropTypes.arrayOf(PropTypes.string)
     })
-  ),
+  )
 };
 
-export default VersionsPage;
+export default VersionPage;
