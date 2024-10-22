@@ -14,16 +14,16 @@ const VersionPage = () => {
         const res = await fetch('versions.json');
 
         // Check if the response is JSON
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Response is not JSON");
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
         }
 
         const data = await res.json();
 
         // Filter out entries that do not have a valid version
         const filteredData = data.filter(
-          (item) => item.version && item.version.trim() !== ""
+          (item) => item.version && item.version.trim() !== ''
         );
 
         setVersionData(filteredData);
@@ -52,8 +52,10 @@ const VersionPage = () => {
       <ul>
         {versionData.map((version, index) => (
           <li key={index}>
-            <strong>Version: </strong>{version.version || 'N/A'} <br />
-            <strong>Branch: </strong>{version.branch || 'N/A'}
+            <strong>Version: </strong>
+            {version.version || 'N/A'} <br />
+            <strong>Branch: </strong>
+            {version.branch || 'N/A'}
             <ul>
               {version.commits && version.commits.length > 0 ? (
                 version.commits.map((commit, i) => <li key={i}>{commit}</li>)
@@ -74,9 +76,9 @@ VersionPage.propTypes = {
     PropTypes.shape({
       version: PropTypes.string.isRequired,
       branch: PropTypes.string,
-      commits: PropTypes.arrayOf(PropTypes.string)
+      commits: PropTypes.arrayOf(PropTypes.string),
     })
-  )
+  ),
 };
 
 export default VersionPage;

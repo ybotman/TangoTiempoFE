@@ -1,5 +1,5 @@
 [
-    {
+  {
     "version": "1.0.0",
     "branch": "TEST",
     "commits": ["1000 commits, in the inital release to prod"]
@@ -7,10 +7,7 @@
   {
     "version": "1.0.1",
     "branch": "TEST",
-    "commits": [
-      "dee8157 - 1.0.1",
-      "ecc2a43 - move from PAT to GITHUB_TOKEN"
-    ]
+    "commits": ["dee8157 - 1.0.1", "ecc2a43 - move from PAT to GITHUB_TOKEN"]
   },
   {
     "version": "1.0.2",
