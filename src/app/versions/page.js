@@ -11,7 +11,7 @@ const VersionPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('public/versions.json');
+        const res = await fetch('versions.json');
 
         // Check if the response is JSON
         const contentType = res.headers.get("content-type");

@@ -27,5 +27,14 @@
       "53b31d4 - 1.0.3",
       "bf9356a - Merge branch 'ignores-and-version.log-fixes' into TEST"
     ]
+  },
+  {
+    "version": "1.0.4",
+    "branch": "",
+    "feature_branch": "",
+    "commits": [
+      "824c590 - 1.0.4",
+      "6504fa7 - Merge branch 'FixYaml4Feature' into TEST"
+    ]
   }
 ]
