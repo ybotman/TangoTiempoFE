@@ -1,14 +1,10 @@
 [
   {
     "version": "1.0.1",
-<<<<<<< HEAD
     "commits": [
       "dee8157 - 1.0.1",
       "ecc2a43 - move from PAT to GITHUB_TOKEN"
     ]
-=======
-    "commits": ["dee8157 - 1.0.1", "ecc2a43 - move from PAT to GITHUB_TOKEN"]
->>>>>>> Meet-the-Team-and-Drawer-work-
   },
   {
     "version": "1.0.2",
