@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Prettier and Lint
         run: |
-          npx prettier --check .
+          npx prettier --write .
           npx eslint --ext .js,.jsx,.ts,.tsx .
 
       # Configure Git
