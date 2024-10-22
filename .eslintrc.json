@@ -12,8 +12,8 @@
     "react/prop-types": "error", // Enable PropTypes linting
     "no-unused-vars": "warn",
     "no-undef": "error",
-    "react-hooks/rules-of-hooks": "error", 
-    "react-hooks/exhaustive-deps": "warn" 
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
   "env": {
     "browser": true,
