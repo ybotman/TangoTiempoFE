@@ -2,17 +2,12 @@
   {
     "version": "1.0.0",
     "branch": "TEST",
-    "commits": [
-      "1000 commits, in the inital release to prod"
-    ]
+    "commits": ["1000 commits, in the initial release to prod"]
   },
   {
     "version": "1.0.1",
     "branch": "TEST",
-    "commits": [
-      "dee8157 - 1.0.1",
-      "ecc2a43 - move from PAT to GITHUB_TOKEN"
-    ]
+    "commits": ["dee8157 - 1.0.1", "ecc2a43 - move from PAT to GITHUB_TOKEN"]
   },
   {
     "version": "1.0.2",
@@ -31,9 +26,9 @@
     ]
   },
   {
-    "version": "",
-    "branch": "",
-    "feature_branch": "",
+    "version": "1.0.4",
+    "branch": "TEST",
+    "feature_branch": "FixYaml4Feature",
     "commits": [
       "824c590 - 1.0.4",
       "6504fa7 - Merge branch 'FixYaml4Feature' into TEST"
