@@ -47,5 +47,14 @@
       "f1634e4 - 1.0.5",
       "b605958 - Merge branch 'FixYaml4Feature' into TEST"
     ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "cc18442 - 1.0.6",
+      "aa9d635 - ci: add Azure Static Web Apps workflow file on-behalf-of: @Azure opensource@microsoft.com"
+    ]
   }
 ]
