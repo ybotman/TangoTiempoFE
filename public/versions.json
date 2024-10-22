@@ -56,5 +56,14 @@
       "cc18442 - 1.0.6",
       "aa9d635 - ci: add Azure Static Web Apps workflow file on-behalf-of: @Azure opensource@microsoft.com"
     ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "64cd0c8 - 1.0.7",
+      "ffd5d33 - Merge branch 'Yaml-+-Deploy-Azure-Wonderful-Glacier' into TEST"
+    ]
   }
 ]
