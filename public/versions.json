@@ -101,5 +101,14 @@
       "6530378 - 1.0.11",
       "4fb5dd5 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
     ]
+  },
+  {
+    "version": "1.0.12",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "99a8d26 - 1.0.12",
+      "b3a022e - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
   }
 ]
