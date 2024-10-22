@@ -101,7 +101,6 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_GLACIER_03516880F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           app_location: '/' # Path to your application source code
-          output_location: '/' # Location where the built app will be stored
           action: 'upload'
 
   close_pull_request_job:
