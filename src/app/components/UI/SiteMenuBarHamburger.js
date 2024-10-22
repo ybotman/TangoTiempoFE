@@ -87,6 +87,9 @@ const SiteMenuBarHamburger = ({
 
       {/* Help */}
       <MenuItem>Help</MenuItem>
+      <MenuItem onClick={() => (window.location.href = '/versions')}>
+        Version History
+      </MenuItem>
     </Menu>
   );
 };
