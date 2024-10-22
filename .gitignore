@@ -45,7 +45,7 @@ out/
 Tangols
 combine_js.sh
 TangoTiempo.data
-
+sitemap-*.xml
 archive/
 public/organizersList.json
 

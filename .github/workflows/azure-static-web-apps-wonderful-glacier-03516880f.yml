@@ -41,6 +41,14 @@ jobs:
           npx prettier --write .
           npx eslint --ext .js,.jsx,.ts,.tsx .
 
+      # Clean the Git working directory
+      - name: Clean Git working directory
+        run: git reset --hard
+
+      # Check for uncommitted changes (for debugging)
+      - name: Check for uncommitted changes
+        run: git status
+
       # Configure Git
       - name: Configure Git
         run: |
