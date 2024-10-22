@@ -65,5 +65,14 @@
       "64cd0c8 - 1.0.7",
       "ffd5d33 - Merge branch 'Yaml-+-Deploy-Azure-Wonderful-Glacier' into TEST"
     ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "4440cf3 - 1.0.8",
+      "6c69628 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
   }
 ]
