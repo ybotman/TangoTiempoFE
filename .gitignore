@@ -40,12 +40,14 @@ out/
 .fusebox/
 .dynamodb/
 .vscode-test/
+.vscode/
+.husky/
 Tangols
 combine_js.sh
-.husky/
 TangoTiempo.data
 
 archive/
+public/organizersList.json
 
 # Coverage directories used by tools like istanbul, nyc, etc.
 coverage/

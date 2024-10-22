@@ -51,22 +51,24 @@ jobs:
       - name: Increment Patch Version
         run: npm version patch
 
-      # Fetch the latest commits
-      - name: Get Commit History
-        run: git log -10 --pretty=format:"%h - %s" > commit_logs.txt
-
-      # Append the version and commit logs to a JSON file
-      - name: Append Version and Commits to JSON
+      # Fetch the latest commits and branch name
+      - name: Get Commit History and Branch
         run: |
           VERSION=$(npm pkg get version | tr -d '"')
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          git log -10 --pretty=format:"%h - %s" > commit_logs.txt
+
+      # Append the version, branch, and commit logs to a JSON file
+      - name: Append Version, Branch, and Commits to JSON
+        run: |
           if [ -f versions.json ]; then
             echo "Updating existing versions.json"
           else
             echo "Creating versions.json"
             echo "[]" > versions.json
           fi
-          jq --arg ver "$VERSION" --argjson commits "$(cat commit_logs.txt | jq -R . | jq -s .)" \
-            '. += [{"version": $ver, "commits": $commits}]' versions.json > temp.json && mv temp.json versions.json
+          jq --arg ver "$VERSION" --arg branch "$BRANCH_NAME" --argjson commits "$(cat commit_logs.txt | jq -R . | jq -s .)" \
+            '. += [{"version": $ver, "branch": $branch, "commits": $commits}]' versions.json > temp.json && mv temp.json versions.json
 
       # Commit the version history
       - name: Commit Version History
