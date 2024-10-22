@@ -22,3 +22,5 @@ logs/
 
 # Ignore any archive folders you mentioned
 archive/
+
+public/versions.json
