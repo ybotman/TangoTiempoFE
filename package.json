@@ -1,6 +1,6 @@
 {
   "name": "tangotiempo",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "private": true,
   "proxy": "http://localhost:3001",
   "scripts": {
