@@ -2,12 +2,17 @@
   {
     "version": "1.0.0",
     "branch": "TEST",
-    "commits": ["1000 commits, in the initial release to prod"]
+    "commits": [
+      "1000 commits, in the initial release to prod"
+    ]
   },
   {
     "version": "1.0.1",
     "branch": "TEST",
-    "commits": ["dee8157 - 1.0.1", "ecc2a43 - move from PAT to GITHUB_TOKEN"]
+    "commits": [
+      "dee8157 - 1.0.1",
+      "ecc2a43 - move from PAT to GITHUB_TOKEN"
+    ]
   },
   {
     "version": "1.0.2",
@@ -68,6 +73,15 @@
     "commits": [
       "4440cf3 - 1.0.8",
       "6c69628 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "7b81b39 - 1.0.9",
+      "152872f - yaml syntax 2"
     ]
   }
 ]
