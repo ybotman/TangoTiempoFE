@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Menu, MenuItem, Divider, Popper, Paper, ClickAwayListener } from '@mui/material';
+import {
+  Menu,
+  MenuItem,
+  Divider,
+  Popper,
+  Paper,
+  ClickAwayListener,
+} from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { listOfAllRoles } from '@/utils/masterData';
 
@@ -71,7 +78,9 @@ const SiteMenuBarHamburger = ({
               <MenuItem onClick={() => (window.location.href = '/about-toby')}>
                 About Toby
               </MenuItem>
-              <MenuItem onClick={() => (window.location.href = '/about-wailing')}>
+              <MenuItem
+                onClick={() => (window.location.href = '/about-wailing')}
+              >
                 About Wailing
               </MenuItem>
               <MenuItem onClick={() => (window.location.href = '/about-tural')}>

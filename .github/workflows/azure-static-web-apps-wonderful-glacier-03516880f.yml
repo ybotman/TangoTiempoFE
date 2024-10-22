@@ -36,6 +36,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run Prettier and Lint
+        run: |
+          npx prettier --check .
+          npx eslint --ext .js,.jsx,.ts,.tsx .
+
       # Configure Git
       - name: Configure Git
         run: |

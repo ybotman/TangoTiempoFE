@@ -35,7 +35,6 @@ export const useSiteMenuBar = () => {
     setOpenTeamMenu(false);
   };
 
-
   const handleHamburgerMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
