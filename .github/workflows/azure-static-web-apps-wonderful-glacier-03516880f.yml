@@ -110,3 +110,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           app_location: "/"  # Path to your application source code
           output_location: "build"  # Location where the built app will be stored
+          action: "upload" 
