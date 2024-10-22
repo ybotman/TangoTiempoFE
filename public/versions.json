@@ -1,6 +1,12 @@
 [
+    {
+    "version": "1.0.0",
+    "branch": "TEST",
+    "commits": ["1000 commits, in the inital release to prod"]
+  },
   {
     "version": "1.0.1",
+    "branch": "TEST",
     "commits": [
       "dee8157 - 1.0.1",
       "ecc2a43 - move from PAT to GITHUB_TOKEN"
@@ -8,14 +14,15 @@
   },
   {
     "version": "1.0.2",
+    "branch": "TEST",
     "commits": [
       "6f3807b - 1.0.2",
       "8bc10a5 - Merge branch 'Meet-the-Team-and-Drawer-work-' into TEST"
     ]
   },
   {
-    "version": "",
-    "branch": "",
+    "version": "1.0.3",
+    "branch": "TEST",
     "commits": [
       "53b31d4 - 1.0.3",
       "bf9356a - Merge branch 'ignores-and-version.log-fixes' into TEST"
