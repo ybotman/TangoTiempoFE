@@ -92,5 +92,14 @@
       "ef48555 - 1.0.10",
       "e2e2a21 - Merge remote-tracking branch 'origin/Fix-the-Version.json' into TEST"
     ]
+  },
+  {
+    "version": "1.0.11",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "6530378 - 1.0.11",
+      "4fb5dd5 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
   }
 ]
