@@ -24,9 +24,14 @@ const nextConfig = {
     return config;
   },
 
-  // Image configuration to allow external images
+  // Updated image configuration to allow external images
   images: {
-    domains: ['bostontangocalendar.com'], // Allow images from this domain
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'bostontangocalendar.com',
+      },
+    ],
   },
 
   // Any other Next.js configurations can be added here

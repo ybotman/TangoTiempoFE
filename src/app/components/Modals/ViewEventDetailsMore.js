@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { useLocations } from '@/hooks/useLocations'; // Assuming the hook is available for fetching locations
-
+import { useLocations } from '@/hooks/useLocations';
+import PropTypes from 'prop-types';
 const ViewEventDetailsMore = ({ eventDetails }) => {
   const { getLocationById } = useLocations(); // Use the hook's method for fetching
   const [locationDetails, setLocationDetails] = useState(null);
@@ -75,6 +75,22 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
       </Typography>
     </Box>
   );
+};
+
+ViewEventDetailsMore.propTypes = {
+  eventDetails: PropTypes.shape({
+    extendedProps: PropTypes.shape({
+      description: PropTypes.string,
+      cost: PropTypes.string,
+      categoryFirst: PropTypes.string,
+      categorySecond: PropTypes.string,
+      categoryThird: PropTypes.string,
+      locationID: PropTypes.string,
+      locationName: PropTypes.string,
+      ownerOrganizerName: PropTypes.string,
+      active: PropTypes.bool,
+    }),
+  }),
 };
 
 export default ViewEventDetailsMore;

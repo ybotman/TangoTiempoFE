@@ -1,0 +1,106 @@
+[
+  {
+    "version": "1.0.0",
+    "branch": "TEST",
+    "commits": ["1000 commits, in the initial release to prod"]
+  },
+  {
+    "version": "1.0.1",
+    "branch": "TEST",
+    "commits": ["dee8157 - 1.0.1", "ecc2a43 - move from PAT to GITHUB_TOKEN"]
+  },
+  {
+    "version": "1.0.2",
+    "branch": "TEST",
+    "commits": [
+      "6f3807b - 1.0.2",
+      "8bc10a5 - Merge branch 'Meet-the-Team-and-Drawer-work-' into TEST"
+    ]
+  },
+  {
+    "version": "1.0.3",
+    "branch": "TEST",
+    "commits": [
+      "53b31d4 - 1.0.3",
+      "bf9356a - Merge branch 'ignores-and-version.log-fixes' into TEST"
+    ]
+  },
+  {
+    "version": "1.0.4",
+    "branch": "TEST",
+    "feature_branch": "FixYaml4Feature",
+    "commits": [
+      "824c590 - 1.0.4",
+      "6504fa7 - Merge branch 'FixYaml4Feature' into TEST"
+    ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "f1634e4 - 1.0.5",
+      "b605958 - Merge branch 'FixYaml4Feature' into TEST"
+    ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "cc18442 - 1.0.6",
+      "aa9d635 - ci: add Azure Static Web Apps workflow file on-behalf-of: @Azure opensource@microsoft.com"
+    ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "64cd0c8 - 1.0.7",
+      "ffd5d33 - Merge branch 'Yaml-+-Deploy-Azure-Wonderful-Glacier' into TEST"
+    ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": [
+      "4440cf3 - 1.0.8",
+      "6c69628 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  },
+  {
+    "version": "",
+    "branch": "",
+    "feature_branch": "TEST",
+    "commits": ["7b81b39 - 1.0.9", "152872f - yaml syntax 2"]
+  },
+  {
+    "version": "1.0.10",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "ef48555 - 1.0.10",
+      "e2e2a21 - Merge remote-tracking branch 'origin/Fix-the-Version.json' into TEST"
+    ]
+  },
+  {
+    "version": "1.0.11",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "6530378 - 1.0.11",
+      "4fb5dd5 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  },
+  {
+    "version": "1.0.12",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "99a8d26 - 1.0.12",
+      "b3a022e - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  }
+]

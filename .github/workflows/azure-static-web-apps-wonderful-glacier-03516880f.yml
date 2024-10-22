@@ -13,40 +13,101 @@ jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Build, Version, and Deploy Job
     environment: TESTING
+    permissions:
+      contents: write # Ensure write access to repository contents for the GITHUB_TOKEN
     env:
       NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
       NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Prettier and Lint
+        run: |
+          npx prettier --write .
+          npx eslint --ext .js,.jsx,.ts,.tsx .
+
+      # Clean the Git working directory
+      - name: Clean Git working directory
+        run: git reset --hard
+
+      # Configure Git
+      - name: Configure Git
+        run: |
+          git config --global user.name "ybotman"
+          git config --global user.email "toby.balsley@gmail.com"
+
+      # Increment the patch version
+      - name: Increment Patch Version
+        run: npm version patch
+
+      # Capture feature branch
+      - name: Capture Feature Branch
+        id: branch-name
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH_NAME="${{ github.head_ref }}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+      - name: Get Commit History and Branch
+        run: |
+          VERSION=$(npm pkg get version | tr -d '"')
+          TARGET_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TARGET_BRANCH_NAME=$TARGET_BRANCH_NAME" >> $GITHUB_ENV
+          git log -10 --pretty=format:"%h - %s" > commit_logs.txt
+
+      - name: Append Version, Branch, and Commits to JSON
+        run: |
+          if [ -f public/versions.json ]; then
+            echo "Updating existing versions.json"
+          else
+            echo "Creating versions.json"
+            echo "[]" > public/versions.json
+          fi
+          jq --arg ver "$VERSION" --arg branch "$TARGET_BRANCH_NAME" --arg feature_branch "$BRANCH_NAME" --argjson commits "$(cat commit_logs.txt | jq -R . | jq -s .)" \
+            '. += [{"version": $ver, "branch": $branch, "feature_branch": $feature_branch, "commits": $commits}]' public/versions.json > temp.json && mv temp.json public/versions.json
+            
+            # Commit the version history
+      - name: Commit Version History
+        run: |
+          git add public/versions.json
+          git commit -m "chore: update version history for $VERSION"
+          git push https://github.com/ybotman/TangoTiempoFE.git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Azure Static Web Apps deploy step
+      - name: Build And Deploy to Azure
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_GLACIER_03516880F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          app_location: '/' # Path to your application source code
           action: 'upload'
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: '/' # App source code path
-          api_location: '' # Api source code path - optional
-          output_location: '' # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
     environment: TESTING
-    env:
-      NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
-      NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
     steps:
       - name: Close Pull Request
         id: closepullrequest

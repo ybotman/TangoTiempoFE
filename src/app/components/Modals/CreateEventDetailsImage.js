@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
+import PropTypes from 'prop-types';
 
 const ImageEventDetails = ({ imageFile, setImageFile }) => {
   const onDrop = (acceptedFiles) => {
@@ -27,6 +28,11 @@ const ImageEventDetails = ({ imageFile, setImageFile }) => {
       {imageFile && <Typography>Selected Image: {imageFile.name}</Typography>}
     </Box>
   );
+};
+
+ImageEventDetails.propTypes = {
+  imageFile: PropTypes.object, // Represents the selected file object
+  setImageFile: PropTypes.func.isRequired, // Function to update the selected file
 };
 
 export default ImageEventDetails;

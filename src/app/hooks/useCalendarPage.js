@@ -33,9 +33,8 @@ export const useCalendarPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const calendarRef = useRef(null);
-
   const handleRegionChange = (event) => {
-    const selectedValue = event.target.value; // Extract the selected value (region ID)
+    const selectedValue = event.target.value;
 
     if (!selectedValue) {
       console.error('No region selected');
@@ -44,18 +43,17 @@ export const useCalendarPage = () => {
 
     const selectedRegion = regions.find(
       (region) => region._id === selectedValue
-    ); // Lookup the region based on ID
+    );
 
     if (selectedRegion) {
       console.log('Region Selected:', selectedRegion);
 
       // Set the selected region object and its ID in the context
       setSelectedRegion(selectedRegion);
-      context;
-      setSelectedDivision(''); // Reset division
-      setSelectedCity(''); // Reset city
+      // context; <-- Remove or replace this line
+      setSelectedDivision('');
+      setSelectedCity('');
 
-      // Optionally refresh events based on the new region
       refreshEvents();
     } else {
       console.error('Region not found for selected value:', selectedValue);

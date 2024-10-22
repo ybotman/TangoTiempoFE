@@ -18,13 +18,23 @@ export const useSiteMenuBar = () => {
     setSelectedCity,
     regions,
   } = useContext(RegionsContext);
-  //const { organizers } = useContext(PostFilterContext);
+
   const { roles, selectedRole } = useContext(RoleContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [FAQModalOpen, setFAQModalOpen] = useState(false);
+  const [teamMenuAnchorEl, setTeamMenuAnchorEl] = useState(null);
+  const [openTeamMenu, setOpenTeamMenu] = useState(false);
 
-  // Handle menu opening and closing
+  const handleTeamMenuOpen = (event) => {
+    setTeamMenuAnchorEl(event.currentTarget);
+    setOpenTeamMenu(true);
+  };
+
+  const handleTeamMenuClose = () => {
+    setOpenTeamMenu(false);
+  };
+
   const handleHamburgerMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -33,10 +43,10 @@ export const useSiteMenuBar = () => {
     setAnchorEl(null);
   };
 
-  // Handle role changes
   const handleRoleChange = (event) => {
     setSelectedRole(event.target.value);
   };
+
   const handleRegionChange = (event) => {
     const selectedRegionName = event.target.value;
     const selectedRegionData = regions.find(
@@ -44,10 +54,7 @@ export const useSiteMenuBar = () => {
     );
 
     setSelectedRegion(selectedRegionName);
-
-    // Make sure you're setting the correct ID
-    setSelectedRegionID(selectedRegionData ? selectedRegionData._id : ''); // assuming _id is the ID of the region
-
+    setSelectedRegionID(selectedRegionData ? selectedRegionData._id : '');
     setSelectedDivision('');
     setSelectedCity('');
   };
@@ -72,7 +79,6 @@ export const useSiteMenuBar = () => {
     selectedRegion,
     selectedDivision,
     selectedCity,
-    // organizers,
     regions,
     roles,
     selectedRole,
@@ -85,21 +91,25 @@ export const useSiteMenuBar = () => {
     handleCityChange,
     openFAQModal,
     closeFAQModal,
+    teamMenuAnchorEl,
+    openTeamMenu, // Using openTeamMenu
+    setOpenTeamMenu, // Include setter
+    handleTeamMenuOpen,
+    handleTeamMenuClose,
     logOut,
   };
 };
 
 useSiteMenuBar.propTypes = {
-  activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired, // Array of active category names
-  handleCategoryChange: PropTypes.func.isRequired, // Function to handle category change
+  activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  handleCategoryChange: PropTypes.func.isRequired,
   categories: PropTypes.arrayOf(
-    // Array of category objects with name property
     PropTypes.shape({
       categoryName: PropTypes.string.isRequired,
     })
   ).isRequired,
-  selectedOrganizer: PropTypes.string.isRequired, // Currently selected organizer
-  handleOrganizerChange: PropTypes.func.isRequired, // Function to handle organizer change
+  selectedOrganizer: PropTypes.string.isRequired,
+  handleOrganizerChange: PropTypes.func.isRequired,
 };
 
 export default useSiteMenuBar;
