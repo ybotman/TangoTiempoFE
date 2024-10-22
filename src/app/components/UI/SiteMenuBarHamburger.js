@@ -1,6 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types'; // Importing PropTypes
-import { Menu, MenuItem, Divider } from '@mui/material';
+import PropTypes from 'prop-types';
+import { Menu, MenuItem, Divider, Popper, Paper, ClickAwayListener } from '@mui/material';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { listOfAllRoles } from '@/utils/masterData';
 
 const SiteMenuBarHamburger = ({
@@ -11,7 +12,7 @@ const SiteMenuBarHamburger = ({
   handleTeamMenuOpen,
   handleTeamMenuClose,
   teamMenuAnchorEl,
-  openTeamMenu, // Updated to openTeamMenu
+  openTeamMenu, // Team menu state from useSiteMenuBar
 }) => {
   return (
     <Menu
@@ -42,15 +43,44 @@ const SiteMenuBarHamburger = ({
       {/* About TangoTiempo */}
       <MenuItem>About TangoTiempo</MenuItem>
 
-      {/* The Team with a nested menu */}
-      <Menu
-        anchorEl={teamMenuAnchorEl}
-        open={openTeamMenu} // Updated
-        onClose={handleTeamMenuClose}
+      {/* Meet the Team section */}
+      <MenuItem
+        onMouseEnter={handleTeamMenuOpen}
+        onMouseLeave={handleTeamMenuClose}
       >
-        <MenuItem onClick={handleTeamMenuOpen}>Meet the Team</MenuItem>
-        {/* Add nested team menu items here */}
-      </Menu>
+        Meet the Team
+        <ArrowRightIcon style={{ marginLeft: 'auto' }} />
+      </MenuItem>
+
+      {/* Nested team menu */}
+      <Popper
+        open={openTeamMenu}
+        anchorEl={teamMenuAnchorEl}
+        placement="right-start"
+        disablePortal
+        onMouseEnter={handleTeamMenuOpen}
+        onMouseLeave={handleTeamMenuClose}
+      >
+        <Paper>
+          <ClickAwayListener onClickAway={handleTeamMenuClose}>
+            <Menu
+              anchorEl={teamMenuAnchorEl}
+              open={openTeamMenu}
+              onClose={handleTeamMenuClose}
+            >
+              <MenuItem onClick={() => (window.location.href = '/about-toby')}>
+                About Toby
+              </MenuItem>
+              <MenuItem onClick={() => (window.location.href = '/about-wailing')}>
+                About Wailing
+              </MenuItem>
+              <MenuItem onClick={() => (window.location.href = '/about-tural')}>
+                About Tural
+              </MenuItem>
+            </Menu>
+          </ClickAwayListener>
+        </Paper>
+      </Popper>
 
       {/* Divider */}
       <Divider />
@@ -70,7 +100,7 @@ SiteMenuBarHamburger.propTypes = {
   handleTeamMenuOpen: PropTypes.func.isRequired,
   handleTeamMenuClose: PropTypes.func.isRequired,
   teamMenuAnchorEl: PropTypes.object,
-  openTeamMenu: PropTypes.bool.isRequired, // Updated prop-type
+  openTeamMenu: PropTypes.bool.isRequired, // Updated prop-type for team menu
 };
 
 export default SiteMenuBarHamburger;

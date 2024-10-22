@@ -24,16 +24,17 @@ export const useSiteMenuBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [FAQModalOpen, setFAQModalOpen] = useState(false);
   const [teamMenuAnchorEl, setTeamMenuAnchorEl] = useState(null);
-  const [openTeamMenu, setOpenTeamMenu] = useState(false); // Using openTeamMenu
+  const [openTeamMenu, setOpenTeamMenu] = useState(false);
 
   const handleTeamMenuOpen = (event) => {
     setTeamMenuAnchorEl(event.currentTarget);
-    setOpenTeamMenu(true); // Opening team menu
+    setOpenTeamMenu(true);
   };
 
   const handleTeamMenuClose = () => {
-    setOpenTeamMenu(false); // Closing team menu
+    setOpenTeamMenu(false);
   };
+
 
   const handleHamburgerMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
