@@ -22,6 +22,7 @@ const modalStyle = {
   p: 3,
   maxHeight: '90vh',
   overflowY: 'auto',
+  zIndex: 1300,
 };
 
 const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {

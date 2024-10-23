@@ -36,7 +36,7 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
       locationDetails;
     return (
       <>
-        <Typography variant="body1">
+        <Typography component="span" variant="body1">
           {address_1}, {address_2 && `${address_2}, `}
           {address_3 && `${address_3}, `}
           {city}, {state} {zip}
