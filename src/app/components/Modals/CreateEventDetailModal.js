@@ -31,8 +31,8 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
-  const { selectedRegion } = useContext(RegionsContext); // Get the selected region from context
-  const [currentTab, setCurrentTab] = useState('basic'); // Default to basic tab
+  const { selectedRegion, selectedRegionID } = useContext(RegionsContext);
+  const [currentTab, setCurrentTab] = useState('basic');
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
@@ -46,11 +46,11 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     grantedOrganizer: '',
     isRepeating: false,
     imageFile: null,
+    selectedRegion: selectedRegion || '', // Store selectedRegion
+    selectedRegionID: selectedRegionID || '', // Store selectedRegionID
   });
 
-  useEffect(() => {
-    console.log('CreateEventModal opened:', open);
-  }, [open]);
+  useEffect(() => {}, [open]);
 
   const handleSave = async () => {
     console.log('Saving event data:', eventData);

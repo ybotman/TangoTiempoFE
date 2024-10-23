@@ -1,43 +1,123 @@
-import React, { useContext } from 'react';
-import { Modal, Box, Typography, Button } from '@mui/material';
-import { RegionsContext } from '@/contexts/RegionsContext';
+import React from 'react';
+import {
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Grid,
+} from '@mui/material';
+import useCategories from '@/hooks/useCategories'; // Import the categories hook
+import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
 import PropTypes from 'prop-types';
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90%',
-  maxWidth: '600px',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 3,
-  maxHeight: '90vh',
-  overflowY: 'auto',
-};
+const CreateEventDetailsBasic = ({ open, eventData, setEventData }) => {
+  const categories = useCategories(); // Fetch categories
+  const { organizers, loading, error } = useOrganizers(); // Fetch organizers
 
-const CreateEventDetailsBasic = ({ open, onClose, selectedDate }) => {
-  const { selectedRegion } = useContext(RegionsContext); // Get the selected region from context
+  // Handle category change
+  const handleCategoryChange = (event) => {
+    const selectedCategoryId = event.target.value;
+    setEventData({ ...eventData, categoryFirst: selectedCategoryId });
+  };
+
+  // Handle title change
+  const handleTitleChange = (event) => {
+    const title = event.target.value;
+    setEventData({ ...eventData, title });
+  };
+
+  // Handle organizer change
+  const handleOrganizerChange = (event) => {
+    const selectedOrganizerId = event.target.value;
+    setEventData({ ...eventData, grantedOrganizer: selectedOrganizerId });
+  };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={modalStyle}>
-        <Typography variant="h5" component="h2">
-          {`Event in: ${selectedRegion || 'Unknown Region'}`}
-        </Typography>
-        <Button onClick={onClose} variant="outlined" color="secondary">
-          Close
-        </Button>
-      </Box>
-    </Modal>
+    <Box>
+      <Typography variant="h5" component="h2">
+        Mandatory Event Details (Basic)
+      </Typography>
+
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {/* Title Input */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <TextField
+              label="Event Title"
+              value={eventData.title}
+              onChange={handleTitleChange}
+              fullWidth
+            />
+          </FormControl>
+        </Grid>
+
+        {/* Category Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="category-label">Category</InputLabel>
+            <Select
+              labelId="category-label"
+              value={eventData.categoryFirst || ''}
+              onChange={handleCategoryChange}
+              label="Category"
+            >
+              {categories.map((category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+
+      {/* Description Input */}
+      <FormControl fullWidth sx={{ mt: 2 }}>
+        <TextField
+          label="Event Description"
+          multiline
+          rows={4}
+          value={eventData.description}
+          onChange={(e) =>
+            setEventData({ ...eventData, description: e.target.value })
+          }
+          fullWidth
+        />
+      </FormControl>
+
+      {/* Organizer Selection */}
+      <FormControl fullWidth sx={{ mt: 2 }}>
+        <InputLabel id="organizer-label">Organizer</InputLabel>
+        <Select
+          labelId="organizer-label"
+          value={eventData.grantedOrganizer || ''}
+          onChange={handleOrganizerChange}
+          label="Organizer"
+        >
+          {loading ? (
+            <MenuItem disabled>Loading...</MenuItem>
+          ) : error ? (
+            <MenuItem disabled>Error loading organizers</MenuItem>
+          ) : (
+            organizers.map((organizer) => (
+              <MenuItem key={organizer._id} value={organizer._id}>
+                {organizer.name}
+              </MenuItem>
+            ))
+          )}
+        </Select>
+      </FormControl>
+    </Box>
   );
 };
 
 CreateEventDetailsBasic.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  selectedDate: PropTypes.instanceOf(Date),
+  eventData: PropTypes.object.isRequired,
+  setEventData: PropTypes.func.isRequired,
 };
 
 export default CreateEventDetailsBasic;
