@@ -63,6 +63,7 @@ const VersionPage = () => {
                 <li>No commits available</li>
               )}
             </ul>
+            <p></p>
           </li>
         ))}
       </ul>
