@@ -10,25 +10,26 @@ import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetails
 import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
 import PropTypes from 'prop-types';
 
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '90%',
+  maxWidth: '600px',
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 3,
+  maxHeight: '90vh',
+  overflowY: 'auto',
+};
+
 const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const [currentTab, setCurrentTab] = useState('basic');
   const [showFullTitle, setShowFullTitle] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [showImageTab, setShowImageTab] = useState(false);
 
-  const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: { xs: '95%', md: '80%', lg: '60%' }, // Adjust for different screen sizes
-    maxWidth: '600px',
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    p: 3,
-    maxHeight: '80vh', // Reduce the height a bit
-    overflowY: 'auto',
-  };
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
@@ -96,7 +97,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
                 top: '2px',
                 right: '8px',
                 zIndex: '1000',
-                fontSize: '0.575rem',
+                fontSize: '0.75rem',
               }}
             >
               Close

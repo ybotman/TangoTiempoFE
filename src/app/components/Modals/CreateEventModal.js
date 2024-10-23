@@ -1,151 +1,207 @@
-import React, { useState, useContext } from 'react';
-import { Modal, Box, Typography, Button, Tabs, Tab } from '@mui/material';
-import BasicEventDetails from '@/components/Modals/CreateEventDetailsBasic';
-import OtherEventDetails from '@/components/Modals/CreateEventDetailsOther';
-import RepeatingEventDetails from '@/components/Modals/CreateEventDetailsRepeating';
-import ImageEventDetails from '@/components/Modals/CreateEventDetailsImage';
-import { RegionsContext } from '@/contexts/RegionsContext';
-import { useLocations } from '@/hooks/useLocations';
-import useCategories from '@/hooks/useCategories';
-//import { useCreateEvent } from '@/hooks/useEvents';
-//import { validateEvent } from '@/utils/EventCreateRules';
+import React, { useState, useEffect } from 'react';
+import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import NextImage from 'next/image';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ViewEventDetailsBasic from '@/components/Modals/ViewEventDetailsBasic';
+import ViewEventDetailsRepeating from '@/components/Modals/ViewEventDetailsRepeating';
+import ViewEventDetailsMore from '@/components/Modals/ViewEventDetailsMore';
+import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
+import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
+import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
 import PropTypes from 'prop-types';
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90%',
-  maxWidth: '600px',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 3,
-  maxHeight: '90vh',
-  overflowY: 'auto',
-};
+const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
+  const [currentTab, setCurrentTab] = useState('Basic');
+  const [showFullTitle, setShowFullTitle] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [showImageTab, setShowImageTab] = useState(false);
 
-const CreateEventModal = ({ open, onClose, selectedDate, onCreate }) => {
-  console.log(onCreate);
-
-  const { selectedRegionID } = useContext(RegionsContext);
-  const {
-    locations,
-    loading: loadingLocations,
-    error: locationsError,
-  } = useLocations(selectedRegionID);
-  //console.log(locations, loadingLocations, locationsError); // probably needed at all
-  const {
-    categories,
-    loading: loadingCategories,
-    error: categoriesError,
-  } = useCategories();
-  //console.log(categories, loadingCategories, categoriesError); // probably needed at all
-  console.log(
-    selectedRegionID,
-    locations,
-    categories,
-    loadingLocations,
-    locationsError,
-    loadingCategories,
-    categoriesError
-  );
-  // const createEvent = useCreateEvent();
-  //console.log(createEvent); // needed at create?  But goes where?
-
-  // State variables
-  const [currentTab, setCurrentTab] = useState('basic');
-  const [eventData, setEventData] = useState({
-    title: '',
-    description: '',
-    startDate: selectedDate || new Date(),
-    endDate: selectedDate || new Date(),
-    cost: '',
-    locationID: '',
-    categoryFirst: '',
-    categorySecond: '',
-    categoryThird: '',
-    grantedOrganizer: '',
-    isRepeating: false,
-    imageFile: null, // New state for image file
-  });
-
-  const handleSave = async () => {
-    // Handle the event save logic
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: { xs: '95%', md: '80%', lg: '60%' }, // Adjust for different screen sizes
+    maxWidth: '600px',
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 3,
+    maxHeight: '80vh', // Reduce the height a bit
+    overflowY: 'auto',
   };
+
+  useEffect(() => {
+    if (open) {
+      setCurrentTab('Basic');
+      setShowFullTitle(false); // Reset title expansion when modal is reopened
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (eventDetails?.extendedProps?.eventImage) {
+      const img = new Image();
+      img.src = eventDetails.extendedProps.eventImage;
+
+      img.onload = function () {
+        if (img.width > img.height) {
+          setImageSrc(eventDetails.extendedProps.eventImage);
+          setShowImageTab(true);
+        } else {
+          setImageSrc('/Submit16by9Please.jpeg');
+          setShowImageTab(true);
+        }
+      };
+    } else {
+      setImageSrc('/tangohandsWide.jpeg');
+      setShowImageTab(true);
+    }
+  }, [eventDetails]);
+
+  if (!eventDetails) {
+    return null;
+  }
+
+  const eventTitle = eventDetails?.title || 'Event Details';
+  const startDate = eventDetails?._instance?.range?.start || null;
+  const endDate = eventDetails?._instance?.range?.end || null;
+  const allDay = eventDetails?.allDay || false;
+
+  // Function to truncate the title to 30 characters
+  const truncatedTitle =
+    eventTitle.length > 30 && !showFullTitle
+      ? eventTitle.slice(0, 30) + '...'
+      : eventTitle;
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Typography
-          id="create-event-title"
-          variant="h6"
-          component="h2"
-          sx={{ mb: 2 }}
-        >
-          Create Single Event
-        </Typography>
+        {/* Title and Date */}
+        <Grid container justifyContent="space-between" alignItems="center">
+          <Grid item xs={8}>
+            <Typography variant="h5" component="h2">
+              {truncatedTitle}
+              {eventTitle.length > 30 && (
+                <Button
+                  size="small"
+                  onClick={() => setShowFullTitle(!showFullTitle)}
+                  sx={{ ml: 1 }}
+                >
+                  {showFullTitle ? 'Show Less' : 'Show More'}
+                </Button>
+              )}
+            </Typography>
+            <Button
+              onClick={onClose}
+              sx={{
+                position: 'absolute',
+                top: '2px',
+                right: '8px',
+                zIndex: '1000',
+                fontSize: '0.575rem',
+              }}
+            >
+              Close
+            </Button>
+          </Grid>
+          <Grid item xs={4} style={{ textAlign: 'right' }}>
+            <Typography variant="h5" component="h5">
+              {startDate && new Date(startDate).toLocaleDateString()}
+            </Typography>
+          </Grid>
+        </Grid>
 
-        {/* Tab Navigation */}
+        {/* Time Range */}
+        {!allDay && startDate && endDate && (
+          <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
+            <Typography variant="h6" color="textSecondary">
+              Time:{' '}
+              {new Date(startDate).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Typography>
+            <ArrowForwardIcon sx={{ verticalAlign: 'middle', mx: 1 }} />
+            <Typography variant="h6" color="textSecondary">
+              {new Date(endDate).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Image */}
+        {imageSrc && showImageTab && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: '20px',
+            }}
+          >
+            <NextImage
+              src={imageSrc}
+              alt="Event"
+              height={300}
+              width={500} // Adjust as needed for higher resolution
+              layout="intrinsic"
+              objectFit="contain"
+            />
+          </Box>
+        )}
+
+        {/* Tabs */}
         <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
-          <Tab label="Basic" value="basic" />
-          <Tab label="Image" value="image" />
-          <Tab label="Other" value="other" />
-          {eventData.isRepeating && <Tab label="Repeating" value="rrule" />}
+          <Tab label="Basic" value="Basic" />
+          <Tab label="More" value="More" />
+          <Tab label="Images" value="Images" />
+          <Tab label="Repeating" value="repeating" />
+          <Tab label="Organizer" value="Organizer" />
+          <Tab label="Location" value="Location" />
         </Tabs>
 
-        {/* Basic Tab */}
-        {currentTab === 'basic' && (
-          <BasicEventDetails
-            eventData={eventData}
-            setEventData={setEventData}
-          />
+        {/* Tab Content */}
+        {currentTab === 'Basic' && (
+          <ViewEventDetailsBasic eventDetails={eventDetails} />
         )}
-
-        {/* Image Tab */}
-        {currentTab === 'image' && (
-          <ImageEventDetails
-            imageFile={eventData.imageFile}
-            setImageFile={(file) =>
-              setEventData({ ...eventData, imageFile: file })
-            }
-          />
+        {currentTab === 'Images' && (
+          <ViewEventDetailsImage eventDetails={eventDetails} />
         )}
-
-        {/* Other Tab */}
-        {currentTab === 'other' && (
-          <OtherEventDetails
-            eventData={eventData}
-            setEventData={setEventData}
-          />
+        {currentTab === 'repeating' && (
+          <ViewEventDetailsRepeating eventDetails={eventDetails} />
         )}
-
-        {/* Repeating Tab */}
-        {currentTab === 'rrule' && (
-          <RepeatingEventDetails
-            eventData={eventData}
-            setEventData={setEventData}
-          />
+        {currentTab === 'More' && (
+          <ViewEventDetailsMore eventDetails={eventDetails} />
         )}
-
-        <Box mt={2} display="flex" justifyContent="space-between">
-          <Button onClick={handleSave} variant="contained" color="primary">
-            Save
-          </Button>
-          <Button onClick={onClose} variant="outlined" color="secondary">
-            Cancel
-          </Button>
-        </Box>
+        {currentTab === 'Organizer' && (
+          <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />
+        )}
+        {currentTab === 'Location' && (
+          <ViewEventDetailsLocationOther eventDetails={eventDetails} />
+        )}
       </Box>
     </Modal>
   );
 };
 
-CreateEventModal.propTypes = {
+ViewEventDetailModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  selectedDate: PropTypes.instanceOf(Date),
-  onCreate: PropTypes.func,
+  eventDetails: PropTypes.shape({
+    title: PropTypes.string,
+    allDay: PropTypes.bool,
+    extendedProps: PropTypes.shape({
+      eventImage: PropTypes.string,
+    }),
+    _instance: PropTypes.shape({
+      range: PropTypes.shape({
+        start: PropTypes.string,
+        end: PropTypes.string,
+      }),
+    }),
+  }),
 };
 
-export default CreateEventModal;
+export default ViewEventDetailModal;
