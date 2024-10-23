@@ -147,7 +147,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
               height={300}
               width={500} // Adjust as needed for higher resolution
               layout="intrinsic"
-              objectFit="contain"
+              style={{ objectFit: 'contain' }}
             />
           </Box>
         )}

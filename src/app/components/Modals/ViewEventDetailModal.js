@@ -144,9 +144,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
               src={imageSrc}
               alt="Event"
               height={300}
-              width={500} // Adjust as needed for higher resolution
-              layout="intrinsic"
-              objectFit="contain"
+              width={500} // Adjust as needed
+              style={{ objectFit: 'contain' }}
             />
           </Box>
         )}
