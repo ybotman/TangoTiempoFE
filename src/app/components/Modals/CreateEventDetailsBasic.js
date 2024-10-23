@@ -11,11 +11,21 @@ import {
 } from '@mui/material';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
+import { useLocations } from '@/hooks/useLocations'; // Import the locations hook
 import PropTypes from 'prop-types';
 
-const CreateEventDetailsBasic = ({ open, eventData, setEventData }) => {
+const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
-  const { organizers, loading, error } = useOrganizers(); // Fetch organizers
+  const {
+    organizers,
+    loading: loadingOrganizers,
+    error: errorOrganizers,
+  } = useOrganizers(); // Fetch organizers
+  const {
+    locations,
+    loading: loadingLocations,
+    error: errorLocations,
+  } = useLocations(); // Fetch locations
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -33,6 +43,12 @@ const CreateEventDetailsBasic = ({ open, eventData, setEventData }) => {
   const handleOrganizerChange = (event) => {
     const selectedOrganizerId = event.target.value;
     setEventData({ ...eventData, grantedOrganizer: selectedOrganizerId });
+  };
+
+  // Handle location change
+  const handleLocationChange = (event) => {
+    const selectedLocationId = event.target.value;
+    setEventData({ ...eventData, locationID: selectedLocationId });
   };
 
   return (
@@ -72,6 +88,56 @@ const CreateEventDetailsBasic = ({ open, eventData, setEventData }) => {
             </Select>
           </FormControl>
         </Grid>
+
+        {/* Organizer Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="organizer-label">Organizer</InputLabel>
+            <Select
+              labelId="organizer-label"
+              value={eventData.grantedOrganizer || ''}
+              onChange={handleOrganizerChange}
+              label="Organizer"
+            >
+              {loadingOrganizers ? (
+                <MenuItem disabled>Loading...</MenuItem>
+              ) : errorOrganizers ? (
+                <MenuItem disabled>Error loading organizers</MenuItem>
+              ) : (
+                organizers.map((organizer) => (
+                  <MenuItem key={organizer._id} value={organizer._id}>
+                    {organizer.name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Location Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="location-label">Location</InputLabel>
+            <Select
+              labelId="location-label"
+              value={eventData.locationID || ''}
+              onChange={handleLocationChange}
+              label="Location"
+            >
+              {loadingLocations ? (
+                <MenuItem disabled>Loading...</MenuItem>
+              ) : errorLocations ? (
+                <MenuItem disabled>Error loading locations</MenuItem>
+              ) : (
+                locations.map((location) => (
+                  <MenuItem key={location._id} value={location._id}>
+                    {location.name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </Grid>
       </Grid>
 
       {/* Description Input */}
@@ -86,29 +152,6 @@ const CreateEventDetailsBasic = ({ open, eventData, setEventData }) => {
           }
           fullWidth
         />
-      </FormControl>
-
-      {/* Organizer Selection */}
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel id="organizer-label">Organizer</InputLabel>
-        <Select
-          labelId="organizer-label"
-          value={eventData.grantedOrganizer || ''}
-          onChange={handleOrganizerChange}
-          label="Organizer"
-        >
-          {loading ? (
-            <MenuItem disabled>Loading...</MenuItem>
-          ) : error ? (
-            <MenuItem disabled>Error loading organizers</MenuItem>
-          ) : (
-            organizers.map((organizer) => (
-              <MenuItem key={organizer._id} value={organizer._id}>
-                {organizer.name}
-              </MenuItem>
-            ))
-          )}
-        </Select>
       </FormControl>
     </Box>
   );
