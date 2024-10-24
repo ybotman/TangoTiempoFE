@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       signUpOngoing.current = true;
-      console.log('Initiating Google sign-in...');
+      //   console.log('Initiating Google sign-in...');
       const result = await signInWithPopup(auth, provider);
       console.log('Google sign-in successful:', result);
       const firebaseUser = result.user;
