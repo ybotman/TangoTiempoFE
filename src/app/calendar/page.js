@@ -21,7 +21,8 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
-import CreateEventModal from '@/components/Modals/CreateEventModal';
+import CreateEventDetailModal from '@/components/Modals/CreateEventDetailModal';
+
 import ViewEventDetailModal from '@/components/Modals/ViewEventDetailModal.js';
 
 const CalendarPage = () => {
@@ -89,7 +90,7 @@ const CalendarPage = () => {
   const getInitialView = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
   };
-
+  console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();
@@ -199,7 +200,7 @@ const CalendarPage = () => {
         onActionSelected={handleMenuAction}
       />
 
-      <CreateEventModal
+      <CreateEventDetailModal
         open={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         selectedDate={clickedDate}

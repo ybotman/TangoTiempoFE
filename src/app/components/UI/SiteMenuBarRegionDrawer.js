@@ -62,7 +62,7 @@ const SiteMenuBarRegionDrawer = ({
           <List>
             {regions.map((region) => (
               <ListItem
-                button
+                component="button"
                 key={region.regionCode}
                 onClick={() => {
                   setLocalSelectedRegion(region);
@@ -80,7 +80,7 @@ const SiteMenuBarRegionDrawer = ({
           <List>
             {localSelectedRegion.divisions.map((division) => (
               <ListItem
-                button
+                component="button"
                 key={division.divisionCode}
                 onClick={() => {
                   setLocalSelectedDivision(division);
@@ -97,7 +97,7 @@ const SiteMenuBarRegionDrawer = ({
           <List>
             {localSelectedDivision.majorCities.map((city) => (
               <ListItem
-                button
+                component="button"
                 key={city.cityCode}
                 onClick={() => {
                   setSelectedAbbreviation(city.cityCode);

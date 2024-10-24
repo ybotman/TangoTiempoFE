@@ -31,12 +31,10 @@ const SiteMenuBarHamburger = ({
       {selectedRole === listOfAllRoles.NAMED_USER && (
         <MenuItem>User Settings</MenuItem>
       )}
-      {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-        <>
-          <MenuItem>Organizer Settings</MenuItem>
-          <MenuItem>Location Management</MenuItem>
-        </>
-      )}
+      {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && [
+        <MenuItem key="organizer-settings">Organizer Settings</MenuItem>,
+        <MenuItem key="location-management">Location Management</MenuItem>,
+      ]}
       {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
         <MenuItem>Add Organizers</MenuItem>
       )}

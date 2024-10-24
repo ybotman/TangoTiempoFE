@@ -22,6 +22,7 @@ const modalStyle = {
   p: 3,
   maxHeight: '90vh',
   overflowY: 'auto',
+  zIndex: 1300,
 };
 
 const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
@@ -90,6 +91,18 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
                 </Button>
               )}
             </Typography>
+            <Button
+              onClick={onClose}
+              sx={{
+                position: 'absolute',
+                top: '2px',
+                right: '8px',
+                zIndex: '1000',
+                fontSize: '0.75rem',
+              }}
+            >
+              Close
+            </Button>
           </Grid>
           <Grid item xs={4} style={{ textAlign: 'right' }}>
             <Typography variant="h5" component="h5">
@@ -132,9 +145,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
               src={imageSrc}
               alt="Event"
               height={300}
-              width={500} // Adjust as needed for higher resolution
-              layout="intrinsic"
-              objectFit="contain"
+              width={500} // Adjust as needed
+              style={{ objectFit: 'contain' }}
             />
           </Box>
         )}
