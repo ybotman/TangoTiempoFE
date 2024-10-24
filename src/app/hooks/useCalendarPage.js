@@ -48,9 +48,7 @@ export const useCalendarPage = () => {
     if (selectedRegion) {
       console.log('Region Selected:', selectedRegion);
 
-      // Set the selected region object and its ID in the context
       setSelectedRegion(selectedRegion);
-      // context; <-- Remove or replace this line
       setSelectedDivision('');
       setSelectedCity('');
 
@@ -174,7 +172,8 @@ export const useCalendarPage = () => {
     }
 
     if (action === 'addSingleEvent') {
-      setCreateModalOpen(true);
+      console.log('Opening Create Event Modal'); // Add this for debugging
+      setCreateModalOpen(true); // Ensure this is properly called
     }
   };
 
