@@ -17,6 +17,7 @@ export const useOrganizers = () => {
     try {
       setLoading(true);
       const response = await axios.get(endpoint);
+
       setOrganizers(response.data);
     } catch (error) {
       setError(error);

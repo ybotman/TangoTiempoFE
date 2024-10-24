@@ -25,9 +25,9 @@ const ViewEventDetailsImage = ({ eventDetails }) => {
         <Image
           src={eventImage}
           alt="Event Image"
-          width={800}
-          height={600}
-          style={{ objectFit: 'cover', width: '100%', maxHeight: '100%' }}
+          width={500}
+          height={300} // Adjust as needed for the modal size
+          style={{ objectFit: 'cover', maxHeight: '100%' }}
         />
       </Box>
 

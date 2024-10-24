@@ -9,13 +9,16 @@ export const useLocations = () => {
   const [error, setError] = useState(null);
 
   // Function to fetch locations by region ID
+
   const fetchLocations = useCallback(async () => {
-    if (!selectedRegionID) return; // If no region is selected, skip fetching
+    const endpoint = selectedRegionID
+      ? `${process.env.NEXT_PUBLIC_BE_URL}/api/locations?regionID=${selectedRegionID}`
+      : `${process.env.NEXT_PUBLIC_BE_URL}/api/locations`;
+
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/locations?regionID=${selectedRegionID}`
-      );
+      const response = await axios.get(endpoint);
+
       setLocations(response.data);
     } catch (error) {
       setError(error);

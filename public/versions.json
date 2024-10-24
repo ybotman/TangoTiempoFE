@@ -128,5 +128,23 @@
       "e3c7bda - 1.0.14",
       "e722c3a - Merge branch 'Default-Lower-Categories-off-' into TEST"
     ]
+  },
+  {
+    "version": "1.0.15",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "b70e4df - 1.0.15",
+      "aa5807a - Merge branch 'CREATE-EVENTS' into TEST"
+    ]
+  },
+  {
+    "version": "1.0.16",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "3f305ef - 1.0.16",
+      "12ed337 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
   }
 ]
