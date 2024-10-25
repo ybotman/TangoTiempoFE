@@ -2,12 +2,17 @@
   {
     "version": "1.0.0",
     "branch": "TEST",
-    "commits": ["1000 commits, in the initial release to prod"]
+    "commits": [
+      "1000 commits, in the initial release to prod"
+    ]
   },
   {
     "version": "1.0.1",
     "branch": "TEST",
-    "commits": ["dee8157 - 1.0.1", "ecc2a43 - move from PAT to GITHUB_TOKEN"]
+    "commits": [
+      "dee8157 - 1.0.1",
+      "ecc2a43 - move from PAT to GITHUB_TOKEN"
+    ]
   },
   {
     "version": "1.0.2",
@@ -74,7 +79,10 @@
     "version": "",
     "branch": "",
     "feature_branch": "TEST",
-    "commits": ["7b81b39 - 1.0.9", "152872f - yaml syntax 2"]
+    "commits": [
+      "7b81b39 - 1.0.9",
+      "152872f - yaml syntax 2"
+    ]
   },
   {
     "version": "1.0.10",
@@ -107,7 +115,10 @@
     "version": "1.0.13",
     "branch": "TEST",
     "feature_branch": "TEST",
-    "commits": ["0fed73d - 1.0.13", "20748f2 - Remove Output Loc"]
+    "commits": [
+      "0fed73d - 1.0.13",
+      "20748f2 - Remove Output Loc"
+    ]
   },
   {
     "version": "1.0.14",
@@ -170,6 +181,15 @@
     "commits": [
       "1741a30 - 1.0.20",
       "b43d93c - GitHub .chmod +w for .git/config"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "4d77aa5 - 1.0.21",
+      "b8770c3 - Slug updates, Image change"
     ]
   }
 ]
