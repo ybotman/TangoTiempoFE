@@ -7,12 +7,19 @@ import PropTypes from 'prop-types';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RegionsProvider } from '@/contexts/RegionsContext';
 import { RoleProvider } from '@/contexts/RoleContext';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { Settings } from 'luxon';
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+Settings.defaultZone = timezone;
 const Providers = ({ children }) => {
   return (
     <AuthProvider>
       <RegionsProvider>
-        <RoleProvider>{children}</RoleProvider>
+        <LocalizationProvider dateAdapter={AdapterLuxon}>
+          <RoleProvider>{children}</RoleProvider>
+        </LocalizationProvider>
       </RegionsProvider>
     </AuthProvider>
   );

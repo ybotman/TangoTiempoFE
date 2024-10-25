@@ -7,7 +7,7 @@ import { useRegions } from '@/hooks/useRegions';
 import PropTypes from 'prop-types';
 
 export const RegionsContext = createContext();
-console.log('RegionsContext created');
+//console.log('RegionsContext created');
 
 export const RegionsProvider = ({ children }) => {
   const regionsData = useRegions(); // Custom hook to fetch regions
@@ -24,7 +24,7 @@ export const RegionsProvider = ({ children }) => {
     }
   }, [regionsData]);
 
-  console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
+  //console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
   return (
     <RegionsContext.Provider
       value={{

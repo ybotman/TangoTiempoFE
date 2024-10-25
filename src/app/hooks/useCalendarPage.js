@@ -46,7 +46,7 @@ export const useCalendarPage = () => {
     );
 
     if (selectedRegion) {
-      console.log('Region Selected:', selectedRegion);
+      //  console.log('Region Selected:', selectedRegion);
 
       setSelectedRegion(selectedRegion);
       setSelectedDivision('');
@@ -108,7 +108,7 @@ export const useCalendarPage = () => {
   };
 
   const handleDateClick = (arg) => {
-    console.log('Date clicked:', arg.dateStr);
+    //   console.log('Date clicked:', arg.dateStr);
     setClickedDate(arg.dateStr); // Store the clicked date
 
     if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
@@ -127,7 +127,7 @@ export const useCalendarPage = () => {
     // Add other role-based conditions as needed...
   };
   const handleEventClick = (arg) => {
-    console.log('1 Event clicked:', arg.event.title);
+    //   console.log('1 Event clicked:', arg.event.title);
 
     // Setting the raw event data as a fallback
     setSelectedEventDetails(arg.event);
@@ -163,16 +163,16 @@ export const useCalendarPage = () => {
   };
 
   const handleMenuAction = (action) => {
-    console.log(`Action selected: ${action}`);
+    //   console.log(`Action selected: ${action}`);
     setMenuAnchor(null); // Close the menu
 
     if (action === 'viewDetails') {
-      console.log('setViewDetailModalOpen');
+      //     console.log('setViewDetailModalOpen');
       setViewDetailModalOpen(true);
     }
 
     if (action === 'addSingleEvent') {
-      console.log('Opening Create Event Modal'); // Add this for debugging
+      //    console.log('Opening Create Event Modal'); // Add this for debugging
       setCreateModalOpen(true); // Ensure this is properly called
     }
   };
