@@ -13,16 +13,16 @@ const LoginPage = () => {
   const { user, loading, error, authenticateWithGoogle } =
     useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  console.log('LoginPage called'); // Debugging
+  //console.log('LoginPage called'); // Debugging
   const handleGoogleLogIn = async () => {
-    console.log('handleGoogleLogIn called'); // Debugging
+    //console.log('handleGoogleLogIn called'); // Debugging
     setIsRedirecting(true);
     const result = await authenticateWithGoogle();
     if (result) {
-      console.log('Login successful, redirecting'); // Debugging
+      //console.log('Login successful, redirecting'); // Debugging
       router.push('/calendar');
     } else {
-      console.log('Login failed'); // Debugging
+      // console.log('Login failed'); // Debugging
       setIsRedirecting(false);
     }
   };

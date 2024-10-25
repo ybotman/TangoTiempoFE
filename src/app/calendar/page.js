@@ -90,7 +90,7 @@ const CalendarPage = () => {
   const getInitialView = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
   };
-  console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
+  //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();

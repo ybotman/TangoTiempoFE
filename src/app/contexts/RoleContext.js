@@ -8,14 +8,14 @@ import { AuthContext } from '@/contexts/AuthContext';
 
 // Create Role Context
 export const RoleContext = createContext();
-console.log('RoleContext created');
+//console.log('RoleContext created');
 
 // RoleProvider Component
 export const RoleProvider = ({ children }) => {
   const { user, selectedRole, setSelectedRole } = useContext(AuthContext);
   const [roles, setRoles] = useState([]);
 
-  console.log('RoleProvider rendering : selectedRole:', selectedRole);
+  //console.log('RoleProvider rendering : selectedRole:', selectedRole);
 
   useEffect(() => {
     if (user && user.roles && user.roles.length > 0) {

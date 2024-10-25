@@ -46,6 +46,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     grantedOrganizer: '',
     isRepeating: false,
     imageFile: null,
+    shortName: '',
     selectedRegion: selectedRegion || '', // Store selectedRegion
     selectedRegionID: selectedRegionID || '', // Store selectedRegionID
   });
@@ -53,7 +54,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   useEffect(() => {}, [open]);
 
   const handleSave = async () => {
-    console.log('Saving event data:', eventData);
+    //console.log('Saving event data:', eventData);
     // Save logic for the event data
   };
 
