@@ -287,6 +287,22 @@ export default async function OrganizerProfile({ params }) {
         >
           www.tangotiempo.com/AdminApply
         </a>
+        <hr
+          style={{
+            border: 'none',
+            borderTop: '1px solid #ccc',
+            margin: '20px 0',
+          }}
+        />
+        .<br />
+        <h3>
+          {' '}
+          But of course just take a look and see whats going on the world of
+          Argentine Tango at :{' '}
+          <a href="https://tangotiempo.com" target="_blank" rel="noreferrer">
+            TangoTiempo.com
+          </a>
+        </h3>
       </p>
     </div>
   );
