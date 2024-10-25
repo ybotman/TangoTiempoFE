@@ -173,5 +173,14 @@
       "5dbd9d5 - 1.0.19",
       "45b822e - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
     ]
+  },
+  {
+    "version": "1.0.20",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "1741a30 - 1.0.20",
+      "b43d93c - GitHub .chmod +w for .git/config"
+    ]
   }
 ]

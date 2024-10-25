@@ -16,7 +16,7 @@ jobs:
     name: Build, Version, and Deploy Job
     environment: TESTING
     permissions:
-      contents: write # Ensure write access to repository contents for the GITHUB_TOKEN
+      contents: write
     env:
       NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
       NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
@@ -25,6 +25,10 @@ jobs:
         with:
           submodules: true
           lfs: false
+
+      # Set proper permissions for .git/config
+      - name: Set proper permissions for .git/config
+        run: chmod +w .git/config
 
       # Set up Node.js
       - name: Set up Node.js
@@ -65,6 +69,7 @@ jobs:
             BRANCH_NAME="${{ github.ref_name }}"
           fi
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Get Commit History and Branch
         run: |
           VERSION=$(npm pkg get version | tr -d '"')
@@ -83,8 +88,8 @@ jobs:
           fi
           jq --arg ver "$VERSION" --arg branch "$TARGET_BRANCH_NAME" --arg feature_branch "$BRANCH_NAME" --argjson commits "$(cat commit_logs.txt | jq -R . | jq -s .)" \
             '. += [{"version": $ver, "branch": $branch, "feature_branch": $feature_branch, "commits": $commits}]' public/versions.json > temp.json && mv temp.json public/versions.json
-            
-            # Commit the version history
+
+      # Commit the version history
       - name: Commit Version History
         run: |
           git add public/versions.json
