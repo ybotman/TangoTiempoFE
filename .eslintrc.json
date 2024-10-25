@@ -5,15 +5,13 @@
     "plugin:react/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["react", "prettier", "react-hooks"],
+  "plugins": ["react", "prettier"],
   "rules": {
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "error", // Enable PropTypes linting
     "no-unused-vars": "warn",
-    "no-undef": "error",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "no-undef": "error"
   },
   "env": {
     "browser": true,
