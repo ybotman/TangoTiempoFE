@@ -1,8 +1,8 @@
 // src/app/layout.js
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import Providers from '@/components/Providers';
+import GoogleAnalytics from '@/components/GoogleAnalytics'; // Import your client component
 
 export const metadata = {
   title: 'TangoTiempo',
@@ -24,6 +24,8 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        {/* Google Analytics for Client Side */}
+        <GoogleAnalytics />
         <Providers>{children}</Providers>
       </body>
     </html>
