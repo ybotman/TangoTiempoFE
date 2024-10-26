@@ -202,4 +202,3 @@ SiteMenuBar.propTypes = {
 };
 
 export default SiteMenuBar;
-
