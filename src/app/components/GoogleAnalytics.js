@@ -5,8 +5,15 @@ import { useEffect } from 'react';
 
 export default function GoogleAnalytics() {
   useEffect(() => {
-    const GA_ID = 'G-6KGB3S21KH'; // Hard-coded GA ID
-    if (!GA_ID) return;
+    const GA_ID = process.env.GA_ID; // Fetch GA_ID from environment variable
+    const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
+
+    // Log GA_ID and environment to the console for verification
+    console.log(`Google Analytics ID: ${GA_ID}`);
+    console.log(`Environment: ${environment}`);
+
+    // Only initialize GA if in production and GA_ID is available
+    if (environment !== 'PRODUCTION' || !GA_ID || GA_ID === 'n/a') return;
 
     // Insert Google Analytics script
     const script1 = document.createElement('script');
