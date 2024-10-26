@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Drawer,
   List,
@@ -13,68 +14,67 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';
 import HelpIcon from '@mui/icons-material/Help';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // New icon for FAQ
-import FAQModal from '@/components/Modals/FAQModal';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 
-const SidebarDrawer = () => {
-  const [open, setOpen] = useState(false);
-  const [faqOpen, setFaqOpen] = useState(false); // State for FAQ modal
+const SidebarDrawer = ({ open, onClose }) => {
+  const [expanded, setExpanded] = useState(false); // Controls icon-only to icon + text view
 
-  const toggleDrawer = () => setOpen((prevOpen) => !prevOpen);
-  const toggleFaq = () => setFaqOpen((prevFaqOpen) => !prevFaqOpen);
+  const toggleExpansion = () => setExpanded((prev) => !prev);
 
   return (
-    <>
-      <Drawer
-        variant="permanent"
-        open={open}
-        sx={{
-          width: open ? 240 : 72,
-          transition: 'width 0.3s',
-          '& .MuiDrawer-paper': {
-            width: open ? 240 : 72,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <List>
-          <ListItem button={true} onClick={toggleDrawer}>
-            <ListItemIcon>
-              <IconButton>
-                <MenuIcon />
-              </IconButton>
-            </ListItemIcon>
-            {open && <ListItemText primary="Menu" />}
-          </ListItem>
+    <Drawer
+      anchor="left"
+      open={open}
+      onClose={onClose}
+      sx={{
+        width: expanded ? 240 : 72,
+        transition: 'width 0.3s',
+        '& .MuiDrawer-paper': {
+          width: expanded ? 240 : 72,
+          boxSizing: 'border-box',
+        },
+      }}
+    >
+      <List>
+        {/* Inner Hamburger to expand the sidebar */}
+        <ListItem button onClick={toggleExpansion}>
+          <ListItemIcon>
+            <IconButton>
+              <MenuIcon />
+            </IconButton>
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Menu" />}
+        </ListItem>
 
-          <ListItem button={true}>
-            <ListItemIcon>
-              <InfoIcon />
-            </ListItemIcon>
-            {open && <ListItemText primary="About" />}
-          </ListItem>
+        {/* Other Sidebar Items */}
+        <ListItem button>
+          <ListItemIcon>
+            <InfoIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="About" />}
+        </ListItem>
 
-          <ListItem button={true}>
-            <ListItemIcon>
-              <HelpIcon />
-            </ListItemIcon>
-            {open && <ListItemText primary="Help" />}
-          </ListItem>
+        <ListItem button>
+          <ListItemIcon>
+            <HelpIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Help" />}
+        </ListItem>
 
-          {/* FAQ Icon */}
-          <ListItem button={true} onClick={toggleFaq}>
-            <ListItemIcon>
-              <QuestionAnswerIcon />
-            </ListItemIcon>
-            {open && <ListItemText primary="FAQ" />}
-          </ListItem>
-        </List>
-      </Drawer>
-
-      {/* FAQ Modal */}
-      <FAQModal open={faqOpen} handleClose={toggleFaq} />
-    </>
+        <ListItem button>
+          <ListItemIcon>
+            <QuestionAnswerIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="FAQ" />}
+        </ListItem>
+      </List>
+    </Drawer>
   );
+};
+
+SidebarDrawer.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default SidebarDrawer;

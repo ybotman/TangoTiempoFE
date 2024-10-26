@@ -171,14 +171,11 @@
       "1741a30 - 1.0.20",
       "b43d93c - GitHub .chmod +w for .git/config"
     ]
-<<<<<<< Updated upstream
-=======
   },
   {
     "version": "1.0.21",
     "branch": "TEST",
     "feature_branch": "TEST",
     "commits": ["4d77aa5 - 1.0.21", "b8770c3 - Slug updates, Image change"]
->>>>>>> Stashed changes
   }
 ]
