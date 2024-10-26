@@ -68,7 +68,7 @@ const SiteMenuBar = ({
       return (
         <Avatar
           alt="Select Region"
-          src="/USARegions.png"
+          src="/images/USARegions.png"
           sx={{ width: 24, height: 24 }}
         />
       );

@@ -10,17 +10,23 @@ import {
   ListItemIcon,
   ListItemText,
   IconButton,
+  Collapse,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';
 import HelpIcon from '@mui/icons-material/Help';
-
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import Link from 'next/link';
 
 const SidebarDrawer = ({ open, onClose }) => {
   const [expanded, setExpanded] = useState(false); // Controls icon-only to icon + text view
+  const [aboutOpen, setAboutOpen] = useState(false); // Controls "About" submenu
 
   const toggleExpansion = () => setExpanded((prev) => !prev);
+  const toggleAboutMenu = () => setAboutOpen((prev) => !prev);
 
   return (
     <Drawer
@@ -47,14 +53,59 @@ const SidebarDrawer = ({ open, onClose }) => {
           {expanded && <ListItemText primary="Menu" />}
         </ListItem>
 
-        {/* Other Sidebar Items */}
-        <ListItem button>
+        {/* About Section with Nested Menu */}
+        <ListItem button onClick={toggleAboutMenu}>
           <ListItemIcon>
             <InfoIcon />
           </ListItemIcon>
           {expanded && <ListItemText primary="About" />}
+          {expanded && (aboutOpen ? <ExpandLess /> : <ExpandMore />)}
         </ListItem>
 
+        {/* Submenu for "Meet the Team" */}
+        <Collapse in={aboutOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding sx={{ paddingLeft: 4 }}>
+            <Link href="/about" passHref legacyBehavior>
+              <ListItem button component="a">
+                <ListItemIcon>
+                  <GroupIcon />
+                </ListItemIcon>
+                {expanded && <ListItemText primary="Meet the Team" />}
+              </ListItem>
+            </Link>
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+              {/* Nested links under "Meet the Team" */}
+              <List component="div" disablePadding sx={{ paddingLeft: 4 }}>
+                <Link href="/about-toby" passHref legacyBehavior>
+                  <ListItem button component="a">
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    {expanded && <ListItemText primary="About Toby" />}
+                  </ListItem>
+                </Link>
+                <Link href="/about-tural" passHref legacyBehavior>
+                  <ListItem button component="a">
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    {expanded && <ListItemText primary="About Tural" />}
+                  </ListItem>
+                </Link>
+                <Link href="/about-wailing" passHref legacyBehavior>
+                  <ListItem button component="a">
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    {expanded && <ListItemText primary="About Wailing" />}
+                  </ListItem>
+                </Link>
+              </List>
+            </Collapse>
+          </List>
+        </Collapse>
+
+        {/* Other Sidebar Items */}
         <ListItem button>
           <ListItemIcon>
             <HelpIcon />
