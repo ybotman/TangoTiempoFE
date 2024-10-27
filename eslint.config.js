@@ -1,9 +1,9 @@
-// eslint.config.js
+// eslint.config.cjs
 
-import js from '@eslint/js';
-import react from 'eslint-plugin-react';
-import prettier from 'eslint-plugin-prettier';
-import next from 'eslint-plugin-next';
+const js = require('@eslint/js');
+const react = require('eslint-plugin-react');
+const prettier = require('eslint-plugin-prettier');
+const next = require('eslint-plugin-next');
 
 export default [
   js.configs.recommended,
