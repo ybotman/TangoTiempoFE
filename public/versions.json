@@ -214,6 +214,7 @@
     "version": "local",
     "branch": "TEST",
     "commits": [
+      "bf1e52e - Fix EsLint",
       "84d2776 - eslint fixes again",
       "e9e03a8 - eslint naems",
       "bf2833a - ELSINT updates",
@@ -222,8 +223,7 @@
       "f3c2721 - BetterDrawer and Icon",
       "57e64b1 - confict resolved i hope",
       "7dcf35c - SOme Drawer Items,  USRegion Fixed",
-      "aba95fe - Hidding Side MenuBar",
-      "2b8f00f - Hidding Side MenuBar"
+      "aba95fe - Hidding Side MenuBar"
     ]
   }
 ]
