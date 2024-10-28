@@ -314,5 +314,14 @@
       "672adb6 - 1.0.23",
       "1b05b95 - Commit with Versions History"
     ]
+  },
+  {
+    "version": "1.0.24",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "66b721d - 1.0.24",
+      "8be42af -  actions/checkout@v4 on all YAML"
+    ]
   }
 ]
