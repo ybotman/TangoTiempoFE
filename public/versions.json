@@ -200,5 +200,137 @@
       "79531c8 - 1.0.22",
       "86d7617 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
     ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "4d77aa5 - 1.0.21",
+      "b8770c3 - Slug updates, Image change"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "commits": [
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint",
+      "84d2776 - eslint fixes again",
+      "e9e03a8 - eslint naems",
+      "bf2833a - ELSINT updates",
+      "ccc0806 - - name: Run Prettier and Lint   run: |     npx prettier --write .     npx eslint .",
+      "d60db05 - Conficts for SideDrawer Reoslved.",
+      "f3c2721 - BetterDrawer and Icon",
+      "57e64b1 - confict resolved i hope"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "commits": [
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint",
+      "84d2776 - eslint fixes again",
+      "e9e03a8 - eslint naems",
+      "bf2833a - ELSINT updates",
+      "ccc0806 - - name: Run Prettier and Lint   run: |     npx prettier --write .     npx eslint .",
+      "d60db05 - Conficts for SideDrawer Reoslved.",
+      "f3c2721 - BetterDrawer and Icon"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "commits": [
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint",
+      "84d2776 - eslint fixes again",
+      "e9e03a8 - eslint naems",
+      "bf2833a - ELSINT updates",
+      "ccc0806 - - name: Run Prettier and Lint   run: |     npx prettier --write .     npx eslint ."
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "1aee8e7 - promote.sh",
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "5f17ebd - still preping to promote.sh",
+      "1aee8e7 - promote.sh",
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions"
+    ]
+  },
+  {
+    "version": "1.0.23",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "672adb6 - 1.0.23",
+      "1b05b95 - Commit with Versions History"
+    ]
+  },
+  {
+    "version": "1.0.24",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "66b721d - 1.0.24",
+      "8be42af -  actions/checkout@v4 on all YAML"
+    ]
+  },
+  {
+    "version": "1.0.25",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "038f984 - 1.0.25",
+      "02dae26 - Merge branch 'merge-INTG-TEST' into TEST"
+    ]
   }
 ]

@@ -49,6 +49,7 @@ sitemap-*.xml
 archive/
 public/organizersList.json
 
+
 # Coverage directories used by tools like istanbul, nyc, etc.
 coverage/
 *.lcov
@@ -95,4 +96,4 @@ web_modules/
 # System files
 .DS_Store
 .tern-port
-.lock-wscript
+.lock-wscript.eslintignore

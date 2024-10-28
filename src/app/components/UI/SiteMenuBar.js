@@ -3,18 +3,14 @@
 'use client';
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  IconButton,
-  Avatar,
-  Typography, // Keep Typography import, it's used in renderRegionIcon
-} from '@mui/material';
+import { Box, IconButton, Avatar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import PostFilter from '@/components/UI/PostFilter';
 import FAQModal from '@/components/Modals/FAQModal';
+import SidebarDrawer from '@/components/UI/SidebarDrawer';
 
 // Import all modular components
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
@@ -33,25 +29,20 @@ const SiteMenuBar = ({
     selectedRole,
     user,
     roles,
-    handleHamburgerMenuOpen,
-    handleHamburgerMenuClose,
     handleRoleChange,
-    openFAQModal,
     closeFAQModal,
     logOut,
     teamMenuAnchorEl,
-    openTeamMenu, // Make sure openTeamMenu is included
-    setOpenTeamMenu, // Make sure setOpenTeamMenu is included
+    openTeamMenu,
+    setOpenTeamMenu,
     handleTeamMenuOpen,
     handleTeamMenuClose,
   } = useSiteMenuBar();
 
-  //const [openSubMenu, setOpenSubMenu] = useState(false);
+  const { regions, setSelectedRegion } = useContext(RegionsContext);
 
-  const {
-    regions,
-    setSelectedRegion, // Keep only the necessary region-related functions
-  } = useContext(RegionsContext);
+  // State for SidebarDrawer
+  const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
 
   // State for the region selection drawer
   const [regionDrawerOpen, setRegionDrawerOpen] = useState(false);
@@ -77,7 +68,7 @@ const SiteMenuBar = ({
       return (
         <Avatar
           alt="Select Region"
-          src="/USARegions.png"
+          src="/images/USARegions.png"
           sx={{ width: 24, height: 24 }}
         />
       );
@@ -110,12 +101,12 @@ const SiteMenuBar = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* Hamburger Menu */}
+          {/* Primary Hamburger to open SidebarDrawer */}
           <IconButton
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={handleHamburgerMenuOpen}
+            onClick={() => setSidebarDrawerOpen(!sidebarDrawerOpen)}
           >
             <MenuIcon />
           </IconButton>
@@ -123,14 +114,13 @@ const SiteMenuBar = ({
           {/* Hamburger Menu Component */}
           <SiteMenuBarHamburger
             anchorEl={anchorEl}
-            handleHamburgerMenuClose={handleHamburgerMenuClose}
-            openFAQModal={openFAQModal}
+            handleHamburgerMenuClose={() => setSidebarDrawerOpen(false)}
             selectedRole={selectedRole}
             handleTeamMenuOpen={handleTeamMenuOpen}
             handleTeamMenuClose={handleTeamMenuClose}
             teamMenuAnchorEl={teamMenuAnchorEl}
-            openTeamMenu={openTeamMenu} // Updated
-            setOpenTeamMenu={setOpenTeamMenu} // Updated
+            openTeamMenu={openTeamMenu}
+            setOpenTeamMenu={setOpenTeamMenu}
           />
 
           {/* Region Selection Icon */}
@@ -164,6 +154,12 @@ const SiteMenuBar = ({
 
       {/* Help Modal */}
       <FAQModal open={FAQModalOpen} handleClose={closeFAQModal} />
+
+      {/* Sidebar Drawer - Opens with primary hamburger */}
+      <SidebarDrawer
+        open={sidebarDrawerOpen}
+        onClose={() => setSidebarDrawerOpen(false)}
+      />
 
       {/* Region Selection Drawer */}
       <SiteMenuBarRegionDrawer

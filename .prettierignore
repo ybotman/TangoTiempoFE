@@ -1,0 +1,6 @@
+node_modules
+.next
+public
+dist
+archive
+.husky

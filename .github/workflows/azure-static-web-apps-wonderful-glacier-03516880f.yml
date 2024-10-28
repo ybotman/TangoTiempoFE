@@ -43,7 +43,7 @@ jobs:
       - name: Run Prettier and Lint
         run: |
           npx prettier --write .
-          npx eslint --ext .js,.jsx,.ts,.tsx .
+          npx eslint .
 
       # Clean the Git working directory
       - name: Clean Git working directory
