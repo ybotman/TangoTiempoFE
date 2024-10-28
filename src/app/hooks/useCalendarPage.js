@@ -7,7 +7,7 @@ import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { RoleContext } from '@/contexts/RoleContext';
-import { trackEvent } from '@/utils/useGoogleAnalytics'; // Import the tracking function
+import { trackEvent } from '@/hooks/useGoogleAnalytics'; // Import the tracking function
 import { listOfAllRoles } from '@/utils/masterData';
 
 export const useCalendarPage = () => {
@@ -96,7 +96,7 @@ export const useCalendarPage = () => {
     // Track event creation
     trackEvent({
       action: 'create_event',
-      category: 'Calendar',
+      category: 'Event Management',
       label: newEvent.title || 'New Event',
       value: newEvent.id,
     });
@@ -108,8 +108,9 @@ export const useCalendarPage = () => {
     // Track previous navigation
     trackEvent({
       action: 'navigate_prev',
-      category: 'Calendar',
+      category: 'Calendar Navigation',
       label: 'Previous Period',
+      value:''
     });
   };
 
@@ -119,7 +120,7 @@ export const useCalendarPage = () => {
     // Track next navigation
     trackEvent({
       action: 'navigate_next',
-      category: 'Calendar',
+      category: 'Calendar Date Navigation',
       label: 'Next Period',
     });
   };
@@ -130,7 +131,7 @@ export const useCalendarPage = () => {
     // Track navigation to today
     trackEvent({
       action: 'navigate_today',
-      category: 'Calendar',
+      category: 'Calendar Date Navigation',
       label: 'Today',
     });
   };
@@ -141,7 +142,7 @@ export const useCalendarPage = () => {
     // Track date click
     trackEvent({
       action: 'click_date',
-      category: 'Calendar',
+      category: 'Calendar Date Navigation',
       label: arg.dateStr,
     });
 
@@ -164,7 +165,7 @@ export const useCalendarPage = () => {
     // Track event click
     trackEvent({
       action: 'click_event',
-      category: 'Calendar',
+      category: 'Event Management',
       label: arg.event.title,
       value: arg.event.id,
     });
@@ -200,7 +201,7 @@ export const useCalendarPage = () => {
     // Track menu action
     trackEvent({
       action: `menu_action_${action}`,
-      category: 'Calendar',
+      category: 'Event Management',
       label: action,
     });
 
