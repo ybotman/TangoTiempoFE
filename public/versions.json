@@ -305,5 +305,14 @@
       "3c91ab6 - more \"type\": \"module\". for next.*",
       "727b353 - esline.config.mjs, type module, commitVersions"
     ]
+  },
+  {
+    "version": "1.0.23",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "672adb6 - 1.0.23",
+      "1b05b95 - Commit with Versions History"
+    ]
   }
 ]
