@@ -323,5 +323,21 @@
       "66b721d - 1.0.24",
       "8be42af -  actions/checkout@v4 on all YAML"
     ]
+  },
+  {
+    "version": "1.0.24",
+    "branch": "TEST",
+    "commits": [
+      "02dae26 - Merge branch 'merge-INTG-TEST' into TEST",
+      "02b7b05 - Merge branch 'INTG' into merge-INTG-TEST",
+      "37233f1 - chore: update version history for 1.0.24",
+      "66b721d - 1.0.24",
+      "8be42af -  actions/checkout@v4 on all YAML",
+      "0c09ba7 - chore: update version history for 1.0.23",
+      "672adb6 - 1.0.23",
+      "1b05b95 - Commit with Versions History",
+      "5f17ebd - still preping to promote.sh",
+      "1aee8e7 - promote.sh"
+    ]
   }
 ]
