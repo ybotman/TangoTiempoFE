@@ -323,5 +323,14 @@
       "66b721d - 1.0.24",
       "8be42af -  actions/checkout@v4 on all YAML"
     ]
+  },
+  {
+    "version": "1.0.25",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "038f984 - 1.0.25",
+      "02dae26 - Merge branch 'merge-INTG-TEST' into TEST"
+    ]
   }
 ]
