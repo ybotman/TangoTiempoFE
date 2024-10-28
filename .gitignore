@@ -96,4 +96,4 @@ web_modules/
 # System files
 .DS_Store
 .tern-port
-.lock-wscript
+.lock-wscript.eslintignore
