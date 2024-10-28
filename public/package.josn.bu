@@ -9,11 +9,11 @@
     "build": "next build && next-sitemap",
     "start": "next start",
     "lint": "clear && next lint --fix",
-    "eslint": "clear && npx eslint  . --fix",
     "format": "prettier --write .",
     "test": "echo \"No tests specified\"",
-    "prep": "prettier --write . && npm run eslint && npm run build",
-    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
+    "prep": "prettier --write . && next lint --fix && npm run build",
+    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
@@ -51,12 +51,23 @@
     "slugify": "^1.6.6",
     "winston": "^3.15.0"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx}": "eslint --cache --fix",
+    "*.{js,jsx,css,md}": "prettier --write"
+  },
   "devDependencies": {
-    "@eslint/js": "^9.13.0",
     "eslint": "^9.13.0",
     "eslint-config-next": "^15.0.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.11.0",
+    "husky": "^9.1.6",
     "prettier": "^3.3.3"
   }
 }

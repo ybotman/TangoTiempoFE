@@ -16,7 +16,10 @@ try {
   ).split('\n');
 
   // Path to versions.json
-  const versionsPath = new URL('../../../public/versions.json', import.meta.url);
+  const versionsPath = new URL(
+    '../../../public/versions.json',
+    import.meta.url
+  );
 
   // Load the current versions.json file
   const versions = JSON.parse(fs.readFileSync(versionsPath, 'utf8'));
