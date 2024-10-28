@@ -49,6 +49,7 @@ sitemap-*.xml
 archive/
 public/organizersList.json
 
+
 # Coverage directories used by tools like istanbul, nyc, etc.
 coverage/
 *.lcov
