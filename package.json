@@ -8,10 +8,8 @@
     "dev": "next dev",
     "build": "next build && next-sitemap",
     "start": "next start",
-    "lint": "clear && next lint --fix",
     "eslint": "clear && npx eslint  . --fix",
     "format": "prettier --write .",
-    "test": "echo \"No tests specified\"",
     "prep": "prettier --write . && npm run eslint && npm run build",
     "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
   },
