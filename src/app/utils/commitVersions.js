@@ -49,6 +49,3 @@ try {
 } catch (error) {
   console.error('Error updating versions.json:', error.message);
 }
-
-
-

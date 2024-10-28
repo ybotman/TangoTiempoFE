@@ -15,4 +15,3 @@ const app = initializeApp(decodedFirebaseConfig);
 
 // Export auth for use in other components
 export const auth = getAuth(app);
- 

@@ -273,5 +273,21 @@
       "24dfaa7 - versions",
       "bf1e52e - Fix EsLint"
     ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "1aee8e7 - promote.sh",
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions"
+    ]
   }
 ]
