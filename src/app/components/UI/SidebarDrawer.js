@@ -69,14 +69,21 @@ const SidebarDrawer = ({ open, onClose }) => {
           }}
         >
           <ListItemIcon>
-            <Avatar alt="Select Region" src="/images/Regions/RegionsIcon.png" sx={{ width: 32, height: 32 }} />
+            <Avatar
+              alt="Select Region"
+              src="/images/Regions/RegionsIcon.png"
+              sx={{ width: 32, height: 32 }}
+            />
           </ListItemIcon>
           {expanded && <ListItemText primary="Regions" />}
         </ListItem>
-        
+
         {/* Region Menu */}
         <Collapse in={regionMenuOpen} timeout="auto" unmountOnExit>
-          <RegionMenu expanded={expanded} onClose={() => setRegionMenuOpen(false)} />
+          <RegionMenu
+            expanded={expanded}
+            onClose={() => setRegionMenuOpen(false)}
+          />
         </Collapse>
 
         {/* About Section */}
@@ -90,7 +97,11 @@ const SidebarDrawer = ({ open, onClose }) => {
 
         {/* Meet the Team Top Level */}
         <Collapse in={aboutOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding sx={{ paddingLeft: expanded ? 4 : 0 }}>
+          <List
+            component="div"
+            disablePadding
+            sx={{ paddingLeft: expanded ? 4 : 0 }}
+          >
             <Link href="/about" passHref>
               <ListItem button component="a">
                 <ListItemIcon>

@@ -1,7 +1,14 @@
 // SiteMenuBar.js
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar, Tooltip, Typography, Fade } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Avatar,
+  Tooltip,
+  Typography,
+  Fade,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -47,7 +54,10 @@ const SiteMenuBar = ({
   // Toggle pulse effect for "Select Region" when no region is selected
   useEffect(() => {
     if (!selectedRegion) {
-      const interval = setInterval(() => setPulseRegionText((prev) => !prev), 1000);
+      const interval = setInterval(
+        () => setPulseRegionText((prev) => !prev),
+        1000
+      );
       return () => clearInterval(interval);
     }
   }, [selectedRegion]);
@@ -64,8 +74,15 @@ const SiteMenuBar = ({
     );
 
   return (
-    <Box sx={{ width: '100%', padding: '0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      
+    <Box
+      sx={{
+        width: '100%',
+        padding: '0 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
       {/* Left Icons and Region Context */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
