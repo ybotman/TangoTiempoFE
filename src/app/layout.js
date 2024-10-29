@@ -13,7 +13,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* ... other head elements */}
+        {/* Facebook Domain Verification */}
+        <meta name="facebook-domain-verification" content="39o5h74oasigr7d761a9danhuv0ckg" />
+
+        {/* Google Analytics Script */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
           strategy="afterInteractive"
