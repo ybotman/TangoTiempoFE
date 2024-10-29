@@ -4,10 +4,11 @@ import React from 'react';
 import styles from '@/styles/About.module.css';
 
 export const metadata = {
-  title: 'About Us',
-  description: 'Making the US Tango community more connected',
+  title: 'Tango Tiempo - About Us',
+  description:
+    'Making Argentine Tagno Better for US. Tango Tiempo for the US is a comprehensive calendar application designed to help tango dancers and organizers across the nation coordinate and manage tango events.',
   openGraph: {
-    title: 'About Us',
+    title: 'ango Tiempo - About Us',
     description: 'Learn more about our company',
     url: 'http://TangoTiempo.com/about',
   },
