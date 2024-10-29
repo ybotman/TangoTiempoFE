@@ -418,5 +418,14 @@
       "7c2164c - chore: update version history for 1.0.30",
       "c3efe66 - 1.0.30"
     ]
+  },
+  {
+    "version": "1.0.33",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "cf7700f - 1.0.33",
+      "d0c2147 - Commit with Versions History"
+    ]
   }
 ]
