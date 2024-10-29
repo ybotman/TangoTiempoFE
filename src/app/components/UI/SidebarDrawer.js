@@ -70,7 +70,7 @@ const SidebarDrawer = ({ open, onClose }) => {
     >
       <List>
         {/* Inner Hamburger to expand the sidebar */}
-        <ListItem button onClick={toggleExpansion}>
+        <ListItem button={true} onClick={toggleExpansion}>
           <ListItemIcon>
             <IconButton>
               <MenuIcon />
@@ -110,7 +110,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         </Collapse>
 
         {/* About Section with Nested Menu */}
-        <ListItem button onClick={toggleAboutMenu}>
+        <ListItem button={true} onClick={toggleAboutMenu}>
           <ListItemIcon>
             <InfoIcon />
           </ListItemIcon>
@@ -126,7 +126,7 @@ const SidebarDrawer = ({ open, onClose }) => {
             sx={{ paddingLeft: expanded ? 4 : 0 }}
           >
             <Link href="/about" passHref legacyBehavior>
-              <ListItem button component="a">
+              <ListItem button={true} component="a">
                 <ListItemIcon>
                   <GroupIcon />
                 </ListItemIcon>
@@ -137,7 +137,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               {/* Nested links under "Meet the Team" */}
               <List component="div" disablePadding sx={{ paddingLeft: 4 }}>
                 <Link href="/about-toby" passHref legacyBehavior>
-                  <ListItem button component="a">
+                  <ListItem button={true} component="a">
                     <ListItemIcon>
                       <PersonIcon />
                     </ListItemIcon>
@@ -145,7 +145,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                   </ListItem>
                 </Link>
                 <Link href="/about-tural" passHref legacyBehavior>
-                  <ListItem button component="a">
+                  <ListItem button={true} component="a">
                     <ListItemIcon>
                       <PersonIcon />
                     </ListItemIcon>
@@ -153,7 +153,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                   </ListItem>
                 </Link>
                 <Link href="/about-wailing" passHref legacyBehavior>
-                  <ListItem button component="a">
+                  <ListItem button={true} component="a">
                     <ListItemIcon>
                       <PersonIcon />
                     </ListItemIcon>
@@ -166,14 +166,14 @@ const SidebarDrawer = ({ open, onClose }) => {
         </Collapse>
 
         {/* Other Sidebar Items */}
-        <ListItem button>
+        <ListItem button={true}>
           <ListItemIcon>
             <HelpIcon />
           </ListItemIcon>
           {expanded && <ListItemText primary="Help" />}
         </ListItem>
 
-        <ListItem button>
+        <ListItem button={true} >
           <ListItemIcon>
             <QuestionAnswerIcon />
           </ListItemIcon>
