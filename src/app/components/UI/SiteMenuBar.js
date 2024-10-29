@@ -1,20 +1,28 @@
 // SiteMenuBar.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Avatar,
+  Tooltip,
+  Typography,
+  Fade,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import FAQModal from '@/components/Modals/FAQModal';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
+import { RegionsContext } from '@/contexts/RegionsContext';
 
 const SiteMenuBar = ({
   activeCategories,
   handleCategoryChange,
   categories,
-  selectedOrganizer,
 }) => {
   const {
     FAQModalOpen,
@@ -28,6 +36,30 @@ const SiteMenuBar = ({
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [pulseRegionText, setPulseRegionText] = useState(false);
+
+  // Access selectedRegion from RegionsContext
+  const { selectedRegion } = useContext(RegionsContext);
+
+  // Tooltip toggle for arrow effect if user is not logged in
+  useEffect(() => {
+    if (!user) {
+      const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  // Toggle pulse effect for "Select Region" when no region is selected
+  useEffect(() => {
+    if (!selectedRegion) {
+      const interval = setInterval(
+        () => setPulseRegionText((prev) => !prev),
+        1000
+      );
+      return () => clearInterval(interval);
+    }
+  }, [selectedRegion]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -41,16 +73,19 @@ const SiteMenuBar = ({
     );
 
   return (
-    <Box sx={{ width: '100%', padding: '0 0' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-        }}
-      >
+    <Box
+      sx={{
+        width: '100%',
+        padding: '0 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      {/* Left Icons and Region Context */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
-          edge="end"
+          edge="start"
           color="inherit"
           aria-label="menu"
           onClick={() => setSidebarDrawerOpen(!sidebarDrawerOpen)}
@@ -58,26 +93,44 @@ const SiteMenuBar = ({
           <MenuIcon />
         </IconButton>
 
-        <IconButton onClick={() => setUserDrawerOpen(true)}>
-          {renderUserIcon()}
-        </IconButton>
+        {/* Region Context Display */}
+        {selectedRegion ? (
+          <Typography variant="body1" sx={{ ml: 2, fontWeight: 'bold' }}>
+            {selectedRegion}
+          </Typography>
+        ) : (
+          <Fade in={pulseRegionText} timeout={800}>
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+              <ArrowBackIcon sx={{ fontSize: 20, mr: 0.5 }} />
+              <Typography variant="body2" color="textSecondary">
+                Select Region
+              </Typography>
+            </Box>
+          </Fade>
+        )}
       </Box>
 
-      {/* Category Filter Centered */}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: 2,
-        }}
-      >
+      {/* Centered PostFilter */}
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
         <PostFilter
           activeCategories={activeCategories}
           handleCategoryChange={handleCategoryChange}
           categories={categories}
-          selectedOrganizer={selectedOrganizer}
         />
+      </Box>
+
+      {/* Right Icons - User Account with conditional tooltip */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Tooltip
+          title="Login here!"
+          arrow
+          open={!user && showTooltip}
+          placement="left"
+        >
+          <IconButton onClick={() => setUserDrawerOpen(true)}>
+            {renderUserIcon()}
+          </IconButton>
+        </Tooltip>
       </Box>
 
       {/* FAQ Modal */}

@@ -1,6 +1,6 @@
 {
   "name": "tangotiempo",
-  "version": "1.0.27",
+  "version": "1.0.32",
   "private": true,
   "proxy": "http://localhost:3001",
   "type": "module",
@@ -12,6 +12,9 @@
     "format": "prettier --write .",
     "prep": "prettier --write . && npm run eslint && npm run build",
     "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
+  },
+  "engines": {
+    "node": "=20.x"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
