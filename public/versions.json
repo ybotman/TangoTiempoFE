@@ -339,5 +339,21 @@
       "5f17ebd - still preping to promote.sh",
       "1aee8e7 - promote.sh"
     ]
+  },
+  {
+    "version": "1.0.24",
+    "branch": "Move-Items-to-HiddenDrawer",
+    "commits": [
+      "698fcab - proptype fixes and regions working.",
+      "e9b9d91 - RegionsDrawer Moved.  Small Bugs",
+      "79b083d - ReOrgedGoogleAnalyics",
+      "69f945c - versions",
+      "02dae26 - Merge branch 'merge-INTG-TEST' into TEST",
+      "02b7b05 - Merge branch 'INTG' into merge-INTG-TEST",
+      "37233f1 - chore: update version history for 1.0.24",
+      "66b721d - 1.0.24",
+      "8be42af -  actions/checkout@v4 on all YAML",
+      "0c09ba7 - chore: update version history for 1.0.23"
+    ]
   }
 ]
