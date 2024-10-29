@@ -325,6 +325,7 @@
     ]
   },
   {
+<<<<<<< HEAD
     "version": "1.0.24",
     "branch": "TEST",
     "commits": [
@@ -354,6 +355,14 @@
       "66b721d - 1.0.24",
       "8be42af -  actions/checkout@v4 on all YAML",
       "0c09ba7 - chore: update version history for 1.0.23"
+=======
+    "version": "1.0.25",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "038f984 - 1.0.25",
+      "02dae26 - Merge branch 'merge-INTG-TEST' into TEST"
+>>>>>>> 86e8fa2bfb5337e43a0d3a698e3cec3f9821e4b4
     ]
   }
 ]
