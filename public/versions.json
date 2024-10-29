@@ -332,5 +332,14 @@
       "038f984 - 1.0.25",
       "02dae26 - Merge branch 'merge-INTG-TEST' into TEST"
     ]
+  },
+  {
+    "version": "1.0.26",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "4d41933 - 1.0.26",
+      "11b314f - commit verions"
+    ]
   }
 ]
