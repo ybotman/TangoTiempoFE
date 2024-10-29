@@ -1,7 +1,8 @@
-// src/components/UI/SidebarDrawer.js
+// SidebarDrawer.js
 'use client';
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Drawer,
   List,
@@ -9,72 +10,166 @@ import {
   ListItemIcon,
   ListItemText,
   IconButton,
+  Collapse,
+  Avatar,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';
 import HelpIcon from '@mui/icons-material/Help';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // New icon for FAQ
-import FAQModal from '@/components/Modals/FAQModal';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
+import MessageIcon from '@mui/icons-material/Message';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import Link from 'next/link';
+import RegionMenu from './RegionMenu';
 
-const SidebarDrawer = () => {
-  const [open, setOpen] = useState(false);
-  const [faqOpen, setFaqOpen] = useState(false); // State for FAQ modal
+const SidebarDrawer = ({ open, onClose }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
 
-  const toggleDrawer = () => setOpen((prevOpen) => !prevOpen);
-  const toggleFaq = () => setFaqOpen((prevFaqOpen) => !prevFaqOpen);
+  const toggleExpansion = () => setExpanded((prev) => !prev);
+  const toggleAboutMenu = () => setAboutOpen((prev) => !prev);
 
   return (
-    <>
-      <Drawer
-        variant="permanent"
-        open={open}
-        sx={{
-          width: open ? 240 : 72,
-          transition: 'width 0.3s',
-          '& .MuiDrawer-paper': {
-            width: open ? 240 : 72,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <List>
-          <ListItem button={true} onClick={toggleDrawer}>
-            <ListItemIcon>
-              <IconButton>
-                <MenuIcon />
-              </IconButton>
-            </ListItemIcon>
-            {open && <ListItemText primary="Menu" />}
-          </ListItem>
+    <Drawer
+      anchor="left"
+      open={open}
+      onClose={onClose}
+      sx={{
+        width: expanded ? 240 : 72,
+        transition: 'width 0.3s',
+        '& .MuiDrawer-paper': {
+          width: expanded ? 240 : 72,
+          boxSizing: 'border-box',
+        },
+      }}
+    >
+      <List>
+        {/* Expandable Menu */}
+        <ListItem button onClick={toggleExpansion}>
+          <ListItemIcon>
+            <IconButton>
+              <MenuIcon />
+            </IconButton>
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Menu" />}
+        </ListItem>
 
-          <ListItem button={true}>
-            <ListItemIcon>
-              <InfoIcon />
-            </ListItemIcon>
-            {open && <ListItemText primary="About" />}
-          </ListItem>
+        {/* Regions Section */}
+        <ListItem
+          button
+          onClick={() => {
+            if (!expanded) toggleExpansion();
+            setRegionMenuOpen(true);
+          }}
+        >
+          <ListItemIcon>
+            <Avatar
+              alt="Select Region"
+              src="/images/Regions/RegionsIcon.png"
+              sx={{ width: 32, height: 32 }}
+            />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Regions" />}
+        </ListItem>
 
-          <ListItem button={true}>
-            <ListItemIcon>
-              <HelpIcon />
-            </ListItemIcon>
-            {open && <ListItemText primary="Help" />}
-          </ListItem>
+        {/* Region Menu */}
+        <Collapse in={regionMenuOpen} timeout="auto" unmountOnExit>
+          <RegionMenu
+            expanded={expanded}
+            onClose={() => setRegionMenuOpen(false)}
+          />
+        </Collapse>
 
-          {/* FAQ Icon */}
-          <ListItem button={true} onClick={toggleFaq}>
+        {/* About Section */}
+        <ListItem button onClick={toggleAboutMenu}>
+          <ListItemIcon>
+            <InfoIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="About" />}
+          {expanded && (aboutOpen ? <ExpandLess /> : <ExpandMore />)}
+        </ListItem>
+
+        {/* Meet the Team Top Level */}
+        <Collapse in={aboutOpen} timeout="auto" unmountOnExit>
+          <List
+            component="div"
+            disablePadding
+            sx={{ paddingLeft: expanded ? 4 : 0 }}
+          >
+            <Link href="/about" passHref>
+              <ListItem button component="a">
+                <ListItemIcon>
+                  <GroupIcon />
+                </ListItemIcon>
+                {expanded && <ListItemText primary="Meet the Team" />}
+              </ListItem>
+            </Link>
+
+            {/* About Toby Submenu */}
+            <Link href="/about-toby/page.js" passHref>
+              <ListItem button component="a" sx={{ paddingLeft: 4 }}>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                {expanded && <ListItemText primary="About Toby" />}
+              </ListItem>
+            </Link>
+          </List>
+        </Collapse>
+
+        {/* FAQ */}
+        <Link href="/components/Modals/FAQModal.js" passHref>
+          <ListItem button component="a">
             <ListItemIcon>
               <QuestionAnswerIcon />
             </ListItemIcon>
-            {open && <ListItemText primary="FAQ" />}
+            {expanded && <ListItemText primary="FAQ" />}
           </ListItem>
-        </List>
-      </Drawer>
+        </Link>
 
-      {/* FAQ Modal */}
-      <FAQModal open={faqOpen} handleClose={toggleFaq} />
-    </>
+        {/* Help */}
+        <ListItem button>
+          <ListItemIcon>
+            <HelpIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Help" />}
+        </ListItem>
+
+        {/* User Settings (Fake) */}
+        <ListItem button>
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="User Settings" />}
+        </ListItem>
+
+        {/* Organizer Settings (Fake) */}
+        <ListItem button>
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Organizer Settings" />}
+        </ListItem>
+
+        {/* Message Admin (Fake) */}
+        <ListItem button>
+          <ListItemIcon>
+            <MessageIcon />
+          </ListItemIcon>
+          {expanded && <ListItemText primary="Message Admin" />}
+        </ListItem>
+      </List>
+    </Drawer>
   );
+};
+
+SidebarDrawer.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default SidebarDrawer;

@@ -200,5 +200,207 @@
       "79531c8 - 1.0.22",
       "86d7617 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
     ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "4d77aa5 - 1.0.21",
+      "b8770c3 - Slug updates, Image change"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "commits": [
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint",
+      "84d2776 - eslint fixes again",
+      "e9e03a8 - eslint naems",
+      "bf2833a - ELSINT updates",
+      "ccc0806 - - name: Run Prettier and Lint   run: |     npx prettier --write .     npx eslint .",
+      "d60db05 - Conficts for SideDrawer Reoslved.",
+      "f3c2721 - BetterDrawer and Icon",
+      "57e64b1 - confict resolved i hope"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "commits": [
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint",
+      "84d2776 - eslint fixes again",
+      "e9e03a8 - eslint naems",
+      "bf2833a - ELSINT updates",
+      "ccc0806 - - name: Run Prettier and Lint   run: |     npx prettier --write .     npx eslint .",
+      "d60db05 - Conficts for SideDrawer Reoslved.",
+      "f3c2721 - BetterDrawer and Icon"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "TEST",
+    "commits": [
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint",
+      "84d2776 - eslint fixes again",
+      "e9e03a8 - eslint naems",
+      "bf2833a - ELSINT updates",
+      "ccc0806 - - name: Run Prettier and Lint   run: |     npx prettier --write .     npx eslint ."
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions",
+      "bf1e52e - Fix EsLint"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "1aee8e7 - promote.sh",
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions",
+      "24dfaa7 - versions"
+    ]
+  },
+  {
+    "version": "1.0.21",
+    "branch": "LINT-and-PRETTIER-and-VCOMMIT",
+    "commits": [
+      "5f17ebd - still preping to promote.sh",
+      "1aee8e7 - promote.sh",
+      "9ae7114 - remove old commend LINT",
+      "ac91aad - firebase back to old",
+      "1dd25cc - ESLINT+, PLUGIN-REACT+, GLOBALS+",
+      "faeb9db -     \"version\": \"1.0.21\",",
+      "0a3cb04 -  eslint.config.mjs with import statements:",
+      "167d383 - V",
+      "3c91ab6 - more \"type\": \"module\". for next.*",
+      "727b353 - esline.config.mjs, type module, commitVersions"
+    ]
+  },
+  {
+    "version": "1.0.23",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "672adb6 - 1.0.23",
+      "1b05b95 - Commit with Versions History"
+    ]
+  },
+  {
+    "version": "1.0.24",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "66b721d - 1.0.24",
+      "8be42af -  actions/checkout@v4 on all YAML"
+    ]
+  },
+  {
+    "version": "1.0.25",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "038f984 - 1.0.25",
+      "02dae26 - Merge branch 'merge-INTG-TEST' into TEST"
+    ]
+  },
+  {
+    "version": "1.0.26",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "4d41933 - 1.0.26",
+      "11b314f - commit verions"
+    ]
+  },
+  {
+    "version": "1.0.27",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "78df066 - 1.0.27",
+      "9d8ce78 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  },
+  {
+    "version": "1.0.28",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "7804c75 - 1.0.28",
+      "50b0135 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  },
+  {
+    "version": "1.0.28",
+    "branch": "More-Sidebar-Integration---User",
+    "commits": [
+      "8b61efa - cleanup PREP",
+      "9cdc7bb - CLosing on the SideBar Structure",
+      "1f34907 - RegionsICon and SideBar and SiteBar set.",
+      "01955c0 - SiteMenu Single",
+      "3a5f4ea - Single  SIteMenu + L&R Drawer w/  Login pulse",
+      "74bb0e2 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
+      "f4d0c98 - FaceBook TEST Metatag",
+      "fb0c5ae - chore: update version history for 1.0.28",
+      "7804c75 - 1.0.28",
+      "50b0135 - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
+  },
+  {
+    "version": "1.0.30",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "c3efe66 - 1.0.30",
+      "43f58a8 - lint --Fixes i missed"
+    ]
+  },
+  {
+    "version": "1.0.31",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "deb9dfd - 1.0.31",
+      "ed25658 -   \"engines\": {     \"node\": \">=20.0.0\""
+    ]
+  },
+  {
+    "version": "1.0.32",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "eecee90 - 1.0.32",
+      "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
   }
 ]

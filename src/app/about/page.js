@@ -4,10 +4,11 @@ import React from 'react';
 import styles from '@/styles/About.module.css';
 
 export const metadata = {
-  title: 'About Us',
-  description: 'Making the US Tango community more connected',
+  title: 'Tango Tiempo - About Us',
+  description:
+    'Making Argentine Tagno Better for US. Tango Tiempo for the US is a comprehensive calendar application designed to help tango dancers and organizers across the nation coordinate and manage tango events.',
   openGraph: {
-    title: 'About Us',
+    title: 'ango Tiempo - About Us',
     description: 'Learn more about our company',
     url: 'http://TangoTiempo.com/about',
   },
@@ -20,15 +21,15 @@ export default function About() {
         <h1>Tango Tiempo - National Tango Calendar App</h1>
         <h2>Overview</h2>
         <p>
-          Currently, we are in ALPHA MODE. I am surprised you found this site!
-          If you are an Argentine Tango organizer and are interested in becoming
-          a regional admin for Tango Tiempo, please contact me. We hope to go
-          live by the end of 2024, and will bring on new Tango regions (one at a
-          time) in January of 2025. If you have found this site, feel free to
-          contact me. To be careful, I will give you my TEXT number: Use the
-          Massachusetts area code, (and you have to find it but you can do it),
-          and text me at 6 5 3 dash 9 4 5 2. Yes, you to go right this down. ;-)
-          This page will be changed when we are live.
+          Currently, we are in BETA MODE. I am surprised you found this site! If
+          you are an Argentine Tango organizer and are interested in becoming a
+          regional admin for Tango Tiempo, please contact me. We hope to be
+          fullly live by the end of 2024, and will bring on new Tango regions
+          (one at a time) in January of 2025. If you have found this site, feel
+          free to contact me. To be careful, I will give you my TEXT number: Use
+          the Massachusetts area code, (and you have to find it but you can do
+          it), and text me at 6 5 3 dash 9 4 5 2. Yes, you to go right this
+          down. ;-) This page will be changed when we are live.
         </p>
         <p>
           Tango Tiempo is a comprehensive calendar application designed to help

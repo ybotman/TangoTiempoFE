@@ -1,5 +1,5 @@
 // next-seo.config.js
-module.exports = {
+export default {
   title: 'Tango Tiempo',
   description:
     "The United States' first fully dedicated Argentine Tango calendar. Every feature for searching, finding, adding, and managing Tango events is free, forever. We just want to help you find the best Tango events in your area and help organizers get the word out about their events. Let's make the Tango community stronger together.",
