@@ -14,7 +14,7 @@
     "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "=20.x"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
