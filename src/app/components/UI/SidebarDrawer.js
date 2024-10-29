@@ -11,9 +11,7 @@ import {
   ListItemText,
   IconButton,
   Collapse,
-  Typography,
   Avatar,
-  Box,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';

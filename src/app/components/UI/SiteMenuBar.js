@@ -23,7 +23,6 @@ const SiteMenuBar = ({
   activeCategories,
   handleCategoryChange,
   categories,
-  selectedOrganizer,
 }) => {
   const {
     FAQModalOpen,
