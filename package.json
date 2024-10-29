@@ -13,6 +13,9 @@
     "prep": "prettier --write . && npm run eslint && npm run build",
     "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
     "@emotion/react": "^11.13.3",
