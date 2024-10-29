@@ -50,8 +50,15 @@ const SiteMenuBar = ({
     );
 
   return (
-    <Box sx={{ width: '100%', padding: '0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      
+    <Box
+      sx={{
+        width: '100%',
+        padding: '0 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
       {/* Left Icons */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
