@@ -1,14 +1,16 @@
 // SiteMenuBar.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar, Tooltip } from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Typography, Fade } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import FAQModal from '@/components/Modals/FAQModal';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
+import { RegionsContext } from '@/contexts/RegionsContext';
 
 const SiteMenuBar = ({
   activeCategories,
@@ -29,6 +31,10 @@ const SiteMenuBar = ({
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [pulseRegionText, setPulseRegionText] = useState(false);
+
+  // Access selectedRegion from RegionsContext
+  const { selectedRegion } = useContext(RegionsContext);
 
   // Tooltip toggle for arrow effect if user is not logged in
   useEffect(() => {
@@ -37,6 +43,14 @@ const SiteMenuBar = ({
       return () => clearInterval(interval);
     }
   }, [user]);
+
+  // Toggle pulse effect for "Select Region" when no region is selected
+  useEffect(() => {
+    if (!selectedRegion) {
+      const interval = setInterval(() => setPulseRegionText((prev) => !prev), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedRegion]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -50,16 +64,9 @@ const SiteMenuBar = ({
     );
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        padding: '0 0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
-      {/* Left Icons */}
+    <Box sx={{ width: '100%', padding: '0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      
+      {/* Left Icons and Region Context */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
           edge="start"
@@ -69,6 +76,22 @@ const SiteMenuBar = ({
         >
           <MenuIcon />
         </IconButton>
+
+        {/* Region Context Display */}
+        {selectedRegion ? (
+          <Typography variant="body1" sx={{ ml: 2, fontWeight: 'bold' }}>
+            {selectedRegion}
+          </Typography>
+        ) : (
+          <Fade in={pulseRegionText} timeout={800}>
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+              <ArrowBackIcon sx={{ fontSize: 20, mr: 0.5 }} />
+              <Typography variant="body2" color="textSecondary">
+                Select Region
+              </Typography>
+            </Box>
+          </Fade>
+        )}
       </Box>
 
       {/* Centered PostFilter */}

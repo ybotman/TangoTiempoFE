@@ -49,7 +49,7 @@ const SidebarDrawer = ({ open, onClose }) => {
     ) : (
       <Avatar
         alt="Select Region"
-        src="/images/USARegions.png"
+        src="/images/Regions/RegionsIcon.png"
         sx={{ width: 32, height: 32 }}
       />
     );
