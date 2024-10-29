@@ -1,4 +1,4 @@
-// RegionMenu.js
+'use client'; // RegionMenu.js
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {

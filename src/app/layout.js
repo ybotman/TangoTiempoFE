@@ -40,9 +40,7 @@ export default function RootLayout({ children }) {
         </Script>
       </head>
       <body style={{ display: 'flex' }}>
-        {/* Sidebar Drawer */}
         <SidebarDrawer />
-
         {/* Main Content Area */}
         <div style={{ flexGrow: 1, padding: '1rem' }}>
           <Providers>

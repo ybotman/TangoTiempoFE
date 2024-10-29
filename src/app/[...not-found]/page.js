@@ -1,10 +1,22 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Container, Typography, Button, Box } from '@mui/material';
 import Image from 'next/image';
 
 const NotFoundPage = () => {
+  useEffect(() => {
+    if (window.gtag) {
+      // Track the 404 page view with referrer info
+      window.gtag('event', 'page_view', {
+        page_path: '/404',
+        page_title: '404 Not Found',
+        referrer: document.referrer || 'direct', // Capture referrer or mark as direct if none
+      });
+    }
+  }, []);
+
   return (
     <Container style={{ textAlign: 'center', marginTop: '50px' }}>
       <Image
@@ -26,26 +38,6 @@ const NotFoundPage = () => {
         <Link href="/calendar" passHref>
           <Button variant="contained" color="primary">
             Go to Calendar
-          </Button>
-        </Link>
-        <Link href="/signin" passHref>
-          <Button variant="contained" color="primary">
-            Sign In
-          </Button>
-        </Link>
-        <Link href="/help" passHref>
-          <Button variant="contained" color="primary">
-            Help
-          </Button>
-        </Link>
-        <Link href="/OrganizerApply" passHref>
-          <Button variant="contained" color="primary">
-            Join as an Organizer
-          </Button>
-        </Link>
-        <Link href="/adminMessage" passHref>
-          <Button variant="contained" color="primary">
-            Message Us
           </Button>
         </Link>
       </Box>
