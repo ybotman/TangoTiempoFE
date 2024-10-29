@@ -110,7 +110,7 @@ export const useCalendarPage = () => {
       action: 'navigate_prev',
       category: 'Calendar Navigation',
       label: 'Previous Period',
-      value:''
+      value: '',
     });
   };
 

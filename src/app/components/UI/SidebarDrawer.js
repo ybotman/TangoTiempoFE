@@ -1,7 +1,7 @@
-// src/components/UI/SidebarDrawer.js
+// SidebarDrawer.js
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -11,6 +11,9 @@ import {
   ListItemText,
   IconButton,
   Collapse,
+  Typography,
+  Avatar,
+  Box,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';
@@ -20,13 +23,36 @@ import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
+// import { RegionsContext } from '@/contexts/RegionsContext';
+import RegionMenu from './RegionMenu';
 
 const SidebarDrawer = ({ open, onClose }) => {
   const [expanded, setExpanded] = useState(false); // Controls icon-only to icon + text view
   const [aboutOpen, setAboutOpen] = useState(false); // Controls "About" submenu
+  const [regionMenuOpen, setRegionMenuOpen] = useState(false); // Controls Region Menu
+
+  // const { selectedRegion } = useContext(RegionsContext);
+  const [selectedAbbreviation, setSelectedAbbreviation] = useState(null);
 
   const toggleExpansion = () => setExpanded((prev) => !prev);
   const toggleAboutMenu = () => setAboutOpen((prev) => !prev);
+
+  const handleRegionSelect = (abbreviation) => {
+    setSelectedAbbreviation(abbreviation);
+  };
+
+  const renderRegionIcon = () =>
+    selectedAbbreviation ? (
+      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        {selectedAbbreviation}
+      </Typography>
+    ) : (
+      <Avatar
+        alt="Select Region"
+        src="/images/USARegions.png"
+        sx={{ width: 32, height: 32 }}
+      />
+    );
 
   return (
     <Drawer
@@ -53,6 +79,36 @@ const SidebarDrawer = ({ open, onClose }) => {
           {expanded && <ListItemText primary="Menu" />}
         </ListItem>
 
+        {/* Regions Section */}
+        <ListItem
+          button
+          onClick={() => {
+            if (!expanded) toggleExpansion(); // Expand sidebar if not expanded
+            setRegionMenuOpen(true); // Open RegionMenu
+          }}
+        >
+          <ListItemIcon>{renderRegionIcon()}</ListItemIcon>
+          {expanded && (
+            <Box>
+              <ListItemText primary="Regions" />
+              {selectedAbbreviation && (
+                <Typography variant="caption">
+                  {selectedAbbreviation}
+                </Typography>
+              )}
+            </Box>
+          )}
+        </ListItem>
+
+        {/* Region Menu */}
+        <Collapse in={regionMenuOpen} timeout="auto" unmountOnExit>
+          <RegionMenu
+            expanded={expanded}
+            onRegionSelect={handleRegionSelect}
+            onClose={() => setRegionMenuOpen(false)}
+          />
+        </Collapse>
+
         {/* About Section with Nested Menu */}
         <ListItem button onClick={toggleAboutMenu}>
           <ListItemIcon>
@@ -64,7 +120,11 @@ const SidebarDrawer = ({ open, onClose }) => {
 
         {/* Submenu for "Meet the Team" */}
         <Collapse in={aboutOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding sx={{ paddingLeft: 4 }}>
+          <List
+            component="div"
+            disablePadding
+            sx={{ paddingLeft: expanded ? 4 : 0 }}
+          >
             <Link href="/about" passHref legacyBehavior>
               <ListItem button component="a">
                 <ListItemIcon>

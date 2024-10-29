@@ -3,7 +3,7 @@ import axios from 'axios';
 import { RegionsContext } from '@/contexts/RegionsContext';
 
 export const useLocations = () => {
-  const { selectedRegionID } = useContext(RegionsContext); // Get region _id from RegionsContext
+  const { selectedRegionID } = useContext(RegionsContext);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
