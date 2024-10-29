@@ -166,14 +166,14 @@ const SidebarDrawer = ({ open, onClose }) => {
         </Collapse>
 
         {/* Other Sidebar Items */}
-        <ListItem button={true}>
+        <ListItem button>
           <ListItemIcon>
             <HelpIcon />
           </ListItemIcon>
           {expanded && <ListItemText primary="Help" />}
         </ListItem>
 
-        <ListItem button={true} >
+        <ListItem button>
           <ListItemIcon>
             <QuestionAnswerIcon />
           </ListItemIcon>

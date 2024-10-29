@@ -1,7 +1,7 @@
 // SiteMenuBar.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar } from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
@@ -28,6 +28,15 @@ const SiteMenuBar = ({
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  // Tooltip toggle for arrow effect if user is not logged in
+  useEffect(() => {
+    if (!user) {
+      const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -41,43 +50,41 @@ const SiteMenuBar = ({
     );
 
   return (
-    <Box sx={{ width: '100%', padding: '0 0' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-        }}
-      >
+    <Box sx={{ width: '100%', padding: '0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      
+      {/* Left Icons */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
-          edge="end"
+          edge="start"
           color="inherit"
           aria-label="menu"
           onClick={() => setSidebarDrawerOpen(!sidebarDrawerOpen)}
         >
           <MenuIcon />
         </IconButton>
-
-        <IconButton onClick={() => setUserDrawerOpen(true)}>
-          {renderUserIcon()}
-        </IconButton>
       </Box>
 
-      {/* Category Filter Centered */}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: 2,
-        }}
-      >
+      {/* Centered PostFilter */}
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
         <PostFilter
           activeCategories={activeCategories}
           handleCategoryChange={handleCategoryChange}
           categories={categories}
-          selectedOrganizer={selectedOrganizer}
         />
+      </Box>
+
+      {/* Right Icons - User Account with conditional tooltip */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Tooltip
+          title="Login here!"
+          arrow
+          open={!user && showTooltip}
+          placement="left"
+        >
+          <IconButton onClick={() => setUserDrawerOpen(true)}>
+            {renderUserIcon()}
+          </IconButton>
+        </Tooltip>
       </Box>
 
       {/* FAQ Modal */}
