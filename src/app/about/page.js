@@ -21,9 +21,9 @@ export default function About() {
         <h1>Tango Tiempo - National Tango Calendar App</h1>
         <h2>Overview</h2>
         <p>
-          Currently, we are in ALPHA MODE. I am surprised you found this site!
+          Currently, we are in BETA MODE. I am surprised you found this site!
           If you are an Argentine Tango organizer and are interested in becoming
-          a regional admin for Tango Tiempo, please contact me. We hope to go
+          a regional admin for Tango Tiempo, please contact me. We hope to be fullly
           live by the end of 2024, and will bring on new Tango regions (one at a
           time) in January of 2025. If you have found this site, feel free to
           contact me. To be careful, I will give you my TEXT number: Use the
