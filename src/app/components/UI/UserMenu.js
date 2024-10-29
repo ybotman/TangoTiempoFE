@@ -1,4 +1,4 @@
-// @/components/UI/UserMenu.js
+// @/components/UI/SideUserMenu.js
 'use client';
 
 import React from 'react';
@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const UserMenu = ({
+const SideUserMenu = ({
   isLoggedIn,
   onClose,
   user,
@@ -118,7 +118,7 @@ const UserMenu = ({
   </Box>
 );
 
-UserMenu.propTypes = {
+SideUserMenu.propTypes = {
   isLoggedIn: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   user: PropTypes.shape({
@@ -132,4 +132,4 @@ UserMenu.propTypes = {
   logOut: PropTypes.func.isRequired,
 };
 
-export default UserMenu;
+export default SideUserMenu;
