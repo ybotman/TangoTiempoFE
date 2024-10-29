@@ -393,5 +393,14 @@
       "deb9dfd - 1.0.31",
       "ed25658 -   \"engines\": {     \"node\": \">=20.0.0\""
     ]
+  },
+  {
+    "version": "1.0.32",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "eecee90 - 1.0.32",
+      "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
+    ]
   }
 ]
