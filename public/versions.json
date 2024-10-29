@@ -402,5 +402,21 @@
       "eecee90 - 1.0.32",
       "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST"
     ]
+  },
+  {
+    "version": "1.0.32",
+    "branch": "SubMenuClean-with-Roles",
+    "commits": [
+      "b3dc62d - Setting:NU, RO with SideBar Framework",
+      "0450761 - chore: update version history for 1.0.32",
+      "eecee90 - 1.0.32",
+      "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
+      "3716586 - node 20.x for engines",
+      "12f2234 - chore: update version history for 1.0.31",
+      "deb9dfd - 1.0.31",
+      "ed25658 -   \"engines\": {     \"node\": \">=20.0.0\"",
+      "7c2164c - chore: update version history for 1.0.30",
+      "c3efe66 - 1.0.30"
+    ]
   }
 ]
