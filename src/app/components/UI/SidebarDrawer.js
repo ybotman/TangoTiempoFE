@@ -7,6 +7,7 @@ import {
   Drawer,
   List,
   ListItem,
+  Divider,
   ListItemIcon,
   ListItemText,
   IconButton,
@@ -16,6 +17,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';
 import HelpIcon from '@mui/icons-material/Help';
+import LockIcon from '@mui/icons-material/Lock';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import GroupIcon from '@mui/icons-material/Group';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -26,14 +28,16 @@ import MessageIcon from '@mui/icons-material/Message';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 import RegionMenu from './RegionMenu';
-import UserSettingsModal from '@/components/Modals/UserSettingsModal';
-import RegionalOrganizersModal from '@/components/Modals/RegionalOrganizersModal'; // Import RegionalOrganizersModal
+import UserSettingsModal from '@/components/Modals/UserSettings/UserSettingsModal';
+import RegionalOrganizersModal from '@/components/Modals/RegionalOrganizers/RegionalOrganizersModal';
+import PrivacyPolicyModal from '@/components/Modals/PrivacyPolicyModal';
 
 const SidebarDrawer = ({ open, onClose }) => {
   const [expanded, setExpanded] = useState(false);
   const [regionMenuOpen, setRegionMenuOpen] = useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = useState(false); // Modal state for User Settings
-  const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false); // Modal state for Regional Organizer Settings
+  const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false);
+  const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false); // State for Privacy Policy modal
 
   const toggleExpansion = () => setExpanded((prev) => !prev);
 
@@ -54,7 +58,7 @@ const SidebarDrawer = ({ open, onClose }) => {
       >
         <List>
           {/* Expandable Menu */}
-          <ListItem button onClick={toggleExpansion}>
+          <ListItem button="true" onClick={toggleExpansion}>
             <ListItemIcon>
               <IconButton>
                 <MenuIcon />
@@ -65,7 +69,7 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {/* Regions Section */}
           <ListItem
-            button
+            button="true"
             onClick={() => {
               if (!expanded) toggleExpansion();
               setRegionMenuOpen(!regionMenuOpen);
@@ -94,9 +98,46 @@ const SidebarDrawer = ({ open, onClose }) => {
             />
           </Collapse>
 
+          {/* User Settings - Opens UserSettingsModal */}
+          <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="User Settings" />}
+          </ListItem>
+
+          {/* Organizer Settings */}
+          <ListItem button="true">
+            <ListItemIcon>
+              <EventAvailableIcon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="Organizer Settings" />}
+          </ListItem>
+
+          {/* Regional Organizer Settings - Opens RegionalOrganizersModal */}
+          <ListItem
+            button="true"
+            onClick={() => setRegionalOrganizerOpen(true)}
+          >
+            <ListItemIcon>
+              <PlaceIcon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="Regional Organizer Settings" />}
+          </ListItem>
+
+          {/* System Admin Settings */}
+          <ListItem button="true">
+            <ListItemIcon>
+              <AdminPanelSettingsIcon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="System Admin Settings" />}
+          </ListItem>
+
+
+        <Divider />
           {/* About */}
           <Link href="/about/page.js" passHref>
-            <ListItem button component="a">
+            <ListItem button="true">
               <ListItemIcon>
                 <InfoIcon />
               </ListItemIcon>
@@ -106,7 +147,7 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {/* Meet the Team (Top Level) */}
           <Link href="/about" passHref>
-            <ListItem button component="a">
+            <ListItem button="true">
               <ListItemIcon>
                 <GroupIcon />
               </ListItemIcon>
@@ -116,7 +157,7 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {/* FAQ */}
           <Link href="/components/Modals/FAQModal.js" passHref>
-            <ListItem button component="a">
+            <ListItem button="true">
               <ListItemIcon>
                 <QuestionAnswerIcon />
               </ListItemIcon>
@@ -125,53 +166,30 @@ const SidebarDrawer = ({ open, onClose }) => {
           </Link>
 
           {/* Help */}
-          <ListItem button>
+          <ListItem button="true">
             <ListItemIcon>
               <HelpIcon />
             </ListItemIcon>
             {expanded && <ListItemText primary="Help" />}
           </ListItem>
 
-          {/* User Settings - Opens UserSettingsModal */}
-          <ListItem button onClick={() => setUserSettingsOpen(true)}>
-            <ListItemIcon>
-              <AccountCircleIcon />
-            </ListItemIcon>
-            {expanded && <ListItemText primary="User Settings" />}
-          </ListItem>
-
-          {/* Organizer Settings */}
-          <ListItem button>
-            <ListItemIcon>
-              <EventAvailableIcon />
-            </ListItemIcon>
-            {expanded && <ListItemText primary="Organizer Settings" />}
-          </ListItem>
-
-          {/* Regional Organizer Settings - Opens RegionalOrganizersModal */}
-          <ListItem button onClick={() => setRegionalOrganizerOpen(true)}>
-            <ListItemIcon>
-              <PlaceIcon />
-            </ListItemIcon>
-            {expanded && <ListItemText primary="Regional Organizer Settings" />}
-          </ListItem>
-
-          {/* System Admin Settings */}
-          <ListItem button>
-            <ListItemIcon>
-              <AdminPanelSettingsIcon />
-            </ListItemIcon>
-            {expanded && <ListItemText primary="System Admin Settings" />}
-          </ListItem>
-
           {/* Message Admin */}
-          <ListItem button>
+          <ListItem button="true">
             <ListItemIcon>
               <MessageIcon />
             </ListItemIcon>
             {expanded && <ListItemText primary="Message Admin" />}
           </ListItem>
+
+          {/* Privacy Policy Modal */}
+          <ListItem button="true" onClick={() => setPrivacyPolicyOpen(true)}>
+            <ListItemIcon>
+              <LockIcon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="Privacy Poli" />}
+          </ListItem>
         </List>
+        <Divider />
       </Drawer>
 
       {/* User Settings Modal */}
@@ -184,6 +202,10 @@ const SidebarDrawer = ({ open, onClose }) => {
       <RegionalOrganizersModal
         open={regionalOrganizerOpen}
         onClose={() => setRegionalOrganizerOpen(false)}
+      />
+      <PrivacyPolicyModal
+        open={privacyPolicyOpen}
+        onClose={() => setPrivacyPolicyOpen(false)}
       />
     </>
   );

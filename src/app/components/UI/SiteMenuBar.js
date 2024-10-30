@@ -102,9 +102,6 @@ const SiteMenuBar = ({
           <Fade in={pulseRegionText} timeout={800}>
             <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
               <ArrowBackIcon sx={{ fontSize: 20, mr: 0.5 }} />
-              <Typography variant="body2" color="textSecondary">
-                Select Region
-              </Typography>
             </Box>
           </Fade>
         )}
