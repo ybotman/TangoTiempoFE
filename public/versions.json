@@ -418,5 +418,21 @@
       "7c2164c - chore: update version history for 1.0.30",
       "c3efe66 - 1.0.30"
     ]
+  },
+  {
+    "version": "1.0.32",
+    "branch": "Roles-with-SidebarDrawer",
+    "commits": [
+      "929d745 - lint  fixes",
+      "987c716 - button=\"true\" and fixed FAX, Roles.  UtilDir",
+      "f343ac9 - Menu Order, and Privacy",
+      "5d33673 - Privacy Page",
+      "d0c2147 - Commit with Versions History",
+      "b3dc62d - Setting:NU, RO with SideBar Framework",
+      "0450761 - chore: update version history for 1.0.32",
+      "eecee90 - 1.0.32",
+      "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
+      "3716586 - node 20.x for engines"
+    ]
   }
 ]
