@@ -92,6 +92,9 @@ jobs:
       # Commit the version history
       - name: Commit Version History
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin ${{ github.ref_name }}  # Fetch and rebase to avoid conflicts
           git add public/versions.json
           git commit -m "chore: update version history for $VERSION"
           git push https://github.com/ybotman/TangoTiempoFE.git
