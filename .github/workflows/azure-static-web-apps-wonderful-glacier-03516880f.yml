@@ -59,48 +59,6 @@ jobs:
       - name: Increment Patch Version
         run: npm version patch
 
-      # Capture feature branch
-      - name: Capture Feature Branch
-        id: branch-name
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BRANCH_NAME="${{ github.head_ref }}"
-          else
-            BRANCH_NAME="${{ github.ref_name }}"
-          fi
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-
-      - name: Get Commit History and Branch
-        run: |
-          VERSION=$(npm pkg get version | tr -d '"')
-          TARGET_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TARGET_BRANCH_NAME=$TARGET_BRANCH_NAME" >> $GITHUB_ENV
-          git log -10 --pretty=format:"%h - %s" > commit_logs.txt
-
-      - name: Append Version, Branch, and Commits to JSON
-        run: |
-          if [ -f public/versions.json ]; then
-            echo "Updating existing versions.json"
-          else
-            echo "Creating versions.json"
-            echo "[]" > public/versions.json
-          fi
-          jq --arg ver "$VERSION" --arg branch "$TARGET_BRANCH_NAME" --arg feature_branch "$BRANCH_NAME" --argjson commits "$(cat commit_logs.txt | jq -R . | jq -s .)" \
-            '. += [{"version": $ver, "branch": $branch, "feature_branch": $feature_branch, "commits": $commits}]' public/versions.json > temp.json && mv temp.json public/versions.json
-
-      # Commit the version history
-      - name: Commit Version History
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin ${{ github.ref_name }}  # Fetch and rebase to avoid conflicts
-          git add public/versions.json
-          git commit -m "chore: update version history for $VERSION"
-          git push https://github.com/ybotman/TangoTiempoFE.git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # Azure Static Web Apps deploy step
       - name: Build And Deploy to Azure
         id: builddeploy
