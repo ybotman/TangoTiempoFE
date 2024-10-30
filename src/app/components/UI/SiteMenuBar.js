@@ -14,7 +14,6 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
-import FAQModal from '@/components/Modals/FAQModal';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 import { RegionsContext } from '@/contexts/RegionsContext';
@@ -24,15 +23,8 @@ const SiteMenuBar = ({
   handleCategoryChange,
   categories,
 }) => {
-  const {
-    FAQModalOpen,
-    selectedRole,
-    user,
-    roles,
-    handleRoleChange,
-    closeFAQModal,
-    logOut,
-  } = useSiteMenuBar();
+  const { selectedRole, user, roles, handleRoleChange, logOut } =
+    useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
@@ -129,9 +121,6 @@ const SiteMenuBar = ({
           </IconButton>
         </Tooltip>
       </Box>
-
-      {/* FAQ Modal */}
-      <FAQModal open={FAQModalOpen} handleClose={closeFAQModal} />
 
       {/* Side Drawers */}
       <SidebarDrawer

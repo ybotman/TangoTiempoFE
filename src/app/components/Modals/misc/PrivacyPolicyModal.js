@@ -26,8 +26,12 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
         <Typography variant="h5" component="h2" gutterBottom>
           Privacy Policy
         </Typography>
+        <Typography variant="h6">
+          We never sell, give away, or misuse your data. Period.
+          <br />
+        </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Our Commitment to Your Privacy</strong>
           <br />
           We respect your privacy and are fully committed to protecting your
@@ -36,7 +40,7 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           misuse your data. Period.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Information We Collect</strong>
           <br />
           1. <strong>User-Provided Information:</strong> When you register or
@@ -52,7 +56,7 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           your browser.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>How We Use Your Information</strong>
           <br />
           1. <strong>To Provide and Improve Services:</strong> We use the data
@@ -68,7 +72,7 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           marketing or other purposes.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Control Over Your Information</strong>
           <br />
           We are dedicated to putting you in control of your data. You decide:
@@ -78,7 +82,7 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           your personal data at any time.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Data Protection and Security</strong>
           <br />
           1. <strong>Encryption:</strong> All sensitive data, including
@@ -90,14 +94,14 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           as we cannot retrieve it for you.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Data Retention</strong>
           <br />
           We retain your data only as long as necessary to provide services or
           as required by law. You may request deletion of your data at any time.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Your Rights</strong>
           <br />
           1. <strong>Access and Update:</strong> You can access and update your
@@ -110,7 +114,7 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           non-essential communications at any time.
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Policy Changes</strong>
           <br />
           We may update this policy periodically. Any changes will be
