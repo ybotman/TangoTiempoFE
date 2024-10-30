@@ -134,7 +134,10 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 {expanded && <ListItemText primary="User Settings" />}
               </ListItem>
-              <ListItem button="true" onClick={() => setRegionalOrganizerOpen(true)}>
+              <ListItem
+                button="true"
+                onClick={() => setRegionalOrganizerOpen(true)}
+              >
                 <ListItemIcon>
                   <PlaceIcon />
                 </ListItemIcon>

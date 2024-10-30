@@ -17,7 +17,8 @@ const modalStyle = {
   p: 4,
 };
 
-const FAQModal = ({ open, onClose }) => { // Changed handleClose to onClose here
+const FAQModal = ({ open, onClose }) => {
+  // Changed handleClose to onClose here
   return (
     <Modal
       open={open}
