@@ -432,6 +432,16 @@
       "0450761 - chore: update version history for 1.0.32",
       "eecee90 - 1.0.32",
       "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
-      "3716586 - node 20.x for engines"]
+      "3716586 - node 20.x for engines"
+    ]
+  },
+  {
+    "version": "1.0.34",
+    "branch": "TEST",
+    "feature_branch": "TEST",
+    "commits": [
+      "750b887 - 1.0.34",
+      "ab810d2 - Manual Version intervension"
+    ]
   }
 ]
