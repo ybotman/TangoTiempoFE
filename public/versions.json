@@ -443,5 +443,29 @@
       "750b887 - 1.0.34",
       "ab810d2 - Manual Version intervension"
     ]
+  },
+  {
+    "version": "1.0.35",
+    "branch": "TEST",
+    "feature_branch": "Local",
+    "commits": [
+      "Force a Version Change"
+    ]
+  },
+  {
+    "version": "1.0.35",
+    "branch": "YamlChanges",
+    "commits": [
+      "d12e809 - YAML changes for pull --rebase",
+      "c83bdb5 - chore: update version history for 1.0.34",
+      "750b887 - 1.0.34",
+      "ab810d2 - Manual Version intervension",
+      "fbe34db - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
+      "cb90e33 - Commit with Versions History",
+      "929d745 - lint  fixes",
+      "987c716 - button=\"true\" and fixed FAX, Roles.  UtilDir",
+      "f343ac9 - Menu Order, and Privacy",
+      "5d33673 - Privacy Page"
+    ]
   }
 ]
