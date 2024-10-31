@@ -1,4 +1,4 @@
-// src/components/Modals/RegionalOrganizersPrimaryLocations.js
+// src/components/Modals/RegionalOrganizers/RegionalOrganizersPrimaryLocations.js
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, TextField } from '@mui/material';

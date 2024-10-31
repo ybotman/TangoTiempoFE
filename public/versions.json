@@ -420,12 +420,52 @@
     ]
   },
   {
-    "version": "1.0.33",
+    "version": "1.0.32",
+    "branch": "Roles-with-SidebarDrawer",
+    "commits": [
+      "929d745 - lint  fixes",
+      "987c716 - button=\"true\" and fixed FAX, Roles.  UtilDir",
+      "f343ac9 - Menu Order, and Privacy",
+      "5d33673 - Privacy Page",
+      "d0c2147 - Commit with Versions History",
+      "b3dc62d - Setting:NU, RO with SideBar Framework",
+      "0450761 - chore: update version history for 1.0.32",
+      "eecee90 - 1.0.32",
+      "642ac4d - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
+      "3716586 - node 20.x for engines"
+    ]
+  },
+  {
+    "version": "1.0.34",
     "branch": "TEST",
     "feature_branch": "TEST",
     "commits": [
-      "cf7700f - 1.0.33",
-      "d0c2147 - Commit with Versions History"
+      "750b887 - 1.0.34",
+      "ab810d2 - Manual Version intervension"
+    ]
+  },
+  {
+    "version": "1.0.35",
+    "branch": "TEST",
+    "feature_branch": "Local",
+    "commits": [
+      "Force a Version Change"
+    ]
+  },
+  {
+    "version": "1.0.35",
+    "branch": "YamlChanges",
+    "commits": [
+      "d12e809 - YAML changes for pull --rebase",
+      "c83bdb5 - chore: update version history for 1.0.34",
+      "750b887 - 1.0.34",
+      "ab810d2 - Manual Version intervension",
+      "fbe34db - Merge branch 'TEST' of https://github.com/ybotman/TangoTiempoFE into TEST",
+      "cb90e33 - Commit with Versions History",
+      "929d745 - lint  fixes",
+      "987c716 - button=\"true\" and fixed FAX, Roles.  UtilDir",
+      "f343ac9 - Menu Order, and Privacy",
+      "5d33673 - Privacy Page"
     ]
   }
 ]
