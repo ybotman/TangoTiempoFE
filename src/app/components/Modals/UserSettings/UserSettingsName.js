@@ -1,5 +1,5 @@
 // src/components/Modals/UserSettings/UserSettingsName.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, TextField, Button, Typography } from '@mui/material';
 
@@ -7,6 +7,12 @@ const UserSettingsName = ({ firstName, lastName, updateUserData }) => {
   const [first, setFirst] = useState(firstName);
   const [last, setLast] = useState(lastName);
   const [loading, setLoading] = useState(false);
+
+  // Sync prop changes into state
+  useEffect(() => {
+    setFirst(firstName);
+    setLast(lastName);
+  }, [firstName, lastName]);
 
   const handleSave = async () => {
     setLoading(true);

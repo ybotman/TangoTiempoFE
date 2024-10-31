@@ -84,10 +84,7 @@ const UserSettingsModal = ({ open, onClose }) => {
         {/* Modal Actions */}
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
           <Button onClick={onClose} color="secondary">
-            Cancel
-          </Button>
-          <Button variant="contained" color="primary">
-            Save
+            Done
           </Button>
         </Box>
       </Box>
