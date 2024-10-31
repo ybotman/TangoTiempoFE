@@ -3,7 +3,7 @@ import { Modal, Box, Typography, Tabs, Tab, Grid, Button } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
-import ViewEventDetailsRepeating from '.ViewEventDetailsRepeating';
+import ViewEventDetailsRepeating from './ViewEventDetailsRepeating';
 import ViewEventDetailsMore from './ViewEventDetailsMore';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';

@@ -9,6 +9,7 @@ import RegionalOrganizersDemographic from './RegionalOrganizersDemographic';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
 import RegionalOrganizersPrimaryLocations from './RegionalOrganizersPrimaryLocations';
 import RegionalOrganizersSearch from './RegionalOrganizersSearch';
+import RegionalOrganizersImages from './RegionalOrganizersImages';
 
 const modalStyle = {
   position: 'absolute',
@@ -47,6 +48,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
           <Tab label="Address" value="address" />
           <Tab label="Primary Locations" value="primaryLocations" />
           <Tab label="Search" value="search" />
+           <Tab label="Images" value="images" /> {/* New Images Tab */}
         </Tabs>
 
         {/* Tab Panels */}
@@ -57,6 +59,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
           <RegionalOrganizersPrimaryLocations />
         )}
         {currentTab === 'search' && <RegionalOrganizersSearch />}
+        {currentTab === 'images' && <RegionalOrganizersImages />}
 
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
           <Button onClick={onClose} color="secondary">
