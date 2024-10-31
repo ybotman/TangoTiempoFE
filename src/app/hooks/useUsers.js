@@ -4,14 +4,17 @@ import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 
 export const useUsers = () => {
-  const { user } = useContext(AuthContext); // Pull in current user from AuthContext
+  const auth = useContext(AuthContext); // Get the AuthContext safely
+  const { user } = auth || {}; // Destructure user only if auth is defined
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Function to fetch user data by Firebase ID
   const fetchUserData = useCallback(async () => {
-    if (!user?.uid) return;
+    if (!user?.uid) {
+      console.log("AuthContext or user not yet initialized.");
+      return;
+    }
 
     const endpoint = `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`;
 
@@ -20,7 +23,6 @@ export const useUsers = () => {
       const response = await axios.get(endpoint);
       setUserData(response.data);
     } catch (error) {
-      setError(error);
       console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
@@ -29,7 +31,10 @@ export const useUsers = () => {
 
   // Function to update user data
   const updateUserData = async (updatedData) => {
-    if (!user?.uid) return;
+    if (!user?.uid) {
+      console.log("User UID not available for updating.");
+      return;
+    }
 
     try {
       const response = await axios.put(
@@ -51,5 +56,5 @@ export const useUsers = () => {
     fetchUserData();
   }, [fetchUserData]);
 
-  return { userData, loading, error, updateUserData };
+  return { userData, loading, updateUserData };
 };
