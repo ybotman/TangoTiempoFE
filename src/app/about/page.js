@@ -2,13 +2,15 @@
 
 import React from 'react';
 import styles from '@/styles/About.module.css';
+import Link from 'next/link';
+import { Button, Box } from '@mui/material';
 
 export const metadata = {
   title: 'Tango Tiempo - About Us',
   description:
     'Making Argentine Tagno Better for US. Tango Tiempo for the US is a comprehensive calendar application designed to help tango dancers and organizers across the nation coordinate and manage tango events.',
   openGraph: {
-    title: 'ango Tiempo - About Us',
+    title: 'Tango Tiempo - About Us',
     description: 'Learn more about our company',
     url: 'http://TangoTiempo.com/about',
   },
@@ -20,17 +22,33 @@ export default function About() {
       <div>
         <h1>Tango Tiempo - National Tango Calendar App</h1>
         <h2>Overview</h2>
+
         <p>
           Currently, we are in BETA MODE. I am surprised you found this site! If
-          you are an Argentine Tango organizer and are interested in becoming a
-          regional admin for Tango Tiempo, please contact me. We hope to be
-          fullly live by the end of 2024, and will bring on new Tango regions
-          (one at a time) in January of 2025. If you have found this site, feel
-          free to contact me. To be careful, I will give you my TEXT number: Use
-          the Massachusetts area code, (and you have to find it but you can do
-          it), and text me at 6 5 3 dash 9 4 5 2. Yes, you to go right this
-          down. ;-) This page will be changed when we are live.
+          you are an Argentine Tango teacher / host / DJ / studio / etc
+          (meaning, you host events, are a band or a DJ) and are interested in
+          submitting events in Tango Tiempo, please contact me. Its free free
+          free, and we hope all of the US is onboard. We hope to be fullly live
+          by the end of 2024, and will bring on new Tango regions/ area (one
+          area at a time) in January of 2025. If you have found this site, feel
+          free to contact me. Her is my contact info: I will give you my TEXT
+          number: Use the Massachusetts area code, (and you have to find it but
+          you can do it), and text me at 6 5 3 dash 9 4 5 2. Yes, you have to go
+          write this down. ;-) <br />
+          <br />
+          <h2>
+            We are very excited about this site for the American Tango
+            Community, and hope it brings us all together.{' '}
+          </h2>{' '}
+          This page will self-desruct when we are up and alive.
         </p>
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+          <Link href="/calendar" passHref>
+            <Button variant="contained" color="primary">
+              Go to Calendar
+            </Button>
+          </Link>
+        </Box>
         <p>
           Tango Tiempo is a comprehensive calendar application designed to help
           tango dancers and organizers across the nation coordinate and manage
@@ -40,12 +58,11 @@ export default function About() {
         </p>
         <h3>Features</h3>
         <h4>
-          It`&lsquo;s free. It`&lsquo;s easy, and it`&lsquo;s Modern. We just
-          want to help the tango world. It`&lsquo;s for all of US Argentine
-          Tango.
+          It&lsquo;s free. It&lsquo;s easy, and it&lsquo;s Modern. We just want
+          to help the tango world. It`&lsquo;s for all of US Argentine Tango.
         </h4>
         <h4>
-          It`&lsquo;s a Mobile app and Web Version. We hope it`&lsquo;s highly
+          It&lsquo;s a Mobile app and Web Version. We hope it&lsquo;s highly
           interactive.
         </h4>
         <h4>
