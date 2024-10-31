@@ -1,13 +1,60 @@
-// src/components/Modals/UserSettingsName.js
-import React from 'react';
-import { Box, Typography, TextField } from '@mui/material';
+// src/components/Modals/UserSettings/UserSettingsName.js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { Box, TextField, Button, Typography } from '@mui/material';
 
-const UserSettingsName = () => (
-  <Box sx={{ mt: 2 }}>
-    <Typography variant="h6">Update Your Name</Typography>
-    <TextField label="First Name" fullWidth margin="normal" />
-    <TextField label="Last Name" fullWidth margin="normal" />
-  </Box>
-);
+const UserSettingsName = ({ firstName, lastName, updateUserData }) => {
+  const [first, setFirst] = useState(firstName);
+  const [last, setLast] = useState(lastName);
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await updateUserData({ firstName: first, lastName: last });
+      alert("Name updated successfully");
+    } catch (error) {
+      alert("Failed to update name. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="h6">Update Your Name</Typography>
+      <TextField
+        label="First Name"
+        value={first}
+        onChange={(e) => setFirst(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Last Name"
+        value={last}
+        onChange={(e) => setLast(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSave}
+        disabled={loading}
+        sx={{ mt: 2 }}
+      >
+        {loading ? "Saving..." : "Save"}
+      </Button>
+    </Box>
+  );
+};
+
+// PropTypes validation
+UserSettingsName.propTypes = {
+  firstName: PropTypes.string.isRequired,
+  lastName: PropTypes.string.isRequired,
+  updateUserData: PropTypes.func.isRequired,
+};
 
 export default UserSettingsName;
