@@ -14,16 +14,16 @@ const UserSettingsName = ({ firstName, lastName, updateUserData }) => {
     setLast(lastName);
   }, [firstName, lastName]);
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await updateUserData({ firstName: first, lastName: last });
-      alert("Name updated successfully");
-    } catch (error) {
-      alert("Failed to update name. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+const handleSave = async () => {
+  setLoading(true);
+  try {
+    await updateUserData({ firstName: first, lastName: last });
+    alert("Name updated successfully");
+  } catch (error) {
+    alert(`Failed to update name. Error: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
   };
 
   return (
