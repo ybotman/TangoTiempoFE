@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, Tabs, Tab, Grid, Button } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ViewEventDetailsBasic from '@/components/Modals/ViewEventDetailsBasic';
-import ViewEventDetailsRepeating from '@/components/Modals/ViewEventDetailsRepeating';
-import ViewEventDetailsMore from '@/components/Modals/ViewEventDetailsMore';
-import ViewEventDetailsImage from '@/components/Modals/ViewEventDetailsImage';
-import ViewEventDetailsOrganizerOther from '@/components/Modals/ViewEventDetailsOrganizerOther';
-import ViewEventDetailsLocationOther from '@/components/Modals/ViewEventDetailsLocationOther';
+import ViewEventDetailsBasic from './ViewEventDetailsBasic';
+import ViewEventDetailsRepeating from '.ViewEventDetailsRepeating';
+import ViewEventDetailsMore from './ViewEventDetailsMore';
+import ViewEventDetailsImage from './ViewEventDetailsImage';
+import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
+import ViewEventDetailsLocationOther from './ViewEventDetailsLocationOther';
 import PropTypes from 'prop-types';
 
 const modalStyle = {
