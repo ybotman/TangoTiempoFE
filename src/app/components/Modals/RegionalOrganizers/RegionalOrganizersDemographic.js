@@ -1,4 +1,4 @@
-// src/components/Modals/RegionalOrganizersDemographic.js
+// src/components/Modals/RegionalOrganizers/RegionalOrganizersDemographic.js
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, FormControlLabel, Switch } from '@mui/material';

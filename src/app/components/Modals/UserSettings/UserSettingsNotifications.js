@@ -1,4 +1,4 @@
-// src/components/Modals/userSettingsNotifications.js
+// src/components/Modals/UserSettings/UserSettings/Notifications.js
 import React from 'react';
 import { Box, Typography, Switch, FormControlLabel } from '@mui/material';
 

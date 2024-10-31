@@ -6,9 +6,8 @@ import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import { RegionsContext } from '@/contexts/RegionsContext';
-import { RoleContext } from '@/contexts/RoleContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics'; // Import the tracking function
-import { listOfAllRoles } from '@/utils/masterData';
+import useMenuItems from '@/hooks/useMenuItems';
 
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -18,6 +17,7 @@ export const useCalendarPage = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const categories = useCategories();
+  const { getMenuItems } = useMenuItems();
 
   const {
     regions,
@@ -28,8 +28,6 @@ export const useCalendarPage = () => {
     selectedCity,
     setSelectedCity,
   } = useContext(RegionsContext);
-
-  const { selectedRole } = useContext(RoleContext);
 
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -82,8 +80,6 @@ export const useCalendarPage = () => {
     return {
       ...event,
       backgroundColor: categoryColor,
-      textColor:
-        event.extendedProps.categoryFirst === 'Milonga' ? 'white' : 'black',
       borderColor: categoryColor,
     };
   });
@@ -146,17 +142,9 @@ export const useCalendarPage = () => {
       label: arg.dateStr,
     });
 
-    if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
-      setMenuItems([
-        { label: 'Change Date', action: 'changeDate' },
-        { label: 'Add Single Event', action: 'addSingleEvent' },
-        { label: 'Add Repeating Event', action: 'addRepeatingEvent' },
-      ]);
-      setMenuAnchor({
-        mouseX: arg.jsEvent.clientX,
-        mouseY: arg.jsEvent.clientY,
-      });
-    }
+    const menuItems = getMenuItems('dateClick'); // Correctly call getMenuItems
+    setMenuItems(menuItems);
+    setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
   };
 
   const handleEventClick = (arg) => {
@@ -170,29 +158,9 @@ export const useCalendarPage = () => {
       value: arg.event.id,
     });
 
-    let menuOptions = [{ label: 'View Event', action: 'viewDetails' }];
-    if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
-      menuOptions = [
-        ...menuOptions,
-        { label: 'Edit Event', action: 'editEvent' },
-        { label: 'Delete Event', action: 'deleteEvent' },
-        { label: 'Add Photos', action: 'addPhotos' },
-      ];
-    }
-
-    if (selectedRole === listOfAllRoles.NAMED_USER) {
-      menuOptions = [
-        ...menuOptions,
-        { label: 'View Details', action: 'viewDetails' },
-        { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
-      ];
-    }
-
-    setMenuItems(menuOptions);
-    setMenuAnchor({
-      mouseX: arg.jsEvent.clientX,
-      mouseY: arg.jsEvent.clientY,
-    });
+    const menuItems = getMenuItems('eventClick');
+    setMenuItems(menuItems);
+    setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
   };
 
   const handleMenuAction = (action) => {

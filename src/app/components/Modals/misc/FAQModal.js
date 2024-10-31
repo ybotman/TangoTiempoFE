@@ -1,4 +1,4 @@
-// components/Modals/FAQModal.js
+// components/Modals/misc/FAQModal.js
 
 import React from 'react';
 import { Modal, Box, Typography, Button } from '@mui/material';
@@ -17,11 +17,12 @@ const modalStyle = {
   p: 4,
 };
 
-const FAQModal = ({ open, handleClose }) => {
+const FAQModal = ({ open, onClose }) => {
+  // Changed handleClose to onClose here
   return (
     <Modal
       open={open}
-      onClose={handleClose}
+      onClose={onClose} // Updated here as well
       aria-labelledby="help-modal-title"
       aria-describedby="help-modal-description"
     >
@@ -59,7 +60,7 @@ const FAQModal = ({ open, handleClose }) => {
             No, we do not sell or share your information with third parties.
           </Typography>
         </Box>
-        <Button onClick={handleClose} variant="contained" sx={{ mt: 3 }}>
+        <Button onClick={onClose} variant="contained" sx={{ mt: 3 }}>
           Close
         </Button>
       </Box>
@@ -69,7 +70,7 @@ const FAQModal = ({ open, handleClose }) => {
 
 FAQModal.propTypes = {
   open: PropTypes.bool.isRequired,
-  handleClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired, // Updated here
 };
 
 export default FAQModal;
