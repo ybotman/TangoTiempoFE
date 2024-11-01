@@ -7,23 +7,30 @@ const UserSettingsName = ({ firstName, lastName, updateUserData }) => {
   const [first, setFirst] = useState(firstName);
   const [last, setLast] = useState(lastName);
   const [loading, setLoading] = useState(false);
+  const [isModified, setIsModified] = useState(false);
 
   // Sync prop changes into state
   useEffect(() => {
     setFirst(firstName);
     setLast(lastName);
+    setIsModified(false); // Reset modification state when props change
   }, [firstName, lastName]);
 
-const handleSave = async () => {
-  setLoading(true);
-  try {
-    await updateUserData({ firstName: first, lastName: last });
-    alert("Name updated successfully");
-  } catch (error) {
-    alert(`Failed to update name. Error: ${error.message}`);
-  } finally {
-    setLoading(false);
-  }
+  // Check if the input fields have been modified
+  useEffect(() => {
+    setIsModified(first !== firstName || last !== lastName);
+  }, [first, last, firstName, lastName]);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await updateUserData({ firstName: first, lastName: last });
+      console.log("Name updated successfully");
+    } catch (error) {
+      alert(`Failed to update name. Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,7 +54,7 @@ const handleSave = async () => {
         variant="contained"
         color="primary"
         onClick={handleSave}
-        disabled={loading}
+        disabled={loading || !isModified} // Disable if not modified
         sx={{ mt: 2 }}
       >
         {loading ? "Saving..." : "Save"}

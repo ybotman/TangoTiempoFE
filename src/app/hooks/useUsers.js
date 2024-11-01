@@ -29,28 +29,32 @@ export const useUsers = () => {
     }
   }, [user?.uid]);
 
-  // Function to update user data
-  const updateUserData = async (updatedData) => {
-    if (!user?.uid) {
-      console.log("User UID not available for updating.");
-      return;
-    }
+// Inside the useUsers hook or your backend interaction logic
+const updateUserData = async (updatedData) => {
+  if (!user?.uid) return;
 
-    try {
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
-        {
-          firebaseUserId: user.uid,
-          ...updatedData,
-        }
-      );
-      setUserData((prevData) => ({ ...prevData, ...updatedData }));
-      console.log('User data updated successfully:', response.data);
-    } catch (updateError) {
-      console.error('Error updating user data:', updateError);
-      throw updateError;
-    }
-  };
+  try {
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
+      {
+        firebaseUserId: user.uid,
+        ...updatedData,
+      }
+    );
+    // Update local userData state with the saved data
+    setUserData((prevData) => ({
+      ...prevData,
+      localUserInfo: {
+        ...prevData.localUserInfo,
+        ...updatedData,
+      },
+    }));
+    console.log('User data updated successfully:', response.data);
+  } catch (updateError) {
+    console.error('Error updating user data:', updateError);
+    throw updateError;
+  }
+};
 
   useEffect(() => {
     fetchUserData();
