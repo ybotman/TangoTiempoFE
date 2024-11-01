@@ -1,11 +1,14 @@
-// @/hooks/useOrganizers.js
+// src/hooks/useOrganizers.js
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { RegionsContext } from '@/contexts/RegionsContext';
 
 export const useOrganizers = () => {
-  const { selectedRegionID } = useContext(RegionsContext);
+  const regionContext = useContext(RegionsContext);
+  const selectedRegionID = regionContext ? regionContext.selectedRegionID : null;
+
   const [organizers, setOrganizers] = useState([]);
+  const [organizer, setOrganizer] = useState(null); // Single organizer data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,27 +28,32 @@ export const useOrganizers = () => {
     }
   }, [selectedRegionID]);
 
-  // Function to upload image
-  const uploadOrganizerImage = async (organizerId, file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('organizerId', organizerId);
-
+  // New function to fetch organizer by ID
+  const fetchOrganizerById = useCallback(async (organizerId) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/upload-image`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
+      console.error('Calling fetchOrganizerById with organizerId:', organizerId);
+      setLoading(true);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
+      setOrganizer(response.data);
+    } catch (fetchError) {
+      setError(fetchError);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateOrganizer = async (organizerId, updateData) => {
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
+        updateData
       );
-      console.log('Image upload successful:', response.data);
-      return response.data; // Return the response data if you want to use it
-    } catch (uploadError) {
-      console.error('Image upload failed:', uploadError);
-      throw uploadError;
+      console.log('Organizer updated successfully:', response.data);
+      setOrganizer(response.data); // Update organizer state with response data
+      return response.data;
+    } catch (updateError) {
+      console.error('Error updating organizer:', updateError);
+      throw updateError;
     }
   };
 
@@ -53,5 +61,5 @@ export const useOrganizers = () => {
     fetchOrganizers();
   }, [fetchOrganizers]);
 
-  return { organizers, loading, error, uploadOrganizerImage };
+  return { organizers, organizer, setOrganizer, loading, error, fetchOrganizerById, updateOrganizer };
 };
