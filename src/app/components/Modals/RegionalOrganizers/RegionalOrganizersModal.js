@@ -23,28 +23,32 @@ const modalStyle = {
 const RegionalOrganizersModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
+  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } =
+    useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-    useEffect(() => {
-      console.log('AuthContext:', user);
+  useEffect(() => {
+    console.log('AuthContext:', user);
 
     if (user?.backendInfo.firebaseUserId) {
       console.log('Firebase User ID:', user.backendInfo.firebaseUserId);
-      console.log('organzier User ID:', user.backendInfo.localOrganizerInfo.organizerId);
-      
+      console.log(
+        'organzier User ID:',
+        user.backendInfo.regionalOrganizerInfo.organizerId
+      );
     }
-    if (user?.localOrganizerInfo?.organizerId) {
-      console.log('Organizer ID:', user.backendInfo.localOrganizerInfo.organizerId);
+    if (user?.regionalOrganizerInfo?.organizerId) {
+      console.log(
+        'Organizer ID:',
+        user.backendInfo.regionalOrganizerInfo.organizerId
+      );
     }
   }, [auth, user]);
 
-
-
   // Fetch organizer data when the modal opens
   useEffect(() => {
-    if (open && user?.backendInfo.localOrganizerInfo?.organizerId) {
-      fetchOrganizerById(user.backendInfo.localOrganizerInfo.organizerId);
+    if (open && user?.backendInfo.regionalOrganizerInfo?.organizerId) {
+      fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
     }
   }, [open, user, fetchOrganizerById]);
 
@@ -57,15 +61,15 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
           Regional Organizer Settings
         </Typography>
 
-        {/* Display localOrganizerInfo.organizerId if present */}
-        {user?.backendInfo.localOrganizerInfo?.organizerId && (
+        {/* Display regionalOrganizerInfo.organizerId if present */}
+        {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
           <Typography variant="body2" color="textSecondary" gutterBottom>
-            Organizer ID: {user.backendInfo.localOrganizerInfo.organizerId}
+            Organizer ID: {user.backendInfo.regionalOrganizerInfo.organizerId}
           </Typography>
         )}
 
         {/* Only display tabs if organizerId is present */}
-        {user?.backendInfo.localOrganizerInfo?.organizerId ? (
+        {user?.backendInfo.regionalOrganizerInfo?.organizerId ? (
           <>
             <Tabs
               value={currentTab}
@@ -80,7 +84,9 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             {loading ? (
               <Typography>Loading...</Typography>
             ) : error ? (
-              <Typography color="error">Error loading organizer data</Typography>
+              <Typography color="error">
+                Error loading organizer data
+              </Typography>
             ) : (
               <>
                 {currentTab === 'name' && (
