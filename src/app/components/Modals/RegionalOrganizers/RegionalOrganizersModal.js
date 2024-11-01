@@ -23,23 +23,27 @@ const modalStyle = {
 const RegionalOrganizersModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
+  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } =
+    useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-    useEffect(() => {
-      console.log('AuthContext:', user);
+  useEffect(() => {
+    console.log('AuthContext:', user);
 
     if (user?.backendInfo.firebaseUserId) {
       console.log('Firebase User ID:', user.backendInfo.firebaseUserId);
-      console.log('organzier User ID:', user.backendInfo.regionalOrganizerInfo.organizerId);
-      
+      console.log(
+        'organzier User ID:',
+        user.backendInfo.regionalOrganizerInfo.organizerId
+      );
     }
     if (user?.regionalOrganizerInfo?.organizerId) {
-      console.log('Organizer ID:', user.backendInfo.regionalOrganizerInfo.organizerId);
+      console.log(
+        'Organizer ID:',
+        user.backendInfo.regionalOrganizerInfo.organizerId
+      );
     }
   }, [auth, user]);
-
-
 
   // Fetch organizer data when the modal opens
   useEffect(() => {
@@ -80,7 +84,9 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             {loading ? (
               <Typography>Loading...</Typography>
             ) : error ? (
-              <Typography color="error">Error loading organizer data</Typography>
+              <Typography color="error">
+                Error loading organizer data
+              </Typography>
             ) : (
               <>
                 {currentTab === 'name' && (

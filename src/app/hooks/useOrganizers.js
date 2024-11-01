@@ -5,7 +5,9 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 
 export const useOrganizers = () => {
   const regionContext = useContext(RegionsContext);
-  const selectedRegionID = regionContext ? regionContext.selectedRegionID : null;
+  const selectedRegionID = regionContext
+    ? regionContext.selectedRegionID
+    : null;
 
   const [organizers, setOrganizers] = useState([]);
   const [organizer, setOrganizer] = useState(null); // Single organizer data
@@ -31,9 +33,14 @@ export const useOrganizers = () => {
   // New function to fetch organizer by ID
   const fetchOrganizerById = useCallback(async (organizerId) => {
     try {
-      console.error('Calling fetchOrganizerById with organizerId:', organizerId);
+      console.error(
+        'Calling fetchOrganizerById with organizerId:',
+        organizerId
+      );
       setLoading(true);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
+      );
       setOrganizer(response.data);
     } catch (fetchError) {
       setError(fetchError);
@@ -61,5 +68,13 @@ export const useOrganizers = () => {
     fetchOrganizers();
   }, [fetchOrganizers]);
 
-  return { organizers, organizer, setOrganizer, loading, error, fetchOrganizerById, updateOrganizer };
+  return {
+    organizers,
+    organizer,
+    setOrganizer,
+    loading,
+    error,
+    fetchOrganizerById,
+    updateOrganizer,
+  };
 };
