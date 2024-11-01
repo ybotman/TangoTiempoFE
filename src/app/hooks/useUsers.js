@@ -12,7 +12,7 @@ export const useUsers = () => {
   // Function to fetch user data by Firebase ID
   const fetchUserData = useCallback(async () => {
     if (!user?.uid) {
-      console.log("AuthContext or user not yet initialized.");
+      console.log('AuthContext or user not yet initialized.');
       return;
     }
 
@@ -29,32 +29,32 @@ export const useUsers = () => {
     }
   }, [user?.uid]);
 
-// Inside the useUsers hook or your backend interaction logic
-const updateUserData = async (updatedData) => {
-  if (!user?.uid) return;
+  // Inside the useUsers hook or your backend interaction logic
+  const updateUserData = async (updatedData) => {
+    if (!user?.uid) return;
 
-  try {
-    const response = await axios.put(
-      `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
-      {
-        firebaseUserId: user.uid,
-        ...updatedData,
-      }
-    );
-    // Update local userData state with the saved data
-    setUserData((prevData) => ({
-      ...prevData,
-      localUserInfo: {
-        ...prevData.localUserInfo,
-        ...updatedData,
-      },
-    }));
-    console.log('User data updated successfully:', response.data);
-  } catch (updateError) {
-    console.error('Error updating user data:', updateError);
-    throw updateError;
-  }
-};
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
+        {
+          firebaseUserId: user.uid,
+          ...updatedData,
+        }
+      );
+      // Update local userData state with the saved data
+      setUserData((prevData) => ({
+        ...prevData,
+        localUserInfo: {
+          ...prevData.localUserInfo,
+          ...updatedData,
+        },
+      }));
+      console.log('User data updated successfully:', response.data);
+    } catch (updateError) {
+      console.error('Error updating user data:', updateError);
+      throw updateError;
+    }
+  };
 
   useEffect(() => {
     fetchUserData();

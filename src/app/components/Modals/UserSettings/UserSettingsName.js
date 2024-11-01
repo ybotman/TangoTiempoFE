@@ -25,7 +25,7 @@ const UserSettingsName = ({ firstName, lastName, updateUserData }) => {
     setLoading(true);
     try {
       await updateUserData({ firstName: first, lastName: last });
-      console.log("Name updated successfully");
+      console.log('Name updated successfully');
     } catch (error) {
       alert(`Failed to update name. Error: ${error.message}`);
     } finally {
@@ -57,7 +57,7 @@ const UserSettingsName = ({ firstName, lastName, updateUserData }) => {
         disabled={loading || !isModified} // Disable if not modified
         sx={{ mt: 2 }}
       >
-        {loading ? "Saving..." : "Save"}
+        {loading ? 'Saving...' : 'Save'}
       </Button>
     </Box>
   );

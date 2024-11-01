@@ -33,7 +33,9 @@ const UserSettingsModal = ({ open, onClose }) => {
   // Log state if user is missing
   useEffect(() => {
     if (!user) {
-      console.log("User is not authenticated or AuthContext is not initialized yet.");
+      console.log(
+        'User is not authenticated or AuthContext is not initialized yet.'
+      );
     }
   }, [user]);
 
@@ -74,10 +76,18 @@ const UserSettingsModal = ({ open, onClose }) => {
                 updateUserData={updateUserData}
               />
             )}
-            {currentTab === 'events' && <UserSettingsEvents userData={userData} />}
-            {currentTab === 'organizer' && <UserSettingsOrganizers userData={userData} />}
-            {currentTab === 'notifications' && <UserSettingsNotifications userData={userData} />}
-            {currentTab === 'other' && <UserSettingsOther userData={userData} />}
+            {currentTab === 'events' && (
+              <UserSettingsEvents userData={userData} />
+            )}
+            {currentTab === 'organizer' && (
+              <UserSettingsOrganizers userData={userData} />
+            )}
+            {currentTab === 'notifications' && (
+              <UserSettingsNotifications userData={userData} />
+            )}
+            {currentTab === 'other' && (
+              <UserSettingsOther userData={userData} />
+            )}
           </>
         )}
 
