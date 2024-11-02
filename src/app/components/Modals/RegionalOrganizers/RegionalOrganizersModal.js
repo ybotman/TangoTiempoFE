@@ -5,6 +5,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import RegionalOrganizersName from './RegionalOrganizersName';
+import RegionalOrganizersAddress from './RegionalOrganizersAddress';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 
@@ -27,28 +28,11 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
     useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-  useEffect(() => {
-    console.log('AuthContext:', user);
-
-    if (user?.backendInfo.firebaseUserId) {
-      console.log('Firebase User ID:', user.backendInfo.firebaseUserId);
-      console.log(
-        'organzier User ID:',
-        user.backendInfo.regionalOrganizerInfo.organizerId
-      );
-    }
-    if (user?.regionalOrganizerInfo?.organizerId) {
-      console.log(
-        'Organizer ID:',
-        user.backendInfo.regionalOrganizerInfo.organizerId
-      );
-    }
-  }, [auth, user]);
-
   // Fetch organizer data when the modal opens
   useEffect(() => {
     if (open && user?.backendInfo.regionalOrganizerInfo?.organizerId) {
       fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+      console.log('useEffect is Fetching organizer data');
     }
   }, [open, user, fetchOrganizerById]);
 
@@ -61,14 +45,12 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
           Regional Organizer Settings
         </Typography>
 
-        {/* Display regionalOrganizerInfo.organizerId if present */}
         {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
           <Typography variant="body2" color="textSecondary" gutterBottom>
             Organizer ID: {user.backendInfo.regionalOrganizerInfo.organizerId}
           </Typography>
         )}
 
-        {/* Only display tabs if organizerId is present */}
         {user?.backendInfo.regionalOrganizerInfo?.organizerId ? (
           <>
             <Tabs
@@ -78,7 +60,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               variant="scrollable"
             >
               <Tab label="Name" value="name" />
-              {/* Add other tabs as needed */}
+              <Tab label="Address" value="address" />
             </Tabs>
 
             {loading ? (
@@ -97,6 +79,13 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     updateOrganizer={updateOrganizer}
                   />
                 )}
+                {currentTab === 'address' && (
+                  <RegionalOrganizersAddress
+                    publicContactInfo={organizer?.publicContactInfo || {}}
+                    wantRender={organizer?.wantRender || false}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
               </>
             )}
           </>
@@ -106,7 +95,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
           </Typography>
         )}
 
-        {/* Only a Close button */}
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
           <Button onClick={onClose} color="secondary">
             Close
