@@ -1,158 +1,102 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersAddress.js
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Typography,
-  TextField,
-  Switch,
-  FormControlLabel,
-  Button,
-} from '@mui/material';
+import { Box, TextField, Button, Switch, FormControlLabel, Typography } from '@mui/material';
 
-const RegionalOrganizersAddress = ({
-  publicContactInfo,
-  wantRender,
-  updateOrganizer,
-}) => {
-  const [formValues, setFormValues] = useState({
-    phone: publicContactInfo?.phone || '',
-    email: publicContactInfo?.email || '',
-    url: publicContactInfo?.url || '',
-    street1: publicContactInfo?.address?.street1 || '',
-    street2: publicContactInfo?.address?.street2 || '',
-    city: publicContactInfo?.address?.city || '',
-    state: publicContactInfo?.address?.state || '',
-    postalCode: publicContactInfo?.address?.postalCode || '',
-  });
+const RegionalOrganizersAddress = ({ organizerId, publicContactInfo, wantRender, updateOrganizer }) => {
+  const [contactInfo, setContactInfo] = useState(publicContactInfo);
+  const [isWantRender, setIsWantRender] = useState(wantRender);
+  const [isModified, setIsModified] = useState(false); // Tracks if the values are modified
 
-  const [isChanged, setIsChanged] = useState(false);
-  const [isSearchable, setIsSearchable] = useState(wantRender);
-
+  // Update local state when props change
   useEffect(() => {
-    const initialValues = JSON.stringify(formValues);
-    const currentValues = JSON.stringify({
-      phone: publicContactInfo?.phone || '',
-      email: publicContactInfo?.email || '',
-      url: publicContactInfo?.url || '',
-      street1: publicContactInfo?.address?.street1 || '',
-      street2: publicContactInfo?.address?.street2 || '',
-      city: publicContactInfo?.address?.city || '',
-      state: publicContactInfo?.address?.state || '',
-      postalCode: publicContactInfo?.address?.postalCode || '',
-    });
-    setIsChanged(initialValues !== currentValues);
-  }, [formValues, publicContactInfo]);
+    setContactInfo(publicContactInfo);
+    setIsWantRender(wantRender);
+    setIsModified(false); // Reset modification tracker on prop change
+  }, [publicContactInfo, wantRender]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
+  const handleInputChange = (field, value) => {
+    setContactInfo((prev) => ({ ...prev, [field]: value }));
+    setIsModified(true); // Mark as modified
   };
-  const handleSaveClick = async () => {
-    const updateData = {
-      publicContactInfo: {
-        phone: formValues.phone,
-        email: formValues.email,
-        url: formValues.url,
-        address: {
-          street1: formValues.street1,
-          street2: formValues.street2,
-          city: formValues.city,
-          state: formValues.state,
-          postalCode: formValues.postalCode,
-        },
-      },
-      wantRender: isSearchable,
-    };
 
-    try {
-      await updateOrganizer(formValues._id, updateData);
-      alert('Address information updated successfully.');
-    } catch (error) {
-      console.error('Error updating address information:', error);
-    }
+  const handleSave = async () => {
+    const updateData = {
+      publicContactInfo: contactInfo,
+      wantRender: isWantRender,
+    };
+    await updateOrganizer(organizerId, updateData);
+    setIsModified(false); // Reset modification tracker after saving
   };
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <Typography variant="h6">Contact Information</Typography>
+    <Box>
+      <Typography variant="h6">Organizer Address</Typography>
+
       <TextField
         label="Phone"
-        name="phone"
         fullWidth
+        value={contactInfo.phone || ''}
+        onChange={(e) => handleInputChange('phone', e.target.value)}
         margin="normal"
-        value={formValues.phone}
-        onChange={handleChange}
       />
       <TextField
         label="Email"
-        name="email"
         fullWidth
+        value={contactInfo.email || ''}
+        onChange={(e) => handleInputChange('email', e.target.value)}
         margin="normal"
-        value={formValues.email}
-        onChange={handleChange}
       />
       <TextField
         label="URL"
-        name="url"
         fullWidth
+        value={contactInfo.url || ''}
+        onChange={(e) => handleInputChange('url', e.target.value)}
         margin="normal"
-        value={formValues.url}
-        onChange={handleChange}
       />
-
-      <Typography variant="h6" sx={{ mt: 2 }}>
-        Address
-      </Typography>
       <TextField
         label="Street 1"
-        name="street1"
         fullWidth
+        value={contactInfo.address?.street1 || ''}
+        onChange={(e) => handleInputChange('address.street1', e.target.value)}
         margin="normal"
-        value={formValues.street1}
-        onChange={handleChange}
       />
       <TextField
         label="Street 2"
-        name="street2"
         fullWidth
+        value={contactInfo.address?.street2 || ''}
+        onChange={(e) => handleInputChange('address.street2', e.target.value)}
         margin="normal"
-        value={formValues.street2}
-        onChange={handleChange}
       />
       <TextField
         label="City"
-        name="city"
         fullWidth
+        value={contactInfo.address?.city || ''}
+        onChange={(e) => handleInputChange('address.city', e.target.value)}
         margin="normal"
-        value={formValues.city}
-        onChange={handleChange}
       />
       <TextField
         label="State"
-        name="state"
         fullWidth
+        value={contactInfo.address?.state || ''}
+        onChange={(e) => handleInputChange('address.state', e.target.value)}
         margin="normal"
-        value={formValues.state}
-        onChange={handleChange}
       />
       <TextField
         label="Postal Code"
-        name="postalCode"
         fullWidth
+        value={contactInfo.address?.postalCode || ''}
+        onChange={(e) => handleInputChange('address.postalCode', e.target.value)}
         margin="normal"
-        value={formValues.postalCode}
-        onChange={handleChange}
       />
 
       <FormControlLabel
         control={
           <Switch
-            checked={isSearchable}
-            onChange={(e) => setIsSearchable(e.target.checked)}
+            checked={isWantRender}
+            onChange={(e) => {
+              setIsWantRender(e.target.checked);
+              setIsModified(true); // Mark as modified
+            }}
             color="primary"
           />
         }
@@ -162,9 +106,9 @@ const RegionalOrganizersAddress = ({
       <Button
         variant="contained"
         color="primary"
-        sx={{ mt: 2 }}
-        onClick={handleSaveClick}
-        disabled={!isChanged}
+        onClick={handleSave}
+        disabled={!isModified} // Disable save if no changes
+        style={{ marginTop: '1em' }}
       >
         Save
       </Button>
@@ -173,6 +117,7 @@ const RegionalOrganizersAddress = ({
 };
 
 RegionalOrganizersAddress.propTypes = {
+  organizerId: PropTypes.string.isRequired,
   publicContactInfo: PropTypes.shape({
     phone: PropTypes.string,
     email: PropTypes.string,
@@ -185,7 +130,7 @@ RegionalOrganizersAddress.propTypes = {
       postalCode: PropTypes.string,
     }),
   }),
-  wantRender: PropTypes.bool.isRequired,
+  wantRender: PropTypes.bool,
   updateOrganizer: PropTypes.func.isRequired,
 };
 

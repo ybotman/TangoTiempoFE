@@ -80,7 +80,8 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                   />
                 )}
                 {currentTab === 'address' && (
-                  <RegionalOrganizersAddress
+                      <RegionalOrganizersAddress
+                    organizerId={organizer?._id}
                     publicContactInfo={organizer?.publicContactInfo || {}}
                     wantRender={organizer?.wantRender || false}
                     updateOrganizer={updateOrganizer}
