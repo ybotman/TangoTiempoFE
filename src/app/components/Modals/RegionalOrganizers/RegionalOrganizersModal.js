@@ -28,11 +28,14 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
     useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-  // Fetch organizer data when the modal opens
+  // Fetch organizer data and reset tab to "name" when the modal opens
   useEffect(() => {
-    if (open && user?.backendInfo.regionalOrganizerInfo?.organizerId) {
-      fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
-      console.log('useEffect is Fetching organizer data');
+    if (open) {
+      setCurrentTab('name'); // Reset to "name" tab on each open
+      if (user?.backendInfo.regionalOrganizerInfo?.organizerId) {
+        fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+        console.log('useEffect is Fetching organizer data');
+      }
     }
   }, [open, user, fetchOrganizerById]);
 
@@ -80,7 +83,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                   />
                 )}
                 {currentTab === 'address' && (
-                      <RegionalOrganizersAddress
+                  <RegionalOrganizersAddress
                     organizerId={organizer?._id}
                     publicContactInfo={organizer?.publicContactInfo || {}}
                     wantRender={organizer?.wantRender || false}

@@ -15,7 +15,10 @@ export const useOrganizers = () => {
   const [error, setError] = useState(null);
 
   const fetchOrganizers = useCallback(async () => {
-    console.log('fetchOrganizers called with selectedRegionID:', selectedRegionID);
+    console.log(
+      'fetchOrganizers called with selectedRegionID:',
+      selectedRegionID
+    );
     const endpoint = selectedRegionID
       ? `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers?regionID=${selectedRegionID}`
       : `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`;
@@ -32,23 +35,23 @@ export const useOrganizers = () => {
     }
   }, [selectedRegionID]);
 
-// New function to fetch organizer by ID
-const fetchOrganizerById = useCallback(async (organizerId) => {
-  console.log('fetchOrganizerById called with organizerId:', organizerId);
-  try {
-    setLoading(true);
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
-    );
-    setOrganizer(response.data);
-    console.log('Organizer fetched successfully:', response.data);
-  } catch (fetchError) {
-    console.error('Error fetching organizer:', fetchError); // Use fetchError here
-    setError(fetchError);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  // New function to fetch organizer by ID
+  const fetchOrganizerById = useCallback(async (organizerId) => {
+    console.log('fetchOrganizerById called with organizerId:', organizerId);
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
+      );
+      setOrganizer(response.data);
+      console.log('Organizer fetched successfully:', response.data);
+    } catch (fetchError) {
+      console.error('Error fetching organizer:', fetchError); // Use fetchError here
+      setError(fetchError);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const updateOrganizer = async (organizerId, updateData) => {
     try {
