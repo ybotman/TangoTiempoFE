@@ -26,10 +26,17 @@ const RegionalOrganizersName = ({
   useEffect(() => {
     setIsModified(
       currentName !== name ||
-      currentShortName !== shortName ||
-      currentDescription !== description
+        currentShortName !== shortName ||
+        currentDescription !== description
     );
-  }, [currentName, currentShortName, currentDescription, name, shortName, description]);
+  }, [
+    currentName,
+    currentShortName,
+    currentDescription,
+    name,
+    shortName,
+    description,
+  ]);
 
   // Handle shortName restrictions
   const handleShortNameChange = (e) => {
