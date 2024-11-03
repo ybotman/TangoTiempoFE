@@ -1,7 +1,7 @@
 // src/components/Modals/UserSettings/UserSettingsModal.js
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
@@ -9,6 +9,8 @@ import UserSettingsEvents from '@/components/Modals/UserSettings/UserSettingsEve
 import UserSettingsOrganizers from '@/components/Modals/UserSettings/UserSettingsOrganizers';
 import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
 import UserSettingsOther from '@/components/Modals/UserSettings/UserSettingsOther';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useUsers } from '@/hooks/useUsers';
 
 const modalStyle = {
   position: 'absolute',
@@ -23,11 +25,21 @@ const modalStyle = {
 };
 
 const UserSettingsModal = ({ open, onClose }) => {
-  const [currentTab, setCurrentTab] = useState('name');
+  const auth = useContext(AuthContext);
+  const { user } = auth || {}; // Destructure user only if auth is defined
+  const { userData, loading, error, updateUserData } = useUsers();
+  const [currentTab, setCurrentTab] = useState('name'); // Manage active tab state
 
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
-  };
+  // Log state if user is missing
+  useEffect(() => {
+    if (!user) {
+      console.log(
+        'User is not authenticated or AuthContext is not initialized yet.'
+      );
+    }
+  }, [user]);
+
+  const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -36,6 +48,7 @@ const UserSettingsModal = ({ open, onClose }) => {
           User Settings
         </Typography>
 
+        {/* Tab Navigation */}
         <Tabs
           value={currentTab}
           onChange={handleTabChange}
@@ -49,19 +62,39 @@ const UserSettingsModal = ({ open, onClose }) => {
           <Tab label="Other" value="other" />
         </Tabs>
 
-        {/* Tab Panels */}
-        {currentTab === 'name' && <UserSettingsName />}
-        {currentTab === 'events' && <UserSettingsEvents />}
-        {currentTab === 'organizer' && <UserSettingsOrganizers />}
-        {currentTab === 'notifications' && <UserSettingsNotifications />}
-        {currentTab === 'other' && <UserSettingsOther />}
+        {/* Content Based on Selected Tab */}
+        {loading ? (
+          <Typography>Loading...</Typography>
+        ) : error ? (
+          <Typography color="error">Error loading user data</Typography>
+        ) : (
+          <>
+            {currentTab === 'name' && (
+              <UserSettingsName
+                firstName={userData?.localUserInfo?.firstName || ''}
+                lastName={userData?.localUserInfo?.lastName || ''}
+                updateUserData={updateUserData}
+              />
+            )}
+            {currentTab === 'events' && (
+              <UserSettingsEvents userData={userData} />
+            )}
+            {currentTab === 'organizer' && (
+              <UserSettingsOrganizers userData={userData} />
+            )}
+            {currentTab === 'notifications' && (
+              <UserSettingsNotifications userData={userData} />
+            )}
+            {currentTab === 'other' && (
+              <UserSettingsOther userData={userData} />
+            )}
+          </>
+        )}
 
+        {/* Modal Actions */}
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
           <Button onClick={onClose} color="secondary">
-            Cancel
-          </Button>
-          <Button variant="contained" color="primary">
-            Save
+            Done
           </Button>
         </Box>
       </Box>

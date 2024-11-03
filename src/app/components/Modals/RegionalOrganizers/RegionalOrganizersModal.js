@@ -1,14 +1,13 @@
 // src/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import RegionalOrganizersName from './RegionalOrganizersName';
-import RegionalOrganizersDemographic from './RegionalOrganizersDemographic';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
-import RegionalOrganizersPrimaryLocations from './RegionalOrganizersPrimaryLocations';
-import RegionalOrganizersSearch from './RegionalOrganizersSearch';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useOrganizers } from '@/hooks/useOrganizers';
 
 const modalStyle = {
   position: 'absolute',
@@ -23,11 +22,24 @@ const modalStyle = {
 };
 
 const RegionalOrganizersModal = ({ open, onClose }) => {
+  const auth = useContext(AuthContext);
+  const { user } = auth || {};
+  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } =
+    useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
-  };
+  // Fetch organizer data and reset tab to "name" when the modal opens
+  useEffect(() => {
+    if (open) {
+      setCurrentTab('name'); // Reset to "name" tab on each open
+      if (user?.backendInfo.regionalOrganizerInfo?.organizerId) {
+        fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+        console.log('useEffect is Fetching organizer data');
+      }
+    }
+  }, [open, user, fetchOrganizerById]);
+
+  const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -36,34 +48,60 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
           Regional Organizer Settings
         </Typography>
 
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="Regional Organizer Settings Tabs"
-          variant="scrollable"
-        >
-          <Tab label="Name" value="name" />
-          <Tab label="Demographic" value="demographic" />
-          <Tab label="Address" value="address" />
-          <Tab label="Primary Locations" value="primaryLocations" />
-          <Tab label="Search" value="search" />
-        </Tabs>
-
-        {/* Tab Panels */}
-        {currentTab === 'name' && <RegionalOrganizersName />}
-        {currentTab === 'demographic' && <RegionalOrganizersDemographic />}
-        {currentTab === 'address' && <RegionalOrganizersAddress />}
-        {currentTab === 'primaryLocations' && (
-          <RegionalOrganizersPrimaryLocations />
+        {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
+          <Typography variant="body2" color="textSecondary" gutterBottom>
+            Organizer ID: {user.backendInfo.regionalOrganizerInfo.organizerId}
+          </Typography>
         )}
-        {currentTab === 'search' && <RegionalOrganizersSearch />}
+
+        {user?.backendInfo.regionalOrganizerInfo?.organizerId ? (
+          <>
+            <Tabs
+              value={currentTab}
+              onChange={handleTabChange}
+              aria-label="Regional Organizer Settings Tabs"
+              variant="scrollable"
+            >
+              <Tab label="Name" value="name" />
+              <Tab label="Address" value="address" />
+            </Tabs>
+
+            {loading ? (
+              <Typography>Loading...</Typography>
+            ) : error ? (
+              <Typography color="error">
+                Error loading organizer data
+              </Typography>
+            ) : (
+              <>
+                {currentTab === 'name' && (
+                  <RegionalOrganizersName
+                    organizerId={organizer?._id}
+                    shortName={organizer?.shortName || ''}
+                    description={organizer?.description || ''}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'address' && (
+                  <RegionalOrganizersAddress
+                    organizerId={organizer?._id}
+                    publicContactInfo={organizer?.publicContactInfo || {}}
+                    wantRender={organizer?.wantRender || false}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+              </>
+            )}
+          </>
+        ) : (
+          <Typography color="textSecondary" gutterBottom>
+            No organizer information available.
+          </Typography>
+        )}
 
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
           <Button onClick={onClose} color="secondary">
-            Cancel
-          </Button>
-          <Button variant="contained" color="primary">
-            Save
+            Close
           </Button>
         </Box>
       </Box>

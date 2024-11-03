@@ -21,9 +21,8 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
-import CreateEventDetailModal from '@/components/Modals/CreateEventDetailModal';
-
-import ViewEventDetailModal from '@/components/Modals/ViewEventDetailModal.js';
+import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
+import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 
 const CalendarPage = () => {
   <Head>

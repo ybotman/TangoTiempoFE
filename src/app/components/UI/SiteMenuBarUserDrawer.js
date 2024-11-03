@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -13,6 +13,11 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -25,6 +30,24 @@ const SiteMenuBarUserDrawer = ({
   handleRoleChange,
   logOut,
 }) => {
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+
+  // Open confirmation dialog
+  const handleLogoutClick = () => {
+    setLogoutConfirmOpen(true);
+  };
+
+  // Close dialog without logging out
+  const handleCancelLogout = () => {
+    setLogoutConfirmOpen(false);
+  };
+
+  // Confirm logout and call the logOut function
+  const handleConfirmLogout = () => {
+    setLogoutConfirmOpen(false);
+    logOut();
+  };
+
   return (
     <Drawer
       anchor="right"
@@ -114,15 +137,44 @@ const SiteMenuBarUserDrawer = ({
               />
             </Box>
 
+            {/* Logout Button with Confirmation */}
             <Button
               variant="contained"
               color="secondary"
               fullWidth
               sx={{ marginTop: 2 }}
-              onClick={logOut}
+              onClick={handleLogoutClick}
             >
               Log Out
             </Button>
+
+            {/* Logout Confirmation Dialog */}
+            <Dialog
+              open={logoutConfirmOpen}
+              onClose={handleCancelLogout}
+              aria-labelledby="logout-confirmation-dialog-title"
+            >
+              <DialogTitle id="logout-confirmation-dialog-title">
+                Confirm Logout
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Are you sure you want to log out?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCancelLogout} color="primary">
+                  No
+                </Button>
+                <Button
+                  onClick={handleConfirmLogout}
+                  color="secondary"
+                  autoFocus
+                >
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Box>
         )}
       </Box>
