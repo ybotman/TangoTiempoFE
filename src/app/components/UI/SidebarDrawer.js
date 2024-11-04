@@ -22,12 +22,13 @@ import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SettingsOverscanIcon from '@mui/icons-material/SettingsOverscan';
+//import SettingsOverscanIcon from '@mui/icons-material/SettingsOverscan';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
+import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
@@ -44,6 +45,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [regionMenuOpen, setRegionMenuOpen] = useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
   const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false);
+  const [systemAdminOpen, setSystemAdminOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false); // State for FAQ modal
 
@@ -184,22 +186,22 @@ const SidebarDrawer = ({ open, onClose }) => {
             </>
           )}
 
-          {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
-            <>
-              <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
-                <ListItemIcon>
-                  <AccountCircleIcon sx={{ color: 'blue' }} />
-                </ListItemIcon>
-                {expanded && <ListItemText primary="User Settings" />}
-              </ListItem>
-              <ListItem button="true">
-                <ListItemIcon>
-                  <SettingsOverscanIcon sx={{ color: 'Red' }} />
-                </ListItemIcon>
-                {expanded && <ListItemText primary="Monster Settings" />}
-              </ListItem>
-            </>
-          )}
+{selectedRole === listOfAllRoles.SYSTEM_OWNER && (
+  <>
+    <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+      <ListItemIcon>
+        <AccountCircleIcon sx={{ color: 'blue' }} />
+      </ListItemIcon>
+      {expanded && <ListItemText primary="User Settings" />}
+    </ListItem>
+    <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
+      <ListItemIcon>
+        <AdminPanelSettingsIcon sx={{ color: 'red' }} />
+      </ListItemIcon>
+      {expanded && <ListItemText primary="System Admin Panel" />}
+    </ListItem>
+  </>
+)}
 
           <Divider />
 
@@ -270,6 +272,10 @@ const SidebarDrawer = ({ open, onClose }) => {
         open={regionalOrganizerOpen}
         onClose={() => setRegionalOrganizerOpen(false)}
       />
+      <SystemAdminModal
+  open={systemAdminOpen}
+  onClose={() => setSystemAdminOpen(false)}
+/>
       <FAQModal
         open={faqOpen}
         onClose={() => setFaqOpen(false)} // FAQ modal control
