@@ -22,7 +22,6 @@ import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-//import SettingsOverscanIcon from '@mui/icons-material/SettingsOverscan';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
@@ -241,12 +240,6 @@ const SidebarDrawer = ({ open, onClose }) => {
           </Link>
 
           <Divider />
-          <ListItem button="true" onClick={() => setPrivacyPolicyOpen(true)}>
-            <ListItemIcon>
-              <LockIcon sx={{ color: 'green' }} />
-            </ListItemIcon>
-            {expanded && <ListItemText primary="Privacy Policy" />}
-          </ListItem>
           <ListItem button="true">
             <ListItemIcon>
               <MessageIcon sx={{ color: 'coral' }} />
