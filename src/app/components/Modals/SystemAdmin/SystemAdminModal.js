@@ -19,7 +19,7 @@ export default function SystemAdminModal({ open, onClose }) {
     <Modal open={open} onClose={onClose}>
       <Box sx={{ width: 600, margin: "auto", padding: 4, mt: 10, backgroundColor: "white", borderRadius: 1 }}>
         <Typography variant="h4" align="center" gutterBottom>
-          ADMIN
+          SYSTEM ADMINISTRATON
         </Typography>
         <Tabs value={selectedTab} onChange={handleTabChange} centered>
           <Tab label="UserLogin" />
