@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -14,50 +14,48 @@ import {
   FormControlLabel,
   TextField,
   Divider,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import axios from "axios";
+  Select,
+  MenuItem,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import axios from 'axios';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_BE_URL;
 
 export default function SystemAdminUserLogin() {
   const [userLogins, setUserLogins] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [organizers, setOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedUserId, setExpandedUserId] = useState(null);
   const [editUserId, setEditUserId] = useState(null);
   const [originalUserData, setOriginalUserData] = useState({});
 
   useEffect(() => {
-    const fetchUserLogins = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/userlogins/all`);
-        const userLoginsData = response.data;
+        const [userResponse, roleResponse, organizerResponse] =
+          await Promise.all([
+            axios.get(`${apiBaseUrl}/api/userlogins/all`),
+            axios.get(`${apiBaseUrl}/api/roles`),
+            axios.get(`${apiBaseUrl}/api/organizers`),
+          ]);
 
-        // Normalize roleIds to be an array of IDs
-        const normalizedUserLogins = userLoginsData.map((user) => ({
+        const userLoginsData = userResponse.data.map((user) => ({
           ...user,
           roleIds: user.roleIds.map((role) => role._id),
         }));
 
-        setUserLogins(normalizedUserLogins);
+        setUserLogins(userLoginsData);
+        setRoles(roleResponse.data);
+        setOrganizers(organizerResponse.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching user logins:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    const fetchRoles = async () => {
-      try {
-        const response = await axios.get(`${apiBaseUrl}/api/roles`);
-        setRoles(response.data);
-      } catch (error) {
-        console.error("Error fetching roles:", error);
-      }
-    };
-
-    fetchUserLogins();
-    fetchRoles();
+    fetchData();
   }, []);
 
   const toggleRole = (user, roleId) => {
@@ -85,13 +83,44 @@ export default function SystemAdminUserLogin() {
     );
   };
 
+  const handleOrganizerChange = (user, organizerId) => {
+    setUserLogins((prev) =>
+      prev.map((u) =>
+        u.firebaseUserId === user.firebaseUserId
+          ? {
+              ...u,
+              regionalOrganizerInfo: {
+                ...u.regionalOrganizerInfo,
+                organizerId,
+              },
+            }
+          : u
+      )
+    );
+  };
+
+  const handleApprovalChange = (user, isApproved) => {
+    setUserLogins((prev) =>
+      prev.map((u) =>
+        u.firebaseUserId === user.firebaseUserId
+          ? {
+              ...u,
+              regionalOrganizerInfo: {
+                ...u.regionalOrganizerInfo,
+                isApproved,
+              },
+            }
+          : u
+      )
+    );
+  };
+
   const handleAccordionChange = (userId) => {
     setExpandedUserId((prev) => (prev === userId ? null : userId));
   };
 
   const toggleEditMode = (userId) => {
     if (editUserId === userId) {
-      // Exiting edit mode
       setEditUserId(null);
       setOriginalUserData((prev) => {
         const updated = { ...prev };
@@ -99,7 +128,6 @@ export default function SystemAdminUserLogin() {
         return updated;
       });
     } else {
-      // Entering edit mode
       setEditUserId(userId);
       const user = userLogins.find((u) => u.firebaseUserId === userId);
       setOriginalUserData((prev) => ({
@@ -116,25 +144,29 @@ export default function SystemAdminUserLogin() {
         return role ? role.roleName : null;
       })
       .filter(Boolean)
-      .join(", ");
+      .join(', ');
   };
 
   const hasUnsavedChanges = (user) => {
     const originalData = originalUserData[user.firebaseUserId];
     if (!originalData) return false;
 
-    // Compare relevant fields
     return (
       user.localUserInfo.firstName !== originalData.localUserInfo.firstName ||
       user.localUserInfo.lastName !== originalData.localUserInfo.lastName ||
-      user.localUserInfo.loginUserName !== originalData.localUserInfo.loginUserName ||
-      JSON.stringify(user.roleIds.sort()) !== JSON.stringify(originalData.roleIds.sort())
+      user.localUserInfo.loginUserName !==
+        originalData.localUserInfo.loginUserName ||
+      JSON.stringify(user.roleIds.sort()) !==
+        JSON.stringify(originalData.roleIds.sort()) ||
+      user.regionalOrganizerInfo.organizerId !==
+        originalData.regionalOrganizerInfo.organizerId ||
+      user.regionalOrganizerInfo.isApproved !==
+        originalData.regionalOrganizerInfo.isApproved
     );
   };
 
   const handleSaveChanges = async (user) => {
     try {
-      // Update user info
       await axios.put(`${apiBaseUrl}/api/userlogins/updateUserInfo`, {
         firebaseUserId: user.firebaseUserId,
         firstName: user.localUserInfo.firstName,
@@ -142,15 +174,16 @@ export default function SystemAdminUserLogin() {
         loginUserName: user.localUserInfo.loginUserName,
       });
 
-      // Update roles
-      await axios.put(`${apiBaseUrl}/api/userlogins/${user.firebaseUserId}/roles`, {
-        roleIds: user.roleIds,
-      });
+      await axios.put(
+        `${apiBaseUrl}/api/userlogins/${user.firebaseUserId}/roles`,
+        {
+          roleIds: user.roleIds,
+        }
+      );
 
-      // Exit edit mode
       toggleEditMode(user.firebaseUserId);
     } catch (error) {
-      console.error("Error saving user changes:", error);
+      console.error('Error saving user changes:', error);
     }
   };
 
@@ -163,7 +196,6 @@ export default function SystemAdminUserLogin() {
       <Typography variant="h5" gutterBottom>
         User Logins
       </Typography>
-
       {Array.isArray(userLogins) && userLogins.length > 0 ? (
         userLogins.map((user) => {
           const isExpanded = expandedUserId === user.firebaseUserId;
@@ -185,11 +217,11 @@ export default function SystemAdminUserLogin() {
                     toggleEditMode(user.firebaseUserId);
                   }}
                   variant="outlined"
-                  color={isEditing ? "secondary" : "primary"}
+                  color={isEditing ? 'secondary' : 'primary'}
                   size="small"
                   sx={{ ml: 2 }}
                 >
-                  {isEditing ? "Cancel Edit" : "Edit"}
+                  {isEditing ? 'Cancel Edit' : 'Edit'}
                 </Button>
               </AccordionSummary>
               <AccordionDetails>
@@ -201,7 +233,7 @@ export default function SystemAdminUserLogin() {
                           label="First Name"
                           value={user.localUserInfo.firstName}
                           onChange={(e) =>
-                            handleFieldChange(user, "firstName", e.target.value)
+                            handleFieldChange(user, 'firstName', e.target.value)
                           }
                           fullWidth
                         />
@@ -211,7 +243,7 @@ export default function SystemAdminUserLogin() {
                           label="Last Name"
                           value={user.localUserInfo.lastName}
                           onChange={(e) =>
-                            handleFieldChange(user, "lastName", e.target.value)
+                            handleFieldChange(user, 'lastName', e.target.value)
                           }
                           fullWidth
                         />
@@ -221,9 +253,51 @@ export default function SystemAdminUserLogin() {
                           label="Username"
                           value={user.localUserInfo.loginUserName}
                           onChange={(e) =>
-                            handleFieldChange(user, "loginUserName", e.target.value)
+                            handleFieldChange(
+                              user,
+                              'loginUserName',
+                              e.target.value
+                            )
                           }
                           fullWidth
+                        />
+                      </Grid>
+
+                      {/* Organizer dropdown */}
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="textSecondary">
+                          Organizer:
+                        </Typography>
+                        <Select
+                          fullWidth
+                          value={user.regionalOrganizerInfo.organizerId || ''}
+                          onChange={(e) =>
+                            handleOrganizerChange(user, e.target.value)
+                          }
+                        >
+                          {organizers.map((organizer) => (
+                            <MenuItem key={organizer._id} value={organizer._id}>
+                              {organizer.shortName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Grid>
+
+                      {/* Approval switch */}
+                      <Grid item xs={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={
+                                user.regionalOrganizerInfo.isApproved || false
+                              }
+                              onChange={(e) =>
+                                handleApprovalChange(user, e.target.checked)
+                              }
+                              color="primary"
+                            />
+                          }
+                          label="Is Approved"
                         />
                       </Grid>
                     </>
@@ -245,7 +319,15 @@ export default function SystemAdminUserLogin() {
                         <Typography variant="body2" color="textSecondary">
                           Username:
                         </Typography>
-                        <Typography>{user.localUserInfo.loginUserName}</Typography>
+                        <Typography>
+                          {user.localUserInfo.loginUserName}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="textSecondary">
+                          Roles:
+                        </Typography>
+                        <Typography>{getRoleNames(user)}</Typography>
                       </Grid>
                     </>
                   )}
@@ -253,7 +335,7 @@ export default function SystemAdminUserLogin() {
 
                 <Divider sx={{ my: 2 }} />
 
-                {isEditing ? (
+                {isEditing && (
                   <Accordion sx={{ mt: 2 }} disableGutters>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography variant="body2" color="textSecondary">
@@ -279,28 +361,14 @@ export default function SystemAdminUserLogin() {
                       </Box>
                     </AccordionDetails>
                   </Accordion>
-                ) : (
-                  <Box mt={2}>
-                    <Typography variant="body2" color="textSecondary">
-                      Roles:
-                    </Typography>
-                    <Typography>{getRoleNames(user)}</Typography>
-                  </Box>
                 )}
-
-                <Typography variant="body2" sx={{ mt: 2 }}>
-                  Organizer: {user.regionalOrganizerInfo?.organizerId?.name || "N/A"}
-                </Typography>
-                <Typography variant="body2">
-                  Enabled: {user.localUserInfo.isEnabled ? "Yes" : "No"}
-                </Typography>
 
                 {isEditing && (
                   <Button
+                    onClick={() => handleSaveChanges(user)}
                     variant="contained"
                     color="primary"
                     sx={{ mt: 2 }}
-                    onClick={() => handleSaveChanges(user)}
                     disabled={!hasUnsavedChanges(user)}
                   >
                     Save Changes
