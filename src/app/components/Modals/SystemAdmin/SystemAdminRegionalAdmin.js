@@ -1,7 +1,7 @@
 // @/components/Modals/SystemAdmin/SystemAdminRegionalAdmin.js
-"use client";
+'use client';
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from '@mui/material';
 
 export default function SystemAdminRegionalAdmin() {
   return (
