@@ -186,22 +186,22 @@ const SidebarDrawer = ({ open, onClose }) => {
             </>
           )}
 
-{selectedRole === listOfAllRoles.SYSTEM_OWNER && (
-  <>
-    <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
-      <ListItemIcon>
-        <AccountCircleIcon sx={{ color: 'blue' }} />
-      </ListItemIcon>
-      {expanded && <ListItemText primary="User Settings" />}
-    </ListItem>
-    <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
-      <ListItemIcon>
-        <AdminPanelSettingsIcon sx={{ color: 'red' }} />
-      </ListItemIcon>
-      {expanded && <ListItemText primary="System Admin Panel" />}
-    </ListItem>
-  </>
-)}
+          {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
+            <>
+              <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+                <ListItemIcon>
+                  <AccountCircleIcon sx={{ color: 'blue' }} />
+                </ListItemIcon>
+                {expanded && <ListItemText primary="User Settings" />}
+              </ListItem>
+              <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
+                <ListItemIcon>
+                  <AdminPanelSettingsIcon sx={{ color: 'red' }} />
+                </ListItemIcon>
+                {expanded && <ListItemText primary="System Admin Panel" />}
+              </ListItem>
+            </>
+          )}
 
           <Divider />
 
@@ -273,9 +273,9 @@ const SidebarDrawer = ({ open, onClose }) => {
         onClose={() => setRegionalOrganizerOpen(false)}
       />
       <SystemAdminModal
-  open={systemAdminOpen}
-  onClose={() => setSystemAdminOpen(false)}
-/>
+        open={systemAdminOpen}
+        onClose={() => setSystemAdminOpen(false)}
+      />
       <FAQModal
         open={faqOpen}
         onClose={() => setFaqOpen(false)} // FAQ modal control
