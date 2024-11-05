@@ -37,7 +37,7 @@
     "debounce": "^2.2.0",
     "depcheck": "^1.4.7",
     "dompurify": "^3.1.7",
-    "firebase": "^10.13.0",
+    "firebase": "^11.0.1",
     "install": "^0.13.0",
     "jsdom": "^25.0.1",
     "luxon": "^3.5.0",
