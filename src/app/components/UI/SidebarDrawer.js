@@ -22,12 +22,12 @@ import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SettingsOverscanIcon from '@mui/icons-material/SettingsOverscan';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
+import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
@@ -44,6 +44,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [regionMenuOpen, setRegionMenuOpen] = useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
   const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false);
+  const [systemAdminOpen, setSystemAdminOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false); // State for FAQ modal
 
@@ -192,11 +193,11 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 {expanded && <ListItemText primary="User Settings" />}
               </ListItem>
-              <ListItem button="true">
+              <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
                 <ListItemIcon>
-                  <SettingsOverscanIcon sx={{ color: 'Red' }} />
+                  <AdminPanelSettingsIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="Monster Settings" />}
+                {expanded && <ListItemText primary="System Admin Panel" />}
               </ListItem>
             </>
           )}
@@ -239,12 +240,6 @@ const SidebarDrawer = ({ open, onClose }) => {
           </Link>
 
           <Divider />
-          <ListItem button="true" onClick={() => setPrivacyPolicyOpen(true)}>
-            <ListItemIcon>
-              <LockIcon sx={{ color: 'green' }} />
-            </ListItemIcon>
-            {expanded && <ListItemText primary="Privacy Policy" />}
-          </ListItem>
           <ListItem button="true">
             <ListItemIcon>
               <MessageIcon sx={{ color: 'coral' }} />
@@ -269,6 +264,10 @@ const SidebarDrawer = ({ open, onClose }) => {
       <RegionalOrganizersModal
         open={regionalOrganizerOpen}
         onClose={() => setRegionalOrganizerOpen(false)}
+      />
+      <SystemAdminModal
+        open={systemAdminOpen}
+        onClose={() => setSystemAdminOpen(false)}
       />
       <FAQModal
         open={faqOpen}
