@@ -176,11 +176,11 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 {expanded && <ListItemText primary="User Settings" />}
               </ListItem>
-              <ListItem button="true">
+          <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
                 <ListItemIcon>
                   <AdminPanelSettingsIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="System Admin Settings" />}
+                {expanded && <ListItemText primary="System Admin Panel" />}
               </ListItem>
             </>
           )}
