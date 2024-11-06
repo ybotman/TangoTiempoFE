@@ -77,8 +77,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 {currentTab === 'name' && (
                   <RegionalOrganizersName
                     organizerId={organizer?._id}
-                    shortName={organizer?.shortName || ''}
-                    description={organizer?.description || ''}
+                    organizer={organizer} // Pass the entire organizer object
                     updateOrganizer={updateOrganizer}
                   />
                 )}

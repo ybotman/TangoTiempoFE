@@ -1,104 +1,119 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersName.js
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, TextField, Button } from '@mui/material';
 
 const RegionalOrganizersName = ({
   organizerId,
-  name = '',
-  shortName = '',
-  description = '',
+  organizer,
   updateOrganizer,
 }) => {
-  const [currentName, setCurrentName] = useState(name);
-  const [currentShortName, setCurrentShortName] = useState(shortName);
-  const [currentDescription, setCurrentDescription] = useState(description);
-  const [isModified, setIsModified] = useState(false);
+  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [shortName, setShortName] = useState('');
+  const [description, setDescription] = useState('');
+  const [url, setUrl] = useState('');
 
-  // Sync state with props when the component receives new props after save
+  // Sync state with organizer prop on each prop update
   useEffect(() => {
-    setCurrentName(name || '');
-    setCurrentShortName(shortName || '');
-    setCurrentDescription(description || '');
-  }, [name, shortName, description]);
+    if (organizer) {
+      setName(organizer.name || '');
+      setFullName(organizer.fullName || '');
+      setShortName(organizer.shortName || '');
+      setDescription(organizer.description || '');
+      setUrl(organizer.url || '');
+    }
+  }, [organizer]);
 
-  // Track if any field has been modified to enable the Save button
-  useEffect(() => {
-    setIsModified(
-      currentName !== name ||
-        currentShortName !== shortName ||
-        currentDescription !== description
-    );
-  }, [
-    currentName,
-    currentShortName,
-    currentDescription,
-    name,
-    shortName,
-    description,
-  ]);
+  // Determine if save button should be enabled based on field changes
+  const isSaveDisabled =
+    name === organizer?.name &&
+    fullName === organizer?.fullName &&
+    shortName === organizer?.shortName &&
+    description === organizer?.description &&
+    url === organizer?.url;
 
-  // Handle shortName restrictions
+  // Handle shortName with validation
   const handleShortNameChange = (e) => {
     const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     if (value.length <= 9) {
-      setCurrentShortName(value);
+      setShortName(value);
     }
   };
 
   const handleSave = async () => {
     const updateData = {
-      name: currentName,
-      shortName: currentShortName,
-      description: currentDescription,
+      name,
+      fullName,
+      shortName,
+      description,
+      url,
     };
     try {
-      await updateOrganizer(organizerId, updateData);
-      console.log('Organizer updated successfully');
+      const updatedOrganizer = await updateOrganizer(organizerId, updateData);
+      setName(updatedOrganizer.name);
+      setFullName(updatedOrganizer.fullName);
+      setShortName(updatedOrganizer.shortName);
+      setDescription(updatedOrganizer.description);
+      setUrl(updatedOrganizer.url);
+      console.log('Name updated successfully.');
     } catch (error) {
-      console.log('Failed to update organizer', error);
+      console.error('Failed to update name:', error);
     }
   };
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h6">Edit Organizer Details</Typography>
+      <Typography variant="h6">Edit Organizer Name</Typography>
 
-      {/* Name and Short Name on the Same Line */}
       <Box display="flex" gap={2} mb={2}>
         <TextField
           label="Name"
           fullWidth
           margin="normal"
-          value={currentName}
-          onChange={(e) => setCurrentName(e.target.value)}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
         />
+        <TextField
+          label="Full Name"
+          fullWidth
+          margin="normal"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+        />
+      </Box>
+
+      <Box display="flex" gap={2} mb={2}>
         <TextField
           label="Short Name (No spaces, max 9 characters)"
           fullWidth
           margin="normal"
-          value={currentShortName}
+          value={shortName}
           onChange={handleShortNameChange}
-          helperText="Converted to uppercase, limited to 9 characters."
+        />
+        <TextField
+          label="URL"
+          fullWidth
+          margin="normal"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
         />
       </Box>
 
-      {/* Description Field */}
       <TextField
         label="Description"
         fullWidth
         margin="normal"
         multiline
         rows={3}
-        value={currentDescription}
-        onChange={(e) => setCurrentDescription(e.target.value)}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
 
       <Button
         variant="contained"
         color="primary"
         onClick={handleSave}
-        disabled={!isModified}
+        disabled={isSaveDisabled}
         sx={{ mt: 2 }}
       >
         Save
@@ -109,9 +124,13 @@ const RegionalOrganizersName = ({
 
 RegionalOrganizersName.propTypes = {
   organizerId: PropTypes.string.isRequired,
-  name: PropTypes.string,
-  shortName: PropTypes.string,
-  description: PropTypes.string,
+  organizer: PropTypes.shape({
+    name: PropTypes.string,
+    fullName: PropTypes.string,
+    shortName: PropTypes.string,
+    url: PropTypes.string,
+    description: PropTypes.string,
+  }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
 };
 

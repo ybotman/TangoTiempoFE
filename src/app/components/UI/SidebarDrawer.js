@@ -176,7 +176,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 {expanded && <ListItemText primary="User Settings" />}
               </ListItem>
-          <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
+              <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
                 <ListItemIcon>
                   <AdminPanelSettingsIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
