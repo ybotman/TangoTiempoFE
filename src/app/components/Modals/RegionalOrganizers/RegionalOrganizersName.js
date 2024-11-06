@@ -20,7 +20,7 @@ const RegionalOrganizersName = ({
       setFullName(organizer.fullName || '');
       setShortName(organizer.shortName || '');
       setDescription(organizer.description || '');
-      setUrl(organizer.url || '');
+      setUrl(organizer.publicContactInfo?.url || '');
     }
   }, [organizer]);
 
@@ -30,7 +30,7 @@ const RegionalOrganizersName = ({
     fullName === organizer?.fullName &&
     shortName === organizer?.shortName &&
     description === organizer?.description &&
-    url === organizer?.url;
+    url === organizer?.publicContactInfo?.url; // Check URL from publicContactInfo
 
   // Handle shortName with validation
   const handleShortNameChange = (e) => {
@@ -46,7 +46,9 @@ const RegionalOrganizersName = ({
       fullName,
       shortName,
       description,
-      url,
+      publicContactInfo: {
+        url, // Save URL within publicContactInfo
+      },
     };
     try {
       const updatedOrganizer = await updateOrganizer(organizerId, updateData);
@@ -54,7 +56,7 @@ const RegionalOrganizersName = ({
       setFullName(updatedOrganizer.fullName);
       setShortName(updatedOrganizer.shortName);
       setDescription(updatedOrganizer.description);
-      setUrl(updatedOrganizer.url);
+      setUrl(updatedOrganizer.publicContactInfo?.url);
       console.log('Name updated successfully.');
     } catch (error) {
       console.error('Failed to update name:', error);
@@ -128,7 +130,9 @@ RegionalOrganizersName.propTypes = {
     name: PropTypes.string,
     fullName: PropTypes.string,
     shortName: PropTypes.string,
-    url: PropTypes.string,
+    publicContactInfo: PropTypes.shape({
+      url: PropTypes.string,
+    }),
     description: PropTypes.string,
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
