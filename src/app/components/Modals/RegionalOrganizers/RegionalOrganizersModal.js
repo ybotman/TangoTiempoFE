@@ -1,11 +1,11 @@
 // src/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
-'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
+import RegionalOrganizersDelegated from './RegionalOrganizersDelegated'; // Import the new Delegated component
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 
@@ -64,6 +64,8 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
+              <Tab label="Delegated" value="delegated" />{' '}
+              {/* New Delegated tab */}
             </Tabs>
 
             {loading ? (
@@ -77,16 +79,23 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 {currentTab === 'name' && (
                   <RegionalOrganizersName
                     organizerId={organizer?._id}
-                    shortName={organizer?.shortName || ''}
-                    description={organizer?.description || ''}
+                    organizer={organizer}
                     updateOrganizer={updateOrganizer}
                   />
                 )}
                 {currentTab === 'address' && (
                   <RegionalOrganizersAddress
                     organizerId={organizer?._id}
-                    publicContactInfo={organizer?.publicContactInfo || {}}
-                    wantRender={organizer?.wantRender || false}
+                    organizer={organizer}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'delegated' && (
+                  <RegionalOrganizersDelegated
+                    organizerId={organizer?._id}
+                    delegatedOrganizerIds={
+                      organizer.delegatedOrganizerIds || []
+                    } // Pass as array
                     updateOrganizer={updateOrganizer}
                   />
                 )}
