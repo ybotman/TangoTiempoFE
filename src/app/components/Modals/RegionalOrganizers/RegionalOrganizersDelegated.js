@@ -72,7 +72,9 @@ const RegionalOrganizersDelegated = ({
   const handleAddDelegatedOrganizer = async () => {
     const updatedDelegatedIds = [...delegatedOrganizerIds, selectedOrganizerId];
     try {
-      await updateOrganizer(organizerId, { delegatedOrganizerIds: updatedDelegatedIds });
+      await updateOrganizer(organizerId, {
+        delegatedOrganizerIds: updatedDelegatedIds,
+      });
       setSelectedOrganizerId('');
     } catch (error) {
       console.error('Error adding delegated organizer:', error);
@@ -80,9 +82,13 @@ const RegionalOrganizersDelegated = ({
   };
 
   const handleRemoveDelegatedOrganizer = async (idToRemove) => {
-    const updatedDelegatedIds = delegatedOrganizerIds.filter((id) => id !== idToRemove);
+    const updatedDelegatedIds = delegatedOrganizerIds.filter(
+      (id) => id !== idToRemove
+    );
     try {
-      await updateOrganizer(organizerId, { delegatedOrganizerIds: updatedDelegatedIds });
+      await updateOrganizer(organizerId, {
+        delegatedOrganizerIds: updatedDelegatedIds,
+      });
     } catch (error) {
       console.error('Error removing delegated organizer:', error);
     }
