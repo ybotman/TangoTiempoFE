@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
-import RegionalOrganizersDelegated from './RegionalOrganizersDelegated'; // Import the new Delegated component
+import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
+import RegionalOrganizersImages from './RegionalOrganizersImages'; // Import the new Images component
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 
@@ -15,7 +16,7 @@ const modalStyle = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: '80%',
-  maxWidth: '600px',
+  maxWidth: '800px',
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 3,
@@ -24,17 +25,22 @@ const modalStyle = {
 const RegionalOrganizersModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } =
-    useOrganizers();
+  const {
+    organizers,
+    organizer,
+    loading,
+    error,
+    fetchOrganizerById,
+    updateOrganizer,
+  } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-  // Fetch organizer data and reset tab to "name" when the modal opens
   useEffect(() => {
     if (open) {
-      setCurrentTab('name'); // Reset to "name" tab on each open
+      setCurrentTab('name');
       if (user?.backendInfo.regionalOrganizerInfo?.organizerId) {
         fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
-        console.log('useEffect is Fetching organizer data');
+        console.log('Fetching organizer data');
       }
     }
   }, [open, user, fetchOrganizerById]);
@@ -64,8 +70,8 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
-              <Tab label="Delegated" value="delegated" />{' '}
-              {/* New Delegated tab */}
+              <Tab label="Delegated" value="delegated" />
+              <Tab label="Images" value="images" /> {/* New Images tab */}
             </Tabs>
 
             {loading ? (
@@ -95,7 +101,15 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     delegatedOrganizerIds={
                       organizer.delegatedOrganizerIds || []
-                    } // Pass as array
+                    }
+                    organizers={organizers}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'images' && (
+                  <RegionalOrganizersImages
+                    organizerId={organizer?._id}
+                    organizer={organizer}
                     updateOrganizer={updateOrganizer}
                   />
                 )}
