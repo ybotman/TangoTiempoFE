@@ -57,6 +57,7 @@ export const useImages = (organizerId) => {
     fetchImages();
   }, [organizerId]);
 
+  // Upload image using SAS token
   const uploadImage = async (file) => {
     setLoading(true);
     try {
@@ -87,14 +88,7 @@ export const useImages = (organizerId) => {
 
       // Get the URL of the uploaded blob
       const imageUrl = blockBlobClient.url; // Since blobs are public, we can use this URL
-
-      // Update the organizer's images array in the database
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}/add-image`,
-        { imageUrl }
-      );
-
-      // Refresh images list
+console.log('imageUrl:', imageUrl);
       await fetchImages();
     } catch (error) {
       console.error('Error uploading image:', error);
