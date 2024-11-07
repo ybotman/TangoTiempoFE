@@ -88,7 +88,7 @@ export const useImages = (organizerId) => {
 
       // Get the URL of the uploaded blob
       const imageUrl = blockBlobClient.url; // Since blobs are public, we can use this URL
-console.log('imageUrl:', imageUrl);
+      console.log('imageUrl:', imageUrl);
       await fetchImages();
     } catch (error) {
       console.error('Error uploading image:', error);
