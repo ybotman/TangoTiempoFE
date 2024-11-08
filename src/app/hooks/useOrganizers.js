@@ -35,7 +35,6 @@ export const useOrganizers = () => {
     }
   }, [selectedRegionID]);
 
-  // New function to fetch organizer by ID
   const fetchOrganizerById = useCallback(async (organizerId) => {
     console.log('fetchOrganizerById called with organizerId:', organizerId);
     try {

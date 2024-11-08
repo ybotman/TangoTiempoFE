@@ -1,4 +1,5 @@
 // src/components/Modals/RegionalOrganizers/RegionalOrganizersAddress.js
+
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -11,49 +12,66 @@ import {
 
 const RegionalOrganizersAddress = ({
   organizerId,
-  publicContactInfo,
-  wantRender,
+  organizer,
   updateOrganizer,
 }) => {
-  const [phone, setPhone] = useState(publicContactInfo?.phone || '');
-  const [email, setEmail] = useState(publicContactInfo?.email || '');
-  const [url, setUrl] = useState(publicContactInfo?.url || '');
-  const [street, setStreet] = useState(publicContactInfo?.street1 || '');
-  const [city, setCity] = useState(publicContactInfo?.city || '');
-  const [zip, setZip] = useState(publicContactInfo?.postalCode || '');
-  const [isSearchable, setIsSearchable] = useState(wantRender);
+  const publicContactInfo = organizer?.publicContactInfo || {};
+  const address = publicContactInfo.address || {};
 
-  // Update state when props change (e.g., after saving)
+  // Corrected `useState` initializations
+  const [phone, setPhone] = useState(publicContactInfo.phone || '');
+  const [Email, setEmail] = useState(publicContactInfo.Email || '');
+  const [street1, setStreet1] = useState(
+    publicContactInfo.address?.street1 || ''
+  );
+  const [street2, setStreet2] = useState(
+    publicContactInfo.address?.street2 || ''
+  );
+  const [city, setCity] = useState(publicContactInfo.address?.city || '');
+  const [state, setState] = useState(publicContactInfo.address?.state || '');
+  const [zip, setZip] = useState(publicContactInfo.address?.postalCode || '');
+  const [isSearchable, setIsSearchable] = useState(
+    organizer?.wantRender || false
+  );
+
+  // Update state when organizer prop changes
   useEffect(() => {
-    setPhone(publicContactInfo?.phone || '');
-    setEmail(publicContactInfo?.email || '');
-    setUrl(publicContactInfo?.url || '');
-    setStreet(publicContactInfo?.street1 || '');
-    setCity(publicContactInfo?.city || '');
-    setZip(publicContactInfo?.postalCode || '');
-    setIsSearchable(wantRender);
-  }, [publicContactInfo, wantRender]);
+    const publicContactInfo = organizer?.publicContactInfo || {};
 
-  // Determine if save button should be enabled based on field changes
+    setPhone(publicContactInfo.phone || '');
+    setEmail(publicContactInfo.Email || '');
+    setStreet1(publicContactInfo.address?.street1 || '');
+    setStreet2(publicContactInfo.address?.street2 || '');
+    setCity(publicContactInfo.address?.city || '');
+    setState(publicContactInfo.address?.state || '');
+    setZip(publicContactInfo.address?.postalCode || '');
+    setIsSearchable(organizer?.wantRender || false);
+  }, [organizer]);
+
+  // Determine if save button should be enabled
   const isSaveDisabled =
-    phone === (publicContactInfo?.phone || '') &&
-    email === (publicContactInfo?.email || '') &&
-    url === (publicContactInfo?.url || '') &&
-    street === (publicContactInfo?.street1 || '') &&
-    city === (publicContactInfo?.city || '') &&
-    zip === (publicContactInfo?.postalCode || '') &&
-    isSearchable === wantRender;
+    phone === (publicContactInfo.phone || '') &&
+    Email === (publicContactInfo.Email || '') &&
+    street1 === (address.street1 || '') &&
+    street2 === (address.street2 || '') &&
+    city === (address.city || '') &&
+    state === (address.state || '') &&
+    zip === (address.postalCode || '') &&
+    isSearchable === (organizer?.wantRender || false);
 
   // Handle save action
   const handleSave = async () => {
     const updateData = {
       publicContactInfo: {
         phone,
-        email,
-        url,
-        street1: street,
-        city,
-        postalCode: zip,
+        Email,
+        address: {
+          street1,
+          street2,
+          city,
+          state,
+          postalCode: zip,
+        },
       },
       wantRender: isSearchable,
     };
@@ -77,34 +95,40 @@ const RegionalOrganizersAddress = ({
         />
         <TextField
           label="Email"
-          value={email}
+          value={Email}
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
         />
       </Box>
 
-      {/* Line 2: URL */}
-      <Box mb={2}>
+      {/* Line 2: Address Fields (Street 1 and Street 2) */}
+      <Box display="flex" gap={2} mb={2}>
         <TextField
-          label="URL"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          label="Street 1"
+          value={street1}
+          onChange={(e) => setStreet1(e.target.value)}
+          fullWidth
+        />
+        <TextField
+          label="Street 2"
+          value={street2}
+          onChange={(e) => setStreet2(e.target.value)}
           fullWidth
         />
       </Box>
 
-      {/* Line 3: Street, City, Zip */}
+      {/* Line 3: City, State, Zip */}
       <Box display="flex" gap={2} mb={2}>
-        <TextField
-          label="Street"
-          value={street}
-          onChange={(e) => setStreet(e.target.value)}
-          fullWidth
-        />
         <TextField
           label="City"
           value={city}
           onChange={(e) => setCity(e.target.value)}
+          fullWidth
+        />
+        <TextField
+          label="State"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
           fullWidth
         />
         <TextField
@@ -115,7 +139,7 @@ const RegionalOrganizersAddress = ({
         />
       </Box>
 
-      {/* Toggle and Save Button on the Same Line */}
+      {/* Toggle and Save Button */}
       <Box
         display="flex"
         alignItems="center"
@@ -147,15 +171,20 @@ const RegionalOrganizersAddress = ({
 
 RegionalOrganizersAddress.propTypes = {
   organizerId: PropTypes.string.isRequired,
-  publicContactInfo: PropTypes.shape({
-    phone: PropTypes.string,
-    email: PropTypes.string,
-    url: PropTypes.string,
-    street1: PropTypes.string,
-    city: PropTypes.string,
-    postalCode: PropTypes.string,
+  organizer: PropTypes.shape({
+    publicContactInfo: PropTypes.shape({
+      phone: PropTypes.string,
+      Email: PropTypes.string,
+      address: PropTypes.shape({
+        street1: PropTypes.string,
+        street2: PropTypes.string,
+        city: PropTypes.string,
+        state: PropTypes.string,
+        postalCode: PropTypes.string,
+      }),
+    }),
+    wantRender: PropTypes.bool,
   }),
-  wantRender: PropTypes.bool,
   updateOrganizer: PropTypes.func.isRequired,
 };
 
