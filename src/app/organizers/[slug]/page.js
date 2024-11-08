@@ -18,11 +18,7 @@ const logger = winston.createLogger({
     winston.format.timestamp(),
     winston.format.json()
   ),
-  transports: [
-    new winston.transports.Console(),
-    // Add other transports if needed, e.g., File transport
-    // new winston.transports.File({ filename: 'combined.log' }),
-  ],
+  transports: [new winston.transports.Console()],
 });
 
 // Set up DOMPurify
@@ -34,10 +30,11 @@ const sanitizeHTML = (htmlString) => {
   return purify.sanitize(htmlString);
 };
 
-// Fetch all organizers and generate static params for each
+
+
 export async function generateStaticParams() {
   try {
-    const beUrl = process.env.NEXT_PUBLIC_BE_URL;
+    const beUrl = process.env.NEXT_PUBLIC_BE_URL || 'https://default-url.com';
     const timeout =
       Number(process.env.NEXT_PUBLIC_STATIC_PAGE_GENERATION_TIMEOUT || '120') *
       1000;
@@ -47,81 +44,88 @@ export async function generateStaticParams() {
     logger.info(`Timeout: ${timeout}`);
 
     // Fetch regions
-    const regionsResponse = await axios.get(
-      `${beUrl}/api/regions/activeRegions`,
-      {
+    let regions = [];
+    try {
+      const regionsResponse = await axios.get(`${beUrl}/api/regions/activeRegions`, {
         timeout,
-      }
-    );
-    const regions = regionsResponse.data;
-    logger.info(`Fetched ${regions.length} regions`);
+      });
+      regions = regionsResponse.data || [];
+      logger.info(`Fetched ${regions.length} regions`);
+    } catch (err) {
+      logger.error('Error fetching regions', { error: err.message });
+    }
 
-    // Fetch organizers
-    const organizersResponse = await axios.get(`${beUrl}/api/organizers`, {
-      timeout,
-    });
-    const organizers = organizersResponse.data;
-    logger.info(`Fetched ${organizers.length} organizers`);
+    // Fetch organizers with isActive, isEnabled, and wantRender all set to true
+    let organizers = [];
+    try {
+      const organizersResponse = await axios.get(
+        `${beUrl}/api/organizers?isActive=true&isEnabled=true&wantRender=true`,
+        { timeout }
+      );
+      organizers = organizersResponse.data || [];
+      logger.info(`Fetched ${organizers.length} active, enabled, and renderable organizers`);
+
+      if (organizers.length === 0) {
+        logger.warn('No organizers found with specified criteria - check backend data or API endpoint.');
+      }
+    } catch (err) {
+      logger.error('Error fetching organizers', { error: err.message });
+    }
 
     const paramsList = [];
     const organizersDataList = [];
 
     organizers.forEach((org) => {
-      // Find region, division, city names
-      const region = regions.find((reg) => reg._id === org.organizerRegion);
-      const division = region?.divisions.find(
-        (div) => div._id === org.organizerDivision
-      );
-      const city = division?.majorCities.find(
-        (c) => c._id === org.organizerCity
-      );
+      try {
+        const region = regions.find((reg) => reg._id === org.organizerRegion) || {};
+        const division = (region.divisions || []).find((div) => div._id === org.organizerDivision) || {};
+        const city = (division.majorCities || []).find((c) => c._id === org.organizerCity) || {};
 
-      const regionNameSlug = region
-        ? slugify(region.regionName, { lower: true })
-        : 'unknown-region';
-      const divisionNameSlug = division
-        ? slugify(division.divisionName, { lower: true })
-        : 'unknown-division';
-      const cityNameSlug = city
-        ? slugify(city.cityName, { lower: true })
-        : 'unknown-city';
-      const organizerShortNameSlug = slugify(org.shortName, { lower: true });
+        const slug = [
+          slugify(org.shortName, { lower: true }),
+          slugify(region.regionName || 'unknown-region', { lower: true }),
+          slugify(division.divisionName || 'unknown-division', { lower: true }),
+          slugify(city.cityName || 'unknown-city', { lower: true }),
+        ].join('-');
 
-      // Generate slug
-      const slug = `${organizerShortNameSlug}-${regionNameSlug}-${divisionNameSlug}-${cityNameSlug}`;
+        paramsList.push({ slug });
 
-      // Add to params list
-      paramsList.push({ slug });
-
-      // Collect organizer data
-      organizersDataList.push({
-        id: org._id,
-        slug,
-        name: org.name,
-        shortName: org.shortName,
-        description: org.description,
-        images: org.images,
-        phone: org.phone,
-        publicEmail: org.publicEmail,
-        url: org.url,
-        regionName: region?.regionName || 'Unknown Region',
-        divisionName: division?.divisionName || 'Unknown Division',
-        cityName: city?.cityName || 'Unknown City',
-        // Add other necessary fields if needed
-      });
+        organizersDataList.push({
+          id: org._id,
+          slug,
+          name: org.name,
+          shortName: org.shortName,
+          description: org.description,
+          images: org.images,
+          phone: org.phone,
+          publicEmail: org.publicEmail,
+          url: org.url,
+          regionName: region.regionName || 'Unknown Region',
+          divisionName: division.divisionName || 'Unknown Division',
+          cityName: city.cityName || 'Unknown City',
+        });
+      } catch (error) {
+        logger.error('Error processing organizer data', { error: error.message, organizer: org });
+      }
     });
 
     // Save organizers data to JSON file
-    const filePath = path.join(process.cwd(), 'public', 'organizersList.json');
-    fs.writeFileSync(filePath, JSON.stringify(organizersDataList, null, 2));
-    logger.info(`Organizers data saved to ${filePath}`);
+    try {
+      const filePath = path.join(process.cwd(), 'public', 'organizersList.json');
+      fs.writeFileSync(filePath, JSON.stringify(organizersDataList, null, 2));
+      logger.info(`Organizers data saved to ${filePath}`);
+    } catch (fileError) {
+      logger.error('Error saving organizers data to file', { error: fileError.message });
+    }
 
     return paramsList;
   } catch (error) {
     logger.error('Error in generateStaticParams', { error: error.message });
-    return [];
+    return []; // Return an empty list if the function fails
   }
 }
+
+
 
 // Function to get organizer data based on slug
 async function getOrganizerData(slug) {
