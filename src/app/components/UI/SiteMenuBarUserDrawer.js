@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -25,24 +25,36 @@ const SiteMenuBarUserDrawer = ({
   userDrawerOpen,
   handleUserDrawerClose,
   user,
-  roles,
   selectedRole,
   handleRoleChange,
   logOut,
 }) => {
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
-  // Open confirmation dialog
+  // Order roles as required and set default
+  const orderedRoles = [
+    'NamedUser',
+    'RegionalOrganizer',
+    'RegionalAdmin',
+    'SystemAdmin',
+    'SystemOwner',
+  ];
+
+  // Ensure selectedRole defaults to NamedUser if not set
+  useEffect(() => {
+    if (!selectedRole) {
+      handleRoleChange({ target: { value: 'NamedUser' } });
+    }
+  }, [selectedRole, handleRoleChange]);
+
   const handleLogoutClick = () => {
     setLogoutConfirmOpen(true);
   };
 
-  // Close dialog without logging out
   const handleCancelLogout = () => {
     setLogoutConfirmOpen(false);
   };
 
-  // Confirm logout and call the logOut function
   const handleConfirmLogout = () => {
     setLogoutConfirmOpen(false);
     logOut();
@@ -101,10 +113,10 @@ const SiteMenuBarUserDrawer = ({
               <Typography variant="subtitle1">Select Role:</Typography>
               <FormControl component="fieldset">
                 <RadioGroup
-                  value={selectedRole}
+                  value={selectedRole || 'NamedUser'}
                   onChange={(e) => handleRoleChange(e)}
                 >
-                  {roles.map((role) => (
+                  {orderedRoles.map((role) => (
                     <FormControlLabel
                       key={role}
                       value={role}
@@ -137,7 +149,6 @@ const SiteMenuBarUserDrawer = ({
               />
             </Box>
 
-            {/* Logout Button with Confirmation */}
             <Button
               variant="contained"
               color="secondary"
@@ -148,7 +159,6 @@ const SiteMenuBarUserDrawer = ({
               Log Out
             </Button>
 
-            {/* Logout Confirmation Dialog */}
             <Dialog
               open={logoutConfirmOpen}
               onClose={handleCancelLogout}
@@ -182,7 +192,7 @@ const SiteMenuBarUserDrawer = ({
   );
 };
 
-// Adding prop-types for validation
+// Prop-types
 SiteMenuBarUserDrawer.propTypes = {
   userDrawerOpen: PropTypes.bool.isRequired,
   handleUserDrawerClose: PropTypes.func.isRequired,

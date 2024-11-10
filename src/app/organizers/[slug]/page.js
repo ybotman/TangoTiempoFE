@@ -30,8 +30,6 @@ const sanitizeHTML = (htmlString) => {
   return purify.sanitize(htmlString);
 };
 
-
-
 export async function generateStaticParams() {
   try {
     const beUrl = process.env.NEXT_PUBLIC_BE_URL || 'https://default-url.com';
@@ -46,9 +44,12 @@ export async function generateStaticParams() {
     // Fetch regions
     let regions = [];
     try {
-      const regionsResponse = await axios.get(`${beUrl}/api/regions/activeRegions`, {
-        timeout,
-      });
+      const regionsResponse = await axios.get(
+        `${beUrl}/api/regions/activeRegions`,
+        {
+          timeout,
+        }
+      );
       regions = regionsResponse.data || [];
       logger.info(`Fetched ${regions.length} regions`);
     } catch (err) {
@@ -63,10 +64,14 @@ export async function generateStaticParams() {
         { timeout }
       );
       organizers = organizersResponse.data || [];
-      logger.info(`Fetched ${organizers.length} active, enabled, and renderable organizers`);
+      logger.info(
+        `Fetched ${organizers.length} active, enabled, and renderable organizers`
+      );
 
       if (organizers.length === 0) {
-        logger.warn('No organizers found with specified criteria - check backend data or API endpoint.');
+        logger.warn(
+          'No organizers found with specified criteria - check backend data or API endpoint.'
+        );
       }
     } catch (err) {
       logger.error('Error fetching organizers', { error: err.message });
@@ -77,9 +82,16 @@ export async function generateStaticParams() {
 
     organizers.forEach((org) => {
       try {
-        const region = regions.find((reg) => reg._id === org.organizerRegion) || {};
-        const division = (region.divisions || []).find((div) => div._id === org.organizerDivision) || {};
-        const city = (division.majorCities || []).find((c) => c._id === org.organizerCity) || {};
+        const region =
+          regions.find((reg) => reg._id === org.organizerRegion) || {};
+        const division =
+          (region.divisions || []).find(
+            (div) => div._id === org.organizerDivision
+          ) || {};
+        const city =
+          (division.majorCities || []).find(
+            (c) => c._id === org.organizerCity
+          ) || {};
 
         const slug = [
           slugify(org.shortName, { lower: true }),
@@ -105,17 +117,26 @@ export async function generateStaticParams() {
           cityName: city.cityName || 'Unknown City',
         });
       } catch (error) {
-        logger.error('Error processing organizer data', { error: error.message, organizer: org });
+        logger.error('Error processing organizer data', {
+          error: error.message,
+          organizer: org,
+        });
       }
     });
 
     // Save organizers data to JSON file
     try {
-      const filePath = path.join(process.cwd(), 'public', 'organizersList.json');
+      const filePath = path.join(
+        process.cwd(),
+        'public',
+        'organizersList.json'
+      );
       fs.writeFileSync(filePath, JSON.stringify(organizersDataList, null, 2));
       logger.info(`Organizers data saved to ${filePath}`);
     } catch (fileError) {
-      logger.error('Error saving organizers data to file', { error: fileError.message });
+      logger.error('Error saving organizers data to file', {
+        error: fileError.message,
+      });
     }
 
     return paramsList;
@@ -124,8 +145,6 @@ export async function generateStaticParams() {
     return []; // Return an empty list if the function fails
   }
 }
-
-
 
 // Function to get organizer data based on slug
 async function getOrganizerData(slug) {

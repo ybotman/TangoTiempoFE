@@ -6,7 +6,8 @@ import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
 import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
-import RegionalOrganizersImages from './RegionalOrganizersImages'; // Import the new Images component
+import RegionalOrganizersImages from './RegionalOrganizersImages';
+import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages'; // New component import
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 
@@ -40,7 +41,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
       setCurrentTab('name');
       if (user?.backendInfo.regionalOrganizerInfo?.organizerId) {
         fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
-        console.log('Fetching organizer data');
       }
     }
   }, [open, user, fetchOrganizerById]);
@@ -71,7 +71,9 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
               <Tab label="Delegated" value="delegated" />
-              <Tab label="Images" value="images" /> {/* New Images tab */}
+              <Tab label="Images" value="images" />
+              <Tab label="Profile Images" value="profileImages" />{' '}
+              {/* New Profile Images tab */}
             </Tabs>
 
             {loading ? (
@@ -108,6 +110,13 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 )}
                 {currentTab === 'images' && (
                   <RegionalOrganizersImages
+                    organizerId={organizer?._id}
+                    organizer={organizer}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'profileImages' && (
+                  <RegionalOrganizersProfileImages
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
