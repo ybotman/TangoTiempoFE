@@ -1,7 +1,7 @@
 // src/app/components/UI/SiteMenuBarUserDrawer.js
 'use client';
 
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -23,18 +23,15 @@ import {
   DialogTitle,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
 
-const SiteMenuBarUserDrawer = ({
-  userDrawerOpen,
-  handleUserDrawerClose,
-  user,
-  selectedRole,
-  handleRoleChange,
-  logOut,
-}) => {
+const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
+  const { user, logOut } = useContext(AuthContext);
+  const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
-  // Order roles as required and set default
+  // Order roles as required
   const orderedRoles = [
     'NamedUser',
     'RegionalOrganizer',
@@ -42,13 +39,6 @@ const SiteMenuBarUserDrawer = ({
     'SystemAdmin',
     'SystemOwner',
   ];
-
-  // Ensure selectedRole defaults to NamedUser if not set
-  useEffect(() => {
-    if (!selectedRole) {
-      handleRoleChange({ target: { value: 'NamedUser' } });
-    }
-  }, [selectedRole, handleRoleChange]);
 
   const handleLogoutClick = () => {
     setLogoutConfirmOpen(true);
@@ -61,6 +51,10 @@ const SiteMenuBarUserDrawer = ({
   const handleConfirmLogout = () => {
     setLogoutConfirmOpen(false);
     logOut();
+  };
+
+  const handleRoleChange = (event) => {
+    selectRole(event.target.value);
   };
 
   return (
@@ -117,16 +111,19 @@ const SiteMenuBarUserDrawer = ({
               <FormControl component="fieldset">
                 <RadioGroup
                   value={selectedRole || 'NamedUser'}
-                  onChange={(e) => handleRoleChange(e)}
+                  onChange={handleRoleChange}
                 >
-                  {orderedRoles.map((role) => (
-                    <FormControlLabel
-                      key={role}
-                      value={role}
-                      control={<Radio />}
-                      label={role}
-                    />
-                  ))}
+                  {orderedRoles.map(
+                    (role) =>
+                      roles.includes(role) && (
+                        <FormControlLabel
+                          key={role}
+                          value={role}
+                          control={<Radio />}
+                          label={role}
+                        />
+                      )
+                  )}
                 </RadioGroup>
               </FormControl>
               <Button
@@ -195,19 +192,9 @@ const SiteMenuBarUserDrawer = ({
   );
 };
 
-// Prop-types
 SiteMenuBarUserDrawer.propTypes = {
   userDrawerOpen: PropTypes.bool.isRequired,
   handleUserDrawerClose: PropTypes.func.isRequired,
-  user: PropTypes.shape({
-    displayName: PropTypes.string,
-    email: PropTypes.string,
-    photoURL: PropTypes.string,
-  }),
-  roles: PropTypes.arrayOf(PropTypes.string).isRequired,
-  selectedRole: PropTypes.string.isRequired,
-  handleRoleChange: PropTypes.func.isRequired,
-  logOut: PropTypes.func.isRequired,
 };
 
 export default SiteMenuBarUserDrawer;
