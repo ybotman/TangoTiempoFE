@@ -1,29 +1,29 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
+// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
+'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
+import {
+  Modal,
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Button,
+  useMediaQuery,
+} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
 import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
 import RegionalOrganizersImages from './RegionalOrganizersImages';
-import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages'; // New component import
+import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
-
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxWidth: '800px',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 3,
-};
+import modalStyle from '@/components/Styles/modalStyles';
 
 const RegionalOrganizersModal = ({ open, onClose }) => {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const auth = useContext(AuthContext);
   const { user } = auth || {};
   const {
@@ -49,10 +49,16 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={modalStyle}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Regional Organizer Settings
-        </Typography>
+      <Box sx={modalStyle(isMobile)}>
+        {/* Header with Close Button */}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h5" component="h2">
+            Regional Organizer Settings
+          </Typography>
+          <Button onClick={onClose}>
+            <CloseIcon />
+          </Button>
+        </Box>
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
           <Typography variant="body2" color="textSecondary" gutterBottom>
@@ -67,13 +73,14 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               onChange={handleTabChange}
               aria-label="Regional Organizer Settings Tabs"
               variant="scrollable"
+              scrollButtons
+              allowScrollButtonsMobile
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
               <Tab label="Delegated" value="delegated" />
               <Tab label="Images" value="images" />
-              <Tab label="Profile Images" value="profileImages" />{' '}
-              {/* New Profile Images tab */}
+              <Tab label="Profile Images" value="profileImages" />
             </Tabs>
 
             {loading ? (
@@ -83,7 +90,13 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 Error loading organizer data
               </Typography>
             ) : (
-              <>
+              <Box
+                sx={{
+                  mt: 2,
+                  overflowY: 'auto',
+                  flexGrow: 1,
+                }}
+              >
                 {currentTab === 'name' && (
                   <RegionalOrganizersName
                     organizerId={organizer?._id}
@@ -122,7 +135,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     updateOrganizer={updateOrganizer}
                   />
                 )}
-              </>
+              </Box>
             )}
           </>
         ) : (
@@ -130,12 +143,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             No organizer information available.
           </Typography>
         )}
-
-        <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
-          <Button onClick={onClose} color="secondary">
-            Close
-          </Button>
-        </Box>
       </Box>
     </Modal>
   );

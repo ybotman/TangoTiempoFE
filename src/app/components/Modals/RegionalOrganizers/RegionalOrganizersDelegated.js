@@ -1,3 +1,6 @@
+// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -109,8 +112,9 @@ const RegionalOrganizersDelegated = ({
               alignItems="center"
               gap={1}
               mt={2}
+              flexWrap="wrap"
             >
-              <Box display="flex" flexDirection="column">
+              <Box flexGrow={1}>
                 <Typography variant="body1">
                   <strong>Full Name:</strong>{' '}
                   {org.fullName || org.name || 'No Full Name Available'}
@@ -139,8 +143,8 @@ const RegionalOrganizersDelegated = ({
       )}
 
       {/* UI for adding a delegated organizer */}
-      <Box display="flex" gap={2} mt={3} alignItems="center">
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+      <Box display="flex" gap={2} mt={3} alignItems="center" flexWrap="wrap">
+        <FormControl variant="outlined" sx={{ minWidth: 200, flexGrow: 1 }}>
           <InputLabel id="select-organizer-label">Select Organizer</InputLabel>
           <Select
             labelId="select-organizer-label"

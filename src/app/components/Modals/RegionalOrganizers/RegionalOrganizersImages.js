@@ -1,4 +1,5 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersImages.js
+// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersImages.js
+'use client';
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
@@ -12,13 +13,13 @@ import {
   DialogActions,
   IconButton,
   CircularProgress,
+  useMediaQuery,
 } from '@mui/material';
-import { AddPhotoAlternate } from '@mui/icons-material';
-import CloseIcon from '@mui/icons-material/Close';
-import ImageIcon from '@mui/icons-material/Image';
+import { AddPhotoAlternate, Close as CloseIcon } from '@mui/icons-material';
 import { useImages } from '@/hooks/useImages';
 
 const RegionalOrganizersImages = ({ organizerId }) => {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { images, uploadImage, loading } = useImages(organizerId);
@@ -60,37 +61,38 @@ const RegionalOrganizersImages = ({ organizerId }) => {
         {loading && <CircularProgress size={24} />}
       </Box>
 
-      {/* Wrapping Box with scrolling enabled */}
-      <Box sx={{ overflowX: 'auto', mt: 2, maxWidth: '100%' }}>
-        <Grid
-          container
-          spacing={2}
-          sx={{ display: 'inline-flex', flexWrap: 'nowrap' }}
-        >
-          {images.map((image) => (
-            <Grid item key={image.name} sx={{ minWidth: 150 }}>
-              <Box
-                onClick={() => handleImageClick(image)}
-                sx={{
-                  cursor: 'pointer',
-                  position: 'relative',
-                  '&:hover': { opacity: 0.8 },
-                }}
-              >
-                <img
-                  src={image.url}
-                  alt={image.name}
-                  style={{
-                    width: '150px',
-                    height: '150px',
-                    objectFit: 'cover',
-                    borderRadius: 4,
-                  }}
-                />
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+      <Box
+        sx={{
+          overflowX: 'auto',
+          mt: 2,
+          maxWidth: '100%',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {images.map((image) => (
+          <Box
+            key={image.name}
+            component="span"
+            sx={{
+              display: 'inline-block',
+              position: 'relative',
+              mx: 1,
+              cursor: 'pointer',
+            }}
+            onClick={() => handleImageClick(image)}
+          >
+            <img
+              src={image.url}
+              alt={image.name}
+              style={{
+                width: isMobile ? '100px' : '150px',
+                height: isMobile ? '100px' : '150px',
+                objectFit: 'cover',
+                borderRadius: 4,
+              }}
+            />
+          </Box>
+        ))}
       </Box>
 
       <Dialog open={previewOpen} onClose={handleClosePreview} maxWidth="md">
@@ -100,14 +102,12 @@ const RegionalOrganizersImages = ({ organizerId }) => {
           </IconButton>
         </DialogActions>
         <DialogContent>
-          {selectedImage ? (
+          {selectedImage && (
             <img
               src={selectedImage.url}
               alt={selectedImage.name}
               style={{ width: '100%', height: 'auto' }}
             />
-          ) : (
-            <ImageIcon style={{ fontSize: 100 }} />
           )}
         </DialogContent>
       </Dialog>

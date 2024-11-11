@@ -1,4 +1,5 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersAddress.js
+// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersAddress.js
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -8,6 +9,7 @@ import {
   FormControlLabel,
   Button,
   Box,
+  Typography,
 } from '@mui/material';
 
 const RegionalOrganizersAddress = ({
@@ -18,37 +20,31 @@ const RegionalOrganizersAddress = ({
   const publicContactInfo = organizer?.publicContactInfo || {};
   const address = publicContactInfo.address || {};
 
-  // Corrected `useState` initializations
   const [phone, setPhone] = useState(publicContactInfo.phone || '');
   const [Email, setEmail] = useState(publicContactInfo.Email || '');
-  const [street1, setStreet1] = useState(
-    publicContactInfo.address?.street1 || ''
-  );
-  const [street2, setStreet2] = useState(
-    publicContactInfo.address?.street2 || ''
-  );
-  const [city, setCity] = useState(publicContactInfo.address?.city || '');
-  const [state, setState] = useState(publicContactInfo.address?.state || '');
-  const [zip, setZip] = useState(publicContactInfo.address?.postalCode || '');
+  const [street1, setStreet1] = useState(address.street1 || '');
+  const [street2, setStreet2] = useState(address.street2 || '');
+  const [city, setCity] = useState(address.city || '');
+  const [state, setState] = useState(address.state || '');
+  const [zip, setZip] = useState(address.postalCode || '');
   const [isSearchable, setIsSearchable] = useState(
     organizer?.wantRender || false
   );
 
-  // Update state when organizer prop changes
   useEffect(() => {
     const publicContactInfo = organizer?.publicContactInfo || {};
+    const address = publicContactInfo.address || {};
 
     setPhone(publicContactInfo.phone || '');
     setEmail(publicContactInfo.Email || '');
-    setStreet1(publicContactInfo.address?.street1 || '');
-    setStreet2(publicContactInfo.address?.street2 || '');
-    setCity(publicContactInfo.address?.city || '');
-    setState(publicContactInfo.address?.state || '');
-    setZip(publicContactInfo.address?.postalCode || '');
+    setStreet1(address.street1 || '');
+    setStreet2(address.street2 || '');
+    setCity(address.city || '');
+    setState(address.state || '');
+    setZip(address.postalCode || '');
     setIsSearchable(organizer?.wantRender || false);
   }, [organizer]);
 
-  // Determine if save button should be enabled
   const isSaveDisabled =
     phone === (publicContactInfo.phone || '') &&
     Email === (publicContactInfo.Email || '') &&
@@ -59,7 +55,6 @@ const RegionalOrganizersAddress = ({
     zip === (address.postalCode || '') &&
     isSearchable === (organizer?.wantRender || false);
 
-  // Handle save action
   const handleSave = async () => {
     const updateData = {
       publicContactInfo: {
@@ -85,8 +80,11 @@ const RegionalOrganizersAddress = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      {/* Line 1: Phone and Email */}
-      <Box display="flex" gap={2} mb={2}>
+      <Typography variant="h6" gutterBottom>
+        Public Contact Information
+      </Typography>
+      <Box display="flex" flexDirection="column" gap={2}>
+        {/* Phone and Email */}
         <TextField
           label="Phone"
           value={phone}
@@ -99,10 +97,7 @@ const RegionalOrganizersAddress = ({
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
         />
-      </Box>
-
-      {/* Line 2: Address Fields (Street 1 and Street 2) */}
-      <Box display="flex" gap={2} mb={2}>
+        {/* Address Fields */}
         <TextField
           label="Street 1"
           value={street1}
@@ -115,10 +110,6 @@ const RegionalOrganizersAddress = ({
           onChange={(e) => setStreet2(e.target.value)}
           fullWidth
         />
-      </Box>
-
-      {/* Line 3: City, State, Zip */}
-      <Box display="flex" gap={2} mb={2}>
         <TextField
           label="City"
           value={city}
@@ -144,7 +135,7 @@ const RegionalOrganizersAddress = ({
         display="flex"
         alignItems="center"
         justifyContent="space-between"
-        mb={2}
+        mt={2}
       >
         <FormControlLabel
           control={
