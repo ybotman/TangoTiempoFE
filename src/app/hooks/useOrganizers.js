@@ -15,9 +15,6 @@ export const useOrganizers = () => {
   const [error, setError] = useState(null);
 
   const fetchOrganizers = useCallback(async () => {
-  //  console.log('fetchOrganizers called with selectedRegionID:',
-      selectedRegionID
-    );
     const endpoint = selectedRegionID
       ? `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers?regionID=${selectedRegionID}`
       : `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`;
