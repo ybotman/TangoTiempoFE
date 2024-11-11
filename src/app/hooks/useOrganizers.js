@@ -15,8 +15,7 @@ export const useOrganizers = () => {
   const [error, setError] = useState(null);
 
   const fetchOrganizers = useCallback(async () => {
-    console.log(
-      'fetchOrganizers called with selectedRegionID:',
+  //  console.log('fetchOrganizers called with selectedRegionID:',
       selectedRegionID
     );
     const endpoint = selectedRegionID
