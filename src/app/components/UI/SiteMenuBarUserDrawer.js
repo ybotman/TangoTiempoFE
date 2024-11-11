@@ -1,3 +1,6 @@
+// src/app/components/UI/SiteMenuBarUserDrawer.js
+'use client';
+
 import React, { useState, useEffect } from 'react'; // Added useEffect
 import PropTypes from 'prop-types';
 import {
