@@ -1,21 +1,15 @@
 // app/contexts/RoleContext.js
-
 'use client';
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { AuthContext } from '@/contexts/AuthContext';
 
-// Create Role Context
 export const RoleContext = createContext();
-//console.log('RoleContext created');
 
-// RoleProvider Component
 export const RoleProvider = ({ children }) => {
   const { user, selectedRole, setSelectedRole } = useContext(AuthContext);
   const [roles, setRoles] = useState([]);
-
-  //console.log('RoleProvider rendering : selectedRole:', selectedRole);
 
   useEffect(() => {
     if (user && user.roles && user.roles.length > 0) {
@@ -26,11 +20,10 @@ export const RoleProvider = ({ children }) => {
       }
     } else {
       setRoles([]);
-      setSelectedRole(''); // Reset selectedRole if no roles are available
+      setSelectedRole('');
     }
   }, [user, selectedRole, setSelectedRole]);
 
-  // Function to select a role
   const selectRole = (role) => {
     if (roles.includes(role)) {
       setSelectedRole(role);
