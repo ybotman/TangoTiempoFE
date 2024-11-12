@@ -70,7 +70,7 @@ const RegionMenu = ({ onRegionSelect, onClose }) => {
         {selectionLevel === 1 &&
           regions.map((region) => (
             <ListItem
-              button
+              button="true"
               key={region.regionCode}
               onClick={() => handleRegionClick(region)}
             >

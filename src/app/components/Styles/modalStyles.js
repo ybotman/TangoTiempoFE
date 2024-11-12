@@ -1,19 +1,17 @@
 // @/Styles/modalStyles.js
-const modalStyle = {
+const modalStyle = (isMobile) => ({
   position: 'absolute',
-  top: '50%',
+  top: isMobile ? 0 : '50%',
   left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90%',
-  maxWidth: '90vw',
-  minWidth: '280px',
-  height: 'auto',
-  maxHeight: '90vh',
-  minHeight: '200px',
-  overflowY: 'auto',
+  transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+  width: isMobile ? '100%' : '80%',
+  maxWidth: '800px',
+  height: isMobile ? '100%' : 'auto',
+  maxHeight: isMobile ? 'none' : '90vh',
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 3,
-};
+  overflowY: 'auto',
+});
 
 export default modalStyle;
