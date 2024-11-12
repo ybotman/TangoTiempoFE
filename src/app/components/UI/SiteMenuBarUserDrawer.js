@@ -1,6 +1,3 @@
-// src/app/components/UI/SiteMenuBarUserDrawer.js
-'use client';
-
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -11,7 +8,6 @@ import {
   Typography,
   IconButton,
   Avatar,
-  TextField,
   FormControl,
   RadioGroup,
   FormControlLabel,
@@ -26,12 +22,15 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 
-const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
+const SiteMenuBarUserDrawer = ({
+  userDrawerOpen,
+  handleUserDrawerClose,
+  showRoleMessage,
+}) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
-  // Order roles as required
   const orderedRoles = [
     'NamedUser',
     'RegionalOrganizer',
@@ -40,21 +39,11 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
     'SystemOwner',
   ];
 
-  const handleLogoutClick = () => {
-    setLogoutConfirmOpen(true);
-  };
-
-  const handleCancelLogout = () => {
-    setLogoutConfirmOpen(false);
-  };
-
-  const handleConfirmLogout = () => {
-    setLogoutConfirmOpen(false);
-    logOut();
-  };
-
   const handleRoleChange = (event) => {
-    selectRole(event.target.value);
+    const newRole = event.target.value;
+    selectRole(newRole);
+    handleUserDrawerClose(); // Close drawer after selection
+    showRoleMessage(newRole); // Trigger message independently
   };
 
   return (
@@ -113,40 +102,18 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
                   value={selectedRole || 'NamedUser'}
                   onChange={handleRoleChange}
                 >
-                  {orderedRoles.map(
-                    (role) =>
-                      roles.includes(role) && (
-                        <FormControlLabel
-                          key={role}
-                          value={role}
-                          control={<Radio />}
-                          label={role}
-                        />
-                      )
+                  {orderedRoles.map((role) =>
+                    roles.includes(role) ? (
+                      <FormControlLabel
+                        key={role}
+                        value={role}
+                        control={<Radio />}
+                        label={role}
+                      />
+                    ) : null
                   )}
                 </RadioGroup>
               </FormControl>
-              <Button
-                variant="outlined"
-                color="primary"
-                fullWidth
-                sx={{ marginTop: 1 }}
-                disabled
-              >
-                Request New Role
-              </Button>
-            </Box>
-
-            <Box sx={{ marginTop: 2 }}>
-              <Typography variant="subtitle1">Message Admin:</Typography>
-              <TextField
-                placeholder="Feature coming soon..."
-                multiline
-                rows={4}
-                variant="outlined"
-                fullWidth
-                disabled
-              />
             </Box>
 
             <Button
@@ -154,14 +121,14 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
               color="secondary"
               fullWidth
               sx={{ marginTop: 2 }}
-              onClick={handleLogoutClick}
+              onClick={() => setLogoutConfirmOpen(true)}
             >
               Log Out
             </Button>
 
             <Dialog
               open={logoutConfirmOpen}
-              onClose={handleCancelLogout}
+              onClose={() => setLogoutConfirmOpen(false)}
               aria-labelledby="logout-confirmation-dialog-title"
             >
               <DialogTitle id="logout-confirmation-dialog-title">
@@ -173,14 +140,13 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleCancelLogout} color="primary">
+                <Button
+                  onClick={() => setLogoutConfirmOpen(false)}
+                  color="primary"
+                >
                   No
                 </Button>
-                <Button
-                  onClick={handleConfirmLogout}
-                  color="secondary"
-                  autoFocus
-                >
+                <Button onClick={logOut} color="secondary" autoFocus>
                   Yes
                 </Button>
               </DialogActions>
@@ -195,6 +161,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose }) => {
 SiteMenuBarUserDrawer.propTypes = {
   userDrawerOpen: PropTypes.bool.isRequired,
   handleUserDrawerClose: PropTypes.func.isRequired,
+  showRoleMessage: PropTypes.func.isRequired,
 };
 
 export default SiteMenuBarUserDrawer;

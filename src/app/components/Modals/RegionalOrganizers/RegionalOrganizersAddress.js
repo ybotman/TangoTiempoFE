@@ -1,6 +1,3 @@
-// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersAddress.js
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -10,7 +7,10 @@ import {
   Button,
   Box,
   Typography,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 
 const RegionalOrganizersAddress = ({
   organizerId,
@@ -84,7 +84,6 @@ const RegionalOrganizersAddress = ({
         Public Contact Information
       </Typography>
       <Box display="flex" flexDirection="column" gap={2}>
-        {/* Phone and Email */}
         <TextField
           label="Phone"
           value={phone}
@@ -97,7 +96,6 @@ const RegionalOrganizersAddress = ({
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
         />
-        {/* Address Fields */}
         <TextField
           label="Street 1"
           value={street1}
@@ -137,16 +135,23 @@ const RegionalOrganizersAddress = ({
         justifyContent="space-between"
         mt={2}
       >
-        <FormControlLabel
-          control={
-            <Switch
-              checked={isSearchable}
-              onChange={(e) => setIsSearchable(e.target.checked)}
-              color="primary"
-            />
-          }
-          label="Make Organizer Searchable"
-        />
+        <Box display="flex" alignItems="center">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isSearchable}
+                onChange={(e) => setIsSearchable(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Allow Search Engines to Crawl"
+          />
+          <Tooltip title="Your name, phone, primary image, address, and description will be structured for search engines to crawl and display in relevant searches.">
+            <IconButton>
+              <InfoIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Button
           onClick={handleSave}
           color="primary"

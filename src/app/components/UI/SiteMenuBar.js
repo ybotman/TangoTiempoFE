@@ -1,4 +1,3 @@
-// SiteMenuBar.js
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -8,6 +7,8 @@ import {
   Tooltip,
   Typography,
   Fade,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -31,10 +32,21 @@ const SiteMenuBar = ({
   const [showTooltip, setShowTooltip] = useState(false);
   const [pulseRegionText, setPulseRegionText] = useState(false);
 
-  // Access selectedRegion from RegionsContext
+  // Snackbar state for role change message
+  const [roleMessageOpen, setRoleMessageOpen] = useState(false);
+  const [selectedRoleName, setSelectedRoleName] = useState('');
+
+  const showRoleMessage = (roleName) => {
+    setSelectedRoleName(roleName);
+    setRoleMessageOpen(true);
+  };
+
+  const handleRoleMessageClose = () => {
+    setRoleMessageOpen(false);
+  };
+
   const { selectedRegion } = useContext(RegionsContext);
 
-  // Tooltip toggle for arrow effect if user is not logged in
   useEffect(() => {
     if (!user) {
       const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
@@ -42,7 +54,6 @@ const SiteMenuBar = ({
     }
   }, [user]);
 
-  // Toggle pulse effect for "Select Region" when no region is selected
   useEffect(() => {
     if (!selectedRegion) {
       const interval = setInterval(
@@ -85,10 +96,9 @@ const SiteMenuBar = ({
           <MenuIcon />
         </IconButton>
 
-        {/* Region Context Display */}
         {selectedRegion ? (
           <Typography variant="body1" sx={{ ml: 2, fontWeight: 'bold' }}>
-            {selectedRegion}
+            😊
           </Typography>
         ) : (
           <Fade in={pulseRegionText} timeout={800}>
@@ -99,7 +109,6 @@ const SiteMenuBar = ({
         )}
       </Box>
 
-      {/* Centered PostFilter */}
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
         <PostFilter
           activeCategories={activeCategories}
@@ -108,7 +117,6 @@ const SiteMenuBar = ({
         />
       </Box>
 
-      {/* Right Icons - User Account with conditional tooltip */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Tooltip
           title="Login here!"
@@ -122,7 +130,6 @@ const SiteMenuBar = ({
         </Tooltip>
       </Box>
 
-      {/* Side Drawers */}
       <SidebarDrawer
         open={sidebarDrawerOpen}
         onClose={() => setSidebarDrawerOpen(false)}
@@ -135,7 +142,23 @@ const SiteMenuBar = ({
         selectedRole={selectedRole}
         handleRoleChange={handleRoleChange}
         logOut={logOut}
+        showRoleMessage={showRoleMessage} // Pass showRoleMessage callback
       />
+
+      <Snackbar
+        open={roleMessageOpen}
+        onClose={handleRoleMessageClose}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleRoleMessageClose}
+          severity="info"
+          sx={{ backgroundColor: 'green.300', color: 'black' }}
+        >
+          You have changed role to: {selectedRoleName}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
