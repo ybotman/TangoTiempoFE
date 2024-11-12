@@ -100,7 +100,13 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {/* Conditionally Render Based on Role */}
           {selectedRole === listOfAllRoles.NAMED_USER && (
-            <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+            <ListItem
+              button="true"
+              onClick={() => {
+                setUserSettingsOpen(true);
+                onClose();
+              }}
+            >
               <ListItemIcon>
                 <AccountCircleIcon sx={{ color: 'blue' }} />
               </ListItemIcon>
@@ -110,7 +116,13 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
             <>
-              <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
+              >
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: 'blue' }} />
                 </ListItemIcon>
@@ -118,7 +130,10 @@ const SidebarDrawer = ({ open, onClose }) => {
               </ListItem>
               <ListItem
                 button="true"
-                onClick={() => setRegionalOrganizerOpen(true)}
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
               >
                 <ListItemIcon>
                   <EventAvailableIcon sx={{ color: 'green' }} />
@@ -130,7 +145,13 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
             <>
-              <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
+              >
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: 'blue' }} />
                 </ListItemIcon>
@@ -147,13 +168,25 @@ const SidebarDrawer = ({ open, onClose }) => {
 
           {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
             <>
-              <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
+              >
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: 'blue' }} />
                 </ListItemIcon>
                 <ListItemText primary="User Settings" />
               </ListItem>
-              <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
+              >
                 <ListItemIcon>
                   <AdminPanelSettingsIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
@@ -211,7 +244,13 @@ const SidebarDrawer = ({ open, onClose }) => {
             <ListItemText primary="Message Admin" />
           </ListItem>
 
-          <ListItem button="true" onClick={() => setPrivacyPolicyOpen(true)}>
+          <ListItem
+            button="true"
+            onClick={() => {
+              setUserSettingsOpen(true);
+              onClose();
+            }}
+          >
             <ListItemIcon>
               <LockIcon sx={{ color: 'green' }} />
             </ListItemIcon>
