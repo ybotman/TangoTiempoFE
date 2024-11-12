@@ -1,6 +1,5 @@
 // SidebarDrawer.js
 'use client';
-
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -10,17 +9,15 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
-  IconButton,
-  Collapse,
   Avatar,
+  Typography,
+  Collapse,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
 import ErrorIcon from '@mui/icons-material/Error';
 import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
-
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -28,7 +25,6 @@ import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
 import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
-
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 import RegionMenu from './RegionMenu';
@@ -40,17 +36,14 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 
 const SidebarDrawer = ({ open, onClose }) => {
-  const [expanded, setExpanded] = useState(false);
   const [regionMenuOpen, setRegionMenuOpen] = useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
   const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false);
   const [systemAdminOpen, setSystemAdminOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
-  const [faqOpen, setFaqOpen] = useState(false); // State for FAQ modal
+  const [faqOpen, setFaqOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
-
-  const toggleExpansion = () => setExpanded((prev) => !prev);
 
   return (
     <>
@@ -59,32 +52,22 @@ const SidebarDrawer = ({ open, onClose }) => {
         open={open}
         onClose={onClose}
         sx={{
-          width: expanded ? 240 : 72,
-          transition: 'width 0.3s',
+          width: 240,
           '& .MuiDrawer-paper': {
-            width: expanded ? 240 : 72,
+            width: 240,
             boxSizing: 'border-box',
           },
         }}
       >
         <List>
-          {/* Expandable Menu */}
-          <ListItem button="true" onClick={toggleExpansion}>
-            <ListItemIcon>
-              <IconButton>
-                <MenuIcon />
-              </IconButton>
-            </ListItemIcon>
-            {expanded && <ListItemText primary="Menu" />}
-          </ListItem>
-
           {/* Regions Section */}
+          <Divider />
+          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+            Select a Region
+          </Typography>
           <ListItem
             button="true"
-            onClick={() => {
-              if (!expanded) toggleExpansion();
-              setRegionMenuOpen(!regionMenuOpen);
-            }}
+            onClick={() => setRegionMenuOpen(!regionMenuOpen)}
           >
             <ListItemIcon>
               <Avatar
@@ -93,29 +76,25 @@ const SidebarDrawer = ({ open, onClose }) => {
                 sx={{ width: 32, height: 32 }}
               />
             </ListItemIcon>
-            {expanded && (
-              <>
-                <ListItemText primary="Regions" />
-                {regionMenuOpen ? <ExpandLess /> : <ExpandMore />}
-              </>
-            )}
+            <ListItemText primary="Regions" />
+            {regionMenuOpen ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
 
           <Collapse in={regionMenuOpen} timeout="auto" unmountOnExit>
-            <RegionMenu
-              expanded={expanded}
-              onClose={() => setRegionMenuOpen(false)}
-            />
+            <RegionMenu onClose={() => setRegionMenuOpen(false)} />
           </Collapse>
-
           <Divider />
+          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+            Settings
+          </Typography>
+
           {/* Prompt for "None" Role */}
           {selectedRole === '' && (
             <ListItem>
               <ListItemIcon>
                 <ErrorIcon sx={{ color: 'orange' }} />
               </ListItemIcon>
-              {expanded && <ListItemText primary="Sign In to Save Settings" />}
+              <ListItemText primary="Sign In to Save Settings" />
             </ListItem>
           )}
 
@@ -125,7 +104,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemIcon>
                 <AccountCircleIcon sx={{ color: 'blue' }} />
               </ListItemIcon>
-              {expanded && <ListItemText primary="User Settings" />}
+              <ListItemText primary="User Settings" />
             </ListItem>
           )}
 
@@ -135,7 +114,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: 'blue' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="User Settings" />}
+                <ListItemText primary="User Settings" />
               </ListItem>
               <ListItem
                 button="true"
@@ -144,9 +123,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemIcon>
                   <EventAvailableIcon sx={{ color: 'green' }} />
                 </ListItemIcon>
-                {expanded && (
-                  <ListItemText primary="Regional Organizer Settings" />
-                )}
+                <ListItemText primary="Regional Organizer Settings" />
               </ListItem>
             </>
           )}
@@ -157,13 +134,13 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: 'blue' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="User Settings" />}
+                <ListItemText primary="User Settings" />
               </ListItem>
               <ListItem button="true">
                 <ListItemIcon>
                   <CoPresentIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="Regional Admin Settings" />}
+                <ListItemText primary="Regional Admin Settings" />
               </ListItem>
             </>
           )}
@@ -174,60 +151,44 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: 'blue' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="User Settings" />}
+                <ListItemText primary="User Settings" />
               </ListItem>
               <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
                 <ListItemIcon>
                   <AdminPanelSettingsIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
-                {expanded && <ListItemText primary="System Admin Panel" />}
-              </ListItem>
-            </>
-          )}
-
-          {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
-            <>
-              <ListItem button="true" onClick={() => setUserSettingsOpen(true)}>
-                <ListItemIcon>
-                  <AccountCircleIcon sx={{ color: 'blue' }} />
-                </ListItemIcon>
-                {expanded && <ListItemText primary="User Settings" />}
-              </ListItem>
-              <ListItem button="true" onClick={() => setSystemAdminOpen(true)}>
-                <ListItemIcon>
-                  <AdminPanelSettingsIcon sx={{ color: 'red' }} />
-                </ListItemIcon>
-                {expanded && <ListItemText primary="System Admin Panel" />}
+                <ListItemText primary="System Admin Panel" />
               </ListItem>
             </>
           )}
 
           <Divider />
+          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+            Information
+          </Typography>
 
           {/* General Links */}
-
           <Link href="/about" passHref>
             <ListItem button="true">
               <ListItemIcon>
                 <GroupIcon sx={{ color: 'royalBlue' }} />
               </ListItemIcon>
-              {expanded && <ListItemText primary="Meet the Team" />}
+              <ListItemText primary="Meet the Team" />
             </ListItem>
           </Link>
 
-          {/* FAQ Item - Open FAQ Modal on Click */}
           <ListItem button="true" onClick={() => setFaqOpen(true)}>
             <ListItemIcon>
               <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
             </ListItemIcon>
-            {expanded && <ListItemText primary="FAQ" />}
+            <ListItemText primary="FAQ" />
           </ListItem>
 
           <ListItem button="true">
             <ListItemIcon>
               <HelpIcon sx={{ color: 'royalBlue' }} />
             </ListItemIcon>
-            {expanded && <ListItemText primary="Help" />}
+            <ListItemText primary="Help" />
           </ListItem>
 
           <Link href="/about" passHref>
@@ -235,23 +196,26 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemIcon>
                 <SupportIcon sx={{ color: 'royalBlue' }} />
               </ListItemIcon>
-              {expanded && <ListItemText primary="About" />}
+              <ListItemText primary="About" />
             </ListItem>
           </Link>
 
           <Divider />
+          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+            Other
+          </Typography>
           <ListItem button="true">
             <ListItemIcon>
               <MessageIcon sx={{ color: 'coral' }} />
             </ListItemIcon>
-            {expanded && <ListItemText primary="Message Admin" />}
+            <ListItemText primary="Message Admin" />
           </ListItem>
 
           <ListItem button="true" onClick={() => setPrivacyPolicyOpen(true)}>
             <ListItemIcon>
               <LockIcon sx={{ color: 'green' }} />
             </ListItemIcon>
-            {expanded && <ListItemText primary="Privacy Policy" />}
+            <ListItemText primary="Privacy Policy" />
           </ListItem>
         </List>
       </Drawer>
@@ -269,10 +233,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         open={systemAdminOpen}
         onClose={() => setSystemAdminOpen(false)}
       />
-      <FAQModal
-        open={faqOpen}
-        onClose={() => setFaqOpen(false)} // FAQ modal control
-      />
+      <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       <PrivacyPolicyModal
         open={privacyPolicyOpen}
         onClose={() => setPrivacyPolicyOpen(false)}
