@@ -10,6 +10,7 @@
     "start": "next start",
     "eslint": "clear && npx eslint  . --fix",
     "format": "prettier --write .",
+    "snyk": "snyk test",
     "prep": "prettier --write . && npm run eslint && npm run build",
     "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
   },
