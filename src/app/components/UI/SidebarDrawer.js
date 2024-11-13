@@ -44,7 +44,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [faqOpen, setFaqOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
-  console.log('selectedRole', selectedRole);
+
   return (
     <>
       <Drawer
@@ -60,7 +60,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         }}
       >
         <List>
-          {/* Regions Section */}
+          {/* *******Regions Section******* */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Select a Region
@@ -95,7 +95,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="Sign In to Save Settings" />
             </ListItem>
           )}
-          {/* Conditionally Render Based on Role */}
+          {/* ******* Conditional Role******* */}
           {selectedRole !== '' && (
             <ListItem
               button="true"
@@ -121,7 +121,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemIcon>
                 <EventAvailableIcon sx={{ color: 'green' }} />
               </ListItemIcon>
-              <ListItemText primary="Regional Organizer Settings" />
+              <ListItemText primary="Regional Organizer" />
             </ListItem>
           )}
           {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
@@ -133,30 +133,45 @@ const SidebarDrawer = ({ open, onClose }) => {
               }}
             >
               <ListItemIcon>
-                <AdminPanelSettingsIcon sx={{ color: 'red' }} />
+                <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
               </ListItemIcon>
-              <ListItemText primary="System Admin Panel" />
+              <ListItemText primary="System Admin" />
             </ListItem>
           )}
           {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
-            <ListItem
-              button="true"
-              onClick={() => {
-                setSystemAdminOpen(true);
-                onClose();
-              }}
-            >
-              <ListItemIcon>
-                <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
-              </ListItemIcon>
-              <ListItemText primary="System Owner Panel" />
-            </ListItem>
+            <>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setSystemAdminOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
+                </ListItemIcon>
+                <ListItemText primary="System Admin" />
+              </ListItem>
+
+              {/* Face menu for System Owner with CoPresentIcon */}
+              <ListItem
+                button="true"
+                onClick={() => {
+                  // Does nothing on press
+                }}
+              >
+                <ListItemIcon>
+                  <CoPresentIcon sx={{ color: 'red' }} />
+                </ListItemIcon>
+                <ListItemText primary="System Owner" />
+              </ListItem>
+            </>
           )}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Information
           </Typography>
-          {/* General Links */}
+          {/* *******General Links******* */}
           <Link href="/about" passHref>
             <ListItem button="true">
               <ListItemIcon>
@@ -185,6 +200,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="About" />
             </ListItem>
           </Link>
+          {/* *******OTHER******* */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Other
