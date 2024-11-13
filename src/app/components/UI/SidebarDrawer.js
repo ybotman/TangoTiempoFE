@@ -223,6 +223,13 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Privacy Policy" />
           </ListItem>
+          <ListItem
+            button="true"
+            onClick={() => {
+              setPrivacyPolicyOpen(true);
+              onClose();
+            }}
+          ></ListItem>
         </List>
       </Drawer>
 
