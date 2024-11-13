@@ -1,4 +1,5 @@
 // src/app/components/Modals/RegionalOrganizers/RegionalOrganizersImages.js
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,12 +14,15 @@ import {
   IconButton,
   CircularProgress,
   useMediaQuery,
+  useTheme,
+  Grid,
 } from '@mui/material';
 import { AddPhotoAlternate, Close as CloseIcon } from '@mui/icons-material';
 import { useImages } from '@/hooks/useImages';
 
 const RegionalOrganizersImages = ({ organizerId }) => {
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { images, uploadImage, loading } = useImages(organizerId);
@@ -60,39 +64,64 @@ const RegionalOrganizersImages = ({ organizerId }) => {
         {loading && <CircularProgress size={24} />}
       </Box>
 
-      <Box
-        sx={{
-          overflowX: 'auto',
-          mt: 2,
-          maxWidth: '100%',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {images.map((image) => (
-          <Box
-            key={image.name}
-            component="span"
-            sx={{
-              display: 'inline-block',
-              position: 'relative',
-              mx: 1,
-              cursor: 'pointer',
-            }}
-            onClick={() => handleImageClick(image)}
-          >
-            <img
-              src={image.url}
-              alt={image.name}
-              style={{
-                width: isMobile ? '100px' : '150px',
-                height: isMobile ? '100px' : '150px',
-                objectFit: 'cover',
-                borderRadius: 4,
+      {isMobile ? (
+        <Box
+          sx={{
+            overflowX: 'auto',
+            mt: 2,
+            display: 'flex',
+          }}
+        >
+          {images.map((image) => (
+            <Box
+              key={image.name}
+              sx={{
+                minWidth: 100,
+                mx: 1,
+                cursor: 'pointer',
+                position: 'relative',
               }}
-            />
-          </Box>
-        ))}
-      </Box>
+              onClick={() => handleImageClick(image)}
+            >
+              <img
+                src={image.url}
+                alt={image.name}
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  objectFit: 'cover',
+                  borderRadius: 4,
+                }}
+              />
+            </Box>
+          ))}
+        </Box>
+      ) : (
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          {images.map((image) => (
+            <Grid item xs={4} sm={3} md={2} key={image.name}>
+              <Box
+                sx={{
+                  cursor: 'pointer',
+                  position: 'relative',
+                }}
+                onClick={() => handleImageClick(image)}
+              >
+                <img
+                  src={image.url}
+                  alt={image.name}
+                  style={{
+                    width: '100%',
+                    height: '100px',
+                    objectFit: 'cover',
+                    borderRadius: 4,
+                  }}
+                />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       <Dialog open={previewOpen} onClose={handleClosePreview} maxWidth="md">
         <DialogActions>

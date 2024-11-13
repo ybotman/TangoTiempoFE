@@ -1,4 +1,5 @@
 // src/app/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
+
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
@@ -9,8 +10,11 @@ import {
   Typography,
   Tabs,
   Tab,
-  Button,
   useMediaQuery,
+  useTheme,
+  AppBar,
+  Toolbar,
+  IconButton,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersName from './RegionalOrganizersName';
@@ -23,7 +27,8 @@ import { useOrganizers } from '@/hooks/useOrganizers';
 import modalStyle from '@/components/Styles/modalStyles';
 
 const RegionalOrganizersModal = ({ open, onClose }) => {
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const auth = useContext(AuthContext);
   const { user } = auth || {};
   const {
@@ -51,30 +56,45 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle(isMobile)}>
         {/* Header with Close Button */}
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5" component="h2">
-            Regional Organizer Settings
-          </Typography>
-          <Button onClick={onClose}>
-            <CloseIcon />
-          </Button>
-        </Box>
+        <AppBar position="static" color="default">
+          <Toolbar variant="dense">
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Regional Organizer Settings
+            </Typography>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={onClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
-          <Typography variant="body2" color="textSecondary" gutterBottom>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            gutterBottom
+            sx={{ p: 1 }}
+          >
             Organizer ID: {user.backendInfo.regionalOrganizerInfo.organizerId}
           </Typography>
         )}
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId ? (
-          <>
+          <Box
+            sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+          >
             <Tabs
               value={currentTab}
               onChange={handleTabChange}
               aria-label="Regional Organizer Settings Tabs"
               variant="scrollable"
-              scrollButtons
+              scrollButtons="on"
               allowScrollButtonsMobile
+              sx={{ borderBottom: 1, borderColor: 'divider' }}
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
@@ -92,9 +112,9 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             ) : (
               <Box
                 sx={{
-                  mt: 2,
-                  overflowY: 'auto',
                   flexGrow: 1,
+                  overflowY: 'auto',
+                  p: 2,
                 }}
               >
                 {currentTab === 'name' && (
@@ -137,9 +157,9 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 )}
               </Box>
             )}
-          </>
+          </Box>
         ) : (
-          <Typography color="textSecondary" gutterBottom>
+          <Typography color="textSecondary" gutterBottom sx={{ p: 2 }}>
             No organizer information available.
           </Typography>
         )}
