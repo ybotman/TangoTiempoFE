@@ -32,7 +32,6 @@
     "@mui/material": "^6.1.5",
     "@mui/system": "^6.1.5",
     "@mui/x-date-pickers": "^7.22.0",
-    "@toolpad/core": "^0.8.1",
     "axios": "^1.7.7",
     "debounce": "^2.2.0",
     "depcheck": "^1.4.7",
@@ -61,5 +60,8 @@
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.11.0",
     "prettier": "^3.3.3"
-  }
+  },
+  "resolutions": {
+  "cross-spawn": "7.0.5"
+}
 }
