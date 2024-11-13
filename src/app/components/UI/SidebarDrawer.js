@@ -60,7 +60,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         }}
       >
         <List>
-          {/* Regions Section */}
+          {/* *******Regions Section******* */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Select a Region
@@ -79,27 +79,24 @@ const SidebarDrawer = ({ open, onClose }) => {
             <ListItemText primary="Regions" />
             {regionMenuOpen ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
-
           <Collapse in={regionMenuOpen} timeout="auto" unmountOnExit>
             <RegionMenu onClose={() => setRegionMenuOpen(false)} />
           </Collapse>
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Settings
+            Role Settings
           </Typography>
-
           {/* Prompt for "None" Role */}
           {selectedRole === '' && (
             <ListItem>
               <ListItemIcon>
-                <ErrorIcon sx={{ color: 'orange' }} />
+                <ErrorIcon sx={{ color: 'coral' }} />
               </ListItemIcon>
               <ListItemText primary="Sign In to Save Settings" />
             </ListItem>
           )}
-
-          {/* Conditionally Render Based on Role */}
-          {selectedRole === listOfAllRoles.NAMED_USER && (
+          {/* ******* Conditional Role******* */}
+          {selectedRole !== '' && (
             <ListItem
               button="true"
               onClick={() => {
@@ -113,94 +110,68 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="User Settings" />
             </ListItem>
           )}
-
           {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-            <>
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setUserSettingsOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <AccountCircleIcon sx={{ color: 'blue' }} />
-                </ListItemIcon>
-                <ListItemText primary="User Settings" />
-              </ListItem>
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setUserSettingsOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <EventAvailableIcon sx={{ color: 'green' }} />
-                </ListItemIcon>
-                <ListItemText primary="Regional Organizer Settings" />
-              </ListItem>
-            </>
+            <ListItem
+              button="true"
+              onClick={() => {
+                setRegionalOrganizerOpen(true);
+                onClose();
+              }}
+            >
+              <ListItemIcon>
+                <EventAvailableIcon sx={{ color: 'green' }} />
+              </ListItemIcon>
+              <ListItemText primary="Regional Organizer" />
+            </ListItem>
           )}
-
-          {selectedRole === listOfAllRoles.REGIONAL_ADMIN && (
+          {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
+            <ListItem
+              button="true"
+              onClick={() => {
+                setSystemAdminOpen(true);
+                onClose();
+              }}
+            >
+              <ListItemIcon>
+                <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
+              </ListItemIcon>
+              <ListItemText primary="System Admin" />
+            </ListItem>
+          )}
+          {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
             <>
               <ListItem
                 button="true"
                 onClick={() => {
-                  setUserSettingsOpen(true);
+                  setSystemAdminOpen(true);
                   onClose();
                 }}
               >
                 <ListItemIcon>
-                  <AccountCircleIcon sx={{ color: 'blue' }} />
+                  <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
                 </ListItemIcon>
-                <ListItemText primary="User Settings" />
+                <ListItemText primary="System Admin" />
               </ListItem>
-              <ListItem button="true">
+
+              {/* Face menu for System Owner with CoPresentIcon */}
+              <ListItem
+                button="true"
+                onClick={() => {
+                  // Does nothing on press
+                }}
+              >
                 <ListItemIcon>
                   <CoPresentIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
-                <ListItemText primary="Regional Admin Settings" />
+                <ListItemText primary="System Owner" />
               </ListItem>
             </>
           )}
-
-          {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
-            <>
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setUserSettingsOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <AccountCircleIcon sx={{ color: 'blue' }} />
-                </ListItemIcon>
-                <ListItemText primary="User Settings" />
-              </ListItem>
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setUserSettingsOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <AdminPanelSettingsIcon sx={{ color: 'red' }} />
-                </ListItemIcon>
-                <ListItemText primary="System Admin Panel" />
-              </ListItem>
-            </>
-          )}
-
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Information
           </Typography>
-
-          {/* General Links */}
+          {/* *******General Links******* */}
           <Link href="/about" passHref>
             <ListItem button="true">
               <ListItemIcon>
@@ -209,21 +180,18 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="Meet the Team" />
             </ListItem>
           </Link>
-
           <ListItem button="true" onClick={() => setFaqOpen(true)}>
             <ListItemIcon>
               <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
             </ListItemIcon>
             <ListItemText primary="FAQ" />
           </ListItem>
-
           <ListItem button="true">
             <ListItemIcon>
               <HelpIcon sx={{ color: 'royalBlue' }} />
             </ListItemIcon>
             <ListItemText primary="Help" />
           </ListItem>
-
           <Link href="/about" passHref>
             <ListItem button="true">
               <ListItemIcon>
@@ -232,7 +200,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="About" />
             </ListItem>
           </Link>
-
+          {/* *******OTHER******* */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Other
@@ -243,7 +211,6 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Message Admin" />
           </ListItem>
-
           <ListItem
             button="true"
             onClick={() => {
