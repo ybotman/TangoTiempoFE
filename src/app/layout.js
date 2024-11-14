@@ -6,13 +6,31 @@ import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
 
 export const metadata = {
-  // ... your metadata
+  title: 'Tango Tiempo - Your National Tango Calendar',
+  description:
+    'Stay up-to-date with Tango events across the country with Tango Tiempo.',
+  keywords:
+    'Tango, Tango Events, National Tango Calendar, Tango Tiempo, Dance Calendar',
+  author: 'Tango Tiempo Team',
 };
+
+// Separate viewport export
+export const viewport = 'width=device-width, initial-scale=1.0';
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        {/* Metadata */}
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+        <meta name="keywords" content={metadata.keywords} />
+        <meta name="author" content={metadata.author} />
+        <meta name="viewport" content={metadata.viewport} />
+
+        {/* Favicon */}
+        <link rel="icon" href="/Icon64x64.ico" />
+
         {/* Facebook Domain Verification */}
         <meta
           name="facebook-domain-verification"
@@ -38,32 +56,9 @@ export default function RootLayout({ children }) {
             });
           `}
         </Script>
-
-        {/* Facebook SDK Script */}
-        <Script id="facebook-sdk" strategy="afterInteractive">
-          {`
-            window.fbAsyncInit = function() {
-              FB.init({
-                appId      : '1277406560069039',
-                xfbml      : true,
-                version    : 'v21.0'
-              });
-              FB.AppEvents.logPageView();
-            };
-
-            (function(d, s, id){
-               var js, fjs = d.getElementsByTagName(s)[0];
-               if (d.getElementById(id)) {return;}
-               js = d.createElement(s); js.id = id;
-               js.src = "https://connect.facebook.net/en_US/sdk.js";
-               fjs.parentNode.insertBefore(js, fjs);
-             }(document, 'script', 'facebook-jssdk'));
-          `}
-        </Script>
       </head>
       <body style={{ display: 'flex' }}>
         <SidebarDrawer />
-        {/* Main Content Area */}
         <div style={{ flexGrow: 1, padding: '1rem' }}>
           <Providers>
             <GoogleClientWrapper>{children}</GoogleClientWrapper>

@@ -1,28 +1,41 @@
-//app/auth/login/page.js
+// app/auth/login/page.js
 
 'use client';
 
 import React, { useState, useContext } from 'react';
-import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
-import { Box, Typography, Container, Paper } from '@mui/material';
+import { Box, Typography, Container, Paper, Button } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
+import GoogleIcon from '@mui/icons-material/Google';
+import FacebookIcon from '@mui/icons-material/Facebook';
 
 const LoginPage = () => {
   const router = useRouter();
-  const { user, loading, error, authenticateWithGoogle } =
-    useContext(AuthContext);
+  const {
+    user,
+    loading,
+    error,
+    authenticateWithGoogle,
+    authenticateWithFacebook,
+  } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  //console.log('LoginPage called'); // Debugging
+
   const handleGoogleLogIn = async () => {
-    //console.log('handleGoogleLogIn called'); // Debugging
     setIsRedirecting(true);
     const result = await authenticateWithGoogle();
     if (result) {
-      //console.log('Login successful, redirecting'); // Debugging
       router.push('/calendar');
     } else {
-      // console.log('Login failed'); // Debugging
+      setIsRedirecting(false);
+    }
+  };
+
+  const handleFacebookLogIn = async () => {
+    setIsRedirecting(true);
+    const result = await authenticateWithFacebook();
+    if (result) {
+      router.push('/calendar');
+    } else {
       setIsRedirecting(false);
     }
   };
@@ -82,16 +95,29 @@ const LoginPage = () => {
             align="center"
             paragraph
           >
-            Log in with your Google account to access your Tango events
-            calendar.
+            Log in with your Google or Facebook account to access your Tango
+            events calendar.
           </Typography>
-          <Box
-            component="img"
-            src="/web_light_rd_ctn@1x.png"
-            alt="Log in with Google"
-            sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
+          {/* Google Log In Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<GoogleIcon />}
+            sx={{ mt: 2, mb: 2, width: '100%' }}
             onClick={handleGoogleLogIn}
-          />
+          >
+            Log in with Google
+          </Button>
+          {/* Facebook Log In Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<FacebookIcon />}
+            sx={{ mt: 2, mb: 2, width: '100%', backgroundColor: '#4267B2' }}
+            onClick={handleFacebookLogIn}
+          >
+            Log in with Facebook
+          </Button>
         </Box>
       </Paper>
     </Container>
