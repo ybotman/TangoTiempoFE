@@ -1,3 +1,4 @@
+//src/app/calendar/layout.js
 'use client'; // Enable client-side rendering
 
 import { React, useContext, useEffect } from 'react';
