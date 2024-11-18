@@ -9,9 +9,12 @@ import {
   signInWithPopup,
   signOut,
   GoogleAuthProvider,
+  FacebookAuthProvider,
+  linkWithPopup,
+  fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth } from '@/utils/firebase';
+import { auth, facebookProvider } from '@/utils/firebase';
 import axios from 'axios';
 
 // Create Auth Context
@@ -85,7 +88,6 @@ export const AuthProvider = ({ children }) => {
 
     try {
       signUpOngoing.current = true;
-      //   console.log('Initiating Google sign-in...');
       const result = await signInWithPopup(auth, provider);
       console.log('Google sign-in successful:', result);
       const firebaseUser = result.user;
@@ -147,6 +149,115 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Authenticate with Facebook
+  const authenticateWithFacebook = async () => {
+    if (user) {
+      setError('You are already signed in.');
+      return null;
+    }
+
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'development') {
+      setError('Facebook authentication is disabled in development.');
+      return null;
+    }
+
+    setLoading(true);
+    const provider = facebookProvider; // Already initialized in firebase.js
+
+    if (!provider) {
+      setError('Facebook authentication is not configured.');
+      setLoading(false);
+      return null;
+    }
+
+    try {
+      signUpOngoing.current = true;
+      const result = await signInWithPopup(auth, provider);
+      console.log('Facebook sign-in successful:', result);
+      const firebaseUser = result.user;
+
+      // Check if the email is already associated with another account
+      if (firebaseUser.email) {
+        const signInMethods = await fetchSignInMethodsForEmail(
+          auth,
+          firebaseUser.email
+        );
+        if (
+          signInMethods.length > 0 &&
+          !signInMethods.includes(FacebookAuthProvider.PROVIDER_ID)
+        ) {
+          // The email is already associated with another provider (e.g., Google)
+          // Attempt to link Facebook to the existing account
+          try {
+            const linkResult = await linkWithPopup(auth.currentUser, provider);
+            console.log('Account linked successfully:', linkResult);
+          } catch (linkError) {
+            console.error('Error linking accounts:', linkError);
+            setError('Failed to link Facebook account with existing account.');
+            setLoading(false);
+            signUpOngoing.current = false;
+            return null;
+          }
+        }
+      }
+
+      // Fetch or create user in backend
+      const idToken = await firebaseUser.getIdToken();
+      try {
+        console.log('Fetching user from backend...');
+        await axios.get(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+      } catch (error) {
+        console.error('Error fetching user from backend:', error);
+        if (error.response && error.response.status === 404) {
+          console.log('User not found in backend. Creating new user...');
+          const displayName = firebaseUser.displayName || '';
+          const [firstName, lastName] = displayName.split(' ');
+          const userData = {
+            firebaseUserId: firebaseUser.uid,
+            firstName: firstName || '',
+            lastName: lastName || '',
+            phoneNumber: firebaseUser.phoneNumber || '',
+            photoUrl: firebaseUser.photoURL || '',
+          };
+
+          const roleResponse = await axios.post(
+            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
+            userData,
+            {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
+          );
+
+          if (roleResponse.status !== 204) {
+            throw new Error('Failed to assign role in backend');
+          }
+        } else {
+          throw error;
+        }
+      }
+
+      signUpOngoing.current = false;
+      await setUserData(firebaseUser); // Set merged user data
+      setLoading(false);
+      return firebaseUser;
+    } catch (err) {
+      console.error('Error in authenticateWithFacebook:', err);
+      setError(err.message || 'An unexpected error occurred.');
+      setLoading(false);
+      signUpOngoing.current = false;
+      return null;
+    }
+  };
+
   // Login with Email and Password
   const login = async (email, password) => {
     try {
@@ -185,6 +296,7 @@ export const AuthProvider = ({ children }) => {
     error,
     logOut,
     authenticateWithGoogle,
+    authenticateWithFacebook,
     login,
   };
 
@@ -198,3 +310,5 @@ export const AuthProvider = ({ children }) => {
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
+
+export default AuthProvider;

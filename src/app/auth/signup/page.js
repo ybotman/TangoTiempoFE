@@ -1,17 +1,23 @@
-//app/auth/signup/page.js
+// app/auth/signup/page.js
 
 'use client';
 
 import React, { useState, useContext } from 'react';
-import Button from '@mui/material/Button';
+import { Box, Typography, Container, Paper, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { Box, Typography, Container, Paper } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
+import GoogleIcon from '@mui/icons-material/Google';
+import FacebookIcon from '@mui/icons-material/Facebook';
 
 const SignUpPage = () => {
   const router = useRouter();
-  const { user, loading, error, authenticateWithGoogle } =
-    useContext(AuthContext);
+  const {
+    user,
+    loading,
+    error,
+    authenticateWithGoogle,
+    authenticateWithFacebook,
+  } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleGoogleSignUp = async () => {
@@ -24,13 +30,22 @@ const SignUpPage = () => {
     }
   };
 
-  // FIXME: isRedirecting is not working as expected
+  const handleFacebookSignUp = async () => {
+    setIsRedirecting(true);
+    const result = await authenticateWithFacebook();
+    if (result) {
+      router.push('/calendar');
+    } else {
+      setIsRedirecting(false);
+    }
+  };
+
   if (loading || isRedirecting) {
     return <Typography>Loading...</Typography>;
   }
 
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return <Typography color="error">Error: {error}</Typography>;
   }
 
   if (user) {
@@ -45,7 +60,7 @@ const SignUpPage = () => {
             }}
           >
             <Typography component="h1" variant="h5" gutterBottom>
-              You are already logged in!
+              You are already signed up!
             </Typography>
             <Button
               variant="contained"
@@ -80,16 +95,39 @@ const SignUpPage = () => {
             align="center"
             paragraph
           >
-            Sign up with your Google account to start organizing and managing
-            Tango events.
+            Sign up with your Google or Facebook account to start organizing and
+            managing Tango events.
           </Typography>
-          <Box
-            component="img"
-            src="/web_light_rd_SU@1x.png"
-            alt="Sign up with Google"
-            sx={{ cursor: 'pointer', mt: 2, mb: 2 }}
+          {/* Google Sign Up Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<GoogleIcon />}
+            sx={{ mt: 2, mb: 2, width: '100%' }}
             onClick={handleGoogleSignUp}
-          />
+          >
+            Sign up with Google
+          </Button>
+          {/* Conditionally render Facebook Sign Up Button */}
+          {process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development' && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FacebookIcon />}
+              sx={{
+                mt: 2,
+                mb: 2,
+                width: '100%',
+                backgroundColor: '#4267B2',
+                '&:hover': {
+                  backgroundColor: '#365899',
+                },
+              }}
+              onClick={handleFacebookSignUp}
+            >
+              Sign up with Facebook
+            </Button>
+          )}
         </Box>
       </Paper>
     </Container>
