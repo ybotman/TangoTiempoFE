@@ -10,7 +10,8 @@ import {
   signOut,
   GoogleAuthProvider,
   FacebookAuthProvider,
-  linkWithPopup,
+  linkWithCredential,
+  EmailAuthProvider,
   fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         backendInfo,
         roles: backendInfo.roleIds.map((role) => role.roleName) || [],
       };
-
+      console.log('Merged user:', mergedUser);
       setUser(mergedUser);
 
       // Set selectedRole to the first available role
@@ -93,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     const endTime = Date.now();
     console.log(`setUserData execution time: ${endTime - startTime} ms`);
   };
+
   // Authenticate with Google
   const authenticateWithGoogle = async () => {
     if (user) {
@@ -110,48 +112,7 @@ export const AuthProvider = ({ children }) => {
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
-      const idToken = await firebaseUser.getIdToken();
-      try {
-        console.log('Fetching user from backend...');
-        await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
-      } catch (error) {
-        console.error('Error fetching user from backend:', error);
-        if (error.response && error.response.status === 404) {
-          console.log('User not found in backend. Creating new user...');
-          const displayName = firebaseUser.displayName || '';
-          const [firstName, lastName] = displayName.split(' ');
-          const userData = {
-            firebaseUserId: firebaseUser.uid,
-            firstName: firstName || '',
-            lastName: lastName || '',
-            phoneNumber: firebaseUser.phoneNumber || '',
-            photoUrl: firebaseUser.photoURL || '',
-          };
-
-          const roleResponse = await axios.post(
-            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
-            userData,
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            }
-          );
-
-          if (roleResponse.status !== 204) {
-            throw new Error('Failed to assign role in backend');
-          }
-        } else {
-          throw error;
-        }
-      }
+      await handleBackendUser(firebaseUser);
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
@@ -159,7 +120,13 @@ export const AuthProvider = ({ children }) => {
       return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithGoogle:', err);
-      setError(err.message || 'An unexpected error occurred.');
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        // Handle account linking
+        const user = await handleAccountExistsWithDifferentCredential(err);
+        return user;
+      } else {
+        setError(err.message || 'An unexpected error occurred.');
+      }
       setLoading(false);
       signUpOngoing.current = false;
       return null;
@@ -193,74 +160,8 @@ export const AuthProvider = ({ children }) => {
       console.log('Facebook sign-in successful:', result);
       const firebaseUser = result.user;
 
-      // Check if the email is already associated with another account
-      if (firebaseUser.email) {
-        const signInMethods = await fetchSignInMethodsForEmail(
-          auth,
-          firebaseUser.email
-        );
-        if (
-          signInMethods.length > 0 &&
-          !signInMethods.includes(FacebookAuthProvider.PROVIDER_ID)
-        ) {
-          // The email is already associated with another provider (e.g., Google)
-          // Attempt to link Facebook to the existing account
-          try {
-            const linkResult = await linkWithPopup(auth.currentUser, provider);
-            console.log('Account linked successfully:', linkResult);
-          } catch (linkError) {
-            console.error('Error linking accounts:', linkError);
-            setError('Failed to link Facebook account with existing account.');
-            setLoading(false);
-            signUpOngoing.current = false;
-            return null;
-          }
-        }
-      }
-
       // Fetch or create user in backend
-      const idToken = await firebaseUser.getIdToken();
-      try {
-        console.log('Fetching user from backend...');
-        await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
-      } catch (error) {
-        console.error('Error fetching user from backend:', error);
-        if (error.response && error.response.status === 404) {
-          console.log('User not found in backend. Creating new user...');
-          const displayName = firebaseUser.displayName || '';
-          const [firstName, lastName] = displayName.split(' ');
-          const userData = {
-            firebaseUserId: firebaseUser.uid,
-            firstName: firstName || '',
-            lastName: lastName || '',
-            phoneNumber: firebaseUser.phoneNumber || '',
-            photoUrl: firebaseUser.photoURL || '',
-          };
-
-          const roleResponse = await axios.post(
-            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
-            userData,
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            }
-          );
-
-          if (roleResponse.status !== 204) {
-            throw new Error('Failed to assign role in backend');
-          }
-        } else {
-          throw error;
-        }
-      }
+      await handleBackendUser(firebaseUser);
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
@@ -268,10 +169,114 @@ export const AuthProvider = ({ children }) => {
       return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithFacebook:', err);
-      setError(err.message || 'An unexpected error occurred.');
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        // Handle account linking
+        const user = await handleAccountExistsWithDifferentCredential(err);
+        return user;
+      } else {
+        setError(err.message || 'An unexpected error occurred.');
+      }
       setLoading(false);
       signUpOngoing.current = false;
       return null;
+    }
+  };
+
+  // Function to handle account linking when the error occurs
+  const handleAccountExistsWithDifferentCredential = async (error) => {
+    const pendingCred = error.credential;
+    const email = error.email;
+
+    try {
+      // Get sign-in methods for this email
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.length > 0) {
+        let existingProvider;
+        if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
+          existingProvider = new GoogleAuthProvider();
+        } else if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
+          existingProvider = new EmailAuthProvider();
+        } else if (methods.includes(FacebookAuthProvider.PROVIDER_ID)) {
+          existingProvider = new FacebookAuthProvider();
+        } else {
+          // Handle other providers if needed
+          setError('Please sign in using your existing provider.');
+          return null;
+        }
+
+        // Prompt the user to sign in with the existing provider
+        const existingUserResult = await signInWithPopup(
+          auth,
+          existingProvider
+        );
+
+        // Link the pending credential to the existing user
+        await linkWithCredential(existingUserResult.user, pendingCred);
+
+        // Fetch or create user in backend
+        await handleBackendUser(existingUserResult.user);
+        await setUserData(existingUserResult.user); // Update user data
+        setLoading(false);
+        return existingUserResult.user;
+      } else {
+        setError('No existing sign-in methods found for this email.');
+        setLoading(false);
+        return null;
+      }
+    } catch (linkError) {
+      console.error('Error during account linking:', linkError);
+      setError(
+        linkError.message ||
+          'An unexpected error occurred during account linking.'
+      );
+      setLoading(false);
+      return null;
+    }
+  };
+
+  // Function to handle fetching or creating the user in the backend
+  const handleBackendUser = async (firebaseUser) => {
+    const idToken = await firebaseUser.getIdToken();
+    try {
+      console.log('Fetching user from backend...');
+      await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error fetching user from backend:', error);
+      if (error.response && error.response.status === 404) {
+        console.log('User not found in backend. Creating new user...');
+        const displayName = firebaseUser.displayName || '';
+        const [firstName, lastName] = displayName.split(' ');
+        const userData = {
+          firebaseUserId: firebaseUser.uid,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phoneNumber: firebaseUser.phoneNumber || '',
+          photoUrl: firebaseUser.photoURL || '',
+        };
+
+        const roleResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
+          userData,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        if (roleResponse.status !== 204) {
+          throw new Error('Failed to assign role in backend');
+        }
+      } else {
+        throw error;
+      }
     }
   };
 
