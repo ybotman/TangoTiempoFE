@@ -17,10 +17,14 @@ const app = initializeApp(decodedFirebaseConfig);
 const auth = getAuth(app);
 
 // Conditionally initialize Facebook Auth Provider
+
 const facebookProvider =
   process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development'
     ? new FacebookAuthProvider()
     : null;
 
-// Export auth and providers for use in other components
+if (facebookProvider) {
+  facebookProvider.addScope('email');
+}
+
 export { auth, facebookProvider };

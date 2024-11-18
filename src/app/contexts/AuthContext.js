@@ -187,11 +187,22 @@ export const AuthProvider = ({ children }) => {
     const pendingCred = error.credential;
     const email = error.email;
 
+    // Ensure email is available
+    if (!email) {
+      setError(
+        'Your email address is not available. Please use a different sign-in method.'
+      );
+      setLoading(false);
+      return null;
+    }
+
     try {
       // Get sign-in methods for this email
       const methods = await fetchSignInMethodsForEmail(auth, email);
       if (methods.length > 0) {
         let existingProvider;
+
+        // Determine existing provider
         if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
           existingProvider = new GoogleAuthProvider();
         } else if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
@@ -199,7 +210,7 @@ export const AuthProvider = ({ children }) => {
         } else if (methods.includes(FacebookAuthProvider.PROVIDER_ID)) {
           existingProvider = new FacebookAuthProvider();
         } else {
-          // Handle other providers if needed
+          // Handle unknown providers gracefully
           setError('Please sign in using your existing provider.');
           return null;
         }
@@ -219,6 +230,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return existingUserResult.user;
       } else {
+        // No sign-in methods found for the email
         setError('No existing sign-in methods found for this email.');
         setLoading(false);
         return null;
