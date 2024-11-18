@@ -81,7 +81,7 @@ const RegionMenu = ({ onRegionSelect, onClose }) => {
         {selectionLevel === 2 &&
           localSelectedRegion.divisions.map((division) => (
             <ListItem
-              button
+              button="true"
               key={division.divisionCode}
               onClick={() => handleDivisionClick(division)}
             >
@@ -92,7 +92,7 @@ const RegionMenu = ({ onRegionSelect, onClose }) => {
         {selectionLevel === 3 &&
           localSelectedDivision.majorCities.map((city) => (
             <ListItem
-              button
+              button="true"
               key={city.cityCode}
               onClick={() => handleCityClick(city)}
             >

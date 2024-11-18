@@ -186,7 +186,7 @@ const CalendarPage = () => {
         // Extend the number of events shown in list view
         views={{
           listWeek: {
-            eventLimit: false, // Show all events without limiting
+            dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
           },
         }}

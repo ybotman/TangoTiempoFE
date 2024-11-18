@@ -10,9 +10,11 @@ import {
   signOut,
   GoogleAuthProvider,
   FacebookAuthProvider,
+  linkWithPopup,
+  fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth } from '@/utils/firebase';
+import { auth, facebookProvider } from '@/utils/firebase';
 import axios from 'axios';
 
 // Create Auth Context
@@ -171,14 +173,50 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
 
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'development') {
+      setError('Facebook authentication is disabled in development.');
+      return null;
+    }
+
     setLoading(true);
-    const provider = new FacebookAuthProvider();
+    const provider = facebookProvider; // Already initialized in firebase.js
+
+    if (!provider) {
+      setError('Facebook authentication is not configured.');
+      setLoading(false);
+      return null;
+    }
 
     try {
       signUpOngoing.current = true;
       const result = await signInWithPopup(auth, provider);
       console.log('Facebook sign-in successful:', result);
       const firebaseUser = result.user;
+
+      // Check if the email is already associated with another account
+      if (firebaseUser.email) {
+        const signInMethods = await fetchSignInMethodsForEmail(
+          auth,
+          firebaseUser.email
+        );
+        if (
+          signInMethods.length > 0 &&
+          !signInMethods.includes(FacebookAuthProvider.PROVIDER_ID)
+        ) {
+          // The email is already associated with another provider (e.g., Google)
+          // Attempt to link Facebook to the existing account
+          try {
+            const linkResult = await linkWithPopup(auth.currentUser, provider);
+            console.log('Account linked successfully:', linkResult);
+          } catch (linkError) {
+            console.error('Error linking accounts:', linkError);
+            setError('Failed to link Facebook account with existing account.');
+            setLoading(false);
+            signUpOngoing.current = false;
+            return null;
+          }
+        }
+      }
 
       // Fetch or create user in backend
       const idToken = await firebaseUser.getIdToken();
@@ -275,7 +313,7 @@ export const AuthProvider = ({ children }) => {
     error,
     logOut,
     authenticateWithGoogle,
-    authenticateWithFacebook, // Add this to context
+    authenticateWithFacebook,
     login,
   };
 
