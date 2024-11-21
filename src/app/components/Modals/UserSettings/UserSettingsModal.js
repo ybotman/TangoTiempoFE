@@ -71,8 +71,7 @@ const UserSettingsModal = ({ open, onClose }) => {
           <>
             {currentTab === 'name' && (
               <UserSettingsName
-                firstName={userData?.localUserInfo?.firstName || ''}
-                lastName={userData?.localUserInfo?.lastName || ''}
+                userData={userData}
                 updateUserData={updateUserData}
               />
             )}
