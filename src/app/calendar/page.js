@@ -49,9 +49,6 @@ const CalendarPage = () => {
   </Head>;
 
   const { regions } = useContext(RegionsContext);
-  //  const { selectedOrganizers, selectedCategories } = now where??
-  //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-
   const {
     menuAnchor,
     menuItems,

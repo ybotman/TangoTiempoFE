@@ -32,7 +32,7 @@ export const useOrganizers = () => {
   }, [selectedRegionID]);
 
   const fetchOrganizerById = useCallback(async (organizerId) => {
-    //console.log('fetchOrganizerById called with organizerId:', organizerId);
+    console.log('fetchOrganizerById called with organizerId:', organizerId);
     try {
       setLoading(true);
       const response = await axios.get(
@@ -65,7 +65,23 @@ export const useOrganizers = () => {
   };
 
   useEffect(() => {
-    fetchOrganizers();
+    console.log('useOrganizers useEffect triggered');
+    console.log('selectedRegionID:', selectedRegionID);
+    if (!selectedRegionID) {
+      console.log('No region selected. Skipping fetchOrganizers.');
+      return; // Do nothing if there's no region
+    }
+
+    if (selectedRegionID) {
+      console.log(
+        'Calling fetchOrganizers with selectedRegionID:',
+        selectedRegionID
+      );
+    } else {
+      console.warn('Calling fetchOrganizers without a selectedRegionID');
+    }
+
+    fetchOrganizers(); // This is being triggered automatically here.
   }, [fetchOrganizers]);
 
   return {
