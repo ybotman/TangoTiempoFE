@@ -45,7 +45,7 @@ const LoginPage = () => {
   }
 
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return <Typography color="error">Error: {error}</Typography>;
   }
 
   if (user) {
@@ -108,16 +108,26 @@ const LoginPage = () => {
           >
             Log in with Google
           </Button>
-          {/* Facebook Log In Button */}
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<FacebookIcon />}
-            sx={{ mt: 2, mb: 2, width: '100%', backgroundColor: '#4267B2' }}
-            onClick={handleFacebookLogIn}
-          >
-            Log in with Facebook
-          </Button>
+          {/* Conditionally render Facebook Log In Button */}
+          {process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development' && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FacebookIcon />}
+              sx={{
+                mt: 2,
+                mb: 2,
+                width: '100%',
+                backgroundColor: '#4267B2',
+                '&:hover': {
+                  backgroundColor: '#365899',
+                },
+              }}
+              onClick={handleFacebookLogIn}
+            >
+              Log in with Facebook
+            </Button>
+          )}
         </Box>
       </Paper>
     </Container>

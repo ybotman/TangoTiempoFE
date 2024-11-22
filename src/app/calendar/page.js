@@ -49,9 +49,6 @@ const CalendarPage = () => {
   </Head>;
 
   const { regions } = useContext(RegionsContext);
-  //  const { selectedOrganizers, selectedCategories } = now where??
-  //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-
   const {
     menuAnchor,
     menuItems,
@@ -186,7 +183,7 @@ const CalendarPage = () => {
         // Extend the number of events shown in list view
         views={{
           listWeek: {
-            eventLimit: false, // Show all events without limiting
+            dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
           },
         }}

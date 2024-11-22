@@ -45,7 +45,7 @@ const SignUpPage = () => {
   }
 
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return <Typography color="error">Error: {error}</Typography>;
   }
 
   if (user) {
@@ -108,16 +108,26 @@ const SignUpPage = () => {
           >
             Sign up with Google
           </Button>
-          {/* Facebook Sign Up Button */}
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<FacebookIcon />}
-            sx={{ mt: 2, mb: 2, width: '100%', backgroundColor: '#4267B2' }}
-            onClick={handleFacebookSignUp}
-          >
-            Sign up with Facebook
-          </Button>
+          {/* Conditionally render Facebook Sign Up Button */}
+          {process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development' && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FacebookIcon />}
+              sx={{
+                mt: 2,
+                mb: 2,
+                width: '100%',
+                backgroundColor: '#4267B2',
+                '&:hover': {
+                  backgroundColor: '#365899',
+                },
+              }}
+              onClick={handleFacebookSignUp}
+            >
+              Sign up with Facebook
+            </Button>
+          )}
         </Box>
       </Paper>
     </Container>

@@ -10,9 +10,12 @@ import {
   signOut,
   GoogleAuthProvider,
   FacebookAuthProvider,
+  linkWithCredential,
+  EmailAuthProvider,
+  fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth } from '@/utils/firebase';
+import { auth, facebookProvider } from '@/utils/firebase';
 import axios from 'axios';
 
 // Create Auth Context
@@ -76,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         backendInfo,
         roles: backendInfo.roleIds.map((role) => role.roleName) || [],
       };
-
+      console.log('Merged user:', mergedUser);
       setUser(mergedUser);
 
       // Set selectedRole to the first available role
@@ -91,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     const endTime = Date.now();
     console.log(`setUserData execution time: ${endTime - startTime} ms`);
   };
+
   // Authenticate with Google
   const authenticateWithGoogle = async () => {
     if (user) {
@@ -108,48 +112,7 @@ export const AuthProvider = ({ children }) => {
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
-      const idToken = await firebaseUser.getIdToken();
-      try {
-        console.log('Fetching user from backend...');
-        await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
-      } catch (error) {
-        console.error('Error fetching user from backend:', error);
-        if (error.response && error.response.status === 404) {
-          console.log('User not found in backend. Creating new user...');
-          const displayName = firebaseUser.displayName || '';
-          const [firstName, lastName] = displayName.split(' ');
-          const userData = {
-            firebaseUserId: firebaseUser.uid,
-            firstName: firstName || '',
-            lastName: lastName || '',
-            phoneNumber: firebaseUser.phoneNumber || '',
-            photoUrl: firebaseUser.photoURL || '',
-          };
-
-          const roleResponse = await axios.post(
-            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
-            userData,
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            }
-          );
-
-          if (roleResponse.status !== 204) {
-            throw new Error('Failed to assign role in backend');
-          }
-        } else {
-          throw error;
-        }
-      }
+      await handleBackendUser(firebaseUser);
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
@@ -157,7 +120,13 @@ export const AuthProvider = ({ children }) => {
       return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithGoogle:', err);
-      setError(err.message || 'An unexpected error occurred.');
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        // Handle account linking
+        const user = await handleAccountExistsWithDifferentCredential(err);
+        return user;
+      } else {
+        setError(err.message || 'An unexpected error occurred.');
+      }
       setLoading(false);
       signUpOngoing.current = false;
       return null;
@@ -171,8 +140,19 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
 
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'development') {
+      setError('Facebook authentication is disabled in development.');
+      return null;
+    }
+
     setLoading(true);
-    const provider = new FacebookAuthProvider();
+    const provider = facebookProvider; // Already initialized in firebase.js
+
+    if (!provider) {
+      setError('Facebook authentication is not configured.');
+      setLoading(false);
+      return null;
+    }
 
     try {
       signUpOngoing.current = true;
@@ -181,48 +161,7 @@ export const AuthProvider = ({ children }) => {
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
-      const idToken = await firebaseUser.getIdToken();
-      try {
-        console.log('Fetching user from backend...');
-        await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
-      } catch (error) {
-        console.error('Error fetching user from backend:', error);
-        if (error.response && error.response.status === 404) {
-          console.log('User not found in backend. Creating new user...');
-          const displayName = firebaseUser.displayName || '';
-          const [firstName, lastName] = displayName.split(' ');
-          const userData = {
-            firebaseUserId: firebaseUser.uid,
-            firstName: firstName || '',
-            lastName: lastName || '',
-            phoneNumber: firebaseUser.phoneNumber || '',
-            photoUrl: firebaseUser.photoURL || '',
-          };
-
-          const roleResponse = await axios.post(
-            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
-            userData,
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            }
-          );
-
-          if (roleResponse.status !== 204) {
-            throw new Error('Failed to assign role in backend');
-          }
-        } else {
-          throw error;
-        }
-      }
+      await handleBackendUser(firebaseUser);
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
@@ -230,10 +169,126 @@ export const AuthProvider = ({ children }) => {
       return firebaseUser;
     } catch (err) {
       console.error('Error in authenticateWithFacebook:', err);
-      setError(err.message || 'An unexpected error occurred.');
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        // Handle account linking
+        const user = await handleAccountExistsWithDifferentCredential(err);
+        return user;
+      } else {
+        setError(err.message || 'An unexpected error occurred.');
+      }
       setLoading(false);
       signUpOngoing.current = false;
       return null;
+    }
+  };
+
+  // Function to handle account linking when the error occurs
+  const handleAccountExistsWithDifferentCredential = async (error) => {
+    const pendingCred = error.credential;
+    const email = error.email;
+
+    // Ensure email is available
+    if (!email) {
+      setError(
+        'Your email address is not available. Please use a different sign-in method.'
+      );
+      setLoading(false);
+      return null;
+    }
+
+    try {
+      // Get sign-in methods for this email
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.length > 0) {
+        let existingProvider;
+
+        // Determine existing provider
+        if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
+          existingProvider = new GoogleAuthProvider();
+        } else if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
+          existingProvider = new EmailAuthProvider();
+        } else if (methods.includes(FacebookAuthProvider.PROVIDER_ID)) {
+          existingProvider = new FacebookAuthProvider();
+        } else {
+          // Handle unknown providers gracefully
+          setError('Please sign in using your existing provider.');
+          return null;
+        }
+
+        // Prompt the user to sign in with the existing provider
+        const existingUserResult = await signInWithPopup(
+          auth,
+          existingProvider
+        );
+
+        // Link the pending credential to the existing user
+        await linkWithCredential(existingUserResult.user, pendingCred);
+
+        // Fetch or create user in backend
+        await handleBackendUser(existingUserResult.user);
+        await setUserData(existingUserResult.user); // Update user data
+        setLoading(false);
+        return existingUserResult.user;
+      } else {
+        // No sign-in methods found for the email
+        setError('No existing sign-in methods found for this email.');
+        setLoading(false);
+        return null;
+      }
+    } catch (linkError) {
+      console.error('Error during account linking:', linkError);
+      setError(
+        linkError.message ||
+          'An unexpected error occurred during account linking.'
+      );
+      setLoading(false);
+      return null;
+    }
+  };
+
+  // Function to handle fetching or creating the user in the backend
+  const handleBackendUser = async (firebaseUser) => {
+    const idToken = await firebaseUser.getIdToken();
+    try {
+      console.log('Fetching user from backend...');
+      await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error fetching user from backend:', error);
+      if (error.response && error.response.status === 404) {
+        console.log('User not found in backend. Creating new user...');
+        const displayName = firebaseUser.displayName || '';
+        const [firstName, lastName] = displayName.split(' ');
+        const userData = {
+          firebaseUserId: firebaseUser.uid,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phoneNumber: firebaseUser.phoneNumber || '',
+          photoUrl: firebaseUser.photoURL || '',
+        };
+
+        const roleResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
+          userData,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        if (roleResponse.status !== 204) {
+          throw new Error('Failed to assign role in backend');
+        }
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -275,7 +330,7 @@ export const AuthProvider = ({ children }) => {
     error,
     logOut,
     authenticateWithGoogle,
-    authenticateWithFacebook, // Add this to context
+    authenticateWithFacebook,
     login,
   };
 

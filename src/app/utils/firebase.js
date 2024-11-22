@@ -1,7 +1,7 @@
 // utils/firebase.js
 
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, FacebookAuthProvider } from 'firebase/auth';
 
 // Decode the Base64 encoded JSON string from the environment variable
 const decodedFirebaseConfig = JSON.parse(
@@ -13,5 +13,18 @@ console.log('Firebase Config:', decodedFirebaseConfig); // Debugging line
 // Initialize Firebase app
 const app = initializeApp(decodedFirebaseConfig);
 
-// Export auth for use in other components
-export const auth = getAuth(app);
+// Initialize Firebase Auth
+const auth = getAuth(app);
+
+// Conditionally initialize Facebook Auth Provider
+
+const facebookProvider =
+  process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development'
+    ? new FacebookAuthProvider()
+    : null;
+
+if (facebookProvider) {
+  facebookProvider.addScope('email');
+}
+
+export { auth, facebookProvider };

@@ -1,4 +1,6 @@
-//app/hooks/useRegions.js
+// src/hooks/useRegions.js
+'use client';
+
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 

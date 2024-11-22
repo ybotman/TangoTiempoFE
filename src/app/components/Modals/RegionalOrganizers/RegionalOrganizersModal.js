@@ -42,11 +42,33 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const [currentTab, setCurrentTab] = useState('name');
 
   useEffect(() => {
+    console.log('useEffect triggered. Modal open:', open);
+
     if (open) {
+      console.log('Modal is open. Setting currentTab to "name".');
       setCurrentTab('name');
-      if (user?.backendInfo.regionalOrganizerInfo?.organizerId) {
-        fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+
+      const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
+      console.log('Checking user and organizer ID:', {
+        userExists: !!user,
+        backendInfoExists: !!user?.backendInfo,
+        organizerInfoExists: !!user?.backendInfo?.regionalOrganizerInfo,
+        organizerId,
+      });
+
+      if (organizerId) {
+        console.log('Organizer ID found:', organizerId);
+        try {
+          fetchOrganizerById(organizerId);
+          console.log('fetchOrganizerById successfully called.');
+        } catch (error) {
+          console.error('Error calling fetchOrganizerById:', error);
+        }
+      } else {
+        console.warn('No Organizer ID available. Skipping fetch.');
       }
+    } else {
+      console.log('Modal is not open. Skipping fetch.');
     }
   }, [open, user, fetchOrganizerById]);
 
