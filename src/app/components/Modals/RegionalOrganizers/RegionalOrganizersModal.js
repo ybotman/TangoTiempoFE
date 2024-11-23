@@ -1,5 +1,3 @@
-// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
-
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
@@ -22,6 +20,7 @@ import RegionalOrganizersAddress from './RegionalOrganizersAddress';
 import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
 import RegionalOrganizersImages from './RegionalOrganizersImages';
 import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
+import RegionalOrganizerTypes from './RegionalOrganizersTypes'; // Import the new component
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import modalStyle from '@/components/Styles/modalStyles';
@@ -42,33 +41,20 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const [currentTab, setCurrentTab] = useState('name');
 
   useEffect(() => {
-    console.log('useEffect triggered. Modal open:', open);
-
     if (open) {
-      console.log('Modal is open. Setting currentTab to "name".');
       setCurrentTab('name');
 
       const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
-      console.log('Checking user and organizer ID:', {
-        userExists: !!user,
-        backendInfoExists: !!user?.backendInfo,
-        organizerInfoExists: !!user?.backendInfo?.regionalOrganizerInfo,
-        organizerId,
-      });
 
       if (organizerId) {
-        console.log('Organizer ID found:', organizerId);
         try {
           fetchOrganizerById(organizerId);
-          console.log('fetchOrganizerById successfully called.');
         } catch (error) {
           console.error('Error calling fetchOrganizerById:', error);
         }
       } else {
         console.warn('No Organizer ID available. Skipping fetch.');
       }
-    } else {
-      console.log('Modal is not open. Skipping fetch.');
     }
   }, [open, user, fetchOrganizerById]);
 
@@ -120,6 +106,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
+              <Tab label="Types" value="types" /> {/* New Tab */}
               <Tab label="Delegated" value="delegated" />
               <Tab label="Images" value="images" />
               <Tab label="Profile Images" value="profileImages" />
@@ -148,6 +135,13 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 )}
                 {currentTab === 'address' && (
                   <RegionalOrganizersAddress
+                    organizerId={organizer?._id}
+                    organizer={organizer}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'types' && (
+                  <RegionalOrganizerTypes
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
