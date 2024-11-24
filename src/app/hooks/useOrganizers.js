@@ -11,46 +11,53 @@ export const useOrganizers = () => {
 
   const [organizers, setOrganizers] = useState([]);
   const [organizer, setOrganizer] = useState(null); // Single organizer data
-  const [loading, setLoading] = useState(true);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch organizers based on selected region
   const fetchOrganizers = useCallback(async () => {
     const endpoint = selectedRegionID
       ? `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers?regionID=${selectedRegionID}`
       : `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`;
 
     try {
-      setLoading(true);
+      setFetchLoading(true);
       const response = await axios.get(endpoint);
       setOrganizers(response.data);
-      //console.log('Organizers fetched successfully:', response.data);
+      console.log('Organizers fetched successfully:', response.data);
     } catch (error) {
+      console.error('Error fetching organizers:', error);
       setError(error);
     } finally {
-      setLoading(false);
+      setFetchLoading(false);
     }
   }, [selectedRegionID]);
 
+  // Fetch a single organizer by ID
   const fetchOrganizerById = useCallback(async (organizerId) => {
     console.log('fetchOrganizerById called with organizerId:', organizerId);
     try {
-      setLoading(true);
+      setFetchLoading(true);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
       );
       setOrganizer(response.data);
-      //console.log('Organizer fetched successfully:', response.data);
+      console.log('Organizer fetched successfully:', response.data);
     } catch (fetchError) {
-      console.error('Error fetching organizer:', fetchError); // Use fetchError here
+      console.error('Error fetching organizer:', fetchError);
       setError(fetchError);
     } finally {
-      setLoading(false);
+      setFetchLoading(false);
     }
   }, []);
 
+  // Update an existing organizer
   const updateOrganizer = async (organizerId, updateData) => {
     try {
       console.log('updateOrganizer:', organizerId, updateData);
+      setUpdateLoading(true);
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
         updateData
@@ -61,36 +68,52 @@ export const useOrganizers = () => {
     } catch (updateError) {
       console.error('Error updating organizer:', updateError);
       throw updateError;
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
+  // Create a new organizer
+  const createOrganizer = async (organizerData) => {
+    try {
+      setCreateLoading(true);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
+        organizerData
+      );
+      console.log('Organizer created successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating organizer:', error);
+      throw error;
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  // Effect to fetch organizers when the selected region changes
   useEffect(() => {
     console.log('useOrganizers useEffect triggered');
     console.log('selectedRegionID:', selectedRegionID);
     if (!selectedRegionID) {
       console.log('No region selected. Skipping fetchOrganizers.');
-      return; // Do nothing if there's no region
+      setFetchLoading(false); // Ensure loading is set to false
+      return;
     }
 
-    if (selectedRegionID) {
-      console.log(
-        'Calling fetchOrganizers with selectedRegionID:',
-        selectedRegionID
-      );
-    } else {
-      console.warn('Calling fetchOrganizers without a selectedRegionID');
-    }
-
-    fetchOrganizers(); // This is being triggered automatically here.
+    fetchOrganizers();
   }, [fetchOrganizers]);
 
   return {
     organizers,
     organizer,
     setOrganizer,
-    loading,
+    fetchLoading,
+    createLoading,
+    updateLoading,
     error,
     fetchOrganizerById,
     updateOrganizer,
+    createOrganizer,
   };
 };

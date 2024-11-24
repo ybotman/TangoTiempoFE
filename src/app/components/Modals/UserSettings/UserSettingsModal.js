@@ -5,10 +5,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
-import UserSettingsEvents from '@/components/Modals/UserSettings/UserSettingsEvents';
-import UserSettingsOrganizers from '@/components/Modals/UserSettings/UserSettingsOrganizers';
+import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
 import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
-import UserSettingsOther from '@/components/Modals/UserSettings/UserSettingsOther';
+import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 
@@ -56,10 +55,9 @@ const UserSettingsModal = ({ open, onClose }) => {
           variant="scrollable"
         >
           <Tab label="Name" value="name" />
-          <Tab label="Events" value="events" />
-          <Tab label="Organizer" value="organizer" />
+          <Tab label="Favs" value="favorites" />
           <Tab label="Notifications" value="notifications" />
-          <Tab label="Other" value="other" />
+          <Tab label="Apply" value="apply" />
         </Tabs>
 
         {/* Content Based on Selected Tab */}
@@ -75,17 +73,14 @@ const UserSettingsModal = ({ open, onClose }) => {
                 updateUserData={updateUserData}
               />
             )}
-            {currentTab === 'events' && (
-              <UserSettingsEvents userData={userData} />
-            )}
-            {currentTab === 'organizer' && (
-              <UserSettingsOrganizers userData={userData} />
+            {currentTab === 'favorites' && (
+              <UserSettingsFavorites userData={userData} />
             )}
             {currentTab === 'notifications' && (
               <UserSettingsNotifications userData={userData} />
             )}
-            {currentTab === 'other' && (
-              <UserSettingsOther userData={userData} />
+            {currentTab === 'apply' && (
+              <UserSettingsApply userData={userData} />
             )}
           </>
         )}
