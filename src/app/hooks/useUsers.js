@@ -1,4 +1,3 @@
-// src/hooks/useUsers.js
 import { useCallback, useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -32,29 +31,40 @@ export const useUsers = () => {
     }
   }, [user?.uid]);
 
-  const updateUserData = async (updatedData) => {
-    if (!user?.uid) return;
-
-    try {
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
-        {
+  const updateUserData = useCallback(
+    async (updatedData) => {
+      if (!user?.uid) {
+        console.error('User is not authenticated.');
+        return;
+      }
+      try {
+        const dataToUpdate = {
           firebaseUserId: user.uid,
           ...updatedData,
-        }
-      );
-      // Update local state with the updated data from the server
-      setUserData(response.data);
-      console.log('User data updated successfully');
-    } catch (updateError) {
-      console.error('Error updating user data:', updateError);
-      throw updateError;
-    }
-  };
+        };
+
+        const response = await axios.put(
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
+          dataToUpdate
+        );
+        setUserData(response.data.updatedUser);
+        console.log('User data updated successfully');
+      } catch (error) {
+        console.error('Error updating user data:', error);
+        throw error;
+      }
+    },
+    [setUserData, user?.uid]
+  );
 
   useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+    if (user?.uid) {
+      fetchUserData();
+    } else {
+      console.log('User not available yet.');
+      setLoading(false);
+    }
+  }, [fetchUserData, user?.uid]);
 
   return { userData, loading, updateUserData };
 };

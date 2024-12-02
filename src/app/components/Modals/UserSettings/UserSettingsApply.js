@@ -1,8 +1,6 @@
-// src/components/Modals/UserSettings/UserSettingsApply.js
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -25,18 +23,30 @@ const UserSettingsApply = () => {
   const { user } = auth || {};
   const { userData, loading: userDataLoading, updateUserData } = useUsers();
 
-  const { loading: rolesLoading, getRoleByName } = useRoles();
-  const { createOrganizer, createLoading } = useOrganizers();
+  const { roles, loading: rolesLoading } = useRoles();
+  const { createOrganizer, createLoading, fetchOrganizerByFirebaseUserId } =
+    useOrganizers();
 
   const [applicationStatus, setApplicationStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [isApplied, setIsApplied] = useState(false);
 
-  useEffect(() => {
-    console.log('UserData:', userData);
-    if (userData?.regionalOrganizerInfo?.isApproved) {
-      setIsApplied(true);
-    }
+  // Memoize the RegionalOrganizer role
+  const regionalOrganizerRole = useMemo(() => {
+    return roles?.find((role) => role.roleName === 'RegionalOrganizer');
+  }, [roles]);
+
+  // Determine if the user already has the role
+  const hasRole = useMemo(() => {
+    return (
+      regionalOrganizerRole &&
+      Array.isArray(userData?.roleIds) &&
+      userData.roleIds.includes(regionalOrganizerRole._id)
+    );
+  }, [userData, regionalOrganizerRole]);
+
+  // Check if the user has applied (i.e., has an organizerId)
+  const isApplied = useMemo(() => {
+    return Boolean(userData?.regionalOrganizerInfo?.organizerId);
   }, [userData]);
 
   const handleApply = async () => {
@@ -44,65 +54,86 @@ const UserSettingsApply = () => {
     setErrorMessage('');
 
     try {
-      // Step 1: Get the RegionalOrganizer role ID
-      const regionalOrganizerRole = getRoleByName('RegionalOrganizer');
       if (!regionalOrganizerRole) {
         throw new Error('RegionalOrganizer role not found.');
       }
 
-      // Step 2: Add RegionalOrganizer role to user's roleIds
-      const updatedRoleIds = [...userData.roleIds, regionalOrganizerRole._id];
+      if (!hasRole) {
+        const currentRoleIds = userData.roleIds.map((role) =>
+          typeof role === 'object' && role._id ? String(role._id) : String(role)
+        );
 
-      // Remove duplicates if any
-      const uniqueRoleIds = [...new Set(updatedRoleIds.map(String))];
+        const updatedRoleIds = [
+          ...currentRoleIds,
+          String(regionalOrganizerRole._id),
+        ];
 
-      await updateUserData({
-        roleIds: uniqueRoleIds,
-      });
+        const uniqueRoleIds = [...new Set(updatedRoleIds)];
 
-      // Step 3: Create a new organizer with default values
-      const organizerData = {
-        linkedUserLogin: userData._id,
-        firebaseUserId: user.uid,
-        name: userData.localUserInfo.firstName || 'Default Name',
-        fullName:
-          `${userData.localUserInfo.firstName || ''} ${userData.localUserInfo.lastName || ''}`.trim(),
-        shortName: (userData.localUserInfo.firstName || 'Default')
-          .substring(0, 9)
-          .toUpperCase(),
-        description: '',
-        publicContactInfo: {},
-        organizerRegion:
-          userData.localUserInfo.userDefaults?.region || 'defaultRegionId',
-        isEnabled: false,
-        organizerTypes: {
-          isEventOrganizer: true,
-        },
-        // Add any other default values as needed
-      };
+        await updateUserData({
+          roleIds: uniqueRoleIds,
+        });
+      }
 
-      const newOrganizer = await createOrganizer(organizerData);
+      let organizerId = userData?.regionalOrganizerInfo?.organizerId;
 
-      // Step 4: Update userLogins.regionalOrganizerInfo.organizerId
-      await updateUserData({
-        regionalOrganizerInfo: {
-          ...userData.regionalOrganizerInfo,
-          organizerId: newOrganizer._id,
-          isApproved: true,
-        },
-      });
+      if (!organizerId) {
+        // Try to find existing organizer
+        const existingOrganizer = await fetchOrganizerByFirebaseUserId(
+          user.uid
+        );
+        if (existingOrganizer) {
+          organizerId = existingOrganizer._id;
+        } else {
+          // Prepare default values
+          const firstName = userData.localUserInfo?.firstName || 'Default';
+          const lastName = userData.localUserInfo?.lastName || 'Name';
+          const fullName = `${firstName} ${lastName}`.trim() || 'Change this';
+
+          const organizerData = {
+            linkedUserLogin: userData._id,
+            firebaseUserId: user.uid,
+            name: firstName,
+            fullName: fullName,
+            shortName: firstName.substring(0, 9).toUpperCase(),
+            description: '',
+            publicContactInfo: {},
+            organizerRegion:
+              userData.localUserInfo?.userDefaults?.region ||
+              '66c4d99042ec462ea22484bd', // Default region ID
+            isEnabled: false,
+            organizerTypes: {
+              isEventOrganizer: true,
+            },
+          };
+
+          const newOrganizer = await createOrganizer(organizerData);
+          organizerId = newOrganizer._id;
+        }
+
+        // Update userLogins.regionalOrganizerInfo.organizerId
+        await updateUserData({
+          regionalOrganizerInfo: {
+            ...(userData.regionalOrganizerInfo || {}),
+            organizerId: organizerId,
+            isApproved: false,
+          },
+        });
+      }
 
       setApplicationStatus('success');
-      setIsApplied(true);
     } catch (error) {
       console.error('Error during application process:', error);
-      setErrorMessage(error.message || 'An error occurred during application.');
+      setErrorMessage(
+        error.response?.data?.message ||
+          error.message ||
+          'An error occurred during application.'
+      );
       setApplicationStatus('error');
     }
   };
 
-  // Check if userData and roles are still loading
-  if (rolesLoading || userDataLoading) {
+  if (rolesLoading || userDataLoading || createLoading) {
     return (
       <Box
         display="flex"
@@ -111,75 +142,42 @@ const UserSettingsApply = () => {
         sx={{ mt: 2 }}
       >
         <CircularProgress />
-      </Box>
-    );
-  }
-
-  // Check if the application is in loading state
-  if (applicationStatus === 'loading' || createLoading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        sx={{ mt: 2 }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  // Display error message if any
-  if (errorMessage) {
-    return (
-      <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
-        <Alert severity="error">{errorMessage}</Alert>
       </Box>
     );
   }
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Apply to Become a Regional Organizer
-      </Typography>
-
-      {isApplied ? (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          You have already applied and are approved as a Regional Organizer.
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage}
         </Alert>
-      ) : (
-        <>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            As a Regional Organizer, you will have the ability to submit events
-            and manage your organizer profile.
-          </Typography>
-
-          {applicationStatus === 'success' && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              Your application was successful! You can now manage your organizer
-              profile.
-            </Alert>
-          )}
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleApply}
-            disabled={
-              applicationStatus === 'loading' || applicationStatus === 'success'
-            }
-          >
-            {applicationStatus === 'loading' ? 'Applying...' : 'Apply Now'}
-          </Button>
-        </>
       )}
+      {applicationStatus === 'success' && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          Your application has been submitted successfully!
+        </Alert>
+      )}
+      <Typography variant="h6" gutterBottom>
+        Apply for Regional Organizer
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        By applying, you can manage events in your region.
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleApply}
+        disabled={hasRole || isApplied || applicationStatus === 'loading'}
+      >
+        {applicationStatus === 'loading'
+          ? 'Applying...'
+          : hasRole || isApplied
+            ? 'Already Applied'
+            : 'Apply'}
+      </Button>
     </Box>
   );
-};
-
-UserSettingsApply.propTypes = {
-  // No props are used
 };
 
 export default UserSettingsApply;

@@ -53,6 +53,23 @@ export const useOrganizers = () => {
     }
   }, []);
 
+  // Fetch an organizer by firebaseUserId
+  const fetchOrganizerByFirebaseUserId = useCallback(async (firebaseUserId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/firebase/${firebaseUserId}`
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null; // Organizer not found
+      } else {
+        console.error('Error fetching organizer by firebaseUserId:', error);
+        throw error;
+      }
+    }
+  }, []);
+
   // Update an existing organizer
   const updateOrganizer = async (organizerId, updateData) => {
     try {
@@ -113,6 +130,7 @@ export const useOrganizers = () => {
     updateLoading,
     error,
     fetchOrganizerById,
+    fetchOrganizerByFirebaseUserId,
     updateOrganizer,
     createOrganizer,
   };

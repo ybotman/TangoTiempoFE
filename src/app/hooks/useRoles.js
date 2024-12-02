@@ -1,5 +1,5 @@
 // src/hooks/useRoles.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 export const useRoles = () => {
@@ -7,7 +7,7 @@ export const useRoles = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
       console.log(
@@ -26,15 +26,18 @@ export const useRoles = () => {
       setLoading(false);
       console.log('Finished fetching roles. Loading is now false.');
     }
-  };
+  }, []);
 
-  const getRoleByName = (roleName) => {
-    return roles.find((role) => role.roleName === roleName);
-  };
+  const getRoleByName = useCallback(
+    (roleName) => {
+      return roles.find((role) => role.roleName === roleName);
+    },
+    [roles]
+  );
 
   useEffect(() => {
     fetchRoles();
-  }, []);
+  }, [fetchRoles]);
 
   return {
     roles,

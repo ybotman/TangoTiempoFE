@@ -25,11 +25,10 @@ const modalStyle = {
 
 const UserSettingsModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
-  const { user } = auth || {}; // Destructure user only if auth is defined
+  const { user } = auth || {};
   const { userData, loading, error, updateUserData } = useUsers();
-  const [currentTab, setCurrentTab] = useState('name'); // Manage active tab state
+  const [currentTab, setCurrentTab] = useState('name');
 
-  // Log state if user is missing
   useEffect(() => {
     if (!user) {
       console.log(
@@ -74,10 +73,16 @@ const UserSettingsModal = ({ open, onClose }) => {
               />
             )}
             {currentTab === 'favorites' && (
-              <UserSettingsFavorites userData={userData} />
+              <UserSettingsFavorites
+                userData={userData}
+                updateUserData={updateUserData}
+              />
             )}
             {currentTab === 'notifications' && (
-              <UserSettingsNotifications userData={userData} />
+              <UserSettingsNotifications
+                userData={userData}
+                updateUserData={updateUserData}
+              />
             )}
             {currentTab === 'apply' && (
               <UserSettingsApply userData={userData} />
