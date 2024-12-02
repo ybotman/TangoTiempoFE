@@ -29,6 +29,8 @@
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/rrule": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
+    "@microsoft/applicationinsights-react-js": "^17.3.4",
+    "@microsoft/applicationinsights-web": "^3.3.4",
     "@mui/icons-material": "^6.1.5",
     "@mui/material": "^6.1.5",
     "@mui/system": "^6.1.5",
