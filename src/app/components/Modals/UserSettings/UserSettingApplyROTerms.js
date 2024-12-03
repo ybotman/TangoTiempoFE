@@ -23,7 +23,7 @@ const ROTermsModal = ({ open, onClose, onAgree }) => {
           Regional Organizer Terms
         </Typography>
         <Typography variant="body2" gutterBottom>
-          Please read and accept the terms of use to proceed.
+          Please read and accept the terms of use to proceed. TERM 1 TERM 2
         </Typography>
         {/* Include actual terms content here */}
         <Box display="flex" justifyContent="space-between" sx={{ mt: 2 }}>

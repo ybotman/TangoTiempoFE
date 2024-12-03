@@ -1,6 +1,5 @@
 // UserSettingsApply.js
 'use client';
-
 import React, { useState, useMemo } from 'react';
 import {
   Box,
@@ -26,6 +25,7 @@ const UserSettingsApply = () => {
   const [applicationStatus, setApplicationStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [showTerms, setShowTerms] = useState(false);
+  const [restartMessage, setRestartMessage] = useState(false);
 
   const regionalOrganizerRole = useMemo(() => {
     return roles?.find((role) => role.roleName === 'RegionalOrganizer');
@@ -42,7 +42,6 @@ const UserSettingsApply = () => {
   }, [userData, regionalOrganizerRole]);
 
   const isApproved = userData?.regionalOrganizerInfo?.isApproved || false;
-  //  const isEnabled = userData?.regionalOrganizerInfo?.isEnabled || false;
   const hasOrganizerId = !!userData?.regionalOrganizerInfo?.organizerId;
 
   const handleApply = async () => {
@@ -54,7 +53,6 @@ const UserSettingsApply = () => {
         throw new Error('RegionalOrganizer role not found.');
       }
 
-      // Add the RegionalOrganizer role if not already present
       if (!hasRole) {
         const existingRoleIds = (userData.roleIds || []).map((role) =>
           role._id ? String(role._id) : String(role)
@@ -66,17 +64,15 @@ const UserSettingsApply = () => {
         await updateUserData({ roleIds: updatedRoleIds });
       }
 
-      // Create a new Organizer with default values if not already created
       if (!hasOrganizerId) {
         const organizerData = {
           linkedUserLogin: userData._id,
           firebaseUserId: userData.firebaseUserId,
           name: 'New Organizer',
           fullName: 'New Organizer',
-          // 'shortName' will use the default value from the model
           organizerRegion:
             userData.localUserInfo?.userDefaults?.region ||
-            '66c4d99042ec462ea22484bd', // Default region ID
+            '66c4d99042ec462ea22484bd',
           isActive: true,
           isEnabled: true,
           wantRender: true,
@@ -92,7 +88,6 @@ const UserSettingsApply = () => {
 
         const newOrganizer = await createOrganizer(organizerData);
 
-        // Update user's regionalOrganizerInfo with the new organizerId
         const updatedRegionalInfo = {
           organizerId: newOrganizer._id,
           isApproved: false,
@@ -106,7 +101,7 @@ const UserSettingsApply = () => {
       }
 
       setApplicationStatus('success');
-      setShowTerms(true); // Show Terms Modal
+      setShowTerms(true);
     } catch (error) {
       console.error('Error during application process:', error);
       setErrorMessage(
@@ -120,7 +115,6 @@ const UserSettingsApply = () => {
 
   const handleAgreeToTerms = async (agreed) => {
     try {
-      // Merge existing regionalOrganizerInfo with new data
       const updatedRegionalInfo = {
         ...userData.regionalOrganizerInfo,
         isApproved: agreed,
@@ -130,7 +124,14 @@ const UserSettingsApply = () => {
         regionalOrganizerInfo: updatedRegionalInfo,
       });
 
-      setShowTerms(false); // Close the modal
+      setShowTerms(false);
+
+      if (agreed) {
+        setRestartMessage(true);
+        setTimeout(() => {
+          window.location.reload(); // Force app restart
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error updating terms agreement:', error);
       setErrorMessage('Failed to update terms agreement.');
@@ -142,6 +143,11 @@ const UserSettingsApply = () => {
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {errorMessage}
+        </Alert>
+      )}
+      {restartMessage && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Restarting App for Organizer Role...
         </Alert>
       )}
       {applicationStatus === 'success' && (

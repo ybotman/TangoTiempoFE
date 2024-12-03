@@ -117,7 +117,7 @@ const RegionalOrganizersDelegated = ({
               <Box flexGrow={1}>
                 <Typography variant="body1">
                   <strong>Full Name:</strong>{' '}
-                  {org.fullName || org.name || 'No Full Name Available'}
+                  {org.fullName || 'No Full Name Available'}
                 </Typography>
                 <Typography variant="body1">
                   <strong>Short Name:</strong>{' '}
@@ -154,7 +154,7 @@ const RegionalOrganizersDelegated = ({
           >
             {availableOrganizers.map((org) => (
               <MenuItem key={org._id} value={org._id}>
-                {org.fullName || org.name}
+                {org.fullName}
               </MenuItem>
             ))}
           </Select>
