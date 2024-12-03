@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
-  Switch,
   Tooltip,
   IconButton,
   useMediaQuery,
@@ -32,9 +31,8 @@ const RegionalOrganizerTypes = ({
     isDJ: false,
     isOrchestra: false,
   });
-  const [isEnabled, setIsEnabled] = useState(false);
+
   const [initialTypes, setInitialTypes] = useState({});
-  const [initialIsEnabled, setInitialIsEnabled] = useState(false);
 
   useEffect(() => {
     if (organizer) {
@@ -47,7 +45,6 @@ const RegionalOrganizerTypes = ({
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
       });
-      setIsEnabled(organizer.isEnabled ?? false);
 
       setInitialTypes({
         isEventOrganizer: organizerTypes.isEventOrganizer ?? true,
@@ -57,7 +54,6 @@ const RegionalOrganizerTypes = ({
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
       });
-      setInitialIsEnabled(organizer.isEnabled ?? false);
     }
   }, [organizer]);
 
@@ -75,24 +71,16 @@ const RegionalOrganizerTypes = ({
     }));
   };
 
-  const handleIsEnabledChange = (event) => {
-    setIsEnabled(event.target.checked);
-  };
-
-  const isSaveDisabled =
-    JSON.stringify(types) === JSON.stringify(initialTypes) &&
-    isEnabled === initialIsEnabled;
+  const isSaveDisabled = JSON.stringify(types) === JSON.stringify(initialTypes);
 
   const handleSave = async () => {
     const updateData = {
       organizerTypes: types,
-      isEnabled,
     };
 
     try {
       await updateOrganizer(organizerId, updateData);
       setInitialTypes(types);
-      setInitialIsEnabled(isEnabled);
       console.log('Types updated successfully.');
     } catch (error) {
       console.error('Failed to update types:', error);
@@ -141,12 +129,12 @@ const RegionalOrganizerTypes = ({
         {renderTypeCheckbox(
           'Event Organizer',
           'isEventOrganizer',
-          'Is allowed to Manage Events in TangoTiempo like milongas,festivals, classes, etc.'
+          'Is allowed to Manage Events in TangoTiempo like milongas, festivals, classes, etc.'
         )}
         {renderTypeCheckbox(
           'Venue',
           'isVenue',
-          'The adress provided, will be listed for OTHER Organizers to select for their calendar events.'
+          'The address provided will be listed for OTHER Organizers to select for their calendar events.'
         )}
         {renderTypeCheckbox(
           'Teacher',
@@ -162,31 +150,8 @@ const RegionalOrganizerTypes = ({
         {renderTypeCheckbox(
           'Orchestra',
           'isOrchestra',
-          'Performs live Argentine tango music.  Will be listed in the Orchestras directory.'
+          'Performs live Argentine tango music. Will be listed in the Orchestras directory.'
         )}
-      </Box>
-
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{
-          p: 2,
-          borderRadius: 1,
-          backgroundColor: isEnabled ? '#e0f7e9' : '#fdecea',
-          mb: 2,
-        }}
-      >
-        <Typography variant="subtitle1">
-          {isEnabled
-            ? 'I am ready. Enabled Organzier'
-            : 'Organizer Disabled (not Enabled)'}
-        </Typography>
-        <Switch
-          checked={isEnabled}
-          onChange={handleIsEnabledChange}
-          color="primary"
-        />
       </Box>
 
       <Button
@@ -213,7 +178,6 @@ RegionalOrganizerTypes.propTypes = {
       isDJ: PropTypes.bool,
       isOrchestra: PropTypes.bool,
     }),
-    isEnabled: PropTypes.bool,
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
 };

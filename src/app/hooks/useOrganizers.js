@@ -91,7 +91,7 @@ export const useOrganizers = () => {
   };
 
   // Create a new organizer
-  const createOrganizer = async (organizerData) => {
+  const createOrganizer = useCallback(async (organizerData) => {
     try {
       setCreateLoading(true);
       const response = await axios.post(
@@ -106,7 +106,7 @@ export const useOrganizers = () => {
     } finally {
       setCreateLoading(false);
     }
-  };
+  }, []);
 
   // Effect to fetch organizers when the selected region changes
   useEffect(() => {

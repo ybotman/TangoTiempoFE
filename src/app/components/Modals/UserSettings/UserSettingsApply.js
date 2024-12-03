@@ -1,53 +1,49 @@
+// UserSettingsApply.js
 'use client';
 
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
   Button,
-  CircularProgress,
+  Alert,
   useMediaQuery,
   useTheme,
-  Alert,
 } from '@mui/material';
-import { AuthContext } from '@/contexts/AuthContext';
-import { useRoles } from '@/hooks/useRoles';
 import { useUsers } from '@/hooks/useUsers';
+import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
+import ROTermsModal from './UserSettingApplyROTerms.js';
 
 const UserSettingsApply = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const auth = useContext(AuthContext);
-  const { user } = auth || {};
-  const { userData, loading: userDataLoading, updateUserData } = useUsers();
-
-  const { roles, loading: rolesLoading } = useRoles();
-  const { createOrganizer, createLoading, fetchOrganizerByFirebaseUserId } =
-    useOrganizers();
+  const { userData, updateUserData } = useUsers();
+  const { roles } = useRoles();
+  const { createOrganizer } = useOrganizers();
 
   const [applicationStatus, setApplicationStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
 
-  // Memoize the RegionalOrganizer role
   const regionalOrganizerRole = useMemo(() => {
     return roles?.find((role) => role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
-  // Determine if the user already has the role
   const hasRole = useMemo(() => {
+    const userRoleIds = (userData?.roleIds || []).map((role) =>
+      role._id ? String(role._id) : String(role)
+    );
     return (
       regionalOrganizerRole &&
-      Array.isArray(userData?.roleIds) &&
-      userData.roleIds.includes(regionalOrganizerRole._id)
+      userRoleIds.includes(String(regionalOrganizerRole._id))
     );
   }, [userData, regionalOrganizerRole]);
 
-  // Check if the user has applied (i.e., has an organizerId)
-  const isApplied = useMemo(() => {
-    return Boolean(userData?.regionalOrganizerInfo?.organizerId);
-  }, [userData]);
+  const isApproved = userData?.regionalOrganizerInfo?.isApproved || false;
+  //  const isEnabled = userData?.regionalOrganizerInfo?.isEnabled || false;
+  const hasOrganizerId = !!userData?.regionalOrganizerInfo?.organizerId;
 
   const handleApply = async () => {
     setApplicationStatus('loading');
@@ -58,70 +54,59 @@ const UserSettingsApply = () => {
         throw new Error('RegionalOrganizer role not found.');
       }
 
+      // Add the RegionalOrganizer role if not already present
       if (!hasRole) {
-        const currentRoleIds = userData.roleIds.map((role) =>
-          typeof role === 'object' && role._id ? String(role._id) : String(role)
+        const existingRoleIds = (userData.roleIds || []).map((role) =>
+          role._id ? String(role._id) : String(role)
         );
-
         const updatedRoleIds = [
-          ...currentRoleIds,
-          String(regionalOrganizerRole._id),
+          ...new Set([...existingRoleIds, String(regionalOrganizerRole._id)]),
         ];
 
-        const uniqueRoleIds = [...new Set(updatedRoleIds)];
-
-        await updateUserData({
-          roleIds: uniqueRoleIds,
-        });
+        await updateUserData({ roleIds: updatedRoleIds });
       }
 
-      let organizerId = userData?.regionalOrganizerInfo?.organizerId;
-
-      if (!organizerId) {
-        // Try to find existing organizer
-        const existingOrganizer = await fetchOrganizerByFirebaseUserId(
-          user.uid
-        );
-        if (existingOrganizer) {
-          organizerId = existingOrganizer._id;
-        } else {
-          // Prepare default values
-          const firstName = userData.localUserInfo?.firstName || 'Default';
-          const lastName = userData.localUserInfo?.lastName || 'Name';
-          const fullName = `${firstName} ${lastName}`.trim() || 'Change this';
-
-          const organizerData = {
-            linkedUserLogin: userData._id,
-            firebaseUserId: user.uid,
-            name: firstName,
-            fullName: fullName,
-            shortName: firstName.substring(0, 9).toUpperCase(),
-            description: '',
-            publicContactInfo: {},
-            organizerRegion:
-              userData.localUserInfo?.userDefaults?.region ||
-              '66c4d99042ec462ea22484bd', // Default region ID
-            isEnabled: false,
-            organizerTypes: {
-              isEventOrganizer: true,
-            },
-          };
-
-          const newOrganizer = await createOrganizer(organizerData);
-          organizerId = newOrganizer._id;
-        }
-
-        // Update userLogins.regionalOrganizerInfo.organizerId
-        await updateUserData({
-          regionalOrganizerInfo: {
-            ...(userData.regionalOrganizerInfo || {}),
-            organizerId: organizerId,
-            isApproved: false,
+      // Create a new Organizer with default values if not already created
+      if (!hasOrganizerId) {
+        const organizerData = {
+          linkedUserLogin: userData._id,
+          firebaseUserId: userData.firebaseUserId,
+          name: 'New Organizer',
+          fullName: 'New Organizer',
+          // 'shortName' will use the default value from the model
+          organizerRegion:
+            userData.localUserInfo?.userDefaults?.region ||
+            '66c4d99042ec462ea22484bd', // Default region ID
+          isActive: true,
+          isEnabled: true,
+          wantRender: true,
+          organizerTypes: {
+            isEventOrganizer: true,
+            isVenue: false,
+            isTeacher: false,
+            isMaestro: false,
+            isDJ: false,
+            isOrchestra: false,
           },
+        };
+
+        const newOrganizer = await createOrganizer(organizerData);
+
+        // Update user's regionalOrganizerInfo with the new organizerId
+        const updatedRegionalInfo = {
+          organizerId: newOrganizer._id,
+          isApproved: false,
+          isEnabled: true,
+          isActive: true,
+        };
+
+        await updateUserData({
+          regionalOrganizerInfo: updatedRegionalInfo,
         });
       }
 
       setApplicationStatus('success');
+      setShowTerms(true); // Show Terms Modal
     } catch (error) {
       console.error('Error during application process:', error);
       setErrorMessage(
@@ -133,18 +118,24 @@ const UserSettingsApply = () => {
     }
   };
 
-  if (rolesLoading || userDataLoading || createLoading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        sx={{ mt: 2 }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const handleAgreeToTerms = async (agreed) => {
+    try {
+      // Merge existing regionalOrganizerInfo with new data
+      const updatedRegionalInfo = {
+        ...userData.regionalOrganizerInfo,
+        isApproved: agreed,
+      };
+
+      await updateUserData({
+        regionalOrganizerInfo: updatedRegionalInfo,
+      });
+
+      setShowTerms(false); // Close the modal
+    } catch (error) {
+      console.error('Error updating terms agreement:', error);
+      setErrorMessage('Failed to update terms agreement.');
+    }
+  };
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
@@ -164,18 +155,36 @@ const UserSettingsApply = () => {
       <Typography variant="body1" gutterBottom>
         By applying, you can manage events in your region.
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleApply}
-        disabled={hasRole || isApplied || applicationStatus === 'loading'}
-      >
-        {applicationStatus === 'loading'
-          ? 'Applying...'
-          : hasRole || isApplied
-            ? 'Already Applied'
-            : 'Apply'}
-      </Button>
+      {!hasOrganizerId && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleApply}
+          disabled={applicationStatus === 'loading'}
+        >
+          {applicationStatus === 'loading' ? 'Applying...' : 'Apply'}
+        </Button>
+      )}
+      {hasOrganizerId && !isApproved && (
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => setShowTerms(true)}
+        >
+          Accept Terms of Use
+        </Button>
+      )}
+      {hasOrganizerId && isApproved && (
+        <Typography variant="body2" color="textSecondary">
+          You have successfully applied as a Regional Organizer.
+        </Typography>
+      )}
+
+      <ROTermsModal
+        open={showTerms}
+        onClose={() => handleAgreeToTerms(false)}
+        onAgree={() => handleAgreeToTerms(true)}
+      />
     </Box>
   );
 };
