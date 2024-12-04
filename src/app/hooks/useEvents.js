@@ -16,24 +16,23 @@ export function useEvents(
       return;
     }
     try {
+      const params = {
+        active: true,
+        calculatedRegionName: selectedRegion,
+        calculatedDivisionName: selectedDivision || undefined,
+        calculatedCityName: selectedCity || undefined,
+        start: calendarStart,
+        end: calendarEnd,
+      };
+      console.log('Fetching events with params:', params);
+
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`,
-        {
-          params: {
-            active: true,
-            calculatedRegionName: selectedRegion,
-            calculatedDivisionName: selectedDivision || undefined,
-            calculatedCityName: selectedCity || undefined,
-            start: calendarStart,
-            end: calendarEnd,
-          },
-        }
+        { params }
       );
-      //  console.log('useEvents-> Events fetched:', response.data);
-
       setEvents(response.data);
     } catch (error) {
-      console.error('useEvents-> Error fetching events:', error);
+      console.error('Error fetching events:', error);
       setEvents([]);
     }
   }, [

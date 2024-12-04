@@ -10,21 +10,16 @@ export const useRoles = () => {
   const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
-      console.log(
-        'Fetching roles from:',
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/roles`
-      );
+
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/roles`
       );
-      console.log('Roles fetched:', response.data);
       setRoles(response.data);
     } catch (error) {
       console.error('Error fetching roles:', error);
       setError(error);
     } finally {
       setLoading(false);
-      console.log('Finished fetching roles. Loading is now false.');
     }
   }, []);
 

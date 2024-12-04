@@ -32,8 +32,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     console.log('AuthProvider useEffect called'); // Debugging
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log('onAuthStateChanged triggered');
-      const startTime = Date.now();
+      //  console.log('onAuthStateChanged triggered');
+      // const startTime = Date.now();
 
       if (currentUser) {
         console.log('User is logged in:', currentUser.uid);
@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       setLoading(false);
-      const endTime = Date.now();
-      console.log(`Auth state change handling took ${endTime - startTime} ms`);
+      //  const endTime = Date.now();
+      //  console.log(`Auth state change handling took ${endTime - startTime} ms`);
     });
 
     return () => unsubscribe();
@@ -54,8 +54,8 @@ export const AuthProvider = ({ children }) => {
 
   // Function to fetch and set combined user data
   const setUserData = async (firebaseUser) => {
-    console.log('setUserData called');
-    const startTime = Date.now();
+    // console.log('setUserData called');
+    // const startTime = Date.now();
 
     try {
       const idToken = await firebaseUser.getIdToken();
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      console.log('Fetched user data from backend');
+      //  console.log('Fetched user data from backend');
 
       const backendInfo = response.data;
 
@@ -91,8 +91,8 @@ export const AuthProvider = ({ children }) => {
       setSelectedRole('');
     }
 
-    const endTime = Date.now();
-    console.log(`setUserData execution time: ${endTime - startTime} ms`);
+    // const endTime = Date.now();
+    // console.log(`setUserData execution time: ${endTime - startTime} ms`);
   };
 
   // Authenticate with Google

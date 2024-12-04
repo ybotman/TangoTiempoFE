@@ -23,7 +23,7 @@ export const RegionsProvider = ({ children }) => {
     }
   }, [regionsData]);
 
-  //console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
+  console.log('RegionsProvider rendered', selectedRegion, selectedRegionID);
   return (
     <RegionsContext.Provider
       value={{

@@ -29,7 +29,7 @@ axios
     transformedEvents.forEach((event) => {
       // Insert event into your calendar
       // calendar.addEvent(event); // Assuming you have a method to add events to the calendar
-      console.log('Event inserted:', event); // Added for eslint error
+      //  console.log('Event inserted:', event); // Added for eslint error
     });
   })
   .catch((error) => {

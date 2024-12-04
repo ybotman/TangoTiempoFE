@@ -26,7 +26,7 @@ export const useOrganizers = () => {
       setFetchLoading(true);
       const response = await axios.get(endpoint);
       setOrganizers(response.data);
-      console.log('Organizers fetched successfully:', response.data);
+      // console.log('Organizers fetched successfully:', response.data);
     } catch (error) {
       console.error('Error fetching organizers:', error);
       setError(error);
@@ -37,14 +37,14 @@ export const useOrganizers = () => {
 
   // Fetch a single organizer by ID
   const fetchOrganizerById = useCallback(async (organizerId) => {
-    console.log('fetchOrganizerById called with organizerId:', organizerId);
+    // console.log('fetchOrganizerById called with organizerId:', organizerId);
     try {
       setFetchLoading(true);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
       );
       setOrganizer(response.data);
-      console.log('Organizer fetched successfully:', response.data);
+      // console.log('Organizer fetched successfully:', response.data);
     } catch (fetchError) {
       console.error('Error fetching organizer:', fetchError);
       setError(fetchError);
@@ -73,13 +73,13 @@ export const useOrganizers = () => {
   // Update an existing organizer
   const updateOrganizer = async (organizerId, updateData) => {
     try {
-      console.log('updateOrganizer:', organizerId, updateData);
+      // console.log('updateOrganizer:', organizerId, updateData);
       setUpdateLoading(true);
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
         updateData
       );
-      console.log('Organizer updated successfully:', response.data);
+      // console.log('Organizer updated successfully:', response.data);
       setOrganizer(response.data); // Update organizer state with response data
       return response.data;
     } catch (updateError) {
@@ -98,7 +98,7 @@ export const useOrganizers = () => {
         `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
         organizerData
       );
-      console.log('Organizer created successfully:', response.data);
+      // console.log('Organizer created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating organizer:', error);
@@ -110,8 +110,8 @@ export const useOrganizers = () => {
 
   // Effect to fetch organizers when the selected region changes
   useEffect(() => {
-    console.log('useOrganizers useEffect triggered');
-    console.log('selectedRegionID:', selectedRegionID);
+    // console.log('useOrganizers useEffect triggered');
+    // console.log('selectedRegionID:', selectedRegionID);
     if (!selectedRegionID) {
       console.log('No region selected. Skipping fetchOrganizers.');
       setFetchLoading(false); // Ensure loading is set to false

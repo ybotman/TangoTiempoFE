@@ -72,7 +72,7 @@ const RegionalOrganizersAddress = ({
     };
     try {
       await updateOrganizer(organizerId, updateData);
-      console.log('Address updated successfully.');
+      //console.log('Address updated successfully.');
     } catch (error) {
       console.error('Failed to update address:', error);
     }

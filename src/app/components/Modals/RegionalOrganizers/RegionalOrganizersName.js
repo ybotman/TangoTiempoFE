@@ -75,7 +75,7 @@ const RegionalOrganizersName = ({
     try {
       await updateOrganizer(organizerId, updateData);
       setErrorMessage(''); // Clear any existing error messages
-      console.log('Name updated successfully.');
+      //console.log('Name updated successfully.');
     } catch (error) {
       console.error('Failed to update name:', error);
       setErrorMessage('An error occurred while updating the name.');

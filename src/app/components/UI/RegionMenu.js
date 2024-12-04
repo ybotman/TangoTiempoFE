@@ -1,4 +1,6 @@
-'use client'; // RegionMenu.js
+// app/components/UI/RegionMenu.js
+
+'use client';
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -12,8 +14,9 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { RegionsContext } from '@/contexts/RegionsContext';
 
-const RegionMenu = ({ onRegionSelect, onClose }) => {
-  const { regions, setSelectedRegion } = useContext(RegionsContext);
+const RegionMenu = ({ onClose }) => {
+  const { regions, setSelectedRegion, setSelectedDivision, setSelectedCity } =
+    useContext(RegionsContext);
   const [selectionLevel, setSelectionLevel] = useState(1);
   const [localSelectedRegion, setLocalSelectedRegion] = useState(null);
   const [localSelectedDivision, setLocalSelectedDivision] = useState(null);
@@ -29,20 +32,25 @@ const RegionMenu = ({ onRegionSelect, onClose }) => {
   };
 
   const handleRegionClick = (region) => {
+    console.log('Region Selected:', region);
     setLocalSelectedRegion(region);
     setSelectedRegion(region.regionName);
+    setSelectedDivision('');
+    setSelectedCity('');
     setSelectionLevel(2);
   };
 
   const handleDivisionClick = (division) => {
+    console.log('Division Selected:', division);
     setLocalSelectedDivision(division);
-    setSelectedRegion(division.divisionName);
+    setSelectedDivision(division.divisionName);
+    setSelectedCity('');
     setSelectionLevel(3);
   };
 
   const handleCityClick = (city) => {
-    setSelectedRegion(city.cityName);
-    onRegionSelect(city.cityCode);
+    console.log('City Selected:', city);
+    setSelectedCity(city.cityName);
     setSelectionLevel(1);
     setLocalSelectedRegion(null);
     setLocalSelectedDivision(null);
@@ -105,8 +113,6 @@ const RegionMenu = ({ onRegionSelect, onClose }) => {
 };
 
 RegionMenu.propTypes = {
-  expanded: PropTypes.bool.isRequired,
-  onRegionSelect: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
