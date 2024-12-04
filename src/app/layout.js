@@ -4,14 +4,15 @@ import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
+import LocationLogger from '@/utils/geoLocations';
 
 export const metadata = {
-  title: 'Tango Tiempo - Your National Tango Calendar',
+  title: 'Tango Tiempo - The National Tango Calendar',
   description:
     'Stay up-to-date with Tango events across the country with Tango Tiempo.',
   keywords:
     'Tango, Tango Events, National Tango Calendar, Tango Tiempo, Dance Calendar',
-  author: 'Tango Tiempo Team',
+  author: 'Toby Balsley of Tango Tiempo',
 };
 
 // Separate viewport export
@@ -61,6 +62,7 @@ export default function RootLayout({ children }) {
         <SidebarDrawer />
         <div style={{ flexGrow: 1, padding: '1rem' }}>
           <Providers>
+            <LocationLogger /> {/* Trigger location logging */}
             <GoogleClientWrapper>{children}</GoogleClientWrapper>
           </Providers>
         </div>
