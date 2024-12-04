@@ -14,12 +14,8 @@ const LocationLogger = () => {
       })
       .then((data) => {
         console.log('IP and Location Data:', data);
-        console.log('IP Address:', data.ip);
-        console.log('City:', data.city);
-        console.log('Region:', data.region);
-        console.log('Country:', data.country_name);
-        console.log('Latitude:', data.latitude);
-        console.log('Longitude:', data.longitude);
+
+        console.log('City:Lat:Long:', data.city, data.latitude, data.longitude);
       })
       .catch((error) => {
         console.error('Failed to fetch location:', error);
