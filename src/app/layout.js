@@ -1,4 +1,3 @@
-// src/app/layout.js
 import PropTypes from 'prop-types';
 import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
@@ -29,10 +28,7 @@ export default function RootLayout({ children }) {
         <meta name="author" content={metadata.author} />
         <meta name="viewport" content={metadata.viewport} />
 
-        {/* Favicon */}
         <link rel="icon" href="/Icon64x64.ico" />
-
-        {/* Facebook Domain Verification */}
         <meta
           name="facebook-domain-verification"
           content="39o5h74oasigr7d761a9danhuv0ckg"
@@ -42,7 +38,6 @@ export default function RootLayout({ children }) {
           content="yrlcgyfdipyix2rvt4hafij76nsvmz"
         />
 
-        {/* Google Analytics Script */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
           strategy="afterInteractive"
@@ -62,7 +57,7 @@ export default function RootLayout({ children }) {
         <SidebarDrawer />
         <div style={{ flexGrow: 1, padding: '1rem' }}>
           <Providers>
-            <LocationLogger /> {/* Trigger location logging */}
+            <LocationLogger />
             <GoogleClientWrapper>{children}</GoogleClientWrapper>
           </Providers>
         </div>
