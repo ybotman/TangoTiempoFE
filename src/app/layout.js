@@ -3,7 +3,7 @@ import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
-import LocationLogger from '@/utils/geoLocations';
+import LocationLogger from '@/components/LocationLogger';
 
 export const metadata = {
   title: 'Tango Tiempo - The National Tango Calendar',

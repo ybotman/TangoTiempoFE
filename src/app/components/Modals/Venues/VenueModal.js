@@ -21,18 +21,17 @@ import VenueModalList from './VenueModalList';
 import VenueModalAdd from './VenueModalAdd';
 import VenueModalEdit from './VenueModalEdit';
 import VenueModalMap from './VenueModalMap';
-import modalStyle from '@/components/Styles/modalStyles'; // Assuming you have a modalStyles file
+import modalStyle from '@/components/Styles/modalStyles';
 
 const VenueModal = ({ open, onClose, defaultCityId }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
   const { venues, fetchVenues, addVenue, updateVenue, deactivateVenue } =
     useVenues();
   const [currentTab, setCurrentTab] = useState('list');
   const [selectedVenue, setSelectedVenue] = useState(null);
-  const [selectedCityId, setSelectedCityId] = useState(defaultCityId || null);
-  const [activeFilter, setActiveFilter] = useState(true); // filter for active venues
+  const [selectedCityId, setSelectedCityId] = useState(defaultCityId || '');
+  const [activeFilter, setActiveFilter] = useState(true);
 
   useEffect(() => {
     if (open) {
@@ -56,7 +55,6 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle(isMobile)}>
-        {/* Header with Close Button */}
         <AppBar position="static" color="default">
           <Toolbar variant="dense">
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>

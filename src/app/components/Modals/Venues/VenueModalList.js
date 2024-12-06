@@ -1,4 +1,3 @@
-// src/app/components/Modals/Venues/VenueModalList.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -18,9 +17,6 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
-// This component shows a list of venues with filters for city and active/inactive.
-// Double-clicking a venue goes to edit mode.
-
 const VenueModalList = ({
   venues,
   onEdit,
@@ -36,15 +32,12 @@ const VenueModalList = ({
   const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => {
-    // Fetch city list for dropdown
     const fetchCities = async () => {
       try {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/activeCities`
         );
-        // response data format: [{cityName, cityCode, ...}]
-        // We'll just store as is and show cityName
-        setCities(response.data);
+        setCities(response.data); // [{_id, cityName}, ...]
       } catch (err) {
         console.error('Error fetching cities:', err);
       }
@@ -96,7 +89,7 @@ const VenueModalList = ({
         >
           <MenuItem value="">All Cities</MenuItem>
           {cities.map((c) => (
-            <MenuItem key={c.cityName} value={c._id || ''}>
+            <MenuItem key={c._id} value={c._id}>
               {c.cityName}
             </MenuItem>
           ))}
@@ -116,29 +109,37 @@ const VenueModalList = ({
         <Typography>No venues found.</Typography>
       ) : (
         <List>
-          {venues.map((v) => (
-            <React.Fragment key={v._id}>
-              <ListItem
-                button="true"
-                onDoubleClick={() => onEdit(v)}
-                secondaryAction={
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => handleDeleteVenue(v._id)}
-                  >
-                    Deactivate
-                  </Button>
-                }
-              >
-                <ListItemText
-                  primary={`${v.name} (${v.shortName})`}
-                  secondary={`${v.address} - ${v.cityName} ${v.active ? '' : '(Inactive)'}`}
-                />
-              </ListItem>
-              <Divider />
-            </React.Fragment>
-          ))}
+          {venues.map((v) => {
+            const addr = [v.address1, v.address2, v.address3]
+              .filter(Boolean)
+              .join(', ');
+            const cityName = v.calculatedCityId?.cityName || 'No City';
+            return (
+              <React.Fragment key={v._id}>
+                <ListItem
+                  button="true"
+                  onDoubleClick={() => onEdit(v)}
+                  secondaryAction={
+                    v.active && (
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => handleDeleteVenue(v._id)}
+                      >
+                        Deactivate
+                      </Button>
+                    )
+                  }
+                >
+                  <ListItemText
+                    primary={`${v.name} (${v.shortName})`}
+                    secondary={`${addr} - ${cityName} ${v.active ? '' : '(Inactive)'}`}
+                  />
+                </ListItem>
+                <Divider />
+              </React.Fragment>
+            );
+          })}
         </List>
       )}
     </Box>
@@ -151,9 +152,13 @@ VenueModalList.propTypes = {
       _id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       shortName: PropTypes.string.isRequired,
-      address: PropTypes.string.isRequired,
-      cityName: PropTypes.string.isRequired,
-      active: PropTypes.bool.isRequired,
+      address1: PropTypes.string,
+      address2: PropTypes.string,
+      address3: PropTypes.string,
+      calculatedCityId: PropTypes.shape({
+        cityName: PropTypes.string,
+      }),
+      active: PropTypes.bool,
     })
   ).isRequired,
   onEdit: PropTypes.func.isRequired,

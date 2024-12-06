@@ -1,15 +1,15 @@
-// src/app/hooks/useVenues.js
 'use client';
 
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+//import PropTypes from 'prop-types';
 
 export function useVenues() {
   const [venues, setVenues] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchVenues = useCallback(async (cityId = null, active = true) => {
+  const fetchVenues = useCallback(async (cityId = '', active = true) => {
     setLoading(true);
     setError(null);
     try {
@@ -29,7 +29,6 @@ export function useVenues() {
   }, []);
 
   const addVenue = useCallback(async (data) => {
-    // data: { name, shortName, address, cityName, latitude, longitude }
     setLoading(true);
     setError(null);
     try {
@@ -89,3 +88,5 @@ export function useVenues() {
     deactivateVenue,
   };
 }
+
+useVenues.propTypes = {};
