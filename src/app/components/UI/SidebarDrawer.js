@@ -1,5 +1,6 @@
 // SidebarDrawer.js (FULL CODE provided, now adding Venues option)
-// 'use client';
+
+'use client';
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {

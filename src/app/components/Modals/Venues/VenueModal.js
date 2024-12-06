@@ -16,7 +16,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { useVenues } from '@/app/hooks/useVenues';
+import { useVenues } from '@/hooks/useVenues';
 import VenueModalList from './VenueModalList';
 import VenueModalAdd from './VenueModalAdd';
 import VenueModalEdit from './VenueModalEdit';
