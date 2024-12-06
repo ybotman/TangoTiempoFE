@@ -1,5 +1,5 @@
-// SidebarDrawer.js
-'use client';
+// SidebarDrawer.js (FULL CODE provided, now adding Venues option)
+// 'use client';
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -24,7 +24,6 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
-import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 import RegionMenu from './RegionMenu';
@@ -32,8 +31,10 @@ import UserSettingsModal from '@/components/Modals/UserSettings/UserSettingsModa
 import RegionalOrganizersModal from '@/components/Modals/RegionalOrganizers/RegionalOrganizersModal';
 import PrivacyPolicyModal from '@/components/Modals/misc/PrivacyPolicyModal';
 import FAQModal from '@/components/Modals/misc/FAQModal';
+import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
+import VenueModal from '@/components/Modals/Venues/VenueModal';
 
 const SidebarDrawer = ({ open, onClose }) => {
   const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -42,6 +43,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [systemAdminOpen, setSystemAdminOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
+  const [venueModalOpen, setVenueModalOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
 
@@ -60,7 +62,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         }}
       >
         <List>
-          {/* *******Regions Section******* */}
+          {/* Regions Section */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Select a Region
@@ -86,7 +88,6 @@ const SidebarDrawer = ({ open, onClose }) => {
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Role Settings
           </Typography>
-          {/* Prompt for "None" Role */}
           {selectedRole === '' && (
             <ListItem>
               <ListItemIcon>
@@ -95,7 +96,6 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="Sign In to Save Settings" />
             </ListItem>
           )}
-          {/* ******* Conditional Role******* */}
           {selectedRole !== '' && (
             <ListItem
               button="true"
@@ -111,18 +111,33 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItem>
           )}
           {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-            <ListItem
-              button="true"
-              onClick={() => {
-                setRegionalOrganizerOpen(true);
-                onClose();
-              }}
-            >
-              <ListItemIcon>
-                <EventAvailableIcon sx={{ color: 'green' }} />
-              </ListItemIcon>
-              <ListItemText primary="Regional Organizer" />
-            </ListItem>
+            <>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setRegionalOrganizerOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <EventAvailableIcon sx={{ color: 'green' }} />
+                </ListItemIcon>
+                <ListItemText primary="Regional Organizer" />
+              </ListItem>
+              {/* Add the Venue Modal option here */}
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setVenueModalOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <EventAvailableIcon sx={{ color: 'teal' }} />
+                </ListItemIcon>
+                <ListItemText primary="Venues" />
+              </ListItem>
+            </>
           )}
           {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
             <ListItem
@@ -153,13 +168,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemText primary="System Admin" />
               </ListItem>
 
-              {/* Face menu for System Owner with CoPresentIcon */}
-              <ListItem
-                button="true"
-                onClick={() => {
-                  // Does nothing on press
-                }}
-              >
+              <ListItem button="true">
                 <ListItemIcon>
                   <CoPresentIcon sx={{ color: 'red' }} />
                 </ListItemIcon>
@@ -171,7 +180,6 @@ const SidebarDrawer = ({ open, onClose }) => {
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Information
           </Typography>
-          {/* *******General Links******* */}
           <Link href="/about" passHref>
             <ListItem button="true">
               <ListItemIcon>
@@ -200,7 +208,6 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="About" />
             </ListItem>
           </Link>
-          {/* *******OTHER******* */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Other
@@ -229,7 +236,10 @@ const SidebarDrawer = ({ open, onClose }) => {
               setPrivacyPolicyOpen(true);
               onClose();
             }}
-          ></ListItem>
+          >
+            <ListItemIcon>{/* Add an icon here if needed */}</ListItemIcon>
+            <ListItemText primary="Privacy Policy Details" />
+          </ListItem>
         </List>
       </Drawer>
 
@@ -250,6 +260,10 @@ const SidebarDrawer = ({ open, onClose }) => {
       <PrivacyPolicyModal
         open={privacyPolicyOpen}
         onClose={() => setPrivacyPolicyOpen(false)}
+      />
+      <VenueModal
+        open={venueModalOpen}
+        onClose={() => setVenueModalOpen(false)}
       />
     </>
   );
