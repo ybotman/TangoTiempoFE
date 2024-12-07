@@ -31,9 +31,7 @@ const UserSettingsModal = ({ open, onClose }) => {
 
   useEffect(() => {
     if (!user) {
-      console.log(
-        'User is not authenticated or AuthContext is not initialized yet.'
-      );
+      console.log('User is not authenticated or AuthContext is not initialized yet.');
     }
   }, [user]);
 
@@ -47,12 +45,7 @@ const UserSettingsModal = ({ open, onClose }) => {
         </Typography>
 
         {/* Tab Navigation */}
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="User Settings Tabs"
-          variant="scrollable"
-        >
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="User Settings Tabs" variant="scrollable">
           <Tab label="Name" value="name" />
           <Tab label="Favs" value="favorites" />
           <Tab label="Notifications" value="notifications" />
@@ -66,27 +59,14 @@ const UserSettingsModal = ({ open, onClose }) => {
           <Typography color="error">Error loading user data</Typography>
         ) : (
           <>
-            {currentTab === 'name' && (
-              <UserSettingsName
-                userData={userData}
-                updateUserData={updateUserData}
-              />
-            )}
+            {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
             {currentTab === 'favorites' && (
-              <UserSettingsFavorites
-                userData={userData}
-                updateUserData={updateUserData}
-              />
+              <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
             )}
             {currentTab === 'notifications' && (
-              <UserSettingsNotifications
-                userData={userData}
-                updateUserData={updateUserData}
-              />
+              <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
             )}
-            {currentTab === 'apply' && (
-              <UserSettingsApply userData={userData} />
-            )}
+            {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
           </>
         )}
 

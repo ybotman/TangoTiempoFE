@@ -7,8 +7,7 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
   const [showMore, setShowMore] = useState(false);
 
   // Safely access event details with optional chaining
-  const description =
-    eventDetails?.extendedProps?.description || 'No description available';
+  const description = eventDetails?.extendedProps?.description || 'No description available';
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
 
   // Sanitize the description using DOMPurify
@@ -36,9 +35,7 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
 
       {/* Show More / Show Less Button */}
       {sanitizedDescription.length > 15 * 80 && (
-        <Button onClick={toggleShowMore}>
-          {showMore ? 'Show Less' : 'Show More'}
-        </Button>
+        <Button onClick={toggleShowMore}>{showMore ? 'Show Less' : 'Show More'}</Button>
       )}
 
       {/* Event Cost */}

@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-export const usePostFilter = (
-  events,
-  categories,
-  selectedOrganizers = [],
-  selectedTags = []
-) => {
+export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = []) => {
   const [activeCategories, setActiveCategories] = useState([]);
 
   // Initialize activeCategories with all categories when categories change
@@ -35,20 +30,12 @@ export const usePostFilter = (
     if (!Array.isArray(events)) return [];
 
     // Ensure selectedOrganizers and selectedTags are arrays
-    const organizers = Array.isArray(selectedOrganizers)
-      ? selectedOrganizers
-      : [];
+    const organizers = Array.isArray(selectedOrganizers) ? selectedOrganizers : [];
     const tags = Array.isArray(selectedTags) ? selectedTags : [];
 
     // Apply filters only if there are values present
     return events.filter((event) => {
-      const {
-        categoryFirst,
-        categorySecond,
-        categoryThird,
-        organizerId,
-        tags: eventTags,
-      } = event.extendedProps || {};
+      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags } = event.extendedProps || {};
 
       // Category filter
       const matchesCategory =
@@ -59,15 +46,10 @@ export const usePostFilter = (
         activeCategories.includes(categoryThird);
 
       // Organizer filter
-      const matchesOrganizer =
-        organizers.length === 0 ||
-        organizerId === undefined ||
-        organizers.includes(organizerId);
+      const matchesOrganizer = organizers.length === 0 || organizerId === undefined || organizers.includes(organizerId);
 
       // Tags filter
-      const matchesTags =
-        tags.length === 0 ||
-        (eventTags && tags.some((tag) => eventTags.includes(tag)));
+      const matchesTags = tags.length === 0 || (eventTags && tags.some((tag) => eventTags.includes(tag)));
 
       return matchesCategory && matchesOrganizer && matchesTags;
     });

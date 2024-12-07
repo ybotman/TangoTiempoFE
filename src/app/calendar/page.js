@@ -31,19 +31,10 @@ const CalendarPage = () => {
       name="description"
       content="Browse and find upcoming tango events in your region. Updated regularly with new listings."
     />
-    <meta
-      name="keywords"
-      content="tango, tango events, local tango calendar, tango festivals"
-    />
+    <meta name="keywords" content="tango, tango events, local tango calendar, tango festivals" />
     <meta name="robots" content="index, follow" />
-    <meta
-      property="og:title"
-      content="Tango Tiempo - Find Local Tango Events"
-    />
-    <meta
-      property="og:description"
-      content="Browse and find upcoming tango events in your region."
-    />
+    <meta property="og:title" content="Tango Tiempo - Find Local Tango Events" />
+    <meta property="og:description" content="Browse and find upcoming tango events in your region." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.tangotiempo.com" />
   </Head>;
@@ -144,23 +135,13 @@ const CalendarPage = () => {
         </ButtonGroup>
 
         <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <IconButton
-            onClick={() =>
-              calendarRef.current.getApi().changeView('dayGridMonth')
-            }
-          >
+          <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
             <CalendarMonthIcon />
           </IconButton>
-          <IconButton
-            onClick={() =>
-              calendarRef.current.getApi().changeView('timeGridWeek')
-            }
-          >
+          <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
             <ViewWeekIcon />
           </IconButton>
-          <IconButton
-            onClick={() => calendarRef.current.getApi().changeView('listWeek')}
-          >
+          <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
             <ListIcon />
           </IconButton>
         </ButtonGroup>

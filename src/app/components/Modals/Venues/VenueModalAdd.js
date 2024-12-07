@@ -39,10 +39,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const dist = R * c;
     return dist;
@@ -54,14 +51,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     // Step A: Geocode Address
     let latLongResult;
     try {
-      latLongResult = await geocodeAddress(
-        address1,
-        address2,
-        address3,
-        city,
-        state,
-        zip
-      );
+      latLongResult = await geocodeAddress(address1, address2, address3, city, state, zip);
       if (!latLongResult) {
         setErrorMessage('Geocoding failed. Cannot proceed without lat/long.');
         return;
@@ -77,15 +67,12 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     // Step B: Find nearest calculatedCity
     let cityInfo;
     try {
-      const cityResponse = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity`,
-        {
-          params: {
-            latitude: latLongResult.latitude,
-            longitude: latLongResult.longitude,
-          },
-        }
-      );
+      const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity`, {
+        params: {
+          latitude: latLongResult.latitude,
+          longitude: latLongResult.longitude,
+        },
+      });
       cityInfo = cityResponse.data;
       if (!cityInfo || !cityInfo.cityId) {
         setErrorMessage('No nearest city found. Venue may be inactive.');
@@ -104,24 +91,16 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     // Step D: Check for duplicates within 300 meters in the same calculatedCity
     // We'll filter by cityId. If cityId is known, we can pass it as cityId param.
     try {
-      const venuesResponse = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/venues`,
-        {
-          params: { cityId: cityInfo.cityId, isActive: true },
-        }
-      );
+      const venuesResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, {
+        params: { cityId: cityInfo.cityId, isActive: true },
+      });
       const venuesInCity = venuesResponse.data || [];
       const currentLat = parseFloat(latLongResult.latitude);
       const currentLon = parseFloat(latLongResult.longitude);
 
       for (const v of venuesInCity) {
         if (v.latitude && v.longitude) {
-          const dist = calculateDistance(
-            currentLat,
-            currentLon,
-            v.latitude,
-            v.longitude
-          );
+          const dist = calculateDistance(currentLat, currentLon, v.latitude, v.longitude);
           if (dist < 300) {
             console.log('Error: Another venue within 300 meters in this city.');
             // No blocking, just logging error.
@@ -159,8 +138,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
 
       // Include calculated fields if we got them
       if (calculatedCityId) data.calculatedCityId = calculatedCityId;
-      if (calculatedDivisionId)
-        data.calculatedDivisionId = calculatedDivisionId;
+      if (calculatedDivisionId) data.calculatedDivisionId = calculatedDivisionId;
       if (calculatedRegionId) data.calculatedRegionId = calculatedRegionId;
       if (calculatedCountryId) data.calculatedCountryId = calculatedCountryId;
 
@@ -184,18 +162,8 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
       )}
 
       <Box display="flex" flexDirection="column" gap={2}>
-        <TextField
-          label="Venue Name"
-          fullWidth
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <TextField
-          label="Short Name"
-          fullWidth
-          value={shortName}
-          onChange={(e) => setShortName(e.target.value)}
-        />
+        <TextField label="Venue Name" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+        <TextField label="Short Name" fullWidth value={shortName} onChange={(e) => setShortName(e.target.value)} />
 
         {/* Address Box */}
         <Box
@@ -209,71 +177,31 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
             backgroundColor: '#f9f9f9',
           }}
         >
-          <TextField
-            label="Address 1"
-            fullWidth
-            value={address1}
-            onChange={(e) => setAddress1(e.target.value)}
-          />
+          <TextField label="Address 1" fullWidth value={address1} onChange={(e) => setAddress1(e.target.value)} />
 
           {/* Address 2 and 3 on one line, smaller */}
           <Box display="flex" gap={2}>
-            <TextField
-              label="Address 2"
-              fullWidth
-              value={address2}
-              onChange={(e) => setAddress2(e.target.value)}
-            />
-            <TextField
-              label="Address 3"
-              fullWidth
-              value={address3}
-              onChange={(e) => setAddress3(e.target.value)}
-            />
+            <TextField label="Address 2" fullWidth value={address2} onChange={(e) => setAddress2(e.target.value)} />
+            <TextField label="Address 3" fullWidth value={address3} onChange={(e) => setAddress3(e.target.value)} />
           </Box>
 
           {/* City/State line */}
           <Box display="flex" gap={2} alignItems="flex-end">
-            <TextField
-              label="City"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              sx={{ flex: 1 }}
-            />
-            <TextField
-              label="State"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              sx={{ width: 120 }}
-            />
+            <TextField label="City" value={city} onChange={(e) => setCity(e.target.value)} sx={{ flex: 1 }} />
+            <TextField label="State" value={state} onChange={(e) => setState(e.target.value)} sx={{ width: 120 }} />
           </Box>
 
           {/* Zip and Verify line */}
           <Box display="flex" gap={2} alignItems="flex-end">
-            <TextField
-              label="Zip"
-              value={zip}
-              onChange={(e) => setZip(e.target.value)}
-              sx={{ flex: 1 }}
-            />
+            <TextField label="Zip" value={zip} onChange={(e) => setZip(e.target.value)} sx={{ flex: 1 }} />
             <Button variant="outlined" size="small" onClick={verifyData}>
               Verify
             </Button>
           </Box>
         </Box>
 
-        <TextField
-          label="Phone"
-          fullWidth
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-        <TextField
-          label="Comments"
-          fullWidth
-          value={comments}
-          onChange={(e) => setComments(e.target.value)}
-        />
+        <TextField label="Phone" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <TextField label="Comments" fullWidth value={comments} onChange={(e) => setComments(e.target.value)} />
 
         {latitude && longitude && (
           <Typography variant="body2">
@@ -281,13 +209,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
           </Typography>
         )}
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={isSaveDisabled}
-          sx={{ mt: 2 }}
-        >
+        <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled} sx={{ mt: 2 }}>
           Save
         </Button>
         <Button variant="text" onClick={onDone} sx={{ mt: 1 }}>

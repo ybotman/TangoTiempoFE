@@ -42,9 +42,7 @@ export const useCalendarPage = () => {
       return;
     }
 
-    const selectedRegion = regions.find(
-      (region) => region._id === selectedValue
-    );
+    const selectedRegion = regions.find((region) => region._id === selectedValue);
 
     if (selectedRegion) {
       setSelectedRegion(selectedRegion);
@@ -71,12 +69,10 @@ export const useCalendarPage = () => {
     datesSet?.end
   );
   const transformedEvents = transformEvents(events);
-  const { activeCategories, filteredEvents, handleCategoryChange } =
-    usePostFilter(transformedEvents, categories);
+  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(transformedEvents, categories);
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
-    const categoryColor =
-      categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
+    const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
     return {
       ...event,
       backgroundColor: categoryColor,

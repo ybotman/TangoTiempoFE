@@ -16,9 +16,7 @@ const VenueModalMap = ({ venues }) => {
 
   const fetchCities = useCallback(async () => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/activeCities`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/activeCities`);
       setCities(response.data);
     } catch (err) {
       console.error('Error fetching cities:', err);
@@ -55,24 +53,18 @@ const VenueModalMap = ({ venues }) => {
 
     let filteredVenues = venues;
     if (cityFilter) {
-      filteredVenues = venues.filter(
-        (v) => v.calculatedCityId?.['_id'] === cityFilter
-      );
+      filteredVenues = venues.filter((v) => v.calculatedCityId?.['_id'] === cityFilter);
     }
 
     filteredVenues.forEach((v) => {
       if (v.latitude && v.longitude) {
-        L.marker([v.latitude, v.longitude])
-          .addTo(map)
-          .bindPopup(`${v.name} (${v.shortName})`);
+        L.marker([v.latitude, v.longitude]).addTo(map).bindPopup(`${v.name} (${v.shortName})`);
       }
     });
   }, [venues, cityFilter]);
 
   return (
-    <Box
-      sx={{ mt: 2, height: '100%', display: 'flex', flexDirection: 'column' }}
-    >
+    <Box sx={{ mt: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Typography variant="h6" gutterBottom>
         Venues Map
       </Typography>

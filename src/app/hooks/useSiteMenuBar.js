@@ -49,9 +49,7 @@ export const useSiteMenuBar = () => {
 
   const handleRegionChange = (event) => {
     const selectedRegionName = event.target.value;
-    const selectedRegionData = regions.find(
-      (region) => region.regionName === selectedRegionName
-    );
+    const selectedRegionData = regions.find((region) => region.regionName === selectedRegionName);
 
     setSelectedRegion(selectedRegionName);
     setSelectedRegionID(selectedRegionData ? selectedRegionData._id : '');

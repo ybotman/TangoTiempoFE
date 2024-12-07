@@ -34,9 +34,7 @@ const VenueModalList = ({
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/activeCities`
-        );
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/activeCities`);
         setCities(response.data); // [{_id, cityName}, ...]
       } catch (err) {
         console.error('Error fetching cities:', err);
@@ -80,13 +78,7 @@ const VenueModalList = ({
         </Typography>
       )}
       <Box display="flex" gap={2} alignItems="center" sx={{ mb: 2 }}>
-        <TextField
-          select
-          label="City Filter"
-          value={cityFilter}
-          onChange={handleCityChange}
-          sx={{ minWidth: 200 }}
-        >
+        <TextField select label="City Filter" value={cityFilter} onChange={handleCityChange} sx={{ minWidth: 200 }}>
           <MenuItem value="">All Cities</MenuItem>
           {cities.map((c) => (
             <MenuItem key={c._id} value={c._id}>
@@ -95,9 +87,7 @@ const VenueModalList = ({
           ))}
         </TextField>
         <FormControlLabel
-          control={
-            <Switch checked={activeFilter} onChange={handleActiveChange} />
-          }
+          control={<Switch checked={activeFilter} onChange={handleActiveChange} />}
           label="Show Active Only"
         />
         <Button variant="contained" onClick={refreshList}>
@@ -110,9 +100,7 @@ const VenueModalList = ({
       ) : (
         <List>
           {venues.map((v) => {
-            const addr = [v.address1, v.address2, v.address3]
-              .filter(Boolean)
-              .join(', ');
+            const addr = [v.address1, v.address2, v.address3].filter(Boolean).join(', ');
             const cityName = v.calculatedCityId?.cityName || 'No City';
             return (
               <React.Fragment key={v._id}>
@@ -121,11 +109,7 @@ const VenueModalList = ({
                   onDoubleClick={() => onEdit(v)}
                   secondaryAction={
                     v.active && (
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={() => handleDeleteVenue(v._id)}
-                      >
+                      <Button variant="outlined" color="error" onClick={() => handleDeleteVenue(v._id)}>
                         Deactivate
                       </Button>
                     )

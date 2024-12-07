@@ -11,13 +11,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 
 const LoginPage = () => {
   const router = useRouter();
-  const {
-    user,
-    loading,
-    error,
-    authenticateWithGoogle,
-    authenticateWithFacebook,
-  } = useContext(AuthContext);
+  const { user, loading, error, authenticateWithGoogle, authenticateWithFacebook } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleGoogleLogIn = async () => {
@@ -89,14 +83,8 @@ const LoginPage = () => {
           <Typography component="h1" variant="h5" gutterBottom>
             Log In
           </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            align="center"
-            paragraph
-          >
-            Log in with your Google or Facebook account to access your Tango
-            events calendar.
+          <Typography variant="body2" color="textSecondary" align="center" paragraph>
+            Log in with your Google or Facebook account to access your Tango events calendar.
           </Typography>
           {/* Google Log In Button */}
           <Button

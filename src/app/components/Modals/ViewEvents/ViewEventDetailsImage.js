@@ -5,8 +5,7 @@ import PropTypes from 'prop-types';
 
 const ViewEventDetailsImage = ({ eventDetails }) => {
   // Assuming eventImage is already provided in eventDetails
-  const eventImage =
-    eventDetails?.extendedProps?.eventImage || '/path/to/placeholder.jpg';
+  const eventImage = eventDetails?.extendedProps?.eventImage || '/path/to/placeholder.jpg';
 
   return (
     <Box sx={{ padding: 2 }}>
@@ -51,12 +50,7 @@ const ViewEventDetailsImage = ({ eventDetails }) => {
       </Box>
 
       {/* Fake Add Image Button */}
-      <Button
-        variant="contained"
-        color="primary"
-        disabled
-        sx={{ width: '100%' }}
-      >
+      <Button variant="contained" color="primary" disabled sx={{ width: '100%' }}>
         Add an Image (Feature Coming Soon)
       </Button>
     </Box>

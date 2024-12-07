@@ -3,9 +3,7 @@ import { BlobServiceClient } from '@azure/storage-blob';
 // Function to upload a file to Azure Blob Storage
 export const uploadToBlob = async (file) => {
   // Use your Azure Storage connection string
-  const blobServiceClient = BlobServiceClient.fromConnectionString(
-    '<Your Azure Blob Storage Connection String>'
-  );
+  const blobServiceClient = BlobServiceClient.fromConnectionString('<Your Azure Blob Storage Connection String>');
   const containerClient = blobServiceClient.getContainerClient('events-images'); // Name of your container
 
   // Create the container if it doesn't already exist

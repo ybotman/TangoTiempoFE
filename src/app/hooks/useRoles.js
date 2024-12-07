@@ -11,9 +11,7 @@ export const useRoles = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/roles`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/roles`);
       setRoles(response.data);
     } catch (error) {
       console.error('Error fetching roles:', error);

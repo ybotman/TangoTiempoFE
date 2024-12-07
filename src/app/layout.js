@@ -7,10 +7,8 @@ import LocationLogger from '@/components/LocationLogger';
 
 export const metadata = {
   title: 'Tango Tiempo - The National Tango Calendar',
-  description:
-    'Stay up-to-date with Tango events across the country with Tango Tiempo.',
-  keywords:
-    'Tango, Tango Events, National Tango Calendar, Tango Tiempo, Dance Calendar',
+  description: 'Stay up-to-date with Tango events across the country with Tango Tiempo.',
+  keywords: 'Tango, Tango Events, National Tango Calendar, Tango Tiempo, Dance Calendar',
   author: 'Toby Balsley of Tango Tiempo',
 };
 
@@ -29,14 +27,8 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content={metadata.viewport} />
 
         <link rel="icon" href="/Icon64x64.ico" />
-        <meta
-          name="facebook-domain-verification"
-          content="39o5h74oasigr7d761a9danhuv0ckg"
-        />
-        <meta
-          name="facebook-domain-verification"
-          content="yrlcgyfdipyix2rvt4hafij76nsvmz"
-        />
+        <meta name="facebook-domain-verification" content="39o5h74oasigr7d761a9danhuv0ckg" />
+        <meta name="facebook-domain-verification" content="yrlcgyfdipyix2rvt4hafij76nsvmz" />
 
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}

@@ -22,22 +22,12 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 
-const SiteMenuBarUserDrawer = ({
-  userDrawerOpen,
-  handleUserDrawerClose,
-  showRoleMessage,
-}) => {
+const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
-  const orderedRoles = [
-    'NamedUser',
-    'RegionalOrganizer',
-    'RegionalAdmin',
-    'SystemAdmin',
-    'SystemOwner',
-  ];
+  const orderedRoles = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
 
   const handleRoleChange = (event) => {
     const newRole = event.target.value;
@@ -47,11 +37,7 @@ const SiteMenuBarUserDrawer = ({
   };
 
   return (
-    <Drawer
-      anchor="right"
-      open={userDrawerOpen}
-      onClose={handleUserDrawerClose}
-    >
+    <Drawer anchor="right" open={userDrawerOpen} onClose={handleUserDrawerClose}>
       <Box sx={{ width: 300, padding: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
           <Typography variant="h6">User Management</Typography>
@@ -63,22 +49,10 @@ const SiteMenuBarUserDrawer = ({
 
         {!user ? (
           <Box>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              href="/auth/login"
-              sx={{ marginBottom: 1 }}
-            >
+            <Button variant="contained" color="primary" fullWidth href="/auth/login" sx={{ marginBottom: 1 }}>
               Log In
             </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              fullWidth
-              href="/auth/signup"
-              sx={{ marginBottom: 2 }}
-            >
+            <Button variant="contained" color="secondary" fullWidth href="/auth/signup" sx={{ marginBottom: 2 }}>
               Sign Up
             </Button>
           </Box>
@@ -90,26 +64,16 @@ const SiteMenuBarUserDrawer = ({
                 src={user.photoURL || '/defaultAvatar.png'}
                 sx={{ width: 56, height: 56 }}
               />
-              <Typography variant="h6">
-                {user.displayName || user.email}
-              </Typography>
+              <Typography variant="h6">{user.displayName || user.email}</Typography>
             </Stack>
 
             <Box sx={{ marginTop: 2 }}>
               <Typography variant="subtitle1">Select Role:</Typography>
               <FormControl component="fieldset">
-                <RadioGroup
-                  value={selectedRole || 'NamedUser'}
-                  onChange={handleRoleChange}
-                >
+                <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                   {orderedRoles.map((role) =>
                     roles.includes(role) ? (
-                      <FormControlLabel
-                        key={role}
-                        value={role}
-                        control={<Radio />}
-                        label={role}
-                      />
+                      <FormControlLabel key={role} value={role} control={<Radio />} label={role} />
                     ) : null
                   )}
                 </RadioGroup>
@@ -131,19 +95,12 @@ const SiteMenuBarUserDrawer = ({
               onClose={() => setLogoutConfirmOpen(false)}
               aria-labelledby="logout-confirmation-dialog-title"
             >
-              <DialogTitle id="logout-confirmation-dialog-title">
-                Confirm Logout
-              </DialogTitle>
+              <DialogTitle id="logout-confirmation-dialog-title">Confirm Logout</DialogTitle>
               <DialogContent>
-                <DialogContentText>
-                  Are you sure you want to log out?
-                </DialogContentText>
+                <DialogContentText>Are you sure you want to log out?</DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={() => setLogoutConfirmOpen(false)}
-                  color="primary"
-                >
+                <Button onClick={() => setLogoutConfirmOpen(false)} color="primary">
                   No
                 </Button>
                 <Button onClick={logOut} color="secondary" autoFocus>

@@ -68,16 +68,9 @@ const SidebarDrawer = ({ open, onClose }) => {
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Select a Region
           </Typography>
-          <ListItem
-            button="true"
-            onClick={() => setRegionMenuOpen(!regionMenuOpen)}
-          >
+          <ListItem button="true" onClick={() => setRegionMenuOpen(!regionMenuOpen)}>
             <ListItemIcon>
-              <Avatar
-                alt="Select Region"
-                src="/images/Regions/RegionsIcon.png"
-                sx={{ width: 32, height: 32 }}
-              />
+              <Avatar alt="Select Region" src="/images/Regions/RegionsIcon.png" sx={{ width: 32, height: 32 }} />
             </ListItemIcon>
             <ListItemText primary="Regions" />
             {regionMenuOpen ? <ExpandLess /> : <ExpandMore />}
@@ -245,27 +238,12 @@ const SidebarDrawer = ({ open, onClose }) => {
       </Drawer>
 
       {/* Modals */}
-      <UserSettingsModal
-        open={userSettingsOpen}
-        onClose={() => setUserSettingsOpen(false)}
-      />
-      <RegionalOrganizersModal
-        open={regionalOrganizerOpen}
-        onClose={() => setRegionalOrganizerOpen(false)}
-      />
-      <SystemAdminModal
-        open={systemAdminOpen}
-        onClose={() => setSystemAdminOpen(false)}
-      />
+      <UserSettingsModal open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} />
+      <RegionalOrganizersModal open={regionalOrganizerOpen} onClose={() => setRegionalOrganizerOpen(false)} />
+      <SystemAdminModal open={systemAdminOpen} onClose={() => setSystemAdminOpen(false)} />
       <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
-      <PrivacyPolicyModal
-        open={privacyPolicyOpen}
-        onClose={() => setPrivacyPolicyOpen(false)}
-      />
-      <VenueModal
-        open={venueModalOpen}
-        onClose={() => setVenueModalOpen(false)}
-      />
+      <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
+      <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
     </>
   );
 };

@@ -31,9 +31,7 @@ export const useLocations = () => {
   const getLocationById = useCallback(async (locationID) => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationID}`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationID}`);
       return response.data;
     } catch (error) {
       setError(error);

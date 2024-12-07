@@ -14,23 +14,18 @@ export function useGeoLocations() {
         // Fetch IP-based geolocation
         const response = await fetch('https://ipapi.co/json/');
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch geolocation: ${response.statusText}`
-          );
+          throw new Error(`Failed to fetch geolocation: ${response.statusText}`);
         }
         const data = await response.json();
         setGeoData(data);
 
         // Fetch the nearest city from the NEW backend route
-        const cityResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity`,
-          {
-            params: {
-              longitude: data.longitude,
-              latitude: data.latitude,
-            },
-          }
-        );
+        const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity`, {
+          params: {
+            longitude: data.longitude,
+            latitude: data.latitude,
+          },
+        });
 
         setNearestCity(cityResponse.data);
       } catch (err) {

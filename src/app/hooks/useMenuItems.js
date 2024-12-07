@@ -34,10 +34,7 @@ const useMenuItems = () => {
           { label: 'Add Photos', action: 'addPhotos' },
         ];
       } else if (selectedRole === listOfAllRoles.NAMED_USER) {
-        menuOptions = [
-          ...menuOptions,
-          { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
-        ];
+        menuOptions = [...menuOptions, { label: 'Add Comment/Photo', action: 'addCommentPhoto' }];
       }
       return menuOptions;
     }

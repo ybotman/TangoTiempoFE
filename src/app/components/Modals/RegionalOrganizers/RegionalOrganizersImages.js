@@ -48,18 +48,9 @@ const RegionalOrganizersImages = ({ organizerId }) => {
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6">Manage Images</Typography>
       <Box display="flex" alignItems="center" gap={2} mt={2}>
-        <Button
-          variant="contained"
-          component="label"
-          startIcon={<AddPhotoAlternate />}
-        >
+        <Button variant="contained" component="label" startIcon={<AddPhotoAlternate />}>
           Upload Image
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={handleImageUpload}
-          />
+          <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
         </Button>
         {loading && <CircularProgress size={24} />}
       </Box>
@@ -131,11 +122,7 @@ const RegionalOrganizersImages = ({ organizerId }) => {
         </DialogActions>
         <DialogContent>
           {selectedImage && (
-            <img
-              src={selectedImage.url}
-              alt={selectedImage.name}
-              style={{ width: '100%', height: 'auto' }}
-            />
+            <img src={selectedImage.url} alt={selectedImage.name} style={{ width: '100%', height: 'auto' }} />
           )}
         </DialogContent>
       </Dialog>

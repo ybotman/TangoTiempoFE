@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Grid,
-} from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid } from '@mui/material';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
 import { useLocations } from '@/hooks/useLocations'; // Import the locations hook
@@ -16,16 +7,8 @@ import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
-  const {
-    organizers,
-    loading: loadingOrganizers,
-    error: errorOrganizers,
-  } = useOrganizers(); // Fetch organizers
-  const {
-    locations,
-    loading: loadingLocations,
-    error: errorLocations,
-  } = useLocations(); // Fetch locations
+  const { organizers, loading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
+  const { locations, loading: loadingLocations, error: errorLocations } = useLocations(); // Fetch locations
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -61,12 +44,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         {/* Title Input */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <TextField
-              label="Event Title"
-              value={eventData.title}
-              onChange={handleTitleChange}
-              fullWidth
-            />
+            <TextField label="Event Title" value={eventData.title} onChange={handleTitleChange} fullWidth />
           </FormControl>
         </Grid>
 
@@ -147,9 +125,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           multiline
           rows={4}
           value={eventData.description}
-          onChange={(e) =>
-            setEventData({ ...eventData, description: e.target.value })
-          }
+          onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
           fullWidth
         />
       </FormControl>

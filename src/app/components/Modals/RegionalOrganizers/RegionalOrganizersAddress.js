@@ -1,22 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  TextField,
-  Switch,
-  FormControlLabel,
-  Button,
-  Box,
-  Typography,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
+import { TextField, Switch, FormControlLabel, Button, Box, Typography, Tooltip, IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
-const RegionalOrganizersAddress = ({
-  organizerId,
-  organizer,
-  updateOrganizer,
-}) => {
+const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) => {
   const publicContactInfo = organizer?.publicContactInfo || {};
   const address = publicContactInfo.address || {};
 
@@ -27,9 +14,7 @@ const RegionalOrganizersAddress = ({
   const [city, setCity] = useState(address.city || '');
   const [state, setState] = useState(address.state || '');
   const [zip, setZip] = useState(address.postalCode || '');
-  const [isSearchable, setIsSearchable] = useState(
-    organizer?.wantRender || false
-  );
+  const [isSearchable, setIsSearchable] = useState(organizer?.wantRender || false);
 
   useEffect(() => {
     const publicContactInfo = organizer?.publicContactInfo || {};
@@ -84,65 +69,21 @@ const RegionalOrganizersAddress = ({
         Public Contact Information
       </Typography>
       <Box display="flex" flexDirection="column" gap={2}>
-        <TextField
-          label="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Email"
-          value={Email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Street 1"
-          value={street1}
-          onChange={(e) => setStreet1(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Street 2"
-          value={street2}
-          onChange={(e) => setStreet2(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="City"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="State"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Zip"
-          value={zip}
-          onChange={(e) => setZip(e.target.value)}
-          fullWidth
-        />
+        <TextField label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
+        <TextField label="Email" value={Email} onChange={(e) => setEmail(e.target.value)} fullWidth />
+        <TextField label="Street 1" value={street1} onChange={(e) => setStreet1(e.target.value)} fullWidth />
+        <TextField label="Street 2" value={street2} onChange={(e) => setStreet2(e.target.value)} fullWidth />
+        <TextField label="City" value={city} onChange={(e) => setCity(e.target.value)} fullWidth />
+        <TextField label="State" value={state} onChange={(e) => setState(e.target.value)} fullWidth />
+        <TextField label="Zip" value={zip} onChange={(e) => setZip(e.target.value)} fullWidth />
       </Box>
 
       {/* Toggle and Save Button */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        mt={2}
-      >
+      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
         <Box display="flex" alignItems="center">
           <FormControlLabel
             control={
-              <Switch
-                checked={isSearchable}
-                onChange={(e) => setIsSearchable(e.target.checked)}
-                color="primary"
-              />
+              <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
             }
             label="Allow Search Engines to Crawl"
           />
@@ -152,12 +93,7 @@ const RegionalOrganizersAddress = ({
             </IconButton>
           </Tooltip>
         </Box>
-        <Button
-          onClick={handleSave}
-          color="primary"
-          variant="contained"
-          disabled={isSaveDisabled}
-        >
+        <Button onClick={handleSave} color="primary" variant="contained" disabled={isSaveDisabled}>
           Save
         </Button>
       </Box>

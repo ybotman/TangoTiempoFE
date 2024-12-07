@@ -3,18 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Modal,
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  AppBar,
-  Toolbar,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, AppBar, Toolbar, IconButton, useMediaQuery, useTheme } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useVenues } from '@/hooks/useVenues';
 import VenueModalList from './VenueModalList';
@@ -26,8 +15,7 @@ import modalStyle from '@/components/Styles/modalStyles';
 const VenueModal = ({ open, onClose, defaultCityId }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { venues, fetchVenues, addVenue, updateVenue, deactivateVenue } =
-    useVenues();
+  const { venues, fetchVenues, addVenue, updateVenue, deactivateVenue } = useVenues();
   const [currentTab, setCurrentTab] = useState('list');
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(defaultCityId || '');
@@ -60,12 +48,7 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Venues Management
             </Typography>
-            <IconButton
-              edge="end"
-              color="inherit"
-              onClick={onClose}
-              aria-label="close"
-            >
+            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
               <CloseIcon />
             </IconButton>
           </Toolbar>
@@ -107,11 +90,7 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
               />
             )}
             {currentTab === 'add' && (
-              <VenueModalAdd
-                onAdd={addVenue}
-                refreshList={handleListRefresh}
-                onDone={() => setCurrentTab('list')}
-              />
+              <VenueModalAdd onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('list')} />
             )}
             {currentTab === 'edit' && selectedVenue && (
               <VenueModalEdit

@@ -3,20 +3,12 @@
 'use client';
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Typography,
-  Box,
-} from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, Typography, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { RegionsContext } from '@/contexts/RegionsContext';
 
 const RegionMenu = ({ onClose }) => {
-  const { regions, setSelectedRegion, setSelectedDivision, setSelectedCity } =
-    useContext(RegionsContext);
+  const { regions, setSelectedRegion, setSelectedDivision, setSelectedCity } = useContext(RegionsContext);
   const [selectionLevel, setSelectionLevel] = useState(1);
   const [localSelectedRegion, setLocalSelectedRegion] = useState(null);
   const [localSelectedDivision, setLocalSelectedDivision] = useState(null);
@@ -77,33 +69,21 @@ const RegionMenu = ({ onClose }) => {
       <List component="nav">
         {selectionLevel === 1 &&
           regions.map((region) => (
-            <ListItem
-              button="true"
-              key={region.regionCode}
-              onClick={() => handleRegionClick(region)}
-            >
+            <ListItem button="true" key={region.regionCode} onClick={() => handleRegionClick(region)}>
               <ListItemText primary={region.regionName} />
             </ListItem>
           ))}
 
         {selectionLevel === 2 &&
           localSelectedRegion.divisions.map((division) => (
-            <ListItem
-              button="true"
-              key={division.divisionCode}
-              onClick={() => handleDivisionClick(division)}
-            >
+            <ListItem button="true" key={division.divisionCode} onClick={() => handleDivisionClick(division)}>
               <ListItemText primary={division.divisionName} />
             </ListItem>
           ))}
 
         {selectionLevel === 3 &&
           localSelectedDivision.majorCities.map((city) => (
-            <ListItem
-              button="true"
-              key={city.cityCode}
-              onClick={() => handleCityClick(city)}
-            >
+            <ListItem button="true" key={city.cityCode} onClick={() => handleCityClick(city)}>
               <ListItemText primary={city.cityName} />
             </ListItem>
           ))}

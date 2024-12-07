@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  IconButton,
-  Avatar,
-  Tooltip,
-  Typography,
-  Fade,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Typography, Fade, Snackbar, Alert } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -19,13 +10,8 @@ import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 import { RegionsContext } from '@/contexts/RegionsContext';
 
-const SiteMenuBar = ({
-  activeCategories,
-  handleCategoryChange,
-  categories,
-}) => {
-  const { selectedRole, user, roles, handleRoleChange, logOut } =
-    useSiteMenuBar();
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => {
+  const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
@@ -56,10 +42,7 @@ const SiteMenuBar = ({
 
   useEffect(() => {
     if (!selectedRegion) {
-      const interval = setInterval(
-        () => setPulseRegionText((prev) => !prev),
-        1000
-      );
+      const interval = setInterval(() => setPulseRegionText((prev) => !prev), 1000);
       return () => clearInterval(interval);
     }
   }, [selectedRegion]);
@@ -118,22 +101,12 @@ const SiteMenuBar = ({
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Tooltip
-          title="Login here!"
-          arrow
-          open={!user && showTooltip}
-          placement="left"
-        >
-          <IconButton onClick={() => setUserDrawerOpen(true)}>
-            {renderUserIcon()}
-          </IconButton>
+        <Tooltip title="Login here!" arrow open={!user && showTooltip} placement="left">
+          <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
       </Box>
 
-      <SidebarDrawer
-        open={sidebarDrawerOpen}
-        onClose={() => setSidebarDrawerOpen(false)}
-      />
+      <SidebarDrawer open={sidebarDrawerOpen} onClose={() => setSidebarDrawerOpen(false)} />
       <SiteMenuBarUserDrawer
         userDrawerOpen={userDrawerOpen}
         handleUserDrawerClose={() => setUserDrawerOpen(false)}
@@ -151,11 +124,7 @@ const SiteMenuBar = ({
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert
-          onClose={handleRoleMessageClose}
-          severity="info"
-          sx={{ backgroundColor: 'green.300', color: 'black' }}
-        >
+        <Alert onClose={handleRoleMessageClose} severity="info" sx={{ backgroundColor: 'green.300', color: 'black' }}>
           You have changed role to: {selectedRoleName}
         </Alert>
       </Snackbar>

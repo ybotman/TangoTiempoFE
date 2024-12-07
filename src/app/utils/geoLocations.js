@@ -2,14 +2,7 @@
 
 import axios from 'axios';
 
-export async function geocodeAddress(
-  address1,
-  address2,
-  address3,
-  city,
-  state,
-  zip
-) {
+export async function geocodeAddress(address1, address2, address3, city, state, zip) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   if (!accessToken) {

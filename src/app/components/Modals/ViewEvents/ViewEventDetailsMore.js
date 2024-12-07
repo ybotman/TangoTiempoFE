@@ -7,24 +7,15 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   const [locationDetails, setLocationDetails] = useState(null);
 
   // Extract event details
-  const {
-    categoryFirst,
-    categorySecond,
-    categoryThird,
-    locationID,
-    locationName,
-    ownerOrganizerName,
-    active,
-  } = eventDetails?.extendedProps || {};
+  const { categoryFirst, categorySecond, categoryThird, locationID, locationName, ownerOrganizerName, active } =
+    eventDetails?.extendedProps || {};
 
   // Fetch location details using locationID
   useEffect(() => {
     if (locationID) {
       getLocationById(locationID)
         .then((response) => setLocationDetails(response))
-        .catch((error) =>
-          console.error('Error fetching location details:', error)
-        );
+        .catch((error) => console.error('Error fetching location details:', error));
     }
   }, [locationID, getLocationById]);
 
@@ -32,8 +23,7 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   const renderLocationAddress = () => {
     if (!locationDetails) return 'Address not available';
 
-    const { address_1, address_2, address_3, city, state, zip } =
-      locationDetails;
+    const { address_1, address_2, address_3, city, state, zip } = locationDetails;
     return (
       <>
         <Typography component="span" variant="body1">

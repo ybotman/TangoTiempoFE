@@ -17,10 +17,7 @@ export function useVenues() {
       const params = {};
       if (cityId) params.cityId = cityId;
       if (isActive !== undefined) params.isActive = isActive;
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/venues`,
-        { params }
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       setVenues(response.data);
     } catch (err) {
       setError(err.message);
@@ -33,10 +30,7 @@ export function useVenues() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/venues`,
-        data
-      );
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, data);
       return response.data;
     } catch (err) {
       setError(err.message);
@@ -50,10 +44,7 @@ export function useVenues() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`,
-        data
-      );
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`, data);
       return response.data;
     } catch (err) {
       setError(err.message);
@@ -67,9 +58,7 @@ export function useVenues() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`
-      );
+      const response = await axios.delete(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`);
       return response.data;
     } catch (err) {
       setError(err.message);
