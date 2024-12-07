@@ -1,21 +1,22 @@
+// src/app/hooks/useVenues.js
 'use client';
 
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-//import PropTypes from 'prop-types';
 
 export function useVenues() {
   const [venues, setVenues] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchVenues = useCallback(async (cityId = '', active = true) => {
+  // Note: changed from active to isActive
+  const fetchVenues = useCallback(async (cityId = '', isActive = true) => {
     setLoading(true);
     setError(null);
     try {
       const params = {};
       if (cityId) params.cityId = cityId;
-      if (active !== undefined) params.active = active;
+      if (isActive !== undefined) params.isActive = isActive;
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/venues`,
         { params }
@@ -88,5 +89,3 @@ export function useVenues() {
     deactivateVenue,
   };
 }
-
-useVenues.propTypes = {};

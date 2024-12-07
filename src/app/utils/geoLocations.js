@@ -1,4 +1,3 @@
-// src/app/utils/geolocation.js
 'use client';
 
 import axios from 'axios';
@@ -12,8 +11,13 @@ export async function geocodeAddress(
   zip
 ) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-  if (!accessToken) throw new Error('Mapbox access token not provided');
 
+  if (!accessToken) {
+    console.error('Mapbox access token is missing or not provided.');
+    throw new Error('Mapbox access token is missing or not provided.');
+  }
+
+  // Construct the full address query
   const parts = [
     address1,
     address2,
@@ -21,69 +25,32 @@ export async function geocodeAddress(
     city,
     state,
     zip,
-    'United States',
+    'United States', // Default to United States
   ]
     .filter(Boolean)
     .join(', ');
+
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(parts)}.json?access_token=${accessToken}&limit=1`;
 
-  const response = await axios.get(url);
-  if (
-    response.data &&
-    response.data.features &&
-    response.data.features.length > 0
-  ) {
-    const feature = response.data.features[0];
-    const [lng, lat] = feature.center;
-    return { latitude: lat, longitude: lng };
-  } else {
-    return null;
+  console.log('Geocoding Request URL:', url);
+
+  try {
+    const response = await axios.get(url);
+    console.log('Geocoding Response:', response.data);
+
+    if (response.data.features?.length > 0) {
+      const [lng, lat] = response.data.features[0].center;
+      console.log('Extracted Geo Coordinates:', {
+        latitude: lat,
+        longitude: lng,
+      });
+      return { latitude: lat, longitude: lng };
+    } else {
+      console.warn('Geocoding returned no features.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Geocoding Error:', error.message, error.response?.data);
+    throw error;
   }
 }
-/* 'use client';
-
-import { useEffect } from 'react';
-//import PropTypes from 'prop-types';
-
-const LocationLogger = () => {
-  useEffect(() => {
-    const fetchLocationAndClosestCity = async () => {
-      try {
-        // Fetch IP and location data from ipapi
-        const response = await fetch('https://ipapi.co/json/');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const geoData = await response.json();
-        console.log('IP and Location Data:', geoData);
-        console.log('IP Address:', geoData.ip);
-        console.log('City:', geoData.city);
-        console.log('Region:', geoData.region);
-        console.log('Country:', geoData.country_name);
-        console.log('Latitude:', geoData.latitude);
-        console.log('Longitude:', geoData.longitude);
-
-        // Call backend API to find the closest city from the NEW endpoint
-        const backendResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity?latitude=${geoData.latitude}&longitude=${geoData.longitude}`
-        );
-        if (!backendResponse.ok) {
-          throw new Error(`Backend error! status: ${backendResponse.status}`);
-        }
-        const nearestCity = await backendResponse.json();
-        console.log('Closest Country/Region/Division/City:', nearestCity);
-      } catch (error) {
-        console.error('Failed to fetch location or closest city:', error);
-      }
-    };
-
-    fetchLocationAndClosestCity();
-  }, []);
-
-  return null; // No UI
-};
-
-LocationLogger.propTypes = {};
-
-export default LocationLogger;
-*/
