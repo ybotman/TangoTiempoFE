@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Define public environment variables
-  //   env: {
-  //       TangoTiempoBE_URL: process.env.NEXT_PUBLIC_BE_URL,
-  //   },
-
   // Webpack configuration for custom logging
   webpack: (config, { buildId, dev, isServer }) => {
     // Log the public environment variables

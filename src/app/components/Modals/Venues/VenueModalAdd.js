@@ -20,10 +20,10 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
 
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  const [calculatedCityId, setCalculatedCityId] = useState(null);
-  const [calculatedDivisionId, setCalculatedDivisionId] = useState(null);
-  const [calculatedRegionId, setCalculatedRegionId] = useState(null);
-  const [calculatedCountryId, setCalculatedCountryId] = useState(null);
+  const [masteredCityId, setMasteredCityId] = useState(null);
+  const [masteredDivisionId, setMasteredDivisionId] = useState(null);
+  const [masteredRegionId, setMasteredRegionId] = useState(null);
+  const [masteredCountryId, setMasteredCountryId] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -64,10 +64,10 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
       return;
     }
 
-    // Step B: Find nearest calculatedCity
+    // Step B: Find nearest masteredCity
     let cityInfo;
     try {
-      const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity`, {
+      const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestCity`, {
         params: {
           latitude: latLongResult.latitude,
           longitude: latLongResult.longitude,
@@ -78,17 +78,17 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
         setErrorMessage('No nearest city found. Venue may be inactive.');
         return;
       }
-      setCalculatedCityId(cityInfo.cityId || null);
-      setCalculatedDivisionId(cityInfo.divisionId || null);
-      setCalculatedRegionId(cityInfo.regionId || null);
-      setCalculatedCountryId(cityInfo.countryId || null);
+      setMasteredCityId(cityInfo.cityId || null);
+      setMasteredDivisionId(cityInfo.divisionId || null);
+      setMasteredRegionId(cityInfo.regionId || null);
+      setMasteredCountryId(cityInfo.countryId || null);
     } catch (err) {
       console.error(err);
       setErrorMessage('Failed to find nearest calculated city.');
       return;
     }
 
-    // Step D: Check for duplicates within 300 meters in the same calculatedCity
+    // Step D: Check for duplicates within 300 meters in the same masteredCity
     // We'll filter by cityId. If cityId is known, we can pass it as cityId param.
     try {
       const venuesResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, {
@@ -137,10 +137,10 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
       }
 
       // Include calculated fields if we got them
-      if (calculatedCityId) data.calculatedCityId = calculatedCityId;
-      if (calculatedDivisionId) data.calculatedDivisionId = calculatedDivisionId;
-      if (calculatedRegionId) data.calculatedRegionId = calculatedRegionId;
-      if (calculatedCountryId) data.calculatedCountryId = calculatedCountryId;
+      if (masteredCityId) data.masteredCityId = masteredCityId;
+      if (masteredDivisionId) data.masteredDivisionId = masteredDivisionId;
+      if (masteredRegionId) data.masteredRegionId = masteredRegionId;
+      if (masteredCountryId) data.masteredCountryId = masteredCountryId;
 
       await onAdd(data);
       refreshList();

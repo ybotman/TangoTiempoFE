@@ -150,7 +150,7 @@ VenueModalEdit.propTypes = {
     latitude: PropTypes.number,
     longitude: PropTypes.number,
     active: PropTypes.bool,
-    calculatedCityId: PropTypes.shape({
+    masteredCityId: PropTypes.shape({
       cityName: PropTypes.string,
     }),
   }),

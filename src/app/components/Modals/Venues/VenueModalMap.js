@@ -16,7 +16,7 @@ const VenueModalMap = ({ venues }) => {
 
   const fetchCities = useCallback(async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/activeCities`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/activeCities`);
       setCities(response.data);
     } catch (err) {
       console.error('Error fetching cities:', err);
@@ -53,7 +53,7 @@ const VenueModalMap = ({ venues }) => {
 
     let filteredVenues = venues;
     if (cityFilter) {
-      filteredVenues = venues.filter((v) => v.calculatedCityId?.['_id'] === cityFilter);
+      filteredVenues = venues.filter((v) => v.masteredCityId?.['_id'] === cityFilter);
     }
 
     filteredVenues.forEach((v) => {

@@ -14,25 +14,25 @@ const LocationLogger = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const geoData = await response.json();
-        console.log('IP and Location Data:', geoData);
-        console.log('IP Address:', geoData.ip);
-        console.log('City:', geoData.city);
-        console.log('Region:', geoData.region);
-        console.log('Country:', geoData.country_name);
-        console.log('Latitude:', geoData.latitude);
-        console.log('Longitude:', geoData.longitude);
+        console.log('LL:uE-> IP and Location Data:', geoData);
+        console.log('LL:uE->IP Address:', geoData.ip);
+        console.log('LL:uE-> City:', geoData.city);
+        console.log('LL:uE-> Region:', geoData.region);
+        console.log('LL:uE-> Country:', geoData.country_name);
+        console.log('LL:uE-> Latitude:', geoData.latitude);
+        console.log('LL:uE-> Longitude:', geoData.longitude);
 
         // Call backend API to find the closest city from the provided endpoint
         const backendResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity?latitude=${geoData.latitude}&longitude=${geoData.longitude}`
+          `${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestCity?latitude=${geoData.latitude}&longitude=${geoData.longitude}`
         );
         if (!backendResponse.ok) {
           throw new Error(`Backend error! status: ${backendResponse.status}`);
         }
         const nearestCity = await backendResponse.json();
-        console.log('Closest Country/Region/Division/City:', nearestCity);
+        console.log('LL:uE-> Closest Country/Region/Division/City:', nearestCity);
       } catch (error) {
-        console.error('Failed to fetch location or closest city:', error);
+        console.error('LL:uE-> Failed to fetch location or closest city:', error);
       }
     };
 

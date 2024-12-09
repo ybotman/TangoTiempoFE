@@ -36,10 +36,10 @@ export const AuthProvider = ({ children }) => {
       // const startTime = Date.now();
 
       if (currentUser) {
-        console.log('User is logged in:', currentUser.uid);
+        console.log('AuthCtx:uE-> User is logged in:', currentUser.uid);
         await setUserData(currentUser);
       } else {
-        console.log('No user is logged in');
+        console.log('AuthCtx:uE-> No user is logged in');
         setUser(null);
         setSelectedRole(''); // Reset selectedRole on logout
       }

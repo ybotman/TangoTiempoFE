@@ -12,15 +12,15 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
     try {
       const params = {
         active: true,
-        calculatedRegionName: selectedRegion,
-        calculatedDivisionName: selectedDivision || undefined,
-        calculatedCityName: selectedCity || undefined,
+        masteredRegionName: selectedRegion,
+        masteredDivisionName: selectedDivision || undefined,
+        masteredCityName: selectedCity || undefined,
         start: calendarStart,
         end: calendarEnd,
       };
       console.log('Fetching events with params:', params);
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/byMasteredLocations`, {
         params,
       });
       setEvents(response.data);

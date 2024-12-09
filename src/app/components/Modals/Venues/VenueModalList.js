@@ -16,7 +16,7 @@ import {
   ListItemText,
   Divider,
 } from '@mui/material';
-import { useCalculatedLocations } from '@/hooks/useCalculatedLocations';
+import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 
 const VenueModalList = ({
   venues,
@@ -29,7 +29,7 @@ const VenueModalList = ({
   refreshList,
 }) => {
   const { countries, regions, divisions, cities, fetchCountries, fetchRegions, fetchDivisions, fetchCities } =
-    useCalculatedLocations();
+    useMasteredLocations();
 
   const [countryId, setCountryId] = useState('');
   const [regionId, setRegionId] = useState('');
@@ -196,7 +196,7 @@ const VenueModalList = ({
         <List>
           {venues.map((v) => {
             const addr = [v.address1, v.address2, v.address3].filter(Boolean).join(', ');
-            const cityName = v.calculatedCityId?.cityName || 'No City';
+            const cityName = v.masteredCityId?.cityName || 'No City';
             const statusText = v.isActive ? '' : '(Inactive)';
 
             return (
@@ -236,7 +236,7 @@ VenueModalList.propTypes = {
       address1: PropTypes.string,
       address2: PropTypes.string,
       address3: PropTypes.string,
-      calculatedCityId: PropTypes.shape({
+      masteredCityId: PropTypes.shape({
         cityName: PropTypes.string,
       }),
       isActive: PropTypes.bool,

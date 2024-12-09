@@ -20,7 +20,7 @@ export function useGeoLocations() {
         setGeoData(data);
 
         // Fetch the nearest city from the NEW backend route
-        const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/calculatedLocations/nearestCity`, {
+        const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestCity`, {
           params: {
             longitude: data.longitude,
             latitude: data.latitude,

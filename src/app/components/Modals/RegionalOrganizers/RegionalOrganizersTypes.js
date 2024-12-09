@@ -77,7 +77,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
     try {
       await updateOrganizer(organizerId, updateData);
       setInitialTypes(types);
-      console.log('Types updated successfully.');
+      //console.log('Types updated successfully.');
     } catch (error) {
       console.error('Failed to update types:', error);
     }
