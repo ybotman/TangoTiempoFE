@@ -1,4 +1,4 @@
-// src/app/utils/commitVersions.js
+// @/utils/commitVersions.js
 
 import fs from 'fs';
 import { execSync } from 'child_process';

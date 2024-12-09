@@ -1,4 +1,4 @@
-// src/app/hooks/useGoogleAnalytics.js
+// @/hooks/useGoogleAnalytics.js
 'use client';
 
 import { useEffect } from 'react';

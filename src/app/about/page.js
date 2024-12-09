@@ -1,4 +1,4 @@
-// src/app/about/page.js
+// @/about/page.js
 
 import React from 'react';
 import styles from '@/styles/About.module.css';

@@ -1,4 +1,4 @@
-// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersImages.js
+// @/components/Modals/RegionalOrganizers/RegionalOrganizersImages.js
 
 'use client';
 

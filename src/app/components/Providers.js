@@ -1,4 +1,4 @@
-// src/app/components/Providers.js
+// @/components/Providers.js
 'use client';
 
 import React from 'react';

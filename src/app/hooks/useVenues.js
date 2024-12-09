@@ -1,4 +1,4 @@
-// src/app/hooks/useVenues.js
+// @/hooks/useVenues.js
 'use client';
 
 import { useState, useCallback } from 'react';

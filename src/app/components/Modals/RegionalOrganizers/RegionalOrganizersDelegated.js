@@ -1,4 +1,4 @@
-// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
+// @/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
 'use client';
 
 import React, { useEffect, useState } from 'react';

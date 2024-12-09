@@ -1,4 +1,4 @@
-// src/app/organizer/[slug]/page.js
+// @/organizer/[slug]/page.js
 
 import fs from 'fs';
 import path from 'path';

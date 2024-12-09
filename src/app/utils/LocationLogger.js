@@ -1,4 +1,4 @@
-// src/app/components/LocationLogger.js
+// @/utils/LocationLogger.js
 'use client';
 
 import { useEffect } from 'react';

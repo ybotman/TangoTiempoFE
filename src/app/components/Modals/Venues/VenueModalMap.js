@@ -1,4 +1,4 @@
-// src/app/components/Modals/Venues/VenueModalMap.js
+// @/components/Modals/Venues/VenueModalMap.js
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';

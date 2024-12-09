@@ -1,4 +1,4 @@
-// src/app/hooks/useMasteredLocations.js
+// @/hooks/useMasteredLocations.js
 'use client';
 
 import { useState, useCallback } from 'react';
