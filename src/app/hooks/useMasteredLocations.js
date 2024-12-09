@@ -1,4 +1,3 @@
-// @/hooks/useMasteredLocations.js
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -10,6 +9,7 @@ export function useMasteredLocations() {
   const [regions, setRegions] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [cities, setCities] = useState([]);
+  const [nearestCity, setNearestCity] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -90,17 +90,46 @@ export function useMasteredLocations() {
     [baseURL]
   );
 
+  const fetchNearestCity = useCallback(
+    async ({ latitude, longitude, maxDistance, isActive = true }) => {
+      if (!latitude || !longitude) {
+        setError('Latitude and longitude are required.');
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`${baseURL}/api/masteredLocations/nearestCity`, {
+          params: {
+            latitude,
+            longitude,
+            ...(maxDistance && { maxDistance }),
+            isActive,
+          },
+        });
+        setNearestCity(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [baseURL]
+  );
+
   return {
     countries,
     regions,
     divisions,
     cities,
+    nearestCity,
     loading,
     error,
     fetchCountries,
     fetchRegions,
     fetchDivisions,
     fetchCities,
+    fetchNearestCity,
   };
 }
 

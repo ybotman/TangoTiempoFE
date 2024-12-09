@@ -1,39 +1,37 @@
-// @/components/Modals/Venues/VenueModalMap.js
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import dynamic from 'next/dynamic';
 import { Box, Typography, TextField, MenuItem } from '@mui/material';
-import L from 'leaflet';
+import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 import 'leaflet/dist/leaflet.css';
-import axios from 'axios';
+
+// Dynamically import Leaflet without SSR
+const L = dynamic(() => import('leaflet'), { ssr: false });
 
 const VenueModalMap = ({ venues }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [cities, setCities] = useState([]);
   const [cityFilter, setCityFilter] = useState('');
 
-  const fetchCities = useCallback(async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/activeCities`);
-      setCities(response.data);
-    } catch (err) {
-      console.error('Error fetching cities:', err);
-    }
-  }, []);
+  // Use the useMasteredLocations hook
+  const { cities, fetchCities, loading, error } = useMasteredLocations();
 
   useEffect(() => {
+    // Fetch active cities when the component loads
     fetchCities();
   }, [fetchCities]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (typeof window === 'undefined' || !mapRef.current) return; // Ensure this only runs on the client
+
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapRef.current, {
         center: [37.0902, -95.7129],
         zoom: 4,
       });
+
       L.tileLayer(
         `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
         {
@@ -45,23 +43,30 @@ const VenueModalMap = ({ venues }) => {
     }
 
     const map = mapInstanceRef.current;
+
+    // Clear existing markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker) {
         map.removeLayer(layer);
       }
     });
 
+    // Apply city filter
     let filteredVenues = venues;
     if (cityFilter) {
       filteredVenues = venues.filter((v) => v.masteredCityId?.['_id'] === cityFilter);
     }
 
+    // Add markers
     filteredVenues.forEach((v) => {
       if (v.latitude && v.longitude) {
         L.marker([v.latitude, v.longitude]).addTo(map).bindPopup(`${v.name} (${v.shortName})`);
       }
     });
   }, [venues, cityFilter]);
+
+  if (loading) return <Typography>Loading cities...</Typography>;
+  if (error) return <Typography color="error">Error loading cities: {error}</Typography>;
 
   return (
     <Box sx={{ mt: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>

@@ -2,9 +2,11 @@
 'use client';
 
 import { useEffect } from 'react';
-//import PropTypes from 'prop-types';
+import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 
 const LocationLogger = () => {
+  const { nearestCity, fetchNearestCity, error } = useMasteredLocations();
+
   useEffect(() => {
     const fetchLocationAndClosestCity = async () => {
       try {
@@ -14,34 +16,40 @@ const LocationLogger = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const geoData = await response.json();
-        console.log('LL:uE-> IP and Location Data:', geoData);
-        console.log('LL:uE->IP Address:', geoData.ip);
-        console.log('LL:uE-> City:', geoData.city);
-        console.log('LL:uE-> Region:', geoData.region);
-        console.log('LL:uE-> Country:', geoData.country_name);
-        console.log('LL:uE-> Latitude:', geoData.latitude);
-        console.log('LL:uE-> Longitude:', geoData.longitude);
 
-        // Call backend API to find the closest city from the provided endpoint
-        const backendResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestCity?latitude=${geoData.latitude}&longitude=${geoData.longitude}`
-        );
-        if (!backendResponse.ok) {
-          throw new Error(`Backend error! status: ${backendResponse.status}`);
-        }
-        const nearestCity = await backendResponse.json();
-        console.log('LL:uE-> Closest Country/Region/Division/City:', nearestCity);
+        // Log IP and location details (IP, Latitude, Longitude)
+        console.log('LL:uE-> ipapi full:', geoData);
+        console.log(`LL:uE-> ipapi IP: ${geoData.ip}, Lat: ${geoData.latitude}, Long: ${geoData.longitude}`);
+        console.log(`LL:uE-> ipapi Location: ${geoData.country_name},${geoData.region}, ${geoData.city}`);
+
+        // Use hook to fetch nearest city
+        fetchNearestCity({
+          latitude: geoData.latitude,
+          longitude: geoData.longitude,
+          maxDistance: 50000, // Example: 50 km
+          isActive: true,
+        });
       } catch (error) {
         console.error('LL:uE-> Failed to fetch location or closest city:', error);
       }
     };
 
     fetchLocationAndClosestCity();
-  }, []);
+  }, [fetchNearestCity]);
+
+  useEffect(() => {
+    if (nearestCity) {
+      console.log(
+        'LL:uE-> Nearest Mastered to ipapi :',
+        [nearestCity.countryName, nearestCity.regionName, nearestCity.divisionName, nearestCity.cityName].join(', ')
+      );
+    }
+    if (error) {
+      console.error('LL:uE-> Error fetching nearest city:', error);
+    }
+  }, [nearestCity, error]);
 
   return null; // No UI needed
 };
-
-LocationLogger.propTypes = {};
 
 export default LocationLogger;
