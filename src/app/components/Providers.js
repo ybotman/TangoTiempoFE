@@ -6,15 +6,18 @@ import PropTypes from 'prop-types';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RegionsProvider } from '@/contexts/RegionsContext';
 import { RoleProvider } from '@/contexts/RoleContext';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { MasteredLocationProvider } from '@/contexts/MasteredLocationContext';
 
 const Providers = ({ children }) => {
   return (
     <AuthProvider>
       <RegionsProvider>
         <LocalizationProvider dateAdapter={AdapterLuxon}>
-          <RoleProvider>{children}</RoleProvider>
+          <RoleProvider>
+            <MasteredLocationProvider>{children}</MasteredLocationProvider>
+          </RoleProvider>
         </LocalizationProvider>
       </RegionsProvider>
     </AuthProvider>

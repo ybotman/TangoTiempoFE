@@ -3,7 +3,6 @@ import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
-import LocationLogger from '@/utils/LocationLogger';
 
 export const metadata = {
   title: 'Tango Tiempo - The National Tango Calendar',
@@ -49,7 +48,6 @@ export default function RootLayout({ children }) {
         <SidebarDrawer />
         <div style={{ flexGrow: 1, padding: '1rem' }}>
           <Providers>
-            <LocationLogger />
             <GoogleClientWrapper>{children}</GoogleClientWrapper>
           </Providers>
         </div>

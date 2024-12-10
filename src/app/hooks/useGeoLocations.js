@@ -1,41 +1,48 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+// This hook fetches the user's IP-based geolocation via ipapi.
+// It returns latitude, longitude, loading, error, and a refetch function.
 export function useGeoLocations() {
-  const [geoData, setGeoData] = useState(null);
-  const [nearestCity, setNearestCity] = useState(null);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchGeoLocation = async () => {
-      try {
-        // Fetch IP-based geolocation
-        const response = await fetch('https://ipapi.co/json/');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch geolocation: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setGeoData(data);
-
-        // Fetch the nearest city from the NEW backend route
-        const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestCity`, {
-          params: {
-            longitude: data.longitude,
-            latitude: data.latitude,
-          },
-        });
-
-        setNearestCity(cityResponse.data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message || 'Failed to fetch geolocation or nearest city');
+  const fetchIPLocation = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await axios.get('https://ipapi.co/json/');
+      if (data && data.latitude && data.longitude) {
+        setLatitude(data.latitude);
+        setLongitude(data.longitude);
+      } else {
+        throw new Error('Unable to retrieve latitude/longitude from ipapi.');
       }
-    };
-
-    fetchGeoLocation();
+    } catch (err) {
+      console.error('useGeoLocations-> Error:', err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { geoData, nearestCity, error };
+  useEffect(() => {
+    fetchIPLocation();
+  }, [fetchIPLocation]);
+
+  const refetch = async () => {
+    await fetchIPLocation();
+  };
+
+  return {
+    latitude,
+    longitude,
+    loading,
+    error,
+    refetch,
+  };
 }

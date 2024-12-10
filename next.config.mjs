@@ -29,8 +29,18 @@ const nextConfig = {
     ],
   },
 
-  // Any other Next.js configurations can be added here
-  reactStrictMode: true, // Example of enabling strict mode
+  // Add rewrites to route API calls to the backend server
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*', // Proxy to your Express backend
+      },
+    ];
+  },
+
+  // Enable React strict mode
+  reactStrictMode: true,
 };
 
 export default nextConfig;
