@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 
 const LocationLogger = () => {
-  const { nearestCity, fetchNearestCity, error } = useMasteredLocations();
+  const { nearestCity, fetchNearestMastered, error } = useMasteredLocations();
 
   const safeParseJSON = async (response) => {
     const contentType = response.headers.get('content-type');
@@ -18,7 +18,7 @@ const LocationLogger = () => {
   };
 
   useEffect(() => {
-    const fetchLocationAndClosestCity = async () => {
+    const fetchLocationAndNearestMastered = async () => {
       try {
         // Fetch IP-based geolocation from ipapi
         const ipapiUrl = 'https://ipapi.co/json/';
@@ -34,8 +34,8 @@ const LocationLogger = () => {
         console.log(`LL:uE-> ipapi IP: ${ipapiData.ip}, Lat: ${ipapiData.latitude}, Long: ${ipapiData.longitude}`);
         console.log(`LL:uE-> ipapi Location: ${ipapiData.country_name}, ${ipapiData.region}, ${ipapiData.city}`);
 
-        // Use hook to fetch nearest city from ipapi location
-        await fetchNearestCity({
+        // Use hook to fetch nearest mastered location from ipapi location
+        await fetchNearestMastered({
           latitude: ipapiData.latitude,
           longitude: ipapiData.longitude,
           maxDistance: 50000, // Example: 50 km
@@ -69,8 +69,8 @@ const LocationLogger = () => {
       }
     };
 
-    fetchLocationAndClosestCity();
-  }, [fetchNearestCity]);
+    fetchLocationAndNearestMastered();
+  }, [fetchNearestMastered]);
 
   useEffect(() => {
     if (nearestCity) {
@@ -80,7 +80,7 @@ const LocationLogger = () => {
       );
     }
     if (error) {
-      console.error('LL:uE-> Error fetching nearest city:', error);
+      console.error('LL:uE-> Error fetching nearest mastered location:', error);
     }
   }, [nearestCity, error]);
 

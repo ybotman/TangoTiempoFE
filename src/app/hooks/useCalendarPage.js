@@ -5,7 +5,6 @@ import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
-//import { RegionsContext } from '@/contexts/RegionsContext';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
@@ -19,55 +18,25 @@ export const useCalendarPage = () => {
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
-  const { nearestCity, nearestDivision, nearestRegion } = useMasteredLocation();
+  const { nearestCity } = useMasteredLocation();
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const calendarRef = useRef(null);
-
-  /* const {
-    regions,
-    selectedRegion,
-    setSelectedRegion,
-    selectedDivision,
-    setSelectedDivision,
-    selectedCity,
-    setSelectedCity,
-  } = useContext(RegionsContext);
-
-
-  const handleRegionChange = (event) => {
-    const selectedValue = event.target.value;
-
-    if (!selectedValue) {
-      console.error('No region selected');
-      return;
-    }
-
- const selectedRegion = regions.find((region) => region._id === selectedValue);
-
-    if (selectedRegion) {
-      setSelectedRegion(selectedRegion);
-      setSelectedDivision('');
-      setSelectedCity('');
-      refreshEvents();
-    } else {
-      console.error('Region not found for selected value:', selectedValue);
-    }
-  };
-
   const { events, refreshEvents } = useEvents(
-    selectedRegion,
-    selectedDivision,
-    selectedCity,
+    nearestCity.regionName,
+    nearestCity.divisionName,
+    nearestCity.cityName,
     datesSet?.start,
     datesSet?.end
   );
-  */
-
-  const { events, refreshEvents } = useEvents(
-    nearestRegion,
-    nearestDivision,
-    nearestCity,
+  console.log(
+    'uCP : ',
+    nearestCity.regionName,
+    '>>',
+    nearestCity.divisionName,
+    '>>',
+    nearestCity.cityName,
+    '>>',
     datesSet?.start,
     datesSet?.end
   );

@@ -13,7 +13,7 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
     try {
       const params = {
         active: true, // Always fetch active events
-        masteredRegionName: selectedRegion,
+        masteredRegionName: selectedRegion || undefined,
         masteredDivisionName: selectedDivision || undefined,
         masteredCityName: selectedCity || undefined,
         start: calendarStart,

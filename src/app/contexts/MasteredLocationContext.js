@@ -18,7 +18,7 @@ export const MasteredLocationProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const url = `/api/masteredLocations/nearestCity?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true`;
+      const url = `/api/masteredLocations/nearestMastered?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true`;
 
       const response = await fetch(url);
       if (!response.ok) {

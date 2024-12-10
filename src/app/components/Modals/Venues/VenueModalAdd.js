@@ -67,7 +67,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     // Step B: Find nearest masteredCity
     let cityInfo;
     try {
-      const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestCity`, {
+      const cityResponse = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/nearestMastered`, {
         params: {
           latitude: latLongResult.latitude,
           longitude: latLongResult.longitude,
