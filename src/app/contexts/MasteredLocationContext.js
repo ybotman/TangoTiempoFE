@@ -21,13 +21,14 @@ export const MasteredLocationProvider = ({ children }) => {
       const url = `/api/masteredLocations/nearestCity?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true`;
 
       const response = await fetch(url);
-      const rawResponse = await response.text();
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Response is not valid JSON. Check server configuration.');
+      if (!response.ok) {
+        const message =
+          response.status === 404 ? 'No nearby city found.' : `Error fetching nearest city: ${response.statusText}`;
+        setError(message);
+        throw new Error(message);
       }
-      const data = JSON.parse(rawResponse);
 
+      const data = await response.json();
       setNearestCity({
         cityID: data.cityID,
         cityName: data.cityName,
@@ -49,16 +50,15 @@ export const MasteredLocationProvider = ({ children }) => {
   const initializeContext = async () => {
     try {
       const ipapiResponse = await fetch('https://ipapi.co/json/');
-      console.log('MLC-> IPAPI Response Status:', ipapiResponse.status);
+
       if (!ipapiResponse.ok) {
-        throw new Error(`ipapi error: ${ipapiResponse.statusText}`);
+        throw new Error(`IPAPI Error: ${ipapiResponse.statusText}`);
       }
+      const { latitude, longitude } = await ipapiResponse.json();
 
-      const ipapiData = await ipapiResponse.json();
-      console.log('MLC-> IPAPI Data:', ipapiData);
-
-      const { latitude, longitude } = ipapiData;
-      console.log('MLC-> Initial Latitude:', latitude, 'Longitude:', longitude);
+      if (!latitude || !longitude) {
+        throw new Error('Invalid geolocation data from IPAPI.');
+      }
 
       await fetchNearestCity(latitude, longitude);
     } catch (err) {
