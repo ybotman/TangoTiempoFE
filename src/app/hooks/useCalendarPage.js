@@ -1,12 +1,13 @@
 // src/hooks/useCalendarPage.js
-import { useState, useContext, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
-import { RegionsContext } from '@/contexts/RegionsContext';
-import { trackEvent } from '@/hooks/useGoogleAnalytics'; // Import the tracking function
+//import { RegionsContext } from '@/contexts/RegionsContext';
+import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
 
 export const useCalendarPage = () => {
@@ -18,8 +19,12 @@ export const useCalendarPage = () => {
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
+  const { nearestCity, nearestDivision, nearestRegion } = useMasteredLocation();
+  const [datesSet, setDatesSet] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const calendarRef = useRef(null);
 
-  const {
+  /* const {
     regions,
     selectedRegion,
     setSelectedRegion,
@@ -29,10 +34,6 @@ export const useCalendarPage = () => {
     setSelectedCity,
   } = useContext(RegionsContext);
 
-  const [datesSet, setDatesSet] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-
-  const calendarRef = useRef(null);
 
   const handleRegionChange = (event) => {
     const selectedValue = event.target.value;
@@ -42,7 +43,7 @@ export const useCalendarPage = () => {
       return;
     }
 
-    const selectedRegion = regions.find((region) => region._id === selectedValue);
+ const selectedRegion = regions.find((region) => region._id === selectedValue);
 
     if (selectedRegion) {
       setSelectedRegion(selectedRegion);
@@ -54,13 +55,6 @@ export const useCalendarPage = () => {
     }
   };
 
-  const handleDatesSet = (dateInfo) => {
-    setDatesSet({
-      start: dateInfo.startStr,
-      end: dateInfo.endStr,
-    });
-  };
-
   const { events, refreshEvents } = useEvents(
     selectedRegion,
     selectedDivision,
@@ -68,6 +62,23 @@ export const useCalendarPage = () => {
     datesSet?.start,
     datesSet?.end
   );
+  */
+
+  const { events, refreshEvents } = useEvents(
+    nearestRegion,
+    nearestDivision,
+    nearestCity,
+    datesSet?.start,
+    datesSet?.end
+  );
+
+  const handleDatesSet = (dateInfo) => {
+    setDatesSet({
+      start: dateInfo.startStr,
+      end: dateInfo.endStr,
+    });
+  };
+
   const transformedEvents = transformEvents(events);
   const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(transformedEvents, categories);
 
@@ -199,7 +210,7 @@ export const useCalendarPage = () => {
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     handleEventCreated,
-    handleRegionChange,
+    // handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,

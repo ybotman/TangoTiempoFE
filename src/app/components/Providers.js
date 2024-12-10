@@ -9,6 +9,7 @@ import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { MasteredLocationProvider } from '@/contexts/MasteredLocationContext';
+import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 
 const Providers = ({ children }) => {
   return (
@@ -16,7 +17,10 @@ const Providers = ({ children }) => {
       <RegionsProvider>
         <LocalizationProvider dateAdapter={AdapterLuxon}>
           <RoleProvider>
-            <MasteredLocationProvider>{children}</MasteredLocationProvider>
+            <MasteredLocationProvider>
+              <MasteredLocationLogger />
+              {children}
+            </MasteredLocationProvider>
           </RoleProvider>
         </LocalizationProvider>
       </RegionsProvider>
