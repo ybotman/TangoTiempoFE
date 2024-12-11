@@ -1,4 +1,11 @@
-// src/hooks/useCalendarPage.js
+// JAX MODE
+// FULL FILE REPLACEMENT CODE FOR: src/hooks/useCalendarPage.js
+// Explanation:
+// Currently, if nearestCity is null (not yet loaded), attempting to access nearestCity.regionName (and others) throws an error.
+// We will add safe null checks by using optional chaining and defaults.
+// No features are dropped. All existing code is preserved and functional.
+// This ensures that if nearestCity is not yet defined, we pass empty strings to useEvents, preventing runtime errors.
+
 import { useState, useRef } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
@@ -22,24 +29,15 @@ export const useCalendarPage = () => {
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const calendarRef = useRef(null);
-  const { events, refreshEvents } = useEvents(
-    nearestCity.regionName,
-    nearestCity.divisionName,
-    nearestCity.cityName,
-    datesSet?.start,
-    datesSet?.end
-  );
-  console.log(
-    'uCP : ',
-    nearestCity.regionName,
-    '>>',
-    nearestCity.divisionName,
-    '>>',
-    nearestCity.cityName,
-    '>>',
-    datesSet?.start,
-    datesSet?.end
-  );
+
+  // Safely handle nearestCity fields
+  const regionName = nearestCity?.regionName || '';
+  const divisionName = nearestCity?.divisionName || '';
+  const cityName = nearestCity?.cityName || '';
+
+  const { events, refreshEvents } = useEvents(regionName, divisionName, cityName, datesSet?.start, datesSet?.end);
+
+  console.log('uCP : ', regionName, '>>', divisionName, '>>', cityName, '>>', datesSet?.start, datesSet?.end);
 
   const handleDatesSet = (dateInfo) => {
     setDatesSet({
@@ -118,8 +116,8 @@ export const useCalendarPage = () => {
       label: arg.dateStr,
     });
 
-    const menuItems = getMenuItems('dateClick'); // Correctly call getMenuItems
-    setMenuItems(menuItems);
+    const items = getMenuItems('dateClick');
+    setMenuItems(items);
     setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
   };
 
@@ -134,8 +132,8 @@ export const useCalendarPage = () => {
       value: arg.event.id,
     });
 
-    const menuItems = getMenuItems('eventClick');
-    setMenuItems(menuItems);
+    const items = getMenuItems('eventClick');
+    setMenuItems(items);
     setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
   };
 
@@ -179,7 +177,6 @@ export const useCalendarPage = () => {
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     handleEventCreated,
-    // handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,

@@ -1,4 +1,10 @@
-// SidebarDrawer.js (FULL CODE provided, now adding Venues option)
+// JAX MODE
+// FULL FILE REPLACEMENT CODE FOR: @/components/UI/SidebarDrawer.js
+// Explanation: We are removing the Regions icon item and replacing it with a new Map icon that opens the new LocationContextModal.
+// We do not remove any underlying region code (like RegionMenu). We simply comment out the region UI code to "phase out" visually without dropping code.
+// We add a new state for locationModalOpen, import MapIcon, and render the new modal.
+// All other code remains as is. No functions or imports are dropped. Just commented out the region portion as requested.
+// We include PropTypes at end as required.
 
 'use client';
 import React, { useState, useContext } from 'react';
@@ -10,9 +16,9 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
-  Avatar,
+  //  Avatar,
   Typography,
-  Collapse,
+  //  Collapse,
 } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
@@ -25,9 +31,9 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
+//import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
-import RegionMenu from './RegionMenu';
+//import RegionMenu from './RegionMenu';
 import UserSettingsModal from '@/components/Modals/UserSettings/UserSettingsModal';
 import RegionalOrganizersModal from '@/components/Modals/RegionalOrganizers/RegionalOrganizersModal';
 import PrivacyPolicyModal from '@/components/Modals/misc/PrivacyPolicyModal';
@@ -36,15 +42,20 @@ import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import VenueModal from '@/components/Modals/Venues/VenueModal';
+import MapIcon from '@mui/icons-material/Map';
+import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
 
 const SidebarDrawer = ({ open, onClose }) => {
-  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
+  //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
   const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false);
   const [systemAdminOpen, setSystemAdminOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
+
+  // NEW STATE FOR LOCATION MODAL
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
 
@@ -63,7 +74,8 @@ const SidebarDrawer = ({ open, onClose }) => {
         }}
       >
         <List>
-          {/* Regions Section */}
+          {/* REGIONS SECTION - COMMENTED OUT AS WE ARE PHASING OUT, BUT NOT REMOVING */}
+          {/* 
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Select a Region
@@ -78,7 +90,28 @@ const SidebarDrawer = ({ open, onClose }) => {
           <Collapse in={regionMenuOpen} timeout="auto" unmountOnExit>
             <RegionMenu onClose={() => setRegionMenuOpen(false)} />
           </Collapse>
+          */}
+          {/* END OF COMMENTED REGION SECTION */}
+
+          {/* NEW MAP ICON SECTION */}
           <Divider />
+          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+            Location Context
+          </Typography>
+          <ListItem
+            button="true"
+            onClick={() => {
+              setLocationModalOpen(true);
+              onClose();
+            }}
+          >
+            <ListItemIcon>
+              <MapIcon sx={{ color: 'blue' }} />
+            </ListItemIcon>
+            <ListItemText primary="Map (Change Location)" />
+          </ListItem>
+          <Divider />
+
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Role Settings
           </Typography>
@@ -118,7 +151,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 <ListItemText primary="Regional Organizer" />
               </ListItem>
-              {/* Add the Venue Modal option here */}
+
               <ListItem
                 button="true"
                 onClick={() => {
@@ -231,12 +264,11 @@ const SidebarDrawer = ({ open, onClose }) => {
               onClose();
             }}
           >
-            <ListItemIcon>{/* Add an icon here if needed */}</ListItemIcon>
+            <ListItemIcon>{/* Add an icon if needed */}</ListItemIcon>
             <ListItemText primary="Privacy Policy Details" />
           </ListItem>
         </List>
       </Drawer>
-
       {/* Modals */}
       <UserSettingsModal open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} />
       <RegionalOrganizersModal open={regionalOrganizerOpen} onClose={() => setRegionalOrganizerOpen(false)} />
@@ -244,6 +276,7 @@ const SidebarDrawer = ({ open, onClose }) => {
       <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
+      <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
     </>
   );
 };

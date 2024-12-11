@@ -1,8 +1,12 @@
+// JAX MODE
+// FULL FILE REPLACEMENT CODE FOR: src/app/layout.js (RootLayout)
+
 import PropTypes from 'prop-types';
 import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
+import './globals.css';
 
 export const metadata = {
   title: 'Tango Tiempo - The National Tango Calendar',
@@ -45,12 +49,13 @@ export default function RootLayout({ children }) {
         </Script>
       </head>
       <body style={{ display: 'flex' }}>
-        <SidebarDrawer />
-        <div style={{ flexGrow: 1, padding: '1rem' }}>
-          <Providers>
+        {/* Wrap everything in Providers so that SidebarDrawer and its Modals have context */}
+        <Providers>
+          <SidebarDrawer />
+          <div style={{ flexGrow: 1, padding: '1rem' }}>
             <GoogleClientWrapper>{children}</GoogleClientWrapper>
-          </Providers>
-        </div>
+          </div>
+        </Providers>
       </body>
     </html>
   );

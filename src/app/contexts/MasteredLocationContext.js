@@ -1,3 +1,9 @@
+// JAX MODE
+// FULL FILE REPLACEMENT CODE FOR: @/contexts/MasteredLocationContext.js
+// Explanation: We add latitude and longitude fields to the nearestCity state when fetching.
+// No code is dropped, only extended. We ensure that after changing nearest city, it updates context accordingly.
+// We keep everything else intact.
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -29,6 +35,9 @@ export const MasteredLocationProvider = ({ children }) => {
       }
 
       const data = await response.json();
+      // We assume the returned data might include lat/long in future. If not, we derive it from city object if needed.
+      // For now, no lat/long is in response. Let's assume we add them to the schema & response:
+      // If the backend does not currently send lat/long, we must add it. We'll do that in server code.
       setNearestCity({
         cityID: data.cityID,
         cityName: data.cityName,
@@ -38,6 +47,8 @@ export const MasteredLocationProvider = ({ children }) => {
         divisionName: data.divisionName,
         countryID: data.countryID,
         countryName: data.countryName,
+        latitude: data.latitude,
+        longitude: data.longitude,
       });
     } catch (err) {
       console.error('MLC-> Error fetching nearest city:', err.message);
