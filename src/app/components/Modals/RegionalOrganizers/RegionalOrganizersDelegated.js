@@ -1,35 +1,19 @@
-// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
+// @/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
 
-const RegionalOrganizersDelegated = ({
-  organizerId,
-  delegatedOrganizerIds,
-  organizers = [],
-  updateOrganizer,
-}) => {
+const RegionalOrganizersDelegated = ({ organizerId, delegatedOrganizerIds, organizers = [], updateOrganizer }) => {
   const [delegatedOrganizers, setDelegatedOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrganizerId, setSelectedOrganizerId] = useState('');
 
   const fetchOrganizerById = async (organizerId) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching organizer:', error);
@@ -85,9 +69,7 @@ const RegionalOrganizersDelegated = ({
   };
 
   const handleRemoveDelegatedOrganizer = async (idToRemove) => {
-    const updatedDelegatedIds = delegatedOrganizerIds.filter(
-      (id) => id !== idToRemove
-    );
+    const updatedDelegatedIds = delegatedOrganizerIds.filter((id) => id !== idToRemove);
     try {
       await updateOrganizer(organizerId, {
         delegatedOrganizerIds: updatedDelegatedIds,
@@ -106,29 +88,16 @@ const RegionalOrganizersDelegated = ({
       ) : delegatedOrganizers.length > 0 ? (
         delegatedOrganizers.map((org, index) =>
           org ? (
-            <Box
-              key={org._id || index}
-              display="flex"
-              alignItems="center"
-              gap={1}
-              mt={2}
-              flexWrap="wrap"
-            >
+            <Box key={org._id || index} display="flex" alignItems="center" gap={1} mt={2} flexWrap="wrap">
               <Box flexGrow={1}>
                 <Typography variant="body1">
-                  <strong>Full Name:</strong>{' '}
-                  {org.fullName || 'No Full Name Available'}
+                  <strong>Full Name:</strong> {org.fullName || 'No Full Name Available'}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Short Name:</strong>{' '}
-                  {org.shortName || 'No Short Name Available'}
+                  <strong>Short Name:</strong> {org.shortName || 'No Short Name Available'}
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => handleRemoveDelegatedOrganizer(org._id)}
-              >
+              <Button variant="contained" color="secondary" onClick={() => handleRemoveDelegatedOrganizer(org._id)}>
                 Remove
               </Button>
             </Box>

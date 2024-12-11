@@ -1,14 +1,7 @@
 // UserSettingsApply.js
 'use client';
 import React, { useState, useMemo } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Alert,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme } from '@mui/material';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -32,13 +25,8 @@ const UserSettingsApply = () => {
   }, [roles]);
 
   const hasRole = useMemo(() => {
-    const userRoleIds = (userData?.roleIds || []).map((role) =>
-      role._id ? String(role._id) : String(role)
-    );
-    return (
-      regionalOrganizerRole &&
-      userRoleIds.includes(String(regionalOrganizerRole._id))
-    );
+    const userRoleIds = (userData?.roleIds || []).map((role) => (role._id ? String(role._id) : String(role)));
+    return regionalOrganizerRole && userRoleIds.includes(String(regionalOrganizerRole._id));
   }, [userData, regionalOrganizerRole]);
 
   const isApproved = userData?.regionalOrganizerInfo?.isApproved || false;
@@ -54,12 +42,8 @@ const UserSettingsApply = () => {
       }
 
       if (!hasRole) {
-        const existingRoleIds = (userData.roleIds || []).map((role) =>
-          role._id ? String(role._id) : String(role)
-        );
-        const updatedRoleIds = [
-          ...new Set([...existingRoleIds, String(regionalOrganizerRole._id)]),
-        ];
+        const existingRoleIds = (userData.roleIds || []).map((role) => (role._id ? String(role._id) : String(role)));
+        const updatedRoleIds = [...new Set([...existingRoleIds, String(regionalOrganizerRole._id)])];
 
         await updateUserData({ roleIds: updatedRoleIds });
       }
@@ -70,9 +54,7 @@ const UserSettingsApply = () => {
           firebaseUserId: userData.firebaseUserId,
           name: 'New Organizer',
           fullName: 'New Organizer',
-          organizerRegion:
-            userData.localUserInfo?.userDefaults?.region ||
-            '66c4d99042ec462ea22484bd',
+          organizerRegion: userData.localUserInfo?.userDefaults?.region || '66c4d99042ec462ea22484bd',
           isActive: true,
           isEnabled: true,
           wantRender: true,
@@ -104,11 +86,7 @@ const UserSettingsApply = () => {
       setShowTerms(true);
     } catch (error) {
       console.error('Error during application process:', error);
-      setErrorMessage(
-        error.response?.data?.message ||
-          error.message ||
-          'An error occurred during application.'
-      );
+      setErrorMessage(error.response?.data?.message || error.message || 'An error occurred during application.');
       setApplicationStatus('error');
     }
   };
@@ -162,21 +140,12 @@ const UserSettingsApply = () => {
         By applying, you can manage events in your region.
       </Typography>
       {!hasOrganizerId && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleApply}
-          disabled={applicationStatus === 'loading'}
-        >
+        <Button variant="contained" color="primary" onClick={handleApply} disabled={applicationStatus === 'loading'}>
           {applicationStatus === 'loading' ? 'Applying...' : 'Apply'}
         </Button>
       )}
       {hasOrganizerId && !isApproved && (
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => setShowTerms(true)}
-        >
+        <Button variant="outlined" color="secondary" onClick={() => setShowTerms(true)}>
           Accept Terms of Use
         </Button>
       )}

@@ -27,18 +27,10 @@ const ROTermsModal = ({ open, onClose, onAgree }) => {
         </Typography>
         {/* Include actual terms content here */}
         <Box display="flex" justifyContent="space-between" sx={{ mt: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => onAgree(true)}
-          >
+          <Button variant="contained" color="primary" onClick={() => onAgree(true)}>
             I Agree
           </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => onAgree(false)}
-          >
+          <Button variant="outlined" color="secondary" onClick={() => onAgree(false)}>
             I Do Not Agree
           </Button>
         </Box>

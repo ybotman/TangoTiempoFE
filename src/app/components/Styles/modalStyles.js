@@ -1,4 +1,4 @@
-// src/app/components/Styles/modalStyles.js
+// @/components/Styles/modalStyles.js
 
 const modalStyle = (isMobile) => ({
   position: 'fixed',

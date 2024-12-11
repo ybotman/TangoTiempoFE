@@ -5,9 +5,7 @@ import { RegionsContext } from '@/contexts/RegionsContext';
 
 export const useOrganizers = () => {
   const regionContext = useContext(RegionsContext);
-  const selectedRegionID = regionContext
-    ? regionContext.selectedRegionID
-    : null;
+  const selectedRegionID = regionContext ? regionContext.selectedRegionID : null;
 
   const [organizers, setOrganizers] = useState([]);
   const [organizer, setOrganizer] = useState(null); // Single organizer data
@@ -40,9 +38,7 @@ export const useOrganizers = () => {
     // console.log('fetchOrganizerById called with organizerId:', organizerId);
     try {
       setFetchLoading(true);
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
       setOrganizer(response.data);
       // console.log('Organizer fetched successfully:', response.data);
     } catch (fetchError) {
@@ -56,9 +52,7 @@ export const useOrganizers = () => {
   // Fetch an organizer by firebaseUserId
   const fetchOrganizerByFirebaseUserId = useCallback(async (firebaseUserId) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/firebase/${firebaseUserId}`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/firebase/${firebaseUserId}`);
       return response.data;
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -75,10 +69,7 @@ export const useOrganizers = () => {
     try {
       // console.log('updateOrganizer:', organizerId, updateData);
       setUpdateLoading(true);
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
-        updateData
-      );
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`, updateData);
       // console.log('Organizer updated successfully:', response.data);
       setOrganizer(response.data); // Update organizer state with response data
       return response.data;
@@ -94,10 +85,7 @@ export const useOrganizers = () => {
   const createOrganizer = useCallback(async (organizerData) => {
     try {
       setCreateLoading(true);
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
-        organizerData
-      );
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, organizerData);
       // console.log('Organizer created successfully:', response.data);
       return response.data;
     } catch (error) {

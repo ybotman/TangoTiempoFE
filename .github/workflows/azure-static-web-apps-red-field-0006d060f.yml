@@ -44,8 +44,7 @@ jobs:
     environment: INTEGRATION
     steps:
       - name: Set Environment Variables
-        run:
-          echo "NEXT_PUBLIC_BE_URL=${{ secrets.NEXT_PUBLIC_BE_URL }}" >> $GITHUB_ENV
+        run: echo "NEXT_PUBLIC_BE_URL=${{ secrets.NEXT_PUBLIC_BE_URL }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_FIREBASE_JSON=${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}" >> $GITHUB_ENV
       - name: Close Pull Request
         id: closepullrequest

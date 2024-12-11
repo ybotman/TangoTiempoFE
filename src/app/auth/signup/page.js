@@ -11,13 +11,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 
 const SignUpPage = () => {
   const router = useRouter();
-  const {
-    user,
-    loading,
-    error,
-    authenticateWithGoogle,
-    authenticateWithFacebook,
-  } = useContext(AuthContext);
+  const { user, loading, error, authenticateWithGoogle, authenticateWithFacebook } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleGoogleSignUp = async () => {
@@ -89,14 +83,8 @@ const SignUpPage = () => {
           <Typography component="h1" variant="h5" gutterBottom>
             Sign Up
           </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            align="center"
-            paragraph
-          >
-            Sign up with your Google or Facebook account to start organizing and
-            managing Tango events.
+          <Typography variant="body2" color="textSecondary" align="center" paragraph>
+            Sign up with your Google or Facebook account to start organizing and managing Tango events.
           </Typography>
           {/* Google Sign Up Button */}
           <Button

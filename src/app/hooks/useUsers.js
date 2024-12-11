@@ -10,7 +10,7 @@ export const useUsers = () => {
 
   const fetchUserData = useCallback(async () => {
     if (!user?.uid) {
-      console.log('AuthContext or user not yet initialized.');
+      console.log('UU: AuthContext or user not yet initialized.');
       setLoading(false); // Ensure loading is set to false
       return;
     }
@@ -19,22 +19,22 @@ export const useUsers = () => {
 
     try {
       setLoading(true);
-      console.log('Fetching user data from:', endpoint);
+      console.log('UU: Fetching user data from:', endpoint);
       const response = await axios.get(endpoint);
-      console.log('User data fetched:', response.data);
+      console.log('UU:fetch user data fetched:', response.data);
       setUserData(response.data);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('UU: Error fetching user data:', error);
     } finally {
       setLoading(false);
-      console.log('Finished fetching user data. Loading is now false.');
+      console.log('UU: Finished fetching user data. Loading is now false.');
     }
   }, [user?.uid]);
 
   const updateUserData = useCallback(
     async (updatedData) => {
       if (!user?.uid) {
-        console.error('User is not authenticated.');
+        console.error('UU:Updt User is not authenticated.');
         return;
       }
       try {
@@ -48,9 +48,9 @@ export const useUsers = () => {
           dataToUpdate
         );
         setUserData(response.data.updatedUser);
-        console.log('User data updated successfully');
+        console.log('UU:Updt User data updated successfully');
       } catch (error) {
-        console.error('Error updating user data:', error);
+        console.error('UU:Updt Error updating user data:', error);
         throw error;
       }
     },
@@ -61,7 +61,7 @@ export const useUsers = () => {
     if (user?.uid) {
       fetchUserData();
     } else {
-      console.log('User not available yet.');
+      console.log('UU:uE User not available yet.');
       setLoading(false);
     }
   }, [fetchUserData, user?.uid]);

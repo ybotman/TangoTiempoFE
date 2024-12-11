@@ -68,10 +68,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   const allDay = eventDetails?.allDay || false;
 
   // Function to truncate the title to 30 characters
-  const truncatedTitle =
-    eventTitle.length > 30 && !showFullTitle
-      ? eventTitle.slice(0, 30) + '...'
-      : eventTitle;
+  const truncatedTitle = eventTitle.length > 30 && !showFullTitle ? eventTitle.slice(0, 30) + '...' : eventTitle;
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -82,11 +79,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
             <Typography variant="h5" component="h2">
               {truncatedTitle}
               {eventTitle.length > 30 && (
-                <Button
-                  size="small"
-                  onClick={() => setShowFullTitle(!showFullTitle)}
-                  sx={{ ml: 1 }}
-                >
+                <Button size="small" onClick={() => setShowFullTitle(!showFullTitle)} sx={{ ml: 1 }}>
                   {showFullTitle ? 'Show Less' : 'Show More'}
                 </Button>
               )}
@@ -162,24 +155,12 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
         </Tabs>
 
         {/* Tab Content */}
-        {currentTab === 'Basic' && (
-          <ViewEventDetailsBasic eventDetails={eventDetails} />
-        )}
-        {currentTab === 'Images' && (
-          <ViewEventDetailsImage eventDetails={eventDetails} />
-        )}
-        {currentTab === 'repeating' && (
-          <ViewEventDetailsRepeating eventDetails={eventDetails} />
-        )}
-        {currentTab === 'More' && (
-          <ViewEventDetailsMore eventDetails={eventDetails} />
-        )}
-        {currentTab === 'Organizer' && (
-          <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />
-        )}
-        {currentTab === 'Location' && (
-          <ViewEventDetailsLocationOther eventDetails={eventDetails} />
-        )}
+        {currentTab === 'Basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
+        {currentTab === 'Images' && <ViewEventDetailsImage eventDetails={eventDetails} />}
+        {currentTab === 'repeating' && <ViewEventDetailsRepeating eventDetails={eventDetails} />}
+        {currentTab === 'More' && <ViewEventDetailsMore eventDetails={eventDetails} />}
+        {currentTab === 'Organizer' && <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />}
+        {currentTab === 'Location' && <ViewEventDetailsLocationOther eventDetails={eventDetails} />}
       </Box>
     </Modal>
   );

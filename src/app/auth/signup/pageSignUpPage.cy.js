@@ -1,4 +1,4 @@
-//src/app/auth/signup/pageSignUpPage.cy.js
+//@/auth/signup/pageSignUpPage.cy.js
 
 /* global describe, it, cy */
 

@@ -15,11 +15,7 @@ import {
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
-const RegionalOrganizerTypes = ({
-  organizerId,
-  organizer,
-  updateOrganizer,
-}) => {
+const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -81,29 +77,16 @@ const RegionalOrganizerTypes = ({
     try {
       await updateOrganizer(organizerId, updateData);
       setInitialTypes(types);
-      console.log('Types updated successfully.');
+      //console.log('Types updated successfully.');
     } catch (error) {
       console.error('Failed to update types:', error);
     }
   };
 
   const renderTypeCheckbox = (label, name, infoText) => (
-    <Box
-      key={name}
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ mb: 1 }}
-    >
+    <Box key={name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
       <FormControlLabel
-        control={
-          <Checkbox
-            checked={types[name]}
-            onChange={handleTypeChange}
-            name={name}
-            color="primary"
-          />
-        }
+        control={<Checkbox checked={types[name]} onChange={handleTypeChange} name={name} color="primary" />}
         label={label}
       />
       <Tooltip title={infoText}>
@@ -120,12 +103,7 @@ const RegionalOrganizerTypes = ({
         Organizer Types
       </Typography>
 
-      <Box
-        display="flex"
-        flexDirection="column"
-        sx={{ mb: 2 }}
-        maxWidth={isMobile ? '100%' : '400px'}
-      >
+      <Box display="flex" flexDirection="column" sx={{ mb: 2 }} maxWidth={isMobile ? '100%' : '400px'}>
         {renderTypeCheckbox(
           'Event Organizer',
           'isEventOrganizer',
@@ -154,12 +132,7 @@ const RegionalOrganizerTypes = ({
         )}
       </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSave}
-        disabled={isSaveDisabled}
-      >
+      <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled}>
         Save
       </Button>
     </Box>

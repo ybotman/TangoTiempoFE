@@ -18,10 +18,7 @@ const auth = getAuth(app);
 
 // Conditionally initialize Facebook Auth Provider
 
-const facebookProvider =
-  process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development'
-    ? new FacebookAuthProvider()
-    : null;
+const facebookProvider = process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development' ? new FacebookAuthProvider() : null;
 
 if (facebookProvider) {
   facebookProvider.addScope('email');

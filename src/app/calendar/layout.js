@@ -1,4 +1,4 @@
-//src/app/calendar/layout.js
+//@/calendar/layout.js
 'use client'; // Enable client-side rendering
 
 import { React, useContext, useEffect } from 'react';
@@ -12,11 +12,11 @@ const RootLayout = ({ children }) => {
 
   useEffect(() => {
     if (user?.displayName) {
-      // console.log('User Name:', user.displayName);
+      console.log('Layout:uE User Name:', user.displayName);
     }
 
     if (regions?.length > 0) {
-      // console.log('Selected Region:', selectedRegion);
+      console.log('Layout:uE Selected Region:', selectedRegion);
     }
   }, [user, regions, selectedRegion]);
 

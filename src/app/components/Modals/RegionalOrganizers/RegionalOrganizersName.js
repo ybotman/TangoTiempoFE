@@ -4,11 +4,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, TextField, Button } from '@mui/material';
 
-const RegionalOrganizersName = ({
-  organizerId,
-  organizer,
-  updateOrganizer,
-}) => {
+const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => {
   const [fullName, setFullName] = useState('');
   const [shortName, setShortName] = useState('');
   const [description, setDescription] = useState('');
@@ -51,9 +47,7 @@ const RegionalOrganizersName = ({
 
   const handleSave = async () => {
     if (fullName.trim().length < 7 || fullName === 'New Organizer') {
-      setErrorMessage(
-        'Full Name must be at least 5 characters and cannot be "New Organizer".'
-      );
+      setErrorMessage('Full Name must be at least 5 characters and cannot be "New Organizer".');
       return;
     }
     if (isShortNameInvalid()) {
@@ -129,12 +123,7 @@ const RegionalOrganizersName = ({
           }
           error={isShortNameInvalid()}
         />
-        <TextField
-          label="URL (Web or Social Media)"
-          fullWidth
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
+        <TextField label="URL (Web or Social Media)" fullWidth value={url} onChange={(e) => setUrl(e.target.value)} />
         <TextField
           label="Description of Organizer"
           fullWidth
@@ -145,13 +134,7 @@ const RegionalOrganizersName = ({
         />
       </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSave}
-        disabled={isSaveDisabled}
-        sx={{ mt: 2 }}
-      >
+      <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled} sx={{ mt: 2 }}>
         Save
       </Button>
     </Box>

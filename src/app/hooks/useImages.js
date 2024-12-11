@@ -18,9 +18,7 @@ export const useImages = (organizerId) => {
     setLoading(true);
     try {
       // Request SAS token from backend
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/generate-sas-token`
-      );
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/generate-sas-token`);
       const { sasToken } = response.data;
 
       if (!sasToken) {
@@ -28,12 +26,9 @@ export const useImages = (organizerId) => {
       }
 
       // Create BlobServiceClient with SAS token
-      const blobServiceClient = new BlobServiceClient(
-        `https://${accountName}.blob.core.windows.net?${sasToken}`
-      );
+      const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net?${sasToken}`);
 
-      const containerClient =
-        blobServiceClient.getContainerClient(containerName);
+      const containerClient = blobServiceClient.getContainerClient(containerName);
 
       const blobs = [];
       const iterator = containerClient.listBlobsFlat({
@@ -62,9 +57,7 @@ export const useImages = (organizerId) => {
     setLoading(true);
     try {
       // Request SAS token from backend
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/generate-sas-token`
-      );
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/generate-sas-token`);
       const { sasToken } = response.data;
 
       if (!sasToken) {
@@ -72,12 +65,9 @@ export const useImages = (organizerId) => {
       }
 
       // Create BlobServiceClient with SAS token
-      const blobServiceClient = new BlobServiceClient(
-        `https://${accountName}.blob.core.windows.net?${sasToken}`
-      );
+      const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net?${sasToken}`);
 
-      const containerClient =
-        blobServiceClient.getContainerClient(containerName);
+      const containerClient = blobServiceClient.getContainerClient(containerName);
 
       const blobName = `${organizerFolder}${uuidv4()}-${file.name}`;
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);

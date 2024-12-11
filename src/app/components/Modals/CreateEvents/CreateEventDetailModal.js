@@ -1,14 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  Tabs,
-  Tab,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
+import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
@@ -77,25 +68,14 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
             {`Create Event in: ${selectedRegion || 'Unknown Region'}`}
           </Typography>
           <FormControlLabel
-            control={
-              <Switch
-                checked={eventData.isRepeating}
-                onChange={handleToggleRepeating}
-                color="primary"
-              />
-            }
+            control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" />}
             label="Repeating"
             labelPlacement="start"
           />
         </Box>
 
         {/* Tabs for different sections */}
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="event details tabs"
-          sx={{ mb: 2 }}
-        >
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="event details tabs" sx={{ mb: 2 }}>
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
           <Tab label="Other" value="other" />
@@ -103,29 +83,11 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         </Tabs>
 
         {/* Render tab content conditionally */}
-        {currentTab === 'basic' && (
-          <CreateEventDetailsBasic
-            eventData={eventData}
-            setEventData={setEventData}
-          />
-        )}
-        {currentTab === 'image' && (
-          <CreateEventDetailsImage
-            eventData={eventData}
-            setEventData={setEventData}
-          />
-        )}
-        {currentTab === 'other' && (
-          <CreateEventDetailsOther
-            eventData={eventData}
-            setEventData={setEventData}
-          />
-        )}
+        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={setEventData} />}
+        {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={setEventData} />}
+        {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={setEventData} />}
         {currentTab === 'repeating' && (
-          <CreateEventDetailsRepeating
-            eventData={eventData}
-            setEventData={setEventData}
-          />
+          <CreateEventDetailsRepeating eventData={eventData} setEventData={setEventData} />
         )}
 
         <Box mt={2} display="flex" justifyContent="space-between">

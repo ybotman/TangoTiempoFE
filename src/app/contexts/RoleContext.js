@@ -30,11 +30,7 @@ export const RoleProvider = ({ children }) => {
     }
   };
 
-  return (
-    <RoleContext.Provider value={{ roles, selectedRole, selectRole }}>
-      {children}
-    </RoleContext.Provider>
-  );
+  return <RoleContext.Provider value={{ roles, selectedRole, selectRole }}>{children}</RoleContext.Provider>;
 };
 
 RoleProvider.propTypes = {

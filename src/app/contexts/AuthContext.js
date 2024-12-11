@@ -36,10 +36,10 @@ export const AuthProvider = ({ children }) => {
       // const startTime = Date.now();
 
       if (currentUser) {
-        console.log('User is logged in:', currentUser.uid);
+        console.log('AuthCtx:uE-> User is logged in:', currentUser.uid);
         await setUserData(currentUser);
       } else {
-        console.log('No user is logged in');
+        console.log('AuthCtx:uE-> No user is logged in');
         setUser(null);
         setSelectedRole(''); // Reset selectedRole on logout
       }
@@ -189,9 +189,7 @@ export const AuthProvider = ({ children }) => {
 
     // Ensure email is available
     if (!email) {
-      setError(
-        'Your email address is not available. Please use a different sign-in method.'
-      );
+      setError('Your email address is not available. Please use a different sign-in method.');
       setLoading(false);
       return null;
     }
@@ -216,10 +214,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         // Prompt the user to sign in with the existing provider
-        const existingUserResult = await signInWithPopup(
-          auth,
-          existingProvider
-        );
+        const existingUserResult = await signInWithPopup(auth, existingProvider);
 
         // Link the pending credential to the existing user
         await linkWithCredential(existingUserResult.user, pendingCred);
@@ -237,10 +232,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (linkError) {
       console.error('Error during account linking:', linkError);
-      setError(
-        linkError.message ||
-          'An unexpected error occurred during account linking.'
-      );
+      setError(linkError.message || 'An unexpected error occurred during account linking.');
       setLoading(false);
       return null;
     }
@@ -251,14 +243,11 @@ export const AuthProvider = ({ children }) => {
     const idToken = await firebaseUser.getIdToken();
     try {
       console.log('Fetching user from backend...');
-      await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
     } catch (error) {
       console.error('Error fetching user from backend:', error);
       if (error.response && error.response.status === 404) {
@@ -273,15 +262,11 @@ export const AuthProvider = ({ children }) => {
           photoUrl: firebaseUser.photoURL || '',
         };
 
-        const roleResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`,
-          userData,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
+        const roleResponse = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`, userData, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
 
         if (roleResponse.status !== 204) {
           throw new Error('Failed to assign role in backend');
@@ -334,11 +319,7 @@ export const AuthProvider = ({ children }) => {
     login,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
 
 AuthProvider.propTypes = {

@@ -5,11 +5,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { categoryColors } from '@/utils/categoryColors';
 
-const PostFilter = ({
-  activeCategories = [],
-  categories = [],
-  handleCategoryChange,
-}) => {
+const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
   // Define the ordered categories
   const orderedCategories = [
     'Milonga',
@@ -48,9 +44,7 @@ const PostFilter = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div
-        style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
         {/* Display the first four categories in a row */}
         {firstFourCategories.map((category) => {
           const isActive = activeCategories.includes(category.categoryName);
@@ -58,9 +52,7 @@ const PostFilter = ({
             <button
               key={category._id}
               style={{
-                backgroundColor: isActive
-                  ? categoryColors[category.categoryName]
-                  : 'white',
+                backgroundColor: isActive ? categoryColors[category.categoryName] : 'white',
                 color: isActive ? 'black' : 'grey',
                 padding: '2px 2px',
                 border: isActive ? 'none' : '1px solid grey',
@@ -90,9 +82,7 @@ const PostFilter = ({
               <button
                 key={category._id}
                 style={{
-                  backgroundColor: isActive
-                    ? categoryColors[category.categoryName]
-                    : 'white',
+                  backgroundColor: isActive ? categoryColors[category.categoryName] : 'white',
                   color: isActive ? 'black' : 'grey',
                   padding: '2px 2px',
                   border: isActive ? 'none' : '1px solid grey',

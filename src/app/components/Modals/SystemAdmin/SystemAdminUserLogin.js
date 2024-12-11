@@ -83,9 +83,7 @@ export default function SystemAdminUserLogin() {
                         <TextField
                           label="First Name"
                           value={user.localUserInfo.firstName}
-                          onChange={(e) =>
-                            handleFieldChange(user, 'firstName', e.target.value)
-                          }
+                          onChange={(e) => handleFieldChange(user, 'firstName', e.target.value)}
                           fullWidth
                         />
                       </Grid>
@@ -93,9 +91,7 @@ export default function SystemAdminUserLogin() {
                         <TextField
                           label="Last Name"
                           value={user.localUserInfo.lastName}
-                          onChange={(e) =>
-                            handleFieldChange(user, 'lastName', e.target.value)
-                          }
+                          onChange={(e) => handleFieldChange(user, 'lastName', e.target.value)}
                           fullWidth
                         />
                       </Grid>
@@ -103,13 +99,7 @@ export default function SystemAdminUserLogin() {
                         <TextField
                           label="Username"
                           value={user.localUserInfo.loginUserName}
-                          onChange={(e) =>
-                            handleFieldChange(
-                              user,
-                              'loginUserName',
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => handleFieldChange(user, 'loginUserName', e.target.value)}
                           fullWidth
                         />
                       </Grid>
@@ -122,9 +112,7 @@ export default function SystemAdminUserLogin() {
                         <Select
                           fullWidth
                           value={user.regionalOrganizerInfo.organizerId || ''}
-                          onChange={(e) =>
-                            handleOrganizerChange(user, e.target.value)
-                          }
+                          onChange={(e) => handleOrganizerChange(user, e.target.value)}
                         >
                           {organizers.map((organizer) => (
                             <MenuItem key={organizer._id} value={organizer._id}>
@@ -139,12 +127,8 @@ export default function SystemAdminUserLogin() {
                         <FormControlLabel
                           control={
                             <Switch
-                              checked={
-                                user.regionalOrganizerInfo.isApproved || false
-                              }
-                              onChange={(e) =>
-                                handleApprovalChange(user, e.target.checked)
-                              }
+                              checked={user.regionalOrganizerInfo.isApproved || false}
+                              onChange={(e) => handleApprovalChange(user, e.target.checked)}
                               color="primary"
                             />
                           }
@@ -170,9 +154,7 @@ export default function SystemAdminUserLogin() {
                         <Typography variant="body2" color="textSecondary">
                           Username:
                         </Typography>
-                        <Typography>
-                          {user.localUserInfo.loginUserName}
-                        </Typography>
+                        <Typography>{user.localUserInfo.loginUserName}</Typography>
                       </Grid>
                       <Grid item xs={12}>
                         <Typography variant="body2" color="textSecondary">

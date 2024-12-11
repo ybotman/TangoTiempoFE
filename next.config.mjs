@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Define public environment variables
-  //   env: {
-  //       TangoTiempoBE_URL: process.env.NEXT_PUBLIC_BE_URL,
-  //   },
-
   // Webpack configuration for custom logging
   webpack: (config, { buildId, dev, isServer }) => {
     // Log the public environment variables
@@ -34,8 +29,18 @@ const nextConfig = {
     ],
   },
 
-  // Any other Next.js configurations can be added here
-  reactStrictMode: true, // Example of enabling strict mode
+  // Add rewrites to route API calls to the backend server
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*', // Proxy to your Express backend
+      },
+    ];
+  },
+
+  // Enable React strict mode
+  reactStrictMode: true,
 };
 
 export default nextConfig;

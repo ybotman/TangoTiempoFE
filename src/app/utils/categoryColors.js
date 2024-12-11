@@ -18,9 +18,7 @@ export const coloredFilteredEvents = (events, activeCategories) => {
   const filteredEvents =
     activeCategories.length === 0
       ? events // If no active categories, return all events
-      : events.filter((event) =>
-          activeCategories.includes(event.categoryFirst)
-        );
+      : events.filter((event) => activeCategories.includes(event.categoryFirst));
 
   // Apply colors to the filtered events
   const coloredEvents = filteredEvents.map((event) => {
