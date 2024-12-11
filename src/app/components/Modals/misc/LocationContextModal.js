@@ -27,6 +27,7 @@ const LocationContextModal = ({ open, onClose }) => {
 
   useEffect(() => {
     const loadCities = async () => {
+      console.log('LCM uE: loadCities Start');
       if (open) {
         setLoading(true);
         // We will fetch ALL cities. We will update the backend route to return all cities if no divisionId provided.

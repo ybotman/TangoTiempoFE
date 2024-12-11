@@ -85,7 +85,8 @@ export function useMasteredLocations() {
 
   const fetchCities = useCallback(
     async (divisionId, isActive = true) => {
-      if (!divisionId) return;
+      console.log('FE: uML fetchCities');
+      //     if (!divisionId) return;
       setLoading(true);
       setError(null);
       try {
@@ -93,6 +94,7 @@ export function useMasteredLocations() {
           params: { divisionId, isActive },
         });
         setCities(response.data);
+        console.log('cites response', response);
       } catch (err) {
         console.error('Error fetching cities:', err.message);
         setError(err.message);
