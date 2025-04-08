@@ -11,8 +11,11 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
     }
 
     try {
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
+
       const params = {
         active: true, // Always fetch active events
+        appId, // Include appId as a query parameter
         masteredRegionName: selectedRegion || undefined,
         masteredDivisionName: selectedDivision || undefined,
         masteredCityName: selectedCity || undefined,
@@ -42,7 +45,14 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
 export function useCreateEvent() {
   const createEvent = async (eventData) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, eventData);
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
+
+      // Add appId to the eventData payload
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, {
+        ...eventData,
+        appId, // Include appId
+      });
+
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {

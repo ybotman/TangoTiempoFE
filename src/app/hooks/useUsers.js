@@ -15,12 +15,18 @@ export const useUsers = () => {
       return;
     }
 
+    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
     const endpoint = `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`;
 
     try {
       setLoading(true);
-      console.log('UU: Fetching user data from:', endpoint);
-      const response = await axios.get(endpoint);
+      console.log('UU: Fetching user data from:', endpoint, 'with appId:', appId);
+
+      // Include appId as a query parameter
+      const response = await axios.get(endpoint, {
+        params: { appId },
+      });
+
       console.log('UU:fetch user data fetched:', response.data);
       setUserData(response.data);
     } catch (error) {
@@ -37,9 +43,13 @@ export const useUsers = () => {
         console.error('UU:Updt User is not authenticated.');
         return;
       }
+
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
+
       try {
         const dataToUpdate = {
           firebaseUserId: user.uid,
+          appId, // Include appId in the update payload
           ...updatedData,
         };
 
@@ -47,6 +57,7 @@ export const useUsers = () => {
           `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
           dataToUpdate
         );
+
         setUserData(response.data.updatedUser);
         console.log('UU:Updt User data updated successfully');
       } catch (error) {
