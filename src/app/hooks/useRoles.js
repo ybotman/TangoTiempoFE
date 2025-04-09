@@ -1,4 +1,3 @@
-// src/hooks/useRoles.js
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
@@ -11,7 +10,12 @@ export const useRoles = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/roles`);
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/roles`, {
+        params: { appId }, // Add appId as a query parameter
+      });
+
       setRoles(response.data);
     } catch (error) {
       console.error('Error fetching roles:', error);

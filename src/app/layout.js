@@ -9,10 +9,10 @@ import GoogleClientWrapper from '@/components/GoogleAnalytics';
 import './globals.css';
 
 export const metadata = {
-  title: 'Tango Tiempo - The National Tango Calendar',
-  description: 'Stay up-to-date with Tango events across the country with Tango Tiempo.',
-  keywords: 'Tango, Tango Events, National Tango Calendar, Tango Tiempo, Dance Calendar',
-  author: 'Toby Balsley of Tango Tiempo',
+  title: 'Harmony Junction - Vocal Harmony Community Calendar',
+  description: 'Stay up-to-date with a cappella, barbershop, and vocal harmony events across the country with Harmony Junction.',
+  keywords: 'A Cappella, Barbershop, Sweet Adelines, Vocal Harmony, Community Calendar, Harmony Junction',
+  author: 'Toby Balsley of Harmony Junction',
 };
 
 // Separate viewport export
