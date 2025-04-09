@@ -31,7 +31,8 @@ export const useCalendarPage = () => {
   const calendarRef = useRef(null);
 
   // Safely handle nearestCity fields
-  const regionName = nearestCity?.regionName || '';
+  // Default to Northeast region if location context is not available
+  const regionName = nearestCity?.regionName || 'Northeast';
   const divisionName = nearestCity?.divisionName || '';
   const cityName = nearestCity?.cityName || '';
 

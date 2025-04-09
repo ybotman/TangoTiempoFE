@@ -24,12 +24,30 @@ export const MasteredLocationProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const url = `/api/masteredLocations/nearestMastered?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true`;
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const url = `${baseURL}/api/masteredLocations/nearestMastered?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true&appId=${appId}`;
 
       const response = await fetch(url);
       if (!response.ok) {
-        const message =
-          response.status === 404 ? 'No nearby city found.' : `Error fetching nearest city: ${response.statusText}`;
+        // Default to Northeast region if no city is found
+        if (response.status === 404) {
+          console.log('No nearby city found, defaulting to Northeast region');
+          return setNearestCity({
+            cityID: null,
+            cityName: 'Default',
+            regionID: '67f6123c2bbba9c1dd731eb9', // Northeast region ID for appId=2
+            regionName: 'Northeast',
+            divisionID: null,
+            divisionName: 'Default',
+            countryID: '67f6123c2bbba9c1dd731eae', // US country ID for appId=2
+            countryName: 'United States',
+            latitude: 42.6526,
+            longitude: -73.7562,
+          });
+        }
+        
+        const message = `Error fetching nearest city: ${response.statusText}`;
         setError(message);
         throw new Error(message);
       }
