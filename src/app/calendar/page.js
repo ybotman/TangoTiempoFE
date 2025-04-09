@@ -71,6 +71,7 @@ const CalendarPage = () => {
     handleEventClick,
     handleOrganizerChange,
     coloredFilteredEvents,
+    datesSet,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -118,6 +119,7 @@ const CalendarPage = () => {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
+          alignItems: 'center',
           margin: '20px',
         }}
       >
@@ -132,6 +134,25 @@ const CalendarPage = () => {
             <ArrowForwardIcon />
           </IconButton>
         </ButtonGroup>
+
+        {/* Date Range Display */}
+        <div
+          style={{
+            fontWeight: 'bold',
+            fontSize: '1.1rem',
+            flex: 1,
+            textAlign: 'center',
+          }}
+        >
+          {datesSet && datesSet.start
+            ? new Date(datesSet.start).toLocaleDateString(undefined, {
+                month: 'long',
+                year: 'numeric',
+                day:
+                  calendarRef.current && calendarRef.current.getApi().view.type.includes('day') ? 'numeric' : undefined,
+              })
+            : 'Loading calendar...'}
+        </div>
 
         <ButtonGroup variant="outlined" aria-label="outlined button group">
           <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>

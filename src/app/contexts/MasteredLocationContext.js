@@ -46,7 +46,7 @@ export const MasteredLocationProvider = ({ children }) => {
             longitude: -73.7562,
           });
         }
-        
+
         const message = `Error fetching nearest city: ${response.statusText}`;
         setError(message);
         throw new Error(message);
@@ -93,6 +93,21 @@ export const MasteredLocationProvider = ({ children }) => {
     } catch (err) {
       console.error('MLC-> Error initializing MasteredLocationContext:', err.message);
       setError(err.message);
+
+      // Default to Boston if geolocation fails
+      console.log('Defaulting to Boston as fallback city');
+      setNearestCity({
+        cityID: '6751f58a5db435dd8005e479',
+        cityName: 'Boston',
+        regionID: '6751f58a5db435dd8005e45b',
+        regionName: 'Northeast',
+        divisionID: '6751f58a5db435dd8005e461',
+        divisionName: 'New England',
+        countryID: '6751f57e2e74d97609e7dca0',
+        countryName: 'United States',
+        latitude: 42.3601,
+        longitude: -71.0589,
+      });
     }
   };
 

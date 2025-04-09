@@ -96,7 +96,7 @@ const SidebarDrawer = ({ open, onClose }) => {
           {/* NEW MAP ICON SECTION */}
           <Divider />
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Location Context
+            Calendar Location
           </Typography>
           <ListItem
             button="true"
@@ -108,7 +108,7 @@ const SidebarDrawer = ({ open, onClose }) => {
             <ListItemIcon>
               <MapIcon sx={{ color: 'blue' }} />
             </ListItemIcon>
-            <ListItemText primary="Map (Change Location)" />
+            <ListItemText primary="Select Nearest City" />
           </ListItem>
           <Divider />
 

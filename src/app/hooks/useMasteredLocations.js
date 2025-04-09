@@ -89,16 +89,27 @@ export function useMasteredLocations() {
   const fetchCities = useCallback(
     async (divisionId, isActive = true) => {
       console.log('FE: uML fetchCities');
-      //     if (!divisionId) return;
       setLoading(true);
       setError(null);
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        console.log('Fetching cities for appId:', appId, 'isActive:', isActive);
+
         const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
-          params: { divisionId, isActive, appId },
+          params: {
+            divisionId,
+            isActive: isActive ? 'true' : 'false',
+            appId,
+          },
         });
-        setCities(response.data);
-        console.log('cites response', response);
+
+        // Ensure each city has latitude/longitude for the map
+        const citiesWithCoordinates = response.data.filter(
+          (city) => city.latitude !== undefined && city.longitude !== undefined
+        );
+
+        console.log(`Cities fetched: ${response.data.length}, With coordinates: ${citiesWithCoordinates.length}`);
+        setCities(citiesWithCoordinates);
       } catch (err) {
         console.error('Error fetching cities:', err.message);
         setError(err.message);

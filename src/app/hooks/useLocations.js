@@ -14,12 +14,12 @@ export const useLocations = () => {
     try {
       setLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      
+
       const params = { appId };
       if (selectedRegionID) {
         params.regionID = selectedRegionID;
       }
-      
+
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations`, { params });
 
       setLocations(response.data);
@@ -36,7 +36,7 @@ export const useLocations = () => {
       setLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationID}`, {
-        params: { appId }
+        params: { appId },
       });
       return response.data;
     } catch (error) {

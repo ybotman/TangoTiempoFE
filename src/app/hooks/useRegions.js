@@ -13,7 +13,7 @@ export function useRegions() {
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`, {
-          params: { appId }
+          params: { appId },
         });
         console.log('Regions loaded:', response.data);
         setRegions(response.data);

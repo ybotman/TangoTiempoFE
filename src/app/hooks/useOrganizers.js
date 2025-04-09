@@ -18,11 +18,11 @@ export const useOrganizers = () => {
   const fetchOrganizers = useCallback(async () => {
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
     const params = { appId };
-    
+
     if (selectedRegionID) {
       params.regionID = selectedRegionID;
     }
-    
+
     try {
       setFetchLoading(true);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, { params });
@@ -43,7 +43,7 @@ export const useOrganizers = () => {
       setFetchLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`, {
-        params: { appId }
+        params: { appId },
       });
       console.log('Organizer fetched successfully:', response.data);
       setOrganizer(response.data);
@@ -60,7 +60,7 @@ export const useOrganizers = () => {
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/firebase/${firebaseUserId}`, {
-        params: { appId }
+        params: { appId },
       });
       console.log('Organizer by Firebase ID fetched:', response.data);
       return response.data;
@@ -79,15 +79,15 @@ export const useOrganizers = () => {
     try {
       console.log('updateOrganizer:', organizerId, updateData);
       setUpdateLoading(true);
-      
+
       // Add appId to the update data
       const dataWithAppId = {
         ...updateData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
-      
+
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`, 
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
         dataWithAppId
       );
       console.log('Organizer updated successfully:', response.data);
@@ -107,7 +107,7 @@ export const useOrganizers = () => {
       setCreateLoading(true);
       const dataWithAppId = {
         ...organizerData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, dataWithAppId);
       console.log('Organizer created successfully:', response.data);

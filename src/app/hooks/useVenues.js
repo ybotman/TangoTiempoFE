@@ -33,7 +33,7 @@ export function useVenues() {
     try {
       const dataWithAppId = {
         ...data,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, dataWithAppId);
       return response.data;
@@ -51,7 +51,7 @@ export function useVenues() {
     try {
       const dataWithAppId = {
         ...data,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
       const response = await axios.put(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`, dataWithAppId);
       return response.data;
@@ -69,7 +69,7 @@ export function useVenues() {
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const response = await axios.delete(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`, {
-        params: { appId }
+        params: { appId },
       });
       return response.data;
     } catch (err) {

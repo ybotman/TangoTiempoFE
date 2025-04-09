@@ -62,7 +62,7 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
               className={`category-button ${isActive ? 'active' : ''}`}
               onClick={() => handleCategoryChange(category.categoryName)}
             >
-              {category.categoryName}
+              {category.categoryNameAbbreviation || category.categoryName}
             </button>
           );
         })}
@@ -92,7 +92,7 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
                 className={`category-button ${isActive ? 'active' : ''}`}
                 onClick={() => handleCategoryChange(category.categoryName)}
               >
-                {category.categoryName}
+                {category.categoryNameAbbreviation || category.categoryName}
               </button>
             );
           })}
@@ -108,6 +108,7 @@ PostFilter.propTypes = {
     PropTypes.shape({
       _id: PropTypes.string.isRequired, // Unique identifier for each category
       categoryName: PropTypes.string.isRequired, // Name of the category
+      categoryNameAbbreviation: PropTypes.string, // Abbreviation for the category
     })
   ).isRequired,
   activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired, // Array of active category names

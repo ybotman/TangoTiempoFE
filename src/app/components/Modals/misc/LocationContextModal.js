@@ -19,6 +19,7 @@ const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.Map
 const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
 const CircleMarker = dynamic(() => import('react-leaflet').then((mod) => mod.CircleMarker), { ssr: false });
 const ZoomControl = dynamic(() => import('react-leaflet').then((mod) => mod.ZoomControl), { ssr: false });
+const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip), { ssr: false });
 
 const LocationContextModal = ({ open, onClose }) => {
   const { cities, fetchCities } = useMasteredLocations();
@@ -30,13 +31,17 @@ const LocationContextModal = ({ open, onClose }) => {
       console.log('LCM uE: loadCities Start');
       if (open) {
         setLoading(true);
-        // We will fetch ALL cities. We will update the backend route to return all cities if no divisionId provided.
+        // We will fetch ALL cities with no divisionId filter
         await fetchCities(undefined, true); // no divisionId => fetch all active cities
         setLoading(false);
       }
     };
     loadCities();
   }, [open, fetchCities]);
+
+  // Log to debug when component renders
+  console.log('LocationContextModal - Cities available:', cities?.length || 0);
+  console.log('LocationContextModal - Current city:', nearestCity);
 
   const handleCityClick = async (city) => {
     if (!city.latitude || !city.longitude) return;
@@ -52,7 +57,7 @@ const LocationContextModal = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Change Your Location Context</DialogTitle>
+      <DialogTitle>Select Nearest City</DialogTitle>
       <DialogContent style={{ height: '400px', position: 'relative' }}>
         {loading || !nearestCity ? (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -74,14 +79,24 @@ const LocationContextModal = ({ open, onClose }) => {
                   <CircleMarker
                     key={city._id}
                     center={[city.latitude, city.longitude]}
-                    pathOptions={{ color }}
-                    radius={8}
+                    pathOptions={{
+                      color,
+                      fillColor: color,
+                      fillOpacity: 0.8,
+                      weight: 2,
+                    }}
+                    radius={isCurrent ? 12 : 8}
                     eventHandlers={{
                       click: () => {
+                        console.log('City clicked:', city.cityName);
                         if (!isCurrent) handleCityClick(city);
                       },
                     }}
-                  />
+                  >
+                    <Tooltip direction="top" offset={[0, -10]} permanent={isCurrent}>
+                      {city.cityName}
+                    </Tooltip>
+                  </CircleMarker>
                 );
               })}
           </MapContainer>

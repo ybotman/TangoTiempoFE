@@ -5,14 +5,14 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
   const [events, setEvents] = useState([]);
 
   const getEvents = useCallback(async () => {
-    if (!selectedRegion) {
+    if (!selectedRegion || !calendarStart || !calendarEnd) {
       setEvents([]);
       return;
     }
 
     try {
       const params = {
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID || "1",
         active: true, // Always fetch active events
         masteredRegionName: selectedRegion || undefined,
         masteredDivisionName: selectedDivision || undefined,
@@ -46,9 +46,9 @@ export function useCreateEvent() {
       // Add appId to the event data
       const dataWithAppId = {
         ...eventData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
-      
+
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, dataWithAppId);
       console.log('Event created successfully:', response.data);
       return response.data;
