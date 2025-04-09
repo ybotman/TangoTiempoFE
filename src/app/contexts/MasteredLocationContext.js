@@ -24,12 +24,30 @@ export const MasteredLocationProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const url = `/api/masteredLocations/nearestMastered?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true`;
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const url = `${baseURL}/api/masteredLocations/nearestMastered?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true&appId=${appId}`;
 
       const response = await fetch(url);
       if (!response.ok) {
-        const message =
-          response.status === 404 ? 'No nearby city found.' : `Error fetching nearest city: ${response.statusText}`;
+        // Default to Northeast region if no city is found
+        if (response.status === 404) {
+          console.log('No nearby city found, defaulting to Northeast region');
+          return setNearestCity({
+            cityID: null,
+            cityName: 'Default',
+            regionID: '6751f58a5db435dd8005e45b', // Northeast region ID
+            regionName: 'Northeast',
+            divisionID: null,
+            divisionName: 'Default',
+            countryID: '6751f57e2e74d97609e7dca0', // US country ID
+            countryName: 'United States',
+            latitude: 42.6526,
+            longitude: -73.7562,
+          });
+        }
+        
+        const message = `Error fetching nearest city: ${response.statusText}`;
         setError(message);
         throw new Error(message);
       }
