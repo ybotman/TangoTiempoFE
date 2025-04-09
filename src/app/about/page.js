@@ -6,13 +6,13 @@ import Link from 'next/link';
 import { Button, Box } from '@mui/material';
 
 export const metadata = {
-  title: 'Tango Tiempo - About Us',
+  title: 'Harmony Junction - About Us',
   description:
-    'Making Argentine Tagno Better for US. Tango Tiempo for the US is a comprehensive calendar application designed to help tango dancers and organizers across the nation coordinate and manage tango events.',
+    'Making Vocal Harmony Communities Better. Harmony Junction is a comprehensive calendar application designed to help a cappella groups, barbershop quartets, Sweet Adelines, and vocal harmony organizers across the nation coordinate and manage events.',
   openGraph: {
-    title: 'Tango Tiempo - About Us',
-    description: 'Learn more about our company',
-    url: 'http://TangoTiempo.com/about',
+    title: 'Harmony Junction - About Us',
+    description: 'Learn more about our vocal harmony community',
+    url: 'http://HarmonyJunction.org/about',
   },
 };
 
@@ -20,23 +20,20 @@ export default function About() {
   return (
     <main className={styles.container}>
       <div>
-        <h1>Tango Tiempo - National Tango Calendar App</h1>
+        <h1>Harmony Junction - Vocal Harmony Community Calendar</h1>
         <h2>Overview</h2>
 
         <p>
-          Currently, we are in BETA MODE. I am surprised you found this site! If you are an Argentine Tango teacher /
-          host / DJ / studio / etc (meaning, you host events, are a band or a DJ) and are interested in submitting
-          events in Tango Tiempo, please contact me. Its free free free, and we hope all of the US is onboard. We hope
-          to be fullly live by the end of 2024, and will bring on new Tango regions/ area (one area at a time) in
-          January of 2025. If you have found this site, feel free to contact me. Her is my contact info: I will give you
-          my TEXT number: Use the Massachusetts area code, (and you have to find it but you can do it), and text me at 6
-          5 3 dash 9 4 5 2. Yes, you have to go write this down. ;-) <br />
+          Welcome to Harmony Junction! We are a comprehensive calendar application designed specifically for a cappella 
+          organizations, barbershop quartets, Sweet Adelines, and all vocal harmony groups. Our platform helps organizers 
+          coordinate and manage vocal events across various harmony communities. The service is free to use and 
+          designed to bring harmony communities together through better event organization and discovery.
+          <br />
           <br />
           <h2>
-            We are very excited about this site for the American Tango Community, and hope it brings us all
-            together.{' '}
-          </h2>{' '}
-          This page will self-desruct when we are up and alive.
+            We are very excited about this site for the Vocal Harmony Community, and hope it brings us all
+            together in perfect harmony.{' '}
+          </h2>
         </p>
         <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
           <Link href="/calendar" passHref>
@@ -46,15 +43,15 @@ export default function About() {
           </Link>
         </Box>
         <p>
-          Tango Tiempo is a comprehensive calendar application designed to help tango dancers and organizers across the
-          nation coordinate and manage tango events. The application provides multiple views (calendar, list, and
-          upcoming map view) for users to browse events and includes advanced filtering options for a personalized
+          Harmony Junction is a comprehensive calendar application designed specifically for vocal harmony groups including barbershop quartets, 
+          Sweet Adelines, a cappella ensembles, and harmony organizations across the nation. The application provides multiple views (calendar, list, and
+          upcoming map view) for users to browse vocal events and includes advanced filtering options for a personalized
           experience.
         </p>
         <h3>Features</h3>
         <h4>
-          It&lsquo;s free. It&lsquo;s easy, and it&lsquo;s Modern. We just want to help the tango world. It`&lsquo;s for
-          all of US Argentine Tango.
+          It&lsquo;s free. It&lsquo;s easy, and it&lsquo;s Modern. We just want to help the vocal harmony community. It`&lsquo;s for
+          all styles of a cappella and barbershop groups.
         </h4>
         <h4>It&lsquo;s a Mobile app and Web Version. We hope it&lsquo;s highly interactive.</h4>
         <h4>It has Facebook integrations, pinging active users when you cancel an event. Merge with your campaigns.</h4>
