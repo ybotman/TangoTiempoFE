@@ -9,7 +9,11 @@ const useCategories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`);
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`, {
+          params: { appId }
+        });
+        console.log('Categories loaded:', response.data);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);

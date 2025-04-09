@@ -34,7 +34,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*', // Proxy to your Express backend
+        destination: 'http://localhost:3010/api/:path*', // Proxy to your Express backend
       },
     ];
   },
