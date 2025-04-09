@@ -11,13 +11,16 @@ export const useLocations = () => {
   // Function to fetch locations by region ID
 
   const fetchLocations = useCallback(async () => {
-    const endpoint = selectedRegionID
-      ? `${process.env.NEXT_PUBLIC_BE_URL}/api/locations?regionID=${selectedRegionID}`
-      : `${process.env.NEXT_PUBLIC_BE_URL}/api/locations`;
-
     try {
       setLoading(true);
-      const response = await axios.get(endpoint);
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      
+      const params = { appId };
+      if (selectedRegionID) {
+        params.regionID = selectedRegionID;
+      }
+      
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations`, { params });
 
       setLocations(response.data);
     } catch (error) {
@@ -31,7 +34,10 @@ export const useLocations = () => {
   const getLocationById = useCallback(async (locationID) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationID}`);
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/locations/${locationID}`, {
+        params: { appId }
+      });
       return response.data;
     } catch (error) {
       setError(error);

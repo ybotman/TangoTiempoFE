@@ -29,8 +29,9 @@ export function useMasteredLocations() {
       setLoading(true);
       setError(null);
       try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${baseURL}/api/masteredLocations/countries`, {
-          params: { isActive },
+          params: { isActive, appId },
         });
         setCountries(response.data);
       } catch (err) {
@@ -49,8 +50,9 @@ export function useMasteredLocations() {
       setLoading(true);
       setError(null);
       try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${baseURL}/api/masteredLocations/regions`, {
-          params: { countryId, isActive },
+          params: { countryId, isActive, appId },
         });
         setRegions(response.data);
       } catch (err) {
@@ -69,8 +71,9 @@ export function useMasteredLocations() {
       setLoading(true);
       setError(null);
       try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${baseURL}/api/masteredLocations/divisions`, {
-          params: { regionId, isActive },
+          params: { regionId, isActive, appId },
         });
         setDivisions(response.data);
       } catch (err) {
@@ -90,8 +93,9 @@ export function useMasteredLocations() {
       setLoading(true);
       setError(null);
       try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
-          params: { divisionId, isActive },
+          params: { divisionId, isActive, appId },
         });
         setCities(response.data);
         console.log('cites response', response);
@@ -116,12 +120,14 @@ export function useMasteredLocations() {
       setLoading(true);
       setError(null);
       try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${baseURL}/api/masteredLocations/nearestMastered`, {
           params: {
             latitude,
             longitude,
             maxDistance,
             isActive,
+            appId,
           },
         });
         console.log('Nearest Mastered Location Response:', response.data);

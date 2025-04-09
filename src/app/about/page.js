@@ -33,7 +33,8 @@ export default function About() {
           5 3 dash 9 4 5 2. Yes, you have to go write this down. ;-) <br />
           <br />
           <h2>
-            We are very excited about this site for the American Tango Community, and hope it brings us all together.{' '}
+            We are very excited about this site for the American Tango Community, and hope it brings us all
+            together.{' '}
           </h2>{' '}
           This page will self-desruct when we are up and alive.
         </p>
