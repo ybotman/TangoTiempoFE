@@ -11,8 +11,8 @@ const SiteHeader = () => {
   return (
     <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
       <Image
-        src="/images/HarmonyJunctionBanner2.jpeg"
-        alt="Harmony Junction"
+        src="/images/TangoTiempo3.jpg"
+        alt="Tango Tiempo"
         width={1200}
         height={600}
         style={{ width: '100%', height: 'auto' }}

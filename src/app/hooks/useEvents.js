@@ -12,7 +12,7 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
 
     try {
       const params = {
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID || "1",
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
         active: true, // Always fetch active events
         masteredRegionName: selectedRegion || undefined,
         masteredDivisionName: selectedDivision || undefined,

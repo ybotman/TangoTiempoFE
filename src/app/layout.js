@@ -9,10 +9,11 @@ import GoogleClientWrapper from '@/components/GoogleAnalytics';
 import './globals.css';
 
 export const metadata = {
-  title: 'Harmony Junction - Vocal Harmony Community Calendar',
-  description: 'Stay up-to-date with a cappella, barbershop, and vocal harmony events across the country with Harmony Junction.',
-  keywords: 'A Cappella, Barbershop, Sweet Adelines, Vocal Harmony, Community Calendar, Harmony Junction',
-  author: 'Toby Balsley of Harmony Junction',
+  title: 'Tango Tiempo - The Ultimate Argentine Tango Calendar',
+  description:
+    "The United States' first fully dedicated Argentine Tango calendar. Open, easy, and free to use.",
+  keywords: 'Argentine Tango, Tango Events, Tango Calendar, Tango Tiempo, Community Calendar, Milonga, Tango Workshop',
+  author: 'Toby Balsley of Tango Tiempo',
 };
 
 // Separate viewport export

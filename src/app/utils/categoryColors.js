@@ -10,10 +10,10 @@ export const categoryColors = {
   Virtual: 'Orange',
   DayWorkshop: 'PaleGreen',
   Unknown: 'lightGrey',
-  
+
   // AppId 2 Categories (Barbershop)
   'Chapter Show': 'MediumPurple',
-  'Convention': 'Crimson',
+  Convention: 'Crimson',
   'International Contest': 'Gold',
   'Public Gathering': 'CornflowerBlue',
   'Quartet Show': 'MediumOrchid',
