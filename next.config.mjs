@@ -12,7 +12,7 @@ const nextConfig = {
 
     // Check for missing environment variables and log a warning
     if (!process.env.NEXT_PUBLIC_BE_URL) {
-      console.warn('Warning: TangoTiempoBE_URL is not defined!');
+      console.warn('Warning: NEXT_PUBLIC_BE_URL is not defined!');
     }
 
     // Return the modified config
