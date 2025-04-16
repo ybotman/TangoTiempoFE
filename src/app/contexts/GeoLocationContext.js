@@ -193,33 +193,148 @@ export const GeoLocationProvider = ({ children }) => {
   const refreshUserLocation = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, userLocation: true }));
     
+    // Add cache/session storage to reduce API calls to ipapi.co (which has strict rate limits)
+    let cachedLocation = null;
+    let cacheTimestamp = null;
+    const cacheExpiry = 3600000; // 1 hour in milliseconds
+    
+    // Only access sessionStorage in browser environment
+    if (typeof window !== 'undefined') {
+      try {
+        cachedLocation = sessionStorage.getItem('userGeoLocation');
+        cacheTimestamp = sessionStorage.getItem('userGeoLocationTimestamp');
+      } catch (err) {
+        console.error('Error accessing sessionStorage:', err);
+        // Silently fail if sessionStorage is not available
+      }
+    }
+    
     try {
-      // Use only IP-based geolocation (no user permission needed)
-      const { data } = await axios.get('https://ipapi.co/json/');
-      
-      if (data && data.latitude && data.longitude) {
-        setUserLocation({
-          latitude: data.latitude,
-          longitude: data.longitude,
-          accuracy: null,
-          lastUpdated: new Date().toISOString(),
-          ipBased: true
-        });
-        
-        // Update the nearest city based on these coordinates
-        if (fetchNearestCity) {
-          fetchNearestCity(data.latitude, data.longitude);
+      // Check if we have a valid cached location
+      if (cachedLocation && cacheTimestamp) {
+        try {
+          const parsedLocation = JSON.parse(cachedLocation);
+          const timestamp = parseInt(cacheTimestamp, 10);
+          const now = Date.now();
           
-          // We'll rely on the useEffect watching nearestCity to reset the location
-          // This avoids the circular dependency with resetToNearestLocation
+          // If cache is still valid, use it instead of making a new API call
+          if (now - timestamp < cacheExpiry && 
+              parsedLocation && 
+              parsedLocation.latitude && 
+              parsedLocation.longitude) {
+            
+            console.log('Using cached geo location data');
+            
+            setUserLocation({
+              latitude: parsedLocation.latitude,
+              longitude: parsedLocation.longitude,
+              accuracy: null,
+              lastUpdated: new Date(timestamp).toISOString(),
+              ipBased: true
+            });
+            
+            // Update the nearest city based on cached coordinates
+            if (fetchNearestCity) {
+              fetchNearestCity(parsedLocation.latitude, parsedLocation.longitude);
+            }
+            
+            setErrorState(prev => ({ ...prev, userLocation: null }));
+            setLoadingState(prev => ({ ...prev, userLocation: false }));
+            return;
+          }
+        } catch (parseError) {
+          console.error('Error parsing cached location:', parseError);
+          // Continue if cache parsing fails
         }
-      } else {
-        throw new Error('Unable to retrieve latitude/longitude from IP service');
       }
       
-      setErrorState(prev => ({ ...prev, userLocation: null }));
+      // If no valid cache, make API request with error handling for rate limits
+      try {
+        // Use only IP-based geolocation (no user permission needed)
+        const { data } = await axios.get('https://ipapi.co/json/', {
+          // Add longer timeout and better error handling
+          timeout: 5000,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'TangoTiempo/1.0' // Identify our app to the API provider
+          }
+        });
+        
+        if (data && data.latitude && data.longitude) {
+          // Cache the location data - only in browser environment
+          if (typeof window !== 'undefined') {
+            try {
+              sessionStorage.setItem('userGeoLocation', JSON.stringify({
+                latitude: data.latitude,
+                longitude: data.longitude
+              }));
+              sessionStorage.setItem('userGeoLocationTimestamp', Date.now().toString());
+            } catch (storageError) {
+              console.error('Error saving to sessionStorage:', storageError);
+              // Continue even if storage fails
+            }
+          }
+          
+          setUserLocation({
+            latitude: data.latitude,
+            longitude: data.longitude,
+            accuracy: null,
+            lastUpdated: new Date().toISOString(),
+            ipBased: true
+          });
+          
+          // Update the nearest city based on these coordinates
+          if (fetchNearestCity) {
+            fetchNearestCity(data.latitude, data.longitude);
+            
+            // We'll rely on the useEffect watching nearestCity to reset the location
+            // This avoids the circular dependency with resetToNearestLocation
+          }
+        } else {
+          throw new Error('Unable to retrieve latitude/longitude from IP service');
+        }
+      } catch (error) {
+        console.error('ipapi.co API error:', error);
+        
+        if (error.response && error.response.status === 429) {
+          setErrorState(prev => ({ 
+            ...prev, 
+            userLocation: 'Rate limit exceeded for location service. Please try again later.' 
+          }));
+          
+          // Fall back to a default location or previously stored location if available
+          if (userLocation.latitude && userLocation.longitude) {
+            // We already have a location, so let's use it
+            if (fetchNearestCity) {
+              fetchNearestCity(userLocation.latitude, userLocation.longitude);
+            }
+          } else {
+            // Use a default location (US center)
+            const defaultLat = 39.8283;
+            const defaultLng = -98.5795;
+            
+            setUserLocation({
+              latitude: defaultLat,
+              longitude: defaultLng,
+              accuracy: null,
+              lastUpdated: new Date().toISOString(),
+              ipBased: false
+            });
+            
+            if (fetchNearestCity) {
+              fetchNearestCity(defaultLat, defaultLng);
+            }
+          }
+        } else {
+          setErrorState(prev => ({ 
+            ...prev, 
+            userLocation: error.message || 'Failed to get user location' 
+          }));
+        }
+      }
+      
     } catch (error) {
-      console.error('Error getting user location:', error);
+      console.error('Error in refreshUserLocation:', error);
       setErrorState(prev => ({ 
         ...prev, 
         userLocation: error.message || 'Failed to get user location' 
@@ -227,11 +342,16 @@ export const GeoLocationProvider = ({ children }) => {
     } finally {
       setLoadingState(prev => ({ ...prev, userLocation: false }));
     }
-  }, [fetchNearestCity]);
+  }, [fetchNearestCity, userLocation]);
 
   // Determine overall loading and error states
+  // Only show errors that are critical and would prevent functionality
   const isLoading = loadingState.userLocation || loadingState.locationData || loadingState.nearestCity;
-  const hasError = errorState.userLocation || errorState.locationData || errorState.nearestCity;
+  
+  // Don't treat the IP-based location errors as critical since we have fallbacks
+  const hasError = (errorState.userLocation && !userLocation.latitude) || 
+                   errorState.locationData || 
+                   (errorState.nearestCity && !nearestCity);
 
   // Get display text for current location
   const locationDisplayText = selectedLocation.city.name 

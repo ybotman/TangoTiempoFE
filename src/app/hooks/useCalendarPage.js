@@ -13,6 +13,7 @@ import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
 
@@ -26,19 +27,26 @@ export const useCalendarPage = () => {
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
   const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const calendarRef = useRef(null);
 
-  // Safely handle nearestCity fields
-  // Default to Northeast region if location context is not available
-  const regionName = nearestCity?.regionName || 'Northeast';
-  const divisionName = nearestCity?.divisionName || '';
-  const cityName = nearestCity?.cityName || '';
+  // Use GeoLocationContext as primary source, with fallback to MasteredLocationContext
+  // Ensure we have valid string values to avoid API errors
+  const regionName = (selectedLocation.region.name || nearestCity?.regionName || 'Northeast').trim();
+  const divisionName = (selectedLocation.division.name || nearestCity?.divisionName || '').trim();
+  const cityName = (selectedLocation.city.name || nearestCity?.cityName || '').trim();
 
-  const { events, refreshEvents } = useEvents(regionName, divisionName, cityName, datesSet?.start, datesSet?.end);
+  const { events, loading: eventsLoading, error: eventsError, refreshEvents } = useEvents(
+    regionName, 
+    divisionName, 
+    cityName, 
+    datesSet?.start, 
+    datesSet?.end
+  );
 
-  console.log('uCP : ', regionName, '>>', divisionName, '>>', cityName, '>>', datesSet?.start, datesSet?.end);
+  console.log('uCP GeoLocation: ', regionName, '>>', divisionName, '>>', cityName, '>>', datesSet?.start, datesSet?.end);
 
   const handleDatesSet = (dateInfo) => {
     setDatesSet({
@@ -189,5 +197,12 @@ export const useCalendarPage = () => {
     menuAnchor,
     menuItems,
     selectedEventDetails,
+    // Add loading and error states 
+    eventsLoading,
+    eventsError,
+    // Location info
+    regionName,
+    divisionName,
+    cityName
   };
 };
