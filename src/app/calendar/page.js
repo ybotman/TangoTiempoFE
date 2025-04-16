@@ -18,7 +18,6 @@ import ListIcon from '@mui/icons-material/List';
 
 import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
-import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import LocationInfo from '@/components/UI/LocationInfo';
@@ -40,7 +39,7 @@ const CalendarPage = () => {
     <meta property="og:url" content="https://www.tangotiempo.com" />
   </Head>;
 
-  const { regions } = useContext(RegionsContext);
+  // Regions data is now handled by useCalendarPage
   const {
     menuAnchor,
     menuItems,
@@ -102,16 +101,6 @@ const CalendarPage = () => {
     <div>
       <SiteHeader />
       <SiteMenuBar
-        selectedRegion={selectedRegion}
-        setSelectedRegion={setSelectedRegion}
-        selectedDivision={selectedDivision}
-        setSelectedDivision={setSelectedDivision}
-        selectedCity={selectedCity}
-        setSelectedCity={setSelectedCity}
-        regions={regions}
-        handleRegionChange={handleRegionChange}
-        organizers={organizers}
-        handleOrganizerChange={handleOrganizerChange}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
@@ -214,7 +203,6 @@ const CalendarPage = () => {
         open={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         selectedDate={clickedDate}
-        selectedRegion={selectedRegion}
       />
 
       <ViewEventDetailModal
@@ -222,7 +210,6 @@ const CalendarPage = () => {
         onClose={() => setViewDetailModalOpen(false)}
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
-        selectedRegion={selectedRegion}
       />
     </div>
   );

@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar, Tooltip, Typography, Fade, Snackbar, Alert } from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Typography, Snackbar, Alert } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
-import { RegionsContext } from '@/contexts/RegionsContext';
 
 const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
@@ -16,8 +14,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [pulseRegionText, setPulseRegionText] = useState(false);
-
+  
   // Snackbar state for role change message
   const [roleMessageOpen, setRoleMessageOpen] = useState(false);
   const [selectedRoleName, setSelectedRoleName] = useState('');
@@ -31,21 +28,12 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => 
     setRoleMessageOpen(false);
   };
 
-  const { selectedRegion } = useContext(RegionsContext);
-
   useEffect(() => {
     if (!user) {
       const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
       return () => clearInterval(interval);
     }
   }, [user]);
-
-  useEffect(() => {
-    if (!selectedRegion) {
-      const interval = setInterval(() => setPulseRegionText((prev) => !prev), 1000);
-      return () => clearInterval(interval);
-    }
-  }, [selectedRegion]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -68,7 +56,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => 
         justifyContent: 'space-between',
       }}
     >
-      {/* Left Icons and Region Context */}
+      {/* Left Icons */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
           edge="start"
@@ -78,18 +66,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => 
         >
           <MenuIcon />
         </IconButton>
-
-        {selectedRegion ? (
-          <Typography variant="body1" sx={{ ml: 2, fontWeight: 'bold' }}>
-            😊
-          </Typography>
-        ) : (
-          <Fade in={pulseRegionText} timeout={800}>
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
-              <ArrowBackIcon sx={{ fontSize: 20, mr: 0.5 }} />
-            </Box>
-          </Fade>
-        )}
       </Box>
 
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>

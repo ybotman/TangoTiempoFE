@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
-import { RegionsContext } from '@/contexts/RegionsContext';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCreateEvent } from '@/hooks/useEvents';
@@ -25,7 +24,6 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
-  const { selectedRegion, selectedRegionID, selectedDivision, selectedCity } = useContext(RegionsContext);
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('basic');
@@ -43,13 +41,13 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     isRepeating: false,
     imageFile: null,
     shortName: '',
-    // Use mastered location fields from GeoLocationContext first, then fall back to other contexts
-    masteredRegionName: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
-    masteredDivisionName: selectedLocation.division.name || selectedDivision || (nearestCity?.divisionName || ''),
-    masteredCityName: selectedLocation.city.name || selectedCity || (nearestCity?.cityName || ''),
+    // Use mastered location fields from GeoLocationContext first, then fall back to MasteredLocationContext
+    masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+    masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+    masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
     // Keep old fields for backward compatibility
-    selectedRegion: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
-    selectedRegionID: selectedLocation.region.id || selectedRegionID || (nearestCity?.regionID || ''),
+    selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+    selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
   });
 
   // Refresh event data when modal opens to get latest selected location
@@ -57,15 +55,15 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     if (open) {
       setEventData(prev => ({
         ...prev,
-        masteredRegionName: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
-        masteredDivisionName: selectedLocation.division.name || selectedDivision || (nearestCity?.divisionName || ''),
-        masteredCityName: selectedLocation.city.name || selectedCity || (nearestCity?.cityName || ''),
+        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
         // Keep old fields for backward compatibility
-        selectedRegion: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
-        selectedRegionID: selectedLocation.region.id || selectedRegionID || (nearestCity?.regionID || ''),
+        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
       }));
     }
-  }, [open, selectedLocation, selectedRegion, selectedDivision, selectedCity, nearestCity, selectedRegionID]);
+  }, [open, selectedLocation, nearestCity]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -201,6 +199,7 @@ CreateEventModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   selectedDate: PropTypes.instanceOf(Date),
+  // selectedRegion prop removed - now using GeoLocationContext
 };
 
 export default CreateEventModal;

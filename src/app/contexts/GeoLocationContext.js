@@ -4,7 +4,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import PropTypes from 'prop-types';
 import { useGeoLocations } from '@/hooks/useGeoLocations';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
-import { RegionsContext } from '@/contexts/RegionsContext';
+// Import RegionsContext with a deprecation warning - will be removed in future versions
+let RegionsContext;
+try {
+  RegionsContext = require('@/contexts/RegionsContext').RegionsContext;
+} catch (error) {
+  console.info('RegionsContext not found or imported. GeoLocationContext will operate independently.');
+}
 import axios from 'axios';
 
 // Create the GeoLocationContext
@@ -20,7 +26,8 @@ const GeoLocationContext = createContext();
 export const GeoLocationProvider = ({ children }) => {
   // Connect to existing contexts for backward compatibility
   const { nearestCity, fetchNearestCity } = useMasteredLocation();
-  const regionsContext = useContext(RegionsContext);
+  // Try to use RegionsContext if available, but make it optional
+  const regionsContext = RegionsContext ? useContext(RegionsContext) : null;
   const { latitude, longitude, loading: geoLoading, error: geoError } = useGeoLocations();
 
   // State for the new unified geo location context
@@ -101,7 +108,18 @@ export const GeoLocationProvider = ({ children }) => {
   }, [nearestCity, selectedLocation.region.id]);
 
   // Initialize from RegionsContext when someone changes the selection there
+  // This useEffect will be removed in a future version when RegionsContext is fully deprecated
   useEffect(() => {
+    // Skip sync if RegionsContext isn't present or if data isn't available
+    if (!regionsContext || !regionsContext.selectedRegion) {
+      return;
+    }
+    
+    console.warn(
+      "RegionsContext is deprecated and will be removed in a future version. " +
+      "Please migrate to GeoLocationContext for all location operations."
+    );
+    
     if (regionsContext.selectedRegion && regionsContext.selectedRegionID) {
       setSelectedLocation(prev => ({
         ...prev,
@@ -122,17 +140,21 @@ export const GeoLocationProvider = ({ children }) => {
       }));
     }
   }, [
-    regionsContext.selectedRegion, 
-    regionsContext.selectedRegionID, 
-    regionsContext.selectedDivision, 
-    regionsContext.selectedCity
+    regionsContext?.selectedRegion, 
+    regionsContext?.selectedRegionID, 
+    regionsContext?.selectedDivision, 
+    regionsContext?.selectedCity
   ]);
 
-  // Function to update the RegionsContext when our selection changes
-  // This ensures backward compatibility
+  // Function to update the RegionsContext when our selection changes for backward compatibility
+  // This useEffect will be removed in a future version when RegionsContext is fully deprecated
   useEffect(() => {
-    // Only update if we have actually selected something
-    if (selectedLocation.region.name) {
+    // Skip sync if RegionsContext isn't present or if we don't have location data
+    if (!regionsContext || !selectedLocation.region.name) {
+      return;
+    }
+    
+    try {
       // Update the RegionsContext to maintain compatibility
       if (regionsContext.selectedRegion !== selectedLocation.region.name) {
         regionsContext.setSelectedRegion(selectedLocation.region.name);
@@ -149,6 +171,9 @@ export const GeoLocationProvider = ({ children }) => {
       if (regionsContext.selectedCity !== selectedLocation.city.name) {
         regionsContext.setSelectedCity(selectedLocation.city.name || '');
       }
+    } catch (error) {
+      console.error("Error syncing with RegionsContext:", error);
+      // If RegionsContext is missing methods, we can safely continue without it
     }
   }, [
     selectedLocation, 

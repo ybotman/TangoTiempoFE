@@ -1,14 +1,14 @@
 import React from 'react';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert } from '@mui/material';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
-import { useLocations } from '@/hooks/useLocations'; // Import the locations hook
+import { useVenues } from '@/hooks/useLocations'; // Use the renamed hook for venues
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
-  const { organizers, loading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
-  const { locations, loading: loadingLocations, error: errorLocations } = useLocations(); // Fetch locations
+  const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
+  const { locations: venues, loading: loadingVenues, error: errorVenues } = useVenues(); // Fetch venues (using locations for backward compatibility)
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -28,10 +28,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     setEventData({ ...eventData, grantedOrganizer: selectedOrganizerId });
   };
 
-  // Handle location change
-  const handleLocationChange = (event) => {
-    const selectedLocationId = event.target.value;
-    setEventData({ ...eventData, locationID: selectedLocationId });
+  // Handle venue change
+  const handleVenueChange = (event) => {
+    const selectedVenueId = event.target.value;
+    setEventData({ ...eventData, locationID: selectedVenueId });
   };
 
   return (
@@ -76,44 +76,70 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               value={eventData.grantedOrganizer || ''}
               onChange={handleOrganizerChange}
               label="Organizer"
+              disabled={loadingOrganizers}
             >
               {loadingOrganizers ? (
-                <MenuItem disabled>Loading...</MenuItem>
+                <MenuItem disabled>
+                  <Box display="flex" alignItems="center">
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Loading organizers...
+                  </Box>
+                </MenuItem>
               ) : errorOrganizers ? (
                 <MenuItem disabled>Error loading organizers</MenuItem>
+              ) : organizers.length === 0 ? (
+                <MenuItem disabled>No organizers found in this area</MenuItem>
               ) : (
                 organizers.map((organizer) => (
                   <MenuItem key={organizer._id} value={organizer._id}>
-                    {organizer.name}
+                    {organizer.name || organizer.fullName}
                   </MenuItem>
                 ))
               )}
             </Select>
+            {organizers.length === 0 && !loadingOrganizers && !errorOrganizers && (
+              <Alert severity="info" sx={{ mt: 1 }}>
+                No organizers found in the selected location. Please select a different region or contact an administrator.
+              </Alert>
+            )}
           </FormControl>
         </Grid>
 
-        {/* Location Selection */}
+        {/* Venue Selection */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <InputLabel id="location-label">Location</InputLabel>
+            <InputLabel id="venue-label">Venue</InputLabel>
             <Select
-              labelId="location-label"
+              labelId="venue-label"
               value={eventData.locationID || ''}
-              onChange={handleLocationChange}
-              label="Location"
+              onChange={handleVenueChange}
+              label="Venue"
+              disabled={loadingVenues}
             >
-              {loadingLocations ? (
-                <MenuItem disabled>Loading...</MenuItem>
-              ) : errorLocations ? (
-                <MenuItem disabled>Error loading locations</MenuItem>
+              {loadingVenues ? (
+                <MenuItem disabled>
+                  <Box display="flex" alignItems="center">
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Loading venues...
+                  </Box>
+                </MenuItem>
+              ) : errorVenues ? (
+                <MenuItem disabled>Error loading venues</MenuItem>
+              ) : venues.length === 0 ? (
+                <MenuItem disabled>No venues found in this area</MenuItem>
               ) : (
-                locations.map((location) => (
-                  <MenuItem key={location._id} value={location._id}>
-                    {location.name}
+                venues.map((venue) => (
+                  <MenuItem key={venue._id} value={venue._id}>
+                    {venue.name}
                   </MenuItem>
                 ))
               )}
             </Select>
+            {venues.length === 0 && !loadingVenues && !errorVenues && (
+              <Alert severity="info" sx={{ mt: 1 }}>
+                No venues found in the selected location. Please select a different region or contact an administrator.
+              </Alert>
+            )}
           </FormControl>
         </Grid>
       </Grid>
