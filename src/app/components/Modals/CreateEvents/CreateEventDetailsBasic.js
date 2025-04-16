@@ -134,7 +134,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
 };
 
 CreateEventDetailsBasic.propTypes = {
-  open: PropTypes.bool.isRequired,
   eventData: PropTypes.object.isRequired,
   setEventData: PropTypes.func.isRequired,
 };

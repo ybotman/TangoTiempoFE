@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel } from '@mui/material';
+import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
 import { RegionsContext } from '@/contexts/RegionsContext';
+import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useCreateEvent } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
 
 const modalStyle = {
@@ -22,7 +24,8 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
-  const { selectedRegion, selectedRegionID } = useContext(RegionsContext);
+  const { selectedRegion, selectedRegionID, selectedDivision, selectedCity } = useContext(RegionsContext);
+  const { nearestCity } = useMasteredLocation();
   const [currentTab, setCurrentTab] = useState('basic');
   const [eventData, setEventData] = useState({
     title: '',
@@ -38,15 +41,65 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     isRepeating: false,
     imageFile: null,
     shortName: '',
-    selectedRegion: selectedRegion || '', // Store selectedRegion
-    selectedRegionID: selectedRegionID || '', // Store selectedRegionID
+    // Use mastered location fields from context
+    masteredRegionName: selectedRegion || (nearestCity?.regionName || ''),
+    masteredDivisionName: selectedDivision || (nearestCity?.divisionName || ''),
+    masteredCityName: selectedCity || (nearestCity?.cityName || ''),
+    // Keep old fields for backward compatibility
+    selectedRegion: selectedRegion || (nearestCity?.regionName || ''),
+    selectedRegionID: selectedRegionID || (nearestCity?.regionID || ''),
   });
 
-  useEffect(() => {}, [open]);
+  // Refresh event data when modal opens to get latest selected location
+  useEffect(() => {
+    if (open) {
+      setEventData(prev => ({
+        ...prev,
+        masteredRegionName: selectedRegion || (nearestCity?.regionName || ''),
+        masteredDivisionName: selectedDivision || (nearestCity?.divisionName || ''),
+        masteredCityName: selectedCity || (nearestCity?.cityName || ''),
+        // Keep old fields for backward compatibility
+        selectedRegion: selectedRegion || (nearestCity?.regionName || ''),
+        selectedRegionID: selectedRegionID || (nearestCity?.regionID || ''),
+      }));
+    }
+  }, [open, selectedRegion, selectedDivision, selectedCity, nearestCity]);
+
+  const [saveError, setSaveError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Import useCreateEvent hook
+  const createEvent = useCreateEvent();
 
   const handleSave = async () => {
-    //console.log('Saving event data:', eventData);
-    // Save logic for the event data
+    try {
+      setSaving(true);
+      setSaveError(null);
+      
+      // Validate required fields
+      if (!eventData.title) {
+        throw new Error('Event title is required');
+      }
+      if (!eventData.masteredRegionName) {
+        throw new Error('Region is required');
+      }
+      if (!eventData.categoryFirst) {
+        throw new Error('Category is required');
+      }
+      
+      console.log('Saving event data:', eventData);
+      
+      // Call the create event function from the hook
+      await createEvent(eventData);
+      
+      // Close the modal on successful save
+      onClose();
+    } catch (error) {
+      console.error('Error saving event:', error);
+      setSaveError(error.message || 'Error saving event');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -63,9 +116,9 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" flexWrap="wrap">
           <Typography variant="h5" component="h2">
-            {`Create Event in: ${selectedRegion || 'Unknown Region'}`}
+            Create Event
           </Typography>
           <FormControlLabel
             control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" />}
@@ -73,6 +126,35 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
             labelPlacement="start"
           />
         </Box>
+
+        {/* Display Current Location Hierarchy */}
+        <Box sx={{ my: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Chip 
+            label={`Region: ${eventData.masteredRegionName || 'Not selected'}`} 
+            color="primary" 
+            variant="outlined" 
+            size="small"
+          />
+          <Chip 
+            label={`Division: ${eventData.masteredDivisionName || 'Not selected'}`} 
+            color="primary" 
+            variant="outlined" 
+            size="small"
+          />
+          <Chip 
+            label={`City: ${eventData.masteredCityName || 'Not selected'}`} 
+            color="primary" 
+            variant="outlined" 
+            size="small"
+          />
+        </Box>
+
+        {/* Error message */}
+        {saveError && (
+          <Alert severity="error" sx={{ my: 1 }}>
+            {saveError}
+          </Alert>
+        )}
 
         {/* Tabs for different sections */}
         <Tabs value={currentTab} onChange={handleTabChange} aria-label="event details tabs" sx={{ mb: 2 }}>
@@ -91,8 +173,14 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         )}
 
         <Box mt={2} display="flex" justifyContent="space-between">
-          <Button onClick={handleSave} variant="contained" color="primary">
-            Save Event
+          <Button 
+            onClick={handleSave} 
+            variant="contained" 
+            color="primary"
+            disabled={saving}
+            startIcon={saving && <CircularProgress size={20} />}
+          >
+            {saving ? 'Saving...' : 'Save Event'}
           </Button>
           <Button onClick={onClose} variant="outlined" color="secondary">
             Close
