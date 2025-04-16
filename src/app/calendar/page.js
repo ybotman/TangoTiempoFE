@@ -21,6 +21,7 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
+import LocationInfo from '@/components/UI/LocationInfo';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 
@@ -118,53 +119,65 @@ const CalendarPage = () => {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: 'column',
+          gap: '10px',
           margin: '20px',
         }}
       >
-        <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <IconButton onClick={handlePrev}>
-            <ArrowBackIcon />
-          </IconButton>
-          <IconButton onClick={handleToday}>
-            <TodayIcon />
-          </IconButton>
-          <IconButton onClick={handleNext}>
-            <ArrowForwardIcon />
-          </IconButton>
-        </ButtonGroup>
-
-        {/* Date Range Display */}
+        {/* Location Information Bar */}
+        <LocationInfo />
+        
+        {/* Calendar Controls */}
         <div
           style={{
-            fontWeight: 'bold',
-            fontSize: '1.1rem',
-            flex: 1,
-            textAlign: 'center',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          {datesSet && datesSet.start
-            ? new Date(datesSet.start).toLocaleDateString(undefined, {
-                month: 'long',
-                year: 'numeric',
-                day:
-                  calendarRef.current && calendarRef.current.getApi().view.type.includes('day') ? 'numeric' : undefined,
-              })
-            : 'Loading calendar...'}
-        </div>
+          <ButtonGroup variant="outlined" aria-label="outlined button group">
+            <IconButton onClick={handlePrev}>
+              <ArrowBackIcon />
+            </IconButton>
+            <IconButton onClick={handleToday}>
+              <TodayIcon />
+            </IconButton>
+            <IconButton onClick={handleNext}>
+              <ArrowForwardIcon />
+            </IconButton>
+          </ButtonGroup>
 
-        <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
-            <CalendarMonthIcon />
-          </IconButton>
-          <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
-            <ViewWeekIcon />
-          </IconButton>
-          <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
-            <ListIcon />
-          </IconButton>
-        </ButtonGroup>
+          {/* Date Range Display */}
+          <div
+            style={{
+              fontWeight: 'bold',
+              fontSize: '1.1rem',
+              flex: 1,
+              textAlign: 'center',
+            }}
+          >
+            {datesSet && datesSet.start
+              ? new Date(datesSet.start).toLocaleDateString(undefined, {
+                  month: 'long',
+                  year: 'numeric',
+                  day:
+                    calendarRef.current && calendarRef.current.getApi().view.type.includes('day') ? 'numeric' : undefined,
+                })
+              : 'Loading calendar...'}
+          </div>
+
+          <ButtonGroup variant="outlined" aria-label="outlined button group">
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
+              <CalendarMonthIcon />
+            </IconButton>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
+              <ViewWeekIcon />
+            </IconButton>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+              <ListIcon />
+            </IconButton>
+          </ButtonGroup>
+        </div>
       </div>
 
       <FullCalendar

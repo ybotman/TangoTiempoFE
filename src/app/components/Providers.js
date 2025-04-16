@@ -9,6 +9,7 @@ import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { MasteredLocationProvider } from '@/contexts/MasteredLocationContext';
+import { GeoLocationProvider } from '@/contexts/GeoLocationContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 
 const Providers = ({ children }) => {
@@ -19,7 +20,9 @@ const Providers = ({ children }) => {
           <RoleProvider>
             <MasteredLocationProvider>
               <MasteredLocationLogger />
-              {children}
+              <GeoLocationProvider>
+                {children}
+              </GeoLocationProvider>
             </MasteredLocationProvider>
           </RoleProvider>
         </LocalizationProvider>

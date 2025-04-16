@@ -6,6 +6,7 @@ import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
 import { RegionsContext } from '@/contexts/RegionsContext';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCreateEvent } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
 
@@ -26,6 +27,7 @@ const modalStyle = {
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
   const { selectedRegion, selectedRegionID, selectedDivision, selectedCity } = useContext(RegionsContext);
   const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('basic');
   const [eventData, setEventData] = useState({
     title: '',
@@ -41,13 +43,13 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     isRepeating: false,
     imageFile: null,
     shortName: '',
-    // Use mastered location fields from context
-    masteredRegionName: selectedRegion || (nearestCity?.regionName || ''),
-    masteredDivisionName: selectedDivision || (nearestCity?.divisionName || ''),
-    masteredCityName: selectedCity || (nearestCity?.cityName || ''),
+    // Use mastered location fields from GeoLocationContext first, then fall back to other contexts
+    masteredRegionName: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
+    masteredDivisionName: selectedLocation.division.name || selectedDivision || (nearestCity?.divisionName || ''),
+    masteredCityName: selectedLocation.city.name || selectedCity || (nearestCity?.cityName || ''),
     // Keep old fields for backward compatibility
-    selectedRegion: selectedRegion || (nearestCity?.regionName || ''),
-    selectedRegionID: selectedRegionID || (nearestCity?.regionID || ''),
+    selectedRegion: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
+    selectedRegionID: selectedLocation.region.id || selectedRegionID || (nearestCity?.regionID || ''),
   });
 
   // Refresh event data when modal opens to get latest selected location
@@ -55,15 +57,15 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     if (open) {
       setEventData(prev => ({
         ...prev,
-        masteredRegionName: selectedRegion || (nearestCity?.regionName || ''),
-        masteredDivisionName: selectedDivision || (nearestCity?.divisionName || ''),
-        masteredCityName: selectedCity || (nearestCity?.cityName || ''),
+        masteredRegionName: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
+        masteredDivisionName: selectedLocation.division.name || selectedDivision || (nearestCity?.divisionName || ''),
+        masteredCityName: selectedLocation.city.name || selectedCity || (nearestCity?.cityName || ''),
         // Keep old fields for backward compatibility
-        selectedRegion: selectedRegion || (nearestCity?.regionName || ''),
-        selectedRegionID: selectedRegionID || (nearestCity?.regionID || ''),
+        selectedRegion: selectedLocation.region.name || selectedRegion || (nearestCity?.regionName || ''),
+        selectedRegionID: selectedLocation.region.id || selectedRegionID || (nearestCity?.regionID || ''),
       }));
     }
-  }, [open, selectedRegion, selectedDivision, selectedCity, nearestCity]);
+  }, [open, selectedLocation, selectedRegion, selectedDivision, selectedCity, nearestCity, selectedRegionID]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -132,21 +134,25 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
           <Chip 
             label={`Region: ${eventData.masteredRegionName || 'Not selected'}`} 
             color="primary" 
-            variant="outlined" 
+            variant={eventData.masteredDivisionName ? "outlined" : "filled"}
             size="small"
           />
-          <Chip 
-            label={`Division: ${eventData.masteredDivisionName || 'Not selected'}`} 
-            color="primary" 
-            variant="outlined" 
-            size="small"
-          />
-          <Chip 
-            label={`City: ${eventData.masteredCityName || 'Not selected'}`} 
-            color="primary" 
-            variant="outlined" 
-            size="small"
-          />
+          {eventData.masteredDivisionName && (
+            <Chip 
+              label={`Division: ${eventData.masteredDivisionName}`} 
+              color="primary" 
+              variant={eventData.masteredCityName ? "outlined" : "filled"}
+              size="small"
+            />
+          )}
+          {eventData.masteredCityName && (
+            <Chip 
+              label={`City: ${eventData.masteredCityName}`} 
+              color="primary" 
+              variant="filled"
+              size="small"
+            />
+          )}
         </Box>
 
         {/* Error message */}
