@@ -6,8 +6,17 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // To handle the case in LocationInfo.js where we're getting counts and don't need date filters
+  // To handle cases like LocationInfo.js where we're getting counts and don't need date filters
+  // Or we're loading the calendar view initially
   const isCountsQuery = calendarStart === null && calendarEnd === null;
+  
+  // Generate default date range if needed (current month)
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return { start: startOfMonth.toISOString(), end: endOfMonth.toISOString() };
+  };
 
   const getEvents = useCallback(async () => {
     // For counts query, we just need selectedRegion
@@ -31,10 +40,16 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
         masteredCityName: selectedCity && selectedCity.trim() !== '' ? selectedCity.trim() : undefined
       };
       
-      // Only add date parameters if this is not a counts query
+      // Add date parameters 
       if (!isCountsQuery) {
+        // Use provided dates
         params.start = calendarStart;
         params.end = calendarEnd;
+      } else {
+        // For counts queries or initial load, use default date range
+        const defaultDates = getDefaultDateRange();
+        params.start = defaultDates.start;
+        params.end = defaultDates.end;
       }
 
       console.log('Fetching events with params:', params);
