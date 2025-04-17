@@ -57,7 +57,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
   });
 
-  // Refresh event data when modal opens to get latest selected location
+  // Refresh event data and related data when modal opens or location changes
   useEffect(() => {
     if (open) {
       // Create initial date/time values from selectedDate if provided using dayjs
@@ -79,7 +79,17 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         // Keep old fields for backward compatibility
         selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
         selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+        // Reset venue and organizer selections when location changes to avoid invalid selections
+        locationID: '',
+        grantedOrganizer: ''
       }));
+
+      // Log current location for debugging
+      console.log('Current location for event creation:', {
+        region: selectedLocation.region,
+        division: selectedLocation.division,
+        city: selectedLocation.city
+      });
     }
   }, [open, selectedLocation, nearestCity, selectedDate]);
 

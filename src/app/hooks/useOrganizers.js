@@ -27,16 +27,17 @@ export const useOrganizers = () => {
     };
 
     // Add location filters from the GeoLocationContext
+    // Using correct parameter names expected by the backend
     if (masteredRegionId) {
-      params.masteredRegionId = masteredRegionId;
+      params.organizerRegion = masteredRegionId;
     }
     
     if (masteredDivisionId) {
-      params.masteredDivisionId = masteredDivisionId;
+      params.organizerDivision = masteredDivisionId;
     }
     
     if (masteredCityId) {
-      params.masteredCityId = masteredCityId;
+      params.organizerCity = masteredCityId;
     }
 
     try {

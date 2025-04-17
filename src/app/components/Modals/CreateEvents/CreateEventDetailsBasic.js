@@ -6,13 +6,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
-import { useVenues } from '@/hooks/useLocations'; // Use the renamed hook for venues
+import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hook
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
   const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
-  const { locations: venues, loading: loadingVenues, error: errorVenues } = useVenues(); // Fetch venues (using locations for backward compatibility)
+  const { venues, loading: loadingVenues, error: errorVenues } = useVenues(); // Fetch venues with the updated hook
 
   // Handle category change
   const handleCategoryChange = (event) => {
