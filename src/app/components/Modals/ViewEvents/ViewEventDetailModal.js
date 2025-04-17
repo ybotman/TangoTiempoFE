@@ -39,6 +39,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
   }, [open]);
 
   useEffect(() => {
+    // Try to use the event image if available
     if (eventDetails?.extendedProps?.eventImage) {
       const img = new Image();
       img.src = eventDetails.extendedProps.eventImage;
@@ -48,12 +49,41 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails }) => {
           setImageSrc(eventDetails.extendedProps.eventImage);
           setShowImageTab(true);
         } else {
+          // For portrait images, use a special placeholder
           setImageSrc('/Submit16by9Please.jpeg');
           setShowImageTab(true);
         }
       };
+
+      // Handle image load error - try fallback image if available
+      img.onerror = function() {
+        console.log('Primary image failed to load, trying fallback');
+        
+        // Try event-specific fallback if available
+        if (eventDetails?.extendedProps?.fallbackImageUrl) {
+          const fallbackImg = new Image();
+          fallbackImg.src = eventDetails.extendedProps.fallbackImageUrl;
+          
+          fallbackImg.onload = function() {
+            setImageSrc(eventDetails.extendedProps.fallbackImageUrl);
+            setShowImageTab(true);
+          };
+          
+          fallbackImg.onerror = function() {
+            // If both primary and fallback fail, use the default question image
+            console.log('Fallback image also failed, using default');
+            setImageSrc('/TangoQuestion.jpg');
+            setShowImageTab(true);
+          };
+        } else {
+          // No fallback provided, use default
+          setImageSrc('/TangoQuestion.jpg');
+          setShowImageTab(true);
+        }
+      };
     } else {
-      setImageSrc('/tangohandsWide.jpeg');
+      // No image provided at all
+      setImageSrc('/TangoQuestion.jpg');
       setShowImageTab(true);
     }
   }, [eventDetails]);

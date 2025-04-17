@@ -14,14 +14,17 @@ export function transformEvents(events) {
       categorySecond: event.categorySecond,
       categoryThird: event.categoryThird,
       eventImage: event.eventImage,
+      fallbackImageUrl: event.fallbackImageUrl || '/TangoQuestion.jpg',
       locationID: event.locationID,
       locationName: event.locationName,
       cost: event.cost,
       masteredRegionName: event.masteredRegionName,
       masteredDivisionName: event.masteredDivisionName,
       masteredCityName: event.masteredCityName,
-      active: event.active,
+      active: event.active, // Legacy field
+      isActive: event.isActive, // Current field
       canceled: event.canceled,
+      isCanceled: event.isCanceled, // Current field
       recurrenceRule: event.recurrenceRule,
       ownerOrganizerID: event.ownerOrganizerID,
       grantedOrganizerID: event.grantedOrganizerID,

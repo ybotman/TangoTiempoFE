@@ -1,20 +1,41 @@
-import { BlobServiceClient } from '@azure/storage-blob';
+import axios from 'axios';
 
-// Function to upload a file to Azure Blob Storage
-export const uploadToBlob = async (file) => {
-  // Use your Azure Storage connection string
-  const blobServiceClient = BlobServiceClient.fromConnectionString('<Your Azure Blob Storage Connection String>');
-  const containerClient = blobServiceClient.getContainerClient('events-images'); // Name of your container
-
-  // Create the container if it doesn't already exist
-  await containerClient.createIfNotExists();
-
-  // Create a block blob client
-  const blobClient = containerClient.getBlockBlobClient(file.name); // You can also include a folder structure in the name
-
-  // Upload the file
-  await blobClient.uploadBrowserFile(file); // Upload the file from the browser
-
-  // Return the URL of the uploaded blob
-  return blobClient.url; // This URL can be saved to MongoDB for later access
+/**
+ * Uploads a file to the server, which will then handle Azure storage.
+ * This approach avoids exposing storage keys in the frontend.
+ * 
+ * @param {File} file - The file object to upload
+ * @returns {Promise<string>} URL of the uploaded image
+ */
+export const uploadEventImage = async (file) => {
+  try {
+    // Create a unique filename to avoid collisions
+    const timestamp = new Date().getTime();
+    const uniqueFilename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('image', file, uniqueFilename);
+    formData.append('appId', process.env.NEXT_PUBLIC_APPLICATION_ID);
+    
+    // Upload to our backend API, which will handle Azure storage
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BE_URL}/api/events/upload-image`, 
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    
+    // Return both the image URL and fallback URL from the server response
+    return {
+      imageUrl: response.data.imageUrl,
+      fallbackUrl: response.data.fallbackUrl || '/TangoQuestion.jpg'
+    };
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw new Error('Failed to upload image. Please try again.');
+  }
 };
