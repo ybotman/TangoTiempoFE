@@ -7,7 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { RegionsProvider } from '@/contexts/RegionsContext';
 import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MasteredLocationProvider } from '@/contexts/MasteredLocationContext';
 import { GeoLocationProvider } from '@/contexts/GeoLocationContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
@@ -16,7 +16,7 @@ const Providers = ({ children }) => {
   return (
     <AuthProvider>
       <RegionsProvider>
-        <LocalizationProvider dateAdapter={AdapterLuxon}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
           <RoleProvider>
             <MasteredLocationProvider>
               <MasteredLocationLogger />

@@ -1,5 +1,9 @@
 import React from 'react';
 import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
 import { useVenues } from '@/hooks/useLocations'; // Use the renamed hook for venues
@@ -33,6 +37,39 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     const selectedVenueId = event.target.value;
     setEventData({ ...eventData, locationID: selectedVenueId });
   };
+  
+  // Handle start date change
+  const handleStartDateChange = (newDate) => {
+    // Convert to dayjs objects for comparison
+    const newDayjsDate = dayjs(newDate);
+    const currentEndDate = dayjs(eventData.endDate);
+    
+    // If end date is before the new start date, update end date to match start date
+    if (currentEndDate.isBefore(newDayjsDate)) {
+      setEventData({ 
+        ...eventData, 
+        startDate: newDate,
+        endDate: newDate
+      });
+    } else {
+      setEventData({ ...eventData, startDate: newDate });
+    }
+  };
+  
+  // Handle end date change
+  const handleEndDateChange = (newDate) => {
+    // Convert to dayjs objects for comparison
+    const newDayjsDate = dayjs(newDate);
+    const currentStartDate = dayjs(eventData.startDate);
+    
+    // Ensure end date is not before start date
+    if (newDayjsDate.isBefore(currentStartDate)) {
+      // If selected end date is before start date, don't update
+      console.warn('End date cannot be before start date');
+      return;
+    }
+    setEventData({ ...eventData, endDate: newDate });
+  };
 
   return (
     <Box>
@@ -65,6 +102,45 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               ))}
             </Select>
           </FormControl>
+        </Grid>
+        
+        {/* Start Date/Time Picker */}
+        <Grid item xs={12} md={6}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="Start Date & Time"
+              value={eventData.startDate}
+              onChange={handleStartDateChange}
+              slotProps={{ 
+                textField: { 
+                  fullWidth: true,
+                  required: true,
+                  helperText: "When will the event start?"
+                } 
+              }}
+              sx={{ width: '100%' }}
+            />
+          </LocalizationProvider>
+        </Grid>
+        
+        {/* End Date/Time Picker */}
+        <Grid item xs={12} md={6}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="End Date & Time"
+              value={eventData.endDate}
+              onChange={handleEndDateChange}
+              minDateTime={eventData.startDate}
+              slotProps={{ 
+                textField: { 
+                  fullWidth: true,
+                  required: true,
+                  helperText: "When will the event end?"
+                } 
+              }}
+              sx={{ width: '100%' }}
+            />
+          </LocalizationProvider>
         </Grid>
 
         {/* Organizer Selection */}

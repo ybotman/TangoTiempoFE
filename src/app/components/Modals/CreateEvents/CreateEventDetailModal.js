@@ -8,6 +8,7 @@ import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCreateEvent } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
+import dayjs from 'dayjs';
 
 const modalStyle = {
   position: 'absolute',
@@ -27,11 +28,17 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('basic');
+  // Create initial date/time values from selectedDate using dayjs
+  const initialStartDate = selectedDate ? dayjs(selectedDate) : dayjs();
+  
+  // Set end date to be 2 hours after start date by default
+  const initialEndDate = selectedDate ? dayjs(selectedDate).add(2, 'hour') : dayjs().add(2, 'hour');
+  
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
-    startDate: selectedDate || new Date(),
-    endDate: selectedDate || new Date(),
+    startDate: initialStartDate,
+    endDate: initialEndDate,
     cost: '',
     locationID: '',
     categoryFirst: '',
@@ -53,8 +60,19 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   // Refresh event data when modal opens to get latest selected location
   useEffect(() => {
     if (open) {
+      // Create initial date/time values from selectedDate if provided using dayjs
+      let updatedStartDate = prev => prev.startDate;
+      let updatedEndDate = prev => prev.endDate;
+      
+      if (selectedDate) {
+        updatedStartDate = dayjs(selectedDate);
+        updatedEndDate = dayjs(selectedDate).add(2, 'hour');
+      }
+      
       setEventData(prev => ({
         ...prev,
+        startDate: selectedDate ? updatedStartDate : prev.startDate,
+        endDate: selectedDate ? updatedEndDate : prev.endDate,
         masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
         masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
         masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
@@ -63,7 +81,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
       }));
     }
-  }, [open, selectedLocation, nearestCity]);
+  }, [open, selectedLocation, nearestCity, selectedDate]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
