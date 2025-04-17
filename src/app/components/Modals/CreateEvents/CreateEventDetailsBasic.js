@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -12,7 +12,13 @@ import PropTypes from 'prop-types';
 const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
   const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
-  const { venues, loading: loadingVenues, error: errorVenues } = useVenues(); // Fetch venues with the updated hook
+  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  
+  // Force venue refresh when component mounts
+  useEffect(() => {
+    fetchVenues();
+    console.log('CreateEventDetailsBasic: Refreshing venues, current list:', venues?.length || 0);
+  }, [fetchVenues]);
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -206,7 +212,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               ) : (
                 venues.map((venue) => (
                   <MenuItem key={venue._id} value={venue._id}>
-                    {venue.name}
+                    {venue.name || venue.shortName || `Venue ${venue._id}`}
                   </MenuItem>
                 ))
               )}

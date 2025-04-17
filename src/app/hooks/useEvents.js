@@ -77,6 +77,15 @@ export function useCreateEvent() {
         preparedData.masteredRegionName = preparedData.selectedRegion;
       }
 
+      // Convert dayjs objects to ISO strings
+      if (preparedData.startDate && typeof preparedData.startDate.toISOString === 'function') {
+        preparedData.startDate = preparedData.startDate.toISOString();
+      }
+      
+      if (preparedData.endDate && typeof preparedData.endDate.toISOString === 'function') {
+        preparedData.endDate = preparedData.endDate.toISOString();
+      }
+
       // Log the data being sent
       console.log('Submitting event data to API:', preparedData);
 

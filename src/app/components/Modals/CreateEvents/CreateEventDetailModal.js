@@ -114,6 +114,10 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
       if (!eventData.categoryFirst) {
         throw new Error('Category is required');
       }
+      if (!eventData.grantedOrganizer) {
+        throw new Error('Organizer is required');
+      }
+      // Location is now optional
       
       console.log('Saving event data:', eventData);
       

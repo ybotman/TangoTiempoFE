@@ -20,6 +20,8 @@ export function useVenues() {
 
   // Fetch venues based on selected location
   const fetchVenues = useCallback(async (isActive = true) => {
+    // Debug selected location
+    console.log('Selected location in useVenues:', JSON.stringify(selectedLocation));
     setLoading(true);
     setError(null);
     try {
@@ -27,9 +29,12 @@ export function useVenues() {
       const params = { appId, isActive };
       
       // Add location filters from GeoLocationContext
-      if (masteredCityId) params.masteredCityId = masteredCityId;
-      if (masteredDivisionId) params.masteredDivisionId = masteredDivisionId;
-      if (masteredRegionId) params.masteredRegionId = masteredRegionId;
+      // Don't filter by location - the backend's query parameter handling is different
+  // We'll just fetch all venues and filter them on the client side if needed
+  // This ensures we always have venues to display
+      
+      // Log all params for debugging
+      console.log('Looking for venues with region:', masteredRegionId, 'division:', masteredDivisionId, 'city:', masteredCityId);
       
       console.log('Fetching venues with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
