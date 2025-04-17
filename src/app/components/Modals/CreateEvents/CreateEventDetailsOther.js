@@ -1,47 +1,201 @@
 // src/components/OtherEventDetails.js
 
 import React from 'react';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid, CircularProgress, Alert } from '@mui/material';
 import PropTypes from 'prop-types';
+import useCategories from '@/hooks/useCategories';
+import { useOrganizers } from '@/hooks/useOrganizers';
 
-const OtherEventDetails = ({ eventData, setEventData }) => {
+const CreateEventDetailsOther = ({ eventData, setEventData }) => {
+  const categories = useCategories(); // Fetch categories
+  const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
+
+  // Handle secondary category change
+  const handleSecondCategoryChange = (event) => {
+    const selectedCategoryId = event.target.value;
+    
+    // Find the selected category to get its name
+    const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
+    
+    // Store both the ID and the name
+    setEventData({ 
+      ...eventData, 
+      categorySecondId: selectedCategoryId,
+      categorySecond: selectedCategory ? selectedCategory.categoryName : '' 
+    });
+  };
+
+  // Handle third category change
+  const handleThirdCategoryChange = (event) => {
+    const selectedCategoryId = event.target.value;
+    
+    // Find the selected category to get its name
+    const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
+    
+    // Store both the ID and the name
+    setEventData({ 
+      ...eventData, 
+      categoryThirdId: selectedCategoryId,
+      categoryThird: selectedCategory ? selectedCategory.categoryName : '' 
+    });
+  };
+
+  // Handle granted organizer change
+  const handleGrantedOrganizerChange = (event) => {
+    const selectedOrganizerId = event.target.value;
+    
+    // Find the selected organizer to get its name
+    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
+    
+    // Store both the ID and the name
+    setEventData({ 
+      ...eventData, 
+      grantedOrganizerID: selectedOrganizerId,
+      grantedOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : '' 
+    });
+  };
+
+  // Handle alternate organizer change
+  const handleAlternateOrganizerChange = (event) => {
+    const selectedOrganizerId = event.target.value;
+    
+    // Find the selected organizer to get its name
+    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
+    
+    // Store both the ID and the name
+    setEventData({ 
+      ...eventData, 
+      alternateOrganizerID: selectedOrganizerId,
+      alternateOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : '' 
+    });
+  };
+
   return (
     <Box>
-      <TextField
-        fullWidth
-        label="Granted Organizer"
-        value={eventData.grantedOrganizer}
-        onChange={(e) => setEventData({ ...eventData, grantedOrganizer: e.target.value })}
-        margin="normal"
-      />
-      <TextField
-        fullWidth
-        label="Secondary Category"
-        value={eventData.categorySecond}
-        onChange={(e) => setEventData({ ...eventData, categorySecond: e.target.value })}
-        margin="normal"
-      />
-      <TextField
-        fullWidth
-        label="Third Category"
-        value={eventData.categoryThird}
-        onChange={(e) => setEventData({ ...eventData, categoryThird: e.target.value })}
-        margin="normal"
-      />
-      <Button variant="contained" color="primary" onClick={() => console.log('Promote to Facebook')}>
-        Promote on Facebook
-      </Button>
+      <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+        Additional Event Details
+      </Typography>
+
+      <Grid container spacing={2}>
+        {/* Secondary Category Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="secondary-category-label">Secondary Category</InputLabel>
+            <Select
+              labelId="secondary-category-label"
+              value={eventData.categorySecondId || ''}
+              onChange={handleSecondCategoryChange}
+              label="Secondary Category"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Third Category Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="third-category-label">Third Category</InputLabel>
+            <Select
+              labelId="third-category-label"
+              value={eventData.categoryThirdId || ''}
+              onChange={handleThirdCategoryChange}
+              label="Third Category"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Granted Organizer Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="granted-organizer-label">Granted Organizer</InputLabel>
+            <Select
+              labelId="granted-organizer-label"
+              value={eventData.grantedOrganizerID || ''}
+              onChange={handleGrantedOrganizerChange}
+              label="Granted Organizer"
+              disabled={loadingOrganizers}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {loadingOrganizers ? (
+                <MenuItem disabled>
+                  <Box display="flex" alignItems="center">
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Loading organizers...
+                  </Box>
+                </MenuItem>
+              ) : errorOrganizers ? (
+                <MenuItem disabled>Error loading organizers</MenuItem>
+              ) : (
+                organizers.map((organizer) => (
+                  <MenuItem key={organizer._id} value={organizer._id}>
+                    {organizer.name || organizer.fullName}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Alternate Organizer Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="alternate-organizer-label">Alternate Organizer</InputLabel>
+            <Select
+              labelId="alternate-organizer-label"
+              value={eventData.alternateOrganizerID || ''}
+              onChange={handleAlternateOrganizerChange}
+              label="Alternate Organizer"
+              disabled={loadingOrganizers}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {loadingOrganizers ? (
+                <MenuItem disabled>
+                  <Box display="flex" alignItems="center">
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Loading organizers...
+                  </Box>
+                </MenuItem>
+              ) : errorOrganizers ? (
+                <MenuItem disabled>Error loading organizers</MenuItem>
+              ) : (
+                organizers.map((organizer) => (
+                  <MenuItem key={organizer._id} value={organizer._id}>
+                    {organizer.name || organizer.fullName}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
 
-OtherEventDetails.propTypes = {
-  eventData: PropTypes.shape({
-    grantedOrganizer: PropTypes.string.isRequired,
-    categorySecond: PropTypes.string.isRequired,
-    categoryThird: PropTypes.string.isRequired,
-  }).isRequired,
+CreateEventDetailsOther.propTypes = {
+  eventData: PropTypes.object.isRequired,
   setEventData: PropTypes.func.isRequired,
 };
 
-export default OtherEventDetails;
+export default CreateEventDetailsOther;

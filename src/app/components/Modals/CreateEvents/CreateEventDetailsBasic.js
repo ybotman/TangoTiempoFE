@@ -44,7 +44,17 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   // Handle organizer change
   const handleOrganizerChange = (event) => {
     const selectedOrganizerId = event.target.value;
-    setEventData({ ...eventData, grantedOrganizer: selectedOrganizerId });
+    
+    // Find the selected organizer to get its name
+    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
+    
+    // Store both the ID and the name - use ownerOrganizerID for the backend
+    setEventData({ 
+      ...eventData, 
+      grantedOrganizer: selectedOrganizerId, // Keep for backward compatibility 
+      ownerOrganizerID: selectedOrganizerId, // This is what the backend expects
+      ownerOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : 'Event Organizer'
+    });
   };
 
   // Handle venue change
@@ -102,32 +112,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
       </Typography>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
-        {/* Title Input */}
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <TextField label="Event Title" value={eventData.title} onChange={handleTitleChange} fullWidth />
-          </FormControl>
-        </Grid>
-
-        {/* Category Selection */}
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id="category-label">Category</InputLabel>
-            <Select
-              labelId="category-label"
-              value={eventData.categoryFirst || ''}
-              onChange={handleCategoryChange}
-              label="Category"
-            >
-              {categories.map((category) => (
-                <MenuItem key={category._id} value={category._id}>
-                  {category.categoryName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        
         {/* Start Date/Time Picker */}
         <Grid item xs={12} md={6}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -167,6 +151,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           </LocalizationProvider>
         </Grid>
 
+        {/* Title Input */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <TextField label="Event Title" value={eventData.title} onChange={handleTitleChange} fullWidth />
+          </FormControl>
+        </Grid>
+
+        {/* Category Selection */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel id="category-label">Category</InputLabel>
+            <Select
+              labelId="category-label"
+              value={eventData.categoryFirstId || ''}
+              onChange={handleCategoryChange}
+              label="Category"
+            >
+              {categories.map((category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        
         {/* Organizer Selection */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
