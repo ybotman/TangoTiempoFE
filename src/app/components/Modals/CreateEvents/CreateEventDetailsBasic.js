@@ -23,7 +23,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   // Handle category change
   const handleCategoryChange = (event) => {
     const selectedCategoryId = event.target.value;
-    setEventData({ ...eventData, categoryFirst: selectedCategoryId });
+    
+    // Find the selected category to get its name
+    const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
+    
+    // Store both the ID and the name - the ID in categoryFirstId (new field) and the name in categoryFirst
+    setEventData({ 
+      ...eventData, 
+      categoryFirstId: selectedCategoryId,
+      categoryFirst: selectedCategory ? selectedCategory.categoryName : '' 
+    });
   };
 
   // Handle title change
@@ -41,7 +50,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   // Handle venue change
   const handleVenueChange = (event) => {
     const selectedVenueId = event.target.value;
-    setEventData({ ...eventData, locationID: selectedVenueId });
+    
+    // Find the selected venue to get its name
+    const selectedVenue = venues.find(venue => venue._id === selectedVenueId);
+    
+    // Store both the ID and the name
+    setEventData({ 
+      ...eventData, 
+      locationID: selectedVenueId,
+      locationName: selectedVenue ? (selectedVenue.name || selectedVenue.shortName) : ''
+    });
   };
   
   // Handle start date change

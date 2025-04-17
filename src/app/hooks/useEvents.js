@@ -10,6 +10,15 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
   // Or we're loading the calendar view initially
   const isCountsQuery = calendarStart === null && calendarEnd === null;
   
+  // For debugging
+  console.log('useEvents called with:', { 
+    selectedRegion, 
+    selectedDivision, 
+    selectedCity, 
+    calendarStart: calendarStart?.toISOString ? calendarStart.toISOString() : calendarStart,
+    calendarEnd: calendarEnd?.toISOString ? calendarEnd.toISOString() : calendarEnd 
+  });
+  
   // Generate default date range if needed (current month)
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -85,6 +94,14 @@ export function useCreateEvent() {
       const preparedData = {
         ...eventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        // The backend requires ownerOrganizerID specifically
+        ownerOrganizerID: eventData.ownerOrganizerID || eventData.grantedOrganizer,
+        // Additional required fields from the Mongoose schema
+        regionName: eventData.masteredRegionName || eventData.selectedRegion,
+        // Set default ownerOrganizerName if not provided
+        ownerOrganizerName: eventData.ownerOrganizerName || "Event Organizer",
+        // Set expiresAt to 1 year after endDate
+        expiresAt: new Date(new Date(eventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
       };
 
       // Ensure mastered location fields are included
@@ -93,12 +110,22 @@ export function useCreateEvent() {
       }
 
       // Convert dayjs objects to ISO strings
-      if (preparedData.startDate && typeof preparedData.startDate.toISOString === 'function') {
-        preparedData.startDate = preparedData.startDate.toISOString();
+      if (preparedData.startDate) {
+        if (typeof preparedData.startDate.toISOString === 'function') {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        } else if (preparedData.startDate.isValid && preparedData.startDate.isValid()) {
+          // Handle dayjs objects
+          preparedData.startDate = preparedData.startDate.toISOString();
+        }
       }
       
-      if (preparedData.endDate && typeof preparedData.endDate.toISOString === 'function') {
-        preparedData.endDate = preparedData.endDate.toISOString();
+      if (preparedData.endDate) {
+        if (typeof preparedData.endDate.toISOString === 'function') {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        } else if (preparedData.endDate.isValid && preparedData.endDate.isValid()) {
+          // Handle dayjs objects
+          preparedData.endDate = preparedData.endDate.toISOString();
+        }
       }
 
       // Log the data being sent
