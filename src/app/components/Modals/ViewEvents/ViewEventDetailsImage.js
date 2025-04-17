@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 const ViewEventDetailsImage = ({ eventDetails }) => {
   // Assuming eventImage is already provided in eventDetails
-  const eventImage = eventDetails?.extendedProps?.eventImage || '/path/to/placeholder.jpg';
+  const eventImage = eventDetails?.extendedProps?.eventImage || '/TangoQuestion.jpg';
 
   return (
     <Box sx={{ padding: 2 }}>

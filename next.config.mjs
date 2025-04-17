@@ -19,12 +19,16 @@ const nextConfig = {
     return config;
   },
 
-  // Updated image configuration to allow external images
+  // Updated image configuration to allow external images including Azure Blob Storage
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'bostontangocalendar.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tangotiempoimages.blob.core.windows.net',
       },
     ],
   },

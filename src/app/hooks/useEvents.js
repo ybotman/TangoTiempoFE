@@ -96,8 +96,8 @@ export function useCreateEvent() {
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         // The backend requires ownerOrganizerID specifically
         ownerOrganizerID: eventData.ownerOrganizerID || eventData.grantedOrganizer,
-        // Additional required fields from the Mongoose schema
-        regionName: eventData.masteredRegionName || eventData.selectedRegion,
+        // Make sure we use masteredRegionName
+        masteredRegionName: eventData.masteredRegionName || eventData.selectedRegion,
         // Set default ownerOrganizerName if not provided
         ownerOrganizerName: eventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
@@ -107,6 +107,28 @@ export function useCreateEvent() {
       // Ensure mastered location fields are included
       if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
         preparedData.masteredRegionName = preparedData.selectedRegion;
+      }
+
+      // Handle image upload if an image file is present
+      if (preparedData.imageFile) {
+        try {
+          // Import the upload function dynamically to avoid issues with SSR
+          const { uploadEventImage } = await import('@/utils/uploadEventImages');
+          
+          // Upload the image and get the URLs (primary and fallback)
+          const uploadResult = await uploadEventImage(preparedData.imageFile);
+          
+          // Store the image URL in the event data
+          preparedData.eventImage = uploadResult.imageUrl;
+          preparedData.fallbackImageUrl = uploadResult.fallbackUrl || '/TangoQuestion.jpg';
+          
+          // Remove the file object from the data being sent to the API
+          delete preparedData.imageFile;
+          delete preparedData.imagePreviewUrl;
+        } catch (imageError) {
+          console.error('Error uploading image:', imageError);
+          // Continue without the image if upload fails
+        }
       }
 
       // Convert dayjs objects to ISO strings

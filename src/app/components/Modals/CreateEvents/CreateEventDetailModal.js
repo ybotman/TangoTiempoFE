@@ -54,6 +54,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     grantedOrganizer: '',
     isRepeating: false,
     imageFile: null,
+    imagePreviewUrl: null,
     shortName: '',
     // Use mastered location fields from GeoLocationContext first, then fall back to MasteredLocationContext
     masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
