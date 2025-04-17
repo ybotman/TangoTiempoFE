@@ -1,13 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
-import { RegionsContext } from '@/contexts/RegionsContext';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCreateEvent } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
+import dayjs from 'dayjs';
 
 const modalStyle = {
   position: 'absolute',
@@ -24,14 +25,20 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
-  const { selectedRegion, selectedRegionID, selectedDivision, selectedCity } = useContext(RegionsContext);
   const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('basic');
+  // Create initial date/time values from selectedDate using dayjs
+  const initialStartDate = selectedDate ? dayjs(selectedDate) : dayjs();
+  
+  // Set end date to be 2 hours after start date by default
+  const initialEndDate = selectedDate ? dayjs(selectedDate).add(2, 'hour') : dayjs().add(2, 'hour');
+  
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
-    startDate: selectedDate || new Date(),
-    endDate: selectedDate || new Date(),
+    startDate: initialStartDate,
+    endDate: initialEndDate,
     cost: '',
     locationID: '',
     categoryFirst: '',
@@ -41,29 +48,50 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     isRepeating: false,
     imageFile: null,
     shortName: '',
-    // Use mastered location fields from context
-    masteredRegionName: selectedRegion || (nearestCity?.regionName || ''),
-    masteredDivisionName: selectedDivision || (nearestCity?.divisionName || ''),
-    masteredCityName: selectedCity || (nearestCity?.cityName || ''),
+    // Use mastered location fields from GeoLocationContext first, then fall back to MasteredLocationContext
+    masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+    masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+    masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
     // Keep old fields for backward compatibility
-    selectedRegion: selectedRegion || (nearestCity?.regionName || ''),
-    selectedRegionID: selectedRegionID || (nearestCity?.regionID || ''),
+    selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+    selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
   });
 
-  // Refresh event data when modal opens to get latest selected location
+  // Refresh event data and related data when modal opens or location changes
   useEffect(() => {
     if (open) {
+      // Create initial date/time values from selectedDate if provided using dayjs
+      let updatedStartDate = prev => prev.startDate;
+      let updatedEndDate = prev => prev.endDate;
+      
+      if (selectedDate) {
+        updatedStartDate = dayjs(selectedDate);
+        updatedEndDate = dayjs(selectedDate).add(2, 'hour');
+      }
+      
       setEventData(prev => ({
         ...prev,
-        masteredRegionName: selectedRegion || (nearestCity?.regionName || ''),
-        masteredDivisionName: selectedDivision || (nearestCity?.divisionName || ''),
-        masteredCityName: selectedCity || (nearestCity?.cityName || ''),
+        startDate: selectedDate ? updatedStartDate : prev.startDate,
+        endDate: selectedDate ? updatedEndDate : prev.endDate,
+        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
         // Keep old fields for backward compatibility
-        selectedRegion: selectedRegion || (nearestCity?.regionName || ''),
-        selectedRegionID: selectedRegionID || (nearestCity?.regionID || ''),
+        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+        // Reset venue and organizer selections when location changes to avoid invalid selections
+        locationID: '',
+        grantedOrganizer: ''
       }));
+
+      // Log current location for debugging
+      console.log('Current location for event creation:', {
+        region: selectedLocation.region,
+        division: selectedLocation.division,
+        city: selectedLocation.city
+      });
     }
-  }, [open, selectedRegion, selectedDivision, selectedCity, nearestCity]);
+  }, [open, selectedLocation, nearestCity, selectedDate]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -86,6 +114,10 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
       if (!eventData.categoryFirst) {
         throw new Error('Category is required');
       }
+      if (!eventData.grantedOrganizer) {
+        throw new Error('Organizer is required');
+      }
+      // Location is now optional
       
       console.log('Saving event data:', eventData);
       
@@ -132,21 +164,25 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
           <Chip 
             label={`Region: ${eventData.masteredRegionName || 'Not selected'}`} 
             color="primary" 
-            variant="outlined" 
+            variant={eventData.masteredDivisionName ? "outlined" : "filled"}
             size="small"
           />
-          <Chip 
-            label={`Division: ${eventData.masteredDivisionName || 'Not selected'}`} 
-            color="primary" 
-            variant="outlined" 
-            size="small"
-          />
-          <Chip 
-            label={`City: ${eventData.masteredCityName || 'Not selected'}`} 
-            color="primary" 
-            variant="outlined" 
-            size="small"
-          />
+          {eventData.masteredDivisionName && (
+            <Chip 
+              label={`Division: ${eventData.masteredDivisionName}`} 
+              color="primary" 
+              variant={eventData.masteredCityName ? "outlined" : "filled"}
+              size="small"
+            />
+          )}
+          {eventData.masteredCityName && (
+            <Chip 
+              label={`City: ${eventData.masteredCityName}`} 
+              color="primary" 
+              variant="filled"
+              size="small"
+            />
+          )}
         </Box>
 
         {/* Error message */}
@@ -195,6 +231,7 @@ CreateEventModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   selectedDate: PropTypes.instanceOf(Date),
+  // selectedRegion prop removed - now using GeoLocationContext
 };
 
 export default CreateEventModal;

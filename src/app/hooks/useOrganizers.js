@@ -1,11 +1,15 @@
 // src/hooks/useOrganizers.js
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { RegionsContext } from '@/contexts/RegionsContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 export const useOrganizers = () => {
-  const regionContext = useContext(RegionsContext);
-  const selectedRegionID = regionContext ? regionContext.selectedRegionID : null;
+  const { selectedLocation } = useGeoLocation();
+  
+  // Get location IDs for filtering
+  const masteredRegionId = selectedLocation?.region?.id || null;
+  const masteredDivisionId = selectedLocation?.division?.id || null;
+  const masteredCityId = selectedLocation?.city?.id || null;
 
   const [organizers, setOrganizers] = useState([]);
   const [organizer, setOrganizer] = useState(null); // Single organizer data
@@ -14,17 +18,31 @@ export const useOrganizers = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch organizers based on selected region
+  // Fetch organizers based on selected location hierarchy from GeoLocationContext
   const fetchOrganizers = useCallback(async () => {
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-    const params = { appId };
+    const params = { 
+      appId,
+      isActive: true // Only fetch active organizers by default
+    };
 
-    if (selectedRegionID) {
-      params.regionID = selectedRegionID;
+    // Add location filters from the GeoLocationContext
+    // Using correct parameter names expected by the backend
+    if (masteredRegionId) {
+      params.organizerRegion = masteredRegionId;
+    }
+    
+    if (masteredDivisionId) {
+      params.organizerDivision = masteredDivisionId;
+    }
+    
+    if (masteredCityId) {
+      params.organizerCity = masteredCityId;
     }
 
     try {
       setFetchLoading(true);
+      console.log('Fetching organizers with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, { params });
       console.log('Organizers fetched successfully:', response.data);
       setOrganizers(response.data);
@@ -34,7 +52,7 @@ export const useOrganizers = () => {
     } finally {
       setFetchLoading(false);
     }
-  }, [selectedRegionID]);
+  }, [masteredRegionId, masteredDivisionId, masteredCityId]);
 
   // Fetch a single organizer by ID
   const fetchOrganizerById = useCallback(async (organizerId) => {
@@ -120,16 +138,10 @@ export const useOrganizers = () => {
     }
   }, []);
 
-  // Effect to fetch organizers when the selected region changes
+  // Effect to fetch organizers when the selected location hierarchy changes
   useEffect(() => {
-    // console.log('useOrganizers useEffect triggered');
-    // console.log('selectedRegionID:', selectedRegionID);
-    if (!selectedRegionID) {
-      console.log('No region selected. Skipping fetchOrganizers.');
-      setFetchLoading(false); // Ensure loading is set to false
-      return;
-    }
-
+    // Always fetch organizers regardless of whether a region is selected
+    // The API will return appropriate defaults
     fetchOrganizers();
   }, [fetchOrganizers]);
 

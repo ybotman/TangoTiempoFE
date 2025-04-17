@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress } from '@mui/material';
 import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 // Dynamic imports for react-leaflet (no SSR)
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
@@ -24,6 +25,7 @@ const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip)
 const LocationContextModal = ({ open, onClose }) => {
   const { cities, fetchCities } = useMasteredLocations();
   const { nearestCity, fetchNearestCity } = useMasteredLocation();
+  const { selectLocation } = useGeoLocation();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -43,10 +45,50 @@ const LocationContextModal = ({ open, onClose }) => {
   console.log('LocationContextModal - Cities available:', cities?.length || 0);
   console.log('LocationContextModal - Current city:', nearestCity);
 
+  // Keep track of the city we clicked for updating GeoLocationContext
+  const [clickedCityId, setClickedCityId] = useState(null);
+  
+  // When nearestCity changes and there's a clickedCityId, update GeoLocationContext
+  useEffect(() => {
+    if (clickedCityId && nearestCity && nearestCity.cityID === clickedCityId) {
+      // Update GeoLocationContext with the data from nearestCity
+      selectLocation({
+        country: {
+          id: nearestCity.countryID,
+          name: nearestCity.countryName
+        },
+        region: {
+          id: nearestCity.regionID,
+          name: nearestCity.regionName
+        },
+        division: {
+          id: nearestCity.divisionID,
+          name: nearestCity.divisionName
+        },
+        city: {
+          id: nearestCity.cityID,
+          name: nearestCity.cityName,
+          latitude: nearestCity.latitude,
+          longitude: nearestCity.longitude
+        }
+      });
+      
+      // Clear the clicked city ID
+      setClickedCityId(null);
+      
+      // Close the modal
+      onClose();
+    }
+  }, [nearestCity, clickedCityId, selectLocation, onClose]);
+  
   const handleCityClick = async (city) => {
     if (!city.latitude || !city.longitude) return;
+    
+    // Set the clicked city ID so we can identify when nearestCity updates
+    setClickedCityId(city._id);
+    
+    // Update the MasteredLocationContext (for backward compatibility)
     await fetchNearestCity(city.latitude, city.longitude);
-    onClose();
   };
 
   // Ensure we have a valid center
