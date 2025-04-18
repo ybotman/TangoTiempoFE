@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
@@ -6,7 +6,8 @@ import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { useCreateEvent } from '@/hooks/useEvents';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useEventOperations } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 
@@ -27,6 +28,7 @@ const modalStyle = {
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
+  const { user, getIdToken } = useContext(AuthContext);
   const [currentTab, setCurrentTab] = useState('basic');
   // Create initial date/time values from selectedDate using dayjs
   const initialStartDate = selectedDate ? dayjs(selectedDate) : dayjs();
@@ -47,11 +49,13 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     categorySecondId: '',
     categoryThird: '',
     categoryThirdId: '',
+    // Organizer fields - ownerOrganizerID will be set automatically by the backend
+    ownerOrganizerID: '',
+    ownerOrganizerName: '',
     grantedOrganizerID: '',
     grantedOrganizerName: '',
     alternateOrganizerID: '',
     alternateOrganizerName: '',
-    grantedOrganizer: '',
     isRepeating: false,
     imageFile: null,
     imagePreviewUrl: null,
@@ -87,9 +91,8 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         // Keep old fields for backward compatibility
         selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
         selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
-        // Reset venue and organizer selections when location changes to avoid invalid selections
-        locationID: '',
-        grantedOrganizer: ''
+        // Reset venue selection when location changes to avoid invalid selections
+        locationID: ''
       }));
 
       // Log current location for debugging
@@ -104,33 +107,51 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Import useCreateEvent hook
-  const createEvent = useCreateEvent();
+  // Import event operations hook
+  const { createEvent } = useEventOperations();
 
   const handleSave = async () => {
     try {
       setSaving(true);
       setSaveError(null);
       
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to create events');
+      }
+      
       // Validate required fields
       if (!eventData.title) {
         throw new Error('Event title is required');
       }
+      
       if (!eventData.masteredRegionName) {
         throw new Error('Region is required');
       }
-      if (!eventData.categoryFirst) {
-        throw new Error('Category is required');
-      }
-      if (!eventData.grantedOrganizer) {
-        throw new Error('Organizer is required');
-      }
-      // Location is now optional
       
-      console.log('Saving event data:', eventData);
+      // Apply defaults for optional fields
+      const eventDataWithDefaults = {
+        ...eventData,
+        masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'), 
+        categoryFirst: eventData.categoryFirst || 'Other',
+        description: eventData.description || ''
+      };
       
-      // Call the create event function from the hook
-      await createEvent(eventData);
+      // Update the event data with defaults
+      setEventData(eventDataWithDefaults);
+      
+      // Try to refresh the auth token before saving
+      try {
+        console.log('Refreshing auth token before saving event...');
+        await getIdToken(true); // Force token refresh
+      } catch (tokenError) {
+        console.warn('Could not refresh token, but will continue with existing token:', tokenError);
+      }
+      
+      console.log('Saving event data:', eventDataWithDefaults);
+      
+      // Call the create event function from the hook with defaults
+      await createEvent(eventDataWithDefaults);
       
       // Close the modal on successful save
       onClose();

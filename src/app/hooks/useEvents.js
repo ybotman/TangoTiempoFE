@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export function useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user, selectedRole } = useContext(AuthContext);
   
   // To handle cases like LocationInfo.js where we're getting counts and don't need date filters
   // Or we're loading the calendar view initially
@@ -60,6 +62,13 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
         params.start = defaultDates.start;
         params.end = defaultDates.end;
       }
+      
+      // Add user role and organizerId if user is a RegionalOrganizer
+      if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+        params.userRole = 'RegionalOrganizer';
+        params.organizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
+        console.log('Adding RegionalOrganizer filtering for events where organizerId appears in any organizer field:', params.organizerId);
+      }
 
       console.log('Fetching events with params:', params);
 
@@ -78,7 +87,7 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
     } finally {
       setLoading(false);
     }
-  }, [selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, isCountsQuery]);
+  }, [selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, isCountsQuery, user, selectedRole]);
 
   useEffect(() => {
     getEvents();
@@ -87,9 +96,32 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
   return { events, loading, error, refreshEvents: getEvents };
 }
 
-export function useCreateEvent() {
+export function useEventOperations() {
+  const { user, getIdToken } = useContext(AuthContext);
+  
+  // Create event
   const createEvent = async (eventData) => {
     try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to create events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event creation');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event creation');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
       // Prepare the event data for submission
       const preparedData = {
         ...eventData,
@@ -116,7 +148,8 @@ export function useCreateEvent() {
           const { uploadEventImage } = await import('@/utils/uploadEventImages');
           
           // Upload the image and get the URLs (primary and fallback)
-          const uploadResult = await uploadEventImage(preparedData.imageFile);
+          // Pass the fresh auth token for authentication
+          const uploadResult = await uploadEventImage(preparedData.imageFile, token);
           
           // Store the image URL in the event data
           preparedData.eventImage = uploadResult.imageUrl;
@@ -153,7 +186,15 @@ export function useCreateEvent() {
       // Log the data being sent
       console.log('Submitting event data to API:', preparedData);
 
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, preparedData);
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Sending event creation request with auth token');
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, preparedData, config);
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
@@ -169,5 +210,147 @@ export function useCreateEvent() {
     }
   };
 
-  return createEvent;
+  // Update event
+  const updateEvent = async (eventId, eventData) => {
+    try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to update events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event update');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event update');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Prepare the event data for submission
+      const preparedData = {
+        ...eventData,
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+      };
+      
+      // Convert dayjs objects to ISO strings
+      if (preparedData.startDate) {
+        if (typeof preparedData.startDate.toISOString === 'function') {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        } else if (preparedData.startDate.isValid && preparedData.startDate.isValid()) {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        }
+      }
+      
+      if (preparedData.endDate) {
+        if (typeof preparedData.endDate.toISOString === 'function') {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        } else if (preparedData.endDate.isValid && preparedData.endDate.isValid()) {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        }
+      }
+      
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Updating event:', eventId, preparedData);
+      
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        preparedData, 
+        config
+      );
+      
+      console.log('Event updated successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Delete event
+  const deleteEvent = async (eventId) => {
+    try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to delete events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event deletion');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event deletion');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Deleting event:', eventId);
+      
+      const response = await axios.delete(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        config
+      );
+      
+      console.log('Event deleted successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Get event by ID
+  const getEventById = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/id/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      throw error;
+    }
+  };
+
+  return { createEvent, updateEvent, deleteEvent, getEventById };
 }

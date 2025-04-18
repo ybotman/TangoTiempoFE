@@ -72,6 +72,7 @@ const CalendarPage = () => {
     handleOrganizerChange,
     coloredFilteredEvents,
     datesSet,
+    handleEventUpdated,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -210,6 +211,7 @@ const CalendarPage = () => {
         onClose={() => setViewDetailModalOpen(false)}
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
+        onEventUpdated={handleEventUpdated}
       />
     </div>
   );

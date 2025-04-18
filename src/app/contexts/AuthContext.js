@@ -48,8 +48,31 @@ export const AuthProvider = ({ children }) => {
       //  const endTime = Date.now();
       //  console.log(`Auth state change handling took ${endTime - startTime} ms`);
     });
+    
+    // Set up token refresh interval if a user exists
+    let tokenRefreshInterval;
+    if (auth.currentUser) {
+      // Refresh token every 30 minutes to ensure it doesn't expire
+      tokenRefreshInterval = setInterval(async () => {
+        try {
+          if (auth.currentUser) {
+            const newToken = await auth.currentUser.getIdToken(true);
+            setUser(prevUser => ({
+              ...prevUser,
+              token: newToken
+            }));
+            console.log('Auth token refreshed');
+          }
+        } catch (error) {
+          console.error('Error refreshing token:', error);
+        }
+      }, 30 * 60 * 1000); // 30 minutes
+    }
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (tokenRefreshInterval) clearInterval(tokenRefreshInterval);
+    };
   }, []);
 
   // Function to fetch and set combined user data
@@ -78,6 +101,7 @@ export const AuthProvider = ({ children }) => {
         ...firebaseUser, // Spread Firebase user properties directly
         backendInfo,
         roles: backendInfo.roleIds.map((role) => role.roleName) || [],
+        token: idToken, // Store the token for API calls
       };
       console.log('Merged user:', mergedUser);
       setUser(mergedUser);
@@ -306,6 +330,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Helper method to get a fresh token
+  const getIdToken = async (forceRefresh = false) => {
+    if (!auth.currentUser) {
+      throw new Error('No authenticated user');
+    }
+    
+    try {
+      const token = await auth.currentUser.getIdToken(forceRefresh);
+      
+      // Update the stored token
+      setUser(prevUser => ({
+        ...prevUser,
+        token
+      }));
+      
+      return token;
+    } catch (error) {
+      console.error('Error getting ID token:', error);
+      throw error;
+    }
+  };
+
   // Context Value
   const value = {
     user,
@@ -317,6 +363,7 @@ export const AuthProvider = ({ children }) => {
     authenticateWithGoogle,
     authenticateWithFacebook,
     login,
+    getIdToken, // Add method to get a fresh token
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

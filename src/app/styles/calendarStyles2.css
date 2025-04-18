@@ -82,6 +82,18 @@
   color: black;
 }
 
+/* Global override for all event titles */
+.fc-event-title,
+[class*="fc-event-title"],
+.fc-list-event-title,
+.fc-daygrid-event .fc-event-title,
+.fc-timegrid-event .fc-event-title,
+.fc .fc-daygrid-event .fc-event-title,
+.fc-list-event .fc-list-event-title {
+  font-weight: normal !important;
+  font-family: Arial, sans-serif !important;
+}
+
 /* List View */
 .fc-list-item .fc-list-item-title {
   display: flex;

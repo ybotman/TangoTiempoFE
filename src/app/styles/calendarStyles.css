@@ -95,8 +95,8 @@
 .fc-event-title {
   color: rgb(110, 38, 38);
   /* Event time and title color */
-  font-weight: bold;
-  /* Event time and title font weight */
+  font-weight: normal;
+  /* Changed from bold to normal */
 }
 
 /* Day Headers (e.g., Sun, Mon, etc.) */
@@ -117,6 +117,11 @@
   /* List event border */
   color: white;
   /* List event text color */
+}
+
+/* List view event titles */
+.fc-list-event-title {
+  font-weight: normal !important;
 }
 
 .fc-list-event:hover {
@@ -167,4 +172,10 @@
 .fc-popover-body {
   background-color: #f9f9f9;
   /* Popover body background */
+}
+
+/* Highest specificity override to ensure all event titles are not bold */
+body .fc-view-harness .fc-view .fc-event .fc-event-main .fc-event-title,
+body .fc-view-harness .fc-view table .fc-list-event .fc-list-event-title {
+  font-weight: normal !important;
 }

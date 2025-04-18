@@ -1,24 +1,65 @@
-import React, { useEffect } from 'react';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert } from '@mui/material';
+import React, { useEffect, useContext, useState } from 'react';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert, Paper, Autocomplete } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
-import { useOrganizers } from '@/hooks/useOrganizers'; // Import the organizers hook
 import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hook
+import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
-  const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  const { user } = useContext(AuthContext); // Get current user info
+  const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
+  const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   
   // Force venue refresh when component mounts
   useEffect(() => {
     fetchVenues();
     console.log('CreateEventDetailsBasic: Refreshing venues, current list:', venues?.length || 0);
   }, [fetchVenues]);
+  
+  // Filter venues based on search input
+  useEffect(() => {
+    if (!venues) return;
+    
+    if (!venueInputValue) {
+      setFilteredVenues(venues);
+      return;
+    }
+    
+    const searchTerm = venueInputValue.toLowerCase();
+    const filtered = venues.filter(venue => {
+      const venueName = (venue.name || venue.shortName || '').toLowerCase();
+      return venueName.includes(searchTerm);
+    });
+    
+    setFilteredVenues(filtered);
+  }, [venues, venueInputValue]);
+  
+  // Set owner organizer info from user context when component mounts
+  useEffect(() => {
+    if (user && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+      // Extract organizer information
+      const orgInfo = user.backendInfo.regionalOrganizerInfo;
+      const orgId = user.backendInfo.regionalOrganizerInfo.organizerId;
+      const orgName = user.backendInfo.regionalOrganizerInfo.organizerName || 
+                     (user.backendInfo.localUserInfo && 
+                      `${user.backendInfo.localUserInfo.firstName || ''} ${user.backendInfo.localUserInfo.lastName || ''}`.trim());
+      
+      setEventData(prevData => ({
+        ...prevData,
+        // Owner Organizer data is set automatically from the current user's organization
+        ownerOrganizerID: orgId,
+        ownerOrganizerName: orgName || 'Your Organization'
+      }));
+      
+      console.log('Set owner organizer from user profile:', orgName, 'ID:', orgId);
+    }
+  }, [user, setEventData]);
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -41,35 +82,29 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     setEventData({ ...eventData, title });
   };
 
-  // Handle organizer change
-  const handleOrganizerChange = (event) => {
-    const selectedOrganizerId = event.target.value;
-    
-    // Find the selected organizer to get its name
-    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
-    
-    // Store both the ID and the name - use ownerOrganizerID for the backend
-    setEventData({ 
-      ...eventData, 
-      grantedOrganizer: selectedOrganizerId, // Keep for backward compatibility 
-      ownerOrganizerID: selectedOrganizerId, // This is what the backend expects
-      ownerOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : 'Event Organizer'
-    });
-  };
-
-  // Handle venue change
-  const handleVenueChange = (event) => {
-    const selectedVenueId = event.target.value;
-    
-    // Find the selected venue to get its name
-    const selectedVenue = venues.find(venue => venue._id === selectedVenueId);
+  // Handle venue change from autocomplete
+  const handleVenueChange = (event, newValue) => {
+    if (!newValue) {
+      // Clear venue selection
+      setEventData({
+        ...eventData,
+        locationID: '',
+        locationName: ''
+      });
+      return;
+    }
     
     // Store both the ID and the name
     setEventData({ 
       ...eventData, 
-      locationID: selectedVenueId,
-      locationName: selectedVenue ? (selectedVenue.name || selectedVenue.shortName) : ''
+      locationID: newValue._id,
+      locationName: newValue.name || newValue.shortName || ''
     });
+  };
+  
+  // Handle venue input change for filtering
+  const handleVenueInputChange = (event, newInputValue) => {
+    setVenueInputValue(newInputValue);
   };
   
   // Handle start date change
@@ -122,8 +157,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               slotProps={{ 
                 textField: { 
                   fullWidth: true,
-                  required: true,
-                  helperText: "When will the event start?"
+                  required: true
                 } 
               }}
               sx={{ width: '100%' }}
@@ -142,8 +176,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               slotProps={{ 
                 textField: { 
                   fullWidth: true,
-                  required: true,
-                  helperText: "When will the event end?"
+                  required: true
                 } 
               }}
               sx={{ width: '100%' }}
@@ -154,7 +187,13 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         {/* Title Input */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <TextField label="Event Title" value={eventData.title} onChange={handleTitleChange} fullWidth />
+            <TextField 
+              label="Event Title" 
+              value={eventData.title} 
+              onChange={handleTitleChange}
+              required
+              fullWidth
+            />
           </FormControl>
         </Grid>
 
@@ -168,6 +207,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               onChange={handleCategoryChange}
               label="Category"
             >
+              <MenuItem value="">
+                <em>None (will use 'Other')</em>
+              </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category._id} value={category._id}>
                   {category.categoryName}
@@ -177,75 +219,55 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           </FormControl>
         </Grid>
         
-        {/* Organizer Selection */}
+        {/* Owner Organizer Display (not editable) - smaller size */}
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id="organizer-label">Organizer</InputLabel>
-            <Select
-              labelId="organizer-label"
-              value={eventData.grantedOrganizer || ''}
-              onChange={handleOrganizerChange}
-              label="Organizer"
-              disabled={loadingOrganizers}
-            >
-              {loadingOrganizers ? (
-                <MenuItem disabled>
-                  <Box display="flex" alignItems="center">
-                    <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Loading organizers...
-                  </Box>
-                </MenuItem>
-              ) : errorOrganizers ? (
-                <MenuItem disabled>Error loading organizers</MenuItem>
-              ) : organizers.length === 0 ? (
-                <MenuItem disabled>No organizers found in this area</MenuItem>
-              ) : (
-                organizers.map((organizer) => (
-                  <MenuItem key={organizer._id} value={organizer._id}>
-                    {organizer.name || organizer.fullName}
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-            {organizers.length === 0 && !loadingOrganizers && !errorOrganizers && (
-              <Alert severity="info" sx={{ mt: 1 }}>
-                No organizers found in the selected location. Please select a different region or contact an administrator.
-              </Alert>
-            )}
+          <FormControl fullWidth size="small">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
+                Created by:
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                {eventData.ownerOrganizerName || (user?.backendInfo?.regionalOrganizerInfo?.organizerName || 'Your Organization')}
+              </Typography>
+            </Box>
           </FormControl>
         </Grid>
 
-        {/* Venue Selection */}
+        {/* Venue Selection - Searchable Autocomplete */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <InputLabel id="venue-label">Venue</InputLabel>
-            <Select
-              labelId="venue-label"
-              value={eventData.locationID || ''}
+            <Autocomplete
+              id="venue-autocomplete"
+              options={filteredVenues || []}
+              loading={loadingVenues}
+              value={eventData.locationID ? (venues || []).find(v => v._id === eventData.locationID) || null : null}
               onChange={handleVenueChange}
-              label="Venue"
-              disabled={loadingVenues}
-            >
-              {loadingVenues ? (
-                <MenuItem disabled>
-                  <Box display="flex" alignItems="center">
-                    <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Loading venues...
-                  </Box>
-                </MenuItem>
-              ) : errorVenues ? (
-                <MenuItem disabled>Error loading venues</MenuItem>
-              ) : venues.length === 0 ? (
-                <MenuItem disabled>No venues found in this area</MenuItem>
-              ) : (
-                venues.map((venue) => (
-                  <MenuItem key={venue._id} value={venue._id}>
-                    {venue.name || venue.shortName || `Venue ${venue._id}`}
-                  </MenuItem>
-                ))
+              onInputChange={handleVenueInputChange}
+              getOptionLabel={(option) => option.name || option.shortName || `Venue ${option._id}`}
+              isOptionEqualToValue={(option, value) => option._id === value._id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Venue (type to search)"
+                  variant="outlined"
+                  error={Boolean(errorVenues)}
+                  helperText={errorVenues ? "Error loading venues" : ""}
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingVenues ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
               )}
-            </Select>
-            {venues.length === 0 && !loadingVenues && !errorVenues && (
+              noOptionsText="No venues found. Try a different search or region."
+              loadingText="Loading venues..."
+              filterOptions={(x) => x} // We're handling filtering ourselves via the filteredVenues state
+            />
+            {venues && venues.length === 0 && !loadingVenues && !errorVenues && (
               <Alert severity="info" sx={{ mt: 1 }}>
                 No venues found in the selected location. Please select a different region or contact an administrator.
               </Alert>
