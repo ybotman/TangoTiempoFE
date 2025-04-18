@@ -7,7 +7,7 @@
 // This ensures that if nearestCity is not yet defined, we pass empty strings to useEvents, preventing runtime errors.
 
 import { useState, useRef } from 'react';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, useEventOperations } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
@@ -45,6 +45,9 @@ export const useCalendarPage = () => {
     datesSet?.start, 
     datesSet?.end
   );
+  
+  // Initialize event operations
+  const { getEventById } = useEventOperations();
 
   console.log('uCP GeoLocation: ', regionName, '>>', divisionName, '>>', cityName, '>>', datesSet?.start, datesSet?.end);
 
@@ -68,16 +71,30 @@ export const useCalendarPage = () => {
   });
 
   // Tracking-integrated handlers
-  const handleEventCreated = (newEvent) => {
-    console.log('New event created:', newEvent);
+  // Handle event update actions (create, edit, delete)
+  const handleEventUpdated = (action, eventId) => {
+    console.log(`Event ${action}:`, eventId);
     refreshEvents();
+    
+    // Handle edit case specifically
+    if (action === 'edit' && eventId) {
+      // Fetch the event details and open the edit modal
+      getEventById(eventId)
+        .then(eventData => {
+          setSelectedEventDetails(eventData);
+          setCreateModalOpen(true); // Reuse the create modal for editing
+        })
+        .catch(error => {
+          console.error('Error fetching event details for editing:', error);
+        });
+    }
 
-    // Track event creation
+    // Track the event in analytics
     trackEvent({
-      action: 'create_event',
+      action: `${action}_event`,
       category: 'Event Management',
-      label: newEvent.title || 'New Event',
-      value: newEvent.id,
+      label: action === 'create' ? 'New Event' : `Event ${eventId}`,
+      value: eventId || '',
     });
   };
 
@@ -163,6 +180,17 @@ export const useCalendarPage = () => {
     if (action === 'addSingleEvent') {
       setCreateModalOpen(true);
     }
+    
+    if (action === 'editEvent' && selectedEventDetails) {
+      // Handle edit event from context menu
+      handleEventUpdated('edit', selectedEventDetails.extendedProps?._id);
+    }
+    
+    if (action === 'deleteEvent' && selectedEventDetails) {
+      // Show delete confirmation dialog
+      setViewDetailModalOpen(true);
+      // The delete button in the modal will handle the actual deletion
+    }
   };
 
   const handleMenuClose = () => {
@@ -185,7 +213,7 @@ export const useCalendarPage = () => {
     setCreateModalOpen,
     isViewDetailModalOpen,
     setViewDetailModalOpen,
-    handleEventCreated,
+    handleEventUpdated,
     handlePrev,
     handleNext,
     handleToday,

@@ -96,9 +96,10 @@ export function useEvents(selectedRegion, selectedDivision, selectedCity, calend
   return { events, loading, error, refreshEvents: getEvents };
 }
 
-export function useCreateEvent() {
+export function useEventOperations() {
   const { user, getIdToken } = useContext(AuthContext);
   
+  // Create event
   const createEvent = async (eventData) => {
     try {
       // Check if user is authenticated
@@ -209,5 +210,147 @@ export function useCreateEvent() {
     }
   };
 
-  return createEvent;
+  // Update event
+  const updateEvent = async (eventId, eventData) => {
+    try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to update events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event update');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event update');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Prepare the event data for submission
+      const preparedData = {
+        ...eventData,
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+      };
+      
+      // Convert dayjs objects to ISO strings
+      if (preparedData.startDate) {
+        if (typeof preparedData.startDate.toISOString === 'function') {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        } else if (preparedData.startDate.isValid && preparedData.startDate.isValid()) {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        }
+      }
+      
+      if (preparedData.endDate) {
+        if (typeof preparedData.endDate.toISOString === 'function') {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        } else if (preparedData.endDate.isValid && preparedData.endDate.isValid()) {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        }
+      }
+      
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Updating event:', eventId, preparedData);
+      
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        preparedData, 
+        config
+      );
+      
+      console.log('Event updated successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Delete event
+  const deleteEvent = async (eventId) => {
+    try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to delete events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event deletion');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event deletion');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Deleting event:', eventId);
+      
+      const response = await axios.delete(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        config
+      );
+      
+      console.log('Event deleted successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Get event by ID
+  const getEventById = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/id/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      throw error;
+    }
+  };
+
+  return { createEvent, updateEvent, deleteEvent, getEventById };
 }

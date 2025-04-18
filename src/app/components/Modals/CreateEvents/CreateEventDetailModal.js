@@ -7,7 +7,7 @@ import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
-import { useCreateEvent } from '@/hooks/useEvents';
+import { useEventOperations } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 
@@ -107,8 +107,8 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Import useCreateEvent hook
-  const createEvent = useCreateEvent();
+  // Import event operations hook
+  const { createEvent } = useEventOperations();
 
   const handleSave = async () => {
     try {
