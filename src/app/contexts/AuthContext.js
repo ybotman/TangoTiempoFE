@@ -14,8 +14,10 @@ import {
   EmailAuthProvider,
   fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
-import { auth, facebookProvider } from '@/utils/firebase';
+import { auth, facebookProvider, googleProvider, emailProvider } from '@/utils/firebase';
 import axios from 'axios';
 
 // Create Auth Context
@@ -95,6 +97,31 @@ export const AuthProvider = ({ children }) => {
       //  console.log('Fetched user data from backend');
 
       const backendInfo = response.data;
+      
+      // For debugging
+      console.log('Auth provider:', firebaseUser.providerData[0].providerId);
+      console.log('Backend roleIds:', backendInfo.roleIds);
+      console.log('RegionalOrganizerInfo:', backendInfo.regionalOrganizerInfo);
+      
+      // Check if regionalOrganizerInfo is properly populated
+      if (backendInfo.regionalOrganizerInfo && backendInfo.regionalOrganizerInfo.organizerId) {
+        console.log('User has organizerId:', backendInfo.regionalOrganizerInfo.organizerId);
+        
+        // Ensure the flags are set properly
+        if (!backendInfo.regionalOrganizerInfo.isActive ||
+            !backendInfo.regionalOrganizerInfo.isEnabled ||
+            !backendInfo.regionalOrganizerInfo.isApproved) {
+          console.warn('RegionalOrganizer flags not all enabled:', {
+            isActive: backendInfo.regionalOrganizerInfo.isActive,
+            isEnabled: backendInfo.regionalOrganizerInfo.isEnabled,
+            isApproved: backendInfo.regionalOrganizerInfo.isApproved
+          });
+        }
+      } else if (backendInfo.roleIds && backendInfo.roleIds.some(role => 
+        typeof role === 'object' && role.roleName === 'RegionalOrganizer'
+      )) {
+        console.warn('User has RegionalOrganizer role but no organizerId in regionalOrganizerInfo!');
+      }
 
       // Merge Firebase and backend user data
       const mergedUser = {
@@ -127,11 +154,10 @@ export const AuthProvider = ({ children }) => {
     }
 
     setLoading(true);
-    const provider = new GoogleAuthProvider();
 
     try {
       signUpOngoing.current = true;
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, googleProvider);
       console.log('Google sign-in successful:', result);
       const firebaseUser = result.user;
 
@@ -164,23 +190,11 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
 
-    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'development') {
-      setError('Facebook authentication is disabled in development.');
-      return null;
-    }
-
     setLoading(true);
-    const provider = facebookProvider; // Already initialized in firebase.js
-
-    if (!provider) {
-      setError('Facebook authentication is not configured.');
-      setLoading(false);
-      return null;
-    }
 
     try {
       signUpOngoing.current = true;
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, facebookProvider);
       console.log('Facebook sign-in successful:', result);
       const firebaseUser = result.user;
 
@@ -317,6 +331,73 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Sign up with Email and Password
+  const signUp = async ({ email, password, firstName, lastName }) => {
+    console.log('Starting signup process', { 
+      email, 
+      passwordLength: password ? password.length : 0, 
+      firstName, 
+      lastName 
+    });
+    
+    try {
+      setLoading(true);
+      
+      // Create user with Firebase
+      console.log('Attempting to create user with Firebase...');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      console.log('Firebase user created successfully', { uid: firebaseUser.uid });
+      
+      // Update profile with display name
+      const displayName = `${firstName} ${lastName}`.trim();
+      console.log('Updating user profile with display name...');
+      await updateProfile(firebaseUser, { displayName });
+      console.log('Profile updated successfully');
+      
+      // Create user in backend
+      console.log('Creating user in backend...');
+      await handleBackendUser(firebaseUser);
+      console.log('Backend user created/updated successfully');
+      
+      // Set user data in context
+      console.log('Setting user data in context...');
+      await setUserData(firebaseUser);
+      console.log('User data set in context successfully');
+      
+      setLoading(false);
+      return firebaseUser;
+    } catch (err) {
+      console.error('Error in signUp:', err);
+      console.error('Error details:', { 
+        code: err.code, 
+        message: err.message,
+        stack: err.stack
+      });
+      
+      // Parse Firebase error messages to make them more user-friendly
+      let errorMessage = 'Sign up failed.';
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'Email address is already in use.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Email address is invalid.';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        errorMessage = 'Email/password accounts are not enabled. Please contact support.';
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error occurred. Please check your connection.';
+      } else {
+        // Include original error for debugging
+        errorMessage = `Sign up failed: ${err.message}`;
+      }
+      
+      setError(errorMessage);
+      setLoading(false);
+      return null;
+    }
+  };
+
   // Logout Function
   const logOut = async () => {
     try {
@@ -363,6 +444,7 @@ export const AuthProvider = ({ children }) => {
     authenticateWithGoogle,
     authenticateWithFacebook,
     login,
+    signUp,
     getIdToken, // Add method to get a fresh token
   };
 

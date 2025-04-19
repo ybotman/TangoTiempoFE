@@ -78,15 +78,25 @@ export const MasteredLocationProvider = ({ children }) => {
 
   const initializeContext = async () => {
     try {
-      const ipapiResponse = await fetch('https://ipapi.co/json/');
+      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const ipapiResponse = await fetch(`${baseURL}/api/firebase/geo/ip`);
 
       if (!ipapiResponse.ok) {
-        throw new Error(`IPAPI Error: ${ipapiResponse.statusText}`);
+        throw new Error(`Geolocation Error: ${ipapiResponse.statusText}`);
       }
-      const { latitude, longitude } = await ipapiResponse.json();
-
-      if (!latitude || !longitude) {
-        throw new Error('Invalid geolocation data from IPAPI.');
+      const data = await ipapiResponse.json();
+      let latitude, longitude;
+      
+      if (data.latitude && data.longitude) {
+        latitude = data.latitude;
+        longitude = data.longitude;
+      } else if (data.fallback) {
+        // Use fallback coordinates if provided by proxy
+        latitude = data.fallback.latitude;
+        longitude = data.fallback.longitude;
+        console.log('Using fallback coordinates from proxy');
+      } else {
+        throw new Error('Invalid geolocation data.');
       }
 
       await fetchNearestCity(latitude, longitude);

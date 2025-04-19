@@ -15,16 +15,26 @@ export function useGeoLocations() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await axios.get('https://ipapi.co/json/');
+      // Use the backend proxy to avoid CORS issues
+      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const { data } = await axios.get(`${baseURL}/api/firebase/geo/ip`);
+      
       if (data && data.latitude && data.longitude) {
         setLatitude(data.latitude);
         setLongitude(data.longitude);
+      } else if (data && data.fallback) {
+        // Use fallback coordinates if provided
+        setLatitude(data.fallback.latitude);
+        setLongitude(data.fallback.longitude);
       } else {
-        throw new Error('Unable to retrieve latitude/longitude from ipapi.');
+        throw new Error('Unable to retrieve geolocation data.');
       }
     } catch (err) {
       console.error('useGeoLocations-> Error:', err.message);
       setError(err.message);
+      // Set fallback US center coordinates
+      setLatitude(39.8283);
+      setLongitude(-98.5795);
     } finally {
       setLoading(false);
     }
