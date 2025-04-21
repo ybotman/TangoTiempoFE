@@ -24,7 +24,7 @@ This frontend application (tangotiempo.com) is part of a larger system with four
    - Same functionality with different branding/theme
    - Shares the same backend API
 
-4. **calendaradmin** - Admin dashboard (port 3008)
+4. **calops** - Admin dashboard (port 3008)
    - Administrative interface for user/data management
    - Not directly related to this application's functionality
 
