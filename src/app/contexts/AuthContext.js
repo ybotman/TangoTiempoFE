@@ -86,15 +86,20 @@ export const AuthProvider = ({ children }) => {
       const idToken = await firebaseUser.getIdToken();
       console.log('Fetched ID token');
 
+      console.log('Attempting to fetch user data from backend:', 
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`);
+      
+      // Add timeout to prevent hanging requests
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
         {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
+          timeout: 10000 // 10 second timeout
         }
       );
-      //  console.log('Fetched user data from backend');
+      console.log('Successfully fetched user data from backend');
 
       const backendInfo = response.data;
       
@@ -149,9 +154,40 @@ export const AuthProvider = ({ children }) => {
       console.log('Has valid organizerId:', !!(mergedUser.backendInfo?.regionalOrganizerInfo?.organizerId));
     } catch (err) {
       console.error('Error fetching combined user data:', err);
-      setError('Failed to fetch user data.');
-      setUser(null);
-      setSelectedRole('');
+      
+      // Log detailed error information for debugging
+      if (err.response) {
+        // Server responded with non-2xx status
+        console.error('Backend server error details:', {
+          status: err.response.status,
+          data: err.response.data,
+          headers: err.response.headers
+        });
+      } else if (err.request) {
+        // Request was made but no response received (network issue)
+        console.error('No response received from server:', err.request);
+      } else {
+        // Error setting up the request
+        console.error('Request setup error:', err.message);
+      }
+      
+      // Create a minimal user object with just Firebase data
+      // This allows the user to still use the app with limited functionality
+      const minimalUser = {
+        ...firebaseUser,
+        roles: ['AnonymousUser'], // Fallback role
+        token: await firebaseUser.getIdToken(),
+        backendInfo: {
+          roleIds: [{roleName: 'AnonymousUser', _id: 'temporary'}]
+        }
+      };
+      
+      console.log('Using minimal user object due to backend error:', minimalUser);
+      
+      // Set a minimal user object instead of null to prevent complete login failure
+      setUser(minimalUser);
+      setSelectedRole('AnonymousUser');
+      setError('Warning: Limited functionality due to server issues. Some features may not work.');
     }
 
     // const endTime = Date.now();
