@@ -2,7 +2,7 @@
 
 'use client';
 import Head from 'next/head';
-import React, { useContext, useEffect } from 'react';
+import React, {useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -49,27 +49,18 @@ const CalendarPage = () => {
     handleMenuClose,
     activeCategories,
     handleCategoryChange,
-    selectedRegion,
-    selectedDivision,
-    selectedCity,
-    organizers,
     calendarRef,
-    setSelectedRegion,
-    setSelectedDivision,
-    setSelectedCity,
     isCreateModalOpen,
     setCreateModalOpen,
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     selectedEventDetails,
     handleDatesSet,
-    handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,
     handleDateClick,
     handleEventClick,
-    handleOrganizerChange,
     coloredFilteredEvents,
     datesSet,
     handleEventUpdated,
@@ -114,9 +105,6 @@ const CalendarPage = () => {
           margin: '20px',
         }}
       >
-        {/* Location Information Bar */}
-        <LocationInfo />
-        
         {/* Calendar Controls */}
         <div
           style={{
@@ -192,6 +180,12 @@ const CalendarPage = () => {
           },
         }}
       />
+      
+      {/* Location Information Bar - Moved below calendar */}
+      <div style={{ margin: '20px' }}>
+        <LocationInfo />
+      </div>
+      
       {/* SubMenu */}
       <CalendarSubMenu
         menuAnchor={menuAnchor}
