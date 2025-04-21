@@ -133,8 +133,20 @@ export const AuthProvider = ({ children }) => {
       console.log('Merged user:', mergedUser);
       setUser(mergedUser);
 
-      // Set selectedRole to the first available role
-      setSelectedRole(mergedUser.roles[0] || '');
+      // Always default to NamedUser role if available
+      if (mergedUser.roles.includes('NamedUser')) {
+        console.log('Setting selectedRole to NamedUser by default');
+        setSelectedRole('NamedUser');
+      } else {
+        // Fall back to first available role if NamedUser not available
+        console.log('NamedUser role not found, using first available role:', mergedUser.roles[0] || '');
+        setSelectedRole(mergedUser.roles[0] || '');
+      }
+      
+      // Log available roles for debugging
+      console.log('Available roles for user:', mergedUser.roles);
+      console.log('Has RegionalOrganizer role:', mergedUser.roles.includes('RegionalOrganizer'));
+      console.log('Has valid organizerId:', !!(mergedUser.backendInfo?.regionalOrganizerInfo?.organizerId));
     } catch (err) {
       console.error('Error fetching combined user data:', err);
       setError('Failed to fetch user data.');

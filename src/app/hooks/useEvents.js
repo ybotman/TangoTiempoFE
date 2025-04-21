@@ -1,99 +1,225 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
-export function useEvents(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
-  const [events, setEvents] = useState([]);
+/**
+ * Unified useEvents hook - handles both geo-based and organizer-based filtering
+ * 
+ * @param {Object} options - Configuration options
+ * @param {string} [options.region] - Region name for location filtering
+ * @param {string} [options.division] - Division name for location filtering
+ * @param {string} [options.city] - City name for location filtering
+ * @param {number} [options.lat] - Latitude for geo filtering
+ * @param {number} [options.lng] - Longitude for geo filtering
+ * @param {Date|string} [options.startDate] - Start date for filtering events
+ * @param {Date|string} [options.endDate] - End date for filtering events
+ * @param {number} [options.page=1] - Page number for pagination
+ * @param {number} [options.limit=100] - Number of items per page
+ * @returns {Object} Events data, loading state, error state, and refresh function
+ */
+export function useEvents({
+  region,
+  division,
+  city,
+  lat,
+  lng,
+  startDate,
+  endDate,
+  page = 1,
+  limit = 100,
+  useGeoLocationContext = true // Flag to control whether to use GeoLocationContext
+} = {}) {
+  const [eventsData, setEventsData] = useState({
+    events: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      limit: 100,
+      pages: 0
+    },
+    filterType: null
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user, selectedRole } = useContext(AuthContext);
   
-  // To handle cases like LocationInfo.js where we're getting counts and don't need date filters
-  // Or we're loading the calendar view initially
-  const isCountsQuery = calendarStart === null && calendarEnd === null;
+  // Get location from GeoLocationContext if available
+  const geoLocationContext = useGeoLocationContext ? useGeoLocation() : null;
   
-  // For debugging
-  console.log('useEvents called with:', { 
-    selectedRegion, 
-    selectedDivision, 
-    selectedCity, 
-    calendarStart: calendarStart?.toISOString ? calendarStart.toISOString() : calendarStart,
-    calendarEnd: calendarEnd?.toISOString ? calendarEnd.toISOString() : calendarEnd 
+  // Use context values if explicitly provided parameters are missing
+  const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
+  const effectiveDivision = division || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.division?.name : null);
+  const effectiveCity = city || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.city?.name : null);
+  
+  // Use coordinates from GeoLocationContext if lat/lng not explicitly provided
+  const effectiveLat = lat || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
+    ? geoLocationContext?.userLocation?.latitude : null);
+  const effectiveLng = lng || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
+    ? geoLocationContext?.userLocation?.longitude : null);
+  
+  // Create a cache key for memoizing/deduplicating requests
+  const cacheKey = JSON.stringify({
+    region: effectiveRegion, 
+    division: effectiveDivision, 
+    city: effectiveCity, 
+    lat: effectiveLat, 
+    lng: effectiveLng, 
+    startDate: startDate?.toString(), 
+    endDate: endDate?.toString(),
+    page, 
+    limit, 
+    userId: user?.uid, 
+    selectedRole,
+    geoLocationUpdated: useGeoLocationContext ? geoLocationContext?.userLocation?.lastUpdated : null
   });
   
-  // Generate default date range if needed (current month)
+  // Generate default date range if needed
   const getDefaultDateRange = () => {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 3, 0); // 3 months
     return { start: startOfMonth.toISOString(), end: endOfMonth.toISOString() };
   };
 
-  const getEvents = useCallback(async () => {
-    // For counts query, we just need selectedRegion
-    // For calendar view, we need region and dates
-    if ((!selectedRegion) || (!isCountsQuery && (!calendarStart || !calendarEnd))) {
-      setEvents([]);
-      return;
-    }
-
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Ensure we use the proper parameter case and types
-      // Convert empty strings to undefined to avoid sending them in the request
+      // Prepare parameters for the unified endpoint
       const params = {
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
-        active: true, // Always fetch active events
-        masteredRegionName: selectedRegion && selectedRegion.trim() !== '' ? selectedRegion.trim() : undefined,
-        masteredDivisionName: selectedDivision && selectedDivision.trim() !== '' ? selectedDivision.trim() : undefined,
-        masteredCityName: selectedCity && selectedCity.trim() !== '' ? selectedCity.trim() : undefined
+        page,
+        limit,
       };
       
-      // Add date parameters 
-      if (!isCountsQuery) {
-        // Use provided dates
-        params.start = calendarStart;
-        params.end = calendarEnd;
+      // Format date parameters
+      if (startDate && endDate) {
+        // Handle different date formats
+        params.start = typeof startDate === 'string' ? startDate : 
+                      startDate.toISOString ? startDate.toISOString() : startDate;
+        params.end = typeof endDate === 'string' ? endDate : 
+                    endDate.toISOString ? endDate.toISOString() : endDate;
       } else {
-        // For counts queries or initial load, use default date range
+        // Use default date range if not provided
         const defaultDates = getDefaultDateRange();
         params.start = defaultDates.start;
         params.end = defaultDates.end;
       }
       
+      // Location-based filtering parameters - using effective values that may come from GeoLocationContext
+      if (effectiveRegion) params.masteredRegionName = effectiveRegion;
+      if (effectiveDivision) params.masteredDivisionName = effectiveDivision;
+      if (effectiveCity) params.masteredCityName = effectiveCity;
+      
+      // Geolocation parameters - using effective values that may come from GeoLocationContext
+      if (effectiveLat && effectiveLng) {
+        params.lat = effectiveLat;
+        params.lng = effectiveLng;
+      }
+      
+      // Log the actual values used for filtering (from direct input or GeoLocationContext)
+      console.log('Using location filters:', { 
+        region: effectiveRegion, 
+        division: effectiveDivision, 
+        city: effectiveCity,
+        lat: effectiveLat,
+        lng: effectiveLng,
+        source: useGeoLocationContext && (
+          effectiveRegion !== region || 
+          effectiveDivision !== division || 
+          effectiveCity !== city ||
+          effectiveLat !== lat ||
+          effectiveLng !== lng
+        ) ? 'GeoLocationContext' : 'Direct input'
+      });
+      
+      // Add detailed debugging for role-based filtering
+      console.log('Role-based filtering debug:', {
+        isLoggedIn: !!user,
+        currentRole: selectedRole,
+        availableRoles: user?.roles || [],
+        hasRORole: user?.roles?.includes('RegionalOrganizer') || false,
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId || 'none',
+        isRoleSelected: selectedRole === 'RegionalOrganizer',
+        hasValidId: !!(user?.backendInfo?.regionalOrganizerInfo?.organizerId)
+      });
+      
       // Add user role and organizerId if user is a RegionalOrganizer
       if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
-        params.userRole = 'RegionalOrganizer';
         params.organizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
-        console.log('Adding RegionalOrganizer filtering for events where organizerId appears in any organizer field:', params.organizerId);
+        params.userRole = 'RegionalOrganizer'; // Make sure we're passing the role to the backend
+        console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
+      } else if (user && user.roles?.includes('RegionalOrganizer')) {
+        // If user has RO role but we're not using it, explain why
+        console.warn('User has RegionalOrganizer role but filtering is not being applied because:',
+          !selectedRole ? 'selectedRole is not set' :
+          selectedRole !== 'RegionalOrganizer' ? `selectedRole is "${selectedRole}" instead of "RegionalOrganizer"` :
+          !user.backendInfo?.regionalOrganizerInfo?.organizerId ? 'regionalOrganizerInfo.organizerId is missing' :
+          'unknown reason'
+        );
       }
 
       console.log('Fetching events with params:', params);
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/byMasteredLocations`, {
+      // Call the unified endpoint
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
         params,
-        timeout: 10000, // 10 second timeout
+        timeout: 15000, // 15 second timeout
       });
       
-      setEvents(response.data);
+      // Store the response which includes events array and pagination info
+      setEventsData(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
-      setError(error.message || 'Failed to fetch events');
+      
+      // Format error message for display
+      let errorMessage = 'Failed to fetch events';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
       
       // Keep existing events on error rather than clearing them
       // This provides a better user experience when there are transient network issues
     } finally {
       setLoading(false);
     }
-  }, [selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd, isCountsQuery, user, selectedRole]);
+  }, [cacheKey]); // depends on cacheKey which includes all parameters
 
+  // Fetch events when parameters change
   useEffect(() => {
-    getEvents();
-  }, [getEvents]);
+    fetchEvents();
+  }, [fetchEvents]);
 
-  return { events, loading, error, refreshEvents: getEvents };
+  return { 
+    events: eventsData.events || [], 
+    pagination: eventsData.pagination || { 
+      total: 0, 
+      page: 1, 
+      limit: 100, 
+      pages: 0 
+    },
+    filterType: eventsData.filterType,
+    loading, 
+    error, 
+    refreshEvents: fetchEvents 
+  };
+}
+
+// Backward compatibility hook for code still using the old parameter style
+export function useEventsLegacy(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
+  return useEvents({
+    region: selectedRegion,
+    division: selectedDivision,
+    city: selectedCity,
+    startDate: calendarStart,
+    endDate: calendarEnd
+  });
 }
 
 export function useEventOperations() {

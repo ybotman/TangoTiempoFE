@@ -50,11 +50,24 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                      (user.backendInfo.localUserInfo && 
                       `${user.backendInfo.localUserInfo.firstName || ''} ${user.backendInfo.localUserInfo.lastName || ''}`.trim());
       
+      console.log('User has regionalOrganizerInfo:', orgInfo);
+      console.log('Organizer flags:', {
+        isActive: orgInfo.isActive,
+        isEnabled: orgInfo.isEnabled,
+        isApproved: orgInfo.isApproved
+      });
+      
+      // Check if all required flags are set for the regionalOrganizerInfo
+      const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
+      if (!allFlagsEnabled) {
+        console.warn('Regional organizer flags not all enabled - this will cause permission issues when creating events');
+      }
+      
       setEventData(prevData => ({
         ...prevData,
         // Owner Organizer data is set automatically from the current user's organization
         ownerOrganizerID: orgId,
-        ownerOrganizerName: orgName || 'Your Organization'
+        ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
       }));
       
       console.log('Set owner organizer from user profile:', orgName, 'ID:', orgId);
@@ -227,7 +240,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                 Created by:
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {eventData.ownerOrganizerName || (user?.backendInfo?.regionalOrganizerInfo?.organizerName || 'Your Organization')}
+                {eventData.ownerOrganizerName || 
+                 (user?.backendInfo?.regionalOrganizerInfo?.organizerName || 
+                  user?.backendInfo?.regionalOrganizerInfo?.fullName || 
+                  user?.displayName || 
+                  'Your Organization')}
               </Typography>
             </Box>
           </FormControl>
