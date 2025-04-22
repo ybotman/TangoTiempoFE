@@ -6,6 +6,9 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { categoryColors } from '@/utils/categoryColors';
 
 const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
+  // Debug log to see what categories we're getting
+  console.log('PostFilter received categories:', categories);
+  
   // Define the ordered categories
   const orderedCategories = [
     'Milonga',
@@ -19,17 +22,22 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
     'Unknown',
   ];
 
+  // Make a safe copy of categories if it's an array, otherwise use an empty array
+  // We're not hardcoding the categoryNameAbbreviation since it exists in the DB
+  const categoriesSafe = Array.isArray(categories) ? [...categories] : [];
+  
   // Sort the categories based on their order in orderedCategories
-  const sortedCategories = categories.sort((a, b) => {
-    const indexA = orderedCategories.indexOf(a.categoryName);
-    const indexB = orderedCategories.indexOf(b.categoryName);
+  const sortedCategories = categoriesSafe.filter(cat => cat && typeof cat === 'object' && cat.categoryName)
+    .sort((a, b) => {
+      const indexA = orderedCategories.indexOf(a.categoryName);
+      const indexB = orderedCategories.indexOf(b.categoryName);
 
-    // If the category is not in orderedCategories, move it to the end
-    const validIndexA = indexA === -1 ? orderedCategories.length : indexA;
-    const validIndexB = indexB === -1 ? orderedCategories.length : indexB;
+      // If the category is not in orderedCategories, move it to the end
+      const validIndexA = indexA === -1 ? orderedCategories.length : indexA;
+      const validIndexB = indexB === -1 ? orderedCategories.length : indexB;
 
-    return validIndexA - validIndexB;
-  });
+      return validIndexA - validIndexB;
+    });
 
   // Separate the first four categories and remaining categories
   const firstFourCategories = sortedCategories.slice(0, 4);

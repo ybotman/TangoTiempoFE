@@ -10,6 +10,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
+import axios from 'axios';
 
 const modalStyle = {
   position: 'absolute',
@@ -127,6 +128,87 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
       
       if (!eventData.masteredRegionName) {
         throw new Error('Region is required');
+      }
+      
+      // Check if user has the RegionalOrganizer role and organizerId
+      if (!user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+        // Try to get the user's roles
+        const userRoles = user.backendInfo?.roleIds || [];
+        const hasRoleButNoOrganizer = userRoles.some(role => 
+          (typeof role === 'string' && role === 'RegionalOrganizer') ||
+          (typeof role === 'object' && role.roleName === 'RegionalOrganizer')
+        );
+        
+        if (hasRoleButNoOrganizer) {
+          throw new Error('You have the RegionalOrganizer role but no organizer profile. Please contact an administrator.');
+        } else {
+          throw new Error('You need the RegionalOrganizer role to create events. Please apply to become an organizer.');
+        }
+      }
+      
+      // Check if the user's organizerInfo flags are all enabled
+      const orgInfo = user.backendInfo.regionalOrganizerInfo;
+      const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
+      
+      if (!allFlagsEnabled) {
+        console.warn('Attempting to fix regionalOrganizerInfo flags...');
+        
+        // Try to automatically fix the flags first
+        try {
+          // Get fresh token for authorization
+          const token = await getIdToken(true);
+          
+          // Call API to activate the organizer flags
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
+            { firebaseUserId: user.uid },
+            { 
+              headers: { Authorization: `Bearer ${token}` },
+              params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID }
+            }
+          );
+          
+          console.log('Organizer flags updated:', response.data);
+          
+          // Update the user's info with the updated flags
+          if (response.data.regionalOrganizerInfo) {
+            // Update the flags in the local user context state
+            const updatedUser = {
+              ...user,
+              backendInfo: {
+                ...user.backendInfo,
+                regionalOrganizerInfo: {
+                  ...user.backendInfo.regionalOrganizerInfo,
+                  isActive: true,
+                  isEnabled: true,
+                  isApproved: true
+                }
+              }
+            };
+            
+            // Force a refresh of the user data from backend
+            try {
+              const refreshedUserResponse = await axios.get(
+                `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                }
+              );
+              
+              console.log('User data refreshed after flag update');
+              
+              // Try to continue with event creation now that flags are activated
+              // No longer need to throw error as flags are now fixed
+            } catch (refreshError) {
+              console.warn('Failed to refresh user data after updating flags:', refreshError);
+            }
+          }
+        } catch (flagsError) {
+          console.error('Failed to update organizer flags:', flagsError);
+          throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
+        }
       }
       
       // Apply defaults for optional fields

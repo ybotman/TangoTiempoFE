@@ -25,6 +25,7 @@ export const useCalendarPage = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const categories = useCategories();
+  console.log('useCalendarPage categories:', categories);
   const { getMenuItems } = useMenuItems();
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();

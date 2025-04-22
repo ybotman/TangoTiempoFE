@@ -38,7 +38,19 @@ export function useVenues() {
       
       console.log('Fetching venues with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
-      setVenues(response.data);
+      
+      // Handle the API response which returns {venues: Array, pagination: Object}
+      if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
+        console.log(`Received ${response.data.venues.length} venues from API with pagination:`, response.data.pagination);
+        setVenues(response.data.venues);
+      } else if (Array.isArray(response.data)) {
+        // Handle direct array response (legacy format)
+        console.log(`Received ${response.data.length} venues from API (direct array)`);
+        setVenues(response.data);
+      } else {
+        console.error('API returned unknown venues data format:', response.data);
+        setVenues([]);
+      }
     } catch (err) {
       console.error('Error fetching venues:', err);
       setError(err.message);

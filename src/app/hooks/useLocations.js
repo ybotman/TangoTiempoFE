@@ -43,7 +43,19 @@ export const useLocations = () => {
       console.log('Fetching venues with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       console.log('Venues fetched successfully:', response.data);
-      setLocations(response.data);
+      
+      // Handle the API response which returns {venues: Array, pagination: Object}
+      if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
+        console.log(`useLocations: Received ${response.data.venues.length} venues from API with pagination`);
+        setLocations(response.data.venues);
+      } else if (Array.isArray(response.data)) {
+        // Handle direct array response (legacy format)
+        console.log(`useLocations: Received ${response.data.length} venues from API (direct array)`);
+        setLocations(response.data);
+      } else {
+        console.error('useLocations: API returned unknown venues data format:', response.data);
+        setLocations([]);
+      }
     } catch (error) {
       console.error('Error fetching venues:', error);
       setError(error);
@@ -57,10 +69,33 @@ export const useLocations = () => {
     try {
       setLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      
+      // First check if the venue is already in our local state
+      const existingVenue = locations.find(loc => loc._id === locationID);
+      if (existingVenue) {
+        console.log('Found venue in local cache:', existingVenue.name || existingVenue.shortName);
+        return existingVenue;
+      }
+      
+      // Otherwise fetch from the API
+      console.log(`Fetching venue with ID: ${locationID}`);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${locationID}`, {
         params: { appId },
       });
-      return response.data;
+      
+      // Handle various response formats
+      if (response.data && response.data.venue) {
+        // Handle {venue: Object} format
+        console.log(`Venue fetched with ID ${locationID}:`, response.data.venue.name || 'Unknown name');
+        return response.data.venue;
+      } else if (response.data && typeof response.data === 'object' && response.data._id) {
+        // Handle direct venue object format
+        console.log(`Venue fetched with ID ${locationID}:`, response.data.name || 'Unknown name');
+        return response.data;
+      } else {
+        console.error(`Unexpected venue data format for ID ${locationID}:`, response.data);
+        return null;
+      }
     } catch (error) {
       console.error('Error fetching venue by ID:', error);
       setError(error);
@@ -68,7 +103,7 @@ export const useLocations = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locations]);
 
   useEffect(() => {
     // Always fetch venues regardless of whether a location is selected

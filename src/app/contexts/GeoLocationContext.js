@@ -275,13 +275,12 @@ export const GeoLocationProvider = ({ children }) => {
       
       // If no valid cache, make API request with error handling for rate limits
       try {
-        // Use only IP-based geolocation (no user permission needed)
-        const { data } = await axios.get('https://ipapi.co/json/', {
-          // Add longer timeout and better error handling
+        // Use the backend proxy to avoid CORS issues
+        const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+        const { data } = await axios.get(`${baseURL}/api/firebase/geo/ip`, {
           timeout: 5000,
           headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'TangoTiempo/1.0' // Identify our app to the API provider
+            'Accept': 'application/json'
           }
         });
         

@@ -13,23 +13,42 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   // Fetch location details using locationID
   useEffect(() => {
     if (locationID) {
+      console.log(`ViewEventDetailsMore: Attempting to fetch venue with ID: ${locationID}`);
       getLocationById(locationID)
-        .then((response) => setLocationDetails(response))
-        .catch((error) => console.error('Error fetching location details:', error));
+        .then((response) => {
+          if (response) {
+            console.log(`ViewEventDetailsMore: Successfully retrieved venue: ${response.name || 'Unknown name'}`);
+            setLocationDetails(response);
+          } else {
+            console.warn(`ViewEventDetailsMore: Venue with ID ${locationID} not found or returned null`);
+            setLocationDetails(null);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching location details:', error);
+          setLocationDetails(null);
+        });
+    } else {
+      console.log('ViewEventDetailsMore: No locationID provided');
     }
   }, [locationID, getLocationById]);
 
   // Render the location address if location details are available
   const renderLocationAddress = () => {
-    if (!locationDetails) return 'Address not available';
+    if (!locationDetails) {
+      // Return a more informative message
+      return locationID ? 
+        `Address not available (venue ID: ${locationID})` : 
+        'No venue selected';
+    }
 
     const { address_1, address_2, address_3, city, state, zip } = locationDetails;
     return (
       <>
         <Typography component="span" variant="body1">
-          {address_1}, {address_2 && `${address_2}, `}
+          {address_1 || 'No address'}, {address_2 && `${address_2}, `}
           {address_3 && `${address_3}, `}
-          {city}, {state} {zip}
+          {city || 'Unknown city'}, {state || ''} {zip || ''}
         </Typography>
       </>
     );

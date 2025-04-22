@@ -78,24 +78,82 @@ export const MasteredLocationProvider = ({ children }) => {
 
   const initializeContext = async () => {
     try {
-      const ipapiResponse = await fetch('https://ipapi.co/json/');
-
-      if (!ipapiResponse.ok) {
-        throw new Error(`IPAPI Error: ${ipapiResponse.statusText}`);
+      let latitude, longitude;
+      let useDefaultLocation = false;
+      
+      try {
+        // Only attempt to fetch geolocation if we haven't been rate limited
+        if (!sessionStorage.getItem('geo_rate_limited')) {
+          const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          
+          const ipapiResponse = await fetch(`${baseURL}/api/firebase/geo/ip`, {
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          // Handle rate limiting explicitly
+          if (ipapiResponse.status === 429) {
+            console.warn('Geo IP service rate limited, using default location');
+            sessionStorage.setItem('geo_rate_limited', 'true');
+            // Set a timeout to clear the rate limit flag after 5 minutes
+            setTimeout(() => {
+              sessionStorage.removeItem('geo_rate_limited');
+            }, 5 * 60 * 1000);
+            throw new Error('Rate limited');
+          }
+          
+          if (!ipapiResponse.ok) {
+            throw new Error(`Geolocation Error: ${ipapiResponse.statusText}`);
+          }
+          
+          const data = await ipapiResponse.json();
+          
+          if (data.latitude && data.longitude) {
+            latitude = data.latitude;
+            longitude = data.longitude;
+          } else if (data.fallback) {
+            // Use fallback coordinates if provided by proxy
+            latitude = data.fallback.latitude;
+            longitude = data.fallback.longitude;
+            console.log('Using fallback coordinates from proxy');
+          } else {
+            throw new Error('Invalid geolocation data.');
+          }
+        } else {
+          throw new Error('Using cached rate limit status');
+        }
+      } catch (geoError) {
+        console.warn('Geolocation failed, using default location:', geoError.message);
+        useDefaultLocation = true;
       }
-      const { latitude, longitude } = await ipapiResponse.json();
-
-      if (!latitude || !longitude) {
-        throw new Error('Invalid geolocation data from IPAPI.');
+      
+      if (!useDefaultLocation) {
+        await fetchNearestCity(latitude, longitude);
+      } else {
+        // Default to Boston if geolocation fails
+        console.log('Defaulting to Boston as fallback city');
+        setNearestCity({
+          cityID: '6751f58a5db435dd8005e479',
+          cityName: 'Boston',
+          regionID: '6751f58a5db435dd8005e45b',
+          regionName: 'Northeast',
+          divisionID: '6751f58a5db435dd8005e461',
+          divisionName: 'New England',
+          countryID: '6751f57e2e74d97609e7dca0',
+          countryName: 'United States',
+          latitude: 42.3601,
+          longitude: -71.0589,
+        });
       }
-
-      await fetchNearestCity(latitude, longitude);
     } catch (err) {
       console.error('MLC-> Error initializing MasteredLocationContext:', err.message);
       setError(err.message);
 
-      // Default to Boston if geolocation fails
-      console.log('Defaulting to Boston as fallback city');
+      // Default to Boston if any other error occurs
+      console.log('Defaulting to Boston as fallback city due to error');
       setNearestCity({
         cityID: '6751f58a5db435dd8005e479',
         cityName: 'Boston',
