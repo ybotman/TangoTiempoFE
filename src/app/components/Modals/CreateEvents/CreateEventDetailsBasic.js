@@ -24,20 +24,29 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   
   // Filter venues based on search input
   useEffect(() => {
-    if (!venues) return;
+    // Ensure venues is an array
+    const venuesArray = Array.isArray(venues) ? venues : [];
+    
+    if (venuesArray.length === 0) {
+      setFilteredVenues([]);
+      return;
+    }
     
     if (!venueInputValue) {
-      setFilteredVenues(venues);
+      setFilteredVenues(venuesArray);
       return;
     }
     
     const searchTerm = venueInputValue.toLowerCase();
-    const filtered = venues.filter(venue => {
-      const venueName = (venue.name || venue.shortName || '').toLowerCase();
+    const filtered = venuesArray.filter(venue => {
+      // Safety check for venue object
+      if (!venue || typeof venue !== 'object') return false;
+      const venueName = ((venue.name || venue.shortName || '').toString()).toLowerCase();
       return venueName.includes(searchTerm);
     });
     
     setFilteredVenues(filtered);
+    console.log(`Filtered venues: ${filtered.length} of ${venuesArray.length} total`);
   }, [venues, venueInputValue]);
   
   // Set owner organizer info from user context when component mounts
@@ -104,14 +113,24 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         locationID: '',
         locationName: ''
       });
+      console.log('Venue cleared');
+      return;
+    }
+    
+    // Validate new value is a proper venue object
+    if (typeof newValue !== 'object' || !newValue._id) {
+      console.error('Invalid venue object received:', newValue);
       return;
     }
     
     // Store both the ID and the name
+    const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
+    console.log(`Selected venue: ${venueName} (ID: ${newValue._id})`);
+    
     setEventData({ 
       ...eventData, 
       locationID: newValue._id,
-      locationName: newValue.name || newValue.shortName || ''
+      locationName: venueName
     });
   };
   
@@ -255,13 +274,23 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           <FormControl fullWidth>
             <Autocomplete
               id="venue-autocomplete"
-              options={filteredVenues || []}
+              options={Array.isArray(filteredVenues) ? filteredVenues : []}
               loading={loadingVenues}
-              value={eventData.locationID ? (venues || []).find(v => v._id === eventData.locationID) || null : null}
+              value={eventData.locationID && Array.isArray(venues) 
+                ? venues.find(v => v?._id === eventData.locationID) || null 
+                : null}
               onChange={handleVenueChange}
               onInputChange={handleVenueInputChange}
-              getOptionLabel={(option) => option.name || option.shortName || `Venue ${option._id}`}
-              isOptionEqualToValue={(option, value) => option._id === value._id}
+              getOptionLabel={(option) => {
+                // Safety check for option
+                if (!option || typeof option !== 'object') return '';
+                return option.name || option.shortName || `Venue ${option._id || 'unknown'}`;
+              }}
+              isOptionEqualToValue={(option, value) => {
+                // Safety checks for option and value
+                if (!option || !value || typeof option !== 'object' || typeof value !== 'object') return false;
+                return option._id === value._id;
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -282,7 +311,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               )}
               noOptionsText="No venues found. Try a different search or region."
               loadingText="Loading venues..."
-              filterOptions={(x) => x} // We're handling filtering ourselves via the filteredVenues state
+              filterOptions={(x) => Array.isArray(x) ? x : []} // Ensure filter options is always an array
             />
             {venues && venues.length === 0 && !loadingVenues && !errorVenues && (
               <Alert severity="info" sx={{ mt: 1 }}>
