@@ -43,6 +43,9 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
     startDate: initialStartDate,
     endDate: initialEndDate,
     cost: '',
+    // Use both new venue fields and legacy location fields for compatibility
+    venueId: '',
+    venueName: '',
     locationID: '',
     categoryFirst: '',
     categoryFirstId: '',
@@ -93,6 +96,8 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
         selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
         // Reset venue selection when location changes to avoid invalid selections
+        venueId: '',
+        venueName: '',
         locationID: ''
       }));
 

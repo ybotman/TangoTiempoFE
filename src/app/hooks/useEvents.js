@@ -260,6 +260,13 @@ export function useEventOperations() {
         ownerOrganizerName: eventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(eventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+        // Handle both venue and location fields for transitional compatibility
+        // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
+        // If we only have locationID/locationName, use those and add venueId/venueName fields
+        venueId: eventData.venueId || eventData.locationID || null,
+        venueName: eventData.venueName || eventData.locationName || null,
+        locationID: eventData.locationID || eventData.venueId || null,
+        locationName: eventData.locationName || eventData.venueName || null,
       };
 
       // Ensure mastered location fields are included
@@ -362,7 +369,14 @@ export function useEventOperations() {
       // Prepare the event data for submission
       const preparedData = {
         ...eventData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        // Handle both venue and location fields for transitional compatibility
+        // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
+        // If we only have locationID/locationName, use those and add venueId/venueName fields
+        venueId: eventData.venueId || eventData.locationID || null,
+        venueName: eventData.venueName || eventData.locationName || null,
+        locationID: eventData.locationID || eventData.venueId || null,
+        locationName: eventData.locationName || eventData.venueName || null,
       };
       
       // Convert dayjs objects to ISO strings

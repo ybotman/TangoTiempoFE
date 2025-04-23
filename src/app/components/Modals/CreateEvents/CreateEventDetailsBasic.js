@@ -110,6 +110,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
       // Clear venue selection
       setEventData({
         ...eventData,
+        // Use both new venue fields and legacy location fields for compatibility
+        venueId: '',
+        venueName: '',
         locationID: '',
         locationName: ''
       });
@@ -129,6 +132,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     
     setEventData({ 
       ...eventData, 
+      // Use new standardized venue fields
+      venueId: newValue._id,
+      venueName: venueName,
+      // Also keep legacy fields for backward compatibility
       locationID: newValue._id,
       locationName: venueName
     });
@@ -276,9 +283,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               id="venue-autocomplete"
               options={Array.isArray(filteredVenues) ? filteredVenues : []}
               loading={loadingVenues}
-              value={eventData.locationID && Array.isArray(venues) 
-                ? venues.find(v => v?._id === eventData.locationID) || null 
-                : null}
+              value={((eventData.venueId || eventData.locationID) && Array.isArray(venues) 
+                ? venues.find(v => v?._id === (eventData.venueId || eventData.locationID)) || null 
+                : null)}
               onChange={handleVenueChange}
               onInputChange={handleVenueInputChange}
               getOptionLabel={(option) => {
@@ -338,7 +345,19 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
 };
 
 CreateEventDetailsBasic.propTypes = {
-  eventData: PropTypes.object.isRequired,
+  eventData: PropTypes.shape({
+    title: PropTypes.string,
+    startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+    endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+    categoryFirstId: PropTypes.string,
+    categoryFirst: PropTypes.string,
+    // Support both venue and location fields
+    venueId: PropTypes.string,
+    venueName: PropTypes.string,
+    locationID: PropTypes.string,
+    locationName: PropTypes.string,
+    description: PropTypes.string,
+  }).isRequired,
   setEventData: PropTypes.func.isRequired,
 };
 

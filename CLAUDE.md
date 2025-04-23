@@ -44,6 +44,17 @@ This front end TT.com application node is part of a larger system with four inte
 - `npx cypress open` - Open Cypress test runner
 
 
+### Prohibited Patterns
+
+
+## 1 - Dont create Fallback patterns . 
+ - Dont defer great code to later. Build in error patterns not failback.
+
+## 2 - dont make mock data (unless told to).
+ - mock data desires probably mean you need an api or clafiricagtions of the data
+
+
+
 ## Code Style Guidelines
 - Use ES Modules (import/export) with semicolons and single quotes
 - Follow Next.js 13+ App Router conventions

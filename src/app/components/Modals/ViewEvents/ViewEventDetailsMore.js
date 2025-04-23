@@ -1,53 +1,74 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { useLocations } from '@/hooks/useLocations';
+import { useVenues } from '@/hooks/useVenues';
 import PropTypes from 'prop-types';
 const ViewEventDetailsMore = ({ eventDetails }) => {
-  const { getLocationById } = useLocations(); // Use the hook's method for fetching
-  const [locationDetails, setLocationDetails] = useState(null);
+  const { getVenueById } = useVenues(); // Use the updated hook
+  const [venueDetails, setVenueDetails] = useState(null);
 
-  // Extract event details
-  const { categoryFirst, categorySecond, categoryThird, locationID, locationName, ownerOrganizerName, active } =
-    eventDetails?.extendedProps || {};
+  // Extract event details - support both legacy and new fields
+  const { 
+    categoryFirst, 
+    categorySecond, 
+    categoryThird,
+    // Use venueId/venueName first, fallback to locationID/locationName
+    venueId, 
+    venueName,
+    locationID, 
+    locationName, 
+    ownerOrganizerName, 
+    active, 
+    isActive 
+  } = eventDetails?.extendedProps || {};
+  
+  // Use either venueId or legacy locationID
+  const currentVenueId = venueId || locationID;
+  const currentVenueName = venueName || locationName;
+  const isEventActive = active || isActive;
 
-  // Fetch location details using locationID
+  // Fetch venue details using venueId (or legacy locationID as fallback)
   useEffect(() => {
-    if (locationID) {
-      console.log(`ViewEventDetailsMore: Attempting to fetch venue with ID: ${locationID}`);
-      getLocationById(locationID)
+    if (currentVenueId) {
+      console.log(`ViewEventDetailsMore: Attempting to fetch venue with ID: ${currentVenueId}`);
+      getVenueById(currentVenueId)
         .then((response) => {
           if (response) {
             console.log(`ViewEventDetailsMore: Successfully retrieved venue: ${response.name || 'Unknown name'}`);
-            setLocationDetails(response);
+            setVenueDetails(response);
           } else {
-            console.warn(`ViewEventDetailsMore: Venue with ID ${locationID} not found or returned null`);
-            setLocationDetails(null);
+            console.warn(`ViewEventDetailsMore: Venue with ID ${currentVenueId} not found or returned null`);
+            setVenueDetails(null);
           }
         })
         .catch((error) => {
-          console.error('Error fetching location details:', error);
-          setLocationDetails(null);
+          console.error('Error fetching venue details:', error);
+          setVenueDetails(null);
         });
     } else {
-      console.log('ViewEventDetailsMore: No locationID provided');
+      console.log('ViewEventDetailsMore: No venue ID provided');
     }
-  }, [locationID, getLocationById]);
+  }, [currentVenueId, getVenueById]);
 
-  // Render the location address if location details are available
-  const renderLocationAddress = () => {
-    if (!locationDetails) {
+  // Render the venue address if venue details are available
+  const renderVenueAddress = () => {
+    if (!venueDetails) {
       // Return a more informative message
-      return locationID ? 
-        `Address not available (venue ID: ${locationID})` : 
+      return currentVenueId ? 
+        `Address not available (venue ID: ${currentVenueId})` : 
         'No venue selected';
     }
 
-    const { address_1, address_2, address_3, city, state, zip } = locationDetails;
+    // Handle both legacy and new field naming patterns
+    const address1 = venueDetails.address1 || venueDetails.address_1;
+    const address2 = venueDetails.address2 || venueDetails.address_2;
+    const address3 = venueDetails.address3 || venueDetails.address_3;
+    const { city, state, zip } = venueDetails;
+    
     return (
       <>
         <Typography component="span" variant="body1">
-          {address_1 || 'No address'}, {address_2 && `${address_2}, `}
-          {address_3 && `${address_3}, `}
+          {address1 || 'No address'}, {address2 && `${address2}, `}
+          {address3 && `${address3}, `}
           {city || 'Unknown city'}, {state || ''} {zip || ''}
         </Typography>
       </>
@@ -63,14 +84,14 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
         {categoryThird && ` | ${categoryThird}`}
       </Typography>
 
-      {/* Location Name */}
+      {/* Venue Name */}
       <Typography variant="subtitle1" gutterBottom>
-        Location: {locationName || 'Unknown Location'}
+        Venue: {currentVenueName || 'Unknown Venue'}
       </Typography>
 
-      {/* Location Address */}
+      {/* Venue Address */}
       <Typography variant="body2" gutterBottom>
-        {renderLocationAddress()}
+        {renderVenueAddress()}
       </Typography>
 
       {/* Owner Organizer Name */}
@@ -79,8 +100,8 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
       </Typography>
 
       {/* Active Flag */}
-      <Typography variant="body2" color={active ? 'green' : 'red'} gutterBottom>
-        {active ? 'Active' : 'Inactive'}
+      <Typography variant="body2" color={isEventActive ? 'green' : 'red'} gutterBottom>
+        {isEventActive ? 'Active' : 'Inactive'}
       </Typography>
     </Box>
   );
@@ -94,10 +115,14 @@ ViewEventDetailsMore.propTypes = {
       categoryFirst: PropTypes.string,
       categorySecond: PropTypes.string,
       categoryThird: PropTypes.string,
+      // Support both venue and location fields
+      venueId: PropTypes.string,
+      venueName: PropTypes.string,
       locationID: PropTypes.string,
       locationName: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
       active: PropTypes.bool,
+      isActive: PropTypes.bool,
     }),
   }),
 };

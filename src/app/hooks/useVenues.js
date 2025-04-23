@@ -30,8 +30,8 @@ export function useVenues() {
       
       // Add location filters from GeoLocationContext
       // Don't filter by location - the backend's query parameter handling is different
-  // We'll just fetch all venues and filter them on the client side if needed
-  // This ensures we always have venues to display
+      // We'll just fetch all venues and filter them on the client side if needed
+      // This ensures we always have venues to display
       
       // Log all params for debugging
       console.log('Looking for venues with region:', masteredRegionId, 'division:', masteredDivisionId, 'city:', masteredCityId);
@@ -39,14 +39,19 @@ export function useVenues() {
       console.log('Fetching venues with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
-      // Handle the API response which returns {venues: Array, pagination: Object}
+      // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
+        // Format: {venues: Array, pagination: Object}
         console.log(`Received ${response.data.venues.length} venues from API with pagination:`, response.data.pagination);
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
         console.log(`Received ${response.data.length} venues from API (direct array)`);
         setVenues(response.data);
+      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        // Format: {data: Array, pagination: Object}
+        console.log(`Received ${response.data.data.length} venues from API with pagination:`, response.data.pagination);
+        setVenues(response.data.data);
       } else {
         console.error('API returned unknown venues data format:', response.data);
         setVenues([]);
@@ -119,6 +124,50 @@ export function useVenues() {
     }
   }, []);
 
+  // Function to fetch a venue by ID - mimics getLocationById for compatibility
+  const getVenueById = useCallback(async (venueId) => {
+    try {
+      setLoading(true);
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      
+      // First check if the venue is already in our local state
+      const existingVenue = venues.find(venue => venue._id === venueId);
+      if (existingVenue) {
+        console.log('Found venue in local cache:', existingVenue.name || existingVenue.shortName);
+        return existingVenue;
+      }
+      
+      // Otherwise fetch from the API
+      console.log(`Fetching venue with ID: ${venueId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${venueId}`, {
+        params: { appId },
+      });
+      
+      // Handle various response formats
+      if (response.data && response.data.venue) {
+        // Handle {venue: Object} format
+        console.log(`Venue fetched with ID ${venueId}:`, response.data.venue.name || 'Unknown name');
+        return response.data.venue;
+      } else if (response.data && typeof response.data === 'object' && response.data._id) {
+        // Handle direct venue object format
+        console.log(`Venue fetched with ID ${venueId}:`, response.data.name || 'Unknown name');
+        return response.data;
+      } else {
+        console.error(`Unexpected venue data format for ID ${venueId}:`, response.data);
+        return null;
+      }
+    } catch (err) {
+      console.error('Error fetching venue by ID:', err);
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [venues]);
+
+  // Backward compatibility alias for getLocationById
+  const getLocationById = getVenueById;
+
   return {
     venues,
     error,
@@ -127,5 +176,9 @@ export function useVenues() {
     addVenue,
     updateVenue,
     deactivateVenue,
+    getVenueById,
+    getLocationById, // Include for backward compatibility
+    // Additional properties for compatibility with useLocations
+    locations: venues, // Alias venues as locations for backward compatibility
   };
 }
