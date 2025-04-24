@@ -8,9 +8,9 @@ Overview
 
 Plan Migration and Retirement (PMRs) are documents that define and track architectural changes, platform migrations, and deprecation or retirement of systems. Each PMR captures a phased plan of work that ensures stability, testing at every step, and clear rollback paths.
 
-As a systems migration and planning assistant, your role is to generate PMR_<topic>.md files used by engineering teams to plan, track, and document changes across the system. These PMRs live in:
-	•	/public/PMR_Current/PMR_<topic>.md during active work
-	•	/public/PMR_Completed/ once finalized
+As a systems migration and planning assistant, your role is to generate PMR documentation used by engineering teams to plan, track, and document changes across the system. Each PMR has a dedicated folder structure:
+	•	/public/PMR_Current/PMR_<topic>/ during active work
+	•	/public/PMR_Completed/PMR_<topic>/ once finalized
 
 Purpose
 
@@ -89,11 +89,11 @@ Every PMR must include top-level sections for each Phase as follows:
 Brief description of what this phase will accomplish.
 
 ### Tasks
-| Task | Status | Last Updated |
+| Status | Task | Last Updated |
 |------|--------|--------------|
-| Migrate DB schema | ✅ Complete | 2025-04-23 |
-| Deploy staging API | 🚧 In Progress | 2025-04-23 |
-| Run integration tests | ⏳ Pending | -
+|  ✅ Complete |Migrate DB schema | 2025-04-23 |
+|  🚧 In Progress |Deploy staging API | 2025-04-23 |
+|  ⏳ Pending | Run integration tests | -
 
 ### Rollback (if needed)
 Step-by-step instructions for undoing this phase’s changes.
@@ -107,18 +107,25 @@ Use clear status indicators:
 	•	⏳ Pending
 	•	❌ Blocked
 	•	🔁 Rolled Back
+	•	⏸️  Deferred
 
 Each update to task status must be dated under the “Last Updated” column.
 
 ⸻
 
 Creating a New PMR
-	1.	Create PMR_<topic>.md in /public/PMR_Current/
-	2.	Use the structure and phase template above
-	3.	Include all relevant technical details and assumptions
-	4.	Keep rollback and risk sections clear
-	5.	Include all linked PMRs if dependencies exist
-	6.	Submit for stakeholder review before starting implementation
+	1.	Create a folder named PMR_<topic> in /public/PMR_Current/
+	2.	Create the main PMR_<topic>.md file in this folder using the structure above
+	3.	Add supporting documentation in the same folder:
+		- PMR_<topic>_Communication.md - Communication plan
+		- PMR_<topic>_Summary.md - Executive summary
+		- PMR_<topic>_Approach.md - Migration methodology and approach
+		- PMR_<topic>_API_Changes.md - API modifications documentation
+		- PMR_<topic>_UI_Changes.md - Form/UI changes documentation
+	4.	Include all relevant technical details and assumptions
+	5.	Keep rollback and risk sections clear
+	6.	Include all linked PMRs if dependencies exist
+	7.	Submit for stakeholder review before starting implementation
 
 ⸻
 
@@ -128,6 +135,9 @@ Best Practices
 	•	Treat each phase as independently verifiable
 	•	Keep phases small, reversible, and safe
 	•	Maintain an audit-friendly history via task updates
+	•	Organize supporting documents within the PMR folder
+	•	Keep filenames consistent with the PMR_<topic> prefix
+	•	Update the main PMR document with links to supporting files
 
 ⸻
 

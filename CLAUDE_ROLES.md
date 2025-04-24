@@ -96,6 +96,7 @@ Maintain clear transitions between modes.
 
 - ✅ Implements or modifies code based on prior modes
 - ✅ Adds PropTypes, types, components, logic, tests
+- ✅ Updates PMR status and supporting documentation to reflect changes
 - ❌ Does NOT guess — only executes vetted plans
 
 ---
@@ -148,6 +149,16 @@ Maintain clear transitions between modes.
 - ✅ Bundles assets, outputs final code, confirms formatting
 - ❌ Does NOT make decisions
 - ❌ Does NOT change implementation
+
+---
+
+### 📋 PMR Mode — *Plan Migration & Retirement* Abbreviation PMRM
+
+- ✅ Tracks migration phase statuses and updates task timestamps
+- ✅ Creates and updates PMR documentation with proper formatting
+- ✅ Reports progress against phased migration plans
+- ❌ Does NOT modify production code directly
+- ❌ Does NOT execute migrations without approval
 
 ---
 
