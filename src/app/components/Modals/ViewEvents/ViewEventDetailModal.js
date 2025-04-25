@@ -11,6 +11,8 @@ import ViewEventDetailsRepeating from './ViewEventDetailsRepeating';
 import ViewEventDetailsMore from './ViewEventDetailsMore';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
+import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
+// Import legacy component for backward compatibility during transition
 import ViewEventDetailsLocationOther from './ViewEventDetailsLocationOther';
 import PropTypes from 'prop-types';
 
@@ -261,7 +263,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             <Tab label="Images" value="Images" />
             <Tab label="Repeating" value="repeating" />
             <Tab label="Organizer" value="Organizer" />
-            <Tab label="Location" value="Location" />
+            <Tab label="Venue" value="Venue" />
           </Tabs>
 
           {/* Tab Content */}
@@ -270,7 +272,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           {currentTab === 'repeating' && <ViewEventDetailsRepeating eventDetails={eventDetails} />}
           {currentTab === 'More' && <ViewEventDetailsMore eventDetails={eventDetails} />}
           {currentTab === 'Organizer' && <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />}
-          {currentTab === 'Location' && <ViewEventDetailsLocationOther eventDetails={eventDetails} />}
+          {currentTab === 'Venue' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />
+          /* Old tab kept for compatibility during transition */
+          }{currentTab === 'Location' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />}
         </Box>
       </Modal>
       

@@ -98,6 +98,7 @@ No rollback needed for assessment phase.
   5. `/src/app/utils/transformEvents.js` - Maps locationID/Name in event data transformations
   6. `/src/app/utils/masterData.js` - Contains test data with locationID/Name fields
   7. `/src/app/components/Modals/ViewEvents/ViewEventDetailsLocationOther.js` - Component name and props need updating
+  8. `/src/app/components/Modals/ViewEvents/ViewEventDetailModal.js` - Contains "Location" tab references
 
 - All API calls already target `/api/venues` endpoints (no `/api/locations` found)
 - Existing useVenues hook already has most functionality needed, but missing getVenueById
@@ -182,6 +183,7 @@ Update all event viewing components to use venue terminology.
 | Update UI text from "location" to "venue" | ✅ Complete | 2025-04-23 |
 | Fix any references to locationDetails in display components | ✅ Complete | 2025-04-23 |
 | Update PropTypes for all affected components | ✅ Complete | 2025-04-23 |
+| Update "Location" tab in event details to "Venue" tab | ✅ Complete | 2025-04-23 |
 
 ### Rollback (if needed)
 1. Revert component changes to use original location fields
@@ -195,6 +197,8 @@ Update all event viewing components to use venue terminology.
 - Updated component to handle both legacy and new field naming patterns
 - Enhanced PropTypes to include both venueId/venueName and legacy locationID/locationName
 - Changed all UI text from "Location" to "Venue" for better user experience
+- Updated the "Location" tab in ViewEventDetailModal.js to "Venue" tab
+- Added backward compatibility handling for any location tab references
 
 # Phase 5: Hook Migration and Cleanup
 
@@ -249,3 +253,4 @@ If significant issues are found, roll back all changes until fixed.
 - No errors in console related to venue/location confusion
 - Fixed API response format handling to prevent console errors
 - GeoLocation-related components still use "location" which is intentional and out of scope
+- Event detail view now shows "Venue" tab instead of "Location" tab
