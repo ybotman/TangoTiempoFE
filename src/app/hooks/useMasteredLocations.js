@@ -103,12 +103,28 @@ export function useMasteredLocations() {
           },
         });
 
+        // Check if response.data is an array before filtering
+        if (!Array.isArray(response.data)) {
+          console.error('Error: API response data is not an array:', response.data);
+          setCities([]);
+          setError('City data is in an invalid format. Please contact administrator.');
+          return;
+        }
+
         // Ensure each city has latitude/longitude for the map
         const citiesWithCoordinates = response.data.filter(
-          (city) => city.latitude !== undefined && city.longitude !== undefined
+          (city) => city.latitude !== undefined && 
+                   city.longitude !== undefined && 
+                   city.latitude !== null && 
+                   city.longitude !== null
         );
 
         console.log(`Cities fetched: ${response.data.length}, With coordinates: ${citiesWithCoordinates.length}`);
+        if (citiesWithCoordinates.length > 0) {
+          console.log('Sample city data:', citiesWithCoordinates[0]);
+        } else {
+          console.warn('No cities with valid coordinates found in API response');
+        }
         setCities(citiesWithCoordinates);
       } catch (err) {
         console.error('Error fetching cities:', err.message);

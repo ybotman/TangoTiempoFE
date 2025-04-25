@@ -10,10 +10,11 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Typography, Box } from '@mui/material';
 import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
 // Dynamic imports for react-leaflet (no SSR)
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
@@ -23,23 +24,74 @@ const ZoomControl = dynamic(() => import('react-leaflet').then((mod) => mod.Zoom
 const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip), { ssr: false });
 
 const LocationContextModal = ({ open, onClose }) => {
-  const { cities, fetchCities } = useMasteredLocations();
-  const { nearestCity, fetchNearestCity } = useMasteredLocation();
+  const { cities, fetchCities, loading: citiesLoading, error: citiesError } = useMasteredLocations();
+  const { nearestCity, fetchNearestCity, loading: nearestCityLoading } = useMasteredLocation();
   const { selectLocation } = useGeoLocation();
   const [loading, setLoading] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+  const [citiesWithCoords, setCitiesWithCoords] = useState([]);
 
   useEffect(() => {
     const loadCities = async () => {
       console.log('LCM uE: loadCities Start');
       if (open) {
         setLoading(true);
-        // We will fetch ALL cities with no divisionId filter
-        await fetchCities(undefined, true); // no divisionId => fetch all active cities
-        setLoading(false);
+        try {
+          // We will fetch ALL cities with no divisionId filter
+          await fetchCities(undefined, true); // no divisionId => fetch all active cities
+          console.log('Cities fetched successfully');
+        } catch (error) {
+          console.error('Error fetching cities:', error);
+        } finally {
+          // Always set loading to false, even if there was an error
+          setLoading(false);
+        }
       }
     };
     loadCities();
+    
+    // Add a safeguard timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log('Loading timeout triggered - forcing loading to false');
+        setLoading(false);
+        setMapReady(true);
+      }
+    }, 5000); // 5 second timeout
+    
+    return () => clearTimeout(timeoutId);
   }, [open, fetchCities]);
+
+  // Process cities to ensure they have coordinates and log the results
+  useEffect(() => {
+    if (cities) {
+      console.log(`Processing cities array with ${cities.length} items`);
+      
+      const validCities = cities.filter(city => 
+        city.latitude !== undefined && 
+        city.longitude !== undefined && 
+        city.latitude !== null && 
+        city.longitude !== null
+      );
+      
+      console.log(`Cities with valid coordinates: ${validCities.length} out of ${cities.length}`);
+      
+      // Log the first few cities for debugging
+      if (validCities.length > 0) {
+        console.log('Sample city data:', validCities[0]);
+      } else {
+        console.warn('No cities with valid coordinates found');
+      }
+      
+      setCitiesWithCoords(validCities);
+    } else {
+      console.log('Cities array is null or undefined');
+    }
+    
+    // Always set mapReady to true after processing, even if there are no valid cities
+    // This prevents the loading spinner from being stuck indefinitely
+    setMapReady(true);
+  }, [cities]);
 
   // Log to debug when component renders
   console.log('LocationContextModal - Cities available:', cities?.length || 0);
@@ -82,7 +134,12 @@ const LocationContextModal = ({ open, onClose }) => {
   }, [nearestCity, clickedCityId, selectLocation, onClose]);
   
   const handleCityClick = async (city) => {
-    if (!city.latitude || !city.longitude) return;
+    if (!city.latitude || !city.longitude) {
+      console.warn(`City ${city.cityName} has invalid coordinates:`, city.latitude, city.longitude);
+      return;
+    }
+    
+    console.log(`Clicking city: ${city.cityName} (${city._id}) at ${city.latitude}, ${city.longitude}`);
     
     // Set the clicked city ID so we can identify when nearestCity updates
     setClickedCityId(city._id);
@@ -97,50 +154,120 @@ const LocationContextModal = ({ open, onClose }) => {
       ? [nearestCity.latitude, nearestCity.longitude]
       : [39.8283, -98.5795]; // Default fallback center (USA approx)
 
+  const isLoading = loading || citiesLoading || nearestCityLoading || !mapReady;
+  const hasError = citiesError;
+  const hasCities = citiesWithCoords && citiesWithCoords.length > 0;
+
+  // For debugging
+  console.log('Render state:', {
+    isLoading,
+    hasError: hasError ? citiesError : null,
+    hasCities,
+    hasNearestCity: !!nearestCity,
+    cityCount: citiesWithCoords?.length || 0,
+    loadingState: {
+      componentLoading: loading,
+      citiesLoading,
+      nearestCityLoading,
+      mapReady
+    },
+    nearestCityInfo: nearestCity ? {
+      id: nearestCity.cityID,
+      name: nearestCity.cityName,
+      coordinates: [nearestCity.latitude, nearestCity.longitude]
+    } : 'missing'
+  });
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Select Nearest City</DialogTitle>
       <DialogContent style={{ height: '400px', position: 'relative' }}>
-        {loading || !nearestCity ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <CircularProgress />
-          </div>
+            <Typography variant="body2" sx={{ mt: 2 }}>Loading cities...</Typography>
+            <Typography variant="caption" sx={{ mt: 1, color: 'text.secondary' }}>
+              {loading ? 'Fetching city data...' : 
+               citiesLoading ? 'Processing city data...' : 
+               nearestCityLoading ? 'Loading nearest city...' : 
+               !mapReady ? 'Preparing map...' : 'Initializing...'}
+            </Typography>
+          </Box>
+        ) : hasError ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
+            <Typography color="error" gutterBottom>Error loading cities: {citiesError}</Typography>
+            <Typography variant="body2">Try again later or contact administrator</Typography>
+            <Button onClick={onClose} color="primary" variant="outlined" sx={{ mt: 2 }}>
+              Close
+            </Button>
+          </Box>
+        ) : !hasCities ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
+            <Typography color="error" gutterBottom>No cities with coordinates available</Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              The system couldn't find any cities with valid location coordinates.
+            </Typography>
+            <Typography variant="caption" sx={{ mb: 2 }}>
+              Please contact your administrator to ensure city data includes latitude and longitude.
+            </Typography>
+            <Button onClick={onClose} color="primary" variant="outlined">
+              Close
+            </Button>
+          </Box>
+        ) : !nearestCity ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
+            <Typography gutterBottom>Missing current city information</Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Unable to determine your nearest city.
+            </Typography>
+            <Button onClick={onClose} color="primary" variant="outlined">
+              Close
+            </Button>
+          </Box>
         ) : (
-          <MapContainer center={center} zoom={5} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+          <MapContainer
+            center={center}
+            zoom={5}
+            style={{ height: '100%', width: '100%' }}
+            zoomControl={false}
+            key={`map-${nearestCity.cityID || 'default'}`} // Force re-render when nearest city changes
+          >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution="&copy; OpenStreetMap contributors"
             />
             <ZoomControl position="bottomright" />
-            {cities &&
-              cities.length > 0 &&
-              cities.map((city) => {
-                const isCurrent = city._id === nearestCity.cityID;
-                const color = isCurrent ? 'green' : 'blue';
-                return (
-                  <CircleMarker
-                    key={city._id}
-                    center={[city.latitude, city.longitude]}
-                    pathOptions={{
-                      color,
-                      fillColor: color,
-                      fillOpacity: 0.8,
-                      weight: 2,
-                    }}
-                    radius={isCurrent ? 12 : 8}
-                    eventHandlers={{
-                      click: () => {
-                        console.log('City clicked:', city.cityName);
-                        if (!isCurrent) handleCityClick(city);
-                      },
-                    }}
-                  >
-                    <Tooltip direction="top" offset={[0, -10]} permanent={isCurrent}>
-                      {city.cityName}
-                    </Tooltip>
-                  </CircleMarker>
-                );
-              })}
+            
+            {citiesWithCoords.map((city) => {
+              const isCurrent = city._id === nearestCity.cityID;
+              const color = isCurrent ? 'green' : 'blue';
+              
+              console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);
+              
+              return (
+                <CircleMarker
+                  key={city._id}
+                  center={[city.latitude, city.longitude]}
+                  pathOptions={{
+                    color,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    weight: 2,
+                  }}
+                  radius={isCurrent ? 12 : 8}
+                  eventHandlers={{
+                    click: () => {
+                      console.log('City clicked:', city.cityName);
+                      if (!isCurrent) handleCityClick(city);
+                    },
+                  }}
+                >
+                  <Tooltip direction="top" offset={[0, -10]} permanent={isCurrent}>
+                    {city.cityName}
+                  </Tooltip>
+                </CircleMarker>
+              );
+            })}
           </MapContainer>
         )}
       </DialogContent>
