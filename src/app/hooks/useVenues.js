@@ -42,7 +42,7 @@ export function useVenues() {
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-        console.log(`Received ${response.data.venues.length} venues from API with pagination:`, response.data.pagination);
+        //console.log(`Received ${response.data.venues.length} venues from API with pagination:`, response.data.pagination);
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)

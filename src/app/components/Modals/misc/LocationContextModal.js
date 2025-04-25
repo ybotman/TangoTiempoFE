@@ -294,7 +294,7 @@ const LocationContextModal = ({ open, onClose }) => {
                 const isCurrent = city._id === nearestCity.cityID;
                 const color = isCurrent ? 'green' : 'blue';
                 
-                console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);
+                //console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);
                 
                 // Return both a Marker and CircleMarker for each city
                 return (
