@@ -17,8 +17,7 @@ import {
   Select,
   MenuItem,
   FormControlLabel,
-  Switch,
-  Chip
+  Switch
 } from '@mui/material';
 import { categoryColors } from '@/utils/categoryColors';
 import { useVenueSelection } from '@/hooks/useVenueSelection';
@@ -31,7 +30,7 @@ const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLa
 const CircleMarker = dynamic(() => import('react-leaflet').then((mod) => mod.CircleMarker), { ssr: false });
 const ZoomControl = dynamic(() => import('react-leaflet').then((mod) => mod.ZoomControl), { ssr: false });
 const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
+// const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
 
 const VenueSelectionModal = ({ open, onClose }) => {
   const { selectedLocation } = useGeoLocation();
@@ -67,10 +66,10 @@ const VenueSelectionModal = ({ open, onClose }) => {
   // Fetch venues when modal opens
   useEffect(() => {
     const loadVenues = async () => {
-      if (open && selectedLocation?.city?.id) {
+      if (open && hasSelectedCity) {
         setLoading(true);
         try {
-          await fetchVenues();
+          refreshVenues();
           console.log('Venues fetched successfully');
           // Force map container to re-render with new key
           setMapContainerKey(Date.now());
@@ -95,75 +94,19 @@ const VenueSelectionModal = ({ open, onClose }) => {
     }, 5000); // 5 second timeout
     
     return () => clearTimeout(timeoutId);
-  }, [open, fetchVenues, selectedLocation]);
+  }, [open, refreshVenues, hasSelectedCity, loading]);
 
-  // Process venues to ensure they have coordinates and apply filters
+  // Set map ready when filtered venues change
   useEffect(() => {
-    if (venues && Array.isArray(venues)) {
-      console.log(`Processing venues array with ${venues.length} items`);
-      
-      // Filter based on coordinates
-      const validVenues = venues.filter(venue => 
-        venue.latitude !== undefined && 
-        venue.longitude !== undefined && 
-        venue.latitude !== null && 
-        venue.longitude !== null &&
-        !isNaN(parseFloat(venue.latitude)) && 
-        !isNaN(parseFloat(venue.longitude))
-      );
-      
-      console.log(`Venues with valid coordinates: ${validVenues.length} out of ${venues.length}`);
-      
-      // Apply location filter based on mastered location IDs
-      let filteredVenues = validVenues;
-      
-      if (useDivisionScope && selectedLocation?.division?.id) {
-        // Filter by division
-        filteredVenues = filteredVenues.filter(venue => 
-          venue.masteredDivisionId === selectedLocation.division.id
-        );
-      } else if (selectedLocation?.city?.id) {
-        // Filter by city
-        filteredVenues = filteredVenues.filter(venue => 
-          venue.masteredCityId === selectedLocation.city.id
-        );
-      }
-      
-      // Apply venue category filter if not "all"
-      if (venueCategory !== 'all') {
-        filteredVenues = filteredVenues.filter(venue => 
-          venue.venueCategory === venueCategory || 
-          venue.eventCategory === venueCategory || 
-          venue.primaryEventType === venueCategory
-        );
-      }
-      
-      console.log(`Filtered venues count: ${filteredVenues.length}`);
-      
-      // Log the first few venues for debugging
-      if (filteredVenues.length > 0) {
-        console.log('Sample venue data:', filteredVenues[0]);
-        console.log('First 3 venue coordinates:', filteredVenues.slice(0, 3).map(v => 
-          `${v.name || v.shortName}: [${v.latitude}, ${v.longitude}]`).join(', '));
-      } else {
-        console.warn('No venues with valid coordinates found after filtering');
-      }
-      
-      setVenuesWithCoords(filteredVenues);
-      
+    if (filteredVenues && filteredVenues.length > 0) {
       // Force map container to re-render with new key when venues change
-      if (filteredVenues.length > 0) {
-        setMapContainerKey(Date.now());
-      }
-    } else {
-      console.log('Venues array is null, undefined, or not an array');
-      setVenuesWithCoords([]);
+      setMapContainerKey(Date.now());
     }
     
     // Always set mapReady to true after processing, even if there are no valid venues
     // This prevents the loading spinner from being stuck indefinitely
     setMapReady(true);
-  }, []);
+  }, [filteredVenues]);
 
   // Handle venue selection
   const handleVenueClick = (venue) => {
