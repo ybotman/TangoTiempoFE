@@ -198,3 +198,14 @@ Phase-specific clarifications, side decisions, or extra context.
 - **History Friendly:** Every major update should leave a clean audit trail.
 
 ---
+
+---
+While operating in and on PMRs, it is Very Important to control the interctions:
+
+You must, after each interaction, include a clear SNR block that provides structured closure to the exchange. This includes "PMR:" and :
+
+🔷 S — Summarize: Briefly recap what was discussed, built, or solved in this interaction. Keep it concise but informative, focusing on outcomes or decisions made — this gives context continuity.
+
+🟡 N — Next Steps: Clearly outline the immediate next actions, broken down by who’s responsible (e.g., Jax, Ybot, Shared). These should be specific, testable, and ready for follow-through. Treat this as a live to-do list generated from the conversation.
+
+🟩 R — Request / Role: Think about what role best fits the 🟡 N. Then make an offical request for that Role and highly summerize Next Steps are..

@@ -31,6 +31,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
+import BusinessIcon from '@mui/icons-material/Business';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -42,8 +43,10 @@ import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import VenueModal from '@/components/Modals/Venues/VenueModal';
+import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const SidebarDrawer = ({ open, onClose }) => {
   //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -56,8 +59,14 @@ const SidebarDrawer = ({ open, onClose }) => {
 
   // NEW STATE FOR LOCATION MODAL
   const [locationModalOpen, setLocationModalOpen] = useState(false);
+  
+  // NEW STATE FOR VENUE SELECTION MODAL
+  const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
+  
+  // Get selected location from GeoLocationContext to check if city is selected
+  const { selectedLocation } = useGeoLocation();
 
   return (
     <>
@@ -109,6 +118,26 @@ const SidebarDrawer = ({ open, onClose }) => {
               <MapIcon sx={{ color: 'blue' }} />
             </ListItemIcon>
             <ListItemText primary="Select Nearest City" />
+          </ListItem>
+          {/* New Venue Selection Menu Item */}
+          <ListItem
+            button="true"
+            onClick={() => {
+              setVenueSelectionModalOpen(true);
+              onClose();
+            }}
+            disabled={!selectedLocation?.city?.id}
+            sx={{
+              opacity: selectedLocation?.city?.id ? 1 : 0.5,
+              '&.Mui-disabled': {
+                opacity: 0.5,
+              }
+            }}
+          >
+            <ListItemIcon>
+              <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
+            </ListItemIcon>
+            <ListItemText primary="Select Venue" />
           </ListItem>
           <Divider />
 
@@ -277,6 +306,7 @@ const SidebarDrawer = ({ open, onClose }) => {
       <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
       <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
+      <VenueSelectionModal open={venueSelectionModalOpen} onClose={() => setVenueSelectionModalOpen(false)} />
     </>
   );
 };

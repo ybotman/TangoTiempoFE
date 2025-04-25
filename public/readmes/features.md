@@ -104,4 +104,17 @@ When starting a new feature:
 - Immediately switch to the new `feature/<title>` branch before beginning commits.
 - Naming convention for feature branches: all lowercase, hyphens instead of spaces (e.g., `feature/venue-map-selection`).
 - Commit frequently, referencing the FEATURE_<topic>.md document.
+- Assume I have the backend (:3010) and the one or more, of the frontends (:3003/:3002/:3001) are running. But, you are expected to npm run xxx but you will like may hit the already used port.
 - Merge feature branches into `test` only after successful completion and review.
+
+
+---
+While operating in and on features, it is Very Important to control the interctions:
+
+You must, after each interaction, include a clear SNR block that provides structured closure to the exchange. This includes:
+
+🔷 S — Summarize: Briefly recap what was discussed, built, or solved in this interaction. Keep it concise but informative, focusing on outcomes or decisions made — this gives context continuity.
+
+🟡 N — Next Steps: Clearly outline the immediate next actions, broken down by who’s responsible (e.g., Jax, Ybot, Shared). These should be specific, testable, and ready for follow-through. Treat this as a live to-do list generated from the conversation.
+
+🟩 R — Request / Role: Think about what role best fits the 🟡 N. Then make an offical request for that Role and highly summerize Next Steps are.
