@@ -17,7 +17,9 @@ import {
   Select,
   MenuItem,
   FormControlLabel,
-  Switch
+  Switch,
+  Slider,
+  Grid
 } from '@mui/material';
 import { categoryColors } from '@/utils/categoryColors';
 import { useVenueSelection } from '@/hooks/useVenueSelection';
@@ -39,12 +41,14 @@ const VenueSelectionModal = ({ open, onClose }) => {
     selectedVenue,
     venueCategory,
     useDivisionScope,
+    radiusMiles,
     loading: venuesLoading,
     error: venuesError,
     selectVenue,
     refreshVenues,
     handleVenueCategoryChange: setVenueCategory,
     handleScopeChange: setUseDivisionScope,
+    handleRadiusChange: setRadiusMiles,
     hasSelectedCity
   } = useVenueSelection();
 
@@ -134,6 +138,11 @@ const VenueSelectionModal = ({ open, onClose }) => {
     setUseDivisionScope(event.target.checked);
   };
   
+  // Handle radius slider change
+  const handleRadiusChange = (event, newValue) => {
+    setRadiusMiles(newValue);
+  };
+  
   // Function to select a venue and close the modal
   const handleSelectVenue = () => {
     if (selectedVenue) {
@@ -184,47 +193,76 @@ const VenueSelectionModal = ({ open, onClose }) => {
         ) : (
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             {/* Filter controls */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-              <FormControl sx={{ minWidth: 150 }} size="small">
-                <InputLabel id="venue-category-label">Event Type</InputLabel>
-                <Select
-                  labelId="venue-category-label"
-                  id="venue-category"
-                  value={venueCategory}
-                  label="Event Type"
-                  onChange={handleVenueCategoryChange}
-                >
-                  {venueCategories.map(category => (
-                    <MenuItem key={category.id} value={category.id}>
-                      {category.id !== 'all' ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Box 
-                            sx={{ 
-                              width: 16, 
-                              height: 16, 
-                              borderRadius: '50%', 
-                              bgcolor: category.color, 
-                              mr: 1 
-                            }} 
-                          />
-                          {category.name}
-                        </Box>
-                      ) : category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              
-              <FormControlLabel
-                control={
-                  <Switch 
-                    checked={useDivisionScope} 
-                    onChange={handleScopeChange}
-                    color="primary"
+            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2, gap: 2 }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="venue-category-label">Event Type</InputLabel>
+                    <Select
+                      labelId="venue-category-label"
+                      id="venue-category"
+                      value={venueCategory}
+                      label="Event Type"
+                      onChange={handleVenueCategoryChange}
+                    >
+                      {venueCategories.map(category => (
+                        <MenuItem key={category.id} value={category.id}>
+                          {category.id !== 'all' ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Box 
+                                sx={{ 
+                                  width: 16, 
+                                  height: 16, 
+                                  borderRadius: '50%', 
+                                  bgcolor: category.color, 
+                                  mr: 1 
+                                }} 
+                              />
+                              {category.name}
+                            </Box>
+                          ) : category.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                
+                <Grid item xs={6}>
+                  <FormControlLabel
+                    control={
+                      <Switch 
+                        checked={useDivisionScope} 
+                        onChange={handleScopeChange}
+                        color="primary"
+                      />
+                    }
+                    label={`${useDivisionScope ? 'Division' : 'City'} view`}
                   />
-                }
-                label={`${useDivisionScope ? 'Division' : 'City'} view`}
-              />
+                </Grid>
+              </Grid>
+              
+              {/* Radius Filter - Only show when in City view (not Division view) */}
+              {!useDivisionScope && (
+                <Box sx={{ px: 2 }}>
+                  <Typography variant="body2" gutterBottom>
+                    Distance radius: {radiusMiles} miles
+                  </Typography>
+                  <Slider
+                    value={radiusMiles}
+                    onChange={handleRadiusChange}
+                    min={10}
+                    max={500}
+                    step={10}
+                    marks={[
+                      { value: 50, label: '50mi' },
+                      { value: 200, label: '200mi' },
+                      { value: 500, label: '500mi' }
+                    ]}
+                    valueLabelDisplay="auto"
+                    aria-labelledby="radius-slider"
+                  />
+                </Box>
+              )}
             </Box>
             
             {/* Map container */}

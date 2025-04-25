@@ -56,10 +56,10 @@ Visual workflow to be added:
 | ✅ Complete    | Add custom useVenueSelection hook    | 2025-04-25    |
 | ✅ Complete    | Add user interactions (select venue) | 2025-04-25    |
 | ✅ Complete    | Add empty state messaging            | 2025-04-25    |
-| 🚧 In Progress | Implement radius-based filtering     | 2025-04-25    |
+| ✅ Complete    | Implement radius-based filtering     | 2025-04-25    |
 | ✅ Complete    | Fix build errors                     | 2025-04-25    |
-| 🚧 In Progress | Write unit tests                     | 2025-04-25    |
-| ⏳ Pending      | Write Cypress tests                  | 2025-04-25    |
+| ✅ Complete    | Write unit tests                     | 2025-04-25    |
+| ⏳ Pending      | Write Cypress tests (future sprint)  | 2025-04-25    |
 
 ## Rollback Plan
 - Disable venue selection feature by reverting code
