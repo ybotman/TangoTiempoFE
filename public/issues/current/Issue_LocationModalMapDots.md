@@ -47,21 +47,53 @@ The "Select Nearest City" map functionality in LocationContextModal.js is not di
 4. **CSS Conflicts:** Leaflet CSS might not be properly applied or overridden
 
 ## Fix (if known or applied)
-- **Status:** 🚧 In Progress
+- **Status:** ✅ Fixed
 - **Fix Description:** 
-  1. Add explicit height/width styling to the map container
-  2. Move from CircleMarker to standard Marker component with a more visible icon
-  3. Add z-index styling to ensure markers appear above map tiles
-  4. Improve validation of city data before attempting to render markers
-  5. Add more granular console logging to track exact point of failure
+  1. Fixed API response parsing to handle object structure with cities array
+  2. Removed problematic Leaflet direct initialization that was causing errors
+  3. Used only CircleMarker components that don't require icons
+  4. Added explicit height/width styling to the map container with proper z-index settings
+  5. Added robust validation of city coordinates to filter out invalid values
+  6. Added map container force re-rendering with a unique key on data changes
+  7. Added timeout-based map invalidation to ensure proper sizing
+  8. Added more comprehensive console logging for debugging
 
 - **Testing:** Manual verification that city dots appear and can be selected
 
 ## Resolution Log
-- **Commit/Branch:** (pending)
+- **Commit/Branch:** #-Issue--City-Dots
 - **PR:** (pending)
-- **Deployed To:** (pending)
-- **Verified By:** (pending)
+- **Deployed To:** Local testing
+- **Verified By:** Implementation verified in local environment
+
+## Implementation Details
+
+The following key changes were made to address the issue:
+
+1. **API Response Handling:**
+   - Fixed parsing of API response to handle `{cities: [...]}` structure
+   - Added proper handling for different response formats
+   - Added proper error handling for unexpected response formats
+
+2. **Simplified Marker Implementation:**
+   - Removed problematic Leaflet icon initialization that was causing errors
+   - Used only CircleMarker components which don't require separate icon definitions
+   - Maintained permanent tooltips for the current city
+
+3. **Map Container Styling:**
+   - Added explicit CSS to ensure the map container has proper dimensions
+   - Added z-index declarations to ensure markers appear above map tiles
+   - Added border styling for better visual feedback
+
+4. **Rendering Improvements:**
+   - Added a map container key based on timestamp to force re-rendering when data changes
+   - Added invalidateSize() call to ensure map renders correctly after initialization
+   - Added timeout-based rendering to allow DOM to fully initialize
+
+5. **Data Validation:**
+   - Added more robust validation for city coordinates (checking for NaN, null, undefined)
+   - Added array type checking for the cities data
+   - Added console output of the first few cities' coordinates for verification
 
 ---
 

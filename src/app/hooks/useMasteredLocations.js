@@ -103,23 +103,31 @@ export function useMasteredLocations() {
           },
         });
 
-        // Check if response.data is an array before filtering
-        if (!Array.isArray(response.data)) {
-          console.error('Error: API response data is not an array:', response.data);
+        // Check the response structure - it might be {cities: [...]} format
+        let citiesArray = response.data;
+        
+        // Handle response.data.cities structure (API returns an object with cities array)
+        if (!Array.isArray(response.data) && response.data.cities && Array.isArray(response.data.cities)) {
+          console.log('API returned cities in response.data.cities structure');
+          citiesArray = response.data.cities;
+        } else if (!Array.isArray(response.data)) {
+          console.error('Error: API response data is not an array and has no cities property:', response.data);
           setCities([]);
           setError('City data is in an invalid format. Please contact administrator.');
           return;
         }
 
         // Ensure each city has latitude/longitude for the map
-        const citiesWithCoordinates = response.data.filter(
+        const citiesWithCoordinates = citiesArray.filter(
           (city) => city.latitude !== undefined && 
                    city.longitude !== undefined && 
                    city.latitude !== null && 
-                   city.longitude !== null
+                   city.longitude !== null &&
+                   !isNaN(parseFloat(city.latitude)) &&
+                   !isNaN(parseFloat(city.longitude))
         );
 
-        console.log(`Cities fetched: ${response.data.length}, With coordinates: ${citiesWithCoordinates.length}`);
+        console.log(`Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
         if (citiesWithCoordinates.length > 0) {
           console.log('Sample city data:', citiesWithCoordinates[0]);
         } else {

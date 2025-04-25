@@ -7,7 +7,7 @@ import { categoryColors } from '@/utils/categoryColors';
 
 const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
   // Debug log to see what categories we're getting
-  console.log('PostFilter received categories:', categories);
+  //console.log('PostFilter received categories:', categories);
   
   // Define the ordered categories
   const orderedCategories = [
