@@ -10,7 +10,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
  - when you have read a readme, you must breifly summerzie your understanding
  
 
-
 ## Master Calendar System Architecture
 
 This front end TT.com application node is part of a larger system with four interconnected applications:

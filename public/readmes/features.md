@@ -96,5 +96,12 @@ Name or team responsible for delivery.
 
 ---
 
-Would you like me to auto-create the folder structure and first FEATURE doc for a topic now? ✅
+## Git Integration
 
+When starting a new feature:
+
+- If the current branch is `test`, create a new branch called `feature/<title>`.
+- Immediately switch to the new `feature/<title>` branch before beginning commits.
+- Naming convention for feature branches: all lowercase, hyphens instead of spaces (e.g., `feature/venue-map-selection`).
+- Commit frequently, referencing the FEATURE_<topic>.md document.
+- Merge feature branches into `test` only after successful completion and review.
