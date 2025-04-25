@@ -17,9 +17,11 @@ import {
   Select,
   MenuItem,
   FormControlLabel,
-  Switch
+  Switch,
+  Chip
 } from '@mui/material';
-import { useVenues } from '@/hooks/useVenues';
+import { categoryColors } from '@/utils/categoryColors';
+import { useVenueSelection } from '@/hooks/useVenueSelection';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
@@ -32,18 +34,35 @@ const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip)
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
 
 const VenueSelectionModal = ({ open, onClose }) => {
-  const { venues, fetchVenues, loading: venuesLoading, error: venuesError } = useVenues();
   const { selectedLocation } = useGeoLocation();
+  const {
+    filteredVenues,
+    selectedVenue,
+    venueCategory,
+    useDivisionScope,
+    loading: venuesLoading,
+    error: venuesError,
+    selectVenue,
+    refreshVenues,
+    handleVenueCategoryChange: setVenueCategory,
+    handleScopeChange: setUseDivisionScope,
+    hasSelectedCity
+  } = useVenueSelection();
+
   const [loading, setLoading] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const [venuesWithCoords, setVenuesWithCoords] = useState([]);
   const [mapContainerKey, setMapContainerKey] = useState(Date.now()); // Force re-render key
   const mapRef = useRef(null); // For potential direct map access
-  const [selectedVenue, setSelectedVenue] = useState(null);
   
-  // Additional state for filtering
-  const [venueType, setVenueType] = useState('all');
-  const [useDivisionScope, setUseDivisionScope] = useState(false);
+  // Define venue categories based on the event categories system
+  const venueCategories = [
+    { id: 'all', name: 'All Types' },
+    { id: 'Milonga', name: 'Milonga', color: categoryColors.Milonga },
+    { id: 'Practica', name: 'Practica', color: categoryColors.Practica },
+    { id: 'Class', name: 'Class', color: categoryColors.Class },
+    { id: 'Workshop', name: 'Workshop', color: categoryColors.Workshop },
+    { id: 'Festival', name: 'Festival', color: categoryColors.Festival }
+  ];
   
   // Fetch venues when modal opens
   useEffect(() => {
@@ -110,10 +129,12 @@ const VenueSelectionModal = ({ open, onClose }) => {
         );
       }
       
-      // Apply venue type filter if not "all"
-      if (venueType !== 'all') {
+      // Apply venue category filter if not "all"
+      if (venueCategory !== 'all') {
         filteredVenues = filteredVenues.filter(venue => 
-          venue.venueType === venueType
+          venue.venueCategory === venueCategory || 
+          venue.eventCategory === venueCategory || 
+          venue.primaryEventType === venueCategory
         );
       }
       
@@ -142,12 +163,11 @@ const VenueSelectionModal = ({ open, onClose }) => {
     // Always set mapReady to true after processing, even if there are no valid venues
     // This prevents the loading spinner from being stuck indefinitely
     setMapReady(true);
-  }, [venues, venueType, useDivisionScope, selectedLocation]);
+  }, []);
 
   // Handle venue selection
   const handleVenueClick = (venue) => {
-    setSelectedVenue(venue);
-    // For now, we just select and close - in future we would handle this by updating context
+    selectVenue(venue);
     console.log(`Selected venue: ${venue.name || venue.shortName}`);
   };
 
@@ -159,23 +179,33 @@ const VenueSelectionModal = ({ open, onClose }) => {
 
   const isLoading = loading || venuesLoading || !mapReady;
   const hasError = venuesError;
-  const hasVenues = venuesWithCoords && venuesWithCoords.length > 0;
+  const hasVenues = filteredVenues && filteredVenues.length > 0;
 
-  // Handle venue type change
-  const handleVenueTypeChange = (event) => {
-    setVenueType(event.target.value);
+  // Handle venue category change
+  const handleVenueCategoryChange = (event) => {
+    setVenueCategory(event.target.value);
   };
 
   // Handle scope switch change
   const handleScopeChange = (event) => {
     setUseDivisionScope(event.target.checked);
   };
+  
+  // Function to select a venue and close the modal
+  const handleSelectVenue = () => {
+    if (selectedVenue) {
+      // Using the selectVenue from our hook already handles the context update
+      console.log(`Selecting venue: ${selectedVenue.name || selectedVenue.shortName}`);
+      // Close the modal
+      onClose();
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Select Venue</DialogTitle>
       <DialogContent style={{ height: '500px', position: 'relative' }}>
-        {!selectedLocation?.city?.id ? (
+        {!hasSelectedCity ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <Typography color="error" gutterBottom>Please select a city first</Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
@@ -213,18 +243,32 @@ const VenueSelectionModal = ({ open, onClose }) => {
             {/* Filter controls */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <FormControl sx={{ minWidth: 150 }} size="small">
-                <InputLabel id="venue-type-label">Venue Type</InputLabel>
+                <InputLabel id="venue-category-label">Event Type</InputLabel>
                 <Select
-                  labelId="venue-type-label"
-                  id="venue-type"
-                  value={venueType}
-                  label="Venue Type"
-                  onChange={handleVenueTypeChange}
+                  labelId="venue-category-label"
+                  id="venue-category"
+                  value={venueCategory}
+                  label="Event Type"
+                  onChange={handleVenueCategoryChange}
                 >
-                  <MenuItem value="all">All Types</MenuItem>
-                  <MenuItem value="milonga">Milonga</MenuItem>
-                  <MenuItem value="practica">Practica</MenuItem>
-                  <MenuItem value="class">Class</MenuItem>
+                  {venueCategories.map(category => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.id !== 'all' ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box 
+                            sx={{ 
+                              width: 16, 
+                              height: 16, 
+                              borderRadius: '50%', 
+                              bgcolor: category.color, 
+                              mr: 1 
+                            }} 
+                          />
+                          {category.name}
+                        </Box>
+                      ) : category.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               
@@ -284,17 +328,21 @@ const VenueSelectionModal = ({ open, onClose }) => {
                 <ZoomControl position="bottomright" />
                 
                 {/* Render venue markers */}
-                {venuesWithCoords.map((venue) => {
+                {filteredVenues.map((venue) => {
                   const isSelected = selectedVenue && venue._id === selectedVenue._id;
-                  const venueTypeColors = {
-                    milonga: 'red',
-                    practica: 'blue',
-                    class: 'green',
-                    default: 'purple'
-                  };
-                  const color = isSelected 
-                    ? 'orange' 
-                    : venueTypeColors[venue.venueType] || venueTypeColors.default;
+                  // Use categoryColors from the utility for consistent color scheme
+                  let color;
+                  if (isSelected) {
+                    color = 'orange';
+                  } else if (venue.venueCategory && categoryColors[venue.venueCategory]) {
+                    color = categoryColors[venue.venueCategory];
+                  } else if (venue.eventCategory && categoryColors[venue.eventCategory]) {
+                    color = categoryColors[venue.eventCategory];
+                  } else if (venue.primaryEventType && categoryColors[venue.primaryEventType]) {
+                    color = categoryColors[venue.primaryEventType];
+                  } else {
+                    color = categoryColors.Unknown || 'purple';
+                  }
                   
                   return (
                     <CircleMarker
@@ -336,7 +384,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
             Cancel
           </Button>
           <Button 
-            onClick={onClose} 
+            onClick={handleSelectVenue} 
             color="primary" 
             variant="contained" 
             disabled={!selectedVenue}
