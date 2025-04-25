@@ -3,9 +3,12 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with the TangoTiempo public calendar frontend.
 
 
-# On claude startup you must 
-1) read your roles and responiblity in CLAUDE_ROLES.MD
-2) Reply with your understanding and you current role.
+# Readme
+ - The systems of Readmes are stored in public/readme.
+ - RM is abbreation for Readme
+ - so the command "RM CAUDE ROLES" tells you to open the readme like Claude roles in the public/readme folder.
+ - when you have read a readme, you must breifly summerzie your understanding
+ 
 
 
 ## Master Calendar System Architecture
