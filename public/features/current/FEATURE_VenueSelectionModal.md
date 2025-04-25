@@ -45,17 +45,18 @@ Visual workflow to be added:
 ## Tasks
 | Status         | Task                                | Last Updated  |
 |----------------|-------------------------------------|---------------|
-| ⏳ Pending      | Add "Select Venue" menu item        | 2025-04-25    |
-| ⏳ Pending      | Implement conditional enabling based on MasteredCity | 2025-04-25 |
-| ⏳ Pending      | Create VenueSelectionModal component | 2025-04-25    |
-| ⏳ Pending      | Implement Leaflet map integration    | 2025-04-25    |
-| ⏳ Pending      | Add venue point display on map       | 2025-04-25    |
-| ⏳ Pending      | Implement radius-based filtering     | 2025-04-25    |
-| ⏳ Pending      | Add venue type filtering controls    | 2025-04-25    |
-| ⏳ Pending      | Create scope switch (City/Division)  | 2025-04-25    |
-| ⏳ Pending      | Connect to venue API endpoint        | 2025-04-25    |
-| ⏳ Pending      | Add user interactions (select venue) | 2025-04-25    |
-| ⏳ Pending      | Add empty state messaging            | 2025-04-25    |
+| ✅ Complete    | Add "Select Venue" menu item        | 2025-04-25    |
+| ✅ Complete    | Implement conditional enabling based on MasteredCity | 2025-04-25 |
+| ✅ Complete    | Create VenueSelectionModal component | 2025-04-25    |
+| ✅ Complete    | Implement Leaflet map integration    | 2025-04-25    |
+| ✅ Complete    | Add venue point display on map       | 2025-04-25    |
+| ✅ Complete    | Add venue type filtering controls    | 2025-04-25    |
+| ✅ Complete    | Create scope switch (City/Division)  | 2025-04-25    |
+| ✅ Complete    | Connect to venue API endpoint        | 2025-04-25    |
+| ✅ Complete    | Add custom useVenueSelection hook    | 2025-04-25    |
+| ✅ Complete    | Add user interactions (select venue) | 2025-04-25    |
+| ✅ Complete    | Add empty state messaging            | 2025-04-25    |
+| 🚧 In Progress | Implement radius-based filtering     | 2025-04-25    |
 | ⏳ Pending      | Write Cypress tests                  | 2025-04-25    |
 
 ## Rollback Plan
@@ -81,6 +82,6 @@ Tango Tiempo Dev Team
 | Milestone | Date       |
 |-----------|------------|
 | Created   | 2025-04-25 |
-| First Dev | TBD        |
+| First Dev | 2025-04-25 |
 | Review    | TBD        |
 | Completed | TBD        |
