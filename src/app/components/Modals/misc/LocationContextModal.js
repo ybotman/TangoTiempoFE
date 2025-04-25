@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Typography, Box } from '@mui/material';
@@ -20,6 +20,7 @@ import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
 const CircleMarker = dynamic(() => import('react-leaflet').then((mod) => mod.CircleMarker), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
 const ZoomControl = dynamic(() => import('react-leaflet').then((mod) => mod.ZoomControl), { ssr: false });
 const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip), { ssr: false });
 
@@ -30,7 +31,10 @@ const LocationContextModal = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [citiesWithCoords, setCitiesWithCoords] = useState([]);
+  const [mapContainerKey, setMapContainerKey] = useState(Date.now()); // Force re-render key
+  const mapRef = useRef(null); // For potential direct map access
 
+  // Fetch cities when modal opens
   useEffect(() => {
     const loadCities = async () => {
       console.log('LCM uE: loadCities Start');
@@ -40,6 +44,8 @@ const LocationContextModal = ({ open, onClose }) => {
           // We will fetch ALL cities with no divisionId filter
           await fetchCities(undefined, true); // no divisionId => fetch all active cities
           console.log('Cities fetched successfully');
+          // Force map container to re-render with new key
+          setMapContainerKey(Date.now());
         } catch (error) {
           console.error('Error fetching cities:', error);
         } finally {
@@ -56,6 +62,8 @@ const LocationContextModal = ({ open, onClose }) => {
         console.log('Loading timeout triggered - forcing loading to false');
         setLoading(false);
         setMapReady(true);
+        // Force map container to re-render with new key when timeout occurs
+        setMapContainerKey(Date.now());
       }
     }, 5000); // 5 second timeout
     
@@ -64,14 +72,16 @@ const LocationContextModal = ({ open, onClose }) => {
 
   // Process cities to ensure they have coordinates and log the results
   useEffect(() => {
-    if (cities) {
+    if (cities && Array.isArray(cities)) {
       console.log(`Processing cities array with ${cities.length} items`);
       
       const validCities = cities.filter(city => 
         city.latitude !== undefined && 
         city.longitude !== undefined && 
         city.latitude !== null && 
-        city.longitude !== null
+        city.longitude !== null &&
+        !isNaN(parseFloat(city.latitude)) && 
+        !isNaN(parseFloat(city.longitude))
       );
       
       console.log(`Cities with valid coordinates: ${validCities.length} out of ${cities.length}`);
@@ -79,13 +89,21 @@ const LocationContextModal = ({ open, onClose }) => {
       // Log the first few cities for debugging
       if (validCities.length > 0) {
         console.log('Sample city data:', validCities[0]);
+        console.log('First 3 city coordinates:', validCities.slice(0, 3).map(c => 
+          `${c.cityName}: [${c.latitude}, ${c.longitude}]`).join(', '));
       } else {
         console.warn('No cities with valid coordinates found');
       }
       
       setCitiesWithCoords(validCities);
+      
+      // Force map container to re-render with new key when cities change
+      if (validCities.length > 0) {
+        setMapContainerKey(Date.now());
+      }
     } else {
-      console.log('Cities array is null or undefined');
+      console.log('Cities array is null, undefined, or not an array');
+      setCitiesWithCoords([]);
     }
     
     // Always set mapReady to true after processing, even if there are no valid cities
@@ -225,50 +243,85 @@ const LocationContextModal = ({ open, onClose }) => {
             </Button>
           </Box>
         ) : (
-          <MapContainer
-            center={center}
-            zoom={5}
-            style={{ height: '100%', width: '100%' }}
-            zoomControl={false}
-            key={`map-${nearestCity.cityID || 'default'}`} // Force re-render when nearest city changes
+          // Map container with explicit styling and key for re-rendering
+          <Box 
+            sx={{ 
+              height: '100%', 
+              width: '100%',
+              position: 'relative',
+              overflow: 'hidden',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              '& .leaflet-container': {
+                height: '100%',
+                width: '100%',
+                zIndex: 1
+              },
+              '& .leaflet-marker-icon': {
+                zIndex: 500
+              },
+              '& .leaflet-tooltip': {
+                zIndex: 600
+              }
+            }}
+            ref={mapRef}
           >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap contributors"
-            />
-            <ZoomControl position="bottomright" />
-            
-            {citiesWithCoords.map((city) => {
-              const isCurrent = city._id === nearestCity.cityID;
-              const color = isCurrent ? 'green' : 'blue';
+            <MapContainer
+              center={center}
+              zoom={5}
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
+              // Use both keys to ensure proper rendering
+              key={`map-${mapContainerKey}-${nearestCity?.cityID || 'default'}`}
+              // Add whenCreated callback to debug map initialization
+              whenCreated={(map) => {
+                console.log('Map created successfully', map);
+                // Invalidate map size to ensure correct rendering
+                setTimeout(() => {
+                  map.invalidateSize();
+                  console.log('Map size invalidated');
+                }, 100);
+              }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution="&copy; OpenStreetMap contributors"
+              />
+              <ZoomControl position="bottomright" />
               
-              console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);
-              
-              return (
-                <CircleMarker
-                  key={city._id}
-                  center={[city.latitude, city.longitude]}
-                  pathOptions={{
-                    color,
-                    fillColor: color,
-                    fillOpacity: 0.8,
-                    weight: 2,
-                  }}
-                  radius={isCurrent ? 12 : 8}
-                  eventHandlers={{
-                    click: () => {
-                      console.log('City clicked:', city.cityName);
-                      if (!isCurrent) handleCityClick(city);
-                    },
-                  }}
-                >
-                  <Tooltip direction="top" offset={[0, -10]} permanent={isCurrent}>
-                    {city.cityName}
-                  </Tooltip>
-                </CircleMarker>
-              );
-            })}
-          </MapContainer>
+              {/* Render both markers and circle markers for better visibility */}
+              {citiesWithCoords.map((city) => {
+                const isCurrent = city._id === nearestCity.cityID;
+                const color = isCurrent ? 'green' : 'blue';
+                
+                console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);
+                
+                // Return both a Marker and CircleMarker for each city
+                return (
+                  <React.Fragment key={`fragment-${city._id}`}>
+                    {/* Use only CircleMarker since it doesn't need icon */}
+                    <CircleMarker
+                      key={`circle-${city._id}`}
+                      center={[city.latitude, city.longitude]}
+                      pathOptions={{
+                        color,
+                        fillColor: color,
+                        fillOpacity: 0.8,
+                        weight: 2,
+                      }}
+                      radius={isCurrent ? 12 : 8}
+                      eventHandlers={{
+                        click: () => {
+                          console.log('City clicked:', city.cityName);
+                          if (!isCurrent) handleCityClick(city);
+                        },
+                      }}
+                    />
+                  </React.Fragment>
+                );
+              })}
+            </MapContainer>
+          </Box>
         )}
       </DialogContent>
       <DialogActions>
