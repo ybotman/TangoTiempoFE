@@ -51,10 +51,11 @@ The calendar base view is not displaying any events, despite the API correctly r
   5. Increased event limit from 100 to 200 to ensure all events are displayed
 
 ## Resolution Log
-- **Commit/Branch:** #Issue-CalendarViewNoEvents (b4eaee8)
-- **PR:** (pending)
+- **Commit/Branch:** #Issue-CalendarViewNoEvents (b4eaee8, 6f4ae81)
+- **PR:** Not required - direct fix
 - **Deployed To:** Local testing
 - **Verified By:** Implementation fixes confirmed in local environment
+- **Closed:** 2025-04-25
 
 ## Implementation Details
 
