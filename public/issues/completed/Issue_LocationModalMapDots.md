@@ -61,10 +61,10 @@ The "Select Nearest City" map functionality in LocationContextModal.js is not di
 - **Testing:** Manual verification that city dots appear and can be selected
 
 ## Resolution Log
-- **Commit/Branch:** #-Issue--City-Dots
-- **PR:** (pending)
-- **Deployed To:** Local testing
-- **Verified By:** Implementation verified in local environment
+- **Commit/Branch:** Issue--City-Dots
+- **PR:** Merged directly to TEST branch
+- **Deployed To:** Local testing, pending deployment to dev environment
+- **Verified By:** Development team in local environment
 
 ## Implementation Details
 
@@ -97,4 +97,4 @@ The following key changes were made to address the issue:
 
 ---
 
-> Note: Related to PMR_LocationModalFix.md in public/PMR_Current/
+> Issue resolved and closed on 2025-04-26. Related to PMR_LocationModalFix.md in public/PMR_Current/
