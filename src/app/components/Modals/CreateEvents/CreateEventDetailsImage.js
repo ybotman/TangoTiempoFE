@@ -1,38 +1,130 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Button, LinearProgress, Alert } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import PropTypes from 'prop-types';
+import Image from 'next/image';
 
-const ImageEventDetails = ({ imageFile, setImageFile }) => {
+const CreateEventDetailsImage = ({ eventData, setEventData }) => {
+  const [uploadError, setUploadError] = useState(null);
+
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
-    setImageFile(file);
+    if (file) {
+      // Create a preview URL for immediate display
+      const imagePreviewUrl = URL.createObjectURL(file);
+      
+      setEventData({
+        ...eventData,
+        imageFile: file,
+        imagePreviewUrl
+      });
+      
+      setUploadError(null);
+    }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+    },
+    maxSize: 5 * 1024 * 1024, // 5MB
+    onDropRejected: () => {
+      setUploadError('File must be an image under 5MB');
+    }
+  });
+
+  // Clear the selected image
+  const handleClearImage = () => {
+    // Revoke the object URL to prevent memory leaks
+    if (eventData.imagePreviewUrl) {
+      URL.revokeObjectURL(eventData.imagePreviewUrl);
+    }
+    
+    setEventData({
+      ...eventData,
+      imageFile: null,
+      imagePreviewUrl: null
+    });
+  };
 
   return (
     <Box>
-      <Typography variant="h6">Upload Event Image</Typography>
-      <div
-        {...getRootProps({ className: 'dropzone' })}
-        style={{
-          border: '1px dashed #ccc',
-          padding: '20px',
-          textAlign: 'center',
-        }}
-      >
-        <input {...getInputProps()} />
-        <p>Drag `&lsquo;n&apos; drop an image here, or click to select one</p>
-      </div>
-      {imageFile && <Typography>Selected Image: {imageFile.name}</Typography>}
+      <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+        Event Image
+      </Typography>
+      
+      {uploadError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {uploadError}
+        </Alert>
+      )}
+      
+      {eventData.imagePreviewUrl ? (
+        <Box sx={{ textAlign: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              position: 'relative',
+              width: '100%',
+              height: '200px',
+              mb: 2,
+              borderRadius: 1,
+              overflow: 'hidden'
+            }}
+          >
+            <Image
+              src={eventData.imagePreviewUrl}
+              alt="Event preview"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+          </Box>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            Selected: {eventData.imageFile?.name}
+          </Typography>
+          <Button 
+            variant="outlined" 
+            color="error" 
+            onClick={handleClearImage}
+            size="small"
+          >
+            Remove Image
+          </Button>
+        </Box>
+      ) : (
+        <div
+          {...getRootProps()}
+          style={{
+            border: `2px dashed ${isDragActive ? '#2196f3' : '#cccccc'}`,
+            borderRadius: '4px',
+            padding: '20px',
+            textAlign: 'center',
+            backgroundColor: isDragActive ? 'rgba(33, 150, 243, 0.1)' : 'transparent',
+            cursor: 'pointer',
+            marginBottom: '16px',
+            transition: 'all 0.2s ease-in-out'
+          }}
+        >
+          <input {...getInputProps()} />
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            {isDragActive ? 'Drop the image here' : 'Drag and drop an image here, or click to select'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Accepted formats: JPG, PNG, GIF, WEBP (max 5MB)
+          </Typography>
+        </div>
+      )}
+      
+      <Typography variant="body2" color="text.secondary">
+        The image should have a 16:9 aspect ratio for best appearance. Images will be displayed prominently on event cards and detail pages.
+      </Typography>
     </Box>
   );
 };
 
-ImageEventDetails.propTypes = {
-  imageFile: PropTypes.object, // Represents the selected file object
-  setImageFile: PropTypes.func.isRequired, // Function to update the selected file
+CreateEventDetailsImage.propTypes = {
+  eventData: PropTypes.object.isRequired,
+  setEventData: PropTypes.func.isRequired,
 };
 
-export default ImageEventDetails;
+export default CreateEventDetailsImage;

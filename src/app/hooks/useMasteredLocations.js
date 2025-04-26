@@ -1,0 +1,205 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import axios from 'axios';
+
+export function useMasteredLocations() {
+  const [countries, setCountries] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [nearestCity, setNearestCity] = useState({
+    cityID: null,
+    cityName: 'Unknown',
+    distance: null,
+    regionID: null,
+    regionName: 'Unknown',
+    divisionID: null,
+    divisionName: 'Unknown',
+    countryID: null,
+    countryName: 'Unknown',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+
+  const fetchCountries = useCallback(
+    async (isActive = true) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        const response = await axios.get(`${baseURL}/api/masteredLocations/countries`, {
+          params: { isActive, appId },
+        });
+        setCountries(response.data);
+      } catch (err) {
+        console.error('Error fetching countries:', err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [baseURL]
+  );
+
+  const fetchRegions = useCallback(
+    async (countryId, isActive = true) => {
+      if (!countryId) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        const response = await axios.get(`${baseURL}/api/masteredLocations/regions`, {
+          params: { countryId, isActive, appId },
+        });
+        setRegions(response.data);
+      } catch (err) {
+        console.error('Error fetching regions:', err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [baseURL]
+  );
+
+  const fetchDivisions = useCallback(
+    async (regionId, isActive = true) => {
+      if (!regionId) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        const response = await axios.get(`${baseURL}/api/masteredLocations/divisions`, {
+          params: { regionId, isActive, appId },
+        });
+        setDivisions(response.data);
+      } catch (err) {
+        console.error('Error fetching divisions:', err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [baseURL]
+  );
+
+  const fetchCities = useCallback(
+    async (divisionId, isActive = true) => {
+      console.log('FE: uML fetchCities');
+      setLoading(true);
+      setError(null);
+      try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        console.log('Fetching cities for appId:', appId, 'isActive:', isActive);
+
+        const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
+          params: {
+            divisionId,
+            isActive: isActive ? 'true' : 'false',
+            appId,
+          },
+        });
+
+        // Check the response structure - it might be {cities: [...]} format
+        let citiesArray = response.data;
+        
+        // Handle response.data.cities structure (API returns an object with cities array)
+        if (!Array.isArray(response.data) && response.data.cities && Array.isArray(response.data.cities)) {
+          console.log('API returned cities in response.data.cities structure');
+          citiesArray = response.data.cities;
+        } else if (!Array.isArray(response.data)) {
+          console.error('Error: API response data is not an array and has no cities property:', response.data);
+          setCities([]);
+          setError('City data is in an invalid format. Please contact administrator.');
+          return;
+        }
+
+        // Ensure each city has latitude/longitude for the map
+        const citiesWithCoordinates = citiesArray.filter(
+          (city) => city.latitude !== undefined && 
+                   city.longitude !== undefined && 
+                   city.latitude !== null && 
+                   city.longitude !== null &&
+                   !isNaN(parseFloat(city.latitude)) &&
+                   !isNaN(parseFloat(city.longitude))
+        );
+
+        console.log(`Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
+        if (citiesWithCoordinates.length > 0) {
+          console.log('Sample city data:', citiesWithCoordinates[0]);
+        } else {
+          console.warn('No cities with valid coordinates found in API response');
+        }
+        setCities(citiesWithCoordinates);
+      } catch (err) {
+        console.error('Error fetching cities:', err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [baseURL]
+  );
+
+  const fetchNearestMastered = useCallback(
+    async ({ latitude, longitude, maxDistance = 50000, isActive = true }) => {
+      if (!latitude || !longitude) {
+        const errorMessage = 'Latitude and longitude are required.';
+        console.error(errorMessage);
+        setError(errorMessage);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        const response = await axios.get(`${baseURL}/api/masteredLocations/nearestMastered`, {
+          params: {
+            latitude,
+            longitude,
+            maxDistance,
+            isActive,
+            appId,
+          },
+        });
+        console.log('Nearest Mastered Location Response:', response.data);
+        setNearestCity(response.data);
+      } catch (err) {
+        console.error('Error fetching nearest mastered location:', err.message);
+        setError(err.message);
+        setNearestCity({
+          cityID: null,
+          cityName: 'Unknown. Use the map',
+          distance: null,
+          regionID: null,
+          regionName: 'Unknown',
+          divisionID: null,
+          divisionName: 'Unknown',
+          countryID: null,
+          countryName: 'Unknown',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [baseURL]
+  );
+
+  return {
+    countries,
+    regions,
+    divisions,
+    cities,
+    nearestCity,
+    loading,
+    error,
+    fetchCountries,
+    fetchRegions,
+    fetchDivisions,
+    fetchCities,
+    fetchNearestMastered,
+  };
+}

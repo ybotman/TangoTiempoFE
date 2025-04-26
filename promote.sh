@@ -2,7 +2,7 @@
 
 # Step 1: Run the commitVersions.js script
 echo "Running commitVersions.js..."
-node src/app/utils/commitVersions.js
+node @/utils/commitVersions.js
 
 # Step 2: Stage and commit versions.json with the specified message
 echo "Staging and committing versions.json..."

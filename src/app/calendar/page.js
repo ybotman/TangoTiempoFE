@@ -2,7 +2,7 @@
 
 'use client';
 import Head from 'next/head';
-import React, { useContext, useEffect } from 'react';
+import React, {useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -18,9 +18,9 @@ import ListIcon from '@mui/icons-material/List';
 
 import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
-import { RegionsContext } from '@/contexts/RegionsContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
+import LocationInfo from '@/components/UI/LocationInfo';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 
@@ -31,27 +31,15 @@ const CalendarPage = () => {
       name="description"
       content="Browse and find upcoming tango events in your region. Updated regularly with new listings."
     />
-    <meta
-      name="keywords"
-      content="tango, tango events, local tango calendar, tango festivals"
-    />
+    <meta name="keywords" content="tango, tango events, local tango calendar, tango festivals" />
     <meta name="robots" content="index, follow" />
-    <meta
-      property="og:title"
-      content="Tango Tiempo - Find Local Tango Events"
-    />
-    <meta
-      property="og:description"
-      content="Browse and find upcoming tango events in your region."
-    />
+    <meta property="og:title" content="Tango Tiempo - Find Local Tango Events" />
+    <meta property="og:description" content="Browse and find upcoming tango events in your region." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.tangotiempo.com" />
   </Head>;
 
-  const { regions } = useContext(RegionsContext);
-  //  const { selectedOrganizers, selectedCategories } = now where??
-  //const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-
+  // Regions data is now handled by useCalendarPage
   const {
     menuAnchor,
     menuItems,
@@ -61,28 +49,21 @@ const CalendarPage = () => {
     handleMenuClose,
     activeCategories,
     handleCategoryChange,
-    selectedRegion,
-    selectedDivision,
-    selectedCity,
-    organizers,
     calendarRef,
-    setSelectedRegion,
-    setSelectedDivision,
-    setSelectedCity,
     isCreateModalOpen,
     setCreateModalOpen,
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     selectedEventDetails,
     handleDatesSet,
-    handleRegionChange,
     handlePrev,
     handleNext,
     handleToday,
     handleDateClick,
     handleEventClick,
-    handleOrganizerChange,
     coloredFilteredEvents,
+    datesSet,
+    handleEventUpdated,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -111,18 +92,7 @@ const CalendarPage = () => {
   return (
     <div>
       <SiteHeader />
-      {/* A lot of unnecessary arguments */}
       <SiteMenuBar
-        selectedRegion={selectedRegion}
-        setSelectedRegion={setSelectedRegion}
-        selectedDivision={selectedDivision}
-        setSelectedDivision={setSelectedDivision}
-        selectedCity={selectedCity}
-        setSelectedCity={setSelectedCity}
-        regions={regions}
-        handleRegionChange={handleRegionChange}
-        organizers={organizers}
-        handleOrganizerChange={handleOrganizerChange}
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
@@ -130,43 +100,62 @@ const CalendarPage = () => {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          flexDirection: 'column',
+          gap: '10px',
           margin: '20px',
         }}
       >
-        <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <IconButton onClick={handlePrev}>
-            <ArrowBackIcon />
-          </IconButton>
-          <IconButton onClick={handleToday}>
-            <TodayIcon />
-          </IconButton>
-          <IconButton onClick={handleNext}>
-            <ArrowForwardIcon />
-          </IconButton>
-        </ButtonGroup>
+        {/* Calendar Controls */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <ButtonGroup variant="outlined" aria-label="outlined button group">
+            <IconButton onClick={handlePrev}>
+              <ArrowBackIcon />
+            </IconButton>
+            <IconButton onClick={handleToday}>
+              <TodayIcon />
+            </IconButton>
+            <IconButton onClick={handleNext}>
+              <ArrowForwardIcon />
+            </IconButton>
+          </ButtonGroup>
 
-        <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <IconButton
-            onClick={() =>
-              calendarRef.current.getApi().changeView('dayGridMonth')
-            }
+          {/* Date Range Display */}
+          <div
+            style={{
+              fontWeight: 'bold',
+              fontSize: '1.1rem',
+              flex: 1,
+              textAlign: 'center',
+            }}
           >
-            <CalendarMonthIcon />
-          </IconButton>
-          <IconButton
-            onClick={() =>
-              calendarRef.current.getApi().changeView('timeGridWeek')
-            }
-          >
-            <ViewWeekIcon />
-          </IconButton>
-          <IconButton
-            onClick={() => calendarRef.current.getApi().changeView('listWeek')}
-          >
-            <ListIcon />
-          </IconButton>
-        </ButtonGroup>
+            {datesSet && datesSet.start
+              ? new Date(datesSet.start).toLocaleDateString(undefined, {
+                  month: 'long',
+                  year: 'numeric',
+                  day:
+                    calendarRef.current && calendarRef.current.getApi().view.type.includes('day') ? 'numeric' : undefined,
+                })
+              : 'Loading calendar...'}
+          </div>
+
+          <ButtonGroup variant="outlined" aria-label="outlined button group">
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
+              <CalendarMonthIcon />
+            </IconButton>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
+              <ViewWeekIcon />
+            </IconButton>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+              <ListIcon />
+            </IconButton>
+          </ButtonGroup>
+        </div>
       </div>
 
       <FullCalendar
@@ -186,11 +175,17 @@ const CalendarPage = () => {
         // Extend the number of events shown in list view
         views={{
           listWeek: {
-            eventLimit: false, // Show all events without limiting
+            dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
           },
         }}
       />
+      
+      {/* Location Information Bar - Moved below calendar */}
+      <div style={{ margin: '20px' }}>
+        <LocationInfo />
+      </div>
+      
       {/* SubMenu */}
       <CalendarSubMenu
         menuAnchor={menuAnchor}
@@ -203,7 +198,6 @@ const CalendarPage = () => {
         open={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         selectedDate={clickedDate}
-        selectedRegion={selectedRegion}
       />
 
       <ViewEventDetailModal
@@ -211,7 +205,7 @@ const CalendarPage = () => {
         onClose={() => setViewDetailModalOpen(false)}
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
-        selectedRegion={selectedRegion}
+        onEventUpdated={handleEventUpdated}
       />
     </div>
   );

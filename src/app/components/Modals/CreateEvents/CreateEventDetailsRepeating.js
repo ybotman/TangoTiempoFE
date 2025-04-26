@@ -71,24 +71,14 @@ const MaterialUISwitch = styled(Switch)(() => ({
 }));
 
 const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
-  const [recurrenceType, setRecurrenceType] = useState(
-    eventData.recurrenceType || 'weekly'
-  );
-  const [recurrenceDays, setRecurrenceDays] = useState(
-    eventData.recurrenceDays || []
-  );
+  const [recurrenceType, setRecurrenceType] = useState(eventData.recurrenceType || 'weekly');
+  const [recurrenceDays, setRecurrenceDays] = useState(eventData.recurrenceDays || []);
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
-  const [monthlyWeeks, setMonthlyWeeks] = useState(
-    eventData.monthlyWeeks || []
-  );
-  const [excludeDates, setExcludeDates] = useState(
-    eventData.excludeDates || ''
-  );
+  const [monthlyWeeks, setMonthlyWeeks] = useState(eventData.monthlyWeeks || []);
+  const [excludeDates, setExcludeDates] = useState(eventData.excludeDates || '');
   const [endDate, setEndDate] = useState(eventData.endDate || '');
   const [occurrences, setOccurrences] = useState(eventData.occurrences || '');
-  const [sendReminder, setSendReminder] = useState(
-    eventData.sendReminder || false
-  );
+  const [sendReminder, setSendReminder] = useState(eventData.sendReminder || false);
 
   // State to handle switching between End Date and Occurrences
   const [useEndDate, setUseEndDate] = useState(true); // Default to using End Date
@@ -111,18 +101,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   // Generate RRULE Text
   const generateRRule = () => {
     let rrule = `FREQ=${recurrenceType.toUpperCase()};`;
-    if (
-      recurrenceType === 'daily' ||
-      recurrenceType === 'weekly' ||
-      recurrenceType === 'monthly'
-    ) {
+    if (recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') {
       if (recurrenceType === 'weekly' && recurrenceDays.length > 0) {
         rrule += `BYDAY=${recurrenceDays.join(',')};`;
-      } else if (
-        recurrenceType === 'monthly' &&
-        monthlyDays.length > 0 &&
-        monthlyWeeks.length > 0
-      ) {
+      } else if (recurrenceType === 'monthly' && monthlyDays.length > 0 && monthlyWeeks.length > 0) {
         const weekdaysMap = {
           Su: 'SU',
           Mo: 'MO',
@@ -132,9 +114,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           Fr: 'FR',
           Sa: 'SA',
         };
-        const byDay = monthlyWeeks
-          .map((week) => monthlyDays.map((day) => `${week}${weekdaysMap[day]}`))
-          .flat();
+        const byDay = monthlyWeeks.map((week) => monthlyDays.map((day) => `${week}${weekdaysMap[day]}`)).flat();
         rrule += `BYDAY=${byDay.join(',')};`;
       }
       if (useEndDate && endDate) {
@@ -156,21 +136,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           label="Start Date"
           type="date"
           InputLabelProps={{ shrink: true }}
-          value={
-            eventData.startDate
-              ? eventData.startDate.toISOString().split('T')[0]
-              : ''
-          }
-          onChange={(e) =>
-            setEventData({ ...eventData, startDate: new Date(e.target.value) })
-          }
+          value={eventData.startDate ? eventData.startDate.toISOString().split('T')[0] : ''}
+          onChange={(e) => setEventData({ ...eventData, startDate: new Date(e.target.value) })}
         />
-        <TextField
-          label="Recurrence Type"
-          select
-          value={recurrenceType}
-          onChange={handleRecurrenceTypeChange}
-        >
+        <TextField label="Recurrence Type" select value={recurrenceType} onChange={handleRecurrenceTypeChange}>
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
           <MenuItem value="monthly">Monthly</MenuItem>
@@ -204,11 +173,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         <Tooltip title="Send a reminder 1 month before the end date">
           <FormControlLabel
             control={
-              <Switch
-                checked={sendReminder}
-                onChange={(e) => setSendReminder(e.target.checked)}
-                color="primary"
-              />
+              <Switch checked={sendReminder} onChange={(e) => setSendReminder(e.target.checked)} color="primary" />
             }
             label="Send Reminder"
           />
@@ -227,9 +192,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
                     checked={recurrenceDays.includes(day)}
                     onChange={() => {
                       setRecurrenceDays((prev) =>
-                        prev.includes(day)
-                          ? prev.filter((d) => d !== day)
-                          : [...prev, day]
+                        prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
                       );
                     }}
                   />
@@ -253,11 +216,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
                   <Checkbox
                     checked={monthlyDays.includes(day)}
                     onChange={() => {
-                      setMonthlyDays((prev) =>
-                        prev.includes(day)
-                          ? prev.filter((d) => d !== day)
-                          : [...prev, day]
-                      );
+                      setMonthlyDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
                     }}
                   />
                 }
@@ -276,9 +235,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
                     checked={monthlyWeeks.includes(week)}
                     onChange={() => {
                       setMonthlyWeeks((prev) =>
-                        prev.includes(week)
-                          ? prev.filter((w) => w !== week)
-                          : [...prev, week]
+                        prev.includes(week) ? prev.filter((w) => w !== week) : [...prev, week]
                       );
                     }}
                   />

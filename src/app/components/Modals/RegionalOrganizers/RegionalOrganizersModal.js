@@ -1,40 +1,41 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
+'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, useMediaQuery, useTheme, AppBar, Toolbar, IconButton } from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
-import RegionalOrganizersDelegated from './RegionalOrganizersDelegated'; // Import the new Delegated component
+import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
+import RegionalOrganizersImages from './RegionalOrganizersImages';
+import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
+import RegionalOrganizerTypes from './RegionalOrganizersTypes'; // Import the new component
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
-
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxWidth: '600px',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 3,
-};
+import modalStyle from '@/components/Styles/modalStyles';
 
 const RegionalOrganizersModal = ({ open, onClose }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { organizer, loading, error, fetchOrganizerById, updateOrganizer } =
-    useOrganizers();
+  const { organizers, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
-  // Fetch organizer data and reset tab to "name" when the modal opens
   useEffect(() => {
     if (open) {
-      setCurrentTab('name'); // Reset to "name" tab on each open
-      if (user?.backendInfo.regionalOrganizerInfo?.organizerId) {
-        fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
-        console.log('useEffect is Fetching organizer data');
+      setCurrentTab('name');
+
+      const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
+
+      if (organizerId) {
+        try {
+          fetchOrganizerById(organizerId);
+        } catch (error) {
+          console.error('Error calling fetchOrganizerById:', error);
+        }
+      } else {
+        console.warn('No Organizer ID available. Skipping fetch.');
       }
     }
   }, [open, user, fetchOrganizerById]);
@@ -43,39 +44,56 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={modalStyle}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Regional Organizer Settings
-        </Typography>
+      <Box sx={modalStyle(isMobile)}>
+        {/* Header with Close Button */}
+        <AppBar position="static" color="default">
+          <Toolbar variant="dense">
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Regional Organizer Settings
+            </Typography>
+            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
-          <Typography variant="body2" color="textSecondary" gutterBottom>
+          <Typography variant="body2" color="textSecondary" gutterBottom sx={{ p: 1 }}>
             Organizer ID: {user.backendInfo.regionalOrganizerInfo.organizerId}
           </Typography>
         )}
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId ? (
-          <>
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Tabs
               value={currentTab}
               onChange={handleTabChange}
               aria-label="Regional Organizer Settings Tabs"
               variant="scrollable"
+              scrollButtons="on"
+              allowScrollButtonsMobile
+              sx={{ borderBottom: 1, borderColor: 'divider' }}
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
-              <Tab label="Delegated" value="delegated" />{' '}
-              {/* New Delegated tab */}
+              <Tab label="Types" value="types" /> {/* New Tab */}
+              <Tab label="Delegated" value="delegated" />
+              <Tab label="Images" value="images" />
+              <Tab label="Profile Images" value="profileImages" />
             </Tabs>
 
             {loading ? (
               <Typography>Loading...</Typography>
             ) : error ? (
-              <Typography color="error">
-                Error loading organizer data
-              </Typography>
+              <Typography color="error">Error loading organizer data</Typography>
             ) : (
-              <>
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  overflowY: 'auto',
+                  p: 2,
+                }}
+              >
                 {currentTab === 'name' && (
                   <RegionalOrganizersName
                     organizerId={organizer?._id}
@@ -90,29 +108,43 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     updateOrganizer={updateOrganizer}
                   />
                 )}
-                {currentTab === 'delegated' && (
-                  <RegionalOrganizersDelegated
+                {currentTab === 'types' && (
+                  <RegionalOrganizerTypes
                     organizerId={organizer?._id}
-                    delegatedOrganizerIds={
-                      organizer.delegatedOrganizerIds || []
-                    } // Pass as array
+                    organizer={organizer}
                     updateOrganizer={updateOrganizer}
                   />
                 )}
-              </>
+                {currentTab === 'delegated' && (
+                  <RegionalOrganizersDelegated
+                    organizerId={organizer?._id}
+                    delegatedOrganizerIds={organizer.delegatedOrganizerIds || []}
+                    organizers={organizers}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'images' && (
+                  <RegionalOrganizersImages
+                    organizerId={organizer?._id}
+                    organizer={organizer}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'profileImages' && (
+                  <RegionalOrganizersProfileImages
+                    organizerId={organizer?._id}
+                    organizer={organizer}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
+              </Box>
             )}
-          </>
+          </Box>
         ) : (
-          <Typography color="textSecondary" gutterBottom>
+          <Typography color="textSecondary" gutterBottom sx={{ p: 2 }}>
             No organizer information available.
           </Typography>
         )}
-
-        <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
-          <Button onClick={onClose} color="secondary">
-            Close
-          </Button>
-        </Box>
       </Box>
     </Modal>
   );

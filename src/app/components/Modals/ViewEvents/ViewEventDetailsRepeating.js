@@ -18,9 +18,8 @@ const UnderConstruction = () => {
       }}
     >
       <Typography variant="h5" gutterBottom>
-        Currently, we are NOT doing repeating events. The new is implemented
-        with RRule logic. Note the import from BTC.com is brought in without
-        repeats, builds them day by day 1:1 through 2025.
+        Currently, we are NOT doing repeating events. The new is implemented with RRule logic. Note the import from
+        BTC.com is brought in without repeats, builds them day by day 1:1 through 2025.
       </Typography>
       <Image
         src="/UnderConstruction.jpg"

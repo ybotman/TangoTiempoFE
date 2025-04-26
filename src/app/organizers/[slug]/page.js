@@ -1,4 +1,4 @@
-// src/app/organizer/[slug]/page.js
+// @/organizer/[slug]/page.js
 
 import fs from 'fs';
 import path from 'path';
@@ -14,10 +14,7 @@ import PropTypes from 'prop-types';
 // Set up logging with Winston
 const logger = winston.createLogger({
   level: 'info', // Set the logging level
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [new winston.transports.Console()],
 });
 
@@ -30,14 +27,10 @@ const sanitizeHTML = (htmlString) => {
   return purify.sanitize(htmlString);
 };
 
-
-
 export async function generateStaticParams() {
   try {
     const beUrl = process.env.NEXT_PUBLIC_BE_URL || 'https://default-url.com';
-    const timeout =
-      Number(process.env.NEXT_PUBLIC_STATIC_PAGE_GENERATION_TIMEOUT || '120') *
-      1000;
+    const timeout = Number(process.env.NEXT_PUBLIC_STATIC_PAGE_GENERATION_TIMEOUT || '120') * 1000;
 
     logger.info('Starting generateStaticParams');
     logger.info(`Backend URL: ${beUrl}`);
@@ -105,7 +98,10 @@ export async function generateStaticParams() {
           cityName: city.cityName || 'Unknown City',
         });
       } catch (error) {
-        logger.error('Error processing organizer data', { error: error.message, organizer: org });
+        logger.error('Error processing organizer data', {
+          error: error.message,
+          organizer: org,
+        });
       }
     });
 
@@ -115,7 +111,9 @@ export async function generateStaticParams() {
       fs.writeFileSync(filePath, JSON.stringify(organizersDataList, null, 2));
       logger.info(`Organizers data saved to ${filePath}`);
     } catch (fileError) {
-      logger.error('Error saving organizers data to file', { error: fileError.message });
+      logger.error('Error saving organizers data to file', {
+        error: fileError.message,
+      });
     }
 
     return paramsList;
@@ -124,8 +122,6 @@ export async function generateStaticParams() {
     return []; // Return an empty list if the function fails
   }
 }
-
-
 
 // Function to get organizer data based on slug
 async function getOrganizerData(slug) {
@@ -161,10 +157,7 @@ export async function generateMetadata({ params }) {
       description: organizer.description,
       images: [
         {
-          url:
-            organizer.images && organizer.images.length > 0
-              ? organizer.images[0].imageUrl
-              : '/default-image.jpg',
+          url: organizer.images && organizer.images.length > 0 ? organizer.images[0].imageUrl : '/default-image.jpg',
         },
       ],
     },
@@ -189,10 +182,7 @@ export default async function OrganizerProfile({ params }) {
     name: organizer.name,
     url: organizer.url,
     description: organizer.description,
-    logo:
-      organizer.images && organizer.images.length > 0
-        ? organizer.images[0].imageUrl
-        : null,
+    logo: organizer.images && organizer.images.length > 0 ? organizer.images[0].imageUrl : null,
     contactPoint: [
       {
         '@type': 'ContactPoint',
@@ -206,9 +196,7 @@ export default async function OrganizerProfile({ params }) {
   return (
     <div>
       {/* Structured Data Script */}
-      <script type="application/ld+json">
-        {JSON.stringify(structuredData)}
-      </script>
+      <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
 
       {/* Organizer Content */}
       <div>
@@ -221,10 +209,7 @@ export default async function OrganizerProfile({ params }) {
             style={{ maxWidth: '100%', height: 'auto' }}
           />
         )}
-        <p>
-          A Tango professional/organizer/studio/teacher registered on
-          TangoTiempo.com:
-        </p>
+        <p>A Tango professional/organizer/studio/teacher registered on TangoTiempo.com:</p>
         <h3>Argentine Tango Organizer: {organizer.name}</h3>
         <p>Region: {organizer.regionName}</p>
         <p>Division: {organizer.divisionName}</p>
@@ -255,11 +240,9 @@ export default async function OrganizerProfile({ params }) {
       />
       <h3>TangoTiempo Mission:</h3>
       <p>
-        Our mission is to create a free comprehensive and inclusive platform for
-        all Argentine Tango enthusiasts, including event organizers, DJs, and
-        bands. We aim to connect the community, promote events, and make it easy
-        for everyone to find and participate in tango activities across
-        different regions.
+        Our mission is to create a free comprehensive and inclusive platform for all Argentine Tango enthusiasts,
+        including event organizers, DJs, and bands. We aim to connect the community, promote events, and make it easy
+        for everyone to find and participate in tango activities across different regions.
       </p>
       <hr
         style={{
@@ -269,26 +252,16 @@ export default async function OrganizerProfile({ params }) {
         }}
       />
       <p>
-        If you are an organizer of Argentine Tango events (or a DJ/Band), we
-        would love for you to join the TangoTiempo site. It is free, and you can
-        sign up at:{' '}
-        <a
-          href="https://www.tangotiempo.com/OrganizerApply"
-          target="_blank"
-          rel="noreferrer"
-        >
+        If you are an organizer of Argentine Tango events (or a DJ/Band), we would love for you to join the TangoTiempo
+        site. It is free, and you can sign up at:{' '}
+        <a href="https://www.tangotiempo.com/OrganizerApply" target="_blank" rel="noreferrer">
           www.tangotiempo.com/OrganizerApply
         </a>
         .<br />
-        We are also looking for open and unbiased regional admins for the US
-        board review for onboarding and resolving small issues, in general, to
-        help us manage events and organizers in your area. If you are
-        interested, please contact us at:{' '}
-        <a
-          href="https://www.tangotiempo.com/AdminApply"
-          target="_blank"
-          rel="noreferrer"
-        >
+        We are also looking for open and unbiased regional admins for the US board review for onboarding and resolving
+        small issues, in general, to help us manage events and organizers in your area. If you are interested, please
+        contact us at:{' '}
+        <a href="https://www.tangotiempo.com/AdminApply" target="_blank" rel="noreferrer">
           www.tangotiempo.com/AdminApply
         </a>
         <hr
@@ -301,8 +274,7 @@ export default async function OrganizerProfile({ params }) {
         .<br />
         <h3>
           {' '}
-          But of course just take a look and see whats going on the world of
-          Argentine Tango at :{' '}
+          But of course just take a look and see whats going on the world of Argentine Tango at :{' '}
           <a href="https://tangotiempo.com" target="_blank" rel="noreferrer">
             TangoTiempo.com
           </a>

@@ -1,24 +1,9 @@
 // options/page.js
 'use client';
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Switch,
-  FormControlLabel,
-  Paper,
-} from '@mui/material';
+import { Box, Typography, Grid, Switch, FormControlLabel, Paper } from '@mui/material';
 
-const eventTypes = [
-  'Festivals',
-  'Workshops',
-  'DayWorkshops',
-  'Milongas',
-  'Practices',
-  'Classes',
-  'Concerts',
-];
+const eventTypes = ['Festivals', 'Workshops', 'DayWorkshops', 'Milongas', 'Practices', 'Classes', 'Concerts'];
 
 const eventLevels = [
   { level: 'Favorites', label: 'Favorites' },
@@ -79,18 +64,12 @@ const NotificationOptions = () => {
               </Grid>
               {eventLevels.map(({ level }) => (
                 <Grid item xs={3} key={level}>
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                  >
+                  <Box display="flex" flexDirection="column" alignItems="center">
                     <FormControlLabel
                       control={
                         <Switch
                           checked={notifications[type][level].new}
-                          onChange={() =>
-                            handleSwitchChange(type, level, 'new')
-                          }
+                          onChange={() => handleSwitchChange(type, level, 'new')}
                           color="primary"
                         />
                       }
@@ -101,9 +80,7 @@ const NotificationOptions = () => {
                       control={
                         <Switch
                           checked={notifications[type][level].updates}
-                          onChange={() =>
-                            handleSwitchChange(type, level, 'updates')
-                          }
+                          onChange={() => handleSwitchChange(type, level, 'updates')}
                           color="secondary"
                         />
                       }

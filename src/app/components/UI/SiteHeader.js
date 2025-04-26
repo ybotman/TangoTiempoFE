@@ -1,16 +1,17 @@
-//app/components/UI/SiteHeader.js
+// app/components/UI/SiteHeader.js
 
 import React from 'react';
 import Image from 'next/image';
+import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 
 const SiteHeader = () => {
-  // Assuming run_number is passed as a prop or can be fetched in this component
+  const { nearestCity } = useMasteredLocation();
   const runNumber = process.env.NEXT_PUBLIC_BUILD_VERSION || 'Local'; // Fallback value if not set
 
   return (
     <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
       <Image
-        src="/TangoTiempoColorFull.png"
+        src="/images/TangoTiempo3.jpg"
         alt="Tango Tiempo"
         width={1200}
         height={600}
@@ -48,6 +49,21 @@ const SiteHeader = () => {
         }}
       >
         {runNumber}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '10px',
+          left: '10px',
+          backgroundColor: 'white',
+          color: 'black',
+          padding: '5px 10px',
+          borderRadius: '3px',
+          fontSize: '12px',
+          boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        {`City: ${nearestCity?.cityName || 'Unknown'}`}
       </div>
     </div>
   );

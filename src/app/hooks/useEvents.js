@@ -1,70 +1,496 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
-export function useEvents(
-  selectedRegion,
-  selectedDivision,
-  selectedCity,
-  calendarStart,
-  calendarEnd
-) {
-  const [events, setEvents] = useState([]);
+/**
+ * Unified useEvents hook - handles both geo-based and organizer-based filtering
+ * 
+ * @param {Object} options - Configuration options
+ * @param {string} [options.region] - Region name for location filtering
+ * @param {string} [options.division] - Division name for location filtering
+ * @param {string} [options.city] - City name for location filtering
+ * @param {number} [options.lat] - Latitude for geo filtering
+ * @param {number} [options.lng] - Longitude for geo filtering
+ * @param {Date|string} [options.startDate] - Start date for filtering events
+ * @param {Date|string} [options.endDate] - End date for filtering events
+ * @param {number} [options.page=1] - Page number for pagination
+ * @param {number} [options.limit=100] - Number of items per page
+ * @returns {Object} Events data, loading state, error state, and refresh function
+ */
+export function useEvents({
+  region,
+  division,
+  city,
+  lat,
+  lng,
+  startDate,
+  endDate,
+  page = 1,
+  limit = 100,
+  useGeoLocationContext = true // Flag to control whether to use GeoLocationContext
+} = {}) {
+  const [eventsData, setEventsData] = useState({
+    events: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      limit: 100,
+      pages: 0
+    },
+    filterType: null
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { user, selectedRole } = useContext(AuthContext);
+  
+  // Get location from GeoLocationContext if available
+  const geoLocationContext = useGeoLocationContext ? useGeoLocation() : null;
+  
+  // Use context values if explicitly provided parameters are missing
+  const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
+  const effectiveDivision = division || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.division?.name : null);
+  const effectiveCity = city || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.city?.name : null);
+  
+  // Use coordinates from GeoLocationContext if lat/lng not explicitly provided
+  const effectiveLat = lat || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
+    ? geoLocationContext?.userLocation?.latitude : null);
+  const effectiveLng = lng || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
+    ? geoLocationContext?.userLocation?.longitude : null);
+  
+  // Create a cache key for memoizing/deduplicating requests
+  const cacheKey = JSON.stringify({
+    region: effectiveRegion, 
+    division: effectiveDivision, 
+    city: effectiveCity, 
+    lat: effectiveLat, 
+    lng: effectiveLng, 
+    startDate: startDate?.toString(), 
+    endDate: endDate?.toString(),
+    page, 
+    limit, 
+    userId: user?.uid, 
+    selectedRole,
+    geoLocationUpdated: useGeoLocationContext ? geoLocationContext?.userLocation?.lastUpdated : null
+  });
+  
+  // Generate default date range if needed
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 3, 0); // 3 months
+    return { start: startOfMonth.toISOString(), end: endOfMonth.toISOString() };
+  };
 
-  const getEvents = useCallback(async () => {
-    if (!selectedRegion) {
-      setEvents([]);
-      return;
-    }
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/byCalculatedLocations`,
-        {
-          params: {
-            active: true,
-            calculatedRegionName: selectedRegion,
-            calculatedDivisionName: selectedDivision || undefined,
-            calculatedCityName: selectedCity || undefined,
-            start: calendarStart,
-            end: calendarEnd,
-          },
-        }
-      );
-      //  console.log('useEvents-> Events fetched:', response.data);
+      // Prepare parameters for the unified endpoint
+      const params = {
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
+        page,
+        limit,
+      };
+      
+      // Format date parameters
+      if (startDate && endDate) {
+        // Handle different date formats
+        params.start = typeof startDate === 'string' ? startDate : 
+                      startDate.toISOString ? startDate.toISOString() : startDate;
+        params.end = typeof endDate === 'string' ? endDate : 
+                    endDate.toISOString ? endDate.toISOString() : endDate;
+      } else {
+        // Use default date range if not provided
+        const defaultDates = getDefaultDateRange();
+        params.start = defaultDates.start;
+        params.end = defaultDates.end;
+      }
+      
+      // Location-based filtering parameters - using effective values that may come from GeoLocationContext
+      if (effectiveRegion) params.masteredRegionName = effectiveRegion;
+      if (effectiveDivision) params.masteredDivisionName = effectiveDivision;
+      if (effectiveCity) params.masteredCityName = effectiveCity;
+      
+      // Geolocation parameters - using effective values that may come from GeoLocationContext
+      if (effectiveLat && effectiveLng) {
+        params.lat = effectiveLat;
+        params.lng = effectiveLng;
+      }
+      
+      // Log the actual values used for filtering (from direct input or GeoLocationContext)
+      console.log('Using location filters:', { 
+        region: effectiveRegion, 
+        division: effectiveDivision, 
+        city: effectiveCity,
+        lat: effectiveLat,
+        lng: effectiveLng,
+        source: useGeoLocationContext && (
+          effectiveRegion !== region || 
+          effectiveDivision !== division || 
+          effectiveCity !== city ||
+          effectiveLat !== lat ||
+          effectiveLng !== lng
+        ) ? 'GeoLocationContext' : 'Direct input'
+      });
+      
+      // Add detailed debugging for role-based filtering
+      console.log('Role-based filtering debug:', {
+        isLoggedIn: !!user,
+        currentRole: selectedRole,
+        availableRoles: user?.roles || [],
+        hasRORole: user?.roles?.includes('RegionalOrganizer') || false,
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId || 'none',
+        isRoleSelected: selectedRole === 'RegionalOrganizer',
+        hasValidId: !!(user?.backendInfo?.regionalOrganizerInfo?.organizerId)
+      });
+      
+      // Add user role and organizerId if user is a RegionalOrganizer
+      if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+        params.organizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
+        params.userRole = 'RegionalOrganizer'; // Make sure we're passing the role to the backend
+        console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
+      } else if (user && user.roles?.includes('RegionalOrganizer')) {
+        // If user has RO role but we're not using it, explain why
+        console.warn('User has RegionalOrganizer role but filtering is not being applied because:',
+          !selectedRole ? 'selectedRole is not set' :
+          selectedRole !== 'RegionalOrganizer' ? `selectedRole is "${selectedRole}" instead of "RegionalOrganizer"` :
+          !user.backendInfo?.regionalOrganizerInfo?.organizerId ? 'regionalOrganizerInfo.organizerId is missing' :
+          'unknown reason'
+        );
+      }
 
-      setEvents(response.data);
+      console.log('Fetching events with params:', params);
+
+      // Call the unified endpoint
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
+        params,
+        timeout: 15000, // 15 second timeout
+      });
+      
+      // Store the response which includes events array and pagination info
+      setEventsData(response.data);
     } catch (error) {
-      console.error('useEvents-> Error fetching events:', error);
-      setEvents([]);
+      console.error('Error fetching events:', error);
+      
+      // Format error message for display
+      let errorMessage = 'Failed to fetch events';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Keep existing events on error rather than clearing them
+      // This provides a better user experience when there are transient network issues
+    } finally {
+      setLoading(false);
     }
-  }, [
-    selectedRegion,
-    selectedDivision,
-    selectedCity,
-    calendarStart,
-    calendarEnd,
-  ]);
+  }, [cacheKey]); // depends on cacheKey which includes all parameters
 
+  // Fetch events when parameters change
   useEffect(() => {
-    getEvents();
-  }, [getEvents]);
+    fetchEvents();
+  }, [fetchEvents]);
 
-  return { events, refreshEvents: getEvents };
+  return { 
+    events: eventsData.events || [], 
+    pagination: eventsData.pagination || { 
+      total: 0, 
+      page: 1, 
+      limit: 100, 
+      pages: 0 
+    },
+    filterType: eventsData.filterType,
+    loading, 
+    error, 
+    refreshEvents: fetchEvents 
+  };
 }
 
-export function useCreateEvent() {
+// Backward compatibility hook for code still using the old parameter style
+export function useEventsLegacy(selectedRegion, selectedDivision, selectedCity, calendarStart, calendarEnd) {
+  return useEvents({
+    region: selectedRegion,
+    division: selectedDivision,
+    city: selectedCity,
+    startDate: calendarStart,
+    endDate: calendarEnd
+  });
+}
+
+export function useEventOperations() {
+  const { user, getIdToken } = useContext(AuthContext);
+  
+  // Create event
   const createEvent = async (eventData) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`,
-        eventData
-      );
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to create events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event creation');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event creation');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Prepare the event data for submission
+      const preparedData = {
+        ...eventData,
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        // The backend requires ownerOrganizerID specifically
+        ownerOrganizerID: eventData.ownerOrganizerID || eventData.grantedOrganizer,
+        // Make sure we use masteredRegionName
+        masteredRegionName: eventData.masteredRegionName || eventData.selectedRegion,
+        // Set default ownerOrganizerName if not provided
+        ownerOrganizerName: eventData.ownerOrganizerName || "Event Organizer",
+        // Set expiresAt to 1 year after endDate
+        expiresAt: new Date(new Date(eventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+        // Handle both venue and location fields for transitional compatibility
+        // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
+        // If we only have locationID/locationName, use those and add venueId/venueName fields
+        venueId: eventData.venueId || eventData.locationID || null,
+        venueName: eventData.venueName || eventData.locationName || null,
+        locationID: eventData.locationID || eventData.venueId || null,
+        locationName: eventData.locationName || eventData.venueName || null,
+      };
+
+      // Ensure mastered location fields are included
+      if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
+        preparedData.masteredRegionName = preparedData.selectedRegion;
+      }
+
+      // Handle image upload if an image file is present
+      if (preparedData.imageFile) {
+        try {
+          // Import the upload function dynamically to avoid issues with SSR
+          const { uploadEventImage } = await import('@/utils/uploadEventImages');
+          
+          // Upload the image and get the URLs (primary and fallback)
+          // Pass the fresh auth token for authentication
+          const uploadResult = await uploadEventImage(preparedData.imageFile, token);
+          
+          // Store the image URL in the event data
+          preparedData.eventImage = uploadResult.imageUrl;
+          preparedData.fallbackImageUrl = uploadResult.fallbackUrl || '/TangoQuestion.jpg';
+          
+          // Remove the file object from the data being sent to the API
+          delete preparedData.imageFile;
+          delete preparedData.imagePreviewUrl;
+        } catch (imageError) {
+          console.error('Error uploading image:', imageError);
+          // Continue without the image if upload fails
+        }
+      }
+
+      // Convert dayjs objects to ISO strings
+      if (preparedData.startDate) {
+        if (typeof preparedData.startDate.toISOString === 'function') {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        } else if (preparedData.startDate.isValid && preparedData.startDate.isValid()) {
+          // Handle dayjs objects
+          preparedData.startDate = preparedData.startDate.toISOString();
+        }
+      }
+      
+      if (preparedData.endDate) {
+        if (typeof preparedData.endDate.toISOString === 'function') {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        } else if (preparedData.endDate.isValid && preparedData.endDate.isValid()) {
+          // Handle dayjs objects
+          preparedData.endDate = preparedData.endDate.toISOString();
+        }
+      }
+
+      // Log the data being sent
+      console.log('Submitting event data to API:', preparedData);
+
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Sending event creation request with auth token');
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, preparedData, config);
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
       throw error;
     }
   };
 
-  return createEvent;
+  // Update event
+  const updateEvent = async (eventId, eventData) => {
+    try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to update events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event update');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event update');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Prepare the event data for submission
+      const preparedData = {
+        ...eventData,
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        // Handle both venue and location fields for transitional compatibility
+        // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
+        // If we only have locationID/locationName, use those and add venueId/venueName fields
+        venueId: eventData.venueId || eventData.locationID || null,
+        venueName: eventData.venueName || eventData.locationName || null,
+        locationID: eventData.locationID || eventData.venueId || null,
+        locationName: eventData.locationName || eventData.venueName || null,
+      };
+      
+      // Convert dayjs objects to ISO strings
+      if (preparedData.startDate) {
+        if (typeof preparedData.startDate.toISOString === 'function') {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        } else if (preparedData.startDate.isValid && preparedData.startDate.isValid()) {
+          preparedData.startDate = preparedData.startDate.toISOString();
+        }
+      }
+      
+      if (preparedData.endDate) {
+        if (typeof preparedData.endDate.toISOString === 'function') {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        } else if (preparedData.endDate.isValid && preparedData.endDate.isValid()) {
+          preparedData.endDate = preparedData.endDate.toISOString();
+        }
+      }
+      
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Updating event:', eventId, preparedData);
+      
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        preparedData, 
+        config
+      );
+      
+      console.log('Event updated successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Delete event
+  const deleteEvent = async (eventId) => {
+    try {
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to delete events');
+      }
+      
+      // Get a fresh token for the request
+      let token;
+      try {
+        token = await getIdToken(true); // Force refresh
+        console.log('Got fresh token for event deletion');
+      } catch (tokenError) {
+        console.error('Failed to get fresh token:', tokenError);
+        if (user.token) {
+          token = user.token; // Fall back to existing token if available
+          console.log('Using existing token for event deletion');
+        } else {
+          throw new Error('Authentication token unavailable');
+        }
+      }
+      
+      // Set authorization header with the fresh token
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      console.log('Deleting event:', eventId);
+      
+      const response = await axios.delete(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        config
+      );
+      
+      console.log('Event deleted successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      
+      // Enhance error message based on response
+      if (error.response) {
+        const message = error.response.data?.message || error.response.data?.error || error.message;
+        throw new Error(`Server error: ${message}`);
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Get event by ID
+  const getEventById = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/id/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      throw error;
+    }
+  };
+
+  return { createEvent, updateEvent, deleteEvent, getEventById };
 }

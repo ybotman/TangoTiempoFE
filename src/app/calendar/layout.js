@@ -1,23 +1,25 @@
+//@/calendar/layout.js
 'use client'; // Enable client-side rendering
 
 import { React, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types'; // Import prop-types
 import { AuthContext } from '@/contexts/AuthContext';
-import { RegionsContext } from '@/contexts/RegionsContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { regions, selectedRegion } = useContext(RegionsContext);
+  const { selectedLocation } = useGeoLocation();
 
   useEffect(() => {
     if (user?.displayName) {
-      // console.log('User Name:', user.displayName);
+      console.log('Layout:uE User Name:', user.displayName);
     }
 
-    if (regions?.length > 0) {
-      // console.log('Selected Region:', selectedRegion);
+    // Use GeoLocationContext instead of RegionsContext for logging
+    if (selectedLocation?.region?.name) {
+      console.log('Layout:uE Selected Region:', selectedLocation.region.name);
     }
-  }, [user, regions, selectedRegion]);
+  }, [user, selectedLocation]);
 
   return <>{children}</>;
 };

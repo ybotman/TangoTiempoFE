@@ -1,4 +1,6 @@
-//app/hooks/useRegions.js
+// src/hooks/useRegions.js
+'use client';
+
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -9,9 +11,11 @@ export function useRegions() {
     console.log('useEffect in useRegions');
     const getRegions = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`
-        );
+        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`, {
+          params: { appId },
+        });
+        console.log('Regions loaded:', response.data);
         setRegions(response.data);
       } catch (error) {
         console.error('Error fetching regions:', error);

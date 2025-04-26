@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Define public environment variables
-  //   env: {
-  //       TangoTiempoBE_URL: process.env.NEXT_PUBLIC_BE_URL,
-  //   },
-
   // Webpack configuration for custom logging
   webpack: (config, { buildId, dev, isServer }) => {
     // Log the public environment variables
@@ -17,25 +12,39 @@ const nextConfig = {
 
     // Check for missing environment variables and log a warning
     if (!process.env.NEXT_PUBLIC_BE_URL) {
-      console.warn('Warning: TangoTiempoBE_URL is not defined!');
+      console.warn('Warning: NEXT_PUBLIC_BE_URL is not defined!');
     }
 
     // Return the modified config
     return config;
   },
 
-  // Updated image configuration to allow external images
+  // Updated image configuration to allow external images including Azure Blob Storage
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'bostontangocalendar.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'tangotiempoimages.blob.core.windows.net',
+      },
     ],
   },
 
-  // Any other Next.js configurations can be added here
-  reactStrictMode: true, // Example of enabling strict mode
+  // Add rewrites to route API calls to the backend server
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3010/api/:path*', // Proxy to your Express backend
+      },
+    ];
+  },
+
+  // Enable React strict mode
+  reactStrictMode: true,
 };
 
 export default nextConfig;

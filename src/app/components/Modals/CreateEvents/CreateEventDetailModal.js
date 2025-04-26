@@ -1,20 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  Tabs,
-  Tab,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
+import React, { useEffect, useState, useContext } from 'react';
+import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
-import { RegionsContext } from '@/contexts/RegionsContext';
+import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useEventOperations } from '@/hooks/useEvents';
 import PropTypes from 'prop-types';
+import dayjs from 'dayjs';
+import axios from 'axios';
 
 const modalStyle = {
   position: 'absolute',
@@ -31,31 +27,227 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate }) => {
-  const { selectedRegion, selectedRegionID } = useContext(RegionsContext);
+  const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
+  const { user, getIdToken } = useContext(AuthContext);
   const [currentTab, setCurrentTab] = useState('basic');
+  // Create initial date/time values from selectedDate using dayjs
+  const initialStartDate = selectedDate ? dayjs(selectedDate) : dayjs();
+  
+  // Set end date to be 2 hours after start date by default
+  const initialEndDate = selectedDate ? dayjs(selectedDate).add(2, 'hour') : dayjs().add(2, 'hour');
+  
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
-    startDate: selectedDate || new Date(),
-    endDate: selectedDate || new Date(),
+    startDate: initialStartDate,
+    endDate: initialEndDate,
     cost: '',
+    // Use both new venue fields and legacy location fields for compatibility
+    venueId: '',
+    venueName: '',
     locationID: '',
     categoryFirst: '',
+    categoryFirstId: '',
     categorySecond: '',
+    categorySecondId: '',
     categoryThird: '',
-    grantedOrganizer: '',
+    categoryThirdId: '',
+    // Organizer fields - ownerOrganizerID will be set automatically by the backend
+    ownerOrganizerID: '',
+    ownerOrganizerName: '',
+    grantedOrganizerID: '',
+    grantedOrganizerName: '',
+    alternateOrganizerID: '',
+    alternateOrganizerName: '',
     isRepeating: false,
     imageFile: null,
+    imagePreviewUrl: null,
     shortName: '',
-    selectedRegion: selectedRegion || '', // Store selectedRegion
-    selectedRegionID: selectedRegionID || '', // Store selectedRegionID
+    // Use mastered location fields from GeoLocationContext first, then fall back to MasteredLocationContext
+    masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+    masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+    masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
+    // Keep old fields for backward compatibility
+    selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+    selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
   });
 
-  useEffect(() => {}, [open]);
+  // Refresh event data and related data when modal opens or location changes
+  useEffect(() => {
+    if (open) {
+      // Create initial date/time values from selectedDate if provided using dayjs
+      let updatedStartDate = prev => prev.startDate;
+      let updatedEndDate = prev => prev.endDate;
+      
+      if (selectedDate) {
+        updatedStartDate = dayjs(selectedDate);
+        updatedEndDate = dayjs(selectedDate).add(2, 'hour');
+      }
+      
+      setEventData(prev => ({
+        ...prev,
+        startDate: selectedDate ? updatedStartDate : prev.startDate,
+        endDate: selectedDate ? updatedEndDate : prev.endDate,
+        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
+        // Keep old fields for backward compatibility
+        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+        // Reset venue selection when location changes to avoid invalid selections
+        venueId: '',
+        venueName: '',
+        locationID: ''
+      }));
+
+      // Log current location for debugging
+      console.log('Current location for event creation:', {
+        region: selectedLocation.region,
+        division: selectedLocation.division,
+        city: selectedLocation.city
+      });
+    }
+  }, [open, selectedLocation, nearestCity, selectedDate]);
+
+  const [saveError, setSaveError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Import event operations hook
+  const { createEvent } = useEventOperations();
 
   const handleSave = async () => {
-    //console.log('Saving event data:', eventData);
-    // Save logic for the event data
+    try {
+      setSaving(true);
+      setSaveError(null);
+      
+      // Check if user is authenticated
+      if (!user) {
+        throw new Error('You must be logged in to create events');
+      }
+      
+      // Validate required fields
+      if (!eventData.title) {
+        throw new Error('Event title is required');
+      }
+      
+      if (!eventData.masteredRegionName) {
+        throw new Error('Region is required');
+      }
+      
+      // Check if user has the RegionalOrganizer role and organizerId
+      if (!user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+        // Try to get the user's roles
+        const userRoles = user.backendInfo?.roleIds || [];
+        const hasRoleButNoOrganizer = userRoles.some(role => 
+          (typeof role === 'string' && role === 'RegionalOrganizer') ||
+          (typeof role === 'object' && role.roleName === 'RegionalOrganizer')
+        );
+        
+        if (hasRoleButNoOrganizer) {
+          throw new Error('You have the RegionalOrganizer role but no organizer profile. Please contact an administrator.');
+        } else {
+          throw new Error('You need the RegionalOrganizer role to create events. Please apply to become an organizer.');
+        }
+      }
+      
+      // Check if the user's organizerInfo flags are all enabled
+      const orgInfo = user.backendInfo.regionalOrganizerInfo;
+      const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
+      
+      if (!allFlagsEnabled) {
+        console.warn('Attempting to fix regionalOrganizerInfo flags...');
+        
+        // Try to automatically fix the flags first
+        try {
+          // Get fresh token for authorization
+          const token = await getIdToken(true);
+          
+          // Call API to activate the organizer flags
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
+            { firebaseUserId: user.uid },
+            { 
+              headers: { Authorization: `Bearer ${token}` },
+              params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID }
+            }
+          );
+          
+          console.log('Organizer flags updated:', response.data);
+          
+          // Update the user's info with the updated flags
+          if (response.data.regionalOrganizerInfo) {
+            // Update the flags in the local user context state
+            const updatedUser = {
+              ...user,
+              backendInfo: {
+                ...user.backendInfo,
+                regionalOrganizerInfo: {
+                  ...user.backendInfo.regionalOrganizerInfo,
+                  isActive: true,
+                  isEnabled: true,
+                  isApproved: true
+                }
+              }
+            };
+            
+            // Force a refresh of the user data from backend
+            try {
+              const refreshedUserResponse = await axios.get(
+                `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                }
+              );
+              
+              console.log('User data refreshed after flag update');
+              
+              // Try to continue with event creation now that flags are activated
+              // No longer need to throw error as flags are now fixed
+            } catch (refreshError) {
+              console.warn('Failed to refresh user data after updating flags:', refreshError);
+            }
+          }
+        } catch (flagsError) {
+          console.error('Failed to update organizer flags:', flagsError);
+          throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
+        }
+      }
+      
+      // Apply defaults for optional fields
+      const eventDataWithDefaults = {
+        ...eventData,
+        masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'), 
+        categoryFirst: eventData.categoryFirst || 'Other',
+        description: eventData.description || ''
+      };
+      
+      // Update the event data with defaults
+      setEventData(eventDataWithDefaults);
+      
+      // Try to refresh the auth token before saving
+      try {
+        console.log('Refreshing auth token before saving event...');
+        await getIdToken(true); // Force token refresh
+      } catch (tokenError) {
+        console.warn('Could not refresh token, but will continue with existing token:', tokenError);
+      }
+      
+      console.log('Saving event data:', eventDataWithDefaults);
+      
+      // Call the create event function from the hook with defaults
+      await createEvent(eventDataWithDefaults);
+      
+      // Close the modal on successful save
+      onClose();
+    } catch (error) {
+      console.error('Error saving event:', error);
+      setSaveError(error.message || 'Error saving event');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -72,30 +264,52 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" flexWrap="wrap">
           <Typography variant="h5" component="h2">
-            {`Create Event in: ${selectedRegion || 'Unknown Region'}`}
+            Create Event
           </Typography>
           <FormControlLabel
-            control={
-              <Switch
-                checked={eventData.isRepeating}
-                onChange={handleToggleRepeating}
-                color="primary"
-              />
-            }
+            control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" />}
             label="Repeating"
             labelPlacement="start"
           />
         </Box>
 
+        {/* Display Current Location Hierarchy */}
+        <Box sx={{ my: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Chip 
+            label={`Region: ${eventData.masteredRegionName || 'Not selected'}`} 
+            color="primary" 
+            variant={eventData.masteredDivisionName ? "outlined" : "filled"}
+            size="small"
+          />
+          {eventData.masteredDivisionName && (
+            <Chip 
+              label={`Division: ${eventData.masteredDivisionName}`} 
+              color="primary" 
+              variant={eventData.masteredCityName ? "outlined" : "filled"}
+              size="small"
+            />
+          )}
+          {eventData.masteredCityName && (
+            <Chip 
+              label={`City: ${eventData.masteredCityName}`} 
+              color="primary" 
+              variant="filled"
+              size="small"
+            />
+          )}
+        </Box>
+
+        {/* Error message */}
+        {saveError && (
+          <Alert severity="error" sx={{ my: 1 }}>
+            {saveError}
+          </Alert>
+        )}
+
         {/* Tabs for different sections */}
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="event details tabs"
-          sx={{ mb: 2 }}
-        >
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="event details tabs" sx={{ mb: 2 }}>
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
           <Tab label="Other" value="other" />
@@ -103,34 +317,22 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
         </Tabs>
 
         {/* Render tab content conditionally */}
-        {currentTab === 'basic' && (
-          <CreateEventDetailsBasic
-            eventData={eventData}
-            setEventData={setEventData}
-          />
-        )}
-        {currentTab === 'image' && (
-          <CreateEventDetailsImage
-            eventData={eventData}
-            setEventData={setEventData}
-          />
-        )}
-        {currentTab === 'other' && (
-          <CreateEventDetailsOther
-            eventData={eventData}
-            setEventData={setEventData}
-          />
-        )}
+        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={setEventData} />}
+        {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={setEventData} />}
+        {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={setEventData} />}
         {currentTab === 'repeating' && (
-          <CreateEventDetailsRepeating
-            eventData={eventData}
-            setEventData={setEventData}
-          />
+          <CreateEventDetailsRepeating eventData={eventData} setEventData={setEventData} />
         )}
 
         <Box mt={2} display="flex" justifyContent="space-between">
-          <Button onClick={handleSave} variant="contained" color="primary">
-            Save Event
+          <Button 
+            onClick={handleSave} 
+            variant="contained" 
+            color="primary"
+            disabled={saving}
+            startIcon={saving && <CircularProgress size={20} />}
+          >
+            {saving ? 'Saving...' : 'Save Event'}
           </Button>
           <Button onClick={onClose} variant="outlined" color="secondary">
             Close
@@ -145,6 +347,7 @@ CreateEventModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   selectedDate: PropTypes.instanceOf(Date),
+  // selectedRegion prop removed - now using GeoLocationContext
 };
 
 export default CreateEventModal;

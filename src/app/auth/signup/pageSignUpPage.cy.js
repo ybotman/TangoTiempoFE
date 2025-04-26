@@ -1,3 +1,5 @@
+//@/auth/signup/pageSignUpPage.cy.js
+
 /* global describe, it, cy */
 
 import React from 'react';

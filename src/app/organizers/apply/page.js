@@ -28,28 +28,11 @@ const OrganizerApplyPage = () => {
       <h1>Apply as an Organizer</h1>
       <form onSubmit={handleSubmit}>
         <label>Name:</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+        <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         <label>Email:</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
         <label>Description:</label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-        />
+        <textarea name="description" value={formData.description} onChange={handleChange} required />
         <button type="submit">Submit Application</button>
       </form>
     </div>

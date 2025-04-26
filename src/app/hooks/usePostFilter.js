@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-export const usePostFilter = (
-  events,
-  categories,
-  selectedOrganizers = [],
-  selectedTags = []
-) => {
+export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = []) => {
   const [activeCategories, setActiveCategories] = useState([]);
 
   // Initialize activeCategories with all categories when categories change
@@ -34,21 +29,21 @@ export const usePostFilter = (
   const filteredEvents = useMemo(() => {
     if (!Array.isArray(events)) return [];
 
+    // Log filtering information for debugging
+    console.log(`Filtering ${events.length} events with ${activeCategories?.length || 0} active categories`);
+
     // Ensure selectedOrganizers and selectedTags are arrays
-    const organizers = Array.isArray(selectedOrganizers)
-      ? selectedOrganizers
-      : [];
+    const organizers = Array.isArray(selectedOrganizers) ? selectedOrganizers : [];
     const tags = Array.isArray(selectedTags) ? selectedTags : [];
 
     // Apply filters only if there are values present
-    return events.filter((event) => {
-      const {
-        categoryFirst,
-        categorySecond,
-        categoryThird,
-        organizerId,
-        tags: eventTags,
-      } = event.extendedProps || {};
+    const filtered = events.filter((event) => {
+      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags, isActive } = event.extendedProps || {};
+
+      // First ensure the event is active
+      if (isActive === false) {
+        return false;
+      }
 
       // Category filter
       const matchesCategory =
@@ -59,18 +54,16 @@ export const usePostFilter = (
         activeCategories.includes(categoryThird);
 
       // Organizer filter
-      const matchesOrganizer =
-        organizers.length === 0 ||
-        organizerId === undefined ||
-        organizers.includes(organizerId);
+      const matchesOrganizer = organizers.length === 0 || organizerId === undefined || organizers.includes(organizerId);
 
       // Tags filter
-      const matchesTags =
-        tags.length === 0 ||
-        (eventTags && tags.some((tag) => eventTags.includes(tag)));
+      const matchesTags = tags.length === 0 || (eventTags && tags.some((tag) => eventTags.includes(tag)));
 
       return matchesCategory && matchesOrganizer && matchesTags;
     });
+
+    console.log(`Filtered down to ${filtered.length} events after applying filters`);
+    return filtered;
   }, [events, activeCategories, selectedOrganizers, selectedTags]);
 
   return {

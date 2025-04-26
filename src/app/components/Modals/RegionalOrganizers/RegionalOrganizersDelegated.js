@@ -1,32 +1,19 @@
+// @/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
 
-const RegionalOrganizersDelegated = ({
-  organizerId,
-  delegatedOrganizerIds,
-  organizers = [],
-  updateOrganizer,
-}) => {
+const RegionalOrganizersDelegated = ({ organizerId, delegatedOrganizerIds, organizers = [], updateOrganizer }) => {
   const [delegatedOrganizers, setDelegatedOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrganizerId, setSelectedOrganizerId] = useState('');
 
   const fetchOrganizerById = async (organizerId) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching organizer:', error);
@@ -72,7 +59,9 @@ const RegionalOrganizersDelegated = ({
   const handleAddDelegatedOrganizer = async () => {
     const updatedDelegatedIds = [...delegatedOrganizerIds, selectedOrganizerId];
     try {
-      await updateOrganizer(organizerId, { delegatedOrganizerIds: updatedDelegatedIds });
+      await updateOrganizer(organizerId, {
+        delegatedOrganizerIds: updatedDelegatedIds,
+      });
       setSelectedOrganizerId('');
     } catch (error) {
       console.error('Error adding delegated organizer:', error);
@@ -82,7 +71,9 @@ const RegionalOrganizersDelegated = ({
   const handleRemoveDelegatedOrganizer = async (idToRemove) => {
     const updatedDelegatedIds = delegatedOrganizerIds.filter((id) => id !== idToRemove);
     try {
-      await updateOrganizer(organizerId, { delegatedOrganizerIds: updatedDelegatedIds });
+      await updateOrganizer(organizerId, {
+        delegatedOrganizerIds: updatedDelegatedIds,
+      });
     } catch (error) {
       console.error('Error removing delegated organizer:', error);
     }
@@ -97,28 +88,16 @@ const RegionalOrganizersDelegated = ({
       ) : delegatedOrganizers.length > 0 ? (
         delegatedOrganizers.map((org, index) =>
           org ? (
-            <Box
-              key={org._id || index}
-              display="flex"
-              alignItems="center"
-              gap={1}
-              mt={2}
-            >
-              <Box display="flex" flexDirection="column">
+            <Box key={org._id || index} display="flex" alignItems="center" gap={1} mt={2} flexWrap="wrap">
+              <Box flexGrow={1}>
                 <Typography variant="body1">
-                  <strong>Full Name:</strong>{' '}
-                  {org.fullName || org.name || 'No Full Name Available'}
+                  <strong>Full Name:</strong> {org.fullName || 'No Full Name Available'}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Short Name:</strong>{' '}
-                  {org.shortName || 'No Short Name Available'}
+                  <strong>Short Name:</strong> {org.shortName || 'No Short Name Available'}
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => handleRemoveDelegatedOrganizer(org._id)}
-              >
+              <Button variant="contained" color="secondary" onClick={() => handleRemoveDelegatedOrganizer(org._id)}>
                 Remove
               </Button>
             </Box>
@@ -133,8 +112,8 @@ const RegionalOrganizersDelegated = ({
       )}
 
       {/* UI for adding a delegated organizer */}
-      <Box display="flex" gap={2} mt={3} alignItems="center">
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+      <Box display="flex" gap={2} mt={3} alignItems="center" flexWrap="wrap">
+        <FormControl variant="outlined" sx={{ minWidth: 200, flexGrow: 1 }}>
           <InputLabel id="select-organizer-label">Select Organizer</InputLabel>
           <Select
             labelId="select-organizer-label"
@@ -144,7 +123,7 @@ const RegionalOrganizersDelegated = ({
           >
             {availableOrganizers.map((org) => (
               <MenuItem key={org._id} value={org._id}>
-                {org.fullName || org.name}
+                {org.fullName}
               </MenuItem>
             ))}
           </Select>

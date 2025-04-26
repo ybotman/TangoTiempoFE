@@ -18,12 +18,11 @@ export const useUserLogins = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userResponse, roleResponse, organizerResponse] =
-          await Promise.all([
-            axios.get(`${apiBaseUrl}/api/userlogins/all`),
-            axios.get(`${apiBaseUrl}/api/roles`),
-            axios.get(`${apiBaseUrl}/api/organizers`),
-          ]);
+        const [userResponse, roleResponse, organizerResponse] = await Promise.all([
+          axios.get(`${apiBaseUrl}/api/userlogins/all`),
+          axios.get(`${apiBaseUrl}/api/roles`),
+          axios.get(`${apiBaseUrl}/api/organizers`),
+        ]);
 
         const userLoginsData = userResponse.data.map((user) => ({
           ...user,
@@ -45,16 +44,10 @@ export const useUserLogins = () => {
   const toggleRole = useCallback(
     (user, roleId) => {
       const isRoleAssigned = user.roleIds.includes(roleId);
-      const updatedRoleIds = isRoleAssigned
-        ? user.roleIds.filter((id) => id !== roleId)
-        : [...user.roleIds, roleId];
+      const updatedRoleIds = isRoleAssigned ? user.roleIds.filter((id) => id !== roleId) : [...user.roleIds, roleId];
 
       setUserLogins((prev) =>
-        prev.map((u) =>
-          u.firebaseUserId === user.firebaseUserId
-            ? { ...u, roleIds: updatedRoleIds }
-            : u
-        )
+        prev.map((u) => (u.firebaseUserId === user.firebaseUserId ? { ...u, roleIds: updatedRoleIds } : u))
       );
     },
     [userLogins]
@@ -64,9 +57,7 @@ export const useUserLogins = () => {
     (user, field, value) => {
       setUserLogins((prev) =>
         prev.map((u) =>
-          u.firebaseUserId === user.firebaseUserId
-            ? { ...u, localUserInfo: { ...u.localUserInfo, [field]: value } }
-            : u
+          u.firebaseUserId === user.firebaseUserId ? { ...u, localUserInfo: { ...u.localUserInfo, [field]: value } } : u
         )
       );
     },
@@ -153,14 +144,10 @@ export const useUserLogins = () => {
     return (
       user.localUserInfo.firstName !== originalData.localUserInfo.firstName ||
       user.localUserInfo.lastName !== originalData.localUserInfo.lastName ||
-      user.localUserInfo.loginUserName !==
-        originalData.localUserInfo.loginUserName ||
-      JSON.stringify(user.roleIds.sort()) !==
-        JSON.stringify(originalData.roleIds.sort()) ||
-      user.regionalOrganizerInfo.organizerId !==
-        originalData.regionalOrganizerInfo.organizerId ||
-      user.regionalOrganizerInfo.isApproved !==
-        originalData.regionalOrganizerInfo.isApproved
+      user.localUserInfo.loginUserName !== originalData.localUserInfo.loginUserName ||
+      JSON.stringify(user.roleIds.sort()) !== JSON.stringify(originalData.roleIds.sort()) ||
+      user.regionalOrganizerInfo.organizerId !== originalData.regionalOrganizerInfo.organizerId ||
+      user.regionalOrganizerInfo.isApproved !== originalData.regionalOrganizerInfo.isApproved
     );
   };
 
@@ -173,12 +160,9 @@ export const useUserLogins = () => {
         loginUserName: user.localUserInfo.loginUserName,
       });
 
-      await axios.put(
-        `${apiBaseUrl}/api/userlogins/${user.firebaseUserId}/roles`,
-        {
-          roleIds: user.roleIds,
-        }
-      );
+      await axios.put(`${apiBaseUrl}/api/userlogins/${user.firebaseUserId}/roles`, {
+        roleIds: user.roleIds,
+      });
 
       toggleEditMode(user.firebaseUserId);
     } catch (error) {

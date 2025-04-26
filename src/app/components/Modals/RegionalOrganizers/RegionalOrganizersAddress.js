@@ -1,54 +1,35 @@
-// src/components/Modals/RegionalOrganizers/RegionalOrganizersAddress.js
-
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  TextField,
-  Switch,
-  FormControlLabel,
-  Button,
-  Box,
-} from '@mui/material';
+import { TextField, Switch, FormControlLabel, Button, Box, Typography, Tooltip, IconButton } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 
-const RegionalOrganizersAddress = ({
-  organizerId,
-  organizer,
-  updateOrganizer,
-}) => {
+const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) => {
   const publicContactInfo = organizer?.publicContactInfo || {};
   const address = publicContactInfo.address || {};
 
-  // Corrected `useState` initializations
   const [phone, setPhone] = useState(publicContactInfo.phone || '');
   const [Email, setEmail] = useState(publicContactInfo.Email || '');
-  const [street1, setStreet1] = useState(
-    publicContactInfo.address?.street1 || ''
-  );
-  const [street2, setStreet2] = useState(
-    publicContactInfo.address?.street2 || ''
-  );
-  const [city, setCity] = useState(publicContactInfo.address?.city || '');
-  const [state, setState] = useState(publicContactInfo.address?.state || '');
-  const [zip, setZip] = useState(publicContactInfo.address?.postalCode || '');
-  const [isSearchable, setIsSearchable] = useState(
-    organizer?.wantRender || false
-  );
+  const [street1, setStreet1] = useState(address.street1 || '');
+  const [street2, setStreet2] = useState(address.street2 || '');
+  const [city, setCity] = useState(address.city || '');
+  const [state, setState] = useState(address.state || '');
+  const [zip, setZip] = useState(address.postalCode || '');
+  const [isSearchable, setIsSearchable] = useState(organizer?.wantRender || false);
 
-  // Update state when organizer prop changes
   useEffect(() => {
     const publicContactInfo = organizer?.publicContactInfo || {};
+    const address = publicContactInfo.address || {};
 
     setPhone(publicContactInfo.phone || '');
     setEmail(publicContactInfo.Email || '');
-    setStreet1(publicContactInfo.address?.street1 || '');
-    setStreet2(publicContactInfo.address?.street2 || '');
-    setCity(publicContactInfo.address?.city || '');
-    setState(publicContactInfo.address?.state || '');
-    setZip(publicContactInfo.address?.postalCode || '');
+    setStreet1(address.street1 || '');
+    setStreet2(address.street2 || '');
+    setCity(address.city || '');
+    setState(address.state || '');
+    setZip(address.postalCode || '');
     setIsSearchable(organizer?.wantRender || false);
   }, [organizer]);
 
-  // Determine if save button should be enabled
   const isSaveDisabled =
     phone === (publicContactInfo.phone || '') &&
     Email === (publicContactInfo.Email || '') &&
@@ -59,7 +40,6 @@ const RegionalOrganizersAddress = ({
     zip === (address.postalCode || '') &&
     isSearchable === (organizer?.wantRender || false);
 
-  // Handle save action
   const handleSave = async () => {
     const updateData = {
       publicContactInfo: {
@@ -77,7 +57,7 @@ const RegionalOrganizersAddress = ({
     };
     try {
       await updateOrganizer(organizerId, updateData);
-      console.log('Address updated successfully.');
+      //console.log('Address updated successfully.');
     } catch (error) {
       console.error('Failed to update address:', error);
     }
@@ -85,83 +65,35 @@ const RegionalOrganizersAddress = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      {/* Line 1: Phone and Email */}
-      <Box display="flex" gap={2} mb={2}>
-        <TextField
-          label="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Email"
-          value={Email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-        />
-      </Box>
-
-      {/* Line 2: Address Fields (Street 1 and Street 2) */}
-      <Box display="flex" gap={2} mb={2}>
-        <TextField
-          label="Street 1"
-          value={street1}
-          onChange={(e) => setStreet1(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Street 2"
-          value={street2}
-          onChange={(e) => setStreet2(e.target.value)}
-          fullWidth
-        />
-      </Box>
-
-      {/* Line 3: City, State, Zip */}
-      <Box display="flex" gap={2} mb={2}>
-        <TextField
-          label="City"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="State"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Zip"
-          value={zip}
-          onChange={(e) => setZip(e.target.value)}
-          fullWidth
-        />
+      <Typography variant="h6" gutterBottom>
+        Public Contact Information
+      </Typography>
+      <Box display="flex" flexDirection="column" gap={2}>
+        <TextField label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
+        <TextField label="Email" value={Email} onChange={(e) => setEmail(e.target.value)} fullWidth />
+        <TextField label="Street 1" value={street1} onChange={(e) => setStreet1(e.target.value)} fullWidth />
+        <TextField label="Street 2" value={street2} onChange={(e) => setStreet2(e.target.value)} fullWidth />
+        <TextField label="City" value={city} onChange={(e) => setCity(e.target.value)} fullWidth />
+        <TextField label="State" value={state} onChange={(e) => setState(e.target.value)} fullWidth />
+        <TextField label="Zip" value={zip} onChange={(e) => setZip(e.target.value)} fullWidth />
       </Box>
 
       {/* Toggle and Save Button */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        mb={2}
-      >
-        <FormControlLabel
-          control={
-            <Switch
-              checked={isSearchable}
-              onChange={(e) => setIsSearchable(e.target.checked)}
-              color="primary"
-            />
-          }
-          label="Make Organizer Searchable"
-        />
-        <Button
-          onClick={handleSave}
-          color="primary"
-          variant="contained"
-          disabled={isSaveDisabled}
-        >
+      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
+        <Box display="flex" alignItems="center">
+          <FormControlLabel
+            control={
+              <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
+            }
+            label="Allow Search Engines to Crawl"
+          />
+          <Tooltip title="Your name, phone, primary image, address, and description will be structured for search engines to crawl and display in relevant searches.">
+            <IconButton>
+              <InfoIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+        <Button onClick={handleSave} color="primary" variant="contained" disabled={isSaveDisabled}>
           Save
         </Button>
       </Box>

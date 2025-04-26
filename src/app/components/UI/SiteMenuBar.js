@@ -1,57 +1,39 @@
-// SiteMenuBar.js
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  IconButton,
-  Avatar,
-  Tooltip,
-  Typography,
-  Fade,
-} from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Typography, Snackbar, Alert } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
-import { RegionsContext } from '@/contexts/RegionsContext';
 
-const SiteMenuBar = ({
-  activeCategories,
-  handleCategoryChange,
-  categories,
-}) => {
-  const { selectedRole, user, roles, handleRoleChange, logOut } =
-    useSiteMenuBar();
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => {
+  const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [pulseRegionText, setPulseRegionText] = useState(false);
+  
+  // Snackbar state for role change message
+  const [roleMessageOpen, setRoleMessageOpen] = useState(false);
+  const [selectedRoleName, setSelectedRoleName] = useState('');
 
-  // Access selectedRegion from RegionsContext
-  const { selectedRegion } = useContext(RegionsContext);
+  const showRoleMessage = (roleName) => {
+    setSelectedRoleName(roleName);
+    setRoleMessageOpen(true);
+  };
 
-  // Tooltip toggle for arrow effect if user is not logged in
+  const handleRoleMessageClose = () => {
+    setRoleMessageOpen(false);
+  };
+
   useEffect(() => {
     if (!user) {
       const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
       return () => clearInterval(interval);
     }
   }, [user]);
-
-  // Toggle pulse effect for "Select Region" when no region is selected
-  useEffect(() => {
-    if (!selectedRegion) {
-      const interval = setInterval(
-        () => setPulseRegionText((prev) => !prev),
-        1000
-      );
-      return () => clearInterval(interval);
-    }
-  }, [selectedRegion]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -74,7 +56,7 @@ const SiteMenuBar = ({
         justifyContent: 'space-between',
       }}
     >
-      {/* Left Icons and Region Context */}
+      {/* Left Icons */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
           edge="start"
@@ -84,22 +66,8 @@ const SiteMenuBar = ({
         >
           <MenuIcon />
         </IconButton>
-
-        {/* Region Context Display */}
-        {selectedRegion ? (
-          <Typography variant="body1" sx={{ ml: 2, fontWeight: 'bold' }}>
-            {selectedRegion}
-          </Typography>
-        ) : (
-          <Fade in={pulseRegionText} timeout={800}>
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
-              <ArrowBackIcon sx={{ fontSize: 20, mr: 0.5 }} />
-            </Box>
-          </Fade>
-        )}
       </Box>
 
-      {/* Centered PostFilter */}
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
         <PostFilter
           activeCategories={activeCategories}
@@ -108,25 +76,13 @@ const SiteMenuBar = ({
         />
       </Box>
 
-      {/* Right Icons - User Account with conditional tooltip */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Tooltip
-          title="Login here!"
-          arrow
-          open={!user && showTooltip}
-          placement="left"
-        >
-          <IconButton onClick={() => setUserDrawerOpen(true)}>
-            {renderUserIcon()}
-          </IconButton>
+        <Tooltip title="Login here!" arrow open={!user && showTooltip} placement="left">
+          <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
       </Box>
 
-      {/* Side Drawers */}
-      <SidebarDrawer
-        open={sidebarDrawerOpen}
-        onClose={() => setSidebarDrawerOpen(false)}
-      />
+      <SidebarDrawer open={sidebarDrawerOpen} onClose={() => setSidebarDrawerOpen(false)} />
       <SiteMenuBarUserDrawer
         userDrawerOpen={userDrawerOpen}
         handleUserDrawerClose={() => setUserDrawerOpen(false)}
@@ -135,7 +91,19 @@ const SiteMenuBar = ({
         selectedRole={selectedRole}
         handleRoleChange={handleRoleChange}
         logOut={logOut}
+        showRoleMessage={showRoleMessage} // Pass showRoleMessage callback
       />
+
+      <Snackbar
+        open={roleMessageOpen}
+        onClose={handleRoleMessageClose}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleRoleMessageClose} severity="info" sx={{ backgroundColor: 'green.300', color: 'black' }}>
+          You have changed role to: {selectedRoleName}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -2,24 +2,27 @@
 
 import { useState, useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
-import { RegionsContext } from '@/contexts/RegionsContext';
 import { RoleContext } from '@/contexts/RoleContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import PropTypes from 'prop-types';
 
 export const useSiteMenuBar = () => {
   const { user, logOut, setSelectedRole } = useContext(AuthContext);
-  const {
-    selectedRegion,
-    setSelectedRegion,
-    setSelectedRegionID,
-    selectedDivision,
-    setSelectedDivision,
-    selectedCity,
-    setSelectedCity,
-    regions,
-  } = useContext(RegionsContext);
-
   const { roles, selectedRole } = useContext(RoleContext);
+  
+  // Use GeoLocationContext instead of RegionsContext
+  const { 
+    selectedLocation,
+    selectLocation
+  } = useGeoLocation();
+  
+  // Map values from GeoLocationContext to match the old RegionsContext interface
+  const selectedRegion = selectedLocation.region.name;
+  const selectedDivision = selectedLocation.division.name;
+  const selectedCity = selectedLocation.city.name;
+  
+  // We'll fetch regions elsewhere if needed
+  const regions = [];
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [FAQModalOpen, setFAQModalOpen] = useState(false);
@@ -49,23 +52,44 @@ export const useSiteMenuBar = () => {
 
   const handleRegionChange = (event) => {
     const selectedRegionName = event.target.value;
-    const selectedRegionData = regions.find(
-      (region) => region.regionName === selectedRegionName
-    );
-
-    setSelectedRegion(selectedRegionName);
-    setSelectedRegionID(selectedRegionData ? selectedRegionData._id : '');
-    setSelectedDivision('');
-    setSelectedCity('');
+    
+    // Update GeoLocationContext with the new region
+    selectLocation({
+      ...selectedLocation,
+      region: { 
+        ...selectedLocation.region,
+        name: selectedRegionName 
+      },
+      division: { id: null, name: '' },
+      city: { id: null, name: '', latitude: null, longitude: null }
+    });
   };
 
   const handleDivisionChange = (event) => {
-    setSelectedDivision(event.target.value);
-    setSelectedCity('');
+    const selectedDivisionName = event.target.value;
+    
+    // Update GeoLocationContext with the new division
+    selectLocation({
+      ...selectedLocation,
+      division: { 
+        ...selectedLocation.division,
+        name: selectedDivisionName 
+      },
+      city: { id: null, name: '', latitude: null, longitude: null }
+    });
   };
 
   const handleCityChange = (event) => {
-    setSelectedCity(event.target.value);
+    const selectedCityName = event.target.value;
+    
+    // Update GeoLocationContext with the new city
+    selectLocation({
+      ...selectedLocation,
+      city: { 
+        ...selectedLocation.city,
+        name: selectedCityName 
+      }
+    });
   };
 
   const openFAQModal = () => setFAQModalOpen(true);

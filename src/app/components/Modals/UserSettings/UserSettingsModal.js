@@ -5,10 +5,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
-import UserSettingsEvents from '@/components/Modals/UserSettings/UserSettingsEvents';
-import UserSettingsOrganizers from '@/components/Modals/UserSettings/UserSettingsOrganizers';
+import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
 import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
-import UserSettingsOther from '@/components/Modals/UserSettings/UserSettingsOther';
+import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 
@@ -26,16 +25,13 @@ const modalStyle = {
 
 const UserSettingsModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
-  const { user } = auth || {}; // Destructure user only if auth is defined
+  const { user } = auth || {};
   const { userData, loading, error, updateUserData } = useUsers();
-  const [currentTab, setCurrentTab] = useState('name'); // Manage active tab state
+  const [currentTab, setCurrentTab] = useState('name');
 
-  // Log state if user is missing
   useEffect(() => {
     if (!user) {
-      console.log(
-        'User is not authenticated or AuthContext is not initialized yet.'
-      );
+      console.log('User is not authenticated or AuthContext is not initialized yet.');
     }
   }, [user]);
 
@@ -49,17 +45,11 @@ const UserSettingsModal = ({ open, onClose }) => {
         </Typography>
 
         {/* Tab Navigation */}
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="User Settings Tabs"
-          variant="scrollable"
-        >
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="User Settings Tabs" variant="scrollable">
           <Tab label="Name" value="name" />
-          <Tab label="Events" value="events" />
-          <Tab label="Organizer" value="organizer" />
+          <Tab label="Favs" value="favorites" />
           <Tab label="Notifications" value="notifications" />
-          <Tab label="Other" value="other" />
+          <Tab label="Apply" value="apply" />
         </Tabs>
 
         {/* Content Based on Selected Tab */}
@@ -69,25 +59,14 @@ const UserSettingsModal = ({ open, onClose }) => {
           <Typography color="error">Error loading user data</Typography>
         ) : (
           <>
-            {currentTab === 'name' && (
-              <UserSettingsName
-                firstName={userData?.localUserInfo?.firstName || ''}
-                lastName={userData?.localUserInfo?.lastName || ''}
-                updateUserData={updateUserData}
-              />
-            )}
-            {currentTab === 'events' && (
-              <UserSettingsEvents userData={userData} />
-            )}
-            {currentTab === 'organizer' && (
-              <UserSettingsOrganizers userData={userData} />
+            {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
+            {currentTab === 'favorites' && (
+              <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
             )}
             {currentTab === 'notifications' && (
-              <UserSettingsNotifications userData={userData} />
+              <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
             )}
-            {currentTab === 'other' && (
-              <UserSettingsOther userData={userData} />
-            )}
+            {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
           </>
         )}
 
