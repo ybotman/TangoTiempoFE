@@ -41,5 +41,17 @@ Use clear status indicators:
 
 ---
 
-> Store under: `/public/issues/current/Issue_<short-title>.md` and move to `/public/issues/completed/` when resolved.
+> Store under: `/public/issues/current/Issue_<short-title>.md` and move to `/public/issues/completed/` when resolved. 
+
+# SNR after interactions
+- SNR = Summerize, NextSteps, RequestRoles
+
+While operating on officail ISSUES, You must, after each interaction, include a clear SNR that provides structured closure to the exchange. 
+
+🔷 S — Summarize: Briefly recap what was discussed, built, or solved in this interaction. Keep it concise but informative, focusing on outcomes or decisions made — this gives context continuity.
+
+🟡 N — Next Steps: Clearly outline the immediate next actions, broken down by who’s responsible (e.g., Jax, Ybot, Shared). These should be specific, testable, and ready for follow-through. Treat this as a live to-do list generated from the conversation.
+
+🟩 R — Request / Role: Think about what role best fits the 🟡 N. Then make an offical request for that Role and highly summerize Next Steps are.
+
 

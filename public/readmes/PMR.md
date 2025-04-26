@@ -202,7 +202,7 @@ Phase-specific clarifications, side decisions, or extra context.
 ---
 While operating in and on PMRs, it is Very Important to control the interctions:
 
-You must, after each interaction, include a clear SNR block that provides structured closure to the exchange. This includes "PMR:" and :
+You must, after each interaction, include a clear SNR block that provides structured closure to the exchange. 
 
 🔷 S — Summarize: Briefly recap what was discussed, built, or solved in this interaction. Keep it concise but informative, focusing on outcomes or decisions made — this gives context continuity.
 
