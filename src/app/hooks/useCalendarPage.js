@@ -39,13 +39,15 @@ export const useCalendarPage = () => {
   const divisionName = (selectedLocation.division.name || nearestCity?.divisionName || '').trim();
   const cityName = (selectedLocation.city.name || nearestCity?.cityName || '').trim();
 
-  const { events, loading: eventsLoading, error: eventsError, refreshEvents } = useEvents(
-    regionName, 
-    divisionName, 
-    cityName, 
-    datesSet?.start, 
-    datesSet?.end
-  );
+  // Use the updated useEvents hook implementation that accepts an options object
+  const { events, loading: eventsLoading, error: eventsError, refreshEvents } = useEvents({
+    region: regionName, 
+    division: divisionName, 
+    city: cityName, 
+    startDate: datesSet?.start, 
+    endDate: datesSet?.end,
+    limit: 200 // Increase the limit to ensure we get all events
+  });
   
   // Initialize event operations
   const { getEventById } = useEventOperations();
