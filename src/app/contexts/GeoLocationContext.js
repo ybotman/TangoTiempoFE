@@ -30,6 +30,13 @@ export const GeoLocationProvider = ({ children }) => {
   const regionsContext = RegionsContext ? useContext(RegionsContext) : null;
   const { latitude, longitude, loading: geoLoading, error: geoError } = useGeoLocations();
 
+  console.log('GeoLocationProvider: Initializing with location data', {
+    hasNearestCity: !!nearestCity,
+    nearestCityName: nearestCity?.cityName,
+    latitude,
+    longitude
+  });
+
   // State for the new unified geo location context
   const [userLocation, setUserLocation] = useState({
     latitude: null,
@@ -80,9 +87,21 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Initialize selected location from the MasteredLocationContext
   useEffect(() => {
+    console.log('GeoLocationContext: Checking for nearestCity update', { 
+      hasNearestCity: !!nearestCity, 
+      nearestCityName: nearestCity?.cityName,
+      hasRegionId: !!selectedLocation.region.id
+    });
+    
     if (nearestCity) {
       // Update from nearest city if we don't have a selection yet
       if (!selectedLocation.region.id) {
+        console.log('GeoLocationContext: Setting location from nearestCity', {
+          city: nearestCity.cityName,
+          division: nearestCity.divisionName,
+          region: nearestCity.regionName
+        });
+        
         setSelectedLocation({
           country: { 
             id: nearestCity.countryID, 
@@ -103,7 +122,11 @@ export const GeoLocationProvider = ({ children }) => {
             longitude: nearestCity.longitude
           }
         });
+      } else {
+        console.log('GeoLocationContext: Already have a region selected, not updating from nearestCity');
       }
+    } else {
+      console.log('GeoLocationContext: No nearestCity available yet');
     }
   }, [nearestCity, selectedLocation.region.id]);
 
@@ -112,6 +135,7 @@ export const GeoLocationProvider = ({ children }) => {
   useEffect(() => {
     // Skip sync if RegionsContext isn't present or if data isn't available
     if (!regionsContext || !regionsContext.selectedRegion) {
+      console.log('GeoLocationContext: RegionsContext not available or missing selectedRegion');
       return;
     }
     
@@ -119,6 +143,13 @@ export const GeoLocationProvider = ({ children }) => {
       "RegionsContext is deprecated and will be removed in a future version. " +
       "Please migrate to GeoLocationContext for all location operations."
     );
+    
+    console.log('GeoLocationContext: Syncing from RegionsContext', {
+      region: regionsContext.selectedRegion,
+      regionId: regionsContext.selectedRegionID,
+      division: regionsContext.selectedDivision,
+      city: regionsContext.selectedCity
+    });
     
     if (regionsContext.selectedRegion && regionsContext.selectedRegionID) {
       setSelectedLocation(prev => ({
@@ -216,6 +247,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Function to refresh the user's geolocation (IP-based only, no browser permissions)
   const refreshUserLocation = useCallback(async () => {
+    console.log('GeoLocationContext: Refreshing user location');
     setLoadingState(prev => ({ ...prev, userLocation: true }));
     
     // Add cache/session storage to reduce API calls to ipapi.co (which has strict rate limits)
@@ -228,6 +260,7 @@ export const GeoLocationProvider = ({ children }) => {
       try {
         cachedLocation = sessionStorage.getItem('userGeoLocation');
         cacheTimestamp = sessionStorage.getItem('userGeoLocationTimestamp');
+        console.log('GeoLocationContext: Checking cached location', { hasCachedLocation: !!cachedLocation });
       } catch (err) {
         console.error('Error accessing sessionStorage:', err);
         // Silently fail if sessionStorage is not available
@@ -248,7 +281,7 @@ export const GeoLocationProvider = ({ children }) => {
               parsedLocation.latitude && 
               parsedLocation.longitude) {
             
-            console.log('Using cached geo location data');
+            console.log('GeoLocationContext: Using cached geo location data', parsedLocation);
             
             setUserLocation({
               latitude: parsedLocation.latitude,
@@ -260,12 +293,20 @@ export const GeoLocationProvider = ({ children }) => {
             
             // Update the nearest city based on cached coordinates
             if (fetchNearestCity) {
+              console.log('GeoLocationContext: Fetching nearest city from cache', {
+                lat: parsedLocation.latitude,
+                lng: parsedLocation.longitude
+              });
               fetchNearestCity(parsedLocation.latitude, parsedLocation.longitude);
+            } else {
+              console.warn('GeoLocationContext: fetchNearestCity function not available');
             }
             
             setErrorState(prev => ({ ...prev, userLocation: null }));
             setLoadingState(prev => ({ ...prev, userLocation: false }));
             return;
+          } else {
+            console.log('GeoLocationContext: Cached location expired or invalid');
           }
         } catch (parseError) {
           console.error('Error parsing cached location:', parseError);
@@ -275,6 +316,7 @@ export const GeoLocationProvider = ({ children }) => {
       
       // If no valid cache, make API request with error handling for rate limits
       try {
+        console.log('GeoLocationContext: Fetching location from API');
         // Use the backend proxy to avoid CORS issues
         const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
         const { data } = await axios.get(`${baseURL}/api/firebase/geo/ip`, {
@@ -284,15 +326,24 @@ export const GeoLocationProvider = ({ children }) => {
           }
         });
         
+        console.log('GeoLocationContext: API response received', { 
+          hasData: !!data,
+          hasLatitude: data?.latitude !== undefined,
+          hasLongitude: data?.longitude !== undefined
+        });
+        
         if (data && data.latitude && data.longitude) {
           // Cache the location data - only in browser environment
           if (typeof window !== 'undefined') {
             try {
-              sessionStorage.setItem('userGeoLocation', JSON.stringify({
+              const locationData = {
                 latitude: data.latitude,
                 longitude: data.longitude
-              }));
+              };
+              
+              sessionStorage.setItem('userGeoLocation', JSON.stringify(locationData));
               sessionStorage.setItem('userGeoLocationTimestamp', Date.now().toString());
+              console.log('GeoLocationContext: Location cached successfully');
             } catch (storageError) {
               console.error('Error saving to sessionStorage:', storageError);
               // Continue even if storage fails
@@ -309,18 +360,26 @@ export const GeoLocationProvider = ({ children }) => {
           
           // Update the nearest city based on these coordinates
           if (fetchNearestCity) {
+            console.log('GeoLocationContext: Fetching nearest city from API response', {
+              lat: data.latitude,
+              lng: data.longitude
+            });
             fetchNearestCity(data.latitude, data.longitude);
             
             // We'll rely on the useEffect watching nearestCity to reset the location
             // This avoids the circular dependency with resetToNearestLocation
+          } else {
+            console.warn('GeoLocationContext: fetchNearestCity function not available');
           }
         } else {
+          console.error('GeoLocationContext: Invalid API response format', data);
           throw new Error('Unable to retrieve latitude/longitude from IP service');
         }
       } catch (error) {
-        console.error('ipapi.co API error:', error);
+        console.error('GeoLocationContext: API error fetching location:', error);
         
         if (error.response && error.response.status === 429) {
+          console.warn('GeoLocationContext: Rate limit exceeded, using fallback location');
           setErrorState(prev => ({ 
             ...prev, 
             userLocation: 'Rate limit exceeded for location service. Please try again later.' 
@@ -329,13 +388,24 @@ export const GeoLocationProvider = ({ children }) => {
           // Fall back to a default location or previously stored location if available
           if (userLocation.latitude && userLocation.longitude) {
             // We already have a location, so let's use it
+            console.log('GeoLocationContext: Using existing location as fallback', {
+              lat: userLocation.latitude,
+              lng: userLocation.longitude
+            });
+            
             if (fetchNearestCity) {
               fetchNearestCity(userLocation.latitude, userLocation.longitude);
             }
           } else {
-            // Use a default location (US center)
-            const defaultLat = 39.8283;
-            const defaultLng = -98.5795;
+            // Use default locations by region
+            // Northeast region (New York City)
+            const defaultLat = 40.7128;
+            const defaultLng = -74.0060;
+            
+            console.log('GeoLocationContext: Using default NYC location', {
+              lat: defaultLat,
+              lng: defaultLng
+            });
             
             setUserLocation({
               latitude: defaultLat,
@@ -347,27 +417,158 @@ export const GeoLocationProvider = ({ children }) => {
             
             if (fetchNearestCity) {
               fetchNearestCity(defaultLat, defaultLng);
+            } else {
+              console.warn('GeoLocationContext: fetchNearestCity function not available');
+              
+              // Manual fallback for when everything else fails - set Northeast region as default
+              console.log('GeoLocationContext: Using hardcoded Northeast region fallback');
+              setSelectedLocation({
+                country: { 
+                  id: '6751f57e2e74d97609e7dca0', // US country ID
+                  name: 'United States'
+                },
+                region: { 
+                  id: '6751f58a5db435dd8005e45b', // Northeast region ID
+                  name: 'Northeast'
+                },
+                division: { 
+                  id: '6751f58a5db435dd8005e461', // New England division ID
+                  name: 'New England'
+                },
+                city: { 
+                  id: '6751f58a5db435dd8005e479', // Boston city ID
+                  name: 'Boston',
+                  latitude: 42.3601,
+                  longitude: -71.0589
+                }
+              });
             }
           }
         } else {
+          console.error('GeoLocationContext: Other API error', error.message);
           setErrorState(prev => ({ 
             ...prev, 
             userLocation: error.message || 'Failed to get user location' 
           }));
+          
+          // Emergency fallback - Northeast region
+          console.log('GeoLocationContext: Using emergency fallback for Northeast region');
+          setSelectedLocation({
+            country: { 
+              id: '6751f57e2e74d97609e7dca0', // US country ID
+              name: 'United States'
+            },
+            region: { 
+              id: '6751f58a5db435dd8005e45b', // Northeast region ID
+              name: 'Northeast'
+            },
+            division: { 
+              id: '6751f58a5db435dd8005e461', // New England division ID
+              name: 'New England'
+            },
+            city: { 
+              id: '6751f58a5db435dd8005e479', // Boston city ID
+              name: 'Boston',
+              latitude: 42.3601,
+              longitude: -71.0589
+            }
+          });
         }
       }
       
     } catch (error) {
-      console.error('Error in refreshUserLocation:', error);
+      console.error('GeoLocationContext: General error in refreshUserLocation:', error);
       setErrorState(prev => ({ 
         ...prev, 
         userLocation: error.message || 'Failed to get user location' 
       }));
+      
+      // Last resort fallback - Northeast region
+      console.log('GeoLocationContext: Using last resort fallback for Northeast region');
+      setSelectedLocation({
+        country: { 
+          id: '6751f57e2e74d97609e7dca0', // US country ID
+          name: 'United States'
+        },
+        region: { 
+          id: '6751f58a5db435dd8005e45b', // Northeast region ID
+          name: 'Northeast'
+        },
+        division: { 
+          id: '6751f58a5db435dd8005e461', // New England division ID
+          name: 'New England'
+        },
+        city: { 
+          id: '6751f58a5db435dd8005e479', // Boston city ID
+          name: 'Boston',
+          latitude: 42.3601,
+          longitude: -71.0589
+        }
+      });
     } finally {
       setLoadingState(prev => ({ ...prev, userLocation: false }));
     }
-  }, [fetchNearestCity, userLocation]);
+  }, [fetchNearestCity, userLocation, setSelectedLocation]);
 
+  // Add an explicit initialization effect to force location refresh on mount
+  // This will help ensure we always have a city selected
+  useEffect(() => {
+    console.log('GeoLocationContext: Component mounted, initializing location');
+    
+    const initializeLocation = async () => {
+      // Check if we already have a selected location
+      if (selectedLocation.city.id) {
+        console.log('GeoLocationContext: Already have a city selected, skipping initialization', {
+          city: selectedLocation.city.name
+        });
+        return;
+      }
+      
+      // Check if we already have a nearest city from context
+      if (nearestCity) {
+        console.log('GeoLocationContext: Using nearestCity from context for initialization', {
+          city: nearestCity.cityName
+        });
+        return;
+      }
+      
+      // Force a refresh of the user location
+      console.log('GeoLocationContext: No location available, forcing refresh');
+      await refreshUserLocation();
+      
+      // If still no location, use hardcoded fallback as last resort
+      if (!selectedLocation.city.id) {
+        console.log('GeoLocationContext: Initialization failed, using Boston fallback');
+        setSelectedLocation({
+          country: { 
+            id: '6751f57e2e74d97609e7dca0', // US country ID
+            name: 'United States'
+          },
+          region: { 
+            id: '6751f58a5db435dd8005e45b', // Northeast region ID
+            name: 'Northeast'
+          },
+          division: { 
+            id: '6751f58a5db435dd8005e461', // New England division ID
+            name: 'New England'
+          },
+          city: { 
+            id: '6751f58a5db435dd8005e479', // Boston city ID
+            name: 'Boston',
+            latitude: 42.3601,
+            longitude: -71.0589
+          }
+        });
+      }
+    };
+    
+    // Run initialization
+    initializeLocation();
+    
+    // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   // Determine overall loading and error states
   // Only show errors that are critical and would prevent functionality
   const isLoading = loadingState.userLocation || loadingState.locationData || loadingState.nearestCity;
