@@ -54,16 +54,16 @@ A temporary debug menu system accessible from the hamburger menu that provides t
 ## Tasks
 | Status         | Task                                | Last Updated  |
 |----------------|-------------------------------------|---------------|
-| ⏳ Pending      | Create Debug menu structure in hamburger | 2025-04-26 |
-| ⏳ Pending      | Implement AuthProvider debug view  | 2025-04-26 |
-| ⏳ Pending      | Implement RegionsProvider debug view | 2025-04-26 |
-| ⏳ Pending      | Implement RoleProvider debug view   | 2025-04-26 |
-| ⏳ Pending      | Implement MasteredLocationProvider debug view | 2025-04-26 |
-| ⏳ Pending      | Implement GeoLocationProvider debug view | 2025-04-26 |
-| ⏳ Pending      | Add Environment Variables debug view | 2025-04-26 |
-| ⏳ Pending      | Add collapsible JSON display component | 2025-04-26 |
-| ⏳ Pending      | Add context value overriding capabilities | 2025-04-26 |
-| ⏳ Pending      | Add production env detection to hide in prod | 2025-04-26 |
+| ✅ Complete     | Create Debug menu structure in hamburger | 2025-04-26 |
+| ✅ Complete     | Implement AuthProvider debug view  | 2025-04-26 |
+| ✅ Complete     | Implement RegionsProvider debug view | 2025-04-26 |
+| ✅ Complete     | Implement RoleProvider debug view   | 2025-04-26 |
+| ✅ Complete     | Implement MasteredLocationProvider debug view | 2025-04-26 |
+| ✅ Complete     | Implement GeoLocationProvider debug view | 2025-04-26 |
+| ✅ Complete     | Add Environment Variables debug view | 2025-04-26 |
+| ✅ Complete     | Add collapsible JSON display component | 2025-04-26 |
+| ✅ Complete     | Add context value overriding capabilities | 2025-04-26 |
+| ✅ Complete     | Add production env detection to hide in prod | 2025-04-26 |
 | ⏳ Pending      | Add auto-removal date tracking (6 mo post-launch) | 2025-04-26 |
 
 ## Rollback Plan
@@ -94,9 +94,9 @@ Tango Tiempo Dev Team
 | Milestone | Date       |
 |-----------|------------|
 | Created   | 2025-04-26 |
-| First Dev | TBD        |
-| Review    | TBD        |
-| Completed | TBD        |
+| First Dev | 2025-04-26 |
+| Review    | 2025-04-26 |
+| Completed | 2025-04-26 |
 | Removal   | 6 months post-launch |
 
 ---
