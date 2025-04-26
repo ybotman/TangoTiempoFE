@@ -51,9 +51,11 @@ const DebugJsonView = ({ title, data, expandByDefault = false }) => {
   };
 
   // Recursive function to render nested objects
-  const renderObject = (obj, level = 0) => {
+  const renderObject = (obj, level = 0, visitedRefs = new WeakSet()) => {
     const indent = 16 * level;
+    const maxLevel = 5; // Maximum nesting level to prevent stack overflow
 
+    // Handle primitive types
     if (obj === null || obj === undefined) {
       return formatValue(obj);
     }
@@ -62,6 +64,15 @@ const DebugJsonView = ({ title, data, expandByDefault = false }) => {
       return formatValue(obj);
     }
 
+    // Check for circular references and max depth
+    if (visitedRefs.has(obj) || level > maxLevel) {
+      return <span style={{ color: '#999', fontStyle: 'italic' }}>[Circular or Max Depth]</span>;
+    }
+
+    // Add this object to visited set for circular reference detection
+    visitedRefs.add(obj);
+
+    // Handle arrays
     if (Array.isArray(obj)) {
       return (
         <Box>
@@ -70,14 +81,21 @@ const DebugJsonView = ({ title, data, expandByDefault = false }) => {
             <Typography variant="body2" component="span"> ]</Typography>
           ) : (
             <>
-              {obj.map((item, index) => (
+              {obj.slice(0, 100).map((item, index) => ( // Limit to first 100 items
                 <Box key={index} ml={2} display="block">
                   <Typography variant="body2" component="span" sx={{ ml: 2 }}>
-                    {renderObject(item, level + 1)}
-                    {index < obj.length - 1 ? ',' : ''}
+                    {renderObject(item, level + 1, new WeakSet(visitedRefs))}
+                    {index < Math.min(obj.length - 1, 99) ? ',' : ''}
                   </Typography>
                 </Box>
               ))}
+              {obj.length > 100 && (
+                <Box ml={2} display="block">
+                  <Typography variant="body2" component="span" sx={{ ml: 2, fontStyle: 'italic' }}>
+                    ...{obj.length - 100} more items
+                  </Typography>
+                </Box>
+              )}
               <Typography variant="body2" component="span" sx={{ ml: level * 2 }}>]</Typography>
             </>
           )}
@@ -85,30 +103,63 @@ const DebugJsonView = ({ title, data, expandByDefault = false }) => {
       );
     }
 
-    const keys = Object.keys(obj);
-    return (
-      <Box>
-        <Typography variant="body2" component="span">{'{'}</Typography>
-        {keys.length === 0 ? (
-          <Typography variant="body2" component="span"> {'}'}</Typography>
-        ) : (
-          <>
-            {keys.map((key, index) => (
-              <Box key={key} ml={2} display="block">
-                <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
-                  {key}:
-                </Typography>{' '}
-                <Typography variant="body2" component="span">
-                  {renderObject(obj[key], level + 1)}
-                  {index < keys.length - 1 ? ',' : ''}
-                </Typography>
-              </Box>
-            ))}
-            <Typography variant="body2" component="span">{'}'}</Typography>
-          </>
-        )}
-      </Box>
-    );
+    // Handle objects
+    try {
+      const keys = Object.keys(obj).slice(0, 50); // Limit to first 50 keys
+      const totalKeys = Object.keys(obj).length;
+      
+      return (
+        <Box>
+          <Typography variant="body2" component="span">{'{'}</Typography>
+          {keys.length === 0 ? (
+            <Typography variant="body2" component="span"> {'}'}</Typography>
+          ) : (
+            <>
+              {keys.map((key, index) => {
+                // Skip functions and DOM nodes to avoid circular references
+                if (typeof obj[key] === 'function' || 
+                    (typeof obj[key] === 'object' && obj[key] !== null && obj[key].nodeType)) {
+                  return (
+                    <Box key={key} ml={2} display="block">
+                      <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                        {key}:
+                      </Typography>{' '}
+                      <Typography variant="body2" component="span" sx={{ fontStyle: 'italic' }}>
+                        {typeof obj[key] === 'function' ? '[Function]' : '[DOM Node]'}
+                        {index < keys.length - 1 ? ',' : ''}
+                      </Typography>
+                    </Box>
+                  );
+                }
+                
+                return (
+                  <Box key={key} ml={2} display="block">
+                    <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                      {key}:
+                    </Typography>{' '}
+                    <Typography variant="body2" component="span">
+                      {renderObject(obj[key], level + 1, new WeakSet(visitedRefs))}
+                      {index < keys.length - 1 ? ',' : ''}
+                    </Typography>
+                  </Box>
+                );
+              })}
+              {totalKeys > 50 && (
+                <Box ml={2} display="block">
+                  <Typography variant="body2" component="span" sx={{ fontStyle: 'italic' }}>
+                    ...{totalKeys - 50} more properties
+                  </Typography>
+                </Box>
+              )}
+              <Typography variant="body2" component="span">{'}'}</Typography>
+            </>
+          )}
+        </Box>
+      );
+    } catch (error) {
+      // Return error message if there's an issue with this object
+      return <span style={{ color: 'red' }}>[Error: {error.message}]</span>;
+    }
   };
 
   return (
