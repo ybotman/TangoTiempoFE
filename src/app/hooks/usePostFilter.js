@@ -29,13 +29,21 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
   const filteredEvents = useMemo(() => {
     if (!Array.isArray(events)) return [];
 
+    // Log filtering information for debugging
+    console.log(`Filtering ${events.length} events with ${activeCategories?.length || 0} active categories`);
+
     // Ensure selectedOrganizers and selectedTags are arrays
     const organizers = Array.isArray(selectedOrganizers) ? selectedOrganizers : [];
     const tags = Array.isArray(selectedTags) ? selectedTags : [];
 
     // Apply filters only if there are values present
-    return events.filter((event) => {
-      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags } = event.extendedProps || {};
+    const filtered = events.filter((event) => {
+      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags, isActive } = event.extendedProps || {};
+
+      // First ensure the event is active
+      if (isActive === false) {
+        return false;
+      }
 
       // Category filter
       const matchesCategory =
@@ -53,6 +61,9 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
 
       return matchesCategory && matchesOrganizer && matchesTags;
     });
+
+    console.log(`Filtered down to ${filtered.length} events after applying filters`);
+    return filtered;
   }, [events, activeCategories, selectedOrganizers, selectedTags]);
 
   return {

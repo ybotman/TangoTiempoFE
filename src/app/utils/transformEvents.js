@@ -1,11 +1,27 @@
 export function transformEvents(events) {
-  //console.log("TransformEvent received:", events);
+  console.log("TransformEvent received:", events?.length || 0, "events");
+  if (!events || !Array.isArray(events) || events.length === 0) {
+    console.warn("No events to transform or events is not an array");
+    return [];
+  }
 
   return events.map((event) => {
     // Create standardized venue references
-    // Handle both old locationID/locationName and new venueId/venueName formats
-    const venueId = event.venueId || event.locationID || null;
+    // Handle both old locationID/locationName and new venueID/venueId/venueName formats
+    const venueId = event.venueID || event.venueId || event.locationID || null;
     const venueName = event.venueName || event.locationName || null;
+    
+    // Debug logging for the first few events to check venue references
+    if (events.indexOf(event) < 3) {
+      console.log(`Event ${event.title}:`, { 
+        id: event._id,
+        venueID: event.venueID, 
+        venueId: event.venueId, 
+        locationID: event.locationID,
+        resolvedVenueId: venueId,
+        isActive: event.isActive
+      });
+    }
     
     return {
       title: event.title, // Use the 'title' field from the API
@@ -24,7 +40,8 @@ export function transformEvents(events) {
         // Include both old and new field names during transition
         locationID: venueId,  // Legacy format - keep for compatibility
         locationName: venueName,  // Legacy format - keep for compatibility
-        venueId: venueId,  // New standardized field
+        venueId: venueId,  // New standardized field - lowercase id
+        venueID: venueId,  // New standardized field - uppercase ID for API compatibility
         venueName: venueName,  // New standardized field
         cost: event.cost,
         masteredRegionName: event.masteredRegionName,
@@ -39,7 +56,8 @@ export function transformEvents(events) {
         grantedOrganizerID: event.grantedOrganizerID,
         alternateOrganizerID: event.alternateOrganizerID,
         ownerOrganizerName: event.ownerOrganizerName,
-        featured: event.featured,
+        featured: event.featured || event.isFeatured,
+        isFeatured: event.isFeatured || event.featured,
         expiresAt: event.expiresAt,
         tmpCreator: event.tmpCreator,
         tmpVenueId: event.tmpVenueId,
