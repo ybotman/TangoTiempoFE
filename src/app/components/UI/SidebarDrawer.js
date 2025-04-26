@@ -32,6 +32,7 @@ import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
 import BusinessIcon from '@mui/icons-material/Business';
+import BugReportIcon from '@mui/icons-material/BugReport';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -46,6 +47,7 @@ import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
+import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const SidebarDrawer = ({ open, onClose }) => {
@@ -62,11 +64,17 @@ const SidebarDrawer = ({ open, onClose }) => {
   
   // NEW STATE FOR VENUE SELECTION MODAL
   const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
+  
+  // NEW STATE FOR DEBUG MENU
+  const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
   
   // Get selected location from GeoLocationContext to check if city is selected
   const { selectedLocation } = useGeoLocation();
+  
+  // Check if we're in development mode for debug menu visibility
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <>
@@ -296,6 +304,28 @@ const SidebarDrawer = ({ open, onClose }) => {
             <ListItemIcon>{/* Add an icon if needed */}</ListItemIcon>
             <ListItemText primary="Privacy Policy Details" />
           </ListItem>
+          
+          {/* Debug Menu - only visible in development */}
+          {isDevelopment && (
+            <>
+              <Divider />
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+                Development Tools
+              </Typography>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setDebugMenuOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <BugReportIcon sx={{ color: 'error.main' }} />
+                </ListItemIcon>
+                <ListItemText primary="Debug Menu" />
+              </ListItem>
+            </>
+          )}
         </List>
       </Drawer>
       {/* Modals */}
@@ -307,6 +337,7 @@ const SidebarDrawer = ({ open, onClose }) => {
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
       <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
       <VenueSelectionModal open={venueSelectionModalOpen} onClose={() => setVenueSelectionModalOpen(false)} />
+      <DebugMenu open={debugMenuOpen} onClose={() => setDebugMenuOpen(false)} /> {/* DEBUG MENU */}
     </>
   );
 };
