@@ -8,6 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
  - RMD is abbreation for Readme Docuemntation (only in public/readme)
  - so the command "RM CAUDE ROLES" tells you to open the readme like Claude roles in the public/readme folder.
  - when you have read a readme, you must breifly summerzie your understanding
+ - When you understand the RMD, the list the readmes in public/readme and numbered them, #1 - #x. 
+ - A shortcut for RMD requests is  to  use the command RMD [#3]
+
+
  
 
 ## Master Calendar System Architecture
