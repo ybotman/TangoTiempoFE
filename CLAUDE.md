@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 # Readme
  - The systems of Readmes are stored in public/readme.
- - RM is abbreation for Readme
+ - RMD is abbreation for Readme Docuemntation (only in public/readme)
  - so the command "RM CAUDE ROLES" tells you to open the readme like Claude roles in the public/readme folder.
  - when you have read a readme, you must breifly summerzie your understanding
  
