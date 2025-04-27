@@ -1,27 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import DebugJsonView from './DebugJsonView';
-import { useContext } from 'react';
+import { RegionsContext } from '@/contexts/RegionsContext';
 
 /**
  * Debug component for RegionsContext
  */
 const RegionsContextDebug = () => {
-  let RegionsContext;
-  let regionsContext = {};
-  
-  try {
-    RegionsContext = require('@/contexts/RegionsContext').RegionsContext;
-    if (RegionsContext) {
-      regionsContext = useContext(RegionsContext) || {};
-    }
-  } catch (error) {
-    console.error('Error importing RegionsContext:', error);
-  }
-  
+  const regionsContext = useContext(RegionsContext) || {};
+
   return (
     <Box>
       <Box display="flex" alignItems="center" mb={2}>

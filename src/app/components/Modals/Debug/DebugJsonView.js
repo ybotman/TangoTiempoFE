@@ -52,7 +52,7 @@ const DebugJsonView = ({ title, data, expandByDefault = false }) => {
 
   // Recursive function to render nested objects
   const renderObject = (obj, level = 0, visitedRefs = new WeakSet()) => {
-    const indent = 16 * level;
+    //const _indent = 16 * level;
     const maxLevel = 5; // Maximum nesting level to prevent stack overflow
 
     // Handle primitive types
