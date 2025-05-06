@@ -30,6 +30,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'tangotiempoimages.blob.core.windows.net',
       },
+      {
+      protocol: 'https',
+      hostname: 'i0.wp.com', // <-- Add this
+    },
     ],
   },
 
