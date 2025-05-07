@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(git pull:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv /Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/public/issues/current/Issue_LocationModalMapDots.md /Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/public/issues/current/archive/)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  }
+}
