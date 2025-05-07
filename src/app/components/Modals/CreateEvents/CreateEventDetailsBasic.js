@@ -114,7 +114,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         venueId: '',
         venueName: '',
         locationID: '',
-        locationName: ''
+        locationName: '',
+        // Clear coordinates
+        venueLatitude: null,
+        venueLongitude: null
       });
       console.log('Venue cleared');
       return;
@@ -130,7 +133,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
     console.log(`Selected venue: ${venueName} (ID: ${newValue._id})`);
     
-    setEventData({ 
+    // Create updated event data with venue info
+    const updatedEventData = { 
       ...eventData, 
       // Use new standardized venue fields
       venueId: newValue._id,
@@ -138,7 +142,21 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
       // Also keep legacy fields for backward compatibility
       locationID: newValue._id,
       locationName: venueName
-    });
+    };
+    
+    // Add the coordinates if available
+    if (newValue.latitude && newValue.longitude) {
+      console.log(`Venue has coordinates: [${newValue.longitude}, ${newValue.latitude}]`);
+      updatedEventData.venueLatitude = newValue.latitude;
+      updatedEventData.venueLongitude = newValue.longitude;
+    } else {
+      console.log('Selected venue does not have coordinates');
+      // Clear any existing coordinates
+      updatedEventData.venueLatitude = null;
+      updatedEventData.venueLongitude = null;
+    }
+    
+    setEventData(updatedEventData);
   };
   
   // Handle venue input change for filtering
