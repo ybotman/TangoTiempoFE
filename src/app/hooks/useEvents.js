@@ -268,6 +268,49 @@ export function useEventOperations() {
         locationID: eventData.locationID || eventData.venueId || null,
         locationName: eventData.locationName || eventData.venueName || null,
       };
+      
+      // If venue has coordinates, include them in venueGeolocation
+      if (eventData.venueLatitude && eventData.venueLongitude) {
+        preparedData.venueGeolocation = {
+          type: "Point",
+          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+        };
+        console.log('Added venue coordinates to venueGeolocation:', preparedData.venueGeolocation);
+      } else if (eventData.venueId || eventData.locationID) {
+        // We have a venue but no coordinates - need to fetch them
+        console.log('Venue selected but coordinates not provided. Attempting to fetch venue data.');
+        try {
+          // Import the venue functions dynamically
+          const { useVenues } = await import('@/hooks/useVenues');
+          const venuesApi = useVenues();
+          
+          // Get venue data including coordinates
+          const venueId = eventData.venueId || eventData.locationID;
+          const venueData = await venuesApi.getVenueById(venueId);
+          
+          if (venueData && venueData.latitude && venueData.longitude) {
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+            };
+            console.log('Retrieved and added venue coordinates:', preparedData.venueGeolocation);
+          } else {
+            console.warn('Could not retrieve venue coordinates for venue ID:', venueId);
+            // Fallback to empty coordinates array to prevent schema validation error
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [0, 0]
+            };
+          }
+        } catch (venueError) {
+          console.error('Error fetching venue data:', venueError);
+          // Fallback to empty coordinates array to prevent schema validation error
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [0, 0]
+          };
+        }
+      }
 
       // Ensure mastered location fields are included
       if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
@@ -378,6 +421,49 @@ export function useEventOperations() {
         locationID: eventData.locationID || eventData.venueId || null,
         locationName: eventData.locationName || eventData.venueName || null,
       };
+      
+      // If venue has coordinates, include them in venueGeolocation
+      if (eventData.venueLatitude && eventData.venueLongitude) {
+        preparedData.venueGeolocation = {
+          type: "Point",
+          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+        };
+        console.log('Added venue coordinates to venueGeolocation for update:', preparedData.venueGeolocation);
+      } else if (eventData.venueId || eventData.locationID) {
+        // We have a venue but no coordinates - need to fetch them
+        console.log('Venue selected but coordinates not provided for update. Attempting to fetch venue data.');
+        try {
+          // Import the venue functions dynamically
+          const { useVenues } = await import('@/hooks/useVenues');
+          const venuesApi = useVenues();
+          
+          // Get venue data including coordinates
+          const venueId = eventData.venueId || eventData.locationID;
+          const venueData = await venuesApi.getVenueById(venueId);
+          
+          if (venueData && venueData.latitude && venueData.longitude) {
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+            };
+            console.log('Retrieved and added venue coordinates for update:', preparedData.venueGeolocation);
+          } else {
+            console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
+            // Fallback to empty coordinates array to prevent schema validation error
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [0, 0]
+            };
+          }
+        } catch (venueError) {
+          console.error('Error fetching venue data for update:', venueError);
+          // Fallback to empty coordinates array to prevent schema validation error
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [0, 0]
+          };
+        }
+      }
       
       // Convert dayjs objects to ISO strings
       if (preparedData.startDate) {
