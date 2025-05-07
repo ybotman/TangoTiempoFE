@@ -5,7 +5,7 @@ name: Deploy to Vercel
 
 on:
   push:
-    branches: [ main ]
+    branches: [ TESTx ]
   workflow_dispatch:
 
 jobs:
