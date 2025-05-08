@@ -51,33 +51,41 @@ This issue tracks three related initialization bugs affecting the application: (
    - Initialization ordering or race condition is preventing proper city initialization
 
 ## Fix (if known or applied)
-- **Status:** 🚧 In Progress
+- **Status:** ✅ Fixed
 
 - **Fix Description:** 
   1. For LocationContextModal:
-     - Add additional logging to trace the city data structure
-     - Ensure coordinates are extracted correctly from GeoJSON location field
-     - Add graceful degradation to prevent "No cities" error
+     - Added support for both direct lat/lng and GeoJSON location.coordinates field formats
+     - Implemented an extraction step to convert GeoJSON coordinates to direct lat/lng
+     - Added fallback cities (Boston, New York) when no valid coordinates are found
 
   2. For transformEvents:
-     - Add conditional check in useCalendarPage to prevent calling transformEvents before data is ready
-     - Implement loading state display in calendar page
+     - Added conditional check in useCalendarPage:
+       ```javascript
+       const transformedEvents = (!eventsLoading && Array.isArray(events) && events.length > 0) 
+         ? transformEvents(events) 
+         : [];
+       ```
+     - This prevents the warning during initial loading when events aren't available yet
 
   3. For GeoLocationContext:
-     - Ensure initialization completes with fallback city values
-     - Fix potential race conditions in context initialization
-     - Add error recovery to prevent disabled UI elements
+     - Ensured initialization always sets a fallback Boston city value
+     - Added explicit location setting when nearestCity is available
+     - Fixed race condition by making fallback location unconditional
 
 - **Testing:** 
   - Manual verification with console logging
-  - Verify venue selection becomes enabled
-  - Confirm all warning messages are resolved
+  - Confirmed venue selection becomes enabled with default city
+  - Verified warning messages are resolved
 
 ## Resolution Log
-- **Commit/Branch:** Not yet created
+- **Commit/Branch:** `issue/1008-geolocation-and-events-initialization-bugs`
+- **Commits:** 
+  - 3c07fa9 - Add Issue 1008: GeoLocation and Events initialization bugs document
+  - 1fd099e - Fix GeoLocation and Events initialization bugs
 - **PR:** Not yet created
 - **Deployed To:** Not yet deployed
-- **Verified By:** Not yet verified
+- **Verified By:** Pending verification after deployment
 
 ---
 
