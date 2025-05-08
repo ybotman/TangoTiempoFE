@@ -191,7 +191,7 @@ export function useEvents({
         console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
       } else if (user && user.roles?.includes('RegionalOrganizer')) {
         // If user has RO role but we're not using it, explain why
-        console.warn('User has RegionalOrganizer role but filtering is not being applied because:',
+        //console.warn('User has RegionalOrganizer role but filtering is not being applied because:',
           !selectedRole ? 'selectedRole is not set' :
           selectedRole !== 'RegionalOrganizer' ? `selectedRole is "${selectedRole}" instead of "RegionalOrganizer"` :
           !user.backendInfo?.regionalOrganizerInfo?.organizerId ? 'regionalOrganizerInfo.organizerId is missing' :
