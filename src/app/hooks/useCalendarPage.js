@@ -63,7 +63,12 @@ export const useCalendarPage = () => {
     });
   };
 
-  const transformedEvents = transformEvents(events);
+  // Only transform events when they're actually available and loading is complete
+  // This prevents "No events to transform" warnings during initial loading
+  const transformedEvents = (!eventsLoading && Array.isArray(events) && events.length > 0) 
+    ? transformEvents(events) 
+    : [];
+    
   const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(transformedEvents, categories);
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
