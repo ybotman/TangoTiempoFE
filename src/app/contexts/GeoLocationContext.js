@@ -529,6 +529,30 @@ export const GeoLocationProvider = ({ children }) => {
         console.log('GeoLocationContext: Using nearestCity from context for initialization', {
           city: nearestCity.cityName
         });
+        
+        // Explicitly set the selected location from nearestCity data
+        // This ensures we have a city even if the useEffect watching nearestCity hasn't run yet
+        setSelectedLocation({
+          country: { 
+            id: nearestCity.countryID, 
+            name: nearestCity.countryName 
+          },
+          region: { 
+            id: nearestCity.regionID, 
+            name: nearestCity.regionName 
+          },
+          division: { 
+            id: nearestCity.divisionID, 
+            name: nearestCity.divisionName 
+          },
+          city: { 
+            id: nearestCity.cityID, 
+            name: nearestCity.cityName,
+            latitude: nearestCity.latitude,
+            longitude: nearestCity.longitude
+          }
+        });
+        
         return;
       }
       
@@ -536,30 +560,29 @@ export const GeoLocationProvider = ({ children }) => {
       console.log('GeoLocationContext: No location available, forcing refresh');
       await refreshUserLocation();
       
-      // If still no location, use hardcoded fallback as last resort
-      if (!selectedLocation.city.id) {
-        console.log('GeoLocationContext: Initialization failed, using Boston fallback');
-        setSelectedLocation({
-          country: { 
-            id: '6751f57e2e74d97609e7dca0', // US country ID
-            name: 'United States'
-          },
-          region: { 
-            id: '6751f58a5db435dd8005e45b', // Northeast region ID
-            name: 'Northeast'
-          },
-          division: { 
-            id: '6751f58a5db435dd8005e461', // New England division ID
-            name: 'New England'
-          },
-          city: { 
-            id: '6751f58a5db435dd8005e479', // Boston city ID
-            name: 'Boston',
-            latitude: 42.3601,
-            longitude: -71.0589
-          }
-        });
-      }
+      // ALWAYS set a fallback location, regardless of other initialization steps
+      // This ensures we always have a valid city ID for UI components that depend on it
+      console.log('GeoLocationContext: Setting Boston as fallback location');
+      setSelectedLocation({
+        country: { 
+          id: '6751f57e2e74d97609e7dca0', // US country ID
+          name: 'United States'
+        },
+        region: { 
+          id: '6751f58a5db435dd8005e45b', // Northeast region ID
+          name: 'Northeast'
+        },
+        division: { 
+          id: '6751f58a5db435dd8005e461', // New England division ID
+          name: 'New England'
+        },
+        city: { 
+          id: '6751f58a5db435dd8005e479', // Boston city ID
+          name: 'Boston',
+          latitude: 42.3601,
+          longitude: -71.0589
+        }
+      });
     };
     
     // Run initialization
