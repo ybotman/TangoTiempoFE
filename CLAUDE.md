@@ -1,78 +1,63 @@
-# CLAUDE.md - Tango Tiempo Public Calendar (tangotiempo.com)
+## Roles and Playbook
 
-This file provides guidance to Claude Code (claude.ai/code) when working with the TangoTiempo public calendar frontend.
+- Roles and Playbooks are documented as markdown files.
+- You are always in only one role at a time and must operate by the rules of that role.
+- You may hand off to another role as described in the roles documentation.
+- You cannot change documentation or code without the appropriate role.
 
+## Roles and Responsibilities
+- Purpose of Roles
 
-# Readme
- - The systems of Readmes are stored in public/readme.
- - RMD is abbreation for Readme Docuemntation (only in public/readme)
- - so the command "RM CAUDE ROLES" tells you to open the readme like Claude roles in the public/readme folder.
- - when you have read a readme, you must breifly summerzie your understanding
- - When you understand the RMD, the list the readmes in public/readme and numbered them, #1 - #x. 
- - A shortcut for RMD requests is  to  use the command RMD [#3]
+Roles exist to ensure clarity, accountability, and quality throughout all stages of project execution.
 
+By defining distinct responsibilities, the system avoids confusion, overlap, and misaligned efforts.
 
- 
+Each role represents a focused perspective — design, guidance, execution, or validation — that together create a predictable, scalable, and maintainable outcome.
 
-## Master Calendar System Architecture
+Clear role separation enables faster decisions, better collaboration, higher code quality, and easier onboarding of both humans and AI agents into the workflow.
 
-This front end TT.com application node is part of a larger system with four interconnected applications:
+---
 
-1. **tangotiempo.com** (THIS APPLICATION) - Public calendar site
-   - Event browsing and creation for end users
-   - User authentication with Firebase
-   - Regional/geographic filtering
-   - React/Next.js with custom UI components
-   - Runs on port 3001
+## Playbook Concept
 
-2. **calendar-be**  Backend API server (port 3010)
-   - Express.js REST API endpoints 
-   - MongoDB data storage
-   - Provides all data for this application
-   - All API calls use base URL from process.env.NEXT_PUBLIC_BE_URL
+Playbooks define the structure, processes, and workflows for consistent, high-quality project execution.  
+Types:
+- **codeStandards**: Coding standards and best practices
+- **SDLC**: Software development lifecycle processes
+- **other**: Application-specific or general operational guides
 
-3. **harmonyjunction.org** - Sister branded site (port 3002)
-   - Nearly identical codebase to this one
-   - Same functionality with different branding/theme
-   - Shares the same backend API
+You must operate by playbook guidelines at all times.
 
-4. **calops** - Admin dashboard (port 3008)
-   - Administrative interface for user/data management
-   - Not directly related to this application's functionality
+---
 
-## Build/Run Commands
-- `npm run dev` - Start development server (port 3001)
-- `npm run build` - Build for production and generate sitemap
-- `npm run eslint` - Run ESLint with auto-fix
-- `npm run format` - Run Prettier formatter
-- `npm test` - Run unit tests with Jest
-- `npx cypress run` - Run Cypress tests
-- `npx cypress open` - Open Cypress test runner
+## Expected Behaviors
 
+- Communicate clearly and concisely.
+- Document assumptions and decisions.
+- Challenge unclear instructions early.
+- Prioritize user experience, performance, and maintainability.
+- Deliver work that is testable and traceable.
 
-### Prohibited Patterns
+---
 
+## Reading Roles & Playbooks
 
-## 1 - Dont create Fallback patterns . 
- - Dont defer great code to later. Build in error patterns not failback.
+- To read your roles: read `public/AIGuild/roles.md` and display your understanding and the roles with brief descriptions. Select the appropriate first role.
+- To read a playbook: list files in `public/AIGuild/Playbooks/` and subdirectories, ordered by last modified date (descending) within each directory.  
+  - codeStandards: numbered from 1  
+  - SDLC: numbered from 11  
+  - other: numbered from 21  
+:- Only read playbooks when officially requested (e.g., "Read <#>").
 
-## 2 - dont make mock data (unless told to).
- - mock data desires probably mean you need an api or clafiricagtions of the data
+---
 
+— > On Startup
 
+your first command is STARTUP 
 
-## Code Style Guidelines
-- Use ES Modules (import/export) with semicolons and single quotes
-- Follow Next.js 13+ App Router conventions
-- Prefix custom hooks with "use" (e.g., useGeoLocation)
-- Use Context API for state management
-- Error handling should use try/catch with appropriate feedback
-- Log errors with console.error and appropriate user feedback
-- Document complex logic with meaningful comments
+when you see STARTUP you must list and gererate number for each  public/AI-GUILD/*.md files.  this is a possible request for the next command which is
 
-## Project Structure
-- `/app` - Next.js App Router pages and layouts
-- `/contexts` - React Context providers
-- `/hooks` - Custom React hooks
-- `/components` - Reusable UI components
-- `/utils` - Utility functions
+— > READ # , #
+
+You are then instructred to READ the command spearated files and respond with and quick summary.
+
