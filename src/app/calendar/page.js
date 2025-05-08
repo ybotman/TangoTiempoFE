@@ -64,6 +64,8 @@ const CalendarPage = () => {
     coloredFilteredEvents,
     datesSet,
     handleEventUpdated,
+    isEditMode,
+    eventToEdit,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -198,6 +200,8 @@ const CalendarPage = () => {
         open={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         selectedDate={clickedDate}
+        editMode={isEditMode}
+        eventToEdit={eventToEdit}
       />
 
       <ViewEventDetailModal

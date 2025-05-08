@@ -31,6 +31,8 @@ export const useCalendarPage = () => {
   const { selectedLocation } = useGeoLocation();
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventToEdit, setEventToEdit] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const calendarRef = useRef(null);
 
   // Use GeoLocationContext as primary source, with fallback to MasteredLocationContext
@@ -81,15 +83,25 @@ export const useCalendarPage = () => {
     
     // Handle edit case specifically
     if (action === 'edit' && eventId) {
+      // Reset states
+      setIsEditMode(true);
+      setEventToEdit(null);
+      
       // Fetch the event details and open the edit modal
       getEventById(eventId)
         .then(eventData => {
-          setSelectedEventDetails(eventData);
+          console.log('Fetched event details for editing:', eventData);
+          setEventToEdit(eventData);
           setCreateModalOpen(true); // Reuse the create modal for editing
         })
         .catch(error => {
           console.error('Error fetching event details for editing:', error);
+          setIsEditMode(false); // Reset on error
         });
+    } else {
+      // For non-edit actions, reset the edit mode
+      setIsEditMode(false);
+      setEventToEdit(null);
     }
 
     // Track the event in analytics
@@ -213,7 +225,16 @@ export const useCalendarPage = () => {
     selectedEvent,
     setSelectedEvent,
     isCreateModalOpen,
-    setCreateModalOpen,
+    // Enhanced modal control with edit mode reset
+    setCreateModalOpen: (isOpen) => {
+      // When closing the modal, reset edit mode and event to edit
+      if (!isOpen) {
+        setIsEditMode(false);
+        setEventToEdit(null);
+      }
+      // Use the original state setter
+      setCreateModalOpen(isOpen);
+    },
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     handleEventUpdated,
@@ -234,6 +255,9 @@ export const useCalendarPage = () => {
     // Location info
     regionName,
     divisionName,
-    cityName
+    cityName,
+    // Edit mode properties
+    isEditMode,
+    eventToEdit
   };
 };

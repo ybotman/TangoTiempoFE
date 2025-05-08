@@ -18,6 +18,44 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
  * @param {number} [options.limit=100] - Number of items per page
  * @returns {Object} Events data, loading state, error state, and refresh function
  */
+/**
+ * Helper function to sanitize ObjectId fields for MongoDB
+ * Converts empty strings to null to prevent CastError in Mongoose
+ * 
+ * This function fixes a critical issue where empty strings ("") passed for fields 
+ * expected to be MongoDB ObjectIds (like categorySecondId, grantedOrganizerID, etc.)
+ * would cause Mongoose validation errors. MongoDB ObjectId fields should be either
+ * valid ObjectId strings or null, not empty strings.
+ *
+ * @param {Object} data - The data object containing potential ObjectId fields
+ * @returns {Object} - The sanitized data object with empty strings converted to null
+ */
+function sanitizeObjectIdFields(data) {
+  if (!data) return data;
+  
+  const result = { ...data };
+  const objectIdFields = [
+    'categoryFirstId',
+    'categorySecondId',
+    'categoryThirdId',
+    'ownerOrganizerID',
+    'grantedOrganizerID',
+    'alternateOrganizerID',
+    'venueId',
+    'locationID',
+    '_id'
+  ];
+  
+  objectIdFields.forEach(field => {
+    // Check if the field exists and is an empty string
+    if (result[field] === '') {
+      result[field] = null;
+    }
+  });
+  
+  return result;
+}
+
 export function useEvents({
   region,
   division,
@@ -248,25 +286,28 @@ export function useEventOperations() {
         }
       }
       
+      // Clean up the event data by converting empty strings for ObjectId fields to null
+      const cleanedEventData = sanitizeObjectIdFields(eventData);
+      
       // Prepare the event data for submission
       const preparedData = {
-        ...eventData,
+        ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         // The backend requires ownerOrganizerID specifically
-        ownerOrganizerID: eventData.ownerOrganizerID || eventData.grantedOrganizer,
+        ownerOrganizerID: cleanedEventData.ownerOrganizerID || cleanedEventData.grantedOrganizer,
         // Make sure we use masteredRegionName
-        masteredRegionName: eventData.masteredRegionName || eventData.selectedRegion,
+        masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
         // Set default ownerOrganizerName if not provided
-        ownerOrganizerName: eventData.ownerOrganizerName || "Event Organizer",
+        ownerOrganizerName: cleanedEventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
-        expiresAt: new Date(new Date(eventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
-        venueId: eventData.venueId || eventData.locationID || null,
-        venueName: eventData.venueName || eventData.locationName || null,
-        locationID: eventData.locationID || eventData.venueId || null,
-        locationName: eventData.locationName || eventData.venueName || null,
+        venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
+        venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
+        locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
+        locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
       };
       
       // If venue has coordinates, include them in venueGeolocation
@@ -410,16 +451,19 @@ export function useEventOperations() {
       }
       
       // Prepare the event data for submission
+      // Clean up the event data by converting empty strings for ObjectId fields to null
+      const cleanedEventData = sanitizeObjectIdFields(eventData);
+      
       const preparedData = {
-        ...eventData,
+        ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
-        venueId: eventData.venueId || eventData.locationID || null,
-        venueName: eventData.venueName || eventData.locationName || null,
-        locationID: eventData.locationID || eventData.venueId || null,
-        locationName: eventData.locationName || eventData.venueName || null,
+        venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
+        venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
+        locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
+        locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
       };
       
       // If venue has coordinates, include them in venueGeolocation

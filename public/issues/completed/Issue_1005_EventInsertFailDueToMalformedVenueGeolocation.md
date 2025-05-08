@@ -37,21 +37,21 @@ This is a lightweight formal issue log to capture, trace, and resolve a specific
 
 ## Resolution Log
 - **Commit/Branch:** `issue/1005-event-insert-fail-due-to-malformed-venue-geolocation`
-- **PR:** TBD
-- **Deployed To:** Not yet deployed
-- **Verified By:** Not yet verified
+- **PR:** Merged
+- **Deployed To:** DEVL
+- **Verified By:** System test
+- **Closed On:** 2025-05-07
 
 ---
 
 > Store under: `/public/issues/current/Issue_1005_EventInsertFailDueToMalformedVenueGeolocation.md` and move to `/public/issues/completed/` when resolved. 
 
 # SNR after interactions
-🔷 S — Summarize: Implemented the fix for the malformed venueGeolocation issue. The problem was in the event creation code where the venueGeolocation object was missing the required coordinates array. We've updated both the CreateEventDetailsBasic.js component to capture venue coordinates during selection and the useEvents.js hook to properly structure the venueGeolocation object for API submission.
+🔷 S — Summarize: Successfully fixed and closed the malformed venueGeolocation issue. The problem was in the event creation code where the venueGeolocation object was missing the required coordinates array. We implemented the fix in CreateEventDetailsBasic.js and useEvents.js to ensure proper structure with both type and coordinates. The changes have been merged into DEVL.
 
 🟡 N — Next Steps: 
-1. Commit changes to the issue branch
-2. Test the implementation to confirm that events can be created with venues
-3. Create a pull request to merge the changes into DEVL
-4. Move the issue to the completed folder after successful merge
+1. Move this issue document to the completed folder
+2. Update relevant documentation if needed
+3. Continue monitoring event creation to ensure no regression
 
-🟩 R — Request / Role: Switch to Executer Mode to test the implementation and verify that the issue is resolved.
+🟩 R — Request / Role: Switching to Mirror Mode to confirm issue closure and properly archive the documentation.
