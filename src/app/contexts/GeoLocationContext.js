@@ -619,7 +619,7 @@ export const GeoLocationProvider = ({ children }) => {
     } finally {
       setLoadingState(prev => ({ ...prev, userLocation: false }));
     }
-  }, [fetchNearestCity, userLocation, setSelectedLocation]);
+  }, [externalFetchNearestCity, fetchNearestCityImpl, userLocation, setSelectedLocation]);
 
   // Mark context as initialized after setup completes
   useEffect(() => {
