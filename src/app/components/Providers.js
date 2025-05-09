@@ -18,10 +18,10 @@ const Providers = ({ children }) => {
       <RegionsProvider>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <RoleProvider>
-            {/* 
-              Restructured provider hierarchy:
-              GeoLocationProvider now initializes before rendering the MasteredLocationProvider
-              This ensures GeoLocationContext does not depend on MasteredLocationContext being initialized first
+            {/*
+              Hierarchical provider model:
+              GeoLocationProvider is the primary source of truth for location state
+              MasteredLocationProvider provides the data service without circular dependencies
             */}
             <GeoLocationProvider>
               <MasteredLocationProvider>

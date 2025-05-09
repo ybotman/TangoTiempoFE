@@ -217,52 +217,58 @@ const LocationContextModal = ({ open, onClose }) => {
   // Keep track of the city we clicked for updating GeoLocationContext
   const [clickedCityId, setClickedCityId] = useState(null);
   
-  // When nearestCity changes and there's a clickedCityId, update GeoLocationContext
+  // Close modal after city selection is completed
   useEffect(() => {
-    if (clickedCityId && nearestCity && nearestCity.cityID === clickedCityId) {
-      // Update GeoLocationContext with the data from nearestCity
-      selectLocation({
-        country: {
-          id: nearestCity.countryID,
-          name: nearestCity.countryName
-        },
-        region: {
-          id: nearestCity.regionID,
-          name: nearestCity.regionName
-        },
-        division: {
-          id: nearestCity.divisionID,
-          name: nearestCity.divisionName
-        },
-        city: {
-          id: nearestCity.cityID,
-          name: nearestCity.cityName,
-          latitude: nearestCity.latitude,
-          longitude: nearestCity.longitude
-        }
-      });
-      
-      // Clear the clicked city ID
-      setClickedCityId(null);
-      
-      // Close the modal
-      onClose();
+    if (clickedCityId) {
+      // Small delay to ensure state updates are processed
+      const timeoutId = setTimeout(() => {
+        // Clear the clicked city ID and close modal
+        setClickedCityId(null);
+        onClose();
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [nearestCity, clickedCityId, selectLocation, onClose]);
+  }, [clickedCityId, onClose]);
   
   const handleCityClick = async (city) => {
     if (!city.latitude || !city.longitude) {
       console.warn(`City ${city.cityName} has invalid coordinates:`, city.latitude, city.longitude);
       return;
     }
-    
+
     console.log(`Clicking city: ${city.cityName} (${city._id}) at ${city.latitude}, ${city.longitude}`);
-    
+
     // Set the clicked city ID so we can identify when nearestCity updates
     setClickedCityId(city._id);
-    
-    // Update the MasteredLocationContext (for backward compatibility)
-    await fetchNearestCity(city.latitude, city.longitude);
+
+    // Update both contexts - but GeoLocationContext is the source of truth
+    // Call MasteredLocation for data lookup but use GeoLocation for state updates
+    const cityData = await fetchNearestCity(city.latitude, city.longitude);
+
+    // Update GeoLocationContext directly with the selected location
+    if (cityData) {
+      selectLocation({
+        country: {
+          id: cityData.countryID,
+          name: cityData.countryName
+        },
+        region: {
+          id: cityData.regionID,
+          name: cityData.regionName
+        },
+        division: {
+          id: cityData.divisionID,
+          name: cityData.divisionName
+        },
+        city: {
+          id: cityData.cityID,
+          name: cityData.cityName,
+          latitude: cityData.latitude,
+          longitude: cityData.longitude
+        }
+      });
+    }
   };
 
   // Ensure we have a valid center
