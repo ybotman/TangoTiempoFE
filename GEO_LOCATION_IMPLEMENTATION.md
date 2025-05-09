@@ -80,24 +80,29 @@ This component displays the current location context in the calendar header:
 
 ### 1. Provider Hierarchy
 
-The `GeoLocationProvider` is placed within the existing providers to maintain backward compatibility:
+The `GeoLocationProvider` is now placed before the `MasteredLocationProvider` to establish the hierarchical responsibility model:
 
 ```jsx
 <AuthProvider>
   <RegionsProvider>
-    <LocalizationProvider dateAdapter={AdapterLuxon}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <RoleProvider>
-        <MasteredLocationProvider>
-          <MasteredLocationLogger />
-          <GeoLocationProvider>
+        <GeoLocationProvider>
+          <MasteredLocationProvider>
+            <MasteredLocationLogger />
             {children}
-          </GeoLocationProvider>
-        </MasteredLocationProvider>
+          </MasteredLocationProvider>
+        </GeoLocationProvider>
       </RoleProvider>
     </LocalizationProvider>
   </RegionsProvider>
 </AuthProvider>
 ```
+
+This provider order ensures that:
+1. GeoLocationContext initializes first and has a stable identity
+2. MasteredLocationContext can safely use GeoLocationContext's services
+3. The data flow is unidirectional, eliminating circular dependencies
 
 ### 2. Event Creation
 
@@ -113,14 +118,35 @@ masteredDivisionName: selectedLocation.division.name || selectedDivision || (nea
 masteredCityName: selectedLocation.city.name || selectedCity || (nearestCity?.cityName || ''),
 ```
 
-## Synchronization Mechanism
+## Hierarchical Model & Synchronization
 
-The `GeoLocationContext` keeps all location contexts in sync:
+The location system now uses a hierarchical responsibility model with GeoLocationContext as the primary source of truth:
 
-1. **Initialization from existing contexts**:
+1. **GeoLocationContext as Source of Truth**:
+   ```javascript
+   // GeoLocationContext provides the authoritative fetchNearestCity implementation
+   const fetchNearestCityImpl = useCallback(async (latitude, longitude, maxDistance = 500000) => {
+     // Validate coordinates - ensure they're valid numbers
+     if (!latitude || !longitude || isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude))) {
+       console.error('GeoLocationContext: fetchNearestCity - Invalid coordinates', { latitude, longitude });
+       // Use fallback coordinates instead of returning
+       latitude = 42.3601; // Boston fallback
+       longitude = -71.0589;
+     }
+
+     // Implementation continues with API calls and fallbacks...
+   }, [masteredLocationContext]);
+   ```
+
+2. **Initialization from MasteredLocationContext** (one-way dependency):
    ```javascript
    // Initialize from MasteredLocationContext
    useEffect(() => {
+     console.log('GeoLocationContext: Checking for nearestCity update', {
+       hasNearestCity: !!nearestCity,
+       nearestCityName: nearestCity?.cityName
+     });
+
      if (nearestCity) {
        // Update from nearest city if we don't have a selection yet
        if (!selectedLocation.region.id) {
@@ -131,33 +157,40 @@ The `GeoLocationContext` keeps all location contexts in sync:
        }
      }
    }, [nearestCity, selectedLocation.region.id]);
-
-   // Initialize from RegionsContext
-   useEffect(() => {
-     if (regionsContext.selectedRegion) {
-       setSelectedLocation(prev => ({
-         ...prev,
-         region: {
-           id: regionsContext.selectedRegionID,
-           name: regionsContext.selectedRegion
-         },
-         // ...
-       }));
-     }
-   }, [regionsContext.selectedRegion, /* ... */]);
    ```
 
-2. **Updating existing contexts**:
+3. **Updating legacy RegionsContext** (backward compatibility):
    ```javascript
    // Update RegionsContext when our selection changes
    useEffect(() => {
-     if (selectedLocation.region.name) {
+     // Skip sync if RegionsContext isn't present or if we don't have location data
+     if (!regionsContext || !selectedLocation.region.name) {
+       return;
+     }
+
+     try {
+       // Update the RegionsContext to maintain compatibility
        if (regionsContext.selectedRegion !== selectedLocation.region.name) {
          regionsContext.setSelectedRegion(selectedLocation.region.name);
        }
-       // ...
+       // Other synchronization...
+     } catch (error) {
+       console.error("Error syncing with RegionsContext:", error);
      }
    }, [selectedLocation, regionsContext]);
+   ```
+
+4. **Delayed Initialization for Proper Sequence**:
+   ```javascript
+   // In MasteredLocationContext
+   useEffect(() => {
+     // Add a small delay before initialization to ensure parent contexts are ready
+     const initTimer = setTimeout(() => {
+       initializeContext();
+     }, 100); // Small delay to ensure proper initialization order
+
+     return () => clearTimeout(initTimer);
+   }, []);
    ```
 
 ## Future Expansion
