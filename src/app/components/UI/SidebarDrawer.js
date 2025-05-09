@@ -7,7 +7,7 @@
 // We include PropTypes at end as required.
 
 'use client';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -19,6 +19,7 @@ import {
   //  Avatar,
   Typography,
   //  Collapse,
+  CircularProgress,
 } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
@@ -70,11 +71,31 @@ const SidebarDrawer = ({ open, onClose }) => {
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
   
-  // Get selected location from GeoLocationContext to check if city is selected
-  const { selectedLocation } = useGeoLocation();
+  // Get selected location and loading state from GeoLocationContext
+  const { selectedLocation, isLoading: locationLoading } = useGeoLocation();
   
   // Check if we're in development mode for debug menu visibility
   const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
+  const [venueSelectionReady, setVenueSelectionReady] = useState(false);
+  
+  // Effect to handle delayed city check to avoid race conditions
+  useEffect(() => {
+    // If we already have a city ID, immediately set ready state
+    if (selectedLocation?.city?.id) {
+      setVenueSelectionReady(true);
+      return;
+    }
+    
+    // Otherwise, give GeoLocationContext a moment to initialize
+    const timer = setTimeout(() => {
+      console.log('SidebarDrawer: Checking venue selection readiness after delay');
+      setVenueSelectionReady(true);
+    }, 1000); // 1 second delay
+    
+    return () => clearTimeout(timer);
+  }, [selectedLocation?.city?.id]);
 
   return (
     <>
@@ -127,26 +148,37 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Select Nearest City" />
           </ListItem>
-          {/* New Venue Selection Menu Item */}
-          <ListItem
-            button="true"
-            onClick={() => {
-              setVenueSelectionModalOpen(true);
-              onClose();
-            }}
-            disabled={!selectedLocation?.city?.id}
-            sx={{
-              opacity: selectedLocation?.city?.id ? 1 : 0.5,
-              '&.Mui-disabled': {
-                opacity: 0.5,
-              }
-            }}
-          >
-            <ListItemIcon>
-              <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
-            </ListItemIcon>
-            <ListItemText primary="Select Venue" />
-          </ListItem>
+          {/* New Venue Selection Menu Item with improved loading state handling */}
+          {!venueSelectionReady ? (
+            // Show loading state while GeoLocationContext initializes
+            <ListItem>
+              <ListItemIcon>
+                <CircularProgress size={20} color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Loading Venues..." />
+            </ListItem>
+          ) : (
+            // Interactive menu item that's always clickable
+            <ListItem
+              button="true"
+              onClick={() => {
+                setVenueSelectionModalOpen(true);
+                onClose();
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
+              }}
+            >
+              <ListItemIcon>
+                <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Select Venue" 
+                secondary={!selectedLocation?.city?.id ? "Select a city first" : null}
+              />
+            </ListItem>
+          )}
           <Divider />
 
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>

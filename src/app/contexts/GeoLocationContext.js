@@ -22,15 +22,24 @@ const GeoLocationContext = createContext();
  * This provider combines functionality from RegionsContext and MasteredLocationContext
  * while maintaining backward compatibility. It will initially defer to the existing
  * contexts, but gradually take over functionality as it is implemented.
+ * 
+ * IMPORTANT: After the provider order change in Providers.js, this context now initializes
+ * BEFORE MasteredLocationContext, so we need to handle the case where nearestCity is null
+ * more gracefully and rely more on our direct geolocation methods.
  */
 export const GeoLocationProvider = ({ children }) => {
   // Connect to existing contexts for backward compatibility
-  const { nearestCity, fetchNearestCity } = useMasteredLocation();
+  // Note: useMasteredLocation might return null values since we now initialize before it
+  const masteredLocationContext = useMasteredLocation();
+  const nearestCity = masteredLocationContext?.nearestCity || null;
+  const fetchNearestCity = masteredLocationContext?.fetchNearestCity || null;
+  
   // Try to use RegionsContext if available, but make it optional
   const regionsContext = RegionsContext ? useContext(RegionsContext) : null;
   const { latitude, longitude, loading: geoLoading, error: geoError } = useGeoLocations();
 
   console.log('GeoLocationProvider: Initializing with location data', {
+    masteredLocationAvailable: !!masteredLocationContext,
     hasNearestCity: !!nearestCity,
     nearestCityName: nearestCity?.cityName,
     latitude,
@@ -556,33 +565,86 @@ export const GeoLocationProvider = ({ children }) => {
         return;
       }
       
-      // Force a refresh of the user location
-      console.log('GeoLocationContext: No location available, forcing refresh');
-      await refreshUserLocation();
-      
-      // ALWAYS set a fallback location, regardless of other initialization steps
-      // This ensures we always have a valid city ID for UI components that depend on it
-      console.log('GeoLocationContext: Setting Boston as fallback location');
-      setSelectedLocation({
-        country: { 
-          id: '6751f57e2e74d97609e7dca0', // US country ID
-          name: 'United States'
-        },
-        region: { 
-          id: '6751f58a5db435dd8005e45b', // Northeast region ID
-          name: 'Northeast'
-        },
-        division: { 
-          id: '6751f58a5db435dd8005e461', // New England division ID
-          name: 'New England'
-        },
-        city: { 
-          id: '6751f58a5db435dd8005e479', // Boston city ID
-          name: 'Boston',
-          latitude: 42.3601,
-          longitude: -71.0589
+      try {
+        // Force a refresh of the user location
+        console.log('GeoLocationContext: No location available, forcing refresh');
+        await refreshUserLocation();
+        
+        // After refresh, check if we have a city ID yet
+        if (!selectedLocation.city.id) {
+          // Set a default city by fetching from the API instead of using hardcoded IDs
+          console.log('GeoLocationContext: Fetching default location data');
+          
+          try {
+            const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+            const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+            
+            // Look up by city name instead of ID
+            const cityResponse = await fetch(`${baseURL}/api/masteredLocations/cities?cityName=Boston&appId=${appId}`);
+            const cityData = await cityResponse.json();
+            
+            if (cityData && cityData.length > 0) {
+              const defaultCity = cityData[0];
+              console.log('GeoLocationContext: Setting default from fetched data', defaultCity);
+              
+              setSelectedLocation({
+                country: { 
+                  id: defaultCity.countryID, 
+                  name: defaultCity.countryName || "United States"
+                },
+                region: { 
+                  id: defaultCity.regionID, 
+                  name: defaultCity.regionName || "Northeast"
+                },
+                division: { 
+                  id: defaultCity.divisionID, 
+                  name: defaultCity.divisionName || "New England"
+                },
+                city: { 
+                  id: defaultCity.cityID, 
+                  name: defaultCity.cityName || "Boston",
+                  latitude: defaultCity.latitude || 42.3601,
+                  longitude: defaultCity.longitude || -71.0589
+                }
+              });
+            } else {
+              throw new Error('Failed to fetch default city data');
+            }
+          } catch (apiError) {
+            console.error('GeoLocationContext: Error fetching default location', apiError);
+            
+            // As last resort, set default values with null IDs but valid names
+            // This ensures UI can show something even without IDs
+            console.log('GeoLocationContext: Using default names without IDs as last resort');
+            setSelectedLocation({
+              country: { id: null, name: "United States" },
+              region: { id: null, name: "Northeast" },
+              division: { id: null, name: "New England" },
+              city: { 
+                id: Date.now().toString(), // Generate a temporary ID for the UI to work
+                name: "Boston",
+                latitude: 42.3601,
+                longitude: -71.0589
+              }
+            });
+          }
         }
-      });
+      } catch (error) {
+        console.error('GeoLocationContext: Error in initialization process', error);
+        
+        // Set default with temporary ID as last resort
+        setSelectedLocation({
+          country: { id: null, name: "United States" },
+          region: { id: null, name: "Northeast" },
+          division: { id: null, name: "New England" },
+          city: { 
+            id: Date.now().toString(), // Generate a temporary ID for the UI to work
+            name: "Boston",
+            latitude: 42.3601,
+            longitude: -71.0589
+          }
+        });
+      }
     };
     
     // Run initialization

@@ -159,18 +159,25 @@ const VenueSelectionModal = ({ open, onClose }) => {
       <DialogContent style={{ height: '500px', position: 'relative' }}>
         {!hasSelectedCity ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
-            <Typography color="error" gutterBottom>Please select a city first</Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
+            <Typography color="primary" variant="h6" gutterBottom>Please select a city first</Typography>
+            <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
               You need to select a city before you can choose a venue.
+              Use the &quot;Select Nearest City&quot; option in the main menu.
             </Typography>
-            <Button onClick={onClose} color="primary" variant="outlined">
-              Close
+            <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
+              This is needed even if location detection is enabled,
+              as we need to know which city's venues to display.
+            </Typography>
+            <Button onClick={onClose} color="primary" variant="contained">
+              Go Back to Menu
             </Button>
           </Box>
         ) : isLoading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <CircularProgress />
-            <Typography variant="body2" sx={{ mt: 2 }}>Loading venues...</Typography>
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              Loading venues near {selectedLocation?.city?.name || 'selected city'}...
+            </Typography>
           </Box>
         ) : hasError ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
