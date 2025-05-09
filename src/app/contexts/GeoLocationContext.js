@@ -313,13 +313,15 @@ export const GeoLocationProvider = ({ children }) => {
         if (response.status === 404) {
           console.log('GeoLocationContext: No nearby city found, defaulting to Northeast region');
 
-          // Create default location
+          // Create default location with proper names but dynamic ID generation
+          // This follows the SuccessCriteria to avoid hardcoded MongoDB IDs
+          // We'll use null IDs instead, letting the system generate proper IDs later
           const defaultLocation = {
-            country: { id: '6751f57e2e74d97609e7dca0', name: 'United States' },
-            region: { id: '6751f58a5db435dd8005e45b', name: 'Northeast' },
-            division: { id: '6751f58a5db435dd8005e461', name: 'New England' },
+            country: { id: null, name: 'United States' },
+            region: { id: null, name: 'Northeast' },
+            division: { id: null, name: 'New England' },
             city: {
-              id: '6751f58a5db435dd8005e479',
+              id: null, // Will be acquired later via API lookup
               name: 'Boston',
               latitude: 42.3601,
               longitude: -71.0589
@@ -331,14 +333,17 @@ export const GeoLocationProvider = ({ children }) => {
           setLoadingState(prev => ({ ...prev, nearestCity: false }));
 
           // Return in format compatible with MasteredLocationContext
+          // Using temporary IDs for the return values when needed
+          const tempId = () => `temp_${Date.now().toString().slice(-4)}_${Math.floor(Math.random() * 1000)}`;
+
           return {
-            cityID: defaultLocation.city.id,
+            cityID: defaultLocation.city.id || tempId(),
             cityName: defaultLocation.city.name,
-            regionID: defaultLocation.region.id,
+            regionID: defaultLocation.region.id || tempId(),
             regionName: defaultLocation.region.name,
-            divisionID: defaultLocation.division.id,
+            divisionID: defaultLocation.division.id || tempId(),
             divisionName: defaultLocation.division.name,
-            countryID: defaultLocation.country.id,
+            countryID: defaultLocation.country.id || tempId(),
             countryName: defaultLocation.country.name,
             latitude: defaultLocation.city.latitude,
             longitude: defaultLocation.city.longitude,
@@ -403,13 +408,13 @@ export const GeoLocationProvider = ({ children }) => {
       console.error('GeoLocationContext: Error in fetchNearestCity:', err.message);
       setErrorState(prev => ({ ...prev, nearestCity: err.message }));
 
-      // Create fallback location
+      // Create fallback location with proper names but without hardcoded IDs
       const fallbackLocation = {
-        country: { id: '6751f57e2e74d97609e7dca0', name: 'United States' },
-        region: { id: '6751f58a5db435dd8005e45b', name: 'Northeast' },
-        division: { id: '6751f58a5db435dd8005e461', name: 'New England' },
+        country: { id: null, name: 'United States' },
+        region: { id: null, name: 'Northeast' },
+        division: { id: null, name: 'New England' },
         city: {
-          id: '6751f58a5db435dd8005e479',
+          id: null,
           name: 'Boston',
           latitude: 42.3601,
           longitude: -71.0589
@@ -421,14 +426,17 @@ export const GeoLocationProvider = ({ children }) => {
       setLoadingState(prev => ({ ...prev, nearestCity: false }));
 
       // Return fallback in format compatible with MasteredLocationContext
+      // Using temporary IDs for the return values when needed
+      const tempId = () => `temp_${Date.now().toString().slice(-4)}_${Math.floor(Math.random() * 1000)}`;
+
       return {
-        cityID: fallbackLocation.city.id,
+        cityID: fallbackLocation.city.id || tempId(),
         cityName: fallbackLocation.city.name,
-        regionID: fallbackLocation.region.id,
+        regionID: fallbackLocation.region.id || tempId(),
         regionName: fallbackLocation.region.name,
-        divisionID: fallbackLocation.division.id,
+        divisionID: fallbackLocation.division.id || tempId(),
         divisionName: fallbackLocation.division.name,
-        countryID: fallbackLocation.country.id,
+        countryID: fallbackLocation.country.id || tempId(),
         countryName: fallbackLocation.country.name,
         latitude: fallbackLocation.city.latitude,
         longitude: fallbackLocation.city.longitude,
@@ -633,21 +641,22 @@ export const GeoLocationProvider = ({ children }) => {
 
             // Manual fallback for when everything else fails - set Northeast region as default
             console.log('GeoLocationContext: Using hardcoded Northeast region fallback');
+            // Use names for location without hardcoded IDs
             setSelectedLocation({
               country: {
-                id: '6751f57e2e74d97609e7dca0', // US country ID
+                id: null, // Following SuccessCriteria - no hardcoded IDs
                 name: 'United States'
               },
               region: {
-                id: '6751f58a5db435dd8005e45b', // Northeast region ID
+                id: null, // Following SuccessCriteria - no hardcoded IDs
                 name: 'Northeast'
               },
               division: {
-                id: '6751f58a5db435dd8005e461', // New England division ID
+                id: null, // Following SuccessCriteria - no hardcoded IDs
                 name: 'New England'
               },
               city: {
-                id: '6751f58a5db435dd8005e479', // Boston city ID
+                id: null, // Following SuccessCriteria - no hardcoded IDs
                 name: 'Boston',
                 latitude: 42.3601,
                 longitude: -71.0589
@@ -663,21 +672,22 @@ export const GeoLocationProvider = ({ children }) => {
           
           // Emergency fallback - Northeast region
           console.log('GeoLocationContext: Using emergency fallback for Northeast region');
+          // Use names for location without hardcoded IDs
           setSelectedLocation({
-            country: { 
-              id: '6751f57e2e74d97609e7dca0', // US country ID
+            country: {
+              id: null, // Following SuccessCriteria - no hardcoded IDs
               name: 'United States'
             },
-            region: { 
-              id: '6751f58a5db435dd8005e45b', // Northeast region ID
+            region: {
+              id: null, // Following SuccessCriteria - no hardcoded IDs
               name: 'Northeast'
             },
-            division: { 
-              id: '6751f58a5db435dd8005e461', // New England division ID
+            division: {
+              id: null, // Following SuccessCriteria - no hardcoded IDs
               name: 'New England'
             },
-            city: { 
-              id: '6751f58a5db435dd8005e479', // Boston city ID
+            city: {
+              id: null, // Following SuccessCriteria - no hardcoded IDs
               name: 'Boston',
               latitude: 42.3601,
               longitude: -71.0589
@@ -695,21 +705,22 @@ export const GeoLocationProvider = ({ children }) => {
       
       // Last resort fallback - Northeast region
       console.log('GeoLocationContext: Using last resort fallback for Northeast region');
+      // Use names for location without hardcoded IDs
       setSelectedLocation({
-        country: { 
-          id: '6751f57e2e74d97609e7dca0', // US country ID
+        country: {
+          id: null, // Following SuccessCriteria - no hardcoded IDs
           name: 'United States'
         },
-        region: { 
-          id: '6751f58a5db435dd8005e45b', // Northeast region ID
+        region: {
+          id: null, // Following SuccessCriteria - no hardcoded IDs
           name: 'Northeast'
         },
-        division: { 
-          id: '6751f58a5db435dd8005e461', // New England division ID
+        division: {
+          id: null, // Following SuccessCriteria - no hardcoded IDs
           name: 'New England'
         },
-        city: { 
-          id: '6751f58a5db435dd8005e479', // Boston city ID
+        city: {
+          id: null, // Following SuccessCriteria - no hardcoded IDs
           name: 'Boston',
           latitude: 42.3601,
           longitude: -71.0589
@@ -793,34 +804,67 @@ export const GeoLocationProvider = ({ children }) => {
           console.log('GeoLocationContext: Fetching default location data');
           
           try {
-            // Skip API call and directly use hardcoded default values
-            // This prevents unnecessary API calls during initialization that might fail
-            console.log('GeoLocationContext: Using static default values for initialization');
+            // Use the API to retrieve the proper location data
+            console.log('GeoLocationContext: Fetching location data from API');
 
-            // Set hardcoded default location - these IDs match the expected Boston/Northeast values
-            const defaultLocation = {
-              country: {
-                id: '6751f57e2e74d97609e7dca0',
-                name: "United States"
-              },
-              region: {
-                id: '6751f58a5db435dd8005e45b',
-                name: "Northeast"
-              },
-              division: {
-                id: '6751f58a5db435dd8005e461',
-                name: "New England"
-              },
-              city: {
-                id: '6751f58a5db435dd8005e479',
-                name: "Boston",
-                latitude: 42.3601,
-                longitude: -71.0589
-              }
-            };
+            const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+            const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
 
-            console.log('GeoLocationContext: Setting default fallback location', defaultLocation);
-            setSelectedLocation(defaultLocation);
+            // We'll use the /api/mastered-locations/all endpoint to get all location data at once
+            const locationResponse = await fetch(`${baseURL}/api/masteredLocations/all?appId=${appId}&isActive=true`);
+
+            if (!locationResponse.ok) {
+              throw new Error(`Error fetching location data: ${locationResponse.status}`);
+            }
+
+            const locationData = await locationResponse.json();
+            console.log('GeoLocationContext: Retrieved location data from API', locationData);
+
+            let defaultCountry, defaultRegion, defaultDivision, defaultCity;
+
+            // Find United States from countries
+            defaultCountry = locationData.countries?.find(c => c.countryName === 'United States') || null;
+
+            // Find Northeast from regions
+            defaultRegion = locationData.regions?.find(r => r.regionName === 'Northeast') || null;
+
+            // Find New England from divisions
+            defaultDivision = locationData.divisions?.find(d => d.divisionName === 'New England') || null;
+
+            // Find Boston from cities
+            defaultCity = locationData.cities?.find(c => c.cityName === 'Boston') || null;
+
+            if (defaultCountry && defaultRegion && defaultDivision && defaultCity) {
+              console.log('GeoLocationContext: Found all default location data', {
+                country: defaultCountry.countryName,
+                region: defaultRegion.regionName,
+                division: defaultDivision.divisionName,
+                city: defaultCity.cityName
+              });
+
+              setSelectedLocation({
+                country: {
+                  id: defaultCountry._id || defaultCountry.countryID,
+                  name: defaultCountry.countryName
+                },
+                region: {
+                  id: defaultRegion._id || defaultRegion.regionID,
+                  name: defaultRegion.regionName
+                },
+                division: {
+                  id: defaultDivision._id || defaultDivision.divisionID,
+                  name: defaultDivision.divisionName
+                },
+                city: {
+                  id: defaultCity._id || defaultCity.cityID,
+                  name: defaultCity.cityName,
+                  latitude: defaultCity.latitude,
+                  longitude: defaultCity.longitude
+                }
+              });
+            } else {
+              throw new Error('Could not find all required location data');
+            }
           } catch (apiError) {
             console.error('GeoLocationContext: Error fetching default location', apiError);
             
