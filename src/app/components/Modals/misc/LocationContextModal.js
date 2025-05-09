@@ -127,10 +127,18 @@ const LocationContextModal = ({ open, onClose }) => {
       // Log the first few cities for debugging
       if (processedCities.length > 0) {
         console.log('Sample city data:', processedCities[0]);
-        console.log('First 3 city coordinates:', processedCities.slice(0, 3).map(c => 
+        console.log('First 3 city coordinates:', processedCities.slice(0, 3).map(c =>
           `${c.cityName}: [${c.latitude}, ${c.longitude}]`).join(', '));
       } else {
-        console.warn('No cities with valid coordinates found');
+        // Log more details about the cities array to diagnose the problem
+        console.warn('No cities with valid coordinates found - Debug info:', {
+          citiesArrayIsArray: Array.isArray(cities),
+          citiesLength: cities?.length,
+          firstRawCity: cities && cities.length > 0 ? cities[0] : null,
+          sampleCoords: cities && cities.length > 0
+            ? `lat: ${cities[0].latitude}, lng: ${cities[0].longitude}, location: ${JSON.stringify(cities[0].location)}`
+            : 'No cities'
+        });
 
         // Create a more comprehensive fallback set with various US cities
         // This prevents the "No cities with valid coordinates" error
