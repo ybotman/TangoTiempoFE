@@ -13,20 +13,26 @@ The geo-location system provides a way to:
 
 ## Architecture
 
-The system uses a parallel approach during this transition phase:
+The system now uses a hierarchical responsibility model:
 
-1. **Original Contexts**
-   - `RegionsContext` - For region selection
-   - `MasteredLocationContext` - For nearest city detection
+1. **Source of Truth**
+   - `GeoLocationContext` - Primary context for all location state and operations
 
-2. **New Unified Context**
-   - `GeoLocationContext` - Combines all location functionality while maintaining backward compatibility
+2. **Secondary Contexts**
+   - `MasteredLocationContext` - Pure data provider for canonical location data
+   - `RegionsContext` - Legacy context maintained for backward compatibility
+
+3. **Key Architectural Principles**
+   - Unidirectional data flow from GeoLocationContext to other contexts
+   - Elimination of circular dependencies through hierarchical responsibility
+   - Standardized coordinate handling across the system
+   - Comprehensive error handling and fallbacks at all levels
 
 ## Components
 
 ### GeoLocationContext
 
-This context is the new unified source of truth for location information:
+This context is the authoritative source of truth for all location information:
 
 ```javascript
 // Key state managed by GeoLocationContext
@@ -44,14 +50,28 @@ const [selectedLocation, setSelectedLocation] = useState({
   division: { id: null, name: null },
   city: { id: null, name: null, latitude: null, longitude: null }
 });
+
+const [loadingState, setLoadingState] = useState({
+  userLocation: false,
+  locationData: false,
+  nearestCity: false
+});
+
+const [errorState, setErrorState] = useState({
+  userLocation: null,
+  locationData: null,
+  nearestCity: null
+});
 ```
 
 The context provides:
-- Current user coordinates
-- Selected location in the hierarchy
-- Methods for updating and managing location
-- Loading and error states
-- Display text for current location
+- Current user coordinates with metadata
+- Selected location in the complete hierarchy
+- Primary implementation of `fetchNearestCity` with multiple fallback strategies
+- Granular loading and error states for better UX
+- Display text formatting for current location
+- Comprehensive initialization with timing controls
+- Coordinate format normalization and validation
 
 ### LocationInfo Component
 
@@ -61,11 +81,11 @@ This component displays the current location context in the calendar header:
 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
   <LocationOnIcon color="primary" fontSize="small" />
   <Typography variant="body2" fontWeight="bold">Location:</Typography>
-  
+
   <Chip label={region.name} size="small" color="primary" />
   <Chip label={division.name} size="small" color="primary" />
   <Chip label={city.name} size="small" color="primary" />
-  
+
   <Chip
     icon={<MyLocationIcon fontSize="small" />}
     label="My Location"
@@ -75,6 +95,60 @@ This component displays the current location context in the calendar header:
   />
 </Box>
 ```
+
+### LocationContextModal
+
+The LocationContextModal provides a map interface for selecting locations:
+
+```jsx
+// Map implementation with OpenStreetMap and Leaflet
+<MapContainer
+  center={center}
+  zoom={5}
+  style={{ height: '100%', width: '100%' }}
+  zoomControl={false}
+  key={`map-${mapContainerKey}-${nearestCity?.cityID || 'default'}`}
+>
+  <TileLayer
+    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution="&copy; OpenStreetMap contributors"
+  />
+  <ZoomControl position="bottomright" />
+
+  {/* Render cities as interactive markers */}
+  {citiesWithCoords.map((city) => {
+    const isCurrent = city._id === nearestCity.cityID;
+    const color = isCurrent ? 'green' : 'blue';
+
+    return (
+      <CircleMarker
+        key={`circle-${city._id}`}
+        center={[city.latitude, city.longitude]}
+        pathOptions={{
+          color,
+          fillColor: color,
+          fillOpacity: 0.8,
+          weight: 2,
+        }}
+        radius={isCurrent ? 12 : 8}
+        eventHandlers={{
+          click: () => {
+            if (!isCurrent) handleCityClick(city);
+          },
+        }}
+      />
+    );
+  })}
+</MapContainer>
+```
+
+The component includes:
+- Dynamic loading of cities from MasteredLocationContext
+- Visualization of all cities with current location highlighted
+- City selection that updates GeoLocationContext
+- Comprehensive error handling and loading states
+- Coordinate normalization for different API response formats
+- Fallback mechanisms when cities cannot be loaded
 
 ## Integration Points
 
