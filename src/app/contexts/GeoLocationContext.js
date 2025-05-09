@@ -793,40 +793,34 @@ export const GeoLocationProvider = ({ children }) => {
           console.log('GeoLocationContext: Fetching default location data');
           
           try {
-            const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-            const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
-            
-            // Look up by city name instead of ID
-            const cityResponse = await fetch(`${baseURL}/api/masteredLocations/cities?cityName=Boston&appId=${appId}`);
-            const cityData = await cityResponse.json();
-            
-            if (cityData && cityData.length > 0) {
-              const defaultCity = cityData[0];
-              console.log('GeoLocationContext: Setting default from fetched data', defaultCity);
-              
-              setSelectedLocation({
-                country: { 
-                  id: defaultCity.countryID, 
-                  name: defaultCity.countryName || "United States"
-                },
-                region: { 
-                  id: defaultCity.regionID, 
-                  name: defaultCity.regionName || "Northeast"
-                },
-                division: { 
-                  id: defaultCity.divisionID, 
-                  name: defaultCity.divisionName || "New England"
-                },
-                city: { 
-                  id: defaultCity.cityID, 
-                  name: defaultCity.cityName || "Boston",
-                  latitude: defaultCity.latitude || 42.3601,
-                  longitude: defaultCity.longitude || -71.0589
-                }
-              });
-            } else {
-              throw new Error('Failed to fetch default city data');
-            }
+            // Skip API call and directly use hardcoded default values
+            // This prevents unnecessary API calls during initialization that might fail
+            console.log('GeoLocationContext: Using static default values for initialization');
+
+            // Set hardcoded default location - these IDs match the expected Boston/Northeast values
+            const defaultLocation = {
+              country: {
+                id: '6751f57e2e74d97609e7dca0',
+                name: "United States"
+              },
+              region: {
+                id: '6751f58a5db435dd8005e45b',
+                name: "Northeast"
+              },
+              division: {
+                id: '6751f58a5db435dd8005e461',
+                name: "New England"
+              },
+              city: {
+                id: '6751f58a5db435dd8005e479',
+                name: "Boston",
+                latitude: 42.3601,
+                longitude: -71.0589
+              }
+            };
+
+            console.log('GeoLocationContext: Setting default fallback location', defaultLocation);
+            setSelectedLocation(defaultLocation);
           } catch (apiError) {
             console.error('GeoLocationContext: Error fetching default location', apiError);
             
