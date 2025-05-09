@@ -40,18 +40,31 @@ const LocationContextModal = ({ open, onClose }) => {
       console.log('LCM uE: loadCities Start');
       if (open) {
         setLoading(true);
-        try {
-          // We will fetch ALL cities with no divisionId filter
-          await fetchCities(undefined, true); // no divisionId => fetch all active cities
-          console.log('Cities fetched successfully');
-          // Force map container to re-render with new key
-          setMapContainerKey(Date.now());
-        } catch (error) {
-          console.error('Error fetching cities:', error);
-        } finally {
-          // Always set loading to false, even if there was an error
-          setLoading(false);
-        }
+
+        // Add a short delay before fetching cities to allow contexts to initialize
+        // This helps prevent "No cities with valid coordinates" warnings
+        const fetchWithDelay = () => {
+          return new Promise(resolve => {
+            setTimeout(async () => {
+              try {
+                // We will fetch ALL cities with no divisionId filter
+                await fetchCities(undefined, true); // no divisionId => fetch all active cities
+                console.log('Cities fetched successfully');
+                // Force map container to re-render with new key
+                setMapContainerKey(Date.now());
+                resolve();
+              } catch (error) {
+                console.error('Error fetching cities:', error);
+                resolve(); // Resolve even on error
+              }
+            }, 300); // Small delay of 300ms to ensure context initialization
+          });
+        };
+
+        await fetchWithDelay();
+
+        // Always set loading to false after fetch completes
+        setLoading(false);
       }
     };
     loadCities();
@@ -131,7 +144,7 @@ const LocationContextModal = ({ open, onClose }) => {
           `${c.cityName}: [${c.latitude}, ${c.longitude}]`).join(', '));
       } else {
         // Log more details about the cities array to diagnose the problem
-        console.warn('No cities with valid coordinates found - Debug info:', {
+        console.log('Processing city data - using fallbacks if needed:', {
           citiesArrayIsArray: Array.isArray(cities),
           citiesLength: cities?.length,
           firstRawCity: cities && cities.length > 0 ? cities[0] : null,

@@ -378,7 +378,12 @@ export const MasteredLocationProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    initializeContext();
+    // Add a small delay before initialization to ensure parent contexts are ready
+    const initTimer = setTimeout(() => {
+      initializeContext();
+    }, 100); // Small delay to ensure proper initialization order
+
+    return () => clearTimeout(initTimer);
   }, []);
 
   // Enhanced context value with more data services

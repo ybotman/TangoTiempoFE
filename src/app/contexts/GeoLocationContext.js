@@ -154,10 +154,10 @@ export const GeoLocationProvider = ({ children }) => {
       console.log('GeoLocationContext: RegionsContext not available or missing selectedRegion');
       return;
     }
-    
-    console.warn(
-      "RegionsContext is deprecated and will be removed in a future version. " +
-      "Please migrate to GeoLocationContext for all location operations."
+
+    // Use console.log instead of console.warn to reduce console noise during normal operation
+    console.log(
+      "RegionsContext is deprecated and will be migrated to GeoLocationContext in a future version."
     );
     
     console.log('GeoLocationContext: Syncing from RegionsContext', {
