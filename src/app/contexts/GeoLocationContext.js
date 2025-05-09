@@ -628,7 +628,7 @@ export const GeoLocationProvider = ({ children }) => {
               ipBased: false
             });
             
-            // Directly use our implementation with fallback
+            // Call our implementation with the default coordinates
             fetchNearestCityImpl(defaultLat, defaultLng);
 
             // Manual fallback for when everything else fails - set Northeast region as default
@@ -718,7 +718,7 @@ export const GeoLocationProvider = ({ children }) => {
     } finally {
       setLoadingState(prev => ({ ...prev, userLocation: false }));
     }
-  }, [externalFetchNearestCity, fetchNearestCityImpl, userLocation, setSelectedLocation]);
+  }, [fetchNearestCityImpl, userLocation, setSelectedLocation]);
 
   // Mark context as initialized after setup completes
   useEffect(() => {
