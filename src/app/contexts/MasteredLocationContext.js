@@ -6,7 +6,8 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import PropTypes from 'prop-types';
 
 const MasteredLocationContext = createContext();
@@ -16,7 +17,11 @@ export const MasteredLocationProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchNearestCity = async (latitude, longitude, maxDistance = 500000) => {
+  // Get the GeoLocationContext to register our functions
+  const geoLocationContext = useGeoLocation();
+
+  // Fetch nearest city with improved error handling and rate limiting management
+  const fetchNearestCity = useCallback(async (latitude, longitude, maxDistance = 500000) => {
     if (!latitude || !longitude) {
       setError('Latitude and longitude are required.');
       return;
@@ -74,7 +79,20 @@ export const MasteredLocationProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Register our functions with GeoLocationContext after initialization
+  useEffect(() => {
+    // Only register if GeoLocationContext is available and has the registration function
+    if (geoLocationContext?.registerMasteredLocationFunctions) {
+      console.log('MasteredLocationContext: Registering functions with GeoLocationContext');
+      geoLocationContext.registerMasteredLocationFunctions({
+        fetchNearestCity
+      });
+    } else {
+      console.warn('MasteredLocationContext: Cannot register functions with GeoLocationContext - not available');
+    }
+  }, [geoLocationContext, fetchNearestCity]);
 
   const initializeContext = async () => {
     try {
@@ -146,6 +164,7 @@ export const MasteredLocationProvider = ({ children }) => {
           countryName: 'United States',
           latitude: 42.3601,
           longitude: -71.0589,
+          isFallback: true // Mark as fallback data
         });
       }
     } catch (err) {
@@ -165,6 +184,7 @@ export const MasteredLocationProvider = ({ children }) => {
         countryName: 'United States',
         latitude: 42.3601,
         longitude: -71.0589,
+        isFallback: true // Mark as fallback data for error case
       });
     }
   };
@@ -172,6 +192,21 @@ export const MasteredLocationProvider = ({ children }) => {
   useEffect(() => {
     initializeContext();
   }, []);
+
+  // If GeoLocationContext ever provides a city ID but we don't have a nearestCity yet,
+  // attempt to sync by fetching nearest city data for those coordinates
+  useEffect(() => {
+    const geoLocationCity = geoLocationContext?.selectedLocation?.city;
+    if (geoLocationCity?.id && geoLocationCity?.latitude && geoLocationCity?.longitude && !nearestCity) {
+      console.log('MasteredLocationContext: Syncing with coordinates from GeoLocationContext', {
+        cityId: geoLocationCity.id,
+        cityName: geoLocationCity.name,
+        latitude: geoLocationCity.latitude,
+        longitude: geoLocationCity.longitude
+      });
+      fetchNearestCity(geoLocationCity.latitude, geoLocationCity.longitude);
+    }
+  }, [geoLocationContext?.selectedLocation?.city, nearestCity, fetchNearestCity]);
 
   return (
     <MasteredLocationContext.Provider value={{ nearestCity, loading, error, fetchNearestCity }}>

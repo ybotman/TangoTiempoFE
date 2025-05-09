@@ -35,7 +35,7 @@ const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip)
 // const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
 
 const VenueSelectionModal = ({ open, onClose }) => {
-  const { selectedLocation } = useGeoLocation();
+  const { selectedLocation, isInitialized } = useGeoLocation();
   const {
     filteredVenues,
     selectedVenue,
@@ -70,9 +70,12 @@ const VenueSelectionModal = ({ open, onClose }) => {
   // Fetch venues when modal opens
   useEffect(() => {
     const loadVenues = async () => {
-      if (open && hasSelectedCity) {
+      // Only attempt to load venues if GeoLocation context is initialized
+      // and we have a selected city
+      if (open && hasSelectedCity && isInitialized) {
         setLoading(true);
         try {
+          console.log('VenueSelectionModal: Loading venues for city', selectedLocation?.city?.name);
           refreshVenues();
           console.log('Venues fetched successfully');
           // Force map container to re-render with new key
@@ -82,6 +85,12 @@ const VenueSelectionModal = ({ open, onClose }) => {
         } finally {
           setLoading(false);
         }
+      } else if (open) {
+        console.log('VenueSelectionModal: Not ready to load venues yet', {
+          hasSelectedCity,
+          isInitialized,
+          cityName: selectedLocation?.city?.name
+        });
       }
     };
     loadVenues();
@@ -98,7 +107,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
     }, 5000); // 5 second timeout
     
     return () => clearTimeout(timeoutId);
-  }, [open, refreshVenues, hasSelectedCity, loading]);
+  }, [open, refreshVenues, hasSelectedCity, loading, isInitialized, selectedLocation?.city?.name]);
 
   // Set map ready when filtered venues change
   useEffect(() => {
@@ -157,7 +166,17 @@ const VenueSelectionModal = ({ open, onClose }) => {
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Select Venue</DialogTitle>
       <DialogContent style={{ height: '500px', position: 'relative' }}>
-        {!hasSelectedCity ? (
+        {!isInitialized ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
+            <CircularProgress />
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              Initializing location system...
+            </Typography>
+            <Typography variant="caption" sx={{ mt: 1, color: 'text.secondary' }}>
+              Please wait while we set up the venue selection system.
+            </Typography>
+          </Box>
+        ) : !hasSelectedCity ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <Typography color="primary" variant="h6" gutterBottom>Please select a city first</Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
@@ -190,12 +209,20 @@ const VenueSelectionModal = ({ open, onClose }) => {
         ) : !hasVenues ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <Typography color="error" gutterBottom>No venues found in this area</Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Try expanding the search to the division level or contact your administrator to add venues.
+            <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
+              Try expanding the search to the division level using the switch above, or increasing the radius if in city view.
             </Typography>
-            <Button onClick={onClose} color="primary" variant="outlined">
-              Close
-            </Button>
+            <Typography variant="caption" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
+              If you still don't see any venues, your administrator may need to add venues in this region.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button onClick={() => setUseDivisionScope(true)} color="primary" variant="contained">
+                Switch to Division View
+              </Button>
+              <Button onClick={onClose} color="primary" variant="outlined">
+                Close
+              </Button>
+            </Box>
           </Box>
         ) : (
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

@@ -131,8 +131,8 @@ const LocationContextModal = ({ open, onClose }) => {
           `${c.cityName}: [${c.latitude}, ${c.longitude}]`).join(', '));
       } else {
         console.warn('No cities with valid coordinates found');
-        
-        // FALLBACK: If no cities have coordinates, create a minimal fallback set
+
+        // Create a more comprehensive fallback set with various US cities
         // This prevents the "No cities with valid coordinates" error
         const fallbackCities = [
           {
@@ -148,9 +148,37 @@ const LocationContextModal = ({ open, onClose }) => {
             latitude: 40.7128,
             longitude: -74.006,
             masteredDivisionId: '6751f58a5db435dd8005e461'
+          },
+          {
+            _id: 'fallback-chicago',
+            cityName: 'Chicago (Fallback)',
+            latitude: 41.8781,
+            longitude: -87.6298,
+            masteredDivisionId: 'fallback-midwest'
+          },
+          {
+            _id: 'fallback-miami',
+            cityName: 'Miami (Fallback)',
+            latitude: 25.7617,
+            longitude: -80.1918,
+            masteredDivisionId: 'fallback-southeast'
+          },
+          {
+            _id: 'fallback-la',
+            cityName: 'Los Angeles (Fallback)',
+            latitude: 34.0522,
+            longitude: -118.2437,
+            masteredDivisionId: 'fallback-west'
+          },
+          {
+            _id: 'fallback-seattle',
+            cityName: 'Seattle (Fallback)',
+            latitude: 47.6062,
+            longitude: -122.3321,
+            masteredDivisionId: 'fallback-northwest'
           }
         ];
-        
+
         console.log('Using fallback cities for map display');
         setCitiesWithCoords(fallbackCities);
         setMapContainerKey(Date.now());
@@ -284,16 +312,18 @@ const LocationContextModal = ({ open, onClose }) => {
           </Box>
         ) : !hasCities ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
-            <Typography color="error" gutterBottom>No cities with coordinates available</Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              The system couldn't find any cities with valid location coordinates.
+            <Typography color="primary" variant="h6" gutterBottom>Using Fallback Location Data</Typography>
+            <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
+              We couldn't find city data with coordinates in your account, so we're showing default US cities.
             </Typography>
-            <Typography variant="caption" sx={{ mb: 2 }}>
-              Please contact your administrator to ensure city data includes latitude and longitude.
+            <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
+              You can still select a city from the map to continue using the app.
             </Typography>
-            <Button onClick={onClose} color="primary" variant="outlined">
-              Close
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button onClick={onClose} color="primary" variant="outlined">
+                Close
+              </Button>
+            </Box>
           </Box>
         ) : !nearestCity ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">

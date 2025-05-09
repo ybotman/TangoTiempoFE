@@ -72,7 +72,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
   
   // Get selected location and loading state from GeoLocationContext
-  const { selectedLocation, isLoading: locationLoading } = useGeoLocation();
+  const { selectedLocation, isLoading: locationLoading, isInitialized } = useGeoLocation();
   
   // Check if we're in development mode for debug menu visibility
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -80,22 +80,28 @@ const SidebarDrawer = ({ open, onClose }) => {
   // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
   const [venueSelectionReady, setVenueSelectionReady] = useState(false);
   
-  // Effect to handle delayed city check to avoid race conditions
+  // Effect to handle venue selection readiness
   useEffect(() => {
+    // Always consider ready if initialized, even with no city yet
+    if (isInitialized) {
+      setVenueSelectionReady(true);
+      return;
+    }
+
     // If we already have a city ID, immediately set ready state
     if (selectedLocation?.city?.id) {
       setVenueSelectionReady(true);
       return;
     }
-    
+
     // Otherwise, give GeoLocationContext a moment to initialize
     const timer = setTimeout(() => {
-      console.log('SidebarDrawer: Checking venue selection readiness after delay');
+      console.log('SidebarDrawer: Setting venue selection ready after timeout');
       setVenueSelectionReady(true);
-    }, 1000); // 1 second delay
-    
+    }, 2000); // 2 second delay, increased from original
+
     return () => clearTimeout(timer);
-  }, [selectedLocation?.city?.id]);
+  }, [selectedLocation?.city?.id, isInitialized]);
 
   return (
     <>
@@ -150,15 +156,36 @@ const SidebarDrawer = ({ open, onClose }) => {
           </ListItem>
           {/* New Venue Selection Menu Item with improved loading state handling */}
           {!venueSelectionReady ? (
-            // Show loading state while GeoLocationContext initializes
+            // Show loading state while contexts initialize
             <ListItem>
               <ListItemIcon>
                 <CircularProgress size={20} color="primary" />
               </ListItemIcon>
               <ListItemText primary="Loading Venues..." />
             </ListItem>
+          ) : !isInitialized ? (
+            // System is still initializing but we want to show something
+            <ListItem
+              button="true"
+              onClick={() => {
+                setVenueSelectionModalOpen(true);
+                onClose();
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: 'text.secondary',
+              }}
+            >
+              <ListItemIcon>
+                <BusinessIcon sx={{ color: 'gray' }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Select Venue"
+                secondary="Location system initializing..."
+              />
+            </ListItem>
           ) : (
-            // Interactive menu item that's always clickable
+            // Interactive menu item that's always clickable and shows proper state
             <ListItem
               button="true"
               onClick={() => {
@@ -173,8 +200,8 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemIcon>
                 <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
               </ListItemIcon>
-              <ListItemText 
-                primary="Select Venue" 
+              <ListItemText
+                primary="Select Venue"
                 secondary={!selectedLocation?.city?.id ? "Select a city first" : null}
               />
             </ListItem>
