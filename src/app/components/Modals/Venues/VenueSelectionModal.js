@@ -362,7 +362,6 @@ const VenueSelectionModal = ({ open, onClose }) => {
                   const isSelected = selectedVenue && venue._id === selectedVenue._id;
                   // Use a simple color scheme - orange for selected, blue for others
                   let color = isSelected ? 'orange' : 'DodgerBlue';
-
                   return (
                     <CircleMarker
                       key={venue._id}
