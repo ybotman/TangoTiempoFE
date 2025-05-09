@@ -229,43 +229,11 @@ const VenueSelectionModal = ({ open, onClose }) => {
             {/* Filter controls */}
             <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2, gap: 2 }}>
               <Grid container spacing={2} alignItems="center">
-                <Grid item xs={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="venue-category-label">Event Type</InputLabel>
-                    <Select
-                      labelId="venue-category-label"
-                      id="venue-category"
-                      value={venueCategory}
-                      label="Event Type"
-                      onChange={handleVenueCategoryChange}
-                    >
-                      {venueCategories.map(category => (
-                        <MenuItem key={category.id} value={category.id}>
-                          {category.id !== 'all' ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Box 
-                                sx={{ 
-                                  width: 16, 
-                                  height: 16, 
-                                  borderRadius: '50%', 
-                                  bgcolor: category.color, 
-                                  mr: 1 
-                                }} 
-                              />
-                              {category.name}
-                            </Box>
-                          ) : category.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <FormControlLabel
                     control={
-                      <Switch 
-                        checked={useDivisionScope} 
+                      <Switch
+                        checked={useDivisionScope}
                         onChange={handleScopeChange}
                         color="primary"
                       />
@@ -274,7 +242,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
                   />
                 </Grid>
               </Grid>
-              
+
               {/* Radius Filter - Only show when in City view (not Division view) */}
               {!useDivisionScope && (
                 <Box sx={{ px: 2 }}>
@@ -345,19 +313,8 @@ const VenueSelectionModal = ({ open, onClose }) => {
                 {/* Render venue markers */}
                 {filteredVenues.map((venue) => {
                   const isSelected = selectedVenue && venue._id === selectedVenue._id;
-                  // Use categoryColors from the utility for consistent color scheme
-                  let color;
-                  if (isSelected) {
-                    color = 'orange';
-                  } else if (venue.venueCategory && categoryColors[venue.venueCategory]) {
-                    color = categoryColors[venue.venueCategory];
-                  } else if (venue.eventCategory && categoryColors[venue.eventCategory]) {
-                    color = categoryColors[venue.eventCategory];
-                  } else if (venue.primaryEventType && categoryColors[venue.primaryEventType]) {
-                    color = categoryColors[venue.primaryEventType];
-                  } else {
-                    color = categoryColors.Unknown || 'purple';
-                  }
+                  // Use a simple color scheme - orange for selected, blue for others
+                  let color = isSelected ? 'orange' : 'DodgerBlue';
                   
                   return (
                     <CircleMarker
