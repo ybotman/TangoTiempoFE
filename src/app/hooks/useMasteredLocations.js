@@ -118,20 +118,68 @@ export function useMasteredLocations() {
         }
 
         // Ensure each city has latitude/longitude for the map
-        const citiesWithCoordinates = citiesArray.filter(
-          (city) => city.latitude !== undefined && 
-                   city.longitude !== undefined && 
-                   city.latitude !== null && 
+        let citiesWithCoordinates = citiesArray.filter(
+          (city) => city.latitude !== undefined &&
+                   city.longitude !== undefined &&
+                   city.latitude !== null &&
                    city.longitude !== null &&
                    !isNaN(parseFloat(city.latitude)) &&
                    !isNaN(parseFloat(city.longitude))
         );
 
         console.log(`Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
+
+        // If we have cities with coordinates, log a sample
         if (citiesWithCoordinates.length > 0) {
           console.log('Sample city data:', citiesWithCoordinates[0]);
-        } else {
-          console.warn('No cities with valid coordinates found in API response');
+        }
+        // If we have cities but none with coordinates, check if this is a real problem
+        else if (citiesArray.length > 0) {
+          // Check if any cities have location.coordinates even if not in the expected format
+          const citiesWithAnyCoords = citiesArray.filter(
+            city => city.location && city.location.coordinates
+          );
+
+          if (citiesWithAnyCoords.length > 0) {
+            console.log('Found cities with coordinates in unexpected format - will attempt to normalize');
+
+            // Try to recover these coordinates by normalizing them
+            const recoveredCities = citiesArray.map(city => {
+              // If city has location.coordinates, try to extract them
+              if (city.location && city.location.coordinates) {
+                return {
+                  ...city,
+                  latitude: Array.isArray(city.location.coordinates) ?
+                    city.location.coordinates[1] :
+                    city.location.coordinates.latitude || city.latitude,
+                  longitude: Array.isArray(city.location.coordinates) ?
+                    city.location.coordinates[0] :
+                    city.location.coordinates.longitude || city.longitude
+                };
+              }
+              return city;
+            }).filter(city =>
+              city.latitude !== undefined &&
+              city.longitude !== undefined &&
+              city.latitude !== null &&
+              city.longitude !== null
+            );
+
+            if (recoveredCities.length > 0) {
+              console.log(`Recovered ${recoveredCities.length} cities with coordinates`);
+              // Use the recovered cities
+              citiesWithCoordinates = recoveredCities;
+            }
+          }
+
+          // Only log this as info if we still have no valid cities
+          if (citiesWithCoordinates.length === 0) {
+            console.log('Cities found but none have valid coordinates - this may need investigation');
+          }
+        }
+        // No cities at all - this is probably during initialization
+        else {
+          console.log('No cities found in API response - this might be expected during initialization');
         }
         setCities(citiesWithCoordinates);
       } catch (err) {

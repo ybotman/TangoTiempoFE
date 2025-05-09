@@ -98,3 +98,5 @@ web_modules/
 .DS_Store
 .tern-port
 .lock-wscript.eslintignore
+
+**/.claude/settings.local.json
