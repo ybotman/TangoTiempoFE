@@ -1,7 +1,7 @@
 # FEATURE_3003_OrganizerSelectionModal
 
 ## Summary
-This feature adds a new "Select Organizer" menu option to the hamburger menu, allowing users to filter events based on multiple selected organizers. The organizers will be displayed in a modal with a multi-column layout and checkbox selection, with options to navigate to organizer profiles and filter by recently active organizers.
+This feature adds a new "Select Organizer" menu option to the hamburger menu, allowing users to filter events based on multiple selected organizers. The organizers will be displayed in a modal with a multi-column layout and checkbox selection, leveraging the existing event filtering system which already supports organizer filtering.
 
 ## Motivation
 - Enhance user experience by providing additional filtering capabilities
@@ -19,26 +19,28 @@ This feature adds a new "Select Organizer" menu option to the hamburger menu, al
   - Placeholder buttons for navigation to organizer profile pages
   - Search functionality within the modal
   - Sorting organizers alphabetically for easy selection
+  - Leveraging existing usePostFilter hook which already supports organizer filtering
 
 - **Out-of-Scope:**
   - Changes to the backend API or data model
   - Adding, editing, or managing organizers
   - Changes to event creation or editing workflows
   - Implementation of actual organizer profile pages
+  - Map-based UI elements (unlike venue selection)
 
 ## Feature Behavior
 | Area       | Behavior Description                                  |
 |------------|--------------------------------------------------------|
 | UI         | - New menu item in hamburger menu, positioned between "Select Nearest City" and "Select Venue"<br>- Modal with multi-column organizer list (2 columns)<br>- Checkbox selection for multiple organizers<br>- Search box for quick filtering<br>- Toggle for "Recently Active Organizers Only"<br>- Buttons to navigate to organizer profiles<br>- "Select All" and "Clear All" options<br>- "Apply" and "Cancel" buttons<br>- Visual indication of active filters |
-| API        | - Use existing endpoints, no new API changes required<br>- Filter organizers server-side by isActive:true and matching region to user's context |
+| API        | - Use existing endpoints, no new API changes required<br>- Filter organizers server-side by isActive:true and matching region to user's context<br>- Leverage existing useOrganizers hook for data fetching |
 | Backend    | - No backend changes required (client-side filtering for selected organizers) |
-| Integration | - Integration with GeoLocationContext for region-based filtering<br>- Integration with existing event display and filtering system<br>- Post-API filter similar to category filtering in PostFilter component |
+| Integration | - Integration with GeoLocationContext for region-based filtering<br>- Integration with usePostFilter which already supports organizer filtering<br>- Add selected organizers array to useCalendarPage state management |
 
 ## Design
 The modal will present organizers in a clean, two-column layout with:
 - Header with title, search box, and filter toggle
 - Selection controls (Select All, Clear All)
-- Multi-column scrollable list of organizers with checkboxes
+- Multi-column scrollable list of organizers with checkboxes (no map view needed)
 - Each organizer row includes a link button to future profile page
 - Footer with selected count and action buttons
 
@@ -50,8 +52,8 @@ The modal will present organizers in a clean, two-column layout with:
 | ⏳ Pending      | Add "Recently Active Organizers" toggle                    | 2025-05-09    |
 | ⏳ Pending      | Add placeholder navigation buttons to organizer profiles   | 2025-05-09    |
 | ⏳ Pending      | Add "Select Organizer" option to hamburger menu           | 2025-05-09    |
-| ⏳ Pending      | Create useOrganizerFilter hook for post-API filtering      | 2025-05-09    |
-| ⏳ Pending      | Integrate with event display filtering in calendar view    | 2025-05-09    |
+| ⏳ Pending      | Add selectedOrganizers state to useCalendarPage           | 2025-05-09    |
+| ⏳ Pending      | Pass selectedOrganizers to usePostFilter                  | 2025-05-09    |
 | ⏳ Pending      | Add visual indication for active organizer filters         | 2025-05-09    |
 | ⏳ Pending      | Implement local storage persistence for selections         | 2025-05-09    |
 | ⏳ Pending      | Write tests for organizer selection functionality          | 2025-05-09    |
@@ -61,7 +63,7 @@ The modal will present organizers in a clean, two-column layout with:
 If rollback is required:
 - Remove the "Select Organizer" menu item from hamburger menu
 - Remove the OrganizerSelectionModal component
-- Remove the useOrganizerFilter hook
+- Remove selectedOrganizers state from useCalendarPage
 - Clear any stored organizer selections from local storage
 - Revert to standard filtering without organizer selection
 
@@ -76,7 +78,13 @@ If rollback is required:
 - **Filtering Approach**:
   1. Server-side: Filter organizers by `isActive: true` and matching region using GeoLocationContext
   2. UI Filtering: Allow further filtering by "Recently Active" toggle and search box
-  3. Event Filtering: Apply selected organizers as a post-API filter on events
+  3. Event Filtering: Apply selected organizers as a post-API filter on events using existing usePostFilter hook
+
+- **Implementation Findings**:
+  - The usePostFilter hook already supports filtering by organizer IDs (line 57 in usePostFilter.js)
+  - Events have an `organizerId` field in their `extendedProps` that links to the organizer
+  - The useOrganizers hook already filters by `isActive: true` and region
+  - No need for a custom filtering hook, just pass selected organizers to usePostFilter
 
 - **Performance Considerations**:
   - Cache organizer selections in local storage to persist between sessions
