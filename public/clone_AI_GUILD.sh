@@ -8,7 +8,7 @@ TARGET_DIR="AI-Guild"
 BRANCH="main"
 
 # 1. Verify we’re in the public/ folder
-if [[ "$(basename "$PWD")" != "public" ]]; then
+if [[ "$(basename "$PWD")" != "public" ]]; thenre
   echo "❌ Please cd into your-app/public before running this."
   exit 1
 fi
