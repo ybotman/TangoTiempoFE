@@ -6,7 +6,7 @@
 // No features are dropped. All existing code is preserved and functional.
 // This ensures that if nearestCity is not yet defined, we pass empty strings to useEvents, preventing runtime errors.
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEvents, useEventOperations } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
@@ -34,6 +34,23 @@ export const useCalendarPage = () => {
   const [eventToEdit, setEventToEdit] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const calendarRef = useRef(null);
+
+  // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
+  const [selectedOrganizers, setSelectedOrganizers] = useState(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('selectedOrganizers');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Effect to save selectedOrganizers to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectedOrganizers) {
+      localStorage.setItem('selectedOrganizers', JSON.stringify(selectedOrganizers));
+    }
+  }, [selectedOrganizers]);
 
   // Use GeoLocationContext as primary source, with fallback to MasteredLocationContext
   // Ensure we have valid string values to avoid API errors
@@ -69,7 +86,11 @@ export const useCalendarPage = () => {
     ? transformEvents(events) 
     : [];
     
-  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(transformedEvents, categories);
+  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(
+    transformedEvents,
+    categories,
+    selectedOrganizers // Pass selectedOrganizers to usePostFilter
+  );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
     const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
@@ -254,7 +275,7 @@ export const useCalendarPage = () => {
     menuAnchor,
     menuItems,
     selectedEventDetails,
-    // Add loading and error states 
+    // Add loading and error states
     eventsLoading,
     eventsError,
     // Location info
@@ -263,6 +284,9 @@ export const useCalendarPage = () => {
     cityName,
     // Edit mode properties
     isEditMode,
-    eventToEdit
+    eventToEdit,
+    // Organizer selection state
+    selectedOrganizers,
+    setSelectedOrganizers
   };
 };

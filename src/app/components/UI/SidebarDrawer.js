@@ -20,6 +20,7 @@ import {
   Typography,
   //  Collapse,
   CircularProgress,
+  Box,
 } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
@@ -49,7 +50,9 @@ import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal'
 import MapIcon from '@mui/icons-material/Map';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
 import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
+import RegionalOrganizerSelection from '@/components/Modals/RegionalOrganizers/RegionalOrganizerSelection'; // ORGANIZER SELECTION
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useCalendarPage } from '@/hooks/useCalendarPage';
 
 const SidebarDrawer = ({ open, onClose }) => {
   //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -62,17 +65,23 @@ const SidebarDrawer = ({ open, onClose }) => {
 
   // NEW STATE FOR LOCATION MODAL
   const [locationModalOpen, setLocationModalOpen] = useState(false);
-  
+
   // NEW STATE FOR VENUE SELECTION MODAL
   const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
-  
+
+  // NEW STATE FOR ORGANIZER SELECTION MODAL
+  const [organizerSelectionModalOpen, setOrganizerSelectionModalOpen] = useState(false);
+
   // NEW STATE FOR DEBUG MENU
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
-  
+
   // Get selected location and loading state from GeoLocationContext
   const { selectedLocation, isLoading: locationLoading, isInitialized } = useGeoLocation();
+
+  // Get the organizer selection state from useCalendarPage
+  const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
   
   // Check if we're in development mode for debug menu visibility
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -154,7 +163,65 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Select Nearest City" />
           </ListItem>
-          {/* New Venue Selection Menu Item with improved loading state handling */}
+          {/* Select Organizer Menu Item */}
+          <ListItem
+            button="true"
+            onClick={() => {
+              setOrganizerSelectionModalOpen(true);
+              onClose();
+            }}
+            sx={{
+              cursor: 'pointer',
+              color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
+              bgcolor: selectedOrganizers?.length > 0 ? 'rgba(63, 81, 181, 0.08)' : 'transparent',
+              '&:hover': {
+                bgcolor: selectedOrganizers?.length > 0 ? 'rgba(63, 81, 181, 0.12)' : 'rgba(0, 0, 0, 0.04)'
+              },
+              borderLeft: selectedOrganizers?.length > 0 ? '4px solid #3f51b5' : 'none',
+              pl: selectedOrganizers?.length > 0 ? 1 : 2 // Compensate for the border
+            }}
+          >
+            <ListItemIcon>
+              <GroupIcon sx={{
+                color: !selectedLocation?.city?.id
+                  ? 'gray'
+                  : selectedOrganizers?.length > 0
+                    ? '#3f51b5'
+                    : 'indigo'
+              }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography>Select Organizer</Typography>
+                  {selectedOrganizers?.length > 0 && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        bgcolor: '#3f51b5',
+                        color: 'white',
+                        borderRadius: '10px',
+                        px: 1,
+                        py: 0.2,
+                        ml: 1
+                      }}
+                    >
+                      {selectedOrganizers.length}
+                    </Typography>
+                  )}
+                </Box>
+              }
+              secondary={
+                !selectedLocation?.city?.id
+                  ? "Select a city first"
+                  : selectedOrganizers?.length > 0
+                    ? `${selectedOrganizers.length} organizer${selectedOrganizers.length !== 1 ? 's' : ''} selected`
+                    : null
+              }
+            />
+          </ListItem>
+
+          {/* Venue Selection Menu Item with improved loading state handling */}
           {!venueSelectionReady ? (
             // Show loading state while contexts initialize
             <ListItem>
@@ -396,6 +463,15 @@ const SidebarDrawer = ({ open, onClose }) => {
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
       <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
       <VenueSelectionModal open={venueSelectionModalOpen} onClose={() => setVenueSelectionModalOpen(false)} />
+      <RegionalOrganizerSelection
+        open={organizerSelectionModalOpen}
+        onClose={() => setOrganizerSelectionModalOpen(false)}
+        selectedOrganizers={selectedOrganizers}
+        onSelectOrganizers={(selected) => {
+          console.log('Selected organizers:', selected);
+          setSelectedOrganizers(selected);
+        }}
+      />
       <DebugMenu open={debugMenuOpen} onClose={() => setDebugMenuOpen(false)} /> {/* DEBUG MENU */}
     </>
   );
