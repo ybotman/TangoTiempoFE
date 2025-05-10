@@ -47,10 +47,10 @@ The modal will present organizers in a clean, two-column layout with:
 ## Tasks
 | Status         | Task                                                      | Last Updated  |
 |----------------|-----------------------------------------------------------|---------------|
-| ⏳ Pending      | Create OrganizerSelectionModal component with checkboxes   | 2025-05-09    |
-| ⏳ Pending      | Implement multi-column layout and search functionality     | 2025-05-09    |
-| ⏳ Pending      | Add "Recently Active Organizers" toggle                    | 2025-05-09    |
-| ⏳ Pending      | Add placeholder navigation buttons to organizer profiles   | 2025-05-09    |
+| 🚧 In Progress | Create OrganizerSelectionModal component with checkboxes   | 2025-05-09    |
+| 🚧 In Progress | Implement multi-column layout and search functionality     | 2025-05-09    |
+| 🚧 In Progress | Add "Recently Active Organizers" toggle                    | 2025-05-09    |
+| 🚧 In Progress | Add placeholder navigation buttons to organizer profiles   | 2025-05-09    |
 | ⏳ Pending      | Add "Select Organizer" option to hamburger menu           | 2025-05-09    |
 | ⏳ Pending      | Add selectedOrganizers state to useCalendarPage           | 2025-05-09    |
 | ⏳ Pending      | Pass selectedOrganizers to usePostFilter                  | 2025-05-09    |
@@ -58,6 +58,24 @@ The modal will present organizers in a clean, two-column layout with:
 | ⏳ Pending      | Implement local storage persistence for selections         | 2025-05-09    |
 | ⏳ Pending      | Write tests for organizer selection functionality          | 2025-05-09    |
 | ⏳ Pending      | Final review and testing                                   | 2025-05-09    |
+
+## Implementation Plan
+
+1. **Phase 1: Core Component** (Current)
+   - Create OrganizerSelectionModal component
+   - Implement organizer filtering and selection logic
+   - Add search functionality and "Recently Active" toggle
+
+2. **Phase 2: Integration**
+   - Update SidebarDrawer with new menu item
+   - Add state management to useCalendarPage
+   - Implement localStorage persistence
+
+3. **Phase 3: Polishing**
+   - Add visual indicators for active filters
+   - Add placeholder navigation buttons
+   - Implement tests
+   - Final review and optimization
 
 ## Rollback Plan
 If rollback is required:
@@ -85,6 +103,12 @@ If rollback is required:
   - Events have an `organizerId` field in their `extendedProps` that links to the organizer
   - The useOrganizers hook already filters by `isActive: true` and region
   - No need for a custom filtering hook, just pass selected organizers to usePostFilter
+
+- **Component Architecture**:
+  - **OrganizerSelectionModal**: New component with checkboxes, search, and "Recently Active" toggle
+  - **SidebarDrawer**: Update to add new menu item between "Select Nearest City" and "Select Venue"
+  - **useCalendarPage**: Add selectedOrganizers state and persistence logic
+  - **CalendarPage**: Update to pass selectedOrganizers to SiteMenuBar
 
 - **Performance Considerations**:
   - Cache organizer selections in local storage to persist between sessions
