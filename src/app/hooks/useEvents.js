@@ -191,12 +191,14 @@ export function useEvents({
         console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
       } else if (user && user.roles?.includes('RegionalOrganizer')) {
         // If user has RO role but we're not using it, explain why
+        /* Commented out to reduce console noise
         console.warn('User has RegionalOrganizer role but',
           !selectedRole ? 'selectedRole is not set' :
           selectedRole !== 'RegionalOrganizer' ? `selectedRole is "${selectedRole}" instead of "RegionalOrganizer"` :
           !user.backendInfo?.regionalOrganizerInfo?.organizerId ? 'regionalOrganizerInfo.organizerId is missing' :
           'unknown reason'
         );
+        */
       }
 
       console.log('Fetching events with params:', params);
