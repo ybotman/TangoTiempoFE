@@ -96,7 +96,7 @@ _Fix details, implementation notes, and blockers._
 ## Resolution Log
 - **Commit/Branch:** `issue/1009-regional-organizer-settings-not-working`
 - **Commit:** Added comprehensive error handling to RegionalOrganizersDelegated.js and RegionalOrganizersModal.js
-- **PR:** Not yet created
+- **Merged To:** DEVL branch on 2025-05-10
 - **Deployed To:** Local development environment
 - **Verified By:** Initial testing in development
 
