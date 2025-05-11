@@ -7,22 +7,36 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   const [venueDetails, setVenueDetails] = useState(null);
 
   // Extract event details - support both legacy and new fields
-  const { 
-    categoryFirst, 
-    categorySecond, 
+  const {
+    categoryFirst,
+    categorySecond,
     categoryThird,
-    // Use venueId/venueName first, fallback to locationID/locationName
-    venueId, 
+    // Use venueID/venueName first, fallback to locationID/locationName
+    venueID,
     venueName,
-    locationID, 
-    locationName, 
-    ownerOrganizerName, 
-    active, 
-    isActive 
+    locationID,
+    locationName,
+    ownerOrganizerName,
+    active,
+    isActive
   } = eventDetails?.extendedProps || {};
-  
-  // Use either venueId or legacy locationID
-  const currentVenueId = venueId || locationID;
+
+  // Convert venueID and locationID to strings if they're objects or MongoDB IDs
+  // This ensures we're always working with string IDs
+  const getIdString = (id) => {
+    if (!id) return null;
+    // If it's a string, use it directly
+    if (typeof id === 'string') return id;
+    // If it has a toString method (like MongoDB ObjectId), use that
+    if (id.toString && typeof id.toString === 'function') return id.toString();
+    // If it's an object with _id property, use that
+    if (typeof id === 'object' && id._id) return String(id._id);
+    // Last resort, convert to string
+    return String(id);
+  };
+
+  // Use either venueID or legacy locationID, ensuring they're strings
+  const currentVenueId = getIdString(venueID) || getIdString(locationID);
   const currentVenueName = venueName || locationName;
   const isEventActive = active || isActive;
 
@@ -30,6 +44,13 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   useEffect(() => {
     if (currentVenueId) {
       console.log(`ViewEventDetailsMore: Attempting to fetch venue with ID: ${currentVenueId}`);
+      // Skip the API call if the ID is not valid for the API (e.g., if it's an object that got stringified)
+      if (currentVenueId.includes('[object Object]')) {
+        console.warn('ViewEventDetailsMore: Invalid venue ID format detected, skipping API call');
+        setVenueDetails(null);
+        return;
+      }
+
       getVenueById(currentVenueId)
         .then((response) => {
           if (response) {
@@ -52,9 +73,9 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   // Render the venue address if venue details are available
   const renderVenueAddress = () => {
     if (!venueDetails) {
-      // Return a more informative message
-      return currentVenueId ? 
-        `Address not available (venue ID: ${currentVenueId})` : 
+      // Return a more informative message without showing raw ID
+      return currentVenueId ?
+        `Address not available for this venue` :
         'No venue selected';
     }
 
@@ -115,10 +136,16 @@ ViewEventDetailsMore.propTypes = {
       categoryFirst: PropTypes.string,
       categorySecond: PropTypes.string,
       categoryThird: PropTypes.string,
-      // Support both venue and location fields
-      venueId: PropTypes.string,
+      // Support both venue and location fields with various types
+      venueID: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object, // For MongoDB ObjectId or complex objects
+      ]),
       venueName: PropTypes.string,
-      locationID: PropTypes.string,
+      locationID: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object, // For MongoDB ObjectId or complex objects
+      ]),
       locationName: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
       active: PropTypes.bool,
