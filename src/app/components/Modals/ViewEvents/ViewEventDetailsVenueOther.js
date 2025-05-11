@@ -96,7 +96,7 @@ const ViewEventDetailsVenueOther = ({ eventDetails }) => {
           No venue information available
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          This event doesn't have any specified venue details.
+          This event doesn&apos;t have any specified venue details.
         </Typography>
       </Box>
     );

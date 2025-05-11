@@ -218,7 +218,7 @@ const SignUpPage = () => {
               <GoogleIcon sx={{ fontSize: 60, color: '#4285F4', mb: 2 }} />
               <Typography variant="h6" gutterBottom>Sign up with Google</Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                We'll securely connect your Google account to create your profile
+                We&apos;ll securely connect your Google account to create your profile
               </Typography>
               <Button
                 variant="contained"
@@ -243,7 +243,7 @@ const SignUpPage = () => {
               <FacebookIcon sx={{ fontSize: 60, color: '#4267B2', mb: 2 }} />
               <Typography variant="h6" gutterBottom>Sign up with Facebook</Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                We'll securely connect your Facebook account to create your profile
+                We&apos;ll securely connect your Facebook account to create your profile
               </Typography>
               <Button
                 variant="contained"

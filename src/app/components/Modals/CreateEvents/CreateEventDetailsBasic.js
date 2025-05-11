@@ -265,7 +265,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               label="Category"
             >
               <MenuItem value="">
-                <em>None (will use 'Other')</em>
+                <em>None (will use &apos;Other&apos;)</em>
               </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category._id} value={category._id}>

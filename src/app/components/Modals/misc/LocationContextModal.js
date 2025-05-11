@@ -339,7 +339,7 @@ const LocationContextModal = ({ open, onClose }) => {
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <Typography color="primary" variant="h6" gutterBottom>Using Fallback Location Data</Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
-              We couldn't find city data with coordinates in your account, so we're showing default US cities.
+              We couldn&apos;t find city data with coordinates in your account, so we&apos;re showing default US cities.
             </Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
               You can still select a city from the map to continue using the app.

@@ -216,7 +216,7 @@ const LoginPage = () => {
               <GoogleIcon sx={{ fontSize: 60, color: '#4285F4', mb: 2 }} />
               <Typography variant="h6" gutterBottom>Log in with Google</Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                We'll securely connect your Google account
+                We&apos;ll securely connect your Google account
               </Typography>
               <Button
                 variant="contained"
@@ -241,7 +241,7 @@ const LoginPage = () => {
               <FacebookIcon sx={{ fontSize: 60, color: '#4267B2', mb: 2 }} />
               <Typography variant="h6" gutterBottom>Log in with Facebook</Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                We'll securely connect your Facebook account
+                We&apos;ll securely connect your Facebook account
               </Typography>
               <Button
                 variant="contained"
@@ -268,7 +268,7 @@ const LoginPage = () => {
           
           <Box sx={{ mt: 3, width: '100%', textAlign: 'center' }}>
             <Typography variant="body2">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/auth/signup" style={{ textDecoration: 'none', color: 'primary.main' }}>
                 Sign up
               </Link>
