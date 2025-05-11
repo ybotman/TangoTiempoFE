@@ -375,6 +375,7 @@ CreateEventDetailsBasic.propTypes = {
     locationID: PropTypes.string,
     locationName: PropTypes.string,
     description: PropTypes.string,
+    ownerOrganizerName: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
 };

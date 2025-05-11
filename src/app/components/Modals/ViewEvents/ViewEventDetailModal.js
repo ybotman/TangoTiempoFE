@@ -329,6 +329,7 @@ ViewEventDetailModal.propTypes = {
     extendedProps: PropTypes.shape({
       _id: PropTypes.string,
       eventImage: PropTypes.string,
+      fallbackImageUrl: PropTypes.string,
       description: PropTypes.string,
       categoryFirst: PropTypes.string,
       ownerOrganizerID: PropTypes.string,

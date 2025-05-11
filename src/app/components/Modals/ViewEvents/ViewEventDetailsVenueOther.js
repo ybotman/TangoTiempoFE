@@ -233,6 +233,7 @@ ViewEventDetailsVenueOther.propTypes = {
       locationID: PropTypes.string,
       locationName: PropTypes.string,
       venue: PropTypes.shape({
+        address: PropTypes.string,
         address1: PropTypes.string,
         address2: PropTypes.string,
         city: PropTypes.string,
