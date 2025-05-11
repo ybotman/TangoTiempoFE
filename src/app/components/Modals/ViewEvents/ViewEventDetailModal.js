@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsRepeating from './ViewEventDetailsRepeating';
@@ -42,12 +43,14 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Get user context to check permissions
   const { user } = useContext(AuthContext);
+  const { selectedRole } = useContext(RoleContext);
   const { deleteEvent } = useEventOperations();
 
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
       setShowFullTitle(false); // Reset title expansion when modal is reopened
+      setEditMode(false); // Reset edit mode when modal is reopened
     }
   }, [open]);
 
@@ -114,7 +117,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const truncatedTitle = eventTitle.length > 30 && !showFullTitle ? eventTitle.slice(0, 30) + '...' : eventTitle;
   
   // Check if the user has permissions to edit and delete this event
-  const canEditEvent = user && eventDetails?.extendedProps?.ownerOrganizerID;
+  // User must be logged in, the event must have an owner ID, and the user must have the RegionalOrganizer role
+  const canEditEvent = user &&
+                       eventDetails?.extendedProps?.ownerOrganizerID &&
+                       selectedRole === 'RegionalOrganizer';
   
   // Get truncated description for the delete confirmation
   const truncatedDescription = eventDetails?.extendedProps?.description 
@@ -155,12 +161,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Handle edit button click
   const handleEditClick = () => {
-    // Close this view modal and open the edit modal
-    onClose();
-    // We'll handle this in the parent component with the onEventUpdated callback
-    if (onEventUpdated) {
-      onEventUpdated('edit', eventDetails.extendedProps._id);
-    }
+    // Toggle edit mode
+    setEditMode(true);
+
+    // Alternative: Close this view modal and open the edit modal in the parent component
+    // onClose();
+    // if (onEventUpdated) {
+    //   onEventUpdated('edit', eventDetails.extendedProps._id);
+    // }
+  };
+
+  // Handle cancel edit button click
+  const handleCancelEdit = () => {
+    setEditMode(false);
   };
 
   return (
@@ -177,18 +190,29 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                     {showFullTitle ? 'Show Less' : 'Show More'}
                   </Button>
                 )}
+                {editMode && (
+                  <Chip
+                    label="Edit Mode"
+                    color="primary"
+                    size="small"
+                    sx={{ ml: 1, verticalAlign: 'middle' }}
+                  />
+                )}
               </Typography>
               <Box sx={{ position: 'absolute', top: '2px', right: '8px', zIndex: '1000', display: 'flex', gap: 1 }}>
-                {canEditEvent && (
+                {/* Only show Edit/Delete when user has RegionalOrganizer role */}
+                {canEditEvent && !editMode && (
+                  <Button
+                    onClick={handleEditClick}
+                    size="small"
+                    startIcon={<EditIcon fontSize="small" />}
+                    sx={{ fontSize: '0.75rem' }}
+                  >
+                    Edit
+                  </Button>
+                )}
+                {canEditEvent && editMode && (
                   <>
-                    <Button
-                      onClick={handleEditClick}
-                      size="small"
-                      startIcon={<EditIcon fontSize="small" />}
-                      sx={{ fontSize: '0.75rem' }}
-                    >
-                      Edit
-                    </Button>
                     <Button
                       onClick={handleDeleteClick}
                       size="small"
@@ -197,6 +221,14 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                       sx={{ fontSize: '0.75rem' }}
                     >
                       Delete
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      size="small"
+                      color="secondary"
+                      sx={{ fontSize: '0.75rem' }}
+                    >
+                      Cancel Edit
                     </Button>
                   </>
                 )}
