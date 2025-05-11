@@ -10,6 +10,11 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
   const description = eventDetails?.extendedProps?.description || 'No description available';
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
 
+  // Get venue information - using both new venueID and legacy locationID fields for backward compatibility
+  const venueName = eventDetails?.extendedProps?.venueName ||
+                   eventDetails?.extendedProps?.locationName ||
+                   'Venue not specified';
+
   // Sanitize the description using DOMPurify
   const sanitizedDescription = DOMPurify.sanitize(description);
 
@@ -38,8 +43,16 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
         <Button onClick={toggleShowMore}>{showMore ? 'Show Less' : 'Show More'}</Button>
       )}
 
+      {/* Venue Name */}
+      <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
+        Venue
+      </Typography>
+      <Typography variant="body1" color="textSecondary" gutterBottom>
+        {venueName}
+      </Typography>
+
       {/* Event Cost */}
-      <Typography variant="h6" component="h3" gutterBottom>
+      <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
         Cost
       </Typography>
       <Typography variant="body1" color="textSecondary" gutterBottom>
@@ -53,6 +66,10 @@ ViewEventDetailsBasic.propTypes = {
     extendedProps: PropTypes.shape({
       description: PropTypes.string,
       cost: PropTypes.string,
+      venueName: PropTypes.string,
+      locationName: PropTypes.string, // Legacy field for backward compatibility
+      venueID: PropTypes.string,
+      locationID: PropTypes.string, // Legacy field for backward compatibility
     }),
   }),
 };

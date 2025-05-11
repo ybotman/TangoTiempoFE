@@ -39,7 +39,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const [showImageTab, setShowImageTab] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   
   // Get user context to check permissions
   const { user } = useContext(AuthContext);
@@ -50,7 +49,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     if (open) {
       setCurrentTab('Basic');
       setShowFullTitle(false); // Reset title expansion when modal is reopened
-      setEditMode(false); // Reset edit mode when modal is reopened
     }
   }, [open]);
 
@@ -161,20 +159,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Handle edit button click
   const handleEditClick = () => {
-    // Toggle edit mode
-    setEditMode(true);
+    // Close this view modal and open the edit modal in the parent component
+    onClose();
+    if (onEventUpdated) {
+      onEventUpdated('edit', eventDetails.extendedProps._id);
+    }
 
-    // Alternative: Close this view modal and open the edit modal in the parent component
-    // onClose();
-    // if (onEventUpdated) {
-    //   onEventUpdated('edit', eventDetails.extendedProps._id);
-    // }
+    // Note: We no longer use the internal edit mode since we open the proper edit modal
   };
 
-  // Handle cancel edit button click
-  const handleCancelEdit = () => {
-    setEditMode(false);
-  };
+  // No longer needed - editMode is handled by parent component
 
   return (
     <>
@@ -190,29 +184,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                     {showFullTitle ? 'Show Less' : 'Show More'}
                   </Button>
                 )}
-                {editMode && (
-                  <Chip
-                    label="Edit Mode"
-                    color="primary"
-                    size="small"
-                    sx={{ ml: 1, verticalAlign: 'middle' }}
-                  />
-                )}
               </Typography>
               <Box sx={{ position: 'absolute', top: '2px', right: '8px', zIndex: '1000', display: 'flex', gap: 1 }}>
                 {/* Only show Edit/Delete when user has RegionalOrganizer role */}
-                {canEditEvent && !editMode && (
-                  <Button
-                    onClick={handleEditClick}
-                    size="small"
-                    startIcon={<EditIcon fontSize="small" />}
-                    sx={{ fontSize: '0.75rem' }}
-                  >
-                    Edit
-                  </Button>
-                )}
-                {canEditEvent && editMode && (
+                {canEditEvent && (
                   <>
+                    <Button
+                      onClick={handleEditClick}
+                      size="small"
+                      startIcon={<EditIcon fontSize="small" />}
+                      sx={{ fontSize: '0.75rem' }}
+                    >
+                      Edit
+                    </Button>
                     <Button
                       onClick={handleDeleteClick}
                       size="small"
@@ -221,14 +205,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                       sx={{ fontSize: '0.75rem' }}
                     >
                       Delete
-                    </Button>
-                    <Button
-                      onClick={handleCancelEdit}
-                      size="small"
-                      color="secondary"
-                      sx={{ fontSize: '0.75rem' }}
-                    >
-                      Cancel Edit
                     </Button>
                   </>
                 )}
