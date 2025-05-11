@@ -11,7 +11,7 @@ try {
   RegionsContext = null; // Just set to null for now to avoid linting errors
   // We would use dynamic import here in a production fix
   // This is a simplification for the current issue
-} catch (err) {
+} catch (error) {
   console.info('RegionsContext not found or imported. GeoLocationContext will operate independently.');
 }
 import axios from 'axios';
@@ -741,7 +741,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Add an explicit initialization effect to force location refresh on mount
   // This will help ensure we always have a city selected
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // This effect should only run once on mount
   useEffect(() => {
     // Only run initialization once
     if (initializationAttempted.current) {
@@ -906,7 +906,7 @@ export const GeoLocationProvider = ({ children }) => {
     initializeLocation();
 
     // Run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // This effect should only run once on mount
   }, [fetchNearestCityImpl]);
   
   // Determine overall loading and error states
