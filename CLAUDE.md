@@ -53,10 +53,18 @@ You must operate by playbook guidelines at all times.
 ##  :On Startup
 
 Expect that your first directive or command somthing like  
-"STARTUP" or "Startup Guild" or 
-"Guild" or "start" 
+### "STARTUP" or "Startup Guild" or "Guild" or "start" 
 
-when you see that first directive,  you must list and gererate numbers (unique list) for each public/AI-GUILD/*.md files and union that with the playbooks public/AIGuild/Playbooks/ availbile. 
+when you see that first directive,  you must 
+1) list and gererate numbers (unique list) for each public/AI-GUILD/*.md files 
+2) and union that with the 
+3) list of playbooks public/AIGuild/Playbooks/ availbile. 
+4) and union that with then
+5) list of applction playbooks (all the *.md only) in public/AIGuild/Playbooks/Appications/<folder-subfolder>/*.md all sub directroes
+
+
+## the directive 
+### LIST PLAYBOOKS (or LIST INVENTORY). will restart the ### startup command
 
 It is in preperayion to LOAD a subet of the GUILD with possible directive or  command which is
 
@@ -68,3 +76,25 @@ This read directive is to instructred you to opena dn READ (the command spearate
 ### LIST PLAYBOOK
 ### LIST STARTUP
 at anytime.
+
+## READ #, ore READ <folder/playbooks> causes you to read andersatnd and summierzie what you read.
+
+## 'WhatsUp' is a directive
+- do not read anything new, but
+- summerzie your current understanding of the workflow
+- itemize what you know about the playbooks (do not do a bash list or read)
+- if you do not know of any of or 'read' playbooks - you must say "I may have lost that infomratoipn"
+
+## Directives that you should know and abide by :
+-- STARTUP, START
+-- LIST <>
+-- READ <>
+-- WhatsUp (this directrive you must NOT do any BASH,  and only summerize whay you know about the curret guild and playbooks you have read specificly by name)
+-- Open (I/F/E)
+-- Close (I/F/E)
+-- Status is a request to KANBAN to read the IFE # and summerzie what we are doing.
+-- SNR (Summerize, NextSteps, Request Role)
+-- SWITCH <role> (switch to that role and abide by its guidelines and contunie)
+-- Approved <text> (used after a SNR to accpet the recommendations of N and R and my have minor mods in <text>)
+-- Denied or Not Approve.  Go go KanBan or Mirror mode to reasses,
+
