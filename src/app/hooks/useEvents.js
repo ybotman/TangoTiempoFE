@@ -83,7 +83,7 @@ export function useEvents({
   const { user, selectedRole } = useContext(AuthContext);
   
   // Get location from GeoLocationContext if available
-  const geoLocationContext = useGeoLocationContext ? useGeoLocation() : null;
+  const geoLocationContext = useGeoLocation();
   
   // Use context values if explicitly provided parameters are missing
   const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
@@ -96,21 +96,10 @@ export function useEvents({
   const effectiveLng = lng || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
     ? geoLocationContext?.userLocation?.longitude : null);
   
-  // Create a cache key for memoizing/deduplicating requests
-  const cacheKey = JSON.stringify({
-    region: effectiveRegion, 
-    division: effectiveDivision, 
-    city: effectiveCity, 
-    lat: effectiveLat, 
-    lng: effectiveLng, 
-    startDate: startDate?.toString(), 
-    endDate: endDate?.toString(),
-    page, 
-    limit, 
-    userId: user?.uid, 
-    selectedRole,
-    geoLocationUpdated: useGeoLocationContext ? geoLocationContext?.userLocation?.lastUpdated : null
-  });
+  // Cache key generation commented out to fix ESLint warnings
+  // This was previously used for memoizing/deduplicating requests
+  // Now we explicitly list all dependencies in the useCallback
+  // const cacheKey = JSON.stringify({...});
   
   // Generate default date range if needed
   const getDefaultDateRange = () => {
@@ -131,13 +120,13 @@ export function useEvents({
         page,
         limit,
       };
-      
+
       // Format date parameters
       if (startDate && endDate) {
         // Handle different date formats
-        params.start = typeof startDate === 'string' ? startDate : 
+        params.start = typeof startDate === 'string' ? startDate :
                       startDate.toISOString ? startDate.toISOString() : startDate;
-        params.end = typeof endDate === 'string' ? endDate : 
+        params.end = typeof endDate === 'string' ? endDate :
                     endDate.toISOString ? endDate.toISOString() : endDate;
       } else {
         // Use default date range if not provided
@@ -145,34 +134,34 @@ export function useEvents({
         params.start = defaultDates.start;
         params.end = defaultDates.end;
       }
-      
+
       // Location-based filtering parameters - using effective values that may come from GeoLocationContext
       if (effectiveRegion) params.masteredRegionName = effectiveRegion;
       if (effectiveDivision) params.masteredDivisionName = effectiveDivision;
       if (effectiveCity) params.masteredCityName = effectiveCity;
-      
+
       // Geolocation parameters - using effective values that may come from GeoLocationContext
       if (effectiveLat && effectiveLng) {
         params.lat = effectiveLat;
         params.lng = effectiveLng;
       }
-      
+
       // Log the actual values used for filtering (from direct input or GeoLocationContext)
-      console.log('Using location filters:', { 
-        region: effectiveRegion, 
-        division: effectiveDivision, 
+      console.log('Using location filters:', {
+        region: effectiveRegion,
+        division: effectiveDivision,
         city: effectiveCity,
         lat: effectiveLat,
         lng: effectiveLng,
         source: useGeoLocationContext && (
-          effectiveRegion !== region || 
-          effectiveDivision !== division || 
+          effectiveRegion !== region ||
+          effectiveDivision !== division ||
           effectiveCity !== city ||
           effectiveLat !== lat ||
           effectiveLng !== lng
         ) ? 'GeoLocationContext' : 'Direct input'
       });
-      
+
       // Add detailed debugging for role-based filtering
       console.log('Role-based filtering debug:', {
         isLoggedIn: !!user,
@@ -183,7 +172,7 @@ export function useEvents({
         isRoleSelected: selectedRole === 'RegionalOrganizer',
         hasValidId: !!(user?.backendInfo?.regionalOrganizerInfo?.organizerId)
       });
-      
+
       // Add user role and organizerId if user is a RegionalOrganizer
       if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
         params.organizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
@@ -208,12 +197,12 @@ export function useEvents({
         params,
         timeout: 15000, // 15 second timeout
       });
-      
+
       // Store the response which includes events array and pagination info
       setEventsData(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
-      
+
       // Format error message for display
       let errorMessage = 'Failed to fetch events';
       if (error.response?.data?.message) {
@@ -221,15 +210,38 @@ export function useEvents({
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
-      
+
       // Keep existing events on error rather than clearing them
       // This provides a better user experience when there are transient network issues
     } finally {
       setLoading(false);
     }
-  }, [cacheKey]); // depends on cacheKey which includes all parameters
+  // All essential dependencies are now explicitly included in the array
+  }, [
+    // cacheKey is removed as it's redundant with the explicit dependencies
+    page,
+    limit,
+    startDate,
+    endDate,
+    effectiveRegion,
+    effectiveDivision,
+    effectiveCity,
+    effectiveLat,
+    effectiveLng,
+    region,
+    division,
+    city,
+    lat,
+    lng,
+    useGeoLocationContext,
+    user,
+    selectedRole,
+    setError,
+    setEventsData,
+    setLoading
+  ]);
 
   // Fetch events when parameters change
   useEffect(() => {
@@ -323,14 +335,13 @@ export function useEventOperations() {
         // We have a venue but no coordinates - need to fetch them
         console.log('Venue selected but coordinates not provided. Attempting to fetch venue data.');
         try {
-          // Import the venue functions dynamically
-          const { useVenues } = await import('@/hooks/useVenues');
-          const venuesApi = useVenues();
-          
+          // Import the venue service function directly
+          const { getVenueById } = await import('@/services/venueService');
+
           // Get venue data including coordinates
           const venueId = eventData.venueId || eventData.locationID;
-          const venueData = await venuesApi.getVenueById(venueId);
-          
+          const venueData = await getVenueById(venueId);
+
           if (venueData && venueData.latitude && venueData.longitude) {
             preparedData.venueGeolocation = {
               type: "Point",
@@ -479,14 +490,13 @@ export function useEventOperations() {
         // We have a venue but no coordinates - need to fetch them
         console.log('Venue selected but coordinates not provided for update. Attempting to fetch venue data.');
         try {
-          // Import the venue functions dynamically
-          const { useVenues } = await import('@/hooks/useVenues');
-          const venuesApi = useVenues();
-          
+          // Import the venue service function directly
+          const { getVenueById } = await import('@/services/venueService');
+
           // Get venue data including coordinates
           const venueId = eventData.venueId || eventData.locationID;
-          const venueData = await venuesApi.getVenueById(venueId);
-          
+          const venueData = await getVenueById(venueId);
+
           if (venueData && venueData.latitude && venueData.longitude) {
             preparedData.venueGeolocation = {
               type: "Point",

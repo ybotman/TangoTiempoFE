@@ -139,7 +139,7 @@ const GeoLocationContextDebug = () => {
 
       <Alert severity="info" sx={{ mb: 3 }}>
         This view shows the current state of the GeoLocationContext, which manages location selection for the application.
-        You can use the controls below to refresh the user's location or manually override it.
+        You can use the controls below to refresh the user&apos;s location or manually override it.
       </Alert>
 
       {/* Status indicators */}
