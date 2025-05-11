@@ -77,8 +77,8 @@ const SidebarDrawer = ({ open, onClose }) => {
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
 
-  // Get selected location and loading state from GeoLocationContext
-  const { selectedLocation, isLoading: locationLoading, isInitialized } = useGeoLocation();
+  // Get selected location and initialization state from GeoLocationContext
+  const { selectedLocation, isInitialized } = useGeoLocation();
 
   // Get the organizer selection state from useCalendarPage
   const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();

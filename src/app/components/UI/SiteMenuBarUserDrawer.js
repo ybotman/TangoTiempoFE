@@ -26,7 +26,8 @@ import { useRoles } from '@/hooks/useRoles';
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
-  const { roles: allRoles } = useRoles();
+  // Fetch roles using useRoles hook
+  const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [orderedUserRoles, setOrderedUserRoles] = useState([]);
 

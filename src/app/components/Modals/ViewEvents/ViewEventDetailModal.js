@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
@@ -13,8 +13,7 @@ import ViewEventDetailsMore from './ViewEventDetailsMore';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
 import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
-// Import legacy component for backward compatibility during transition
-import ViewEventDetailsLocationOther from './ViewEventDetailsLocationOther';
+// Legacy component removed as part of transition
 import PropTypes from 'prop-types';
 
 const modalStyle = {
