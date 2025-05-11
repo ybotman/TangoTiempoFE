@@ -24,51 +24,76 @@ This is a lightweight formal issue log to capture, trace, and resolve a specific
 ---
 
 ## 🗂️ KANBAN (Required)
-_Tracks assignments, status, and workflow for this issue.  
-All task assignments and status updates go here._  
-**Last updated:** 2025-05-10 22:30
+_Tracks assignments, status, and workflow for this issue.
+All task assignments and status updates go here._
+**Last updated:** 2025-05-10 23:00
 
 - [x] Create issue tracking document
-- [ ] Investigate View Event Modal component structure
-- [ ] Identify where role checks should be implemented
-- [ ] Determine how to distinguish between view and edit modes
+- [x] Investigate View Event Modal component structure
+- [x] Identify where role checks should be implemented
+- [x] Determine how to distinguish between view and edit modes
 - [ ] Implement proper role-based permission checks for edit/delete actions
 - [ ] Test fix with different user roles
 - [ ] Update documentation
 
 ## 🧭 SCOUT (Required)
-_Investigation, findings, and risk notes.  
-Document what was discovered, suspected causes, and open questions._  
-**Last updated:** 2025-05-10 22:30
+_Investigation, findings, and risk notes.
+Document what was discovered, suspected causes, and open questions._
+**Last updated:** 2025-05-10 23:00
 
-- Initial investigation needed to identify component files for the View Event Modal
-- Need to check how user roles are currently being accessed in the component
-- Need to verify if there's already a mechanism to distinguish between view and edit modes
-- Files to investigate include:
-  - src/app/components/Modals/ViewEvents/ViewEventDetailModal.js (likely the main component)
-  - Other related components in the ViewEvents directory
+- Investigation complete on ViewEventDetailModal.js and related contexts
+- The issue is in lines 181-202 where Edit and Delete buttons are displayed
+- The current permission check at line 117 is insufficient:
+  ```javascript
+  const canEditEvent = user && eventDetails?.extendedProps?.ownerOrganizerID;
+  ```
+- This only checks if a user is logged in and if the event has an owner ID, but doesn't verify the user's role
+- The component doesn't import or use RoleContext, which is available and provides `selectedRole`
+- The existing `editMode` state variable at line 41 is defined but never used
+- ViewEventDetailModal.js doesn't have proper role-based permission checks for displaying Edit/Delete buttons
 
 ## 🛠️ PATCH (Required)
-_Fix details, implementation notes, and blockers._  
-**Last updated:** 2025-05-10 22:30
+_Fix details, implementation notes, and blockers._
+**Last updated:** 2025-05-10 23:00
 
-- Not yet implemented
+- Proposed solution:
+  1. Import RoleContext in ViewEventDetailModal.js
+  2. Update the permission check to verify the user has the 'RegionalOrganizer' role
+  3. Update the `canEditEvent` check to something like:
+     ```javascript
+     const { selectedRole } = useContext(RoleContext);
+     const canEditEvent = user &&
+                          eventDetails?.extendedProps?.ownerOrganizerID &&
+                          selectedRole === 'RegionalOrganizer';
+     ```
+  4. Utilize the existing `editMode` state variable to control when edit/delete buttons appear
+  5. Update the JSX to conditionally render buttons based on both role and edit mode:
+     ```javascript
+     {canEditEvent && editMode && (
+       <>
+         <Button onClick={handleEditClick} ... > Edit </Button>
+         <Button onClick={handleDeleteClick} ... > Delete </Button>
+       </>
+     )}
+     ```
+  6. Add logic to determine when to set `editMode` to true
 
 ---
 
 ## Investigation
-- **Initial Trace:** 
-  - Need to examine ViewEventDetailModal.js and related components
-  - Need to check how AuthContext and RoleContext are being used
-  - Need to investigate how event editing permissions are determined
-- **Suspected Cause:** 
+- **Initial Trace:**
+  - ViewEventDetailModal.js includes Edit and Delete buttons at lines 181-202
+  - These buttons are conditionally displayed based on `canEditEvent` variable
+  - `canEditEvent` only checks for user existence and ownerOrganizerID, not user role
+  - The component has `editMode` state defined, but never actually uses it
+- **Confirmed Cause:**
   - Missing role check for EDIT and DELETE options
-  - Improper conditional rendering based on user role
-  - No distinction between view and edit modes in the UI
-- **Files to Inspect:** 
-  - src/app/components/Modals/ViewEvents/ViewEventDetailModal.js
-  - src/app/contexts/RoleContext.js
-  - src/app/contexts/AuthContext.js
+  - Component doesn't use `RoleContext` to check if user has RegionalOrganizer role
+  - The modal doesn't properly distinguish between view and edit modes
+- **Relevant Files:**
+  - src/app/components/Modals/ViewEvents/ViewEventDetailModal.js - Main component to modify
+  - src/app/contexts/RoleContext.js - Provides current user role information
+  - src/app/hooks/useEvents.js - Contains event permission logic
 
 ## Fix (if known or applied)
 - **Status:** 🚧 In Progress
