@@ -53,12 +53,16 @@ export const useUsers = () => {
           ...updatedData,
         };
 
+        console.log('UU:Updt Attempting to update user data with:', dataToUpdate);
+
+        // Based on server code analysis, the correct endpoint is "/api/userlogins/updateUserInfo"
+        // This endpoint expects firebaseUserId in the request body
         const response = await axios.put(
           `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
           dataToUpdate
         );
 
-        setUserData(response.data.updatedUser);
+        setUserData(response.data.updatedUser || response.data);
         console.log('UU:Updt User data updated successfully');
       } catch (error) {
         console.error('UU:Updt Error updating user data:', error);
