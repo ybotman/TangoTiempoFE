@@ -18,7 +18,7 @@ export const RegionsProvider = ({ children }) => {
 
   // Populate regions when data is available
   useEffect(() => {
-    if (regionsData) {
+    if (regionsData && Array.isArray(regionsData) && JSON.stringify(regionsData) !== JSON.stringify(regions)) {
       setRegions(regionsData);
     }
   }, [regionsData]);
