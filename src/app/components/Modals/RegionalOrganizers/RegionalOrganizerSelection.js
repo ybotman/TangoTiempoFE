@@ -50,26 +50,36 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
   
   // Define "recently active" as organizers with events in the last 3 months (90 days)
   const isRecentlyActive = (organizer) => {
+    if (!organizer) return false;
+
     // This would ideally use a lastEventDate field, but for now we'll assume all are active
     // In a real implementation, we'd check if organizer.lastEventDate > (now - 90 days)
     return organizer.isEventOrganizer === true;
   };
-  
+
   // Filter organizers based on search term and "Recently Active" toggle
   const filteredOrganizers = useMemo(() => {
-    if (!Array.isArray(organizers)) return [];
-    
+    // Ensure organizers is an array before filtering
+    if (!Array.isArray(organizers) || organizers.length === 0) return [];
+
     return organizers.filter(organizer => {
-      // Filter by isEventOrganizer flag first
+      // Skip null/undefined organizers
+      if (!organizer) return false;
+
+      // Filter by isEventOrganizer flag first (with null check)
       if (organizer.isEventOrganizer !== true) return false;
-      
-      // Apply search filter
-      const nameMatch = (organizer.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-      const shortNameMatch = (organizer.shortName || '').toLowerCase().includes(searchTerm.toLowerCase());
-      
+
+      // Apply search filter with null checks
+      const organizerName = organizer.name || '';
+      const organizerShortName = organizer.shortName || '';
+      const searchTermLower = (searchTerm || '').toLowerCase();
+
+      const nameMatch = organizerName.toLowerCase().includes(searchTermLower);
+      const shortNameMatch = organizerShortName.toLowerCase().includes(searchTermLower);
+
       // Apply recently active filter if enabled
       const activeMatch = !recentlyActiveOnly || isRecentlyActive(organizer);
-      
+
       return (nameMatch || shortNameMatch) && activeMatch;
     });
   }, [organizers, searchTerm, recentlyActiveOnly]);
@@ -102,14 +112,26 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
     onClose();
   };
   
+  // Handler for retry loading when there's an error
+  const handleRetry = useCallback(() => {
+    // Call the refetch method from the useOrganizers hook
+    if (typeof error !== 'undefined' && error !== null) {
+      // Call refetch from useOrganizers hook
+      const { refetch } = useOrganizers();
+      if (refetch) {
+        refetch();
+      }
+    }
+  }, [error]);
+
   // Split organizers into two columns
   const organizerColumns = useMemo(() => {
-    if (!filteredOrganizers || filteredOrganizers.length === 0) return [[], []];
-    
+    if (!Array.isArray(filteredOrganizers) || filteredOrganizers.length === 0) return [[], []];
+
     const midpoint = Math.ceil(filteredOrganizers.length / 2);
     const leftColumn = filteredOrganizers.slice(0, midpoint);
     const rightColumn = filteredOrganizers.slice(midpoint);
-    
+
     return [leftColumn, rightColumn];
   }, [filteredOrganizers]);
   
@@ -179,10 +201,19 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
           </Box>
         ) : error ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight={300} flexDirection="column">
-            <Typography color="error" gutterBottom>Error loading organizers</Typography>
-            <Button onClick={onClose} variant="outlined" color="primary">
-              Close
-            </Button>
+            <Typography color="error" gutterBottom>
+              {error.response?.status === 429
+                ? "Too many requests. Please try again in a moment."
+                : "Error loading organizers"}
+            </Typography>
+            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+              <Button onClick={handleRetry} variant="contained" color="primary">
+                Retry
+              </Button>
+              <Button onClick={onClose} variant="outlined" color="primary">
+                Close
+              </Button>
+            </Box>
           </Box>
         ) : (
           <>
@@ -253,20 +284,27 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
             {filteredOrganizers.length === 0 ? (
               <Box display="flex" justifyContent="center" alignItems="center" minHeight={200} flexDirection="column">
                 <Typography color="text.secondary" align="center" sx={{ mb: 2 }}>
-                  {searchTerm 
+                  {searchTerm
                     ? `No organizers found matching "${searchTerm}"`
-                    : recentlyActiveOnly 
+                    : recentlyActiveOnly
                       ? "No recently active organizers found"
-                      : "No organizers available for this location"}
+                      : selectedLocation?.city?.name
+                        ? `No organizers available in ${selectedLocation.city.name}`
+                        : "No location selected. Please select a location first."}
                 </Typography>
                 {searchTerm && (
-                  <Button 
-                    variant="outlined" 
-                    size="small" 
+                  <Button
+                    variant="outlined"
+                    size="small"
                     onClick={() => setSearchTerm('')}
                   >
                     Clear Search
                   </Button>
+                )}
+                {!selectedLocation?.city?.id && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 2, maxWidth: 300, textAlign: 'center' }}>
+                    Tip: Select a location from the hamburger menu to see organizers in that area.
+                  </Typography>
                 )}
               </Box>
             ) : (
