@@ -4,16 +4,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import PropTypes from 'prop-types';
 import { useGeoLocations } from '@/hooks/useGeoLocations';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
-// Import RegionsContext with a deprecation warning - will be removed in future versions
-let RegionsContext;
-try {
-  // Using dynamic import pattern to avoid require
-  RegionsContext = null; // Just set to null for now to avoid linting errors
-  // We would use dynamic import here in a production fix
-  // This is a simplification for the current issue
-} catch (err) {
-  console.info('RegionsContext not found or imported. GeoLocationContext will operate independently.');
-}
+// RegionsContext is being phased out and will be removed in future versions
+// Simplifying this import to avoid ESLint rule violations
+// Note: We no longer use dynamic import or conditional useContext
 import axios from 'axios';
 
 // Create the GeoLocationContext
@@ -40,9 +33,9 @@ export const GeoLocationProvider = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const initializationAttempted = useRef(false);
 
-  // Try to use RegionsContext if available, but make it optional
-  const regionsContext = RegionsContext ? useContext(RegionsContext) : null;
-  const { latitude, longitude, loading: geoLoading, error: geoError } = useGeoLocations();
+  // Create a placeholder for RegionsContext
+  const regionsContext = null;
+  const { latitude, longitude, loading: geoLoading } = useGeoLocations();
 
   console.log('GeoLocationProvider: Initializing with location data', {
     masteredLocationAvailable: !!masteredLocationContext,
@@ -83,7 +76,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Initialize user location from the useGeoLocations hook
   useEffect(() => {
-    if (latitude && longitude && !geoLoading && !geoError) {
+    if (latitude && longitude && !geoLoading) {
       setUserLocation({
         latitude,
         longitude,
@@ -93,22 +86,19 @@ export const GeoLocationProvider = ({ children }) => {
       });
       setLoadingState(prev => ({ ...prev, userLocation: false }));
       setErrorState(prev => ({ ...prev, userLocation: null }));
-    } else if (geoError) {
-      setErrorState(prev => ({ ...prev, userLocation: geoError }));
-      setLoadingState(prev => ({ ...prev, userLocation: false }));
     } else if (geoLoading) {
       setLoadingState(prev => ({ ...prev, userLocation: true }));
     }
-  }, [latitude, longitude, geoLoading, geoError]);
+  }, [latitude, longitude, geoLoading]);
 
   // Initialize selected location from the MasteredLocationContext
   useEffect(() => {
-    console.log('GeoLocationContext: Checking for nearestCity update', { 
-      hasNearestCity: !!nearestCity, 
+    console.log('GeoLocationContext: Checking for nearestCity update', {
+      hasNearestCity: !!nearestCity,
       nearestCityName: nearestCity?.cityName,
       hasRegionId: !!selectedLocation.region.id
     });
-    
+
     if (nearestCity) {
       // Update from nearest city if we don't have a selection yet
       if (!selectedLocation.region.id) {
@@ -117,22 +107,22 @@ export const GeoLocationProvider = ({ children }) => {
           division: nearestCity.divisionName,
           region: nearestCity.regionName
         });
-        
+
         setSelectedLocation({
-          country: { 
-            id: nearestCity.countryID, 
-            name: nearestCity.countryName 
+          country: {
+            id: nearestCity.countryID,
+            name: nearestCity.countryName
           },
-          region: { 
-            id: nearestCity.regionID, 
-            name: nearestCity.regionName 
+          region: {
+            id: nearestCity.regionID,
+            name: nearestCity.regionName
           },
-          division: { 
-            id: nearestCity.divisionID, 
-            name: nearestCity.divisionName 
+          division: {
+            id: nearestCity.divisionID,
+            name: nearestCity.divisionName
           },
-          city: { 
-            id: nearestCity.cityID, 
+          city: {
+            id: nearestCity.cityID,
             name: nearestCity.cityName,
             latitude: nearestCity.latitude,
             longitude: nearestCity.longitude
@@ -144,7 +134,7 @@ export const GeoLocationProvider = ({ children }) => {
     } else {
       console.log('GeoLocationContext: No nearestCity available yet');
     }
-  }, [nearestCity, selectedLocation.region.id]);
+  }, [nearestCity, selectedLocation.region.id, setSelectedLocation]);
 
   // Initialize from RegionsContext when someone changes the selection there
   // This useEffect will be removed in a future version when RegionsContext is fully deprecated
@@ -159,14 +149,14 @@ export const GeoLocationProvider = ({ children }) => {
     console.log(
       "RegionsContext is deprecated and will be migrated to GeoLocationContext in a future version."
     );
-    
+
     console.log('GeoLocationContext: Syncing from RegionsContext', {
       region: regionsContext.selectedRegion,
       regionId: regionsContext.selectedRegionID,
       division: regionsContext.selectedDivision,
       city: regionsContext.selectedCity
     });
-    
+
     if (regionsContext.selectedRegion && regionsContext.selectedRegionID) {
       setSelectedLocation(prev => ({
         ...prev,
@@ -187,10 +177,8 @@ export const GeoLocationProvider = ({ children }) => {
       }));
     }
   }, [
-    regionsContext?.selectedRegion, 
-    regionsContext?.selectedRegionID, 
-    regionsContext?.selectedDivision, 
-    regionsContext?.selectedCity
+    regionsContext,
+    setSelectedLocation
   ]);
 
   // Function to update the RegionsContext when our selection changes for backward compatibility
@@ -200,21 +188,21 @@ export const GeoLocationProvider = ({ children }) => {
     if (!regionsContext || !selectedLocation.region.name) {
       return;
     }
-    
+
     try {
       // Update the RegionsContext to maintain compatibility
       if (regionsContext.selectedRegion !== selectedLocation.region.name) {
         regionsContext.setSelectedRegion(selectedLocation.region.name);
       }
-      
+
       if (regionsContext.selectedRegionID !== selectedLocation.region.id) {
         regionsContext.setSelectedRegionID(selectedLocation.region.id);
       }
-      
+
       if (regionsContext.selectedDivision !== selectedLocation.division.name) {
         regionsContext.setSelectedDivision(selectedLocation.division.name || '');
       }
-      
+
       if (regionsContext.selectedCity !== selectedLocation.city.name) {
         regionsContext.setSelectedCity(selectedLocation.city.name || '');
       }
@@ -223,7 +211,10 @@ export const GeoLocationProvider = ({ children }) => {
       // If RegionsContext is missing methods, we can safely continue without it
     }
   }, [
-    selectedLocation, 
+    selectedLocation.region.name,
+    selectedLocation.region.id,
+    selectedLocation.division.name,
+    selectedLocation.city.name,
     regionsContext
   ]);
 
@@ -737,11 +728,11 @@ export const GeoLocationProvider = ({ children }) => {
       console.log('GeoLocationContext: Marking as initialized', { selectedCity: selectedLocation.city.name });
       setIsInitialized(true);
     }
-  }, [isInitialized, selectedLocation]);
+  }, [isInitialized, selectedLocation.city?.id, selectedLocation.city?.name]);
 
   // Add an explicit initialization effect to force location refresh on mount
   // This will help ensure we always have a city selected
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // This effect should only run once on mount
   useEffect(() => {
     // Only run initialization once
     if (initializationAttempted.current) {
@@ -751,7 +742,7 @@ export const GeoLocationProvider = ({ children }) => {
     // Mark that we've attempted initialization
     initializationAttempted.current = true;
     console.log('GeoLocationContext: Component mounted, initializing location');
-    
+
     const initializeLocation = async () => {
       // Check if we already have a selected location
       if (selectedLocation.city.id) {
@@ -760,49 +751,49 @@ export const GeoLocationProvider = ({ children }) => {
         });
         return;
       }
-      
+
       // Check if we already have a nearest city from context
       if (nearestCity) {
         console.log('GeoLocationContext: Using nearestCity from context for initialization', {
           city: nearestCity.cityName
         });
-        
+
         // Explicitly set the selected location from nearestCity data
         // This ensures we have a city even if the useEffect watching nearestCity hasn't run yet
         setSelectedLocation({
-          country: { 
-            id: nearestCity.countryID, 
-            name: nearestCity.countryName 
+          country: {
+            id: nearestCity.countryID,
+            name: nearestCity.countryName
           },
-          region: { 
-            id: nearestCity.regionID, 
-            name: nearestCity.regionName 
+          region: {
+            id: nearestCity.regionID,
+            name: nearestCity.regionName
           },
-          division: { 
-            id: nearestCity.divisionID, 
-            name: nearestCity.divisionName 
+          division: {
+            id: nearestCity.divisionID,
+            name: nearestCity.divisionName
           },
-          city: { 
-            id: nearestCity.cityID, 
+          city: {
+            id: nearestCity.cityID,
             name: nearestCity.cityName,
             latitude: nearestCity.latitude,
             longitude: nearestCity.longitude
           }
         });
-        
+
         return;
       }
-      
+
       try {
         // Force a refresh of the user location
         console.log('GeoLocationContext: No location available, forcing refresh');
         await refreshUserLocation();
-        
+
         // After refresh, check if we have a city ID yet
         if (!selectedLocation.city.id) {
           // Set a default city by fetching from the API instead of using hardcoded IDs
           console.log('GeoLocationContext: Fetching default location data');
-          
+
           try {
             // Use the API to retrieve the proper location data
             console.log('GeoLocationContext: Fetching location data from API');
@@ -867,7 +858,7 @@ export const GeoLocationProvider = ({ children }) => {
             }
           } catch (apiError) {
             console.error('GeoLocationContext: Error fetching default location', apiError);
-            
+
             // As last resort, set default values with null IDs but valid names
             // This ensures UI can show something even without IDs
             console.log('GeoLocationContext: Using default names without IDs as last resort');
@@ -875,7 +866,7 @@ export const GeoLocationProvider = ({ children }) => {
               country: { id: null, name: "United States" },
               region: { id: null, name: "Northeast" },
               division: { id: null, name: "New England" },
-              city: { 
+              city: {
                 id: Date.now().toString(), // Generate a temporary ID for the UI to work
                 name: "Boston",
                 latitude: 42.3601,
@@ -886,13 +877,13 @@ export const GeoLocationProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('GeoLocationContext: Error in initialization process', error);
-        
+
         // Set default with temporary ID as last resort
         setSelectedLocation({
           country: { id: null, name: "United States" },
           region: { id: null, name: "Northeast" },
           division: { id: null, name: "New England" },
-          city: { 
+          city: {
             id: Date.now().toString(), // Generate a temporary ID for the UI to work
             name: "Boston",
             latitude: 42.3601,
@@ -901,13 +892,14 @@ export const GeoLocationProvider = ({ children }) => {
         });
       }
     };
-    
+
     // Run initialization
     initializeLocation();
 
     // Run once on mount
+    // This effect should only run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchNearestCityImpl]);
+  }, []);
   
   // Determine overall loading and error states
   // Only show errors that are critical and would prevent functionality

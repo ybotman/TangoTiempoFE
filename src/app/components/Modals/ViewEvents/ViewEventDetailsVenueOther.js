@@ -96,7 +96,7 @@ const ViewEventDetailsVenueOther = ({ eventDetails }) => {
           No venue information available
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          This event doesn't have any specified venue details.
+          This event doesn&apos;t have any specified venue details.
         </Typography>
       </Box>
     );
@@ -233,6 +233,7 @@ ViewEventDetailsVenueOther.propTypes = {
       locationID: PropTypes.string,
       locationName: PropTypes.string,
       venue: PropTypes.shape({
+        address: PropTypes.string,
         address1: PropTypes.string,
         address2: PropTypes.string,
         city: PropTypes.string,

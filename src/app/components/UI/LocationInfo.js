@@ -4,7 +4,6 @@ import React from 'react';
 import { Box, Chip, Typography, Tooltip, CircularProgress, Badge } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useEvents } from '@/hooks/useEvents';
 
@@ -13,14 +12,11 @@ import { useEvents } from '@/hooks/useEvents';
  * Shows the currently selected location hierarchy and provides reset option
  */
 const LocationInfo = () => {
-  const { 
-    selectedLocation, 
-    isLoading, 
-    hasError, 
-    resetToNearestLocation,
+  const {
+    selectedLocation,
+    isLoading,
     refreshUserLocation,
-    locationDisplayText,
-    userLocation
+    locationDisplayText
   } = useGeoLocation();
   
   // Get event counts for different location levels
@@ -66,8 +62,7 @@ const LocationInfo = () => {
   );
   
   // Aggregated loading state for the event counts
-  const countsLoading = regionLoading || divisionLoading || cityLoading;
-  const countsError = regionError || divisionError || cityError;
+  const aggregatedLoading = regionLoading || divisionLoading || cityLoading;
   
   // Use fallback values for event counts if there are errors
   const regionCount = regionEvents?.length || 0;
