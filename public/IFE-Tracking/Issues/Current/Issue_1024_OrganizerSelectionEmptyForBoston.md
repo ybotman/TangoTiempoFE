@@ -27,20 +27,20 @@ This issue addresses the problem that organizers are not appearing in the hambur
 ## 🗂️ KANBAN (Required)
 _Tracks assignments, status, and workflow for this issue.  
 All task assignments and status updates go here._  
-**Last updated:** 2025-05-13 11:30
+**Last updated:** 2025-05-13 12:45
 
 - [x] Investigate organizer selection component
 - [x] Examine useOrganizers.js hook functionality
-- [ ] Check if organizers exist in Boston in database
-- [ ] Verify API query parameters for organizer filtering
-- [ ] Test API response directly for Boston masteredCityId
-- [ ] Determine if this is a data problem or API issue
+- [x] Check if organizers exist in Boston in database
+- [x] Verify API query parameters for organizer filtering
+- [x] Test API response directly for Boston masteredCityId
+- [x] Determine if this is a data problem or API issue
 - [ ] Plan appropriate fix based on findings
 
 ## 🧭 SCOUT (Required)
 _Investigation, findings, and risk notes.  
 Document what was discovered, suspected causes, and open questions._  
-**Last updated:** 2025-05-13 11:30
+**Last updated:** 2025-05-13 12:45
 
 ### Initial Investigation:
 - Reviewed RegionalOrganizerSelection.js component:
@@ -54,30 +54,69 @@ Document what was discovered, suspected causes, and open questions._
   - Uses caching mechanism to reduce API calls
   - Implements proper error handling and retry logic
 
-### Potential Causes:
-1. **Data Issue**: No organizers in database for Boston
-   - Boston organizers might not have proper masteredCityId
-   - Boston masteredCityId might be incorrect or mismatched
+### API Testing Results:
 
-2. **API Filtering Issue**:
-   - Region/Division/City query parameters may not be working as expected
-   - Parameter names in API query may be different than frontend expectations
-   - Query might be too restrictive (using all: region, division, AND city)
+1. **Checked Boston's City ID**:
+   ```bash
+   curl "http://localhost:3010/api/masteredLocations/cities?cityName=Boston"
+   ```
+   - Confirmed Boston's masteredCityId is `6751f58a5db435dd8005e46a`
 
-3. **Environment Issue**:
-   - Dev environment might have different data than production
-   - Boston geolocation might not be correctly loaded in location context
+2. **Queried Organizers API for Boston**:
+   ```bash
+   curl "http://localhost:3010/api/organizers?masteredCityId=6751f58a5db435dd8005e46a"
+   ```
+   - Response: Empty organizers array with total count of 0
+   ```json
+   {
+     "organizers": [],
+     "pagination": {
+       "total": 0,
+       "page": 1,
+       "limit": 100,
+       "pages": 0
+     }
+   }
+   ```
 
-### Key Questions:
-- Do organizers exist in the database with Boston's masteredCityId?
-- Is the API properly filtering when provided with Boston's location IDs?
-- Is the client correctly passing Boston's location IDs to the API?
-- Is there a difference in how Boston organizers are structured in the database?
+3. **Checked General Organizers List**:
+   ```bash
+   curl "http://localhost:3010/api/organizers?isActive=true"
+   ```
+   - Response: 44 active organizers in the system
+   - None are associated with Boston's masteredCityId
+   - Organizers are using `organizerRegion` field instead of masteredCityId
 
-Next steps will be to:
-1. Test the API endpoint directly with Boston location parameters
-2. Check Boston's location IDs are correct in the context
-3. Verify database has organizers associated with Boston
+### Root Cause Identified:
+
+The root cause is a **data mapping issue** between the frontend location model and the backend organizer model:
+
+1. **Frontend Expectation**:
+   - Frontend uses a hierarchical model with masteredCityId, masteredDivisionId, masteredRegionId
+   - The `useOrganizers` hook filters using these IDs
+
+2. **Backend Reality**:
+   - Organizers in the database use a field called `organizerRegion` (not masteredRegionId)
+   - No `masteredCityId` field exists on organizer documents
+   - Example organizer document:
+   ```json
+   {
+     "_id": "680669162f92688130212454",
+     "firebaseUserId": "tangospark",
+     "fullName": "Practica Spark",
+     "shortName": "PRACTICASP",
+     "organizerRegion": "68066916a6d70c00c2841000"
+   }
+   ```
+
+3. **API Parameter Mismatch**:
+   - Frontend sends: `?masteredCityId=6751f58a5db435dd8005e46a`
+   - Backend expects: `?organizerCity=6751f58a5db435dd8005e46a`
+   - Additionally, some organizers might be associated with regions but not cities
+
+### Conclusion:
+
+This is a **data structure mismatch** issue. The organizers API endpoint is not recognizing the `masteredCityId` parameter because organizers in the database use a different field structure for location association.
 
 ---
 
@@ -87,22 +126,25 @@ Next steps will be to:
   - No errors in the console, system working as designed but with no data
   - RegionalOrganizerSelection component correctly shows "No organizers available in Boston"
 
-- **Suspected Cause:** 
-  - Most likely a data issue where no organizers are associated with Boston's masteredCityId
-  - Alternatively, API query parameters might be constructed incorrectly
+- **Suspected Cause:**
+  - **Confirmed**: Data mapping issue between frontend and backend models
+  - Frontend uses masteredCityId/Region/Division from new location model
+  - Backend organizers use organizerRegion/City fields from older model
 
 - **Files Inspected:** 
   - RegionalOrganizerSelection.js - Modal component with organizer selection
   - useOrganizers.js - Hook for fetching and filtering organizers
-  - GeoLocationContext.js - Context providing location data
+  - Backend models - Organizer schema using organizerRegion instead of masteredRegionId
 
 ## Fix (if known or applied)
 - **Status:** ⏳ Pending
-- **Fix Description:** To be determined after further investigation
+- **Fix Description:** The fix will need to address the parameter naming mismatch between the frontend hook and the backend API. Two potential approaches:
+  1. Update the useOrganizers hook to map masteredCityId → organizerCity, masteredRegionId → organizerRegion
+  2. Update the backend API to recognize and handle both parameter naming conventions
 - **Testing:** To be determined
 
 ## Resolution Log
-- **Commit/Branch:** `issue/1024-organizer-selection-empty-for-boston`
+- **Commit/Branch:** `issue/1024-organizer-selection-dropdown-empty-for-boston`
 - **PR:** Not yet created
 - **Deployed To:** Not yet deployed
 - **Verified By:** Not yet verified
@@ -112,11 +154,11 @@ Next steps will be to:
 > Store under: `/public/IFE-Tracking/Issues/Current/Issue_1024_OrganizerSelectionEmptyForBoston.md` and move to `/public/IFE-Tracking/Issues/Completed/` when resolved. 
 
 # SNR after interactions
-🔷 **S** - Investigated the organizer selection component and related hooks. The system appears to be working as designed, but no organizers are showing up for Boston. Need to determine if this is a data issue (no Boston organizers in database) or an API filtering issue.
+🔷 **S** - Investigated the empty organizer selection dropdown for Boston and identified the root cause: a parameter naming mismatch between the frontend and backend. The useOrganizers hook sends 'masteredCityId' parameter, but the backend API expects 'organizerCity' due to an older data model in use.
 
 🟡 **N** - Next steps are to:
-1. Check the database for organizers with Boston's masteredCityId
-2. Test the API directly with Boston's location parameters
-3. Verify the location IDs being used in the context are correct
+1. Update useOrganizers.js to map the new location model parameters to the legacy parameter names expected by the API
+2. Test the fix with Boston and other locations
+3. Consider a more comprehensive frontend-backend alignment for location parameters
 
-🟩 **R** - Continue in Scout mode to investigate the API and database, or switch to Architect mode once the root cause is identified to design a solution.
+🟩 **R** - Switch to Architect mode to design the solution that maintains compatibility with both the new mastered location model and the legacy organizer location fields.
