@@ -27,7 +27,7 @@ This issue addresses the problem that organizers are not appearing in the hambur
 ## 🗂️ KANBAN (Required)
 _Tracks assignments, status, and workflow for this issue.  
 All task assignments and status updates go here._  
-**Last updated:** 2025-05-13 12:45
+**Last updated:** 2025-05-13 16:45
 
 - [x] Investigate organizer selection component
 - [x] Examine useOrganizers.js hook functionality
@@ -35,12 +35,17 @@ All task assignments and status updates go here._
 - [x] Verify API query parameters for organizer filtering
 - [x] Test API response directly for Boston masteredCityId
 - [x] Determine if this is a data problem or API issue
-- [ ] Plan appropriate fix based on findings
+- [x] Plan appropriate fix based on findings
+- [ ] Test if backend changes have already resolved the issue
+- [ ] Review LocationModelMigration documentation from backend team
+- [ ] Test with updated backend to validate fix is working
+- [ ] If needed, update useOrganizers.js hook to handle both parameter naming conventions
+- [ ] Add enhanced logging for future debugging
 
 ## 🧭 SCOUT (Required)
 _Investigation, findings, and risk notes.  
 Document what was discovered, suspected causes, and open questions._  
-**Last updated:** 2025-05-13 12:45
+**Last updated:** 2025-05-13 16:45
 
 ### Initial Investigation:
 - Reviewed RegionalOrganizerSelection.js component:
@@ -118,6 +123,22 @@ The root cause is a **data mapping issue** between the frontend location model a
 
 This is a **data structure mismatch** issue. The organizers API endpoint is not recognizing the `masteredCityId` parameter because organizers in the database use a different field structure for location association.
 
+### Additional Findings (2025-05-13 16:45):
+
+After reviewing the LocationModelMigration documentation from the backend team, we've learned:
+
+1. **Backend Changes Implemented**: The backend team has already addressed this issue by:
+   - Adding new mastered location fields to the organizer model (`masteredRegionId`, `masteredDivisionId`, `masteredCityId`)
+   - Enhancing the organizer API to handle both parameter naming conventions
+   - Running a data migration script that updated all organizers with Boston's location hierarchy
+
+2. **Expected Resolution**: These backend changes should allow the frontend to continue using the current parameter names (`masteredCityId`, etc.) while the backend properly maps them to the correct database queries.
+
+3. **Verification Needed**: We need to test the latest backend integration to confirm these changes fully resolve the issue. This will involve:
+   - Testing the organizer dropdown with Boston selected
+   - Verifying API responses contain the expected organizers
+   - Ensuring events filter correctly when organizers are selected
+
 ---
 
 ## Investigation
@@ -137,11 +158,15 @@ This is a **data structure mismatch** issue. The organizers API endpoint is not 
   - Backend models - Organizer schema using organizerRegion instead of masteredRegionId
 
 ## Fix (if known or applied)
-- **Status:** ⏳ Pending
-- **Fix Description:** The fix will need to address the parameter naming mismatch between the frontend hook and the backend API. Two potential approaches:
-  1. Update the useOrganizers hook to map masteredCityId → organizerCity, masteredRegionId → organizerRegion
-  2. Update the backend API to recognize and handle both parameter naming conventions
-- **Testing:** To be determined
+- **Status:** 🚧 In Progress
+- **Fix Description:** The backend team has implemented a comprehensive solution to address the parameter naming mismatch:
+  1. Added new mastered location fields to the organizer model schema
+  2. Enhanced the API to recognize and handle both parameter naming conventions
+  3. Migrated existing organizers to include Boston's location hierarchy
+- **Testing:** 
+  1. Verify organizer dropdown properly populates with Boston selected
+  2. Test filtering functionality with selected organizers
+  3. Check API response for correct organizer data
 
 ## Resolution Log
 - **Commit/Branch:** `issue/1024-organizer-selection-dropdown-empty-for-boston`
@@ -154,11 +179,12 @@ This is a **data structure mismatch** issue. The organizers API endpoint is not 
 > Store under: `/public/IFE-Tracking/Issues/Current/Issue_1024_OrganizerSelectionEmptyForBoston.md` and move to `/public/IFE-Tracking/Issues/Completed/` when resolved. 
 
 # SNR after interactions
-🔷 **S** - Investigated the empty organizer selection dropdown for Boston and identified the root cause: a parameter naming mismatch between the frontend and backend. The useOrganizers hook sends 'masteredCityId' parameter, but the backend API expects 'organizerCity' due to an older data model in use.
+🔷 **S** - Reviewed issue documentation and backend changes. The backend team has already implemented a comprehensive solution that addresses the parameter naming mismatch by enhancing the API to handle both naming conventions and migrating organizer data to include Boston's location hierarchy. This approach allows the frontend to maintain its current implementation while the backend handles the translation.
 
 🟡 **N** - Next steps are to:
-1. Update useOrganizers.js to map the new location model parameters to the legacy parameter names expected by the API
-2. Test the fix with Boston and other locations
-3. Consider a more comprehensive frontend-backend alignment for location parameters
+1. Test if the backend changes have fully resolved the issue
+2. Verify the organizer dropdown properly populates with Boston selected
+3. If needed, update useOrganizers.js to add additional logging for future diagnostics
+4. Document the resolution for future reference
 
-🟩 **R** - Switch to Architect mode to design the solution that maintains compatibility with both the new mastered location model and the legacy organizer location fields.
+🟩 **R** - Switch to Scout mode to verify the backend fix is working as expected before closing the issue.
