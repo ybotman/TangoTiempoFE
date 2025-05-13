@@ -14,41 +14,56 @@ import {
 } from '@mui/material';
 
 const UserSettingsNotifications = ({ userData, updateUserData }) => {
-  const [emailEnabled, setEmailEnabled] = useState(
-    userData?.localUserInfo?.notificationPreferences?.emailEnabled || false
-  );
-  const [smsEnabled, setSmsEnabled] = useState(
-    userData?.localUserInfo?.notificationPreferences?.smsEnabled || false
-  );
+  // Determine current notification preference from userData
+  const getCurrentNotificationPreference = () => {
+    const preference = userData?.localUserInfo?.notificationPreference;
+    if (preference === 'Email') return 'email';
+    if (preference === 'SMS') return 'sms';
+    if (preference === 'Both') return 'both';
+    return 'none';
+  };
+
+  const [notificationPreference, setNotificationPreference] = useState(getCurrentNotificationPreference());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isModified, setIsModified] = useState(false);
 
+  // Compute derived email and SMS states from the preference
+  const emailEnabled = notificationPreference === 'email' || notificationPreference === 'both';
+  const smsEnabled = notificationPreference === 'sms' || notificationPreference === 'both';
+
   // Sync with props when they change
   useEffect(() => {
-    setEmailEnabled(userData?.localUserInfo?.notificationPreferences?.emailEnabled || false);
-    setSmsEnabled(userData?.localUserInfo?.notificationPreferences?.smsEnabled || false);
+    setNotificationPreference(getCurrentNotificationPreference());
     setIsModified(false);
   }, [userData]);
 
   // Check for modifications
   useEffect(() => {
-    const currentEmailEnabled = userData?.localUserInfo?.notificationPreferences?.emailEnabled || false;
-    const currentSmsEnabled = userData?.localUserInfo?.notificationPreferences?.smsEnabled || false;
-    
-    setIsModified(
-      emailEnabled !== currentEmailEnabled || 
-      smsEnabled !== currentSmsEnabled
-    );
-  }, [emailEnabled, smsEnabled, userData]);
+    const currentPreference = getCurrentNotificationPreference();
+    setIsModified(notificationPreference !== currentPreference);
+  }, [notificationPreference, userData]);
+
+  // Update preference based on toggle states
+  const updatePreference = (emailState, smsState) => {
+    if (emailState && smsState) {
+      setNotificationPreference('both');
+    } else if (emailState) {
+      setNotificationPreference('email');
+    } else if (smsState) {
+      setNotificationPreference('sms');
+    } else {
+      setNotificationPreference('none');
+    }
+  };
 
   const handleEmailChange = (event) => {
-    setEmailEnabled(event.target.checked);
+    updatePreference(event.target.checked, smsEnabled);
   };
 
   const handleSmsChange = (event) => {
-    setSmsEnabled(event.target.checked);
+    updatePreference(emailEnabled, event.target.checked);
   };
 
   const handleSnackbarClose = () => {
@@ -60,21 +75,34 @@ const UserSettingsNotifications = ({ userData, updateUserData }) => {
     setError(null);
     setShowSuccessMessage(false);
     
+    // Convert internal state to API expected format
+    let preferenceValue;
+    switch (notificationPreference) {
+      case 'email': 
+        preferenceValue = 'Email';
+        break;
+      case 'sms': 
+        preferenceValue = 'SMS';
+        break;
+      case 'both': 
+        preferenceValue = 'Both';
+        break;
+      default:
+        preferenceValue = 'None';
+    }
+    
     try {
       await updateUserData({
         localUserInfo: {
-          notificationPreferences: {
-            emailEnabled,
-            smsEnabled
-          }
+          notificationPreference: preferenceValue
         }
       });
       
-      console.log('Notification preferences updated successfully');
+      console.log('Notification preference updated successfully to:', preferenceValue);
       setShowSuccessMessage(true);
       setIsModified(false);
     } catch (err) {
-      console.error('Error saving notification preferences:', err);
+      console.error('Error saving notification preference:', err);
       setError(err.message || 'Failed to update notification preferences');
     } finally {
       setLoading(false);
@@ -147,10 +175,7 @@ const UserSettingsNotifications = ({ userData, updateUserData }) => {
 UserSettingsNotifications.propTypes = {
   userData: PropTypes.shape({
     localUserInfo: PropTypes.shape({
-      notificationPreferences: PropTypes.shape({
-        emailEnabled: PropTypes.bool,
-        smsEnabled: PropTypes.bool
-      })
+      notificationPreference: PropTypes.string
     })
   }),
   updateUserData: PropTypes.func.isRequired
