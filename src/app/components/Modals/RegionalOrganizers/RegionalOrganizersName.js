@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, TextField, Button } from '@mui/material';
+import { Box, Typography, TextField, Button, Alert, Snackbar } from '@mui/material';
 
 const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => {
   const [fullName, setFullName] = useState('');
@@ -10,6 +10,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (organizer) {
@@ -45,6 +46,10 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
     setShortName(value);
   };
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
     if (fullName.trim().length < 7 || fullName === 'New Organizer') {
       setErrorMessage('Full Name must be at least 5 characters and cannot be "New Organizer".');
@@ -69,7 +74,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
     try {
       await updateOrganizer(organizerId, updateData);
       setErrorMessage(''); // Clear any existing error messages
-      //console.log('Name updated successfully.');
+      setShowSuccessMessage(true); // Show success notification
     } catch (error) {
       console.error('Failed to update name:', error);
       setErrorMessage('An error occurred while updating the name.');
@@ -82,10 +87,22 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
         Edit Organizer Name
       </Typography>
       {errorMessage && (
-        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
           {errorMessage}
-        </Typography>
+        </Alert>
       )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Organizer name has been updated successfully!
+        </Alert>
+      </Snackbar>
 
       <Box display="flex" flexDirection="column" gap={2}>
         <TextField

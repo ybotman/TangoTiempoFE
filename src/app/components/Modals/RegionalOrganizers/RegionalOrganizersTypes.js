@@ -12,6 +12,8 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
@@ -29,6 +31,8 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
   });
 
   const [initialTypes, setInitialTypes] = useState({});
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (organizer) {
@@ -69,7 +73,14 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
 
   const isSaveDisabled = JSON.stringify(types) === JSON.stringify(initialTypes);
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
+    setErrorMessage('');
+    setShowSuccessMessage(false);
+    
     const updateData = {
       organizerTypes: types,
     };
@@ -77,9 +88,10 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
     try {
       await updateOrganizer(organizerId, updateData);
       setInitialTypes(types);
-      //console.log('Types updated successfully.');
+      setShowSuccessMessage(true);
     } catch (error) {
       console.error('Failed to update types:', error);
+      setErrorMessage('An error occurred while updating organizer types.');
     }
   };
 
@@ -102,6 +114,24 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
       <Typography variant="h6" gutterBottom>
         Organizer Types
       </Typography>
+
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Organizer types have been updated successfully!
+        </Alert>
+      </Snackbar>
 
       <Box display="flex" flexDirection="column" sx={{ mb: 2 }} maxWidth={isMobile ? '100%' : '400px'}>
         {renderTypeCheckbox(

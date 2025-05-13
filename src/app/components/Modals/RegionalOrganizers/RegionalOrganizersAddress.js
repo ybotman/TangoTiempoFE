@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { TextField, Switch, FormControlLabel, Button, Box, Typography, Tooltip, IconButton } from '@mui/material';
+import { TextField, Switch, FormControlLabel, Button, Box, Typography, Tooltip, IconButton, Alert, Snackbar } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
 const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) => {
@@ -15,6 +15,8 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
   const [state, setState] = useState(address.state || '');
   const [zip, setZip] = useState(address.postalCode || '');
   const [isSearchable, setIsSearchable] = useState(organizer?.wantRender || false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     const publicContactInfo = organizer?.publicContactInfo || {};
@@ -40,11 +42,22 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
     zip === (address.postalCode || '') &&
     isSearchable === (organizer?.wantRender || false);
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
+    setErrorMessage('');
+    setShowSuccessMessage(false);
+    
+    // Create a merged update data object that includes all existing publicContactInfo
+    // this prevents overwriting other fields that might be in publicContactInfo
     const updateData = {
       publicContactInfo: {
+        ...organizer?.publicContactInfo, // Preserve existing fields
         phone,
         Email,
+        url: organizer?.publicContactInfo?.url || '', // Preserve URL
         address: {
           street1,
           street2,
@@ -55,11 +68,13 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
       },
       wantRender: isSearchable,
     };
+    
     try {
       await updateOrganizer(organizerId, updateData);
-      //console.log('Address updated successfully.');
+      setShowSuccessMessage(true);
     } catch (error) {
       console.error('Failed to update address:', error);
+      setErrorMessage('An error occurred while updating the address information.');
     }
   };
 
@@ -68,6 +83,24 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
       <Typography variant="h6" gutterBottom>
         Public Contact Information
       </Typography>
+      
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Contact information has been updated successfully!
+        </Alert>
+      </Snackbar>
       <Box display="flex" flexDirection="column" gap={2}>
         <TextField label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
         <TextField label="Email" value={Email} onChange={(e) => setEmail(e.target.value)} fullWidth />
