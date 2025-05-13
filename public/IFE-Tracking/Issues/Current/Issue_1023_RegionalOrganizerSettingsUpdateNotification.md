@@ -119,6 +119,7 @@ Document what was changed, how, and any technical notes._
 - **Verified By:** Not yet verified
 - **Commits:**
   - 397bc6e Create Issue 1023: Regional Organizer Settings Update Notification
+  - adbc423 Implement success notifications in RegionalOrganizer settings
 
 ---
 
