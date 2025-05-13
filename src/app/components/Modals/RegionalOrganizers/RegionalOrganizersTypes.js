@@ -31,6 +31,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
   });
 
   const [initialTypes, setInitialTypes] = useState({});
+  const [pendingVenueRequest, setPendingVenueRequest] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -54,6 +55,9 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
       });
+      
+      // Reset venue request when organizer data changes
+      setPendingVenueRequest(false);
     }
   }, [organizer]);
 
@@ -62,6 +66,18 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
 
     if (name === 'isEventOrganizer' && !checked) {
       alert('You cannot uncheck Event Organizer.');
+      return;
+    }
+
+    // Special handling for venue checkbox
+    if (name === 'isVenue') {
+      if (checked) {
+        // When checked, set to pending request
+        setPendingVenueRequest(true);
+      } else {
+        // When unchecked, cancel the request
+        setPendingVenueRequest(false);
+      }
       return;
     }
 
@@ -95,19 +111,67 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
     }
   };
 
-  const renderTypeCheckbox = (label, name, infoText) => (
-    <Box key={name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-      <FormControlLabel
-        control={<Checkbox checked={types[name]} onChange={handleTypeChange} name={name} color="primary" />}
-        label={label}
-      />
-      <Tooltip title={infoText}>
-        <IconButton size="small" aria-label={`${label} info`}>
-          <InfoIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  );
+  // For handling venue registration request
+  const handleVenueRequest = () => {
+    // In the future, this would submit the request to create a venue
+    // For now, it's just a placeholder that will reset the UI
+    setShowSuccessMessage(true);
+    setPendingVenueRequest(false);
+  };
+
+  const renderTypeCheckbox = (label, name, infoText) => {
+    // Special case for venue checkbox
+    if (name === 'isVenue') {
+      return (
+        <Box key={name} sx={{ mb: 2, mt: 3, pb: 2, borderBottom: '1px solid #e0e0e0' }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <FormControlLabel
+              control={<Checkbox checked={initialTypes.isVenue || pendingVenueRequest} onChange={handleTypeChange} name={name} color="primary" />}
+              label={initialTypes.isVenue ? "Venue (Approved)" : "Venue"}
+            />
+            <Tooltip title="Request to be listed as a venue in the system. Admin approval required. Your address will be used to create the venue.">
+              <IconButton size="small" aria-label="Venue info">
+                <InfoIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          
+          {/* Show submit button when venue is checked but not yet approved */}
+          {pendingVenueRequest && !initialTypes.isVenue && (
+            <Box mt={1} ml={4}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Submit a request to create a venue at your address. System will check for duplicates.
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="inherit"
+                size="small"
+                onClick={handleVenueRequest}
+                sx={{ bgcolor: '#e0e0e0' }}
+              >
+                Submit Venue Request
+              </Button>
+            </Box>
+          )}
+        </Box>
+      );
+    }
+    
+    // Regular checkboxes for other types
+    return (
+      <Box key={name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <FormControlLabel
+          control={<Checkbox checked={types[name]} onChange={handleTypeChange} name={name} color="primary" />}
+          label={label}
+        />
+        <Tooltip title={infoText}>
+          <IconButton size="small" aria-label={`${label} info`}>
+            <InfoIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -140,11 +204,6 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
           'Is allowed to Manage Events in TangoTiempo like milongas, festivals, classes, etc.'
         )}
         {renderTypeCheckbox(
-          'Venue',
-          'isVenue',
-          'The address provided will be listed for OTHER Organizers to select for their calendar events.'
-        )}
-        {renderTypeCheckbox(
           'Teacher',
           'isTeacher',
           'Offers tango classes and workshops. Will be listed in the Teachers directory.'
@@ -159,6 +218,12 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
           'Orchestra',
           'isOrchestra',
           'Performs live Argentine tango music. Will be listed in the Orchestras directory.'
+        )}
+        {/* Venue is handled specially and placed last */}
+        {renderTypeCheckbox(
+          'Venue',
+          'isVenue',
+          'The address provided will be listed for OTHER Organizers to select for their calendar events.'
         )}
       </Box>
 
