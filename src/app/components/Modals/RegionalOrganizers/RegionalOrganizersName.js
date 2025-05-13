@@ -190,6 +190,7 @@ RegionalOrganizersName.propTypes = {
       url: PropTypes.string,
     }),
     description: PropTypes.string,
+    wantRender: PropTypes.bool,
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
 };

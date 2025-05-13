@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { TextField, Switch, FormControlLabel, Button, Box, Typography, Tooltip, IconButton, Alert, Snackbar } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { TextField, Button, Box, Typography, Alert, Snackbar } from '@mui/material';
 
 const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) => {
   const publicContactInfo = organizer?.publicContactInfo || {};
@@ -14,7 +13,6 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
   const [city, setCity] = useState(address.city || '');
   const [state, setState] = useState(address.state || '');
   const [zip, setZip] = useState(address.postalCode || '');
-  const [isSearchable, setIsSearchable] = useState(organizer?.wantRender || false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -29,7 +27,6 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
     setCity(address.city || '');
     setState(address.state || '');
     setZip(address.postalCode || '');
-    setIsSearchable(organizer?.wantRender || false);
   }, [organizer]);
 
   const isSaveDisabled =
@@ -126,6 +123,7 @@ RegionalOrganizersAddress.propTypes = {
     publicContactInfo: PropTypes.shape({
       phone: PropTypes.string,
       Email: PropTypes.string,
+      url: PropTypes.string,
       address: PropTypes.shape({
         street1: PropTypes.string,
         street2: PropTypes.string,
@@ -134,7 +132,6 @@ RegionalOrganizersAddress.propTypes = {
         postalCode: PropTypes.string,
       }),
     }),
-    wantRender: PropTypes.bool,
   }),
   updateOrganizer: PropTypes.func.isRequired,
 };
