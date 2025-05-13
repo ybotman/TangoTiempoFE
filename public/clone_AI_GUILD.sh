@@ -37,4 +37,8 @@ mv "$SPARSE_PATH"/* .
 top_dir="${SPARSE_PATH%%/*}"
 rm -rf "$top_dir"
 
+mv ../CLAUDE.md ../CLAUDE.md.bak && mv AI-Guild/Setup/NewCLAUDE.md ../CLAUDE.md
+
 echo "✅ Initialized sparse-checkout of '$SPARSE_PATH' into public/$TARGET_DIR/"
+
+

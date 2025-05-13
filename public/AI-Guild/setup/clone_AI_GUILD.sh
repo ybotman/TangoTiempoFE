@@ -37,4 +37,7 @@ mv "$SPARSE_PATH"/* .
 top_dir="${SPARSE_PATH%%/*}"
 rm -rf "$top_dir"
 
+
+
 echo "✅ Initialized sparse-checkout of '$SPARSE_PATH' into public/$TARGET_DIR/"
+
