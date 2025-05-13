@@ -106,6 +106,9 @@ Document what was changed, how, and any technical notes._
   - Fixed issues with data not being properly updated in the Address component by preserving existing fields
   - Ensured consistency with the pattern established in Issue #1022 (UserSettingsUpdateNotification)
   - Converted error messages from Typography to Alert components for better visibility
+  - Moved web page visibility toggle from Address to Name tab for better UX with clearer labeling
+  - Implemented controlled flow for venue creation with explicit approval process
+  - Fixed ESLint errors throughout modified components
 - **Testing:** 
   - Manual testing of settings updates across all components
   - Verified success notifications appear when updates succeed
@@ -120,6 +123,10 @@ Document what was changed, how, and any technical notes._
 - **Commits:**
   - 397bc6e Create Issue 1023: Regional Organizer Settings Update Notification
   - adbc423 Implement success notifications in RegionalOrganizer settings
+  - 322cfa5 Move web page visibility toggle from Address to Name tab
+  - 173568a Update web page visibility switch label to be more descriptive
+  - 7fdcb58 Implement controlled flow for venue creation requests
+  - eed6ffb Fix ESLint errors
 
 ---
 
