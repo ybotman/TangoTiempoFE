@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { TextField, Switch, FormControlLabel, Button, Box, Typography, Tooltip, IconButton } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { TextField, Button, Box, Typography, Alert, Snackbar } from '@mui/material';
 
 const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) => {
   const publicContactInfo = organizer?.publicContactInfo || {};
@@ -14,7 +13,8 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
   const [city, setCity] = useState(address.city || '');
   const [state, setState] = useState(address.state || '');
   const [zip, setZip] = useState(address.postalCode || '');
-  const [isSearchable, setIsSearchable] = useState(organizer?.wantRender || false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     const publicContactInfo = organizer?.publicContactInfo || {};
@@ -27,7 +27,6 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
     setCity(address.city || '');
     setState(address.state || '');
     setZip(address.postalCode || '');
-    setIsSearchable(organizer?.wantRender || false);
   }, [organizer]);
 
   const isSaveDisabled =
@@ -37,14 +36,24 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
     street2 === (address.street2 || '') &&
     city === (address.city || '') &&
     state === (address.state || '') &&
-    zip === (address.postalCode || '') &&
-    isSearchable === (organizer?.wantRender || false);
+    zip === (address.postalCode || '');
+
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
 
   const handleSave = async () => {
+    setErrorMessage('');
+    setShowSuccessMessage(false);
+    
+    // Create a merged update data object that includes all existing publicContactInfo
+    // this prevents overwriting other fields that might be in publicContactInfo
     const updateData = {
       publicContactInfo: {
+        ...organizer?.publicContactInfo, // Preserve existing fields
         phone,
         Email,
+        url: organizer?.publicContactInfo?.url || '', // Preserve URL
         address: {
           street1,
           street2,
@@ -53,13 +62,15 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
           postalCode: zip,
         },
       },
-      wantRender: isSearchable,
+      // Don't update wantRender here, as it's managed in the Name component now
     };
+    
     try {
       await updateOrganizer(organizerId, updateData);
-      //console.log('Address updated successfully.');
+      setShowSuccessMessage(true);
     } catch (error) {
       console.error('Failed to update address:', error);
+      setErrorMessage('An error occurred while updating the address information.');
     }
   };
 
@@ -68,6 +79,24 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
       <Typography variant="h6" gutterBottom>
         Public Contact Information
       </Typography>
+      
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Contact information has been updated successfully!
+        </Alert>
+      </Snackbar>
       <Box display="flex" flexDirection="column" gap={2}>
         <TextField label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
         <TextField label="Email" value={Email} onChange={(e) => setEmail(e.target.value)} fullWidth />
@@ -78,21 +107,8 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
         <TextField label="Zip" value={zip} onChange={(e) => setZip(e.target.value)} fullWidth />
       </Box>
 
-      {/* Toggle and Save Button */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
-        <Box display="flex" alignItems="center">
-          <FormControlLabel
-            control={
-              <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
-            }
-            label="Allow Search Engines to Crawl"
-          />
-          <Tooltip title="Your name, phone, primary image, address, and description will be structured for search engines to crawl and display in relevant searches.">
-            <IconButton>
-              <InfoIcon color="primary" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+      {/* Save Button */}
+      <Box display="flex" justifyContent="flex-end" mt={2}>
         <Button onClick={handleSave} color="primary" variant="contained" disabled={isSaveDisabled}>
           Save
         </Button>
@@ -107,6 +123,7 @@ RegionalOrganizersAddress.propTypes = {
     publicContactInfo: PropTypes.shape({
       phone: PropTypes.string,
       Email: PropTypes.string,
+      url: PropTypes.string,
       address: PropTypes.shape({
         street1: PropTypes.string,
         street2: PropTypes.string,
@@ -115,7 +132,6 @@ RegionalOrganizersAddress.propTypes = {
         postalCode: PropTypes.string,
       }),
     }),
-    wantRender: PropTypes.bool,
   }),
   updateOrganizer: PropTypes.func.isRequired,
 };
