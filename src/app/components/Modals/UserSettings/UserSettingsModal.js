@@ -8,8 +8,10 @@ import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName'
 import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
 import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
+import UserSettingsGeoLocation from '@/components/Modals/UserSettings/UserSettingsGeoLocation';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const modalStyle = {
   position: 'absolute',
@@ -26,6 +28,7 @@ const modalStyle = {
 const UserSettingsModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
+  const geoLocation = useGeoLocation();
   const { userData, loading, error, updateUserData } = useUsers();
   const [currentTab, setCurrentTab] = useState('name');
 
@@ -49,6 +52,7 @@ const UserSettingsModal = ({ open, onClose }) => {
           <Tab label="Name" value="name" />
           <Tab label="Favs" value="favorites" />
           <Tab label="Notifications" value="notifications" />
+          <Tab label="Location" value="geolocation" />
           <Tab label="Apply" value="apply" />
         </Tabs>
 
@@ -65,6 +69,9 @@ const UserSettingsModal = ({ open, onClose }) => {
             )}
             {currentTab === 'notifications' && (
               <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
+            )}
+            {currentTab === 'geolocation' && (
+              <UserSettingsGeoLocation userData={userData} geoLocation={geoLocation} />
             )}
             {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
           </>

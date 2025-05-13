@@ -14,7 +14,8 @@ import {
   useTheme,
   useMediaQuery,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Snackbar
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 
@@ -24,6 +25,7 @@ const UserSettingsFavorites = ({ userData, updateUserData }) => {
   const [isDirty, setIsDirty] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // Get theme first, then use it with useMediaQuery
   const theme = useTheme();
@@ -56,9 +58,14 @@ const UserSettingsFavorites = ({ userData, updateUserData }) => {
     setIsDirty(true);
   };
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
     setLoading(true);
     setError(null);
+    setShowSuccessMessage(false);
 
     try {
       // Create safe arrays with proper error handling
@@ -78,6 +85,7 @@ const UserSettingsFavorites = ({ userData, updateUserData }) => {
       });
 
       setIsDirty(false);
+      setShowSuccessMessage(true);
     } catch (error) {
       console.error('Error updating favorites:', error);
       setError(error.message || 'Failed to update favorites. Please try again.');
@@ -107,6 +115,18 @@ const UserSettingsFavorites = ({ userData, updateUserData }) => {
           {error}
         </Alert>
       )}
+
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Your favorites have been updated successfully!
+        </Alert>
+      </Snackbar>
 
       <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} gap={2} sx={{ mt: 2 }}>
         <Box flex={1}>

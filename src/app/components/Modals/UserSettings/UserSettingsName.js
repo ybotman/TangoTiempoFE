@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, TextField, Button, Typography, Alert } from '@mui/material';
+import { Box, TextField, Button, Typography, Alert, Snackbar } from '@mui/material';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const UserSettingsName = ({ userData, updateUserData }) => {
@@ -15,6 +15,7 @@ const UserSettingsName = ({ userData, updateUserData }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModified, setIsModified] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // Sync prop changes into state
   useEffect(() => {
@@ -31,9 +32,14 @@ const UserSettingsName = ({ userData, updateUserData }) => {
     setIsModified(isNameModified);
   }, [first, last, userData]);
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
     setLoading(true);
     setError(null);
+    setShowSuccessMessage(false);
     
     try {
       // Create a clean user data object for update - with proper nesting
@@ -53,6 +59,8 @@ const UserSettingsName = ({ userData, updateUserData }) => {
       await updateUserData(updatedUserData);
       
       console.log('User data updated successfully');
+      // Show success message
+      setShowSuccessMessage(true);
     } catch (err) {
       console.error('Error saving user data:', err);
       setError(err.message || 'Failed to update user settings');
@@ -67,10 +75,22 @@ const UserSettingsName = ({ userData, updateUserData }) => {
       
       {/* Error message for API errors */}
       {error && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error || "There was an issue updating your information."}
         </Alert>
       )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Your name has been updated successfully!
+        </Alert>
+      </Snackbar>
       
       <TextField
         label="First Name"
