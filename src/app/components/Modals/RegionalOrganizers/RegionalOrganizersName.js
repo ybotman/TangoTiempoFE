@@ -100,7 +100,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
             control={
               <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
             }
-            label="Create Public Web Page for This Organizer"
+            label={isSearchable ? "Crawlable Public Web Page" : "No Crawlable Info"}
           />
           <Tooltip title="When enabled, we'll create a public web page for this organizer that displays their name, description, contact info, image, and events. This page will be indexed by search engines to help people find your tango events.">
             <IconButton>
