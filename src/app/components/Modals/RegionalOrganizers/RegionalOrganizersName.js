@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, TextField, Button, Alert, Snackbar } from '@mui/material';
+import { Box, Typography, TextField, Button, Alert, Snackbar, Switch, FormControlLabel, Tooltip, IconButton } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 
 const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => {
   const [fullName, setFullName] = useState('');
   const [shortName, setShortName] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
+  const [isSearchable, setIsSearchable] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -18,6 +20,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
       setShortName(organizer.shortName || '');
       setDescription(organizer.description || '');
       setUrl(organizer.publicContactInfo?.url || '');
+      setIsSearchable(organizer?.wantRender || false);
     }
   }, [organizer]);
 
@@ -36,7 +39,8 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
     (fullName === organizer?.fullName &&
       shortName === organizer?.shortName &&
       description === organizer?.description &&
-      url === organizer.publicContactInfo?.url) ||
+      url === organizer.publicContactInfo?.url &&
+      isSearchable === (organizer?.wantRender || false)) ||
     fullName === 'New Organizer' ||
     fullName.trim().length < 7 ||
     isShortNameInvalid();
@@ -67,8 +71,10 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
       shortName,
       description,
       publicContactInfo: {
+        ...organizer?.publicContactInfo, // Preserve existing fields
         url,
       },
+      wantRender: isSearchable,
     };
 
     try {
@@ -86,6 +92,23 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
       <Typography variant="h6" gutterBottom>
         Edit Organizer Name
       </Typography>
+      
+      {/* Search Engine Visibility Section */}
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+        <Box display="flex" alignItems="center">
+          <FormControlLabel
+            control={
+              <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
+            }
+            label="Create Public Web Page for This Organizer"
+          />
+          <Tooltip title="When enabled, we'll create a public web page for this organizer that displays their name, description, contact info, image, and events. This page will be indexed by search engines to help people find your tango events.">
+            <IconButton>
+              <InfoIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {errorMessage}

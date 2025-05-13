@@ -39,8 +39,7 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
     street2 === (address.street2 || '') &&
     city === (address.city || '') &&
     state === (address.state || '') &&
-    zip === (address.postalCode || '') &&
-    isSearchable === (organizer?.wantRender || false);
+    zip === (address.postalCode || '');
 
   const handleSnackbarClose = () => {
     setShowSuccessMessage(false);
@@ -66,7 +65,7 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
           postalCode: zip,
         },
       },
-      wantRender: isSearchable,
+      // Don't update wantRender here, as it's managed in the Name component now
     };
     
     try {
@@ -111,21 +110,8 @@ const RegionalOrganizersAddress = ({ organizerId, organizer, updateOrganizer }) 
         <TextField label="Zip" value={zip} onChange={(e) => setZip(e.target.value)} fullWidth />
       </Box>
 
-      {/* Toggle and Save Button */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
-        <Box display="flex" alignItems="center">
-          <FormControlLabel
-            control={
-              <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
-            }
-            label="Allow Search Engines to Crawl"
-          />
-          <Tooltip title="Your name, phone, primary image, address, and description will be structured for search engines to crawl and display in relevant searches.">
-            <IconButton>
-              <InfoIcon color="primary" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+      {/* Save Button */}
+      <Box display="flex" justifyContent="flex-end" mt={2}>
         <Button onClick={handleSave} color="primary" variant="contained" disabled={isSaveDisabled}>
           Save
         </Button>
