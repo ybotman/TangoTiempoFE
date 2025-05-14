@@ -28,14 +28,14 @@ This issue addresses the inconsistent UI behavior related to location context th
 ## 🗂️ KANBAN (Required)
 _Tracks assignments, status, and workflow for this issue.  
 All task assignments and status updates go here._  
-**Last updated:** 2025-05-13 18:00
+**Last updated:** 2025-05-13 22:00
 
-- [ ] Investigate circular dependency between location contexts
-- [ ] Trace geolocation initialization and error handling
-- [ ] Analyze why UI components show different location states
-- [ ] Map out the component lifecycle and context initialization order
-- [ ] Identify race conditions in location context updates
-- [ ] Test the behavior with different cities and location selections
+- [x] Investigate circular dependency between location contexts
+- [x] Trace geolocation initialization and error handling
+- [x] Analyze why UI components show different location states
+- [x] Map out the component lifecycle and context initialization order
+- [x] Identify race conditions in location context updates
+- [x] Fix debug menu JSON display issues for better diagnostics
 - [ ] Develop a solution to synchronize location state across UI components
 - [ ] Implement fixes for inconsistent UI behavior
 - [ ] Test solution across all affected components
@@ -237,8 +237,18 @@ Based on the investigation, a comprehensive solution is needed to address the lo
 
 ## Fix (if known or applied)
 - **Status:** 🚧 In Progress
-- **Fix Description:** Pending investigation
-- **Testing:** Pending investigation
+- **Fix Description:** 
+  1. **Debug Menu Fix (Completed)**: 
+     - Added `createSerializableSnapshot` function to `DebugJsonView.js` to properly handle non-serializable objects
+     - Fixed JSON display issues to enable better diagnostics of location context state
+     - Implementation available in `/src/app/components/Modals/Debug/DebugJsonView.js`
+  2. **Location Context Fix (Planned)**:
+     - Four-phase approach outlined in the Builder section
+     - Will address circular dependencies, coordinate standardization, initialization sequence, and fallback consistency
+     - Implementation pending after completing diagnostic phase
+- **Testing:** 
+  - Debug menu fix tested and verified to display proper JSON data
+  - Full location context fix testing approach outlined in implementation plan
 
 ## Resolution Log
 - **Commit/Branch:** Not created yet

@@ -6,7 +6,7 @@
 > All investigation, assignments, and fixes must be recorded here by the responsible role.
 
 ## Overview
-This issue documents a specific error in the debug menu's geo-location tab where MUI's SelectInput component shows "out-of-range value" warnings. These warnings indicate a mismatch between the currently selected city ID value and the available options in the dropdown, revealing important insights about data inconsistencies in the location context system.
+This issue documents a specific error in the debug menu's geo-location tab where MUI's SelectInput component shows "out-of-range value" warnings. These warnings indicate a mismatch between the currently selected city ID value and the available options in the dropdown, revealing important insights about data inconsistencies in the location context system. With the fixes implemented for Issue_1025, the debug menu now properly displays context data, helping diagnose this specific mismatch issue.
 
 ## Details
 - **Reported On:** 2025-05-13
@@ -31,12 +31,13 @@ This issue documents a specific error in the debug menu's geo-location tab where
 ## 🗂️ KANBAN (Required)
 _Tracks assignments, status, and workflow for this issue.  
 All task assignments and status updates go here._  
-**Last updated:** 2025-05-13 21:30
+**Last updated:** 2025-05-13 22:00
 
-- [ ] Investigate the source of the out-of-range value in the select component
-- [ ] Identify why the available options don't include the currently selected value
-- [ ] Determine if this is related to the city ID mismatch between backend and frontend
-- [ ] Check for data inconsistencies between the SelectInput options and context state
+- [x] Investigate the source of the out-of-range value in the select component
+- [x] Identify why the available options don't include the currently selected value
+- [x] Determine if this is related to the city ID mismatch between backend and frontend
+- [x] Check for data inconsistencies between the SelectInput options and context state
+- [x] Fix debug menu JSON display to better visualize the mismatch (via Issue_1025)
 - [ ] Design appropriate fix to ensure selected values are always valid options
 - [ ] Implement validation to prevent out-of-range selections
 - [ ] Add error handling for mismatched city IDs
@@ -147,8 +148,19 @@ function GeoLocationDebugTab() {
 
 ## Fix (if known or applied)
 - **Status:** 🚧 In Progress
-- **Fix Description:** Pending further investigation
-- **Testing:** Pending implementation
+- **Fix Description:** 
+  1. **Debug Menu Diagnostics (Completed)**:
+     - Fixed JSON display in debug menu to properly show the mismatch (via Issue_1025)
+     - Added serialization support to properly display city IDs and dropdown options
+     - Now able to visualize the exact city ID discrepancy
+     
+  2. **SelectInput Validation (Planned)**:
+     - Will implement the data synchronization approach to ensure dropdown options always include the current selection
+     - Add validation to ensure selected values are always in the options list
+     - Implement better error handling for mismatched IDs
+- **Testing:** 
+  - Debug menu fix tested and verified to display proper context data
+  - SelectInput validation fix pending implementation
 
 ## Resolution Log
 - **Commit/Branch:** Not yet created
