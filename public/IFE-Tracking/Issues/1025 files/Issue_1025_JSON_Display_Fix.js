@@ -1,4 +1,14 @@
-import React, { useState } from 'react';
+/**
+ * JSON Display Fix for Debug Menu
+ * 
+ * This file contains a function to fix the "[Error: object is not iterable 
+ * (cannot read property Symbol(Symbol.iterator))]" errors in the debug menu.
+ * 
+ * To implement:
+ * 1. Add this function to your debug menu components
+ * 2. Use it to process context objects before displaying
+ * 3. No other changes needed - this is a non-invasive fix
+ */
 
 /**
  * Creates a serializable snapshot of any object, handling circular references,
@@ -83,42 +93,43 @@ function createSerializableSnapshot(data, maxDepth = 10) {
 }
 
 /**
- * DebugJsonView Component
- * Displays JSON data with syntax highlighting and copy functionality
+ * IMPLEMENTATION INSTRUCTIONS:
+ * 
+ * 1. For the Debug Menu components:
+ * 
+ * // Before displaying any context object
+ * const safeContextData = createSerializableSnapshot(contextData);
+ * 
+ * // Then use JSON.stringify on the safe version
+ * JSON.stringify(safeContextData, null, 2);
+ * 
+ * 2. Example for each context debug component:
+ * 
+ * function GeoLocationContextDebug() {
+ *   const geoContext = useGeoLocation();
+ *   
+ *   // Create safe serializable snapshot
+ *   const safeContext = createSerializableSnapshot(geoContext);
+ *   
+ *   return (
+ *     <div className="debug-section">
+ *       <h3>GeoLocation Context</h3>
+ *       <pre>{JSON.stringify(safeContext, null, 2)}</pre>
+ *     </div>
+ *   );
+ * }
+ * 
+ * 3. Alternatively, modify the DebugJsonView component directly:
+ * 
+ * function DebugJsonView({ data, title }) {
+ *   // Create safe serializable version of the data
+ *   const safeData = createSerializableSnapshot(data);
+ *   
+ *   return (
+ *     <div className="debug-json-view">
+ *       {title && <h4>{title}</h4>}
+ *       <pre>{JSON.stringify(safeData, null, 2)}</pre>
+ *     </div>
+ *   );
+ * }
  */
-function DebugJsonView({ data, title, ...props }) {
-  const [copied, setCopied] = useState(false);
-  
-  // Create a safe serializable copy of the data - THIS IS THE CRITICAL FIX
-  const safeData = createSerializableSnapshot(data);
-  
-  // Format the JSON with pretty printing
-  const jsonString = JSON.stringify(safeData, null, 2);
-  
-  // Handle copy to clipboard
-  const handleCopy = () => {
-    navigator.clipboard.writeText(jsonString).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-  
-  return (
-    <div className="debug-json-view">
-      {title && (
-        <div className="debug-json-header">
-          <h4>{title}</h4>
-          <button 
-            className={`copy-button ${copied ? 'copied' : ''}`}
-            onClick={handleCopy}
-          >
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
-        </div>
-      )}
-      <pre className="json-display">{jsonString}</pre>
-    </div>
-  );
-}
-
-export default DebugJsonView;
