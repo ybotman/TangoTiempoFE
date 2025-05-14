@@ -12,6 +12,8 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
@@ -29,6 +31,9 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
   });
 
   const [initialTypes, setInitialTypes] = useState({});
+  const [pendingVenueRequest, setPendingVenueRequest] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (organizer) {
@@ -50,6 +55,9 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
       });
+      
+      // Reset venue request when organizer data changes
+      setPendingVenueRequest(false);
     }
   }, [organizer]);
 
@@ -61,6 +69,18 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
       return;
     }
 
+    // Special handling for venue checkbox
+    if (name === 'isVenue') {
+      if (checked) {
+        // When checked, set to pending request
+        setPendingVenueRequest(true);
+      } else {
+        // When unchecked, cancel the request
+        setPendingVenueRequest(false);
+      }
+      return;
+    }
+
     setTypes((prevTypes) => ({
       ...prevTypes,
       [name]: checked,
@@ -69,7 +89,14 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
 
   const isSaveDisabled = JSON.stringify(types) === JSON.stringify(initialTypes);
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
+    setErrorMessage('');
+    setShowSuccessMessage(false);
+    
     const updateData = {
       organizerTypes: types,
     };
@@ -77,25 +104,74 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
     try {
       await updateOrganizer(organizerId, updateData);
       setInitialTypes(types);
-      //console.log('Types updated successfully.');
+      setShowSuccessMessage(true);
     } catch (error) {
       console.error('Failed to update types:', error);
+      setErrorMessage('An error occurred while updating organizer types.');
     }
   };
 
-  const renderTypeCheckbox = (label, name, infoText) => (
-    <Box key={name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-      <FormControlLabel
-        control={<Checkbox checked={types[name]} onChange={handleTypeChange} name={name} color="primary" />}
-        label={label}
-      />
-      <Tooltip title={infoText}>
-        <IconButton size="small" aria-label={`${label} info`}>
-          <InfoIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  );
+  // For handling venue registration request
+  const handleVenueRequest = () => {
+    // In the future, this would submit the request to create a venue
+    // For now, it's just a placeholder that will reset the UI
+    setShowSuccessMessage(true);
+    setPendingVenueRequest(false);
+  };
+
+  const renderTypeCheckbox = (label, name, infoText) => {
+    // Special case for venue checkbox
+    if (name === 'isVenue') {
+      return (
+        <Box key={name} sx={{ mb: 2, mt: 3, pb: 2, borderBottom: '1px solid #e0e0e0' }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <FormControlLabel
+              control={<Checkbox checked={initialTypes.isVenue || pendingVenueRequest} onChange={handleTypeChange} name={name} color="primary" />}
+              label={initialTypes.isVenue ? "Venue (Approved)" : "Venue"}
+            />
+            <Tooltip title="Request to be listed as a venue in the system. Admin approval required. Your address will be used to create the venue.">
+              <IconButton size="small" aria-label="Venue info">
+                <InfoIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          
+          {/* Show submit button when venue is checked but not yet approved */}
+          {pendingVenueRequest && !initialTypes.isVenue && (
+            <Box mt={1} ml={4}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Submit a request to create a venue at your address. System will check for duplicates.
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="inherit"
+                size="small"
+                onClick={handleVenueRequest}
+                sx={{ bgcolor: '#e0e0e0' }}
+              >
+                Submit Venue Request
+              </Button>
+            </Box>
+          )}
+        </Box>
+      );
+    }
+    
+    // Regular checkboxes for other types
+    return (
+      <Box key={name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <FormControlLabel
+          control={<Checkbox checked={types[name]} onChange={handleTypeChange} name={name} color="primary" />}
+          label={label}
+        />
+        <Tooltip title={infoText}>
+          <IconButton size="small" aria-label={`${label} info`}>
+            <InfoIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -103,16 +179,29 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         Organizer Types
       </Typography>
 
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Organizer types have been updated successfully!
+        </Alert>
+      </Snackbar>
+
       <Box display="flex" flexDirection="column" sx={{ mb: 2 }} maxWidth={isMobile ? '100%' : '400px'}>
         {renderTypeCheckbox(
           'Event Organizer',
           'isEventOrganizer',
           'Is allowed to Manage Events in TangoTiempo like milongas, festivals, classes, etc.'
-        )}
-        {renderTypeCheckbox(
-          'Venue',
-          'isVenue',
-          'The address provided will be listed for OTHER Organizers to select for their calendar events.'
         )}
         {renderTypeCheckbox(
           'Teacher',
@@ -129,6 +218,12 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
           'Orchestra',
           'isOrchestra',
           'Performs live Argentine tango music. Will be listed in the Orchestras directory.'
+        )}
+        {/* Venue is handled specially and placed last */}
+        {renderTypeCheckbox(
+          'Venue',
+          'isVenue',
+          'The address provided will be listed for OTHER Organizers to select for their calendar events.'
         )}
       </Box>
 

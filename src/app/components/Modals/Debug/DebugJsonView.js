@@ -1,216 +1,124 @@
-'use client';
-
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { 
-  Box, 
-  Paper, 
-  Typography, 
-  Accordion, 
-  AccordionSummary, 
-  AccordionDetails,
-  Button
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 /**
- * A component for displaying JSON data in a formatted, collapsible view
- * with syntax highlighting and copy functionality.
+ * Creates a serializable snapshot of any object, handling circular references,
+ * functions, and other non-serializable values.
+ * 
+ * @param {any} data - The data to sanitize for display
+ * @param {number} [maxDepth=10] - Maximum recursion depth to prevent stack overflow
+ * @return {any} A serializable version of the data
  */
-const DebugJsonView = ({ title, data, expandByDefault = false }) => {
-  const [expanded, setExpanded] = useState(expandByDefault);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Helper to format values with color coding
-  const formatValue = (value) => {
-    if (value === null) return <span style={{ color: '#999' }}>null</span>;
-    if (value === undefined) return <span style={{ color: '#999' }}>undefined</span>;
+function createSerializableSnapshot(data, maxDepth = 10) {
+  // Track processed objects to handle circular references
+  const seen = new WeakSet();
+  
+  function process(value, depth = 0) {
+    // Handle null/undefined immediately
+    if (value === null || value === undefined) {
+      return value;
+    }
     
-    switch (typeof value) {
-      case 'boolean':
-        return <span style={{ color: '#b938a4' }}>{value.toString()}</span>;
-      case 'number':
-        return <span style={{ color: '#1a8cff' }}>{value.toString()}</span>;
-      case 'string':
-        return <span style={{ color: '#ff8400' }}>{`"${value}"`}</span>;
-      case 'object':
-        if (Array.isArray(value)) {
-          return <span style={{ color: '#999' }}>[Array({value.length})]</span>;
-        }
-        return <span style={{ color: '#999' }}>{'{Object}'}</span>;
-      default:
-        return <span>{String(value)}</span>;
+    // Handle primitive types (safe for serialization)
+    if (
+      typeof value === 'string' || 
+      typeof value === 'number' || 
+      typeof value === 'boolean'
+    ) {
+      return value;
     }
-  };
-
-  // Recursive function to render nested objects
-  const renderObject = (obj, level = 0, visitedRefs = new WeakSet()) => {
-    //const _indent = 16 * level;
-    const maxLevel = 5; // Maximum nesting level to prevent stack overflow
-
-    // Handle primitive types
-    if (obj === null || obj === undefined) {
-      return formatValue(obj);
+    
+    // Handle functions - replace with description
+    if (typeof value === 'function') {
+      return `[Function: ${value.name || 'anonymous'}]`;
     }
-
-    if (typeof obj !== 'object') {
-      return formatValue(obj);
+    
+    // Handle maximum recursion depth
+    if (depth >= maxDepth) {
+      return '[Max depth reached]';
     }
-
-    // Check for circular references and max depth
-    if (visitedRefs.has(obj) || level > maxLevel) {
-      return <span style={{ color: '#999', fontStyle: 'italic' }}>[Circular or Max Depth]</span>;
+    
+    // Handle circular references
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular reference]';
+      }
+      seen.add(value);
     }
-
-    // Add this object to visited set for circular reference detection
-    visitedRefs.add(obj);
-
+    
     // Handle arrays
-    if (Array.isArray(obj)) {
-      return (
-        <Box>
-          <Typography variant="body2" component="span">[</Typography>
-          {obj.length === 0 ? (
-            <Typography variant="body2" component="span"> ]</Typography>
-          ) : (
-            <>
-              {obj.slice(0, 100).map((item, index) => ( // Limit to first 100 items
-                <Box key={index} ml={2} display="block">
-                  <Typography variant="body2" component="span" sx={{ ml: 2 }}>
-                    {renderObject(item, level + 1, new WeakSet(visitedRefs))}
-                    {index < Math.min(obj.length - 1, 99) ? ',' : ''}
-                  </Typography>
-                </Box>
-              ))}
-              {obj.length > 100 && (
-                <Box ml={2} display="block">
-                  <Typography variant="body2" component="span" sx={{ ml: 2, fontStyle: 'italic' }}>
-                    ...{obj.length - 100} more items
-                  </Typography>
-                </Box>
-              )}
-              <Typography variant="body2" component="span" sx={{ ml: level * 2 }}>]</Typography>
-            </>
-          )}
-        </Box>
-      );
+    if (Array.isArray(value)) {
+      return value.map(item => process(item, depth + 1));
     }
+    
+    // Handle Date objects
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    
+    // Handle regular objects
+    if (typeof value === 'object') {
+      const result = {};
+      for (const key in value) {
+        // Skip non-enumerable properties and prototypes
+        if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+        
+        try {
+          result[key] = process(value[key], depth + 1);
+        } catch (err) {
+          result[key] = `[Error: ${err.message}]`;
+        }
+      }
+      return result;
+    }
+    
+    // Fallback for any other types
+    return String(value);
+  }
+  
+  try {
+    return process(data);
+  } catch (err) {
+    return { error: `Failed to create snapshot: ${err.message}` };
+  }
+}
 
-    // Handle objects
-    try {
-      const keys = Object.keys(obj).slice(0, 50); // Limit to first 50 keys
-      const totalKeys = Object.keys(obj).length;
-      
-      return (
-        <Box>
-          <Typography variant="body2" component="span">{'{'}</Typography>
-          {keys.length === 0 ? (
-            <Typography variant="body2" component="span"> {'}'}</Typography>
-          ) : (
-            <>
-              {keys.map((key, index) => {
-                // Skip functions and DOM nodes to avoid circular references
-                if (typeof obj[key] === 'function' || 
-                    (typeof obj[key] === 'object' && obj[key] !== null && obj[key].nodeType)) {
-                  return (
-                    <Box key={key} ml={2} display="block">
-                      <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
-                        {key}:
-                      </Typography>{' '}
-                      <Typography variant="body2" component="span" sx={{ fontStyle: 'italic' }}>
-                        {typeof obj[key] === 'function' ? '[Function]' : '[DOM Node]'}
-                        {index < keys.length - 1 ? ',' : ''}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                
-                return (
-                  <Box key={key} ml={2} display="block">
-                    <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
-                      {key}:
-                    </Typography>{' '}
-                    <Typography variant="body2" component="span">
-                      {renderObject(obj[key], level + 1, new WeakSet(visitedRefs))}
-                      {index < keys.length - 1 ? ',' : ''}
-                    </Typography>
-                  </Box>
-                );
-              })}
-              {totalKeys > 50 && (
-                <Box ml={2} display="block">
-                  <Typography variant="body2" component="span" sx={{ fontStyle: 'italic' }}>
-                    ...{totalKeys - 50} more properties
-                  </Typography>
-                </Box>
-              )}
-              <Typography variant="body2" component="span">{'}'}</Typography>
-            </>
-          )}
-        </Box>
-      );
-    } catch (error) {
-      // Return error message if there's an issue with this object
-      return <span style={{ color: 'red' }}>[Error: {error.message}]</span>;
-    }
+/**
+ * DebugJsonView Component
+ * Displays JSON data with syntax highlighting and copy functionality
+ */
+function DebugJsonView({ data, title, ...props }) {
+  const [copied, setCopied] = useState(false);
+  
+  // Create a safe serializable copy of the data - THIS IS THE CRITICAL FIX
+  const safeData = createSerializableSnapshot(data);
+  
+  // Format the JSON with pretty printing
+  const jsonString = JSON.stringify(safeData, null, 2);
+  
+  // Handle copy to clipboard
+  const handleCopy = () => {
+    navigator.clipboard.writeText(jsonString).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
-
+  
   return (
-    <Accordion expanded={expanded} onChange={() => setExpanded(!expanded)}>
-      <AccordionSummary 
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls={`debug-json-${title}-content`}
-        id={`debug-json-${title}-header`}
-      >
-        <Typography variant="subtitle1" fontWeight="medium">{title}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Paper 
-          variant="outlined" 
-          sx={{ 
-            p: 2, 
-            maxHeight: '400px', 
-            overflow: 'auto',
-            bgcolor: '#f8f8f8',
-            fontFamily: 'monospace',
-            fontSize: '0.875rem',
-            position: 'relative'
-          }}
-        >
-          <Button
-            size="small"
-            startIcon={<ContentCopyIcon />}
+    <div className="debug-json-view">
+      {title && (
+        <div className="debug-json-header">
+          <h4>{title}</h4>
+          <button 
+            className={`copy-button ${copied ? 'copied' : ''}`}
             onClick={handleCopy}
-            variant="text"
-            color={copied ? "success" : "primary"}
-            sx={{ 
-              position: 'absolute', 
-              top: 8, 
-              right: 8,
-              minWidth: 0,
-              px: 1
-            }}
           >
             {copied ? 'Copied!' : 'Copy'}
-          </Button>
-          {renderObject(data)}
-        </Paper>
-      </AccordionDetails>
-    </Accordion>
+          </button>
+        </div>
+      )}
+      <pre className="json-display">{jsonString}</pre>
+    </div>
   );
-};
-
-DebugJsonView.propTypes = {
-  title: PropTypes.string.isRequired,
-  data: PropTypes.any.isRequired,
-  expandByDefault: PropTypes.bool
-};
+}
 
 export default DebugJsonView;

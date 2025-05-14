@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar, Tooltip, Typography, Snackbar, Alert } from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';

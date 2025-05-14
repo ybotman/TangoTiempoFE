@@ -6,7 +6,7 @@
 // No features are dropped. All existing code is preserved and functional.
 // This ensures that if nearestCity is not yet defined, we pass empty strings to useEvents, preventing runtime errors.
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEvents, useEventOperations } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
@@ -31,7 +31,26 @@ export const useCalendarPage = () => {
   const { selectedLocation } = useGeoLocation();
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventToEdit, setEventToEdit] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const calendarRef = useRef(null);
+
+  // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
+  const [selectedOrganizers, setSelectedOrganizers] = useState(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('selectedOrganizers');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Effect to save selectedOrganizers to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectedOrganizers) {
+      localStorage.setItem('selectedOrganizers', JSON.stringify(selectedOrganizers));
+    }
+  }, [selectedOrganizers]);
 
   // Use GeoLocationContext as primary source, with fallback to MasteredLocationContext
   // Ensure we have valid string values to avoid API errors
@@ -61,8 +80,17 @@ export const useCalendarPage = () => {
     });
   };
 
-  const transformedEvents = transformEvents(events);
-  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(transformedEvents, categories);
+  // Only transform events when they're actually available and loading is complete
+  // This prevents "No events to transform" warnings during initial loading
+  const transformedEvents = (!eventsLoading && Array.isArray(events) && events.length > 0) 
+    ? transformEvents(events) 
+    : [];
+    
+  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(
+    transformedEvents,
+    categories,
+    selectedOrganizers // Pass selectedOrganizers to usePostFilter
+  );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
     const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
@@ -81,15 +109,25 @@ export const useCalendarPage = () => {
     
     // Handle edit case specifically
     if (action === 'edit' && eventId) {
+      // Reset states
+      setIsEditMode(true);
+      setEventToEdit(null);
+      
       // Fetch the event details and open the edit modal
       getEventById(eventId)
         .then(eventData => {
-          setSelectedEventDetails(eventData);
+          console.log('Fetched event details for editing:', eventData);
+          setEventToEdit(eventData);
           setCreateModalOpen(true); // Reuse the create modal for editing
         })
         .catch(error => {
           console.error('Error fetching event details for editing:', error);
+          setIsEditMode(false); // Reset on error
         });
+    } else {
+      // For non-edit actions, reset the edit mode
+      setIsEditMode(false);
+      setEventToEdit(null);
     }
 
     // Track the event in analytics
@@ -213,7 +251,16 @@ export const useCalendarPage = () => {
     selectedEvent,
     setSelectedEvent,
     isCreateModalOpen,
-    setCreateModalOpen,
+    // Enhanced modal control with edit mode reset
+    setCreateModalOpen: (isOpen) => {
+      // When closing the modal, reset edit mode and event to edit
+      if (!isOpen) {
+        setIsEditMode(false);
+        setEventToEdit(null);
+      }
+      // Use the original state setter
+      setCreateModalOpen(isOpen);
+    },
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     handleEventUpdated,
@@ -228,12 +275,18 @@ export const useCalendarPage = () => {
     menuAnchor,
     menuItems,
     selectedEventDetails,
-    // Add loading and error states 
+    // Add loading and error states
     eventsLoading,
     eventsError,
     // Location info
     regionName,
     divisionName,
-    cityName
+    cityName,
+    // Edit mode properties
+    isEditMode,
+    eventToEdit,
+    // Organizer selection state
+    selectedOrganizers,
+    setSelectedOrganizers
   };
 };

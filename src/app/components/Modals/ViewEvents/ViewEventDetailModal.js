@@ -5,6 +5,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsRepeating from './ViewEventDetailsRepeating';
@@ -12,8 +13,7 @@ import ViewEventDetailsMore from './ViewEventDetailsMore';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
 import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
-// Import legacy component for backward compatibility during transition
-import ViewEventDetailsLocationOther from './ViewEventDetailsLocationOther';
+// Legacy component removed as part of transition
 import PropTypes from 'prop-types';
 
 const modalStyle = {
@@ -38,10 +38,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const [showImageTab, setShowImageTab] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   
   // Get user context to check permissions
   const { user } = useContext(AuthContext);
+  const { selectedRole } = useContext(RoleContext);
   const { deleteEvent } = useEventOperations();
 
   useEffect(() => {
@@ -114,7 +114,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const truncatedTitle = eventTitle.length > 30 && !showFullTitle ? eventTitle.slice(0, 30) + '...' : eventTitle;
   
   // Check if the user has permissions to edit and delete this event
-  const canEditEvent = user && eventDetails?.extendedProps?.ownerOrganizerID;
+  // User must be logged in, the event must have an owner ID, and the user must have the RegionalOrganizer role
+  const canEditEvent = user &&
+                       eventDetails?.extendedProps?.ownerOrganizerID &&
+                       selectedRole === 'RegionalOrganizer';
   
   // Get truncated description for the delete confirmation
   const truncatedDescription = eventDetails?.extendedProps?.description 
@@ -155,13 +158,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Handle edit button click
   const handleEditClick = () => {
-    // Close this view modal and open the edit modal
+    // Close this view modal and open the edit modal in the parent component
     onClose();
-    // We'll handle this in the parent component with the onEventUpdated callback
     if (onEventUpdated) {
       onEventUpdated('edit', eventDetails.extendedProps._id);
     }
+
+    // Note: We no longer use the internal edit mode since we open the proper edit modal
   };
+
+  // No longer needed - editMode is handled by parent component
 
   return (
     <>
@@ -179,6 +185,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 )}
               </Typography>
               <Box sx={{ position: 'absolute', top: '2px', right: '8px', zIndex: '1000', display: 'flex', gap: 1 }}>
+                {/* Only show Edit/Delete when user has RegionalOrganizer role */}
                 {canEditEvent && (
                   <>
                     <Button
@@ -322,6 +329,7 @@ ViewEventDetailModal.propTypes = {
     extendedProps: PropTypes.shape({
       _id: PropTypes.string,
       eventImage: PropTypes.string,
+      fallbackImageUrl: PropTypes.string,
       description: PropTypes.string,
       categoryFirst: PropTypes.string,
       ownerOrganizerID: PropTypes.string,

@@ -1,5 +1,5 @@
 export function transformEvents(events) {
-  console.log("TransformEvent received:", events?.length || 0, "events");
+  // Only log if no events received (potential error condition)
   if (!events || !Array.isArray(events) || events.length === 0) {
     console.warn("No events to transform or events is not an array");
     return [];
@@ -11,17 +11,19 @@ export function transformEvents(events) {
     const venueId = event.venueID || event.venueId || event.locationID || null;
     const venueName = event.venueName || event.locationName || null;
     
-    // Debug logging for the first few events to check venue references
+    // Debug logging removed to reduce console noise
+    /*
     if (events.indexOf(event) < 3) {
-      console.log(`Event ${event.title}:`, { 
+      console.log(`Event ${event.title}:`, {
         id: event._id,
-        venueID: event.venueID, 
-        venueId: event.venueId, 
+        venueID: event.venueID,
+        venueId: event.venueId,
         locationID: event.locationID,
         resolvedVenueId: venueId,
         isActive: event.isActive
       });
     }
+    */
     
     return {
       title: event.title, // Use the 'title' field from the API
