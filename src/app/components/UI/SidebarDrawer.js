@@ -411,7 +411,7 @@ const SidebarDrawer = ({ open, onClose }) => {
           <ListItem
             button="true"
             onClick={() => {
-              setUserSettingsOpen(true);
+              setPrivacyPolicyOpen(true);
               onClose();
             }}
           >
@@ -419,16 +419,6 @@ const SidebarDrawer = ({ open, onClose }) => {
               <LockIcon sx={{ color: 'green' }} />
             </ListItemIcon>
             <ListItemText primary="Privacy Policy" />
-          </ListItem>
-          <ListItem
-            button="true"
-            onClick={() => {
-              setPrivacyPolicyOpen(true);
-              onClose();
-            }}
-          >
-            <ListItemIcon>{/* Add an icon if needed */}</ListItemIcon>
-            <ListItemText primary="Privacy Policy Details" />
           </ListItem>
           
           {/* Debug Menu - visible in all environments */}
