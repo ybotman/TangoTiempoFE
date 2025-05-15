@@ -28,13 +28,16 @@ This issue addresses a UI inconsistency where there are two Privacy Policy optio
 ## 🗂️ KANBAN (Required)
 _Tracks assignments, status, and workflow for this issue.  
 All task assignments and status updates go here._  
-**Last updated:** 2024-05-15
+**Last updated:** 2025-05-15
 
-- [ ] Analyze SidebarDrawer.js to identify the duplicate entries
-- [ ] Determine which entry should be kept (Privacy Policy pointing to the Privacy Policy modal)
-- [ ] Remove the word "Details" from the menu item text
-- [ ] Remove or repurpose the entry pointing to User Settings
-- [ ] Test changes to ensure proper functionality
+- [x] Analyze SidebarDrawer.js to identify the duplicate entries
+- [x] Determine which entry should be kept (Privacy Policy pointing to the Privacy Policy modal)
+- [x] Remove the word "Details" from the menu item text
+- [x] Remove or repurpose the entry pointing to User Settings
+- [x] Test changes to ensure proper functionality
+- [x] Verify fix in local environment
+- [ ] Create pull request
+- [ ] Merge to DEVL branch
 - [ ] Verify fix in all environments
 
 ## 🧭 SCOUT (Required)
@@ -52,9 +55,18 @@ Document what was discovered, suspected causes, and open questions._
 _Fix details, implementation notes, and blockers.  
 This section may be labeled as **BUILDER**, **PATCH**, or **TINKER**—use whichever role is appropriate.  
 Document what was changed, how, and any technical notes._  
-**Last updated:** 2024-05-15
+**Last updated:** 2025-05-15
 
-- Not started
+- Identified two duplicate Privacy Policy menu items in SidebarDrawer.js:
+  - First item (lines 411-422): Labeled "Privacy Policy" but opened User Settings modal
+  - Second item (lines 423-432): Labeled "Privacy Policy Details" but opened correct Privacy Policy modal
+- Fixed by:
+  1. Removing the first duplicate entry that incorrectly opened User Settings
+  2. Keeping only the entry that correctly opens the Privacy Policy modal
+  3. Renaming it from "Privacy Policy Details" to just "Privacy Policy"
+  4. Adding the LockIcon from the removed entry for visual consistency
+- Built and tested the application to verify the changes work correctly
+- The hamburger menu now shows only one Privacy Policy option that opens the correct modal
 
 ---
 
@@ -70,19 +82,21 @@ Document what was changed, how, and any technical notes._
   - src/app/components/UI/SidebarDrawer.js
 
 ## Fix (if known or applied)
-- **Status:** 🚧 In Progress
+- **Status:** ✅ Fixed
 - **Fix Description:** 
-  1. Remove the first Privacy Policy entry (lines 411-422) that points to User Settings
-  2. Rename the second entry from "Privacy Policy Details" to just "Privacy Policy"
+  1. Removed the first Privacy Policy entry (lines 411-422) that pointed to User Settings
+  2. Renamed the second entry from "Privacy Policy Details" to just "Privacy Policy"
+  3. Added the LockIcon from the removed entry for visual consistency
 - **Testing:** 
-  - Verify hamburger menu displays only one Privacy Policy item
-  - Verify clicking on it opens the correct Privacy Policy modal
+  - Verified hamburger menu displays only one Privacy Policy item
+  - Verified clicking on it opens the correct Privacy Policy modal
+  - Ran build process to confirm no regressions
 
 ## Resolution Log
-- **Commit/Branch:** Not created yet
-- **PR:** Not created yet
+- **Commit/Branch:** `issue/1030-duplicate-privacy-policy-menu-items`
+- **PR:** Pending
 - **Deployed To:** Not deployed yet
-- **Verified By:** Not verified yet
+- **Verified By:** Claude AI
 
 ---
 
