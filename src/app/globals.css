@@ -1,0 +1,10 @@
+@import 'leaflet/dist/leaflet.css';
+
+/* Global style override to ensure calendar event titles are not bold */
+.fc .fc-event-title,
+.fc .fc-list-event-title,
+.fc-list-event-title,
+.fc-event-title {
+  font-weight: normal !important;
+  text-shadow: none !important;
+}

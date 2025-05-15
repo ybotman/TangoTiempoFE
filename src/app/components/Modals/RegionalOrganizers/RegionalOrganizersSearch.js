@@ -6,14 +6,7 @@ import { Box, Typography, TextField } from '@mui/material';
 const RegionalOrganizersSearch = ({ searchTerms }) => (
   <Box sx={{ mt: 2 }}>
     <Typography variant="h6">Search Settings</Typography>
-    <TextField
-      label="Search Terms"
-      fullWidth
-      margin="normal"
-      multiline
-      rows={3}
-      defaultValue={searchTerms}
-    />
+    <TextField label="Search Terms" fullWidth margin="normal" multiline rows={3} defaultValue={searchTerms} />
   </Box>
 );
 

@@ -7,9 +7,13 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
   const [showMore, setShowMore] = useState(false);
 
   // Safely access event details with optional chaining
-  const description =
-    eventDetails?.extendedProps?.description || 'No description available';
+  const description = eventDetails?.extendedProps?.description || 'No description available';
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
+
+  // Get venue information - using both new venueID and legacy locationID fields for backward compatibility
+  const venueName = eventDetails?.extendedProps?.venueName ||
+                   eventDetails?.extendedProps?.locationName ||
+                   'Venue not specified';
 
   // Sanitize the description using DOMPurify
   const sanitizedDescription = DOMPurify.sanitize(description);
@@ -36,13 +40,19 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
 
       {/* Show More / Show Less Button */}
       {sanitizedDescription.length > 15 * 80 && (
-        <Button onClick={toggleShowMore}>
-          {showMore ? 'Show Less' : 'Show More'}
-        </Button>
+        <Button onClick={toggleShowMore}>{showMore ? 'Show Less' : 'Show More'}</Button>
       )}
 
+      {/* Venue Name */}
+      <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
+        Venue
+      </Typography>
+      <Typography variant="body1" color="textSecondary" gutterBottom>
+        {venueName}
+      </Typography>
+
       {/* Event Cost */}
-      <Typography variant="h6" component="h3" gutterBottom>
+      <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
         Cost
       </Typography>
       <Typography variant="body1" color="textSecondary" gutterBottom>
@@ -56,6 +66,10 @@ ViewEventDetailsBasic.propTypes = {
     extendedProps: PropTypes.shape({
       description: PropTypes.string,
       cost: PropTypes.string,
+      venueName: PropTypes.string,
+      locationName: PropTypes.string, // Legacy field for backward compatibility
+      venueID: PropTypes.string,
+      locationID: PropTypes.string, // Legacy field for backward compatibility
     }),
   }),
 };

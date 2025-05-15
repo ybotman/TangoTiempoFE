@@ -1,12 +1,13 @@
 // src/hooks/useMenuItems.js
 import { useContext } from 'react';
 import { RoleContext } from '@/contexts/RoleContext';
-import { RegionsContext } from '@/contexts/RegionsContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { listOfAllRoles } from '@/utils/masterData';
 
 const useMenuItems = () => {
   const { selectedRole } = useContext(RoleContext);
-  const { selectedRegion } = useContext(RegionsContext);
+  const { selectedLocation } = useGeoLocation();
+  const selectedRegion = selectedLocation?.region?.name;
 
   const getMenuItems = (context) => {
     if (context === 'dateClick') {
@@ -34,10 +35,7 @@ const useMenuItems = () => {
           { label: 'Add Photos', action: 'addPhotos' },
         ];
       } else if (selectedRole === listOfAllRoles.NAMED_USER) {
-        menuOptions = [
-          ...menuOptions,
-          { label: 'Add Comment/Photo', action: 'addCommentPhoto' },
-        ];
+        menuOptions = [...menuOptions, { label: 'Add Comment/Photo', action: 'addCommentPhoto' }];
       }
       return menuOptions;
     }

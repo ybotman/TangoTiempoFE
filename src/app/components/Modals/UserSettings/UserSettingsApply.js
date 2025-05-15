@@ -1,14 +1,7 @@
 // UserSettingsApply.js
 'use client';
 import React, { useState, useMemo } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Alert,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -18,8 +11,8 @@ const UserSettingsApply = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const { userData, updateUserData } = useUsers();
-  const { roles } = useRoles();
+  const { userData, updateUserData, loading: userDataLoading } = useUsers();
+  const { roles, loading: rolesLoading } = useRoles();
   const { createOrganizer } = useOrganizers();
 
   const [applicationStatus, setApplicationStatus] = useState('idle');
@@ -27,52 +20,70 @@ const UserSettingsApply = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [restartMessage, setRestartMessage] = useState(false);
 
+  // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
-    return roles?.find((role) => role.roleName === 'RegionalOrganizer');
+    if (!Array.isArray(roles)) return null;
+    return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
   const hasRole = useMemo(() => {
-    const userRoleIds = (userData?.roleIds || []).map((role) =>
-      role._id ? String(role._id) : String(role)
-    );
-    return (
-      regionalOrganizerRole &&
-      userRoleIds.includes(String(regionalOrganizerRole._id))
-    );
+    if (!userData || !regionalOrganizerRole) return false;
+
+    // Handle potential data issues safely
+    const userRoleIds = Array.isArray(userData.roleIds)
+      ? userData.roleIds.map(role => {
+          if (!role) return '';
+          return typeof role === 'string' ? role : (role._id ? String(role._id) : '');
+        })
+      : [];
+
+    return regionalOrganizerRole._id && userRoleIds.includes(String(regionalOrganizerRole._id));
   }, [userData, regionalOrganizerRole]);
 
+  // Safe access to nested properties with defaults
   const isApproved = userData?.regionalOrganizerInfo?.isApproved || false;
-  const hasOrganizerId = !!userData?.regionalOrganizerInfo?.organizerId;
+  const hasOrganizerId = Boolean(userData?.regionalOrganizerInfo?.organizerId);
 
   const handleApply = async () => {
+    // Don't proceed if data is loading or missing
+    if (userDataLoading || rolesLoading || !userData || !regionalOrganizerRole) {
+      setErrorMessage('Application data is still loading. Please try again in a moment.');
+      return;
+    }
+
     setApplicationStatus('loading');
     setErrorMessage('');
 
     try {
-      if (!regionalOrganizerRole) {
-        throw new Error('RegionalOrganizer role not found.');
+      if (!regionalOrganizerRole._id) {
+        throw new Error('RegionalOrganizer role not found or invalid.');
       }
 
+      // Apply for regional organizer role if needed
       if (!hasRole) {
-        const existingRoleIds = (userData.roleIds || []).map((role) =>
-          role._id ? String(role._id) : String(role)
-        );
-        const updatedRoleIds = [
-          ...new Set([...existingRoleIds, String(regionalOrganizerRole._id)]),
-        ];
+        // Safely handle roleIds and ensure we have a valid array
+        const existingRoleIds = Array.isArray(userData.roleIds)
+          ? userData.roleIds.map(role => {
+              return typeof role === 'string' ? role : (role && role._id ? String(role._id) : '');
+            }).filter(id => id) // Remove empty strings
+          : [];
+
+        const updatedRoleIds = [...new Set([...existingRoleIds, String(regionalOrganizerRole._id)])];
 
         await updateUserData({ roleIds: updatedRoleIds });
       }
 
-      if (!hasOrganizerId) {
+      // Create an organizer if needed
+      if (!hasOrganizerId && userData._id) {
+        // Use a default region if user's region is not available
+        const defaultRegionId = '66c4d99042ec462ea22484bd'; // Fallback region ID
+
         const organizerData = {
           linkedUserLogin: userData._id,
-          firebaseUserId: userData.firebaseUserId,
-          name: 'New Organizer',
-          fullName: 'New Organizer',
-          organizerRegion:
-            userData.localUserInfo?.userDefaults?.region ||
-            '66c4d99042ec462ea22484bd',
+          firebaseUserId: userData.firebaseUserId || '',
+          name: `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`,
+          fullName: `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`,
+          organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
           isActive: true,
           isEnabled: true,
           wantRender: true,
@@ -87,6 +98,10 @@ const UserSettingsApply = () => {
         };
 
         const newOrganizer = await createOrganizer(organizerData);
+
+        if (!newOrganizer || !newOrganizer._id) {
+          throw new Error('Failed to create organizer record');
+        }
 
         const updatedRegionalInfo = {
           organizerId: newOrganizer._id,
@@ -104,17 +119,19 @@ const UserSettingsApply = () => {
       setShowTerms(true);
     } catch (error) {
       console.error('Error during application process:', error);
-      setErrorMessage(
-        error.response?.data?.message ||
-          error.message ||
-          'An error occurred during application.'
-      );
+      setErrorMessage(error.response?.data?.message || error.message || 'An error occurred during application.');
       setApplicationStatus('error');
     }
   };
 
   const handleAgreeToTerms = async (agreed) => {
     try {
+      // Only proceed if we have valid userData
+      if (!userData || !userData.regionalOrganizerInfo) {
+        setErrorMessage('User data is not available. Please try again later.');
+        return;
+      }
+
       const updatedRegionalInfo = {
         ...userData.regionalOrganizerInfo,
         isApproved: agreed,
@@ -134,9 +151,12 @@ const UserSettingsApply = () => {
       }
     } catch (error) {
       console.error('Error updating terms agreement:', error);
-      setErrorMessage('Failed to update terms agreement.');
+      setErrorMessage('Failed to update terms agreement: ' + (error.message || 'Unknown error'));
     }
   };
+
+  // Determine the overall loading state
+  const isLoading = userDataLoading || rolesLoading || applicationStatus === 'loading';
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
@@ -145,47 +165,67 @@ const UserSettingsApply = () => {
           {errorMessage}
         </Alert>
       )}
+
       {restartMessage && (
         <Alert severity="info" sx={{ mb: 2 }}>
           Restarting App for Organizer Role...
         </Alert>
       )}
+
       {applicationStatus === 'success' && (
         <Alert severity="success" sx={{ mb: 2 }}>
           Your application has been submitted successfully!
         </Alert>
       )}
+
+      {/* Show loading indicator if data is still loading */}
+      {isLoading && (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <CircularProgress size={24} sx={{ mr: 2 }} />
+          <Typography>Loading data...</Typography>
+        </Box>
+      )}
+
       <Typography variant="h6" gutterBottom>
         Apply for Regional Organizer
       </Typography>
+
       <Typography variant="body1" gutterBottom>
         By applying, you can manage events in your region.
       </Typography>
-      {!hasOrganizerId && (
+
+      {/* Only show Apply button if not loading and user doesn't have an organizer ID */}
+      {!isLoading && !hasOrganizerId && (
         <Button
           variant="contained"
           color="primary"
           onClick={handleApply}
-          disabled={applicationStatus === 'loading'}
+          disabled={isLoading || !userData || !regionalOrganizerRole}
         >
           {applicationStatus === 'loading' ? 'Applying...' : 'Apply'}
         </Button>
       )}
-      {hasOrganizerId && !isApproved && (
+
+      {/* Only show Terms button if user has an organizer ID but hasn't approved terms */}
+      {!isLoading && hasOrganizerId && !isApproved && (
         <Button
           variant="outlined"
           color="secondary"
           onClick={() => setShowTerms(true)}
+          disabled={isLoading}
         >
           Accept Terms of Use
         </Button>
       )}
-      {hasOrganizerId && isApproved && (
+
+      {/* Show success message if user is fully set up */}
+      {!isLoading && hasOrganizerId && isApproved && (
         <Typography variant="body2" color="textSecondary">
           You have successfully applied as a Regional Organizer.
         </Typography>
       )}
 
+      {/* Terms modal */}
       <ROTermsModal
         open={showTerms}
         onClose={() => handleAgreeToTerms(false)}

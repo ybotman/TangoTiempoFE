@@ -2,18 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, TextField, Button } from '@mui/material';
+import { Box, Typography, TextField, Button, Alert, Snackbar, Switch, FormControlLabel, Tooltip, IconButton } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 
-const RegionalOrganizersName = ({
-  organizerId,
-  organizer,
-  updateOrganizer,
-}) => {
+const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => {
   const [fullName, setFullName] = useState('');
   const [shortName, setShortName] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
+  const [isSearchable, setIsSearchable] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (organizer) {
@@ -21,6 +20,7 @@ const RegionalOrganizersName = ({
       setShortName(organizer.shortName || '');
       setDescription(organizer.description || '');
       setUrl(organizer.publicContactInfo?.url || '');
+      setIsSearchable(organizer?.wantRender || false);
     }
   }, [organizer]);
 
@@ -39,7 +39,8 @@ const RegionalOrganizersName = ({
     (fullName === organizer?.fullName &&
       shortName === organizer?.shortName &&
       description === organizer?.description &&
-      url === organizer.publicContactInfo?.url) ||
+      url === organizer.publicContactInfo?.url &&
+      isSearchable === (organizer?.wantRender || false)) ||
     fullName === 'New Organizer' ||
     fullName.trim().length < 7 ||
     isShortNameInvalid();
@@ -49,11 +50,13 @@ const RegionalOrganizersName = ({
     setShortName(value);
   };
 
+  const handleSnackbarClose = () => {
+    setShowSuccessMessage(false);
+  };
+
   const handleSave = async () => {
     if (fullName.trim().length < 7 || fullName === 'New Organizer') {
-      setErrorMessage(
-        'Full Name must be at least 5 characters and cannot be "New Organizer".'
-      );
+      setErrorMessage('Full Name must be at least 5 characters and cannot be "New Organizer".');
       return;
     }
     if (isShortNameInvalid()) {
@@ -68,14 +71,16 @@ const RegionalOrganizersName = ({
       shortName,
       description,
       publicContactInfo: {
+        ...organizer?.publicContactInfo, // Preserve existing fields
         url,
       },
+      wantRender: isSearchable,
     };
 
     try {
       await updateOrganizer(organizerId, updateData);
       setErrorMessage(''); // Clear any existing error messages
-      console.log('Name updated successfully.');
+      setShowSuccessMessage(true); // Show success notification
     } catch (error) {
       console.error('Failed to update name:', error);
       setErrorMessage('An error occurred while updating the name.');
@@ -87,11 +92,40 @@ const RegionalOrganizersName = ({
       <Typography variant="h6" gutterBottom>
         Edit Organizer Name
       </Typography>
+      
+      {/* Search Engine Visibility Section */}
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+        <Box display="flex" alignItems="center">
+          <FormControlLabel
+            control={
+              <Switch checked={isSearchable} onChange={(e) => setIsSearchable(e.target.checked)} color="primary" />
+            }
+            label={isSearchable ? "Crawlable Public Web Page" : "No Crawlable Info"}
+          />
+          <Tooltip title="When enabled, we'll create a public web page for this organizer that displays their name, description, contact info, image, and events. This page will be indexed by search engines to help people find your tango events.">
+            <IconButton>
+              <InfoIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
       {errorMessage && (
-        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
           {errorMessage}
-        </Typography>
+        </Alert>
       )}
+      
+      {/* Success notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={handleSnackbarClose}>
+          Organizer name has been updated successfully!
+        </Alert>
+      </Snackbar>
 
       <Box display="flex" flexDirection="column" gap={2}>
         <TextField
@@ -129,12 +163,7 @@ const RegionalOrganizersName = ({
           }
           error={isShortNameInvalid()}
         />
-        <TextField
-          label="URL (Web or Social Media)"
-          fullWidth
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
+        <TextField label="URL (Web or Social Media)" fullWidth value={url} onChange={(e) => setUrl(e.target.value)} />
         <TextField
           label="Description of Organizer"
           fullWidth
@@ -145,13 +174,7 @@ const RegionalOrganizersName = ({
         />
       </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSave}
-        disabled={isSaveDisabled}
-        sx={{ mt: 2 }}
-      >
+      <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled} sx={{ mt: 2 }}>
         Save
       </Button>
     </Box>
@@ -167,6 +190,7 @@ RegionalOrganizersName.propTypes = {
       url: PropTypes.string,
     }),
     description: PropTypes.string,
+    wantRender: PropTypes.bool,
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
 };

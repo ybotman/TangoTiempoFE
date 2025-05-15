@@ -22,9 +22,7 @@ const VersionPage = () => {
         const data = await res.json();
 
         // Filter out entries that do not have a valid version
-        const filteredData = data.filter(
-          (item) => item.version && item.version.trim() !== ''
-        );
+        const filteredData = data.filter((item) => item.version && item.version.trim() !== '');
 
         setVersionData(filteredData);
         setLoading(false);

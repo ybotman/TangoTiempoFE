@@ -5,11 +5,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { categoryColors } from '@/utils/categoryColors';
 
-const PostFilter = ({
-  activeCategories = [],
-  categories = [],
-  handleCategoryChange,
-}) => {
+const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
+  // Debug log to see what categories we're getting
+  //console.log('PostFilter received categories:', categories);
+  
   // Define the ordered categories
   const orderedCategories = [
     'Milonga',
@@ -23,17 +22,22 @@ const PostFilter = ({
     'Unknown',
   ];
 
+  // Make a safe copy of categories if it's an array, otherwise use an empty array
+  // We're not hardcoding the categoryNameAbbreviation since it exists in the DB
+  const categoriesSafe = Array.isArray(categories) ? [...categories] : [];
+  
   // Sort the categories based on their order in orderedCategories
-  const sortedCategories = categories.sort((a, b) => {
-    const indexA = orderedCategories.indexOf(a.categoryName);
-    const indexB = orderedCategories.indexOf(b.categoryName);
+  const sortedCategories = categoriesSafe.filter(cat => cat && typeof cat === 'object' && cat.categoryName)
+    .sort((a, b) => {
+      const indexA = orderedCategories.indexOf(a.categoryName);
+      const indexB = orderedCategories.indexOf(b.categoryName);
 
-    // If the category is not in orderedCategories, move it to the end
-    const validIndexA = indexA === -1 ? orderedCategories.length : indexA;
-    const validIndexB = indexB === -1 ? orderedCategories.length : indexB;
+      // If the category is not in orderedCategories, move it to the end
+      const validIndexA = indexA === -1 ? orderedCategories.length : indexA;
+      const validIndexB = indexB === -1 ? orderedCategories.length : indexB;
 
-    return validIndexA - validIndexB;
-  });
+      return validIndexA - validIndexB;
+    });
 
   // Separate the first four categories and remaining categories
   const firstFourCategories = sortedCategories.slice(0, 4);
@@ -48,9 +52,7 @@ const PostFilter = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div
-        style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
         {/* Display the first four categories in a row */}
         {firstFourCategories.map((category) => {
           const isActive = activeCategories.includes(category.categoryName);
@@ -58,9 +60,7 @@ const PostFilter = ({
             <button
               key={category._id}
               style={{
-                backgroundColor: isActive
-                  ? categoryColors[category.categoryName]
-                  : 'white',
+                backgroundColor: isActive ? categoryColors[category.categoryName] : 'white',
                 color: isActive ? 'black' : 'grey',
                 padding: '2px 2px',
                 border: isActive ? 'none' : '1px solid grey',
@@ -70,7 +70,7 @@ const PostFilter = ({
               className={`category-button ${isActive ? 'active' : ''}`}
               onClick={() => handleCategoryChange(category.categoryName)}
             >
-              {category.categoryName}
+              {category.categoryNameAbbreviation || category.categoryName}
             </button>
           );
         })}
@@ -90,9 +90,7 @@ const PostFilter = ({
               <button
                 key={category._id}
                 style={{
-                  backgroundColor: isActive
-                    ? categoryColors[category.categoryName]
-                    : 'white',
+                  backgroundColor: isActive ? categoryColors[category.categoryName] : 'white',
                   color: isActive ? 'black' : 'grey',
                   padding: '2px 2px',
                   border: isActive ? 'none' : '1px solid grey',
@@ -102,7 +100,7 @@ const PostFilter = ({
                 className={`category-button ${isActive ? 'active' : ''}`}
                 onClick={() => handleCategoryChange(category.categoryName)}
               >
-                {category.categoryName}
+                {category.categoryNameAbbreviation || category.categoryName}
               </button>
             );
           })}
@@ -118,6 +116,7 @@ PostFilter.propTypes = {
     PropTypes.shape({
       _id: PropTypes.string.isRequired, // Unique identifier for each category
       categoryName: PropTypes.string.isRequired, // Name of the category
+      categoryNameAbbreviation: PropTypes.string, // Abbreviation for the category
     })
   ).isRequired,
   activeCategories: PropTypes.arrayOf(PropTypes.string).isRequired, // Array of active category names

@@ -2,18 +2,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Modal,
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  useMediaQuery,
-  useTheme,
-  AppBar,
-  Toolbar,
-  IconButton,
-} from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, useMediaQuery, useTheme, AppBar, Toolbar, IconButton } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
@@ -30,14 +19,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const {
-    organizers,
-    organizer,
-    loading,
-    error,
-    fetchOrganizerById,
-    updateOrganizer,
-  } = useOrganizers();
+  const { organizers, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('name');
 
   useEffect(() => {
@@ -69,32 +51,20 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Regional Organizer Settings
             </Typography>
-            <IconButton
-              edge="end"
-              color="inherit"
-              onClick={onClose}
-              aria-label="close"
-            >
+            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
               <CloseIcon />
             </IconButton>
           </Toolbar>
         </AppBar>
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId && (
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            gutterBottom
-            sx={{ p: 1 }}
-          >
+          <Typography variant="body2" color="textSecondary" gutterBottom sx={{ p: 1 }}>
             Organizer ID: {user.backendInfo.regionalOrganizerInfo.organizerId}
           </Typography>
         )}
 
         {user?.backendInfo.regionalOrganizerInfo?.organizerId ? (
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-          >
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Tabs
               value={currentTab}
               onChange={handleTabChange}
@@ -115,9 +85,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             {loading ? (
               <Typography>Loading...</Typography>
             ) : error ? (
-              <Typography color="error">
-                Error loading organizer data
-              </Typography>
+              <Typography color="error">Error loading organizer data</Typography>
             ) : (
               <Box
                 sx={{
@@ -149,11 +117,11 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 )}
                 {currentTab === 'delegated' && (
                   <RegionalOrganizersDelegated
-                    organizerId={organizer?._id}
-                    delegatedOrganizerIds={
-                      organizer.delegatedOrganizerIds || []
-                    }
-                    organizers={organizers}
+                    organizerId={organizer?._id || ''}
+                    delegatedOrganizerIds={organizer && Array.isArray(organizer.delegatedOrganizerIds)
+                      ? organizer.delegatedOrganizerIds
+                      : []}
+                    organizers={Array.isArray(organizers) ? organizers : []}
                     updateOrganizer={updateOrganizer}
                   />
                 )}

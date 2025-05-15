@@ -1,35 +1,29 @@
-// src/app/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
+// @/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Select, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
 import axios from 'axios';
 
-const RegionalOrganizersDelegated = ({
-  organizerId,
-  delegatedOrganizerIds,
-  organizers = [],
-  updateOrganizer,
-}) => {
+const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds = [], organizers = [], updateOrganizer }) => {
+  // Ensure delegatedOrganizerIds is always a valid array
+  const safeOrganizerIds = Array.isArray(delegatedOrganizerIds) ? delegatedOrganizerIds : [];
+
+  // Log for debugging
+  console.log('RegionalOrganizersDelegated received:', {
+    organizerId,
+    delegatedOrganizerIds: safeOrganizerIds,
+    organizersCount: organizers.length
+  });
   const [delegatedOrganizers, setDelegatedOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrganizerId, setSelectedOrganizerId] = useState('');
 
   const fetchOrganizerById = async (organizerId) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching organizer:', error);
@@ -38,62 +32,91 @@ const RegionalOrganizersDelegated = ({
   };
 
   useEffect(() => {
+    // Reset state when component mounts or dependencies change
+    setError(null);
+
     const fetchDelegatedOrganizers = async () => {
+      if (!organizerId) {
+        setError('No organizer ID provided');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
-        const fetchedOrganizers = await Promise.all(
-          delegatedOrganizerIds.map(async (id) => {
-            try {
-              const organizer = await fetchOrganizerById(id);
-              return organizer || null;
-            } catch (error) {
-              console.error(`Failed to fetch organizer with id ${id}`, error);
-              return null;
-            }
-          })
-        );
-        setDelegatedOrganizers(fetchedOrganizers.filter((org) => org !== null));
+        // Only proceed if we have valid delegated organizer IDs
+        if (safeOrganizerIds.length > 0) {
+          const fetchedOrganizers = await Promise.all(
+            safeOrganizerIds.map(async (id) => {
+              if (!id) return null; // Skip empty IDs
+
+              try {
+                const organizer = await fetchOrganizerById(id);
+                return organizer || null;
+              } catch (error) {
+                console.error(`Failed to fetch organizer with id ${id}`, error);
+                return null;
+              }
+            })
+          );
+          setDelegatedOrganizers(fetchedOrganizers.filter((org) => org !== null));
+        } else {
+          // No delegated organizers to fetch
+          setDelegatedOrganizers([]);
+        }
       } catch (error) {
         console.error('Error fetching delegated organizers:', error);
+        setError('Failed to load delegated organizers');
       } finally {
         setLoading(false);
       }
     };
 
-    if (delegatedOrganizerIds && delegatedOrganizerIds.length > 0) {
-      fetchDelegatedOrganizers();
-    } else {
-      setDelegatedOrganizers([]);
-      setLoading(false);
-    }
-  }, [delegatedOrganizerIds]);
+    // Always call the function, but it will handle empty arrays internally
+    fetchDelegatedOrganizers();
+  }, [safeOrganizerIds, organizerId]);
 
-  const availableOrganizers = organizers.filter(
-    (org) => org._id !== organizerId && !delegatedOrganizerIds.includes(org._id)
-  );
+  // Safely filter available organizers
+  const availableOrganizers = Array.isArray(organizers)
+    ? organizers.filter(
+        (org) => org && org._id && org._id !== organizerId && !safeOrganizerIds.includes(org._id)
+      )
+    : [];
 
   const handleAddDelegatedOrganizer = async () => {
-    const updatedDelegatedIds = [...delegatedOrganizerIds, selectedOrganizerId];
+    if (!selectedOrganizerId || !organizerId) {
+      setError('Cannot add organizer: missing data');
+      return;
+    }
+
+    const updatedDelegatedIds = [...safeOrganizerIds, selectedOrganizerId];
     try {
       await updateOrganizer(organizerId, {
         delegatedOrganizerIds: updatedDelegatedIds,
       });
       setSelectedOrganizerId('');
+      setError(null); // Clear any previous errors
     } catch (error) {
       console.error('Error adding delegated organizer:', error);
+      setError('Failed to add delegated organizer');
     }
   };
 
   const handleRemoveDelegatedOrganizer = async (idToRemove) => {
-    const updatedDelegatedIds = delegatedOrganizerIds.filter(
-      (id) => id !== idToRemove
-    );
+    if (!idToRemove || !organizerId) {
+      setError('Cannot remove organizer: missing data');
+      return;
+    }
+
+    const updatedDelegatedIds = safeOrganizerIds.filter((id) => id !== idToRemove);
     try {
       await updateOrganizer(organizerId, {
         delegatedOrganizerIds: updatedDelegatedIds,
       });
+      setError(null); // Clear any previous errors
     } catch (error) {
       console.error('Error removing delegated organizer:', error);
+      setError('Failed to remove delegated organizer');
     }
   };
 
@@ -101,34 +124,27 @@ const RegionalOrganizersDelegated = ({
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6">Delegated Organizers</Typography>
 
+      {error && (
+        <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       {loading ? (
         <CircularProgress />
       ) : delegatedOrganizers.length > 0 ? (
         delegatedOrganizers.map((org, index) =>
           org ? (
-            <Box
-              key={org._id || index}
-              display="flex"
-              alignItems="center"
-              gap={1}
-              mt={2}
-              flexWrap="wrap"
-            >
+            <Box key={org._id || index} display="flex" alignItems="center" gap={1} mt={2} flexWrap="wrap">
               <Box flexGrow={1}>
                 <Typography variant="body1">
-                  <strong>Full Name:</strong>{' '}
-                  {org.fullName || 'No Full Name Available'}
+                  <strong>Full Name:</strong> {org.fullName || 'No Full Name Available'}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Short Name:</strong>{' '}
-                  {org.shortName || 'No Short Name Available'}
+                  <strong>Short Name:</strong> {org.shortName || 'No Short Name Available'}
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => handleRemoveDelegatedOrganizer(org._id)}
-              >
+              <Button variant="contained" color="secondary" onClick={() => handleRemoveDelegatedOrganizer(org._id)}>
                 Remove
               </Button>
             </Box>
@@ -173,9 +189,9 @@ const RegionalOrganizersDelegated = ({
 };
 
 RegionalOrganizersDelegated.propTypes = {
-  organizerId: PropTypes.string.isRequired,
-  delegatedOrganizerIds: PropTypes.arrayOf(PropTypes.string).isRequired,
-  organizers: PropTypes.arrayOf(PropTypes.object).isRequired,
+  organizerId: PropTypes.string,
+  delegatedOrganizerIds: PropTypes.arrayOf(PropTypes.string),
+  organizers: PropTypes.arrayOf(PropTypes.object),
   updateOrganizer: PropTypes.func.isRequired,
 };
 

@@ -8,8 +8,10 @@ import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName'
 import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
 import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
+import UserSettingsGeoLocation from '@/components/Modals/UserSettings/UserSettingsGeoLocation';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const modalStyle = {
   position: 'absolute',
@@ -26,14 +28,13 @@ const modalStyle = {
 const UserSettingsModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
+  const geoLocation = useGeoLocation();
   const { userData, loading, error, updateUserData } = useUsers();
   const [currentTab, setCurrentTab] = useState('name');
 
   useEffect(() => {
     if (!user) {
-      console.log(
-        'User is not authenticated or AuthContext is not initialized yet.'
-      );
+      console.log('User is not authenticated or AuthContext is not initialized yet.');
     }
   }, [user]);
 
@@ -47,15 +48,11 @@ const UserSettingsModal = ({ open, onClose }) => {
         </Typography>
 
         {/* Tab Navigation */}
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="User Settings Tabs"
-          variant="scrollable"
-        >
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="User Settings Tabs" variant="scrollable">
           <Tab label="Name" value="name" />
           <Tab label="Favs" value="favorites" />
           <Tab label="Notifications" value="notifications" />
+          <Tab label="Location" value="geolocation" />
           <Tab label="Apply" value="apply" />
         </Tabs>
 
@@ -66,27 +63,17 @@ const UserSettingsModal = ({ open, onClose }) => {
           <Typography color="error">Error loading user data</Typography>
         ) : (
           <>
-            {currentTab === 'name' && (
-              <UserSettingsName
-                userData={userData}
-                updateUserData={updateUserData}
-              />
-            )}
+            {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
             {currentTab === 'favorites' && (
-              <UserSettingsFavorites
-                userData={userData}
-                updateUserData={updateUserData}
-              />
+              <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
             )}
             {currentTab === 'notifications' && (
-              <UserSettingsNotifications
-                userData={userData}
-                updateUserData={updateUserData}
-              />
+              <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
             )}
-            {currentTab === 'apply' && (
-              <UserSettingsApply userData={userData} />
+            {currentTab === 'geolocation' && (
+              <UserSettingsGeoLocation userData={userData} geoLocation={geoLocation} />
             )}
+            {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
           </>
         )}
 

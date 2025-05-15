@@ -3,8 +3,8 @@ import Image from 'next/image';
 import { Box, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
 
-const ViewEventDetailsLocationOther = () => {
-  // Changed component name
+const ViewEventDetailsVenueOther = () => {
+  // Renamed component from locationOther to venueOther
   return (
     <Box
       sx={{
@@ -27,7 +27,7 @@ const ViewEventDetailsLocationOther = () => {
         alt="Under Construction"
         width={250}
         height={150}
-        style={{ maxWidth: '100%', height: 'auto' }}
+        style={{ maxWidth: '100%', height: 'auto', width: 'auto' }}
       />
       <Typography variant="body2" sx={{ marginTop: 1 }}>
         We are working hard to bring you this page soon.
@@ -36,9 +36,12 @@ const ViewEventDetailsLocationOther = () => {
   );
 };
 
-ViewEventDetailsLocationOther.propTypes = {
+ViewEventDetailsVenueOther.propTypes = {
   eventDetails: PropTypes.shape({
     extendedProps: PropTypes.shape({
+      // Support both venue and location fields
+      venueId: PropTypes.string,
+      venueName: PropTypes.string,
       locationID: PropTypes.string,
       locationName: PropTypes.string,
       address: PropTypes.string,
@@ -49,4 +52,4 @@ ViewEventDetailsLocationOther.propTypes = {
   }),
 };
 
-export default ViewEventDetailsLocationOther; // Ensure the export matches the component name
+export default ViewEventDetailsVenueOther;
