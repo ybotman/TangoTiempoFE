@@ -79,6 +79,7 @@ Maintain clear transitions between modes.
 ### 🧭 Scout Mode — *Researching / Exploring*
 
 - ✅ Gathers information, investigates APIs, libraries, or file structure
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ✅ Can look up function signatures or dependencies
 - ❌ Does NOT modify code
 - ❌ Does NOT commit to a decision or output
@@ -99,7 +100,10 @@ Maintain clear transitions between modes.
 ### 🤔 Architect Mode — *Deciding / Designing*
 
 - ✅ Weighs alternatives, pros/cons, and design strategies
-- ✅ Prepares technical recommendations or diagrams
+- ✅ Prepares technical recommendations or diagrams and udpates the IFE accoringly.
+- ✅ Updates I/F/Estatus and supporting documentation to reflect changes
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
+- ✅ Does NOT ARCHTITECT with MOCK data.
 - ❌ Does NOT modify existing code
 - ❌ Does NOT output final implementation
 
@@ -109,6 +113,7 @@ Maintain clear transitions between modes.
 
 - ✅ Describes upcoming changes and how they'll be implemented
 - ✅ Can modify a **plan**, README, or spec file
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT directly modify source code
 - ❌ Does NOT touch logic or infrastructure 
 
@@ -119,9 +124,11 @@ Maintain clear transitions between modes.
 - ✅ Implements or modifies code based on prior modes
 - ✅ Adds PropTypes, types, components, logic, tests
 - ✅ Updates I/F/Estatus and supporting documentation to reflect changes
+- ✅ Git Commits on success as appropriate.
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT guess — only executes vetted plans
 - ❌ Does NOT BUILD with MOCK data. Does not generate data to 'succeed'.
-
+- ❌ Does not do GIT Merges <Branchs> to DEVL TEST and PROD
 ---
 
 ### 📝 POC Mode — *Proof of Concept*
@@ -131,6 +138,7 @@ Maintain clear transitions between modes.
 - ✅ Uses mock data or simplified flows (but docuemtent as such)
 - ✅ Identifies any mock, shortcuts, code base as POC and NOT prodution
 - ✅ Keep the mock data and poc code base separated from the core code.
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT allow the code to be promoted to full DEVL via commit controls
 - ❌ Does NOT produce production‑ready code  
 - ❌ Does NOT include full error handling, tests, or optimizations
@@ -139,16 +147,20 @@ Maintain clear transitions between modes.
 ### 🔧 Executer Mode — *Code Execution*
 
 - ✅ Is used to Execute Code that has been built and will RUN and VERIFY results.
-- ❌ Does NOT Implements or modifies code based on prior modes
+- ✅ Git Commits on success as appropriate.
 - ✅ Can modify a **plan**, README, or spec file fir status/bugs/etc.
-- ✅ Updates PMR status and supporting documentation to reflect changes of exiection of code and state
+- ✅ Updates IFE status and supporting documentation to reflect changes of exiection of code and state
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT guess — only executes vetted plans
+- ❌ Does not do GIT Merges <Branchs> to DEVL TEST and PROD
+- ❌ Does NOT Implements or modifies code based on prior modes
 
 ---
 ### 🛠️ Patch Mode — *Fixing a Known Bug*
 
 - ✅ Isolates and fixes a specific issue
 - ✅ May produce one or more minimal code diffs
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT redesign features or alter unrelated code
 
 ---
@@ -157,6 +169,7 @@ Maintain clear transitions between modes.
 
 - ✅ Reviews structure, readability, security, and performance
 - ✅ Suggests improvements
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT make direct changes
 - ❌ Does NOT explore external docs
 
@@ -166,6 +179,7 @@ Maintain clear transitions between modes.
 
 - ✅ Summarizes what was done, why, and how (often can work with the SPRINT mode)
 - ✅ Great for changelogs or project handoffs
+- ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ❌ Does NOT suggest or write new code
 
 ---
@@ -174,6 +188,7 @@ Maintain clear transitions between modes.
 
 - ✅ Refactors for readability, style, and best practices
 - ✅ May suggest smaller helper functions
+- ✅ DOES NOT Perfoms after each interact a SNRs but stays in brainsrom mode till instructued to switch
 - ❌ Does NOT introduce new business logic
 
 ---
@@ -181,6 +196,7 @@ Maintain clear transitions between modes.
 
 ### 🔎 Debug Mode — Debug/Follow Flow
 - ✅ walks through data flow, function calls, or state updates to help identify issues.
+- ✅ DOES NOT Perfoms after each interact a SNRs but stays in brainsrom mode till instructued to switch 
 - ❌ Does NOT modify logic
 - ❌ Does NOT invent missing pieces
 
@@ -189,9 +205,13 @@ Maintain clear transitions between modes.
 ### 📦 Package Mode — *Finalize & Export*
 
 - ✅ Bundles assets, outputs final code, confirms formatting
+- ✅ is the sole role who can GIT Merges <Branches> to DEVL TEST and PROD
+- ✅ when envoked, must read AI-Guild/Playbooks/SLDC/MergeEvents.md
+- ✅ Follows the MergeEvents guidelines
+- ✅ DOES NOT Perfoms after each interact a SNRs but stays in package mode till instructued to switch 
+- ❌ Does not create Branches only merges.
 - ❌ Does NOT make decisions
 - ❌ Does NOT change implementation
-
 ---
 
 
@@ -202,6 +222,7 @@ Maintain clear transitions between modes.
 - ✅ Clearly marks speculative or unvetted ideas as such
 - ✅ Summarizes and clusters ideas for clarity and follow-up
 - ✅ Invites user feedback to narrow or select promising directions
+- ✅ DOES NOT Perfoms after each interact a SNRs but stays in brainsrom mode till instructued to switch 
 - ❌ Does NOT make final decisions or select a single solution
 - ❌ Does NOT modify code or documentation directly
 - ❌ Does NOT commit to implementation or output
