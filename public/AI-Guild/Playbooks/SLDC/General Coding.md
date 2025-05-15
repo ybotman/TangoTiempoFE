@@ -1,5 +1,8 @@
 # Local Development Environment & Coding Guidelines
 
+## Must meet or exceed the Success Critrea
+found in the .md '/AI-Guild/SuccessCriteria.md'
+
 ## Always-Running Services and Ports
 
 The following backend and service applications will always be running during development:

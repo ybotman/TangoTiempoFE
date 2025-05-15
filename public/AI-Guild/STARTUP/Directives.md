@@ -1,6 +1,6 @@
 ## Directives that you should know and abide by :
 
-- **STARTUP, START**  
+- **Startup, START**  
   Begin or initialize the current session or process.
 
 - **LIST &lt;&gt;**  

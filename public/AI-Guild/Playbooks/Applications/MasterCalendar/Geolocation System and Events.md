@@ -102,8 +102,12 @@ TT.com's geolocation system merges precision and abstraction: precision via phys
 
 By transitioning from deprecated `Location` models to `Venue`-driven and mastered city hierarchy-based filtering, the TT.com platform ensures long-term flexibility, speed, and clarity in data architecture.
 
+-- NOTE : LOCATIONS HAS BEEN COMPLETED, VENUES are the NORM.
+-- NOTE :  REGIONS CONTEXT APPEARS TO BE NO LONGER USE USED and MAY BE RETIRED.
 
-Summary finds for the staut
+
+Summary finds for the STATES
+
   1. The LocationContextModal component is fetching cities with coordinates through the useMasteredLocations hook
   2. I've confirmed that the cities API endpoint returns data with latitude/longitude coordinates
   3. The modal includes proper CSS imports for Leaflet and uses dynamic imports for map components
