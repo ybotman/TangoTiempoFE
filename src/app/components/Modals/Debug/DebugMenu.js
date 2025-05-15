@@ -64,7 +64,7 @@ const DebugMenu = ({ open, onClose }) => {
           <BugReportIcon sx={{ mr: 1, color: 'error.main' }} />
           <Typography variant="h6">Debug Menu</Typography>
           <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>
-            (Current environment: {process.env.NODE_ENV})
+            (Current environment: {process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.NODE_ENV})
           </Typography>
         </Box>
       </DialogTitle>

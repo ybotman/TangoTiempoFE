@@ -29,6 +29,7 @@ const EnvVariablesDebug = () => {
     const safeEnvVars = {
       // Application Info
       NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
       NEXT_PUBLIC_APPLICATION_ID: process.env.NEXT_PUBLIC_APPLICATION_ID,
       
       // API Endpoints
@@ -51,7 +52,7 @@ const EnvVariablesDebug = () => {
   
   // Group environment variables by category
   const categories = {
-    'Application': ['NODE_ENV', 'NEXT_PUBLIC_APPLICATION_ID'],
+    'Application': ['NODE_ENV', 'NEXT_PUBLIC_ENVIRONMENT', 'NEXT_PUBLIC_APPLICATION_ID'],
     'API Endpoints': ['NEXT_PUBLIC_BE_URL'],
     'Feature Flags': ['NEXT_PUBLIC_GEOLOCATION_ENABLED', 'NEXT_PUBLIC_MAP_DEBUG'],
     'Build Info': ['NEXT_PUBLIC_APP_VERSION', 'NEXT_PUBLIC_BUILD_TIME'],
@@ -81,9 +82,9 @@ const EnvVariablesDebug = () => {
       </Alert>
 
       <Alert severity="warning" sx={{ mb: 3 }}>
-        <Typography variant="subtitle2">Current Environment: {process.env.NODE_ENV || 'Unknown'}</Typography>
+        <Typography variant="subtitle2">Current Environment: {process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.NODE_ENV || 'Unknown'}</Typography>
         <Typography variant="body2">
-          {process.env.NODE_ENV === 'production' 
+          {(process.env.NEXT_PUBLIC_ENVIRONMENT === 'production' || (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_ENVIRONMENT)) 
             ? 'Production mode is active - be careful with any changes!' 
             : 'Development mode is active'}
         </Typography>
