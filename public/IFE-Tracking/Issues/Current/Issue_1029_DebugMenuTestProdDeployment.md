@@ -53,6 +53,8 @@ Document what was changed, how, and any technical notes._
 - Implemented changes to enable Debug menu in all environments (Dev/Test/Prod)
 - Modified SidebarDrawer.js to show Debug menu regardless of environment
 - Updated DebugMenu.js to display current environment instead of "development only" message
+- Enhanced environment detection to use NEXT_PUBLIC_ENVIRONMENT over NODE_ENV
+- Expanded EnvVariablesDebug.js to show NEXT_PUBLIC_ENVIRONMENT
 - Made Debug menu available for all users, not just admins
 - Changes allow for troubleshooting in Test and Production environments
 
@@ -72,8 +74,8 @@ Document what was changed, how, and any technical notes._
 
 ## Fix (if known or applied)
 - **Status:** ✅ Complete
-- **Fix Description:** Modified code to show Debug menu in all environments for all users by removing environment-specific restrictions in SidebarDrawer.js and updating UI messaging in DebugMenu.js
-- **Testing:** Verified in development environment that Debug menu appears and shows correct environment
+- **Fix Description:** Modified code to show Debug menu in all environments for all users by removing environment-specific restrictions in SidebarDrawer.js and updating UI messaging in DebugMenu.js; implemented proper environment detection using NEXT_PUBLIC_ENVIRONMENT instead of NODE_ENV
+- **Testing:** Verified in development environment that Debug menu appears and shows the correct environment from NEXT_PUBLIC_ENVIRONMENT
 
 ## Resolution Log
 - **Commit/Branch:** issue/1029-debug-menu-test-prod-deployment
