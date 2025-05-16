@@ -8,14 +8,15 @@
 105. Startup/SuccessCriteria.md
 
 ## SLDC (20x)
-201. SLDC/IFE-Epics.md
-202. SLDC/IFE-Features.md
-203. SLDC/IFE-Issues.md
-204. SLDC/GIT.md
-205. SLDC/IFE-101.md
-206. SLDC/errorTracking.md
-207. SLDC/General Coding.md
-208. SLDC/SDLC.md
+201. SLDC/SDLC.md
+202. SLDC/General Coding.md
+203. SLDC/IFE-101.md
+204. SLDC/IFE-Epics.md
+205. SLDC/IFE-Features.md
+206. SLDC/IFE-Issues.md
+207. SLDC/GIT.md
+208. SLDC/MergeEvents.md
+209. SLDC/errorTracking.md
 
 ## Applications/MasterCalendar (30x)
 301. Applications/MasterCalendar/Geolocation System and Events.md
