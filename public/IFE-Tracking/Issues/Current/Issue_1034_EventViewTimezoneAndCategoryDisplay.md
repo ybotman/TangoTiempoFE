@@ -72,7 +72,17 @@ Document design decisions, what was changed, how, and any technical notes._
 - **Color Mapping**: Use existing categoryColors.js (Milonga: DodgerBlue, Practica: cyan, etc.)
 
 **IMPLEMENTATION NOTES:**
-- Pending implementation
+- **Category Display**: ✅ IMPLEMENTED
+  - Added MUI Chip import to ViewEventDetailModal.js
+  - Added categoryColors import from utils/categoryColors.js
+  - Created renderCategoryChips() function to display colored category chips
+  - Inserted category display between date header and time range (line 261)
+  - Categories display in order: categoryFirst, categorySecond, categoryThird
+  - Applied appropriate colors from categoryColors.js with black text for readability
+- **Timezone Enhancement**: ✅ IMPLEMENTED  
+  - Enhanced toLocaleTimeString() to include timeZoneName: 'short'
+  - Now displays local time with timezone abbreviation (e.g., "7:00 PM EST")
+  - Fixed ESLint warning for unused parameter in Tabs onChange handler
 
 ---
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
@@ -15,6 +15,7 @@ import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
 import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
 // Legacy component removed as part of transition
 import PropTypes from 'prop-types';
+import { categoryColors } from '@/utils/categoryColors';
 
 const modalStyle = {
   position: 'absolute',
@@ -109,6 +110,39 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const startDate = eventDetails?._instance?.range?.start || null;
   const endDate = eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
+
+  // Get category information for display
+  const categoryFirst = eventDetails?.extendedProps?.categoryFirst;
+  const categorySecond = eventDetails?.extendedProps?.categorySecond;
+  const categoryThird = eventDetails?.extendedProps?.categoryThird;
+
+  // Function to render category chips with colors
+  const renderCategoryChips = () => {
+    const categories = [categoryFirst, categorySecond, categoryThird].filter(Boolean);
+    
+    if (categories.length === 0) return null;
+
+    return (
+      <Box display="flex" gap={1} sx={{ mt: 1, mb: 1 }}>
+        {categories.map((category, index) => {
+          const color = categoryColors[category] || 'lightGrey';
+          return (
+            <Chip
+              key={index}
+              label={category}
+              sx={{
+                backgroundColor: color,
+                color: '#000000', // Black text for better readability
+                fontWeight: 'bold',
+                fontSize: '0.75rem'
+              }}
+              size="small"
+            />
+          );
+        })}
+      </Box>
+    );
+  };
 
   // Function to truncate the title to 30 characters
   const truncatedTitle = eventTitle.length > 30 && !showFullTitle ? eventTitle.slice(0, 30) + '...' : eventTitle;
@@ -223,6 +257,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             </Grid>
           </Grid>
 
+          {/* Category Display */}
+          {renderCategoryChips()}
+
           {/* Time Range */}
           {!allDay && startDate && endDate && (
             <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
@@ -231,6 +268,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 {new Date(startDate).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZoneName: 'short'
                 })}
               </Typography>
               <ArrowForwardIcon sx={{ verticalAlign: 'middle', mx: 1 }} />
@@ -238,6 +276,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 {new Date(endDate).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZoneName: 'short'
                 })}
               </Typography>
             </Box>
@@ -264,7 +303,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           )}
 
           {/* Tabs */}
-          <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
+          <Tabs value={currentTab} onChange={(_, value) => setCurrentTab(value)}>
             <Tab label="Basic" value="Basic" />
             <Tab label="More" value="More" />
             <Tab label="Images" value="Images" />
