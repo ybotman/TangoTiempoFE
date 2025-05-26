@@ -371,6 +371,8 @@ ViewEventDetailModal.propTypes = {
       fallbackImageUrl: PropTypes.string,
       description: PropTypes.string,
       categoryFirst: PropTypes.string,
+      categorySecond: PropTypes.string,
+      categoryThird: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
     }),
