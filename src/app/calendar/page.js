@@ -1,6 +1,6 @@
 // app/calendar/page.js
 
-'use client';
+'use client'; 
 import Head from 'next/head';
 import React, {useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
@@ -130,20 +130,24 @@ const CalendarPage = () => {
           {/* Date Range Display */}
           <div
             style={{
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
               flex: 1,
               textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
-            {datesSet && datesSet.start
-              ? new Date(datesSet.start).toLocaleDateString(undefined, {
-                  month: 'long',
-                  year: 'numeric',
-                  day:
-                    calendarRef.current && calendarRef.current.getApi().view.type.includes('day') ? 'numeric' : undefined,
-                })
-              : 'Loading calendar...'}
+            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+              {calendarRef.current
+                ? calendarRef.current.getApi().getDate().toLocaleDateString(undefined, {
+                    month: 'long',
+                    year: 'numeric',
+                  }).toUpperCase()
+                : 'LOADING CALENDAR...'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#888' }}>
+              APR 29–30 • JUN 1–7 SHOWN FOR CONTEXT
+            </div>
           </div>
 
           <ButtonGroup variant="outlined" aria-label="outlined button group">
@@ -180,6 +184,19 @@ const CalendarPage = () => {
             dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
           },
+          dayGridMonth: {
+            titleFormat: { year: 'numeric', month: 'long' }, // Ensures title says "May 2025"
+          },
+        }}
+        dayCellDidMount={({ date, el }) => {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const cellDate = new Date(date);
+          cellDate.setHours(0, 0, 0, 0);
+
+          if (cellDate < today) {
+            el.style.backgroundColor = '#c0c0c0';
+          }
         }}
       />
       
