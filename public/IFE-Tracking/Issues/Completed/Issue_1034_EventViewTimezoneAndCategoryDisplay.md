@@ -110,8 +110,8 @@ Document design decisions, what was changed, how, and any technical notes._
 
 ## Resolution Log
 - **Commit/Branch:** `issue/1034-event-view-timezone-category`
-- **PR:** [Ready for merge to DEVL]
-- **Deployed To:** [Ready for DEVL deployment]
+- **PR:** ✅ Merged to DEVL branch
+- **Deployed To:** ✅ DEVL branch 
 - **Verified By:** User - localhost testing passed
 
 ---
