@@ -98,6 +98,8 @@ export const useCalendarPage = () => {
       ...event,
       backgroundColor: categoryColor,
       borderColor: categoryColor,
+      // Store original color for view-specific handling
+      originalCategoryColor: categoryColor,
     };
   });
 

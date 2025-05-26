@@ -23,6 +23,7 @@ import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import LocationInfo from '@/components/UI/LocationInfo';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
+import CategoryCircles from '@/components/UI/CategoryCircles';
 
 const CalendarPage = () => {
   <Head>
@@ -71,6 +72,57 @@ const CalendarPage = () => {
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
+  };
+
+  // Custom event content renderer with category circles
+  const renderEventContent = (eventInfo) => {
+    const { event, view } = eventInfo;
+    
+    // For week view, don't show circles - let background color handle first category
+    if (view.type === 'timeGridWeek') {
+      return (
+        <div style={{ 
+          padding: '2px', 
+          overflow: 'hidden',
+          height: '100%'
+        }}>
+          <div style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 'bold',
+            lineHeight: '1.1',
+            wordWrap: 'break-word',
+            hyphens: 'auto'
+          }}>
+            {event.title}
+          </div>
+        </div>
+      );
+    }
+    
+    // For month and list views, show circles on same line as title
+    return (
+      <div style={{ 
+        padding: '2px', 
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '4px'
+      }}>
+        <CategoryCircles eventProps={event.extendedProps} />
+        <div style={{ 
+          fontSize: '0.75rem', 
+          fontWeight: 'bold',
+          lineHeight: '1.1',
+          wordWrap: 'break-word',
+          hyphens: 'auto',
+          flex: 1,
+          minWidth: 0 // Allow text to shrink
+        }}>
+          {event.title}
+        </div>
+      </div>
+    );
   };
   //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
@@ -172,6 +224,23 @@ const CalendarPage = () => {
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
+        eventContent={renderEventContent}
+        eventDidMount={(eventInfo) => {
+          // Remove background color for list view to avoid double category display
+          if (eventInfo.view.type === 'listWeek') {
+            eventInfo.el.style.backgroundColor = 'transparent';
+            eventInfo.el.style.borderColor = '#ddd';
+            
+            // Hide the list view dot/circle indicator in the time column
+            const dotElement = eventInfo.el.querySelector('.fc-list-event-dot');
+            if (dotElement) {
+              dotElement.style.display = 'none';
+            }
+            
+            // Alternative: hide the entire time column border-left which contains the color indicator
+            eventInfo.el.style.borderLeft = 'none';
+          }
+        }}
         ref={calendarRef}
         headerToolbar={false}
         scrollTime="17:00:00"
@@ -185,6 +254,10 @@ const CalendarPage = () => {
           },
           dayGridMonth: {
             titleFormat: { year: 'numeric', month: 'long' }, // Ensures title says "May 2025"
+            eventMinHeight: 25, // Ensure enough height for title + category circles
+          },
+          timeGridWeek: {
+            eventMinHeight: 25, // Ensure enough height for title + category circles
           },
         }}
         dayCellDidMount={({ date, el }) => {
