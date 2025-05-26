@@ -101,3 +101,4 @@ web_modules/
 .lock-wscript.eslintignore
 
 **/.claude/settings.local.json
+.vercel
