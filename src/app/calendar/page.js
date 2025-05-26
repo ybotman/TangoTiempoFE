@@ -146,7 +146,6 @@ const CalendarPage = () => {
                 : 'LOADING CALENDAR...'}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#888' }}>
-              APR 29–30 • JUN 1–7 SHOWN FOR CONTEXT
             </div>
           </div>
 
