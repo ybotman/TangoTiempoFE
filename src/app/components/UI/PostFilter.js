@@ -99,19 +99,6 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
         }}
       >
         CATEGORIES
-        {activeCount > 0 && (
-          <Chip
-            label={activeCount}
-            size="small"
-            sx={{
-              ml: 1,
-              height: 20,
-              backgroundColor: 'primary.main',
-              color: 'white',
-              fontSize: '0.75rem'
-            }}
-          />
-        )}
       </Button>
       
       <Popper
@@ -147,14 +134,14 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
                       color: 'text.primary'
                     }}
                   >
-                    Select Categories ({activeCount}/{totalCount})
+                    Select Categories
                   </Typography>
                   
                   <Box
                     sx={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                      gap: 1,
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: 0.5,
                       maxHeight: 300,
                       overflowY: 'auto'
                     }}
@@ -168,29 +155,29 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
                           key={category._id}
                           onClick={() => handleCategoryChange(category.categoryName)}
                           sx={{
-                            p: 1.5,
-                            borderRadius: 2,
+                            p: 0.75,
+                            borderRadius: 1.5,
                             cursor: 'pointer',
                             textAlign: 'center',
-                            border: '2px solid',
+                            border: '1px solid',
                             borderColor: isActive ? 'transparent' : 'divider',
                             backgroundColor: isActive ? categoryColor : 'transparent',
-                            color: isActive ? 'white' : 'text.primary',
+                            color: isActive ? 'black' : 'black',
                             fontWeight: isActive ? 600 : 500,
-                            fontSize: '0.875rem',
+                            fontSize: '0.75rem',
                             transition: 'all 0.2s ease-in-out',
                             '&:hover': {
                               backgroundColor: isActive ? categoryColor : `${categoryColor}20`,
                               borderColor: isActive ? 'transparent' : categoryColor,
                               transform: 'scale(1.02)'
                             },
-                            minHeight: 44, // Ensure good touch target size
+                            minHeight: 22, // Smaller touch target size
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}
                         >
-                          {category.categoryNameAbbreviation || category.categoryName}
+                          {category.categoryName}
                         </Box>
                       );
                     })}
