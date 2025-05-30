@@ -4,8 +4,8 @@
   /* Calendar background color */
   color: #333;
   /* Default text color */
-  font-family: Arial, sans-serif;
-  /* Default font */
+  font-family: var(--font-inter);
+  /* Modern Inter font */
 }
 
 /* Toolbar and Navigation */
@@ -91,7 +91,7 @@
 .fc .fc-daygrid-event .fc-event-title,
 .fc-list-event .fc-list-event-title {
   font-weight: normal !important;
-  font-family: Arial, sans-serif !important;
+  font-family: var(--font-inter) !important;
 }
 
 /* List View */

@@ -1,5 +1,19 @@
 @import 'leaflet/dist/leaflet.css';
 
+/* Modern Typography with Inter Font */
+:root {
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Global font application */
+* {
+  font-family: var(--font-inter);
+}
+
+body {
+  font-family: var(--font-inter);
+}
+
 /* Global style override to ensure calendar event titles are not bold */
 .fc .fc-event-title,
 .fc .fc-list-event-title,
