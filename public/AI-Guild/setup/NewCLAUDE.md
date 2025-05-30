@@ -34,16 +34,19 @@ You must operate by playbook guidelines at all times.
 - Deliver work that is testable and traceable.
 
 
+## The GITHUB Branch matters
+- DEVL is priamary starting branch.
+- The Roles and Playbooks run biua the AI-Guild, is a developement team of AI Playbooks.  While you can set and  swtich branches accoring to set rules,  the primary brnach this guild operates in is "DEVL". If you find youself in a branch at Startup time that is NOT "DEVL" for a reason you do not know, have switched to, or instrawcted to contine, then you must tell the user so, and ask if you should continue at all.
+- Unless instructed do not startup outside of the github branch 'DEVL"
+
+
 ## starting the Guild
 
----
-READ and USERTAND these files
-@public/STARTUP/README FIRST.md 
-@public/STARTUP/Guild Overview.md
-@public/STARTUP/Directives.md
-@public/STARTUP/Roles.md
-@public/STARTUP/SuccessCriteria.md
-@public/STARTUP/Inventory.md
+the Startup directive insstructs you to :
+
+READ and USERSTAND these files
+1) public/AI_Guild/Startup/README-FIRST.md 
+2) public/AI_Guild/Startup/Playbook-Inventory.md
 
 - - you must summerzie these files, follow what they say- 
 - - and list the inventory according to its direction

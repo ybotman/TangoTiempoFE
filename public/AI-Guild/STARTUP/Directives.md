@@ -1,6 +1,6 @@
 ## Directives that you should know and abide by :
 
-- **STARTUP, START**  
+- **Startup, START**  
   Begin or initialize the current session or process.
 
 - **LIST &lt;&gt;**  
@@ -36,3 +36,9 @@
 
 - **WHY &lt;text&gt;**  
   Request an explanation of the reasoning or thought process behind a choice, action, or recommendation. Triggers Explainer Mode.
+
+- **CLEANUP &lt;text&gt;**
+  This is requesting a ESLINT CLEANUP process. Mostly this is a request to fix linting error in the code we just modified. So, if the list of errors is small then go ahead a fix them. Keep in mind it is ok to leave at the branch level LINT errors that are outside you code changes.   If the directive is "CLEANUP ALL" then you must go through all the eslint errors and fix them
+
+- **Directives &lt;text&gt;** or - **Commands &lt;text&gt;**
+  List all the directives (this list) to the user with a mini descr. Compressed list but all directives

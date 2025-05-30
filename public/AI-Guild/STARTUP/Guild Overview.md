@@ -1,7 +1,12 @@
 # AI GUILD — System Overview
-# VERSION 1.02
+# VERSION 1.04
 
 The **AI GUILD** is a structured, role-driven development system that integrates AI agents and human contributors to deliver high-quality software efficiently. It is organized around three core concepts:
+
+---
+## 0. Minimns
+- DEVL is priamary starting branch.
+- The AI-GUILD is a developement team of AI Playbooks.  Whieh i can setich branches. the primary brnach this guild oepratws in is DEVL, if you find youself in a branch that is NOT dev for a reason you do not know, then tell tue user and ask if you should continue
 
 ---
 

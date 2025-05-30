@@ -83,8 +83,8 @@ const SidebarDrawer = ({ open, onClose }) => {
   // Get the organizer selection state from useCalendarPage
   const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
   
-  // Check if we're in development mode for debug menu visibility
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  // Debug menu is now available in all environments for all users
+  const showDebugMenu = true; // Previously restricted to development mode only
   
   // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
   const [venueSelectionReady, setVenueSelectionReady] = useState(false);
@@ -411,7 +411,7 @@ const SidebarDrawer = ({ open, onClose }) => {
           <ListItem
             button="true"
             onClick={() => {
-              setUserSettingsOpen(true);
+              setPrivacyPolicyOpen(true);
               onClose();
             }}
           >
@@ -420,23 +420,13 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Privacy Policy" />
           </ListItem>
-          <ListItem
-            button="true"
-            onClick={() => {
-              setPrivacyPolicyOpen(true);
-              onClose();
-            }}
-          >
-            <ListItemIcon>{/* Add an icon if needed */}</ListItemIcon>
-            <ListItemText primary="Privacy Policy Details" />
-          </ListItem>
           
-          {/* Debug Menu - only visible in development */}
-          {isDevelopment && (
+          {/* Debug Menu - visible in all environments */}
+          {showDebugMenu && (
             <>
               <Divider />
               <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-                Development Tools
+                Debug Tools
               </Typography>
               <ListItem
                 button="true"
