@@ -5,7 +5,6 @@ import Head from 'next/head';
 import React, {useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ButtonGroup, IconButton } from '@mui/material';
@@ -13,7 +12,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import ListIcon from '@mui/icons-material/List';
 
 import SiteHeader from '@/components/UI/SiteHeader';
@@ -70,7 +68,7 @@ const CalendarPage = () => {
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
-    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
+    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listMonth';
   };
   //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
@@ -79,7 +77,7 @@ const CalendarPage = () => {
       if (window.innerWidth >= 768) {
         calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
       } else {
-        calendarApi.changeView('listWeek'); // Switch to List view for smaller screens
+        calendarApi.changeView('listMonth'); // Switch to List view for smaller screens
       }
     };
 
@@ -150,10 +148,7 @@ const CalendarPage = () => {
             <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
               <CalendarMonthIcon />
             </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
-              <ViewWeekIcon />
-            </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('listMonth')}>
               <ListIcon />
             </IconButton>
           </ButtonGroup>
@@ -161,7 +156,7 @@ const CalendarPage = () => {
       </div>
 
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
         //        initialView="dayGridMonth"
         initialView={getInitialView()}
         events={coloredFilteredEvents}
@@ -176,7 +171,7 @@ const CalendarPage = () => {
         height="auto" // Adjust based on how much space you want the calendar to take
         // Extend the number of events shown in list view
         views={{
-          listWeek: {
+          listMonth: {
             dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
           },
