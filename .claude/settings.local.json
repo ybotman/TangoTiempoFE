@@ -18,7 +18,8 @@
       "Bash(npm install:*)",
       "Bash(rm:*)",
       "Bash(git push:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git branch:*)"
     ],
     "deny": []
   },
