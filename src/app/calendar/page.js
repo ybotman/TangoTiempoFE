@@ -76,26 +76,6 @@ const CalendarPage = () => {
   const renderEventContent = (eventInfo) => {
     const { event, view } = eventInfo;
     
-    // For week view, don't show circles - let background color handle first category
-    if (view.type === 'timeGridWeek') {
-      return (
-        <div style={{ 
-          padding: '2px', 
-          overflow: 'hidden',
-          height: '100%'
-        }}>
-          <div style={{ 
-            fontSize: '0.75rem', 
-            fontWeight: 'bold',
-            lineHeight: '1.1',
-            wordWrap: 'break-word',
-            hyphens: 'auto'
-          }}>
-            {event.title}
-          </div>
-        </div>
-      );
-    }
     
     // For month and list views, show circles on same line as title
     return (
@@ -222,7 +202,7 @@ const CalendarPage = () => {
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
           // Remove background color for list view to avoid double category display
-          if (eventInfo.view.type === 'listWeek') {
+          if (eventInfo.view.type === 'listMonth') {
             eventInfo.el.style.backgroundColor = 'transparent';
             eventInfo.el.style.borderColor = '#ddd';
             
@@ -249,9 +229,6 @@ const CalendarPage = () => {
           },
           dayGridMonth: {
             titleFormat: { year: 'numeric', month: 'long' }, // Ensures title says "May 2025"
-            eventMinHeight: 25, // Ensure enough height for title + category circles
-          },
-          timeGridWeek: {
             eventMinHeight: 25, // Ensure enough height for title + category circles
           },
         }}
