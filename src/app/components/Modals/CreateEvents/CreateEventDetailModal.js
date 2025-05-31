@@ -250,22 +250,23 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Update the user's info with the updated flags
           if (response.data.regionalOrganizerInfo) {
             // Update the flags in the local user context state
-            const updatedUser = {
-              ...user,
-              backendInfo: {
-                ...user.backendInfo,
-                regionalOrganizerInfo: {
-                  ...user.backendInfo.regionalOrganizerInfo,
-                  isActive: true,
-                  isEnabled: true,
-                  isApproved: true
-                }
-              }
-            };
+            // Update the flags in the local user context state
+            // const updatedUser = {
+            //   ...user,
+            //   backendInfo: {
+            //     ...user.backendInfo,
+            //     regionalOrganizerInfo: {
+            //       ...user.backendInfo.regionalOrganizerInfo,
+            //       isActive: true,
+            //       isEnabled: true,
+            //       isApproved: true
+            //     }
+            //   }
+            // };
             
             // Force a refresh of the user data from backend
             try {
-              const refreshedUserResponse = await axios.get(
+              await axios.get(
                 `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`,
                 {
                   headers: {

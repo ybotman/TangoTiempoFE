@@ -5,13 +5,10 @@ import axios from 'axios';
 
 const useCategories = () => {
   const [categories, setCategories] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        setLoading(true);
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`, {
           params: { appId },
@@ -33,11 +30,8 @@ const useCategories = () => {
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
-        setError(error);
         // Just use an empty array on error
         setCategories([]);
-      } finally {
-        setLoading(false);
       }
     };
 

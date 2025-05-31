@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import { Box, Typography, Paper, Divider, Grid, Chip } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import PublicIcon from '@mui/icons-material/Public';
 
 const UserSettingsGeoLocation = ({ geoLocation }) => {
   // Extract all location information from the geoLocation context

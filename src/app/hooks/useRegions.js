@@ -91,7 +91,7 @@ export function useRegions() {
     const fetchWithRetry = async () => {
       try {
         await getRegions();
-      } catch (error) {
+      } catch {
         if (retryCount < maxRetries) {
           retryCount++;
           const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff

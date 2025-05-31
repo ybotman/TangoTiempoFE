@@ -61,7 +61,7 @@ const CalendarPage = () => {
     handleDateClick,
     handleEventClick,
     coloredFilteredEvents,
-    datesSet,
+    // datesSet,
     handleEventUpdated,
     isEditMode,
     eventToEdit,
@@ -74,7 +74,7 @@ const CalendarPage = () => {
 
   // Custom event content renderer with category circles
   const renderEventContent = (eventInfo) => {
-    const { event, view } = eventInfo;
+    const { event } = eventInfo;
     
     
     // For month and list views, show circles on same line as title

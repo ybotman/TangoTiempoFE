@@ -19,7 +19,8 @@
       "Bash(rm:*)",
       "Bash(git push:*)",
       "Bash(git merge:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   },

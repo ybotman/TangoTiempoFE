@@ -39,7 +39,7 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
   
   // Get location context and organizers data
   const { selectedLocation } = useGeoLocation();
-  const { organizers, fetchLoading: loading, error } = useOrganizers();
+  const { organizers, fetchLoading: loading, error, refetch } = useOrganizers();
   
   // When modal opens, reset internal state to match props
   useEffect(() => {
@@ -115,14 +115,10 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
   // Handler for retry loading when there's an error
   const handleRetry = useCallback(() => {
     // Call the refetch method from the useOrganizers hook
-    if (typeof error !== 'undefined' && error !== null) {
-      // Call refetch from useOrganizers hook
-      const { refetch } = useOrganizers();
-      if (refetch) {
-        refetch();
-      }
+    if (typeof error !== 'undefined' && error !== null && refetch) {
+      refetch();
     }
-  }, [error]);
+  }, [error, refetch]);
 
   // Split organizers into two columns
   const organizerColumns = useMemo(() => {

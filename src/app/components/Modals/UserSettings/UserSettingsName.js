@@ -4,11 +4,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, TextField, Button, Typography, Alert, Snackbar } from '@mui/material';
-import { useGeoLocation } from '@/contexts/GeoLocationContext';
+// import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const UserSettingsName = ({ userData, updateUserData }) => {
   // Connect to GeoLocationContext for future use
-  const geoLocation = useGeoLocation();
+  // const geoLocation = useGeoLocation();
   
   const [first, setFirst] = useState(userData?.localUserInfo?.firstName || '');
   const [last, setLast] = useState(userData?.localUserInfo?.lastName || '');

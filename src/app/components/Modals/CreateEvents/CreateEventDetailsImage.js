@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, LinearProgress, Alert } from '@mui/material';
+import { Box, Typography, Button, Alert } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
