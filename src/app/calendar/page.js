@@ -72,35 +72,119 @@ const CalendarPage = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'listMonth';
   };
 
+  // Format time display without AM/PM for monthly view
+  const formatTimeForMonthly = (start, end) => {
+    const formatTime = (date) => {
+      if (!date) return '';
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}`;
+    };
+    
+    const startTime = formatTime(start);
+    const endTime = end ? formatTime(end) : '';
+    return { startTime, endTime };
+  };
+
   // Custom event content renderer with category circles
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
+    const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
     
-    
-    // For month and list views, show circles on same line as title
-    return (
-      <div style={{ 
-        padding: '2px', 
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '4px'
-      }}>
-        <CategoryCircles eventProps={event.extendedProps} />
+    if (isMonthlyView) {
+      // Monthly view: time + categories on same line, title below
+      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      
+      return (
         <div style={{ 
-          fontSize: '0.75rem', 
-          fontWeight: 'bold',
-          lineHeight: '1.1',
-          wordWrap: 'break-word',
-          hyphens: 'auto',
-          flex: 1,
-          minWidth: 0 // Allow text to shrink
+          padding: '2px', 
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start'
         }}>
-          {event.title}
+          {/* Time and categories on same line */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginBottom: '1px'
+          }}>
+            {startTime && (
+              <div style={{ 
+                fontSize: '0.65rem', 
+                fontWeight: 'normal',
+                lineHeight: '1.0'
+              }}>
+                {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
+              </div>
+            )}
+            <CategoryCircles eventProps={event.extendedProps} />
+          </div>
+          
+          {/* Event title below */}
+          <div style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 'normal',
+            lineHeight: '1.1',
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            flex: 1
+          }}>
+            {event.title}
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      // List view: time above, categories below time, title on right
+      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      
+      return (
+        <div style={{ 
+          padding: '2px', 
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '4px'
+        }}>
+          {/* Time and categories column on left */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 'fit-content',
+            flexShrink: 0
+          }}>
+            {startTime && (
+              <div style={{ 
+                fontSize: '0.65rem', 
+                fontWeight: 'normal',
+                lineHeight: '1.1',
+                marginBottom: '1px'
+              }}>
+                {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
+              </div>
+            )}
+            <CategoryCircles eventProps={event.extendedProps} />
+          </div>
+          
+          {/* Event title on right */}
+          <div style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 'normal',
+            lineHeight: '1.1',
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            flex: 1,
+            minWidth: 0 // Allow text to shrink
+          }}>
+            {event.title}
+          </div>
+        </div>
+      );
+    }
   };
   //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
@@ -210,6 +294,12 @@ const CalendarPage = () => {
             const dotElement = eventInfo.el.querySelector('.fc-list-event-dot');
             if (dotElement) {
               dotElement.style.display = 'none';
+            }
+            
+            // Hide the default FullCalendar time display in list view
+            const timeElement = eventInfo.el.querySelector('.fc-list-event-time');
+            if (timeElement) {
+              timeElement.style.display = 'none';
             }
             
             // Alternative: hide the entire time column border-left which contains the color indicator

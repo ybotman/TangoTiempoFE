@@ -19,26 +19,103 @@ All task assignments and workflow status updates go here._
 ## 🧭 SCOUT (Required)
 _Research, discoveries, risks, and open questions.  
 Document findings and recommendations here._  
-**Last updated:** 2025-01-30 17:00
+**Last updated:** 2025-01-30 17:15
 
-- Need to investigate monthly view event rendering in `renderEventContent` function
-- Need to examine CategoryCircles component implementation
-- Need to understand time formatting and title styling in monthly view
-- Need to identify where AM/PM formatting is applied
+**Current Implementation Found:**
+- Monthly view uses `renderEventContent` function in `/src/app/calendar/page.js` (lines 77-103)
+- CategoryCircles component in `/src/app/components/UI/CategoryCircles.js` shows 3 circles horizontally
+- Current layout: Categories on left, title on right (flexbox with gap: '4px')
+- Title styling: `fontWeight: 'bold'`, `fontSize: '0.75rem'`
+- CategoryCircles has 8px primary circle, 6px secondary circles, 2px gaps
+
+**Key Findings:**
+- FullCalendar automatically displays event times - not controlled by renderEventContent
+- Event title and categories are custom rendered through renderEventContent function
+- Categories currently inline with title using flexbox layout
+- No custom time formatting is currently applied - FullCalendar default includes AM/PM
+
+**Architecture Needed:**
+- Modify renderEventContent to show vertical layout (time at top, categories below)
+- Add custom time formatting function to remove AM/PM
+- Change title fontWeight from 'bold' to 'normal'
+- Detect if view is monthly vs list to apply different layouts
 
 ## 🏛️ ARCHITECT (Required)
 _User-approved decisions, technical recommendations, and rationale.  
 Document all architectural notes and user approvals here._  
-**Last updated:** 2025-01-30 17:00
+**Last updated:** 2025-01-30 17:20
 
-- Awaiting scouting results to design formatting improvements
+**Solution Architecture:**
+
+**1. Monthly View Detection:**
+- Add view type detection in renderEventContent: `eventInfo.view.type === 'dayGridMonth'`
+- Apply different layouts for monthly vs list views
+
+**2. Time Display Customization:**
+- Custom time formatting function to remove AM/PM and format end time smaller
+- Add time display at top of event content (currently FullCalendar handles this)
+- Format: "9:00-11:30" instead of "9:00 AM - 11:30 PM"
+
+**3. Layout Changes for Monthly View:**
+```
+Current: [●●●] Event Title
+New:     9:00-11:30
+         Event Title  
+         [●●●]
+```
+
+**4. Implementation Plan:**
+- Modify renderEventContent function to have monthly-specific layout
+- Add custom time formatting utility function
+- Move CategoryCircles below title in monthly view
+- Change title fontWeight from 'bold' to 'normal'
+- Keep existing layout for list view unchanged
+
+**Benefits:**
+- Better space utilization in monthly view
+- Cleaner, less cluttered appearance
+- Smaller end time saves horizontal space
+- Categories below don't compete with title for space
 
 ## 🛠️ BUILDER (Required)
 _Implementation details, blockers, and technical choices.  
 Document what was built, how, and any issues encountered._  
-**Last updated:** 2025-01-30 17:00
+**Last updated:** 2025-05-30 19:15
 
-- Awaiting architecture decisions to begin implementation
+**Implementation Completed:**
+
+1. **Added Time Formatting Function:**
+   - Created `formatTimeForMonthly()` function that removes AM/PM indicators
+   - Formats time as "9:00" instead of "9:00 AM"
+   - Returns both start and end times in clean format
+
+2. **Modified renderEventContent Function:**
+   - Added view type detection: `eventInfo.view.type === 'dayGridMonth'`
+   - Created separate layouts for monthly vs list views
+   - Monthly view uses vertical flexbox layout
+
+3. **Monthly View Layout Implementation:**
+   ```
+   Time: 9:00-11:30 (smaller end time)
+   Title: Event Title (non-bold)
+   Circles: [●●●] (below content)
+   ```
+
+4. **Styling Changes:**
+   - Time display: fontSize '0.65rem', end time '0.55rem' 
+   - Title: fontSize '0.75rem', fontWeight 'normal' (changed from 'bold')
+   - CategoryCircles moved below title using flexDirection 'column'
+   - List view maintains existing horizontal layout unchanged
+
+5. **Build Test:**
+   - Build completed successfully with no errors
+   - All formatting improvements implemented as architected
+   - No breaking changes to existing list view functionality
+
+**Technical Choices:**
+- Used conditional rendering based on view type rather than CSS classes for clarity
+- Kept existing horizontal layout for list view to maintain consistency
+- Used smaller margins (1px) for compact vertical spacing in monthly view
 
 ---
 
