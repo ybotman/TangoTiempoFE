@@ -49,6 +49,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
     const items = [];
     if (roleInfo.isApproved) items.push(`${rolePrefix} : Approved`);
     if (roleInfo.isEnabled) items.push(`${rolePrefix} : Enabled`);
+    if (roleInfo.isActive) items.push(`${rolePrefix} : Active`);
     return items;
   };
 
