@@ -21,18 +21,63 @@ All task assignments and workflow status updates go here._
 ## 🧭 SCOUT (Required)
 _Research, discoveries, risks, and open questions.  
 Document findings and recommendations here._  
-**Last updated:** 2025-05-31 14:30
+**Last updated:** 2025-05-31 15:00
 
-- Need to investigate current SiteMenuBarUserDrawer implementation
-- Need to understand userLogins data structure from backend
-- Need to identify data flow for user role information
+✅ **Current Implementation Analysis:**
+- SiteMenuBarUserDrawer: 300px width, right-positioned drawer
+- User data access via AuthContext.user.backendInfo contains full userLogins model
+- Clear data structure: localUserInfo, regionalOrganizerInfo, localAdminInfo with isApproved/isEnabled flags
+- Firebase UID available as user.uid
+- Role display uses mapping (NamedUser → Milongerx)
+
+✅ **Data Access Pattern:**
+- `user.uid` - Firebase UID 
+- `user.backendInfo.localUserInfo.{isApproved, isEnabled}`
+- `user.backendInfo.regionalOrganizerInfo.{isApproved, isEnabled}`
+- `user.backendInfo.localAdminInfo.{isApproved, isEnabled}`
+
+✅ **Risk Assessment:** Low risk - no backend changes needed, existing data structures sufficient
 
 ## 🏛️ ARCHITECT (Required)
 _User-approved decisions, technical recommendations, and rationale.  
 Document all architectural notes and user approvals here._  
-**Last updated:** 2025-05-31 14:30
+**Last updated:** 2025-05-31 15:00
 
-- User approved feature requirements for enhanced user info display in side drawer
+✅ **User approved feature requirements for enhanced user info display in side drawer**
+
+✅ **Technical Design Decisions:**
+
+**Component Layout Design:**
+```
+[User Avatar] [User Name]
+              Firebase ID: abc123... (small gray text)
+              
+Role Status Display:
+• NU : Approved ✓ Enabled ✓
+• RO : Approved ✗ Enabled ✗  
+• Admin : Approved ✗ Enabled ✗
+
+[Role Selection Radio Buttons] (existing)
+
+[LOGOUT Button] (existing)
+
+Conditional Messages:
+- "Update your Organizer Settings to enable your organizer role." (if RO approved=true, enabled=false)
+- "You can apply to add events for free" (if RO approved=false)
+```
+
+**Implementation Approach:**
+1. **Data Access Strategy**: Use existing user.backendInfo structure, no additional API calls needed
+2. **Status Display Logic**: Create helper function to format status indicators (✓/✗)
+3. **Conditional Rendering**: Implement conditional message logic based on RO approval states
+4. **Styling Strategy**: Use MUI Typography with consistent spacing, small text for Firebase UID
+5. **Placement Strategy**: Insert new content between user name and role selection, messages after logout
+
+**Technical Specifications:**
+- Helper function: `getRoleStatusDisplay(roleInfo)` → returns formatted status string
+- Helper function: `getConditionalMessage(roInfo)` → returns appropriate message or null
+- Typography variants: body2 for Firebase UID, body1 for role status, caption for messages
+- Color scheme: success.main for ✓, error.main for ✗, text.secondary for Firebase UID
 
 ## 🛠️ BUILDER (Required)
 _Implementation details, blockers, and technical choices.  

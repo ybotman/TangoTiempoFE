@@ -66,8 +66,13 @@ export function useGeoLocations() {
         throw axiosError;
       }
     } catch (err) {
-      console.error('useGeoLocations-> Error:', err.message);
-      setError(err.message);
+      // Don't log canceled/aborted requests as errors
+      if (err.name === 'AbortError' || err.message === 'canceled') {
+        console.log('useGeoLocations: Request timeout, using fallback coordinates');
+      } else {
+        console.error('useGeoLocations-> Error:', err.message);
+        setError(err.message);
+      }
       // Set fallback US center coordinates - Boston area
       setLatitude(42.3601);
       setLongitude(-71.0589);
