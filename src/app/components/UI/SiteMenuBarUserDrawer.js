@@ -31,8 +31,17 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [orderedUserRoles, setOrderedUserRoles] = useState([]);
 
+  // Define role display mapping (backend role -> display name)
+  const roleDisplayMap = {
+    'NamedUser': 'Milongerx',
+    'RegionalOrganizer': 'RegionalOrganizer',
+    'RegionalAdmin': 'RegionalAdmin', 
+    'SystemAdmin': 'SystemAdmin',
+    'SystemOwner': 'SystemOwner'
+  };
+
   // Define the standard role display order for consistency
-  const roleDisplayOrder = ['Milongerx', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
+  const roleDisplayOrder = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
 
   // When user or roles change, sort user's roles based on the standard order
   useEffect(() => {
@@ -110,9 +119,14 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
             <Box sx={{ marginTop: 2 }}>
               <Typography variant="subtitle1">Select Role:</Typography>
               <FormControl component="fieldset">
-                <RadioGroup value={selectedRole || 'Milongerx'} onChange={handleRoleChange}>
+                <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                   {orderedUserRoles.map((role) => (
-                    <FormControlLabel key={role} value={role} control={<Radio />} label={role} />
+                    <FormControlLabel 
+                      key={role} 
+                      value={role} 
+                      control={<Radio />} 
+                      label={roleDisplayMap[role] || role} 
+                    />
                   ))}
                 </RadioGroup>
               </FormControl>
