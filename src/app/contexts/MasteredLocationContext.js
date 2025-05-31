@@ -37,7 +37,7 @@ export const MasteredLocationProvider = ({ children }) => {
       
       // Generate a fallback city without hardcoded MongoDB IDs
       // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-      const tempId = `temp_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      // const tempId = `temp_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       const bostonFallback = {
         cityID: null,  // No hardcoded ID
         cityName: 'Boston',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Creates a serializable snapshot of any object, handling circular references,
@@ -86,7 +87,7 @@ function createSerializableSnapshot(data, maxDepth = 10) {
  * DebugJsonView Component
  * Displays JSON data with syntax highlighting and copy functionality
  */
-function DebugJsonView({ data, title, ...props }) {
+function DebugJsonView({ data, title }) {
   const [copied, setCopied] = useState(false);
   
   // Create a safe serializable copy of the data - THIS IS THE CRITICAL FIX
@@ -120,5 +121,10 @@ function DebugJsonView({ data, title, ...props }) {
     </div>
   );
 }
+
+DebugJsonView.propTypes = {
+  data: PropTypes.any.isRequired,
+  title: PropTypes.string.isRequired
+};
 
 export default DebugJsonView;

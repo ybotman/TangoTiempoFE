@@ -5,7 +5,6 @@ import {
   Popper, 
   Paper, 
   ClickAwayListener, 
-  Chip,
   Box,
   Typography,
   Grow
@@ -73,9 +72,7 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
     }
   }, [open]);
 
-  // Get active count for button label
-  const activeCount = activeCategories.length;
-  const totalCount = sortedCategories.length;
+  // Get active count for button label (not currently displayed)
 
   return (
     <Box sx={{ position: 'relative' }}>

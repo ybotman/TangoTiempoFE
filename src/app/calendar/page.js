@@ -5,7 +5,6 @@ import Head from 'next/head';
 import React, {useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ButtonGroup, IconButton } from '@mui/material';
@@ -13,7 +12,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import ListIcon from '@mui/icons-material/List';
 
 import SiteHeader from '@/components/UI/SiteHeader';
@@ -63,7 +61,7 @@ const CalendarPage = () => {
     handleDateClick,
     handleEventClick,
     coloredFilteredEvents,
-    datesSet,
+    // datesSet,
     handleEventUpdated,
     isEditMode,
     eventToEdit,
@@ -71,58 +69,122 @@ const CalendarPage = () => {
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
-    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
+    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listMonth';
+  };
+
+  // Format time display without AM/PM for monthly view
+  const formatTimeForMonthly = (start, end) => {
+    const formatTime = (date) => {
+      if (!date) return '';
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}`;
+    };
+    
+    const startTime = formatTime(start);
+    const endTime = end ? formatTime(end) : '';
+    return { startTime, endTime };
   };
 
   // Custom event content renderer with category circles
   const renderEventContent = (eventInfo) => {
-    const { event, view } = eventInfo;
+    const { event } = eventInfo;
+    const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
     
-    // For week view, don't show circles - let background color handle first category
-    if (view.type === 'timeGridWeek') {
+    if (isMonthlyView) {
+      // Monthly view: time + categories on same line, title below
+      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      
       return (
         <div style={{ 
           padding: '2px', 
           overflow: 'hidden',
-          height: '100%'
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start'
         }}>
+          {/* Time and categories on same line */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginBottom: '1px'
+          }}>
+            {startTime && (
+              <div style={{ 
+                fontSize: '0.65rem', 
+                fontWeight: 'normal',
+                lineHeight: '1.0'
+              }}>
+                {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
+              </div>
+            )}
+            <CategoryCircles eventProps={event.extendedProps} />
+          </div>
+          
+          {/* Event title below */}
           <div style={{ 
             fontSize: '0.75rem', 
-            fontWeight: 'bold',
+            fontWeight: 'normal',
             lineHeight: '1.1',
             wordWrap: 'break-word',
-            hyphens: 'auto'
+            hyphens: 'auto',
+            flex: 1
+          }}>
+            {event.title}
+          </div>
+        </div>
+      );
+    } else {
+      // List view: time above, categories below time, title on right
+      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      
+      return (
+        <div style={{ 
+          padding: '2px', 
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '4px'
+        }}>
+          {/* Time and categories column on left */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 'fit-content',
+            flexShrink: 0
+          }}>
+            {startTime && (
+              <div style={{ 
+                fontSize: '0.65rem', 
+                fontWeight: 'normal',
+                lineHeight: '1.1',
+                marginBottom: '1px'
+              }}>
+                {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
+              </div>
+            )}
+            <CategoryCircles eventProps={event.extendedProps} />
+          </div>
+          
+          {/* Event title on right */}
+          <div style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 'normal',
+            lineHeight: '1.1',
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            flex: 1,
+            minWidth: 0 // Allow text to shrink
           }}>
             {event.title}
           </div>
         </div>
       );
     }
-    
-    // For month and list views, show circles on same line as title
-    return (
-      <div style={{ 
-        padding: '2px', 
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '4px'
-      }}>
-        <CategoryCircles eventProps={event.extendedProps} />
-        <div style={{ 
-          fontSize: '0.75rem', 
-          fontWeight: 'bold',
-          lineHeight: '1.1',
-          wordWrap: 'break-word',
-          hyphens: 'auto',
-          flex: 1,
-          minWidth: 0 // Allow text to shrink
-        }}>
-          {event.title}
-        </div>
-      </div>
-    );
   };
   //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
@@ -131,7 +193,7 @@ const CalendarPage = () => {
       if (window.innerWidth >= 768) {
         calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
       } else {
-        calendarApi.changeView('listWeek'); // Switch to List view for smaller screens
+        calendarApi.changeView('listMonth'); // Switch to List view for smaller screens
       }
     };
 
@@ -205,10 +267,7 @@ const CalendarPage = () => {
             <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
               <CalendarMonthIcon />
             </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('timeGridWeek')}>
-              <ViewWeekIcon />
-            </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('listMonth')}>
               <ListIcon />
             </IconButton>
           </ButtonGroup>
@@ -216,7 +275,7 @@ const CalendarPage = () => {
       </div>
 
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
         //        initialView="dayGridMonth"
         initialView={getInitialView()}
         events={coloredFilteredEvents}
@@ -227,7 +286,7 @@ const CalendarPage = () => {
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
           // Remove background color for list view to avoid double category display
-          if (eventInfo.view.type === 'listWeek') {
+          if (eventInfo.view.type === 'listMonth') {
             eventInfo.el.style.backgroundColor = 'transparent';
             eventInfo.el.style.borderColor = '#ddd';
             
@@ -235,6 +294,12 @@ const CalendarPage = () => {
             const dotElement = eventInfo.el.querySelector('.fc-list-event-dot');
             if (dotElement) {
               dotElement.style.display = 'none';
+            }
+            
+            // Hide the default FullCalendar time display in list view
+            const timeElement = eventInfo.el.querySelector('.fc-list-event-time');
+            if (timeElement) {
+              timeElement.style.display = 'none';
             }
             
             // Alternative: hide the entire time column border-left which contains the color indicator
@@ -248,15 +313,12 @@ const CalendarPage = () => {
         height="auto" // Adjust based on how much space you want the calendar to take
         // Extend the number of events shown in list view
         views={{
-          listWeek: {
+          listMonth: {
             dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
           },
           dayGridMonth: {
             titleFormat: { year: 'numeric', month: 'long' }, // Ensures title says "May 2025"
-            eventMinHeight: 25, // Ensure enough height for title + category circles
-          },
-          timeGridWeek: {
             eventMinHeight: 25, // Ensure enough height for title + category circles
           },
         }}

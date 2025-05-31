@@ -1,7 +1,7 @@
 // @/hooks/useVenues.js
 'use client';
 
-import { useState, useCallback, useContext, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 

@@ -21,13 +21,13 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
-import { useRoles } from '@/hooks/useRoles';
+// import { useRoles } from '@/hooks/useRoles';
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   // Fetch roles using useRoles hook
-  const { roles: availableRoles } = useRoles();
+  // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [orderedUserRoles, setOrderedUserRoles] = useState([]);
 
