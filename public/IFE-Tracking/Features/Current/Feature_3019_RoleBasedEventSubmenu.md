@@ -149,9 +149,29 @@ AI Guild - TangoTiempo Development Team
 | Milestone | Date       |
 |-----------|------------|
 | Created   | 2025-06-04 |
-| First Dev | TBD        |
-| Review    | TBD        |
-| Completed | TBD        |
+| First Dev | 2025-06-04 |
+| Review    | 2025-06-04 |
+| Completed | 2025-06-04 |
+
+---
+
+## 🗂️ KANBAN - IMPLEMENTATION COMPLETE (Added)
+**Last updated:** 2025-06-04 18:30
+
+**Status:** ✅ PHASE 1 COMPLETED
+**Committed:** feature/3019-role-based-event-submenu (commit: 91132be)
+**Implementation scope:** NU/Milongerx and Anonymous direct event viewing
+
+**What was implemented:**
+- ✅ NU/Milongerx users directly open ViewEventDetailModal on event click
+- ✅ Anonymous (not logged in) users get same direct viewing behavior  
+- ✅ Other roles maintain existing submenu functionality
+- ✅ No breaking changes to existing role-based logic
+
+**Phase 2 planned (future):**
+- Modal enhancements for Anonymous sign-up encouragement
+- NU photo upload capabilities within modal
+- RO role "Add Photos" handler implementation
 
 ---
 
