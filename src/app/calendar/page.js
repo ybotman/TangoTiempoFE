@@ -87,6 +87,22 @@ const CalendarPage = () => {
     return { startTime, endTime };
   };
 
+  // Format time display with P/A suffix for list view
+  const formatTimeForListView = (start, end) => {
+    const formatTime = (date) => {
+      if (!date) return '';
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+      const suffix = hours >= 12 ? 'P' : 'A';
+      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+    };
+    
+    const startTime = formatTime(start);
+    const endTime = end ? formatTime(end) : '';
+    return { startTime, endTime };
+  };
+
   // Custom event content renderer with category circles
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
@@ -138,47 +154,51 @@ const CalendarPage = () => {
         </div>
       );
     } else {
-      // List view: time above, categories below time, title on right
-      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      // List view: time and categories on top line, title on second line
+      const { startTime, endTime } = formatTimeForListView(event.start, event.end);
       
       return (
         <div style={{ 
-          padding: '2px', 
+          padding: '4px 2px', 
           overflow: 'hidden',
           height: '100%',
           display: 'flex',
-          alignItems: 'flex-start',
-          gap: '4px'
+          flexDirection: 'column',
+          gap: '2px'
         }}>
-          {/* Time and categories column on left */}
+          {/* Top line: Time range and category circles */}
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
-            minWidth: 'fit-content',
-            flexShrink: 0
+            alignItems: 'center',
+            gap: '8px'
           }}>
+            {/* Time range */}
             {startTime && (
               <div style={{ 
-                fontSize: '0.65rem', 
-                fontWeight: 'normal',
-                lineHeight: '1.1',
-                marginBottom: '1px'
+                fontSize: '0.75rem',
+                lineHeight: '1.2',
+                flexShrink: 0
               }}>
-                {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
+                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                {endTime && (
+                  <>
+                    <span> - </span>
+                    <span style={{ fontWeight: 'normal' }}>{endTime}</span>
+                  </>
+                )}
               </div>
             )}
+            {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
           </div>
           
-          {/* Event title on right */}
+          {/* Second line: Event title */}
           <div style={{ 
             fontSize: '0.75rem', 
             fontWeight: 'normal',
-            lineHeight: '1.1',
+            lineHeight: '1.2',
             wordWrap: 'break-word',
-            hyphens: 'auto',
-            flex: 1,
-            minWidth: 0 // Allow text to shrink
+            hyphens: 'auto'
           }}>
             {event.title}
           </div>

@@ -20,7 +20,10 @@
       "Bash(git push:*)",
       "Bash(git merge:*)",
       "Bash(git branch:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git rev-list:*)",
+      "Bash(git fetch:*)",
+      "Bash(gh pr merge:*)"
     ],
     "deny": []
   },
