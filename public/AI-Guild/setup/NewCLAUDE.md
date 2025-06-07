@@ -46,7 +46,6 @@ the Startup directive insstructs you to :
 
 READ and USERSTAND these files
 1) public/AI_Guild/Startup/README-FIRST.md 
-2) public/AI_Guild/Startup/Playbook-Inventory.md
 
 - - you must summerzie these files, follow what they say- 
 - - and list the inventory according to its direction
