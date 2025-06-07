@@ -188,9 +188,17 @@ export const useCalendarPage = () => {
       label: arg.dateStr,
     });
 
-    const items = getMenuItems('dateClick');
-    setMenuItems(items);
-    setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+    // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, no submenu on date click
+    // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
+    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
+      // No action for basic users on date click - they can only view events
+      return;
+    } else {
+      // For other roles, show the submenu for creating events
+      const items = getMenuItems('dateClick');
+      setMenuItems(items);
+      setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+    }
   };
 
   const handleEventClick = (arg) => {
@@ -205,7 +213,8 @@ export const useCalendarPage = () => {
     });
 
     // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
-    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === listOfAllRoles.ANONYMOUS) {
+    // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
+    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
       setViewDetailModalOpen(true);
     } else {
       // For other roles, show the submenu
