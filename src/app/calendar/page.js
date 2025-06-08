@@ -107,10 +107,13 @@ const CalendarPage = () => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
     
-    // Get organizer short name with fallback
+    // Get organizer short name and event short title with fallbacks
     const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
                           event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
                           '';
+    const eventShortTitle = event.extendedProps?.shortTitle || 
+                           event.title?.substring(0, 15) || 
+                           '';
     
     if (isMonthlyView) {
       // Monthly view: time + categories on same line, title below
@@ -125,32 +128,43 @@ const CalendarPage = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start'
         }}>
-          {/* Time and categories on same line */}
+          {/* Row 1: Time, categories, organizer, shortTitle - LARGER */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '4px',
+            gap: '3px',
             marginBottom: '1px'
           }}>
             {startTime && (
               <div style={{ 
-                fontSize: '0.65rem', 
+                fontSize: '0.8rem', 
                 fontWeight: 'normal',
                 lineHeight: '1.0',
                 flexShrink: 0
               }}>
-                {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
+                {startTime}{endTime && `-`}<span style={{ fontSize: '0.75rem' }}>{endTime}</span>
               </div>
             )}
             <CategoryCircles eventProps={event.extendedProps} />
+            {eventShortTitle && (
+              <div style={{
+                fontSize: '0.75rem',
+                fontWeight: 'normal',
+                color: '#444',
+                overflow: 'visible',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                lineHeight: '1.0'
+              }}>
+                {eventShortTitle}
+              </div>
+            )}
             {organizerShort && (
               <div style={{
-                fontSize: '0.55rem',
+                fontSize: '0.75rem',
                 fontWeight: 'bold',
                 color: '#666',
-                maxWidth: '60px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                overflow: 'visible',
                 whiteSpace: 'nowrap',
                 flexShrink: 1,
                 lineHeight: '1.0'
@@ -160,14 +174,15 @@ const CalendarPage = () => {
             )}
           </div>
           
-          {/* Event title below */}
+          {/* Row 2: Event title - SMALLER */}
           <div style={{ 
-            fontSize: '0.75rem', 
+            fontSize: '0.65rem', 
             fontWeight: 'normal',
             lineHeight: '1.1',
             wordWrap: 'break-word',
             hyphens: 'auto',
-            flex: 1
+            flex: 1,
+            color: '#555'
           }}>
             {event.title}
           </div>
@@ -186,7 +201,7 @@ const CalendarPage = () => {
           flexDirection: 'column',
           gap: '2px'
         }}>
-          {/* Top line: Time range and category circles */}
+          {/* Row 1: Time range, category circles, organizer, shortTitle - LARGER */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -195,7 +210,7 @@ const CalendarPage = () => {
             {/* Time range */}
             {startTime && (
               <div style={{ 
-                fontSize: '0.75rem',
+                fontSize: '0.9rem',
                 lineHeight: '1.2',
                 flexShrink: 0
               }}>
@@ -210,14 +225,25 @@ const CalendarPage = () => {
             )}
             {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
+            {eventShortTitle && (
+              <div style={{
+                fontSize: '0.85rem',
+                fontWeight: 'normal',
+                color: '#444',
+                overflow: 'visible',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                lineHeight: '1.2'
+              }}>
+                {eventShortTitle}
+              </div>
+            )}
             {organizerShort && (
               <div style={{
-                fontSize: '0.65rem',
+                fontSize: '0.85rem',
                 fontWeight: 'bold',
                 color: '#666',
-                maxWidth: '80px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                overflow: 'visible',
                 whiteSpace: 'nowrap',
                 flexShrink: 1,
                 lineHeight: '1.2'
@@ -227,13 +253,14 @@ const CalendarPage = () => {
             )}
           </div>
           
-          {/* Second line: Event title */}
+          {/* Row 2: Event title - SMALLER */}
           <div style={{ 
-            fontSize: '0.75rem', 
+            fontSize: '0.7rem', 
             fontWeight: 'normal',
             lineHeight: '1.2',
             wordWrap: 'break-word',
-            hyphens: 'auto'
+            hyphens: 'auto',
+            color: '#555'
           }}>
             {event.title}
           </div>
