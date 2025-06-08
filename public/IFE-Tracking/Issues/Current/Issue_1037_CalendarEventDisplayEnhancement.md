@@ -57,6 +57,9 @@ All task assignments and status updates go here._
 - [x] ✅ Ready for commit and documentation
 - [x] ✅ Testing passed - approved by user
 - [x] ✅ Implementation complete and verified
+- [ ] 🔄 Add shortTitle to first row layout
+- [ ] 🔄 Adjust font sizes: larger first row, smaller second row
+- [ ] 🔄 Update layout: TimeBlock + CircleBlock + OrganizerShortName + shortTitle → title
 
 ## 🧭 SCOUT (Required)
 _Investigation, findings, and risk notes.  
@@ -182,7 +185,7 @@ Document what was changed, how, and any technical notes._
 - **Phase 4:** Test and refine layout for different screen sizes
 
 ## Fix (if known or applied)
-- **Status:** ✅ **CLOSED** - Testing passed and issue resolved
+- **Status:** 🔄 **REOPENED** - Enhancement request for shortTitle addition
 - **Fix Description:** 
   - Modify renderEventContent function to include ownerOrganizerShortName in first row
   - Ensure responsive layout handles text overflow appropriately
@@ -193,11 +196,11 @@ Document what was changed, how, and any technical notes._
   - Confirm no layout breaking on small screens
 
 ## Resolution Log
-- **Commit/Branch:** ✅ Committed to DEVL branch (commit: 0ba168d)
-- **Build Test:** ✅ Passed (npm run build successful)
-- **Testing:** ✅ User testing completed and approved
-- **Issue Status:** ✅ **READY FOR CLOSURE**
-- **Verified By:** User acceptance testing verification
+- **Previous Commits:** ✅ Committed to DEVL branch (commits: 0ba168d, 4a6fa57)
+- **Deployed To:** ✅ TEST and PROD branches
+- **Issue Status:** 🔄 **REOPENED** - Enhancement request
+- **Enhancement Request:** Add shortTitle to Row 1, adjust font sizes
+- **New Layout:** TimeBlock + CircleBlock + OrganizerShortName + shortTitle → title (smaller)
 
 ---
 
