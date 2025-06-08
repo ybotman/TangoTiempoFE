@@ -10,10 +10,7 @@ You must know the roles to read this playbooks
    - *Handoff to → TINKER MODE (for planning/spec updates) or directly to BUILDER MODE if plan is clear*
 4) **TINKER MODE** (optional) — Refine plan, update specs/README, clarify implementation details.
    - *Handoff to → BUILDER MODE*
-5) **CRK** - perform and present sumamry of the Confidence Level, Risks, Knowlege Gap assesmsnet.
-   - To assess if ready for build phase or list unknowns/risks
-
-7) **BUILDER MODE** or **CODE CHANGE MODES** — Implement code, tests, and documentation as per the plan.
+5) **BUILDER MODE** — Implement code, tests, and documentation as per the plan.
    - *Handoff to → KANBAN MODE*
 
 

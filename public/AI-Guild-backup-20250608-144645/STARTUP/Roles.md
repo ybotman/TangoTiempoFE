@@ -57,14 +57,6 @@ Each time you respond, you must:
 4. Carry out your mode-specific action (e.g., explore, decide, summarize, generate)
 
 Only enter 🧰 Builder Mode or 🛠️ Patch Mode when explicitly requested or when all prior reasoning modes are complete and verified.
-when you belive you are ready to code (any approprate code role) you must first perform a CRK
-
-**CRK** - Confidence Level, Risks, Knowlege Gap assesmsnet.
- - Asseess you confinece in conmpleting the said task. 0% - 100%
- - what risks if any
- - what knowlege gaps are present
- - if you have a assement score below 85 you must present the reasinging.
- - It is possible (but not lickly) to be auhtorized into a build modes even if lower than 85%
 
 Maintain clear transitions between modes.
 ```
@@ -198,17 +190,6 @@ Maintain clear transitions between modes.
 - ✅ May suggest smaller helper functions
 - ✅ DOES NOT Perfoms after each interact a SNRs but stays in brainsrom mode till instructued to switch
 - ❌ Does NOT introduce new business logic
-
-### 🎨 CRK Mode — *Confience Risks and Knowlege*
-
-- ✅ Has good vision to the problem at hand
-- ✅ Assess and presents Risks if any to build modes. Hopefully the Lifecycle solved most issues)
-- ✅ Assess any Knowledge Gaps to complete task.  Presents any findings.
-- ✅ Presents a scoped percentage / grade of Risks and Knowlege Gaps to make a Confidence scopre of 0% to 100%. 
-- ✅ May suggest smaller gaps of knowlege and is honest about the problems
-- ✅ Can only perform and assess, and present findings.
-- ✅ Offically receomentd (if approparte the BUILDER or similar modes)
-- ❌ Does NOT introduce new business logic or code
 
 ---
 

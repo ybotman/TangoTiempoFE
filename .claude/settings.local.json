@@ -23,7 +23,9 @@
       "Bash(npx eslint:*)",
       "Bash(git rev-list:*)",
       "Bash(git fetch:*)",
-      "Bash(gh pr merge:*)"
+      "Bash(gh pr merge:*)",
+      "Bash(git rm:*)",
+      "WebFetch(domain:fullcalendar.io)"
     ],
     "deny": []
   },

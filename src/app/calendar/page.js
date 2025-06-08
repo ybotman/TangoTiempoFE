@@ -68,7 +68,7 @@ const CalendarPage = () => {
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
-    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listMonth';
+    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
   };
 
   // Format time display without AM/PM for monthly view
@@ -275,7 +275,7 @@ const CalendarPage = () => {
       if (window.innerWidth >= 768) {
         calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
       } else {
-        calendarApi.changeView('listMonth'); // Switch to List view for smaller screens
+        calendarApi.changeView('listWeek'); // Switch to List view for smaller screens
       }
     };
 
@@ -349,7 +349,7 @@ const CalendarPage = () => {
             <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
               <CalendarMonthIcon />
             </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('listMonth')}>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
               <ListIcon />
             </IconButton>
           </ButtonGroup>
@@ -368,7 +368,7 @@ const CalendarPage = () => {
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
           // Remove background color for list view to avoid double category display
-          if (eventInfo.view.type === 'listMonth') {
+          if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'listWeek') {
             eventInfo.el.style.backgroundColor = 'transparent';
             eventInfo.el.style.borderColor = '#ddd';
             
@@ -395,6 +395,13 @@ const CalendarPage = () => {
         height="auto" // Adjust based on how much space you want the calendar to take
         // Extend the number of events shown in list view
         views={{
+          listWeek: {
+            type: 'list',
+            duration: { days: 7 },
+            buttonText: 'Week',
+            listDayFormat: { weekday: 'long' },
+            dayMaxEvents: 'true',
+          },
           listMonth: {
             dayMaxEvents: 'true', // Show all events without limiting
             listDayFormat: { weekday: 'long' }, // Customize the day formatting in list view
