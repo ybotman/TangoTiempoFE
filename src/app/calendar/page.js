@@ -68,7 +68,7 @@ const CalendarPage = () => {
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
-    return window.innerWidth >= 768 ? 'dayGridMonth' : 'listWeek';
+    return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
   };
 
   // Format time display without AM/PM for monthly view
@@ -275,7 +275,7 @@ const CalendarPage = () => {
       if (window.innerWidth >= 768) {
         calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
       } else {
-        calendarApi.changeView('listWeek'); // Switch to List view for smaller screens
+        calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
       }
     };
 
@@ -349,7 +349,7 @@ const CalendarPage = () => {
             <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
               <CalendarMonthIcon />
             </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('listWeek')}>
+            <IconButton onClick={() => calendarRef.current.getApi().changeView('list21Days')}>
               <ListIcon />
             </IconButton>
           </ButtonGroup>
@@ -368,7 +368,7 @@ const CalendarPage = () => {
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
           // Remove background color for list view to avoid double category display
-          if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'listWeek') {
+          if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'list21Days') {
             eventInfo.el.style.backgroundColor = 'transparent';
             eventInfo.el.style.borderColor = '#ddd';
             
@@ -395,10 +395,10 @@ const CalendarPage = () => {
         height="auto" // Adjust based on how much space you want the calendar to take
         // Extend the number of events shown in list view
         views={{
-          listWeek: {
+          list21Days: {
             type: 'list',
-            duration: { days: 7 },
-            buttonText: 'Week',
+            duration: { days: 21 },
+            buttonText: '3 Weeks',
             listDayFormat: { weekday: 'long' },
             dayMaxEvents: 'true',
           },

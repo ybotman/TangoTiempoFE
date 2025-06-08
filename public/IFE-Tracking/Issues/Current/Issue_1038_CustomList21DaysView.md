@@ -41,7 +41,23 @@ Step 2: Extend to 21 days duration
 Step 3: Update button label if needed
 
 ## Fix
-⏳ Pending
+✅ Fixed
+
+### Implementation Details
+Created a custom view `list21Days` that:
+1. Uses FullCalendar's custom view configuration
+2. Sets duration to 21 days
+3. Starts from the current date automatically
+4. Displays "3 Weeks" as the button text
+5. Uses the same formatting as the previous list view
+
+Changes made:
+- Added custom view configuration in the views object
+- Updated all references from 'listMonth'/'listWeek' to 'list21Days'
+- Updated button click handler
+- Updated initial view logic
+- Updated resize handler
+- Updated event styling detection
 
 ## Testing
 - [ ] Verify list view starts from today's date
@@ -51,4 +67,6 @@ Step 3: Update button label if needed
 - [ ] Test on mobile and desktop viewports
 
 ## Resolution
-⏳ Pending
+- **Date**: 2025-01-08
+- **PR/Commit**: issue/1038-custom-list-21-days-view
+- **Notes**: Successfully implemented custom 21-day list view using FullCalendar's custom view configuration with duration property
