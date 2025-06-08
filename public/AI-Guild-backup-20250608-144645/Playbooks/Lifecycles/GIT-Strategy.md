@@ -9,8 +9,8 @@ Here is the full cleaned version in `.md` format for copy-pasting into your loca
 
 ```
 
-local : DEVL  → BRANCHES  → DEVL
-origin : DEVL → TEST → PROD
+DEVL  → BRANCHES  → DEVL
+DEVL → TEST → INTG → PROD
 
 ```
 
@@ -19,7 +19,7 @@ origin : DEVL → TEST → PROD
 ## 🔧 Assumptions
 
 1. **User Responsibility:** Developers are responsible for placing correct versions into `DEVL` before beginning I/F/E work.
-2. **Explicit Promotion:** Versions do **not** auto-promote. Promotions to `TEST`, or `PROD` require explicit Guild approval and execution.
+2. **Explicit Promotion:** Versions do **not** auto-promote. Promotions to `TEST`, `INTG`, or `PROD` require explicit Guild approval and execution.
 3. **Numbering Scheme:**
    - Issues: `Issue-1000+`
    - Features: `Feature-3000+`
