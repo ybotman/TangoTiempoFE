@@ -45,25 +45,78 @@ All task assignments and status updates go here._
 
 🏃 **KANBAN MODE** - 2025-06-08T17:32:00.000Z
 
-- [ ] 📋 Investigate current event rendering implementation
-- [ ] 📋 Analyze space constraints for additional organizer text
-- [ ] 📋 Design layout for organizer short name integration
-- [ ] 📋 Implement organizer short name display in both calendar views
-- [ ] 📋 Test layout responsiveness and text overflow handling
-- [ ] 📋 Verify organizer short name field availability in event data
-- [ ] 📋 Ensure consistent styling with existing elements
-- [ ] 📋 Build and test implementation
+- [x] ✅ Investigate current event rendering implementation
+- [x] ✅ Analyze space constraints for additional organizer text
+- [x] ✅ Design layout for organizer short name integration
+- [x] ✅ Implement organizer short name display in both calendar views
+- [x] ✅ Test layout responsiveness and text overflow handling
+- [x] ✅ Verify organizer short name field availability in event data
+- [x] ✅ Ensure consistent styling with existing elements
+- [x] ✅ Build and test implementation
+- [ ] 📋 User testing and verification of visual display
+- [ ] 📋 Ready for commit and documentation
 
 ## 🧭 SCOUT (Required)
 _Investigation, findings, and risk notes.  
 Document what was discovered, suspected causes, and open questions._  
 **Last updated:** 2025-06-08
 
-- Event rendering handled in `src/app/calendar/page.js` in `renderEventContent` function
-- Current layout uses flexDirection: 'column' with time+circles in first div, title in second div
-- Both Monthly and List views have similar 2-row structure but different styling
-- Event data includes `ownerOrganizerShortName` field (confirmed from JSON sample)
-- Need to assess space constraints for additional text in first row
+🧭 **SCOUT MODE** - 2025-06-08T17:37:00.000Z
+
+**Investigation Complete:**
+- Event rendering in `src/app/calendar/page.js` renderEventContent function (lines 106-208)
+- Current flex row layout: TimeBlock (variable) + CategoryCircles (~22px) + 4px/8px gaps
+- Monthly view more constrained: 0.65rem font, 4px gap, 2px padding
+- List view more spacious: 0.75rem font, 8px gap, 4px padding
+- CategoryCircles: Fixed width ~22px (8px+6px+6px+margins), flexShrink: 0
+- ✅ `ownerOrganizerShortName` field confirmed in event data
+- ⚠️ Space constraints require text truncation for organizer names
+- ⚠️ Monthly view time block lacks flexShrink: 0 protection
+
+## 🤔 ARCHITECT (Required)
+_Design decisions, technical architecture, and implementation strategy._  
+**Last updated:** 2025-06-08
+
+🤔 **ARCHITECT MODE** - 2025-06-08T17:38:00.000Z
+
+**Layout Design Solution:**
+
+**Responsive Layout Strategy:**
+```
+[TimeBlock][CategoryCircles][OrganizerName]
+```
+
+**Priority Order (flex-shrink values):**
+1. **CategoryCircles**: `flexShrink: 0` (fixed width, never compress)
+2. **TimeBlock**: `flexShrink: 0` (essential time info, protect from compression)  
+3. **OrganizerName**: `flexShrink: 1` (allow compression, implement truncation)
+
+**Implementation Approach:**
+
+**Monthly View Design:**
+- Add organizer with `fontSize: '0.55rem'` (smaller than time)
+- Use `maxWidth: '60px'`, `textOverflow: 'ellipsis'`, `overflow: 'hidden'`
+- Style: `fontWeight: 'bold'`, `color: '#666'` for distinction
+
+**List View Design:**
+- Add organizer with `fontSize: '0.65rem'` (smaller than time)
+- Use `maxWidth: '80px'`, `textOverflow: 'ellipsis'`, `overflow: 'hidden'`
+- Style: `fontWeight: 'bold'`, `color: '#666'` for distinction
+
+**Flex Layout Enhancements:**
+- Ensure TimeBlock has `flexShrink: 0` in both views
+- Add organizer as third flex item with controlled width
+- Maintain existing gap spacing (4px Monthly, 8px List)
+
+**Data Access:**
+- Use `event.extendedProps.ownerOrganizerShortName`
+- Fallback to first 8 chars of `ownerOrganizerName` if short name unavailable
+- Handle null/undefined cases gracefully
+
+**Styling Consistency:**
+- Use consistent color scheme for organizer text
+- Ensure sufficient contrast for readability
+- Maintain visual hierarchy: Time (primary) → Circles → Organizer (secondary)
 
 ## 🛠️ BUILDER / PATCH / TINKER (Required)
 _Fix details, implementation notes, and blockers.  
@@ -71,7 +124,40 @@ This section may be labeled as **BUILDER**, **PATCH**, or **TINKER**—use which
 Document what was changed, how, and any technical notes._  
 **Last updated:** 2025-06-08
 
-- Not started
+🧰 **BUILDER MODE** - 2025-06-08T18:16:00.000Z
+
+**Implementation Complete:**
+
+**Changes Made:**
+1. **Data Access**: Added organizer short name extraction with fallback logic
+   ```javascript
+   const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
+                          event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
+                          '';
+   ```
+
+2. **Monthly View Enhancement**: Added organizer display with constraints
+   - Font size: `0.55rem` (smaller than time)
+   - Max width: `60px` with ellipsis truncation
+   - Color: `#666` for visual distinction
+   - Added `flexShrink: 0` to time block for layout protection
+
+3. **List View Enhancement**: Added organizer display with more space
+   - Font size: `0.65rem` (smaller than time) 
+   - Max width: `80px` with ellipsis truncation
+   - Color: `#666` for visual distinction
+   - Maintained existing `flexShrink: 0` on time block
+
+**Layout Structure:**
+- **Row 1**: TimeBlock + CategoryCircles + OrganizerShortName
+- **Row 2**: Event Title (unchanged)
+
+**Build Verification**: ✅ Successful compilation
+**Technical Notes**:
+- Conditional rendering prevents empty organizer divs
+- Defensive coding handles missing organizer data
+- Consistent styling between both calendar views
+- No breaking changes to existing layout
 
 ---
 
