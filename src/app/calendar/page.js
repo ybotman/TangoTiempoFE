@@ -18,7 +18,6 @@ import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
-import LocationInfo from '@/components/UI/LocationInfo';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import CategoryCircles from '@/components/UI/CategoryCircles';
@@ -354,10 +353,6 @@ const CalendarPage = () => {
         }}
       />
       
-      {/* Location Information Bar - Moved below calendar */}
-      <div style={{ margin: '20px' }}>
-        <LocationInfo />
-      </div>
       
       {/* SubMenu */}
       <CalendarSubMenu
