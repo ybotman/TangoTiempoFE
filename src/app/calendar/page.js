@@ -18,7 +18,6 @@ import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
-import LocationInfo from '@/components/UI/LocationInfo';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import CategoryCircles from '@/components/UI/CategoryCircles';
@@ -108,6 +107,11 @@ const CalendarPage = () => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
     
+    // Get organizer short name with fallback
+    const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
+                          event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
+                          '';
+    
     if (isMonthlyView) {
       // Monthly view: time + categories on same line, title below
       const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
@@ -132,12 +136,28 @@ const CalendarPage = () => {
               <div style={{ 
                 fontSize: '0.65rem', 
                 fontWeight: 'normal',
-                lineHeight: '1.0'
+                lineHeight: '1.0',
+                flexShrink: 0
               }}>
                 {startTime}{endTime && `-`}<span style={{ fontSize: '0.55rem' }}>{endTime}</span>
               </div>
             )}
             <CategoryCircles eventProps={event.extendedProps} />
+            {organizerShort && (
+              <div style={{
+                fontSize: '0.55rem',
+                fontWeight: 'bold',
+                color: '#666',
+                maxWidth: '60px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                lineHeight: '1.0'
+              }}>
+                {organizerShort}
+              </div>
+            )}
           </div>
           
           {/* Event title below */}
@@ -190,6 +210,21 @@ const CalendarPage = () => {
             )}
             {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
+            {organizerShort && (
+              <div style={{
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+                color: '#666',
+                maxWidth: '80px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                lineHeight: '1.2'
+              }}>
+                {organizerShort}
+              </div>
+            )}
           </div>
           
           {/* Second line: Event title */}
@@ -354,10 +389,6 @@ const CalendarPage = () => {
         }}
       />
       
-      {/* Location Information Bar - Moved below calendar */}
-      <div style={{ margin: '20px' }}>
-        <LocationInfo />
-      </div>
       
       {/* SubMenu */}
       <CalendarSubMenu
