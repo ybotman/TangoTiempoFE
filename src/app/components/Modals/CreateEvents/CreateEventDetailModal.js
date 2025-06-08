@@ -26,7 +26,7 @@ const modalStyle = {
   overflowY: 'auto',
 };
 
-const CreateEventModal = ({ open, onClose, selectedDate }) => {
+const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken } = useContext(AuthContext);
@@ -76,45 +76,117 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
   // Refresh event data and related data when modal opens or location changes
   useEffect(() => {
     if (open) {
-      // Create initial date/time values from selectedDate if provided using dayjs
-      let updatedStartDate = prev => prev.startDate;
-      let updatedEndDate = prev => prev.endDate;
-      
-      if (selectedDate) {
-        updatedStartDate = dayjs(selectedDate);
-        updatedEndDate = dayjs(selectedDate).add(2, 'hour');
+      // Handle edit mode - populate form with existing event data
+      if (editMode && eventToEdit) {
+        console.log('Initializing form with event data for editing:', eventToEdit);
+        
+        // Convert dates to dayjs objects for form compatibility
+        const startDate = eventToEdit.startDate ? dayjs(eventToEdit.startDate) : dayjs();
+        const endDate = eventToEdit.endDate ? dayjs(eventToEdit.endDate) : dayjs().add(2, 'hour');
+        
+        // Map API event data to form state
+        setEventData({
+          // Basic info
+          title: eventToEdit.title || '',
+          description: eventToEdit.description || '',
+          shortName: eventToEdit.shortName || '',
+          startDate: startDate,
+          endDate: endDate,
+          cost: eventToEdit.cost || '',
+          
+          // Categories
+          categoryFirst: eventToEdit.categoryFirst || '',
+          categoryFirstId: eventToEdit.categoryFirstId || '',
+          categorySecond: eventToEdit.categorySecond || '',
+          categorySecondId: eventToEdit.categorySecondId || '',
+          categoryThird: eventToEdit.categoryThird || '',
+          categoryThirdId: eventToEdit.categoryThirdId || '',
+          
+          // Venue/Location - support both new and legacy fields
+          venueId: eventToEdit.venueId || eventToEdit.locationID || '',
+          venueName: eventToEdit.venueName || eventToEdit.locationName || '',
+          locationID: eventToEdit.locationID || eventToEdit.venueId || '',
+          locationName: eventToEdit.locationName || eventToEdit.venueName || '',
+          
+          // Venue coordinates if available
+          venueLatitude: eventToEdit.venueGeolocation?.coordinates?.[1] || '',
+          venueLongitude: eventToEdit.venueGeolocation?.coordinates?.[0] || '',
+          
+          // Organizer info
+          ownerOrganizerID: eventToEdit.ownerOrganizerID || '',
+          ownerOrganizerName: eventToEdit.ownerOrganizerName || '',
+          grantedOrganizerID: eventToEdit.grantedOrganizerID || '',
+          grantedOrganizerName: eventToEdit.grantedOrganizerName || '',
+          alternateOrganizerID: eventToEdit.alternateOrganizerID || '',
+          alternateOrganizerName: eventToEdit.alternateOrganizerName || '',
+          
+          // Image
+          imageFile: null, // Can't pass file objects, only URLs
+          imagePreviewUrl: eventToEdit.eventImage || null,
+          eventImage: eventToEdit.eventImage || null,
+          fallbackImageUrl: eventToEdit.fallbackImageUrl || null,
+          
+          // Location hierarchy
+          masteredRegionName: eventToEdit.masteredRegionName || selectedLocation.region.name || (nearestCity?.regionName || ''),
+          masteredDivisionName: eventToEdit.masteredDivisionName || selectedLocation.division.name || (nearestCity?.divisionName || ''),
+          masteredCityName: eventToEdit.masteredCityName || selectedLocation.city.name || (nearestCity?.cityName || ''),
+          
+          // Legacy fields for backward compatibility
+          selectedRegion: eventToEdit.selectedRegion || selectedLocation.region.name || (nearestCity?.regionName || ''),
+          selectedRegionID: eventToEdit.selectedRegionID || selectedLocation.region.id || (nearestCity?.regionID || ''),
+          
+          // Repeating event settings
+          isRepeating: eventToEdit.isRepeating || false,
+          
+          // Maintain the original ID for updates
+          _id: eventToEdit._id || null
+        });
+        
+        console.log('Form initialized for editing');
+      } else {
+        // Create mode - use selected date or defaults
+        console.log('Initializing form for new event creation');
+        
+        let updatedStartDate = prev => prev.startDate;
+        let updatedEndDate = prev => prev.endDate;
+        
+        if (selectedDate) {
+          updatedStartDate = dayjs(selectedDate);
+          updatedEndDate = dayjs(selectedDate).add(2, 'hour');
+        }
+        
+        setEventData(prev => ({
+          ...prev,
+          startDate: selectedDate ? updatedStartDate : prev.startDate,
+          endDate: selectedDate ? updatedEndDate : prev.endDate,
+          masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+          masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+          masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
+          // Keep old fields for backward compatibility
+          selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+          selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+          // Reset venue selection when location changes to avoid invalid selections
+          venueId: '',
+          venueName: '',
+          locationID: ''
+        }));
       }
-      
-      setEventData(prev => ({
-        ...prev,
-        startDate: selectedDate ? updatedStartDate : prev.startDate,
-        endDate: selectedDate ? updatedEndDate : prev.endDate,
-        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
-        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
-        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
-        // Keep old fields for backward compatibility
-        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
-        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
-        // Reset venue selection when location changes to avoid invalid selections
-        venueId: '',
-        venueName: '',
-        locationID: ''
-      }));
 
       // Log current location for debugging
-      console.log('Current location for event creation:', {
+      console.log('Current location for event:', {
         region: selectedLocation.region,
         division: selectedLocation.division,
-        city: selectedLocation.city
+        city: selectedLocation.city,
+        mode: editMode ? 'edit' : 'create'
       });
     }
-  }, [open, selectedLocation, nearestCity, selectedDate]);
+  }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
 
   // Import event operations hook
-  const { createEvent } = useEventOperations();
+  const { createEvent, updateEvent } = useEventOperations();
 
   const handleSave = async () => {
     try {
@@ -178,22 +250,23 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
           // Update the user's info with the updated flags
           if (response.data.regionalOrganizerInfo) {
             // Update the flags in the local user context state
-            const updatedUser = {
-              ...user,
-              backendInfo: {
-                ...user.backendInfo,
-                regionalOrganizerInfo: {
-                  ...user.backendInfo.regionalOrganizerInfo,
-                  isActive: true,
-                  isEnabled: true,
-                  isApproved: true
-                }
-              }
-            };
+            // Update the flags in the local user context state
+            // const updatedUser = {
+            //   ...user,
+            //   backendInfo: {
+            //     ...user.backendInfo,
+            //     regionalOrganizerInfo: {
+            //       ...user.backendInfo.regionalOrganizerInfo,
+            //       isActive: true,
+            //       isEnabled: true,
+            //       isApproved: true
+            //     }
+            //   }
+            // };
             
             // Force a refresh of the user data from backend
             try {
-              const refreshedUserResponse = await axios.get(
+              await axios.get(
                 `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`,
                 {
                   headers: {
@@ -237,8 +310,17 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
       
       console.log('Saving event data:', eventDataWithDefaults);
       
-      // Call the create event function from the hook with defaults
-      await createEvent(eventDataWithDefaults);
+      if (editMode && eventData._id) {
+        // Update existing event
+        console.log(`Updating existing event with ID: ${eventData._id}`);
+        await updateEvent(eventData._id, eventDataWithDefaults);
+        console.log('Event updated successfully');
+      } else {
+        // Create new event
+        console.log('Creating new event');
+        await createEvent(eventDataWithDefaults);
+        console.log('Event created successfully');
+      }
       
       // Close the modal on successful save
       onClose();
@@ -266,7 +348,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
       <Box sx={modalStyle}>
         <Box display="flex" justifyContent="space-between" flexWrap="wrap">
           <Typography variant="h5" component="h2">
-            Create Event
+            {editMode ? 'Edit Event' : 'Create Event'}
           </Typography>
           <FormControlLabel
             control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" />}
@@ -332,7 +414,7 @@ const CreateEventModal = ({ open, onClose, selectedDate }) => {
             disabled={saving}
             startIcon={saving && <CircularProgress size={20} />}
           >
-            {saving ? 'Saving...' : 'Save Event'}
+            {saving ? 'Saving...' : (editMode ? 'Update Event' : 'Save Event')}
           </Button>
           <Button onClick={onClose} variant="outlined" color="secondary">
             Close
@@ -347,6 +429,8 @@ CreateEventModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   selectedDate: PropTypes.instanceOf(Date),
+  editMode: PropTypes.bool,
+  eventToEdit: PropTypes.object,
   // selectedRegion prop removed - now using GeoLocationContext
 };
 

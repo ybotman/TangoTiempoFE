@@ -39,7 +39,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 /**
  * Custom hook for venue selection functionality
  * This hook integrates with GeoLocationContext and useVenues to provide
- * venue selection capabilities based on geographic context
+ * venue selection capabilities based on geographic context.
+ *
+ * In city view mode, venues are filtered based on radius proximity from the
+ * selected city's coordinates. In division view mode, venues are filtered
+ * based on matching masteredDivisionId.
  */
 export function useVenueSelection() {
   const { venues, loading: venuesLoading, error: venuesError, fetchVenues } = useVenues();
@@ -48,8 +52,9 @@ export function useVenueSelection() {
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [filteredVenues, setFilteredVenues] = useState([]);
   const [venueCategory, setVenueCategory] = useState('all');
+  // Always use city view with radius filtering (keep for API compatibility)
   const [useDivisionScope, setUseDivisionScope] = useState(false);
-  const [radiusMiles, setRadiusMiles] = useState(200); // Default radius of 200 miles
+  const [radiusMiles, setRadiusMiles] = useState(50); // Default radius of 50 miles - more reasonable starting point
   
   // Filter venues based on location, category, scope, and radius
   useEffect(() => {
@@ -57,43 +62,34 @@ export function useVenueSelection() {
       setFilteredVenues([]);
       return;
     }
-    
+
     // Filter based on coordinates first
-    let validVenues = venues.filter(venue => 
-      venue.latitude !== undefined && 
-      venue.longitude !== undefined && 
-      venue.latitude !== null && 
+    let validVenues = venues.filter(venue =>
+      venue.latitude !== undefined &&
+      venue.longitude !== undefined &&
+      venue.latitude !== null &&
       venue.longitude !== null &&
-      !isNaN(parseFloat(venue.latitude)) && 
+      !isNaN(parseFloat(venue.latitude)) &&
       !isNaN(parseFloat(venue.longitude))
     );
-    
-    // Apply location filter based on mastered location IDs
+
     if (useDivisionScope && selectedLocation?.division?.id) {
-      // Filter by division
-      validVenues = validVenues.filter(venue => 
+      // Filter by division ID when in division scope mode
+      validVenues = validVenues.filter(venue =>
         venue.masteredDivisionId === selectedLocation.division.id
       );
-    } else if (selectedLocation?.city?.id) {
-      // Filter by city
-      validVenues = validVenues.filter(venue => 
-        venue.masteredCityId === selectedLocation.city.id
-      );
-    }
-    
-    // Apply radius filter if city has coordinates and not using division scope
-    if (!useDivisionScope && 
-        selectedLocation?.city?.latitude && 
-        selectedLocation?.city?.longitude && 
-        radiusMiles > 0) {
-      
+    } else if (selectedLocation?.city?.latitude &&
+               selectedLocation?.city?.longitude &&
+               radiusMiles > 0) {
+      // In city view mode, filter only by radius from the city's coordinates
+      // This shows all venues within the specified radius, regardless of their masteredCityId
       const cityLat = parseFloat(selectedLocation.city.latitude);
       const cityLng = parseFloat(selectedLocation.city.longitude);
-      
+
       validVenues = validVenues.filter(venue => {
         const venueLat = parseFloat(venue.latitude);
         const venueLng = parseFloat(venue.longitude);
-        
+
         const distance = calculateDistance(cityLat, cityLng, venueLat, venueLng);
         return distance <= radiusMiles;
       });

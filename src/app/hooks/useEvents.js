@@ -18,6 +18,44 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
  * @param {number} [options.limit=100] - Number of items per page
  * @returns {Object} Events data, loading state, error state, and refresh function
  */
+/**
+ * Helper function to sanitize ObjectId fields for MongoDB
+ * Converts empty strings to null to prevent CastError in Mongoose
+ * 
+ * This function fixes a critical issue where empty strings ("") passed for fields 
+ * expected to be MongoDB ObjectIds (like categorySecondId, grantedOrganizerID, etc.)
+ * would cause Mongoose validation errors. MongoDB ObjectId fields should be either
+ * valid ObjectId strings or null, not empty strings.
+ *
+ * @param {Object} data - The data object containing potential ObjectId fields
+ * @returns {Object} - The sanitized data object with empty strings converted to null
+ */
+function sanitizeObjectIdFields(data) {
+  if (!data) return data;
+  
+  const result = { ...data };
+  const objectIdFields = [
+    'categoryFirstId',
+    'categorySecondId',
+    'categoryThirdId',
+    'ownerOrganizerID',
+    'grantedOrganizerID',
+    'alternateOrganizerID',
+    'venueId',
+    'locationID',
+    '_id'
+  ];
+  
+  objectIdFields.forEach(field => {
+    // Check if the field exists and is an empty string
+    if (result[field] === '') {
+      result[field] = null;
+    }
+  });
+  
+  return result;
+}
+
 export function useEvents({
   region,
   division,
@@ -45,7 +83,7 @@ export function useEvents({
   const { user, selectedRole } = useContext(AuthContext);
   
   // Get location from GeoLocationContext if available
-  const geoLocationContext = useGeoLocationContext ? useGeoLocation() : null;
+  const geoLocationContext = useGeoLocation();
   
   // Use context values if explicitly provided parameters are missing
   const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
@@ -58,21 +96,10 @@ export function useEvents({
   const effectiveLng = lng || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
     ? geoLocationContext?.userLocation?.longitude : null);
   
-  // Create a cache key for memoizing/deduplicating requests
-  const cacheKey = JSON.stringify({
-    region: effectiveRegion, 
-    division: effectiveDivision, 
-    city: effectiveCity, 
-    lat: effectiveLat, 
-    lng: effectiveLng, 
-    startDate: startDate?.toString(), 
-    endDate: endDate?.toString(),
-    page, 
-    limit, 
-    userId: user?.uid, 
-    selectedRole,
-    geoLocationUpdated: useGeoLocationContext ? geoLocationContext?.userLocation?.lastUpdated : null
-  });
+  // Cache key generation commented out to fix ESLint warnings
+  // This was previously used for memoizing/deduplicating requests
+  // Now we explicitly list all dependencies in the useCallback
+  // const cacheKey = JSON.stringify({...});
   
   // Generate default date range if needed
   const getDefaultDateRange = () => {
@@ -93,13 +120,13 @@ export function useEvents({
         page,
         limit,
       };
-      
+
       // Format date parameters
       if (startDate && endDate) {
         // Handle different date formats
-        params.start = typeof startDate === 'string' ? startDate : 
+        params.start = typeof startDate === 'string' ? startDate :
                       startDate.toISOString ? startDate.toISOString() : startDate;
-        params.end = typeof endDate === 'string' ? endDate : 
+        params.end = typeof endDate === 'string' ? endDate :
                     endDate.toISOString ? endDate.toISOString() : endDate;
       } else {
         // Use default date range if not provided
@@ -107,34 +134,34 @@ export function useEvents({
         params.start = defaultDates.start;
         params.end = defaultDates.end;
       }
-      
+
       // Location-based filtering parameters - using effective values that may come from GeoLocationContext
       if (effectiveRegion) params.masteredRegionName = effectiveRegion;
       if (effectiveDivision) params.masteredDivisionName = effectiveDivision;
       if (effectiveCity) params.masteredCityName = effectiveCity;
-      
+
       // Geolocation parameters - using effective values that may come from GeoLocationContext
       if (effectiveLat && effectiveLng) {
         params.lat = effectiveLat;
         params.lng = effectiveLng;
       }
-      
+
       // Log the actual values used for filtering (from direct input or GeoLocationContext)
-      console.log('Using location filters:', { 
-        region: effectiveRegion, 
-        division: effectiveDivision, 
+      console.log('Using location filters:', {
+        region: effectiveRegion,
+        division: effectiveDivision,
         city: effectiveCity,
         lat: effectiveLat,
         lng: effectiveLng,
         source: useGeoLocationContext && (
-          effectiveRegion !== region || 
-          effectiveDivision !== division || 
+          effectiveRegion !== region ||
+          effectiveDivision !== division ||
           effectiveCity !== city ||
           effectiveLat !== lat ||
           effectiveLng !== lng
         ) ? 'GeoLocationContext' : 'Direct input'
       });
-      
+
       // Add detailed debugging for role-based filtering
       console.log('Role-based filtering debug:', {
         isLoggedIn: !!user,
@@ -145,7 +172,7 @@ export function useEvents({
         isRoleSelected: selectedRole === 'RegionalOrganizer',
         hasValidId: !!(user?.backendInfo?.regionalOrganizerInfo?.organizerId)
       });
-      
+
       // Add user role and organizerId if user is a RegionalOrganizer
       if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
         params.organizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
@@ -153,12 +180,14 @@ export function useEvents({
         console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
       } else if (user && user.roles?.includes('RegionalOrganizer')) {
         // If user has RO role but we're not using it, explain why
-        console.warn('User has RegionalOrganizer role but filtering is not being applied because:',
+        /* Commented out to reduce console noise
+        console.warn('User has RegionalOrganizer role but',
           !selectedRole ? 'selectedRole is not set' :
           selectedRole !== 'RegionalOrganizer' ? `selectedRole is "${selectedRole}" instead of "RegionalOrganizer"` :
           !user.backendInfo?.regionalOrganizerInfo?.organizerId ? 'regionalOrganizerInfo.organizerId is missing' :
           'unknown reason'
         );
+        */
       }
 
       console.log('Fetching events with params:', params);
@@ -168,12 +197,12 @@ export function useEvents({
         params,
         timeout: 15000, // 15 second timeout
       });
-      
+
       // Store the response which includes events array and pagination info
       setEventsData(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
-      
+
       // Format error message for display
       let errorMessage = 'Failed to fetch events';
       if (error.response?.data?.message) {
@@ -181,15 +210,38 @@ export function useEvents({
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
-      
+
       // Keep existing events on error rather than clearing them
       // This provides a better user experience when there are transient network issues
     } finally {
       setLoading(false);
     }
-  }, [cacheKey]); // depends on cacheKey which includes all parameters
+  // All essential dependencies are now explicitly included in the array
+  }, [
+    // cacheKey is removed as it's redundant with the explicit dependencies
+    page,
+    limit,
+    startDate,
+    endDate,
+    effectiveRegion,
+    effectiveDivision,
+    effectiveCity,
+    effectiveLat,
+    effectiveLng,
+    region,
+    division,
+    city,
+    lat,
+    lng,
+    useGeoLocationContext,
+    user,
+    selectedRole,
+    setError,
+    setEventsData,
+    setLoading
+  ]);
 
   // Fetch events when parameters change
   useEffect(() => {
@@ -248,26 +300,71 @@ export function useEventOperations() {
         }
       }
       
+      // Clean up the event data by converting empty strings for ObjectId fields to null
+      const cleanedEventData = sanitizeObjectIdFields(eventData);
+      
       // Prepare the event data for submission
       const preparedData = {
-        ...eventData,
+        ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         // The backend requires ownerOrganizerID specifically
-        ownerOrganizerID: eventData.ownerOrganizerID || eventData.grantedOrganizer,
+        ownerOrganizerID: cleanedEventData.ownerOrganizerID || cleanedEventData.grantedOrganizer,
         // Make sure we use masteredRegionName
-        masteredRegionName: eventData.masteredRegionName || eventData.selectedRegion,
+        masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
         // Set default ownerOrganizerName if not provided
-        ownerOrganizerName: eventData.ownerOrganizerName || "Event Organizer",
+        ownerOrganizerName: cleanedEventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
-        expiresAt: new Date(new Date(eventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
-        venueId: eventData.venueId || eventData.locationID || null,
-        venueName: eventData.venueName || eventData.locationName || null,
-        locationID: eventData.locationID || eventData.venueId || null,
-        locationName: eventData.locationName || eventData.venueName || null,
+        venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
+        venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
+        locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
+        locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
       };
+      
+      // If venue has coordinates, include them in venueGeolocation
+      if (eventData.venueLatitude && eventData.venueLongitude) {
+        preparedData.venueGeolocation = {
+          type: "Point",
+          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+        };
+        console.log('Added venue coordinates to venueGeolocation:', preparedData.venueGeolocation);
+      } else if (eventData.venueId || eventData.locationID) {
+        // We have a venue but no coordinates - need to fetch them
+        console.log('Venue selected but coordinates not provided. Attempting to fetch venue data.');
+        try {
+          // Import the venue service function directly
+          const { getVenueById } = await import('@/services/venueService');
+
+          // Get venue data including coordinates
+          const venueId = eventData.venueId || eventData.locationID;
+          const venueData = await getVenueById(venueId);
+
+          if (venueData && venueData.latitude && venueData.longitude) {
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+            };
+            console.log('Retrieved and added venue coordinates:', preparedData.venueGeolocation);
+          } else {
+            console.warn('Could not retrieve venue coordinates for venue ID:', venueId);
+            // Fallback to empty coordinates array to prevent schema validation error
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [0, 0]
+            };
+          }
+        } catch (venueError) {
+          console.error('Error fetching venue data:', venueError);
+          // Fallback to empty coordinates array to prevent schema validation error
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [0, 0]
+          };
+        }
+      }
 
       // Ensure mastered location fields are included
       if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
@@ -367,17 +464,62 @@ export function useEventOperations() {
       }
       
       // Prepare the event data for submission
+      // Clean up the event data by converting empty strings for ObjectId fields to null
+      const cleanedEventData = sanitizeObjectIdFields(eventData);
+      
       const preparedData = {
-        ...eventData,
+        ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
-        venueId: eventData.venueId || eventData.locationID || null,
-        venueName: eventData.venueName || eventData.locationName || null,
-        locationID: eventData.locationID || eventData.venueId || null,
-        locationName: eventData.locationName || eventData.venueName || null,
+        venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
+        venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
+        locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
+        locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
       };
+      
+      // If venue has coordinates, include them in venueGeolocation
+      if (eventData.venueLatitude && eventData.venueLongitude) {
+        preparedData.venueGeolocation = {
+          type: "Point",
+          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+        };
+        console.log('Added venue coordinates to venueGeolocation for update:', preparedData.venueGeolocation);
+      } else if (eventData.venueId || eventData.locationID) {
+        // We have a venue but no coordinates - need to fetch them
+        console.log('Venue selected but coordinates not provided for update. Attempting to fetch venue data.');
+        try {
+          // Import the venue service function directly
+          const { getVenueById } = await import('@/services/venueService');
+
+          // Get venue data including coordinates
+          const venueId = eventData.venueId || eventData.locationID;
+          const venueData = await getVenueById(venueId);
+
+          if (venueData && venueData.latitude && venueData.longitude) {
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+            };
+            console.log('Retrieved and added venue coordinates for update:', preparedData.venueGeolocation);
+          } else {
+            console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
+            // Fallback to empty coordinates array to prevent schema validation error
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [0, 0]
+            };
+          }
+        } catch (venueError) {
+          console.error('Error fetching venue data for update:', venueError);
+          // Fallback to empty coordinates array to prevent schema validation error
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [0, 0]
+          };
+        }
+      }
       
       // Convert dayjs objects to ISO strings
       if (preparedData.startDate) {

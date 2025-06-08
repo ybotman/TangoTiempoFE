@@ -2,15 +2,13 @@
 
 'use client';
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
   Container, 
   Paper, 
   Button, 
-  Tabs, 
-  Tab,
   Card,
   CardContent,
   CardActions,
@@ -29,12 +27,14 @@ const SignUpPage = () => {
   const { user, loading, error, authenticateWithGoogle, authenticateWithFacebook, signUp } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState('options');
+  const [showEmailForm, setShowEmailForm] = useState(false);
   
-  const handleTabChange = (_, newValue) => {
-    setActiveTab(newValue);
-    setAuthError('');
-  };
+  // Redirect immediately if user is already logged in
+  useEffect(() => {
+    if (user && !loading) {
+      router.push('/calendar');
+    }
+  }, [user, loading, router]);
 
   const handleGoogleSignUp = async () => {
     setIsRedirecting(true);
@@ -72,38 +72,10 @@ const SignUpPage = () => {
     }
   };
 
-  if (loading || isRedirecting) {
+  if (loading || isRedirecting || user) {
     return (
       <Container component="main" maxWidth="xs" sx={{ mt: 8, display: 'flex', justifyContent: 'center' }}>
         <CircularProgress />
-      </Container>
-    );
-  }
-
-  if (user) {
-    return (
-      <Container component="main" maxWidth="xs">
-        <Paper elevation={3} sx={{ padding: 4, marginTop: 8 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Typography component="h1" variant="h5" gutterBottom>
-              You are already signed up!
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ cursor: 'pointer', mt: 2 }}
-              onClick={() => router.push('/calendar')}
-            >
-              Go to Calendar
-            </Button>
-          </Box>
-        </Paper>
       </Container>
     );
   }
@@ -119,23 +91,10 @@ const SignUpPage = () => {
           }}
         >
           <Typography component="h1" variant="h4" gutterBottom>
-            Sign Up
+            Create Account
           </Typography>
-
-          <Tabs 
-            value={activeTab} 
-            onChange={handleTabChange} 
-            aria-label="signup options" 
-            sx={{ mb: 3, width: '100%' }}
-            variant="fullWidth"
-          >
-            <Tab label="Options" value="options" />
-            <Tab label="Email" value="email" />
-            <Tab label="Google" value="google" />
-            <Tab label="Facebook" value="facebook" />
-          </Tabs>
           
-          {activeTab === 'options' && (
+          {!showEmailForm ? (
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Card variant="outlined">
                 <CardContent>
@@ -151,7 +110,7 @@ const SignUpPage = () => {
                   <Button 
                     size="small" 
                     color="primary" 
-                    onClick={() => setActiveTab('email')}
+                    onClick={() => setShowEmailForm(true)}
                     sx={{ ml: 1, mb: 1 }}
                   >
                     Continue with Email
@@ -173,7 +132,7 @@ const SignUpPage = () => {
                   <Button 
                     size="small" 
                     color="primary" 
-                    onClick={() => setActiveTab('google')}
+                    onClick={handleGoogleSignUp}
                     sx={{ ml: 1, mb: 1 }}
                   >
                     Continue with Google
@@ -195,7 +154,7 @@ const SignUpPage = () => {
                   <Button 
                     size="small" 
                     color="primary" 
-                    onClick={() => setActiveTab('facebook')}
+                    onClick={handleFacebookSignUp}
                     sx={{ ml: 1, mb: 1 }}
                   >
                     Continue with Facebook
@@ -203,68 +162,20 @@ const SignUpPage = () => {
                 </CardActions>
               </Card>
             </Box>
-          )}
-          
-          {activeTab === 'email' && (
-            <EmailAuthForm 
-              mode="signup" 
-              onSubmit={handleEmailSignUp} 
-              error={authError || error} 
-            />
-          )}
-          
-          {activeTab === 'google' && (
-            <Box sx={{ width: '100%', textAlign: 'center', py: 3 }}>
-              <GoogleIcon sx={{ fontSize: 60, color: '#4285F4', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>Sign up with Google</Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                We'll securely connect your Google account to create your profile
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<GoogleIcon />}
-                sx={{ mt: 2 }}
-                onClick={handleGoogleSignUp}
-                fullWidth
+          ) : (
+            <Box>
+              <Button 
+                variant="text" 
+                onClick={() => setShowEmailForm(false)}
+                sx={{ mb: 2 }}
               >
-                Continue with Google
+                ← Back to options
               </Button>
-              {error && (
-                <Typography color="error" sx={{ mt: 2 }}>
-                  {error}
-                </Typography>
-              )}
-            </Box>
-          )}
-          
-          {activeTab === 'facebook' && (
-            <Box sx={{ width: '100%', textAlign: 'center', py: 3 }}>
-              <FacebookIcon sx={{ fontSize: 60, color: '#4267B2', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>Sign up with Facebook</Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                We'll securely connect your Facebook account to create your profile
-              </Typography>
-              <Button
-                variant="contained"
-                sx={{
-                  mt: 2,
-                  backgroundColor: '#4267B2',
-                  '&:hover': {
-                    backgroundColor: '#365899',
-                  },
-                  width: '100%'
-                }}
-                startIcon={<FacebookIcon />}
-                onClick={handleFacebookSignUp}
-              >
-                Continue with Facebook
-              </Button>
-              {error && (
-                <Typography color="error" sx={{ mt: 2 }}>
-                  {error}
-                </Typography>
-              )}
+              <EmailAuthForm 
+                mode="signup" 
+                onSubmit={handleEmailSignUp} 
+                error={authError || error} 
+              />
             </Box>
           )}
           

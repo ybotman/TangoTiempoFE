@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const SiteHeader = () => {
-  const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
   const runNumber = process.env.NEXT_PUBLIC_BUILD_VERSION || 'Local'; // Fallback value if not set
 
   return (
@@ -63,7 +63,7 @@ const SiteHeader = () => {
           boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
         }}
       >
-        {`City: ${nearestCity?.cityName || 'Unknown'}`}
+        {`City: ${selectedLocation.city?.name || 'Unknown'}`}
       </div>
     </div>
   );

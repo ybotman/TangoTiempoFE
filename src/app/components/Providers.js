@@ -18,12 +18,17 @@ const Providers = ({ children }) => {
       <RegionsProvider>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <RoleProvider>
-            <MasteredLocationProvider>
-              <MasteredLocationLogger />
-              <GeoLocationProvider>
+            {/*
+              Hierarchical provider model:
+              GeoLocationProvider is the primary source of truth for location state
+              MasteredLocationProvider provides the data service without circular dependencies
+            */}
+            <GeoLocationProvider>
+              <MasteredLocationProvider>
+                <MasteredLocationLogger />
                 {children}
-              </GeoLocationProvider>
-            </MasteredLocationProvider>
+              </MasteredLocationProvider>
+            </GeoLocationProvider>
           </RoleProvider>
         </LocalizationProvider>
       </RegionsProvider>

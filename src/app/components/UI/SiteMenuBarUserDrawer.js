@@ -21,17 +21,49 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
-import { useRoles } from '@/hooks/useRoles';
+// import { useRoles } from '@/hooks/useRoles';
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
-  const { roles: allRoles } = useRoles();
+  // Fetch roles using useRoles hook
+  // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [orderedUserRoles, setOrderedUserRoles] = useState([]);
 
+  // Define role display mapping (backend role -> display name)
+  const roleDisplayMap = {
+    'NamedUser': 'Milongerx',
+    'RegionalOrganizer': 'RegionalOrganizer',
+    'RegionalAdmin': 'RegionalAdmin', 
+    'SystemAdmin': 'SystemAdmin',
+    'SystemOwner': 'SystemOwner'
+  };
+
   // Define the standard role display order for consistency
   const roleDisplayOrder = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
+
+  // Helper function to get role status items (only true values)
+  const getRoleStatusItems = (roleInfo, rolePrefix) => {
+    if (!roleInfo) return [];
+    const items = [];
+    if (roleInfo.isApproved) items.push(`${rolePrefix} : Approved`);
+    if (roleInfo.isEnabled) items.push(`${rolePrefix} : Enabled`);
+    if (roleInfo.isActive) items.push(`${rolePrefix} : Active`);
+    return items;
+  };
+
+  // Helper function to get conditional message for Regional Organizer
+  const getConditionalMessage = (roInfo) => {
+    if (!roInfo) return null;
+    
+    if (roInfo.isApproved && !roInfo.isEnabled) {
+      return "Update your Organizer Settings to enable your organizer role.";
+    } else if (!roInfo.isApproved) {
+      return "You can apply to add events for free";
+    }
+    return null;
+  };
 
   // When user or roles change, sort user's roles based on the standard order
   useEffect(() => {
@@ -88,12 +120,12 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
         {!user ? (
           <Box>
-            <Button variant="contained" color="primary" fullWidth href="/auth/login" sx={{ marginBottom: 1 }}>
-              Log In
+            <Button variant="contained" color="primary" fullWidth href="/auth/login" sx={{ marginBottom: 2 }}>
+              Sign In
             </Button>
-            <Button variant="contained" color="secondary" fullWidth href="/auth/signup" sx={{ marginBottom: 2 }}>
-              Sign Up
-            </Button>
+            <Typography variant="body2" color="text.secondary" align="center">
+              New to TangoTiempo? Create an account when you sign in.
+            </Typography>
           </Box>
         ) : (
           <Box>
@@ -103,15 +135,49 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 src={user.photoURL || '/defaultAvatar.png'}
                 sx={{ width: 56, height: 56 }}
               />
-              <Typography variant="h6">{user.displayName || user.email}</Typography>
+              <Box>
+                <Typography variant="h6">{user.displayName || user.email}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                  Firebase ID: {user.uid}
+                </Typography>
+              </Box>
             </Stack>
+
+            {/* Enhanced User Role Status Display */}
+            <Box sx={{ marginTop: 2, marginBottom: 2 }}>
+              <Typography variant="subtitle2" sx={{ marginBottom: 1 }}>Role Status:</Typography>
+              
+              {/* Show only true statuses for each role */}
+              {getRoleStatusItems(user.backendInfo?.localUserInfo, 'NU').map((status, index) => (
+                <Typography key={`nu-${index}`} variant="body2" sx={{ marginBottom: 0.5 }}>
+                  • {status}
+                </Typography>
+              ))}
+              
+              {getRoleStatusItems(user.backendInfo?.regionalOrganizerInfo, 'RO').map((status, index) => (
+                <Typography key={`ro-${index}`} variant="body2" sx={{ marginBottom: 0.5 }}>
+                  • {status}
+                </Typography>
+              ))}
+              
+              {getRoleStatusItems(user.backendInfo?.localAdminInfo, 'Admin').map((status, index) => (
+                <Typography key={`admin-${index}`} variant="body2" sx={{ marginBottom: 0.5 }}>
+                  • {status}
+                </Typography>
+              ))}
+            </Box>
 
             <Box sx={{ marginTop: 2 }}>
               <Typography variant="subtitle1">Select Role:</Typography>
               <FormControl component="fieldset">
                 <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                   {orderedUserRoles.map((role) => (
-                    <FormControlLabel key={role} value={role} control={<Radio />} label={role} />
+                    <FormControlLabel 
+                      key={role} 
+                      value={role} 
+                      control={<Radio />} 
+                      label={roleDisplayMap[role] || role} 
+                    />
                   ))}
                 </RadioGroup>
               </FormControl>
@@ -126,6 +192,15 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
             >
               Log Out
             </Button>
+
+            {/* Conditional Messages */}
+            {getConditionalMessage(user.backendInfo?.regionalOrganizerInfo) && (
+              <Box sx={{ marginTop: 2, padding: 1, backgroundColor: 'action.hover', borderRadius: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  {getConditionalMessage(user.backendInfo?.regionalOrganizerInfo)}
+                </Typography>
+              </Box>
+            )}
 
             <Dialog
               open={logoutConfirmOpen}

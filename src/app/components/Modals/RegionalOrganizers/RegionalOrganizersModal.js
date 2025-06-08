@@ -117,9 +117,11 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 )}
                 {currentTab === 'delegated' && (
                   <RegionalOrganizersDelegated
-                    organizerId={organizer?._id}
-                    delegatedOrganizerIds={organizer.delegatedOrganizerIds || []}
-                    organizers={organizers}
+                    organizerId={organizer?._id || ''}
+                    delegatedOrganizerIds={organizer && Array.isArray(organizer.delegatedOrganizerIds)
+                      ? organizer.delegatedOrganizerIds
+                      : []}
+                    organizers={Array.isArray(organizers) ? organizers : []}
                     updateOrganizer={updateOrganizer}
                   />
                 )}

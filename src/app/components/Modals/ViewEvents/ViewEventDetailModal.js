@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsRepeating from './ViewEventDetailsRepeating';
@@ -12,9 +13,9 @@ import ViewEventDetailsMore from './ViewEventDetailsMore';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
 import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
-// Import legacy component for backward compatibility during transition
-import ViewEventDetailsLocationOther from './ViewEventDetailsLocationOther';
+// Legacy component removed as part of transition
 import PropTypes from 'prop-types';
+import { categoryColors } from '@/utils/categoryColors';
 
 const modalStyle = {
   position: 'absolute',
@@ -38,10 +39,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const [showImageTab, setShowImageTab] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   
   // Get user context to check permissions
   const { user } = useContext(AuthContext);
+  const { selectedRole } = useContext(RoleContext);
   const { deleteEvent } = useEventOperations();
 
   useEffect(() => {
@@ -110,11 +111,47 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const endDate = eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
 
+  // Get category information for display
+  const categoryFirst = eventDetails?.extendedProps?.categoryFirst;
+  const categorySecond = eventDetails?.extendedProps?.categorySecond;
+  const categoryThird = eventDetails?.extendedProps?.categoryThird;
+
+  // Function to render category chips with colors
+  const renderCategoryChips = () => {
+    const categories = [categoryFirst, categorySecond, categoryThird].filter(Boolean);
+    
+    if (categories.length === 0) return null;
+
+    return (
+      <Box display="flex" gap={1} sx={{ mt: 1, mb: 1 }}>
+        {categories.map((category, index) => {
+          const color = categoryColors[category] || 'lightGrey';
+          return (
+            <Chip
+              key={index}
+              label={category}
+              sx={{
+                backgroundColor: color,
+                color: '#000000', // Black text for better readability
+                fontWeight: 'bold',
+                fontSize: '0.75rem'
+              }}
+              size="small"
+            />
+          );
+        })}
+      </Box>
+    );
+  };
+
   // Function to truncate the title to 30 characters
   const truncatedTitle = eventTitle.length > 30 && !showFullTitle ? eventTitle.slice(0, 30) + '...' : eventTitle;
   
   // Check if the user has permissions to edit and delete this event
-  const canEditEvent = user && eventDetails?.extendedProps?.ownerOrganizerID;
+  // User must be logged in, the event must have an owner ID, and the user must have the RegionalOrganizer role
+  const canEditEvent = user &&
+                       eventDetails?.extendedProps?.ownerOrganizerID &&
+                       selectedRole === 'RegionalOrganizer';
   
   // Get truncated description for the delete confirmation
   const truncatedDescription = eventDetails?.extendedProps?.description 
@@ -155,13 +192,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Handle edit button click
   const handleEditClick = () => {
-    // Close this view modal and open the edit modal
+    // Close this view modal and open the edit modal in the parent component
     onClose();
-    // We'll handle this in the parent component with the onEventUpdated callback
     if (onEventUpdated) {
       onEventUpdated('edit', eventDetails.extendedProps._id);
     }
+
+    // Note: We no longer use the internal edit mode since we open the proper edit modal
   };
+
+  // No longer needed - editMode is handled by parent component
 
   return (
     <>
@@ -179,6 +219,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 )}
               </Typography>
               <Box sx={{ position: 'absolute', top: '2px', right: '8px', zIndex: '1000', display: 'flex', gap: 1 }}>
+                {/* Only show Edit/Delete when user has RegionalOrganizer role */}
                 {canEditEvent && (
                   <>
                     <Button
@@ -216,6 +257,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             </Grid>
           </Grid>
 
+          {/* Category Display */}
+          {renderCategoryChips()}
+
           {/* Time Range */}
           {!allDay && startDate && endDate && (
             <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
@@ -224,6 +268,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 {new Date(startDate).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZoneName: 'short'
                 })}
               </Typography>
               <ArrowForwardIcon sx={{ verticalAlign: 'middle', mx: 1 }} />
@@ -231,6 +276,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 {new Date(endDate).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZoneName: 'short'
                 })}
               </Typography>
             </Box>
@@ -257,7 +303,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           )}
 
           {/* Tabs */}
-          <Tabs value={currentTab} onChange={(e, value) => setCurrentTab(value)}>
+          <Tabs value={currentTab} onChange={(_, value) => setCurrentTab(value)}>
             <Tab label="Basic" value="Basic" />
             <Tab label="More" value="More" />
             <Tab label="Images" value="Images" />
@@ -322,8 +368,11 @@ ViewEventDetailModal.propTypes = {
     extendedProps: PropTypes.shape({
       _id: PropTypes.string,
       eventImage: PropTypes.string,
+      fallbackImageUrl: PropTypes.string,
       description: PropTypes.string,
       categoryFirst: PropTypes.string,
+      categorySecond: PropTypes.string,
+      categoryThird: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
     }),

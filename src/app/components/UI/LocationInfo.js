@@ -4,7 +4,6 @@ import React from 'react';
 import { Box, Chip, Typography, Tooltip, CircularProgress, Badge } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useEvents } from '@/hooks/useEvents';
 
@@ -13,22 +12,19 @@ import { useEvents } from '@/hooks/useEvents';
  * Shows the currently selected location hierarchy and provides reset option
  */
 const LocationInfo = () => {
-  const { 
-    selectedLocation, 
-    isLoading, 
-    hasError, 
-    resetToNearestLocation,
+  const {
+    selectedLocation,
+    isLoading,
     refreshUserLocation,
-    locationDisplayText,
-    userLocation
+    locationDisplayText
   } = useGeoLocation();
   
   // Get event counts for different location levels
   // First, get events for the region level only
   const { 
     events: regionEvents, 
-    loading: regionLoading,
-    error: regionError
+    loading: regionLoading
+    // error: regionError
   } = useEvents(
     selectedLocation.region.name || '',
     '', // No division filter
@@ -41,8 +37,8 @@ const LocationInfo = () => {
   const divisionFilterActive = !!selectedLocation.division.name;
   const { 
     events: divisionEvents,
-    loading: divisionLoading,
-    error: divisionError
+    loading: divisionLoading
+    // error: divisionError
   } = useEvents(
     selectedLocation.region.name || '',
     divisionFilterActive ? (selectedLocation.division.name || '') : '',
@@ -55,8 +51,8 @@ const LocationInfo = () => {
   const cityFilterActive = !!selectedLocation.city.name;
   const { 
     events: cityEvents,
-    loading: cityLoading,
-    error: cityError
+    loading: cityLoading
+    // error: cityError
   } = useEvents(
     selectedLocation.region.name || '',
     selectedLocation.division.name || '',
@@ -66,8 +62,7 @@ const LocationInfo = () => {
   );
   
   // Aggregated loading state for the event counts
-  const countsLoading = regionLoading || divisionLoading || cityLoading;
-  const countsError = regionError || divisionError || cityError;
+  // const aggregatedLoading = regionLoading || divisionLoading || cityLoading;
   
   // Use fallback values for event counts if there are errors
   const regionCount = regionEvents?.length || 0;

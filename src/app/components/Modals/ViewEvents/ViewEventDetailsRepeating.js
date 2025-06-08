@@ -26,7 +26,7 @@ const UnderConstruction = () => {
         alt="Under Construction"
         width={250}
         height={150}
-        style={{ maxWidth: '100%', height: 'auto' }}
+        style={{ maxWidth: '100%', height: 'auto', width: 'auto' }}
       />
       <Typography variant="body2" sx={{ marginTop: 1 }}>
         We are working hard to bring you this page soon.

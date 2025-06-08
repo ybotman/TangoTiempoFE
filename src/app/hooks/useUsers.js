@@ -53,12 +53,18 @@ export const useUsers = () => {
           ...updatedData,
         };
 
+        console.log('UU:Updt Attempting to update user data with:', dataToUpdate);
+
+        // Use the optimized endpoint PUT /api/userlogins/updateUserInfo
+        // This endpoint expects firebaseUserId and appId in the request body
+        // It properly handles localUserInfo nesting
         const response = await axios.put(
           `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
-          dataToUpdate
+          dataToUpdate,
+          { timeout: 15000 } // Add a longer client-side timeout for potentially slow operations
         );
 
-        setUserData(response.data.updatedUser);
+        setUserData(response.data.updatedUser || response.data);
         console.log('UU:Updt User data updated successfully');
       } catch (error) {
         console.error('UU:Updt Error updating user data:', error);

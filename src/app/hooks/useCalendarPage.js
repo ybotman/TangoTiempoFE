@@ -6,7 +6,7 @@
 // No features are dropped. All existing code is preserved and functional.
 // This ensures that if nearestCity is not yet defined, we pass empty strings to useEvents, preventing runtime errors.
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { useEvents, useEventOperations } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
@@ -16,6 +16,8 @@ import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
+import { RoleContext } from '@/contexts/RoleContext';
+import { listOfAllRoles } from '@/utils/masterData';
 
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -29,9 +31,29 @@ export const useCalendarPage = () => {
   const { getMenuItems } = useMenuItems();
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
+  const { selectedRole } = useContext(RoleContext);
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventToEdit, setEventToEdit] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const calendarRef = useRef(null);
+
+  // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
+  const [selectedOrganizers, setSelectedOrganizers] = useState(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('selectedOrganizers');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Effect to save selectedOrganizers to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectedOrganizers) {
+      localStorage.setItem('selectedOrganizers', JSON.stringify(selectedOrganizers));
+    }
+  }, [selectedOrganizers]);
 
   // Use GeoLocationContext as primary source, with fallback to MasteredLocationContext
   // Ensure we have valid string values to avoid API errors
@@ -61,8 +83,17 @@ export const useCalendarPage = () => {
     });
   };
 
-  const transformedEvents = transformEvents(events);
-  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(transformedEvents, categories);
+  // Only transform events when they're actually available and loading is complete
+  // This prevents "No events to transform" warnings during initial loading
+  const transformedEvents = (!eventsLoading && Array.isArray(events) && events.length > 0) 
+    ? transformEvents(events) 
+    : [];
+    
+  const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(
+    transformedEvents,
+    categories,
+    selectedOrganizers // Pass selectedOrganizers to usePostFilter
+  );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
     const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
@@ -70,6 +101,8 @@ export const useCalendarPage = () => {
       ...event,
       backgroundColor: categoryColor,
       borderColor: categoryColor,
+      // Store original color for view-specific handling
+      originalCategoryColor: categoryColor,
     };
   });
 
@@ -81,15 +114,25 @@ export const useCalendarPage = () => {
     
     // Handle edit case specifically
     if (action === 'edit' && eventId) {
+      // Reset states
+      setIsEditMode(true);
+      setEventToEdit(null);
+      
       // Fetch the event details and open the edit modal
       getEventById(eventId)
         .then(eventData => {
-          setSelectedEventDetails(eventData);
+          console.log('Fetched event details for editing:', eventData);
+          setEventToEdit(eventData);
           setCreateModalOpen(true); // Reuse the create modal for editing
         })
         .catch(error => {
           console.error('Error fetching event details for editing:', error);
+          setIsEditMode(false); // Reset on error
         });
+    } else {
+      // For non-edit actions, reset the edit mode
+      setIsEditMode(false);
+      setEventToEdit(null);
     }
 
     // Track the event in analytics
@@ -145,9 +188,17 @@ export const useCalendarPage = () => {
       label: arg.dateStr,
     });
 
-    const items = getMenuItems('dateClick');
-    setMenuItems(items);
-    setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+    // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, no submenu on date click
+    // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
+    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
+      // No action for basic users on date click - they can only view events
+      return;
+    } else {
+      // For other roles, show the submenu for creating events
+      const items = getMenuItems('dateClick');
+      setMenuItems(items);
+      setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+    }
   };
 
   const handleEventClick = (arg) => {
@@ -161,9 +212,16 @@ export const useCalendarPage = () => {
       value: arg.event.id,
     });
 
-    const items = getMenuItems('eventClick');
-    setMenuItems(items);
-    setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+    // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
+    // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
+    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
+      setViewDetailModalOpen(true);
+    } else {
+      // For other roles, show the submenu
+      const items = getMenuItems('eventClick');
+      setMenuItems(items);
+      setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+    }
   };
 
   const handleMenuAction = (action) => {
@@ -213,7 +271,16 @@ export const useCalendarPage = () => {
     selectedEvent,
     setSelectedEvent,
     isCreateModalOpen,
-    setCreateModalOpen,
+    // Enhanced modal control with edit mode reset
+    setCreateModalOpen: (isOpen) => {
+      // When closing the modal, reset edit mode and event to edit
+      if (!isOpen) {
+        setIsEditMode(false);
+        setEventToEdit(null);
+      }
+      // Use the original state setter
+      setCreateModalOpen(isOpen);
+    },
     isViewDetailModalOpen,
     setViewDetailModalOpen,
     handleEventUpdated,
@@ -228,12 +295,18 @@ export const useCalendarPage = () => {
     menuAnchor,
     menuItems,
     selectedEventDetails,
-    // Add loading and error states 
+    // Add loading and error states
     eventsLoading,
     eventsError,
     // Location info
     regionName,
     divisionName,
-    cityName
+    cityName,
+    // Edit mode properties
+    isEditMode,
+    eventToEdit,
+    // Organizer selection state
+    selectedOrganizers,
+    setSelectedOrganizers
   };
 };

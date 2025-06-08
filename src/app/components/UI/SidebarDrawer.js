@@ -7,7 +7,7 @@
 // We include PropTypes at end as required.
 
 'use client';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -19,6 +19,8 @@ import {
   //  Avatar,
   Typography,
   //  Collapse,
+  CircularProgress,
+  Box,
 } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
@@ -32,6 +34,7 @@ import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
 import BusinessIcon from '@mui/icons-material/Business';
+import BugReportIcon from '@mui/icons-material/BugReport';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -46,7 +49,10 @@ import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
+import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
+import RegionalOrganizerSelection from '@/components/Modals/RegionalOrganizers/RegionalOrganizerSelection'; // ORGANIZER SELECTION
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useCalendarPage } from '@/hooks/useCalendarPage';
 
 const SidebarDrawer = ({ open, onClose }) => {
   //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -59,14 +65,52 @@ const SidebarDrawer = ({ open, onClose }) => {
 
   // NEW STATE FOR LOCATION MODAL
   const [locationModalOpen, setLocationModalOpen] = useState(false);
-  
+
   // NEW STATE FOR VENUE SELECTION MODAL
   const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
 
+  // NEW STATE FOR ORGANIZER SELECTION MODAL
+  const [organizerSelectionModalOpen, setOrganizerSelectionModalOpen] = useState(false);
+
+  // NEW STATE FOR DEBUG MENU
+  const [debugMenuOpen, setDebugMenuOpen] = useState(false);
+
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
+
+  // Get selected location and initialization state from GeoLocationContext
+  const { selectedLocation, isInitialized } = useGeoLocation();
+
+  // Get the organizer selection state from useCalendarPage
+  const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
   
-  // Get selected location from GeoLocationContext to check if city is selected
-  const { selectedLocation } = useGeoLocation();
+  // Debug menu is now available in all environments for all users
+  const showDebugMenu = true; // Previously restricted to development mode only
+  
+  // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
+  const [venueSelectionReady, setVenueSelectionReady] = useState(false);
+  
+  // Effect to handle venue selection readiness
+  useEffect(() => {
+    // Always consider ready if initialized, even with no city yet
+    if (isInitialized) {
+      setVenueSelectionReady(true);
+      return;
+    }
+
+    // If we already have a city ID, immediately set ready state
+    if (selectedLocation?.city?.id) {
+      setVenueSelectionReady(true);
+      return;
+    }
+
+    // Otherwise, give GeoLocationContext a moment to initialize
+    const timer = setTimeout(() => {
+      console.log('SidebarDrawer: Setting venue selection ready after timeout');
+      setVenueSelectionReady(true);
+    }, 2000); // 2 second delay, increased from original
+
+    return () => clearTimeout(timer);
+  }, [selectedLocation?.city?.id, isInitialized]);
 
   return (
     <>
@@ -119,26 +163,116 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Select Nearest City" />
           </ListItem>
-          {/* New Venue Selection Menu Item */}
+          {/* Select Organizer Menu Item */}
           <ListItem
             button="true"
             onClick={() => {
-              setVenueSelectionModalOpen(true);
+              setOrganizerSelectionModalOpen(true);
               onClose();
             }}
-            disabled={!selectedLocation?.city?.id}
             sx={{
-              opacity: selectedLocation?.city?.id ? 1 : 0.5,
-              '&.Mui-disabled': {
-                opacity: 0.5,
-              }
+              cursor: 'pointer',
+              color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
+              bgcolor: selectedOrganizers?.length > 0 ? 'rgba(63, 81, 181, 0.08)' : 'transparent',
+              '&:hover': {
+                bgcolor: selectedOrganizers?.length > 0 ? 'rgba(63, 81, 181, 0.12)' : 'rgba(0, 0, 0, 0.04)'
+              },
+              borderLeft: selectedOrganizers?.length > 0 ? '4px solid #3f51b5' : 'none',
+              pl: selectedOrganizers?.length > 0 ? 1 : 2 // Compensate for the border
             }}
           >
             <ListItemIcon>
-              <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
+              <GroupIcon sx={{
+                color: !selectedLocation?.city?.id
+                  ? 'gray'
+                  : selectedOrganizers?.length > 0
+                    ? '#3f51b5'
+                    : 'indigo'
+              }} />
             </ListItemIcon>
-            <ListItemText primary="Select Venue" />
+            <ListItemText
+              primary={
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography>Select Organizer</Typography>
+                  {selectedOrganizers?.length > 0 && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        bgcolor: '#3f51b5',
+                        color: 'white',
+                        borderRadius: '10px',
+                        px: 1,
+                        py: 0.2,
+                        ml: 1
+                      }}
+                    >
+                      {selectedOrganizers.length}
+                    </Typography>
+                  )}
+                </Box>
+              }
+              secondary={
+                !selectedLocation?.city?.id
+                  ? "Select a city first"
+                  : selectedOrganizers?.length > 0
+                    ? `${selectedOrganizers.length} organizer${selectedOrganizers.length !== 1 ? 's' : ''} selected`
+                    : null
+              }
+            />
           </ListItem>
+
+          {/* Venue Selection Menu Item with improved loading state handling */}
+          {!venueSelectionReady ? (
+            // Show loading state while contexts initialize
+            <ListItem>
+              <ListItemIcon>
+                <CircularProgress size={20} color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Loading Venues..." />
+            </ListItem>
+          ) : !isInitialized ? (
+            // System is still initializing but we want to show something
+            <ListItem
+              button="true"
+              onClick={() => {
+                setVenueSelectionModalOpen(true);
+                onClose();
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: 'text.secondary',
+              }}
+            >
+              <ListItemIcon>
+                <BusinessIcon sx={{ color: 'gray' }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Select Venue"
+                secondary="Location system initializing..."
+              />
+            </ListItem>
+          ) : (
+            // Interactive menu item that's always clickable and shows proper state
+            <ListItem
+              button="true"
+              onClick={() => {
+                setVenueSelectionModalOpen(true);
+                onClose();
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
+              }}
+            >
+              <ListItemIcon>
+                <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Select Venue"
+                secondary={!selectedLocation?.city?.id ? "Select a city first" : null}
+              />
+            </ListItem>
+          )}
           <Divider />
 
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
@@ -277,7 +411,7 @@ const SidebarDrawer = ({ open, onClose }) => {
           <ListItem
             button="true"
             onClick={() => {
-              setUserSettingsOpen(true);
+              setPrivacyPolicyOpen(true);
               onClose();
             }}
           >
@@ -286,16 +420,28 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText primary="Privacy Policy" />
           </ListItem>
-          <ListItem
-            button="true"
-            onClick={() => {
-              setPrivacyPolicyOpen(true);
-              onClose();
-            }}
-          >
-            <ListItemIcon>{/* Add an icon if needed */}</ListItemIcon>
-            <ListItemText primary="Privacy Policy Details" />
-          </ListItem>
+          
+          {/* Debug Menu - visible in all environments */}
+          {showDebugMenu && (
+            <>
+              <Divider />
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
+                Debug Tools
+              </Typography>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setDebugMenuOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <BugReportIcon sx={{ color: 'error.main' }} />
+                </ListItemIcon>
+                <ListItemText primary="Debug Menu" />
+              </ListItem>
+            </>
+          )}
         </List>
       </Drawer>
       {/* Modals */}
@@ -307,6 +453,16 @@ const SidebarDrawer = ({ open, onClose }) => {
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
       <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
       <VenueSelectionModal open={venueSelectionModalOpen} onClose={() => setVenueSelectionModalOpen(false)} />
+      <RegionalOrganizerSelection
+        open={organizerSelectionModalOpen}
+        onClose={() => setOrganizerSelectionModalOpen(false)}
+        selectedOrganizers={selectedOrganizers}
+        onSelectOrganizers={(selected) => {
+          console.log('Selected organizers:', selected);
+          setSelectedOrganizers(selected);
+        }}
+      />
+      <DebugMenu open={debugMenuOpen} onClose={() => setDebugMenuOpen(false)} /> {/* DEBUG MENU */}
     </>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert, Paper, Autocomplete } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert, Autocomplete } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -114,7 +114,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         venueId: '',
         venueName: '',
         locationID: '',
-        locationName: ''
+        locationName: '',
+        // Clear coordinates
+        venueLatitude: null,
+        venueLongitude: null
       });
       console.log('Venue cleared');
       return;
@@ -130,7 +133,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
     console.log(`Selected venue: ${venueName} (ID: ${newValue._id})`);
     
-    setEventData({ 
+    // Create updated event data with venue info
+    const updatedEventData = { 
       ...eventData, 
       // Use new standardized venue fields
       venueId: newValue._id,
@@ -138,7 +142,21 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
       // Also keep legacy fields for backward compatibility
       locationID: newValue._id,
       locationName: venueName
-    });
+    };
+    
+    // Add the coordinates if available
+    if (newValue.latitude && newValue.longitude) {
+      console.log(`Venue has coordinates: [${newValue.longitude}, ${newValue.latitude}]`);
+      updatedEventData.venueLatitude = newValue.latitude;
+      updatedEventData.venueLongitude = newValue.longitude;
+    } else {
+      console.log('Selected venue does not have coordinates');
+      // Clear any existing coordinates
+      updatedEventData.venueLatitude = null;
+      updatedEventData.venueLongitude = null;
+    }
+    
+    setEventData(updatedEventData);
   };
   
   // Handle venue input change for filtering
@@ -247,7 +265,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               label="Category"
             >
               <MenuItem value="">
-                <em>None (will use 'Other')</em>
+                <em>None (will use &apos;Other&apos;)</em>
               </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category._id} value={category._id}>
@@ -357,6 +375,7 @@ CreateEventDetailsBasic.propTypes = {
     locationID: PropTypes.string,
     locationName: PropTypes.string,
     description: PropTypes.string,
+    ownerOrganizerName: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
 };

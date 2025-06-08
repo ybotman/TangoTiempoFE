@@ -9,12 +9,26 @@ export default function GlobalError({ error, reset }) {
   }, [error]);
 
   return (
-    <html>
-      <body>
-        <h2>Something went wrong!</h2>
-        <button onClick={() => reset()}>Try again</button>
-      </body>
-    </html>
+    <div className="error-container" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      padding: '20px'
+    }}>
+      <h2>Something went wrong!</h2>
+      <button
+        onClick={() => reset()}
+        style={{
+          padding: '8px 16px',
+          marginTop: '12px',
+          cursor: 'pointer'
+        }}
+      >
+        Try again
+      </button>
+    </div>
   );
 }
 

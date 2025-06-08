@@ -30,9 +30,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'tangotiempoimages.blob.core.windows.net',
       },
+      {
+      protocol: 'https',
+      hostname: 'i0.wp.com',
+      },
+            {
+      protocol: 'https',
+      hostname: 'tangotiempo-com.vercel.app',
+    },
     ],
   },
-
   // Add rewrites to route API calls to the backend server
   async rewrites() {
     return [

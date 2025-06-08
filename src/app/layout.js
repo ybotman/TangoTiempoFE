@@ -7,6 +7,15 @@ import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
 import './globals.css';
+import { Analytics } from "@vercel/analytics/react";
+import { Inter } from 'next/font/google';
+
+// Configure Inter font with optimal loading
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata = {
   title: 'Tango Tiempo - The Ultimate Argentine Tango Calendar',
@@ -21,7 +30,7 @@ export const viewport = 'width=device-width, initial-scale=1.0';
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         {/* Metadata */}
         <title>{metadata.title}</title>
@@ -57,6 +66,7 @@ export default function RootLayout({ children }) {
             <GoogleClientWrapper>{children}</GoogleClientWrapper>
           </div>
         </Providers>
+          <Analytics />
       </body>
     </html>
   );

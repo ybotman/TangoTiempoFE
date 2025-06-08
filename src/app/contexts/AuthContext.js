@@ -17,7 +17,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
-import { auth, facebookProvider, googleProvider, emailProvider } from '@/utils/firebase';
+import { auth, facebookProvider, googleProvider } from '@/utils/firebase';
 import axios from 'axios';
 
 // Create Auth Context

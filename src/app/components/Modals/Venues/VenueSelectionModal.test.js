@@ -2,7 +2,7 @@
  * Jest test file for the VenueSelectionModal component
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import VenueSelectionModal from './VenueSelectionModal';
 import { useVenueSelection } from '@/hooks/useVenueSelection';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
