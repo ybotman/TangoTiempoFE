@@ -5,6 +5,13 @@ export function middleware(request) {
   if (request.nextUrl.pathname === '/geo-diagnostics') {
     const response = NextResponse.next();
     
+    // Log ALL headers to see what's coming through
+    const allHeaders = {};
+    request.headers.forEach((value, key) => {
+      allHeaders[key] = value;
+    });
+    console.log('ALL Headers received:', allHeaders);
+
     // Extract Cloudflare headers (including automatic ones)
     const cfHeaders = {
       city: request.headers.get('cf-ipcity') || null,

@@ -100,6 +100,14 @@ export default function GeoDiagnosticsPage() {
     console.log('Edge geolocation:', enabled ? 'ENABLED' : 'DISABLED');
   };
 
+  // Load edge enabled state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('edge-geolocation-enabled');
+    if (savedState !== null) {
+      setEdgeEnabled(savedState === 'true');
+    }
+  }, []);
+
   // Format display data
   const formatLocation = (location) => {
     if (!location) return 'N/A';
