@@ -1,6 +1,6 @@
 # Feature 3020: Edge Geolocation Beta (POC)
 
-## Status: 🚧 In Progress (POC Implemented)
+## Status: ✅ POC Complete - Awaiting Cloudflare Configuration
 
 ## Overview
 Implement a modern, edge-based geolocation strategy using Cloudflare headers and Next.js middleware to replace the current IP-based API approach. This beta feature will run in parallel with existing geolocation for A/B testing.
@@ -14,29 +14,31 @@ Implement a modern, edge-based geolocation strategy using Cloudflare headers and
 
 ## Requirements
 
-### Phase 1: Infrastructure Setup
-- [ ] Configure Cloudflare to inject geo headers (CF-IPCity, CF-IPCountry, CF-IPContinent)
+### Phase 1: Infrastructure Setup ✅
 - [x] Create Next.js middleware to intercept and process headers
 - [x] Set secure httpOnly cookie with location data
 - [x] Forward location as custom header for SSR
+- [ ] Configure Cloudflare to inject geo headers (CF-IPCity, CF-IPCountry, CF-IPContinent) - **Pending**
 
-### Phase 2: Beta Implementation
+### Phase 2: Beta Implementation ✅
 - [x] Create new `useEdgeLocation` hook for beta testing
 - [x] Add feature flag `ENABLE_EDGE_GEOLOCATION` 
-- [ ] Implement fallback hierarchy (CF → Firebase → Manual → Default)
 - [x] Add debug panel to compare old vs new location data
+- [x] Deploy to all environments (DEVL, TEST, PROD)
+- [ ] Implement fallback hierarchy (CF → Firebase → Manual → Default) - **Next Phase**
 
-### Phase 3: Frontend Integration
+### Phase 3: Frontend Integration 🚧
 - [ ] Create location override UI component
 - [ ] Store manual overrides in localStorage
 - [ ] Update API calls to use new location data when beta enabled
 - [ ] Add performance tracking metrics
 
-### Phase 4: Developer Experience
-- [x] Mock CF headers in development environment
+### Phase 4: Developer Experience ✅
+- [x] Mock CF headers in development environment (removed for production clarity)
+- [x] Implement crawler/bot detection and handling
+- [x] Create `/geo-diagnostics` page for testing
 - [ ] Add environment variable for forced location testing
 - [ ] Create documentation for local testing
-- [x] Implement crawler/bot detection and handling
 
 ## Technical Design
 
@@ -162,8 +164,25 @@ Request → Cloudflare (adds headers) → Next.js Middleware → Cookie/Header �
 5. Add manual location override functionality
 6. Create environment variable for forced location testing
 
+## Cloudflare Configuration Instructions (Free Plan)
+
+### Option 1: Transform Rules (Recommended)
+1. Enable IP Geolocation in Cloudflare Network settings
+2. Create Transform Rule for HTTP Request Header Modification
+3. Add headers: CF-IPCity, CF-IPCountry, etc. using `ip.geoip.*` variables
+4. Deploy and test at `/geo-diagnostics`
+
+### Option 2: Cloudflare Workers (100k requests/day free)
+- Create Worker to inject geo headers from `request.cf` object
+- Route to `tangotiempo.com/*`
+
+### Option 3: Check Existing Headers
+- CF-IPCountry may already be present
+- CF-Connecting-IP is usually available
+
 ## Notes
 - This is a POC to validate edge-based geolocation
 - Old system remains fully functional during beta
 - Users can opt-out via debug menu
 - Privacy-first approach maintained throughout
+- Free Cloudflare plan supports all necessary features
