@@ -126,7 +126,7 @@ Request → Cloudflare (adds headers) → Next.js Middleware → Cookie/Header �
 - Development: Accessible to all
 - Production: Requires SystemAdmin role
 
-### Current State (2025-06-08)
+### Current State (2025-06-09)
 - POC is fully implemented and functional
 - Fixed import issues with contexts (using hooks instead of direct context imports)
 - Build successful, dev server running
@@ -156,6 +156,14 @@ Request → Cloudflare (adds headers) → Next.js Middleware → Cookie/Header �
 - Current ipapi.co system continues to function normally
 - Ready for Cloudflare header configuration
 
+### Cloudflare Configuration Attempts (2025-06-09)
+- Enabled "Add visitor location headers" in Managed Transforms
+- Headers not appearing in production (likely stripped by Vercel)
+- Added debug logging to capture all incoming headers
+- Fixed edge toggle persistence issue
+- Discovered Page Rules option for IP Geolocation Header
+- Next: Test Page Rule or implement Worker solution
+
 ### Next Steps for Full Implementation
 1. Configure Cloudflare to inject headers
 2. Integrate edge hook with existing contexts
@@ -166,19 +174,28 @@ Request → Cloudflare (adds headers) → Next.js Middleware → Cookie/Header �
 
 ## Cloudflare Configuration Instructions (Free Plan)
 
-### Option 1: Transform Rules (Recommended)
-1. Enable IP Geolocation in Cloudflare Network settings
-2. Create Transform Rule for HTTP Request Header Modification
-3. Add headers: CF-IPCity, CF-IPCountry, etc. using `ip.geoip.*` variables
-4. Deploy and test at `/geo-diagnostics`
+### Option 1: Page Rules with IP Geolocation Header (Simplest)
+1. Go to **Rules** → **Page Rules**
+2. Create a Page Rule for `tangotiempo.com/*`
+3. Select setting: **IP Geolocation Header**
+4. This adds CF-IPCountry header to all requests
+5. Save and deploy
 
-### Option 2: Cloudflare Workers (100k requests/day free)
-- Create Worker to inject geo headers from `request.cf` object
+### Option 2: Managed Transforms (More Headers)
+1. Go to **Rules** → **Managed Transforms**
+2. Enable "Add visitor location headers"
+3. This adds city, country, continent, lat/lng headers
+4. Note: Headers may be stripped by Vercel
+
+### Option 3: Cloudflare Workers (Most Reliable)
+- Create Worker to inject geo headers as X-Geo-* headers
 - Route to `tangotiempo.com/*`
+- Bypasses Vercel header stripping
 
-### Option 3: Check Existing Headers
-- CF-IPCountry may already be present
-- CF-Connecting-IP is usually available
+### Troubleshooting Vercel + Cloudflare
+- Vercel often strips CF-* headers
+- Check Function logs to see what headers arrive
+- Use Workers with X-Geo-* headers if CF-* are stripped
 
 ## Notes
 - This is a POC to validate edge-based geolocation
