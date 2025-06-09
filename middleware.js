@@ -5,7 +5,7 @@ export function middleware(request) {
   if (request.nextUrl.pathname === '/geo-diagnostics') {
     const response = NextResponse.next();
     
-    // Extract Cloudflare headers
+    // Extract Cloudflare headers (including automatic ones)
     const cfHeaders = {
       city: request.headers.get('cf-ipcity') || null,
       country: request.headers.get('cf-ipcountry') || null,
