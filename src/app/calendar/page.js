@@ -146,19 +146,6 @@ const CalendarPage = () => {
               </div>
             )}
             <CategoryCircles eventProps={event.extendedProps} />
-            {eventShortTitle && (
-              <div style={{
-                fontSize: '0.75rem',
-                fontWeight: 'normal',
-                color: '#444',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                lineHeight: '1.0'
-              }}>
-                {eventShortTitle}
-              </div>
-            )}
             {organizerShort && (
               <div style={{
                 fontSize: '0.75rem',
@@ -225,19 +212,6 @@ const CalendarPage = () => {
             )}
             {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
-            {eventShortTitle && (
-              <div style={{
-                fontSize: '0.85rem',
-                fontWeight: 'normal',
-                color: '#444',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                lineHeight: '1.2'
-              }}>
-                {eventShortTitle}
-              </div>
-            )}
             {organizerShort && (
               <div style={{
                 fontSize: '0.85rem',
@@ -249,6 +223,19 @@ const CalendarPage = () => {
                 lineHeight: '1.2'
               }}>
                 {organizerShort}
+              </div>
+            )}
+            {eventShortTitle && (
+              <div style={{
+                fontSize: '0.85rem',
+                fontWeight: 'normal',
+                color: '#444',
+                overflow: 'visible',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                lineHeight: '1.2'
+              }}>
+                {eventShortTitle}
               </div>
             )}
           </div>
@@ -399,7 +386,7 @@ const CalendarPage = () => {
             type: 'list',
             duration: { days: 21 },
             buttonText: '3 Weeks',
-            listDayFormat: { weekday: 'long' },
+            listDayFormat: { weekday: 'long', month: 'long', day: 'numeric' },
             dayMaxEvents: 'true',
           },
           listMonth: {

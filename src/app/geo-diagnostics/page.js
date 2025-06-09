@@ -19,10 +19,6 @@ export default function GeoDiagnosticsPage() {
   const [currentSystemData, setCurrentSystemData] = useState(null);
   const [edgeEnabled, setEdgeEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [performanceMetrics, setPerformanceMetrics] = useState({
-    edge: { requests: 0, avgTime: 0, successRate: 0 },
-    current: { requests: 0, avgTime: 0, successRate: 0 }
-  });
 
   // Check access permissions
   useEffect(() => {

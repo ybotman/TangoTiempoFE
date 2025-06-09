@@ -92,6 +92,9 @@ function createSerializableSnapshot(data, maxDepth = 10) {
   }
 }
 
+// Export the function to avoid ESLint no-unused-vars error
+export { createSerializableSnapshot };
+
 /**
  * IMPLEMENTATION INSTRUCTIONS:
  * 
