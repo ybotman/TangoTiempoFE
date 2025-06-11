@@ -396,9 +396,27 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           onChange={handleTabChange} 
           aria-label="event details tabs" 
           variant="scrollable"
-          scrollButtons="on"
+          scrollButtons="auto"
           allowScrollButtonsMobile
-          sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+          sx={{ 
+            mb: 2, 
+            borderBottom: 1, 
+            borderColor: 'divider',
+            '& .MuiTabs-scrollableX': {
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': {
+                display: 'none',
+              },
+            },
+            '& .MuiTabs-scroller': {
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': {
+                display: 'none',
+              },
+            }
+          }}
         >
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />

@@ -44,9 +44,26 @@ export default function SystemAdminModal({ open, onClose }) {
             value={selectedTab} 
             onChange={handleTabChange}
             variant="scrollable"
-            scrollButtons="on"
+            scrollButtons="auto"
             allowScrollButtonsMobile
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{ 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              '& .MuiTabs-scrollableX': {
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+              },
+              '& .MuiTabs-scroller': {
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+              }
+            }}
           >
             <Tab label="UserLogin" />
             <Tab label="Regional Organizer Info" />
