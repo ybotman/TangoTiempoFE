@@ -1,0 +1,9 @@
+# JIRA Configuration
+# Copy this to .jira-config and update with your values
+
+JIRA_URL="https://yourcompany.atlassian.net"
+JIRA_EMAIL="your.email@example.com"
+PROJECT="YOUR-PROJECT"
+
+# Token stored separately in keychain for security
+# Run: security add-generic-password -a "$(whoami)" -s "jira-api-token" -w "your-token"

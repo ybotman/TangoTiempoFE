@@ -80,7 +80,6 @@ Maintain clear transitions between modes.
 - ✅ Updates supporting docs, status, and plans and tasks.
 - ✅ Asses if we are ready to complete commtment.
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)  as the primary deliverable
-- ✅ Logs in Jira Handoffs and expections
 - ❌ Does NOT modify production code
 - ❌ Does NOT perform development or testing tasks
 
@@ -90,8 +89,6 @@ Maintain clear transitions between modes.
 - ✅ Gathers information, investigates APIs, libraries, or file structure
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ✅ Can look up function signatures or dependencies
-- ✅ Logs Time in Jira
-- ✅ Logs in Jira Root Causes, Desisions and Recommendations.
 - ❌ Does NOT modify code
 - ❌ Does NOT commit to a decision or output
 
@@ -115,8 +112,6 @@ Maintain clear transitions between modes.
 - ✅ Updates I/F/Estatus and supporting documentation to reflect changes
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
 - ✅ Does NOT ARCHTITECT with MOCK data.
-- ✅ Logs Time in Jira
-- ✅ Logs in Jira Architecualt Desings and Scope and Recommendations.
 - ❌ Does NOT modify existing code
 - ❌ Does NOT output final implementation
 
@@ -127,8 +122,6 @@ Maintain clear transitions between modes.
 - ✅ Describes upcoming changes and how they'll be implemented
 - ✅ Can modify a **plan**, README, or spec file
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs in Jira Root Causes, Desisions and Recommendations.
 - ❌ Does NOT directly modify source code
 - ❌ Does NOT touch logic or infrastructure 
 
@@ -141,8 +134,6 @@ Maintain clear transitions between modes.
 - ✅ Updates I/F/Estatus and supporting documentation to reflect changes
 - ✅ Git Commits on success as appropriate.
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs in Jira Completesions of phases, scope and any deviations
 - ❌ Does NOT guess — only executes vetted plans
 - ❌ Does NOT BUILD with MOCK data. Does not generate data to 'succeed'.
 - ❌ Does not do GIT Merges <Branchs> to DEVL TEST and PROD
@@ -156,8 +147,6 @@ Maintain clear transitions between modes.
 - ✅ Identifies any mock, shortcuts, code base as POC and NOT prodution
 - ✅ Keep the mock data and poc code base separated from the core code.
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs  in Jira Goals and Findings, and Recommendations.
 - ❌ Does NOT allow the code to be promoted to full DEVL via commit controls
 - ❌ Does NOT produce production‑ready code  
 - ❌ Does NOT include full error handling, tests, or optimizations
@@ -170,8 +159,6 @@ Maintain clear transitions between modes.
 - ✅ Can modify a **plan**, README, or spec file fir status/bugs/etc.
 - ✅ Updates IFE status and supporting documentation to reflect changes of exiection of code and state
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs  in Jira Complications ad Completions
 - ❌ Does NOT guess — only executes vetted plans
 - ❌ Does not do GIT Merges <Branchs> to DEVL TEST and PROD
 - ❌ Does NOT Implements or modifies code based on prior modes
@@ -182,8 +169,6 @@ Maintain clear transitions between modes.
 - ✅ Isolates and fixes a specific issue
 - ✅ May produce one or more minimal code diffs
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs  in Jira Completions, and Recommendations.
 - ❌ Does NOT redesign features or alter unrelated code
 
 ---
@@ -193,8 +178,6 @@ Maintain clear transitions between modes.
 - ✅ Reviews structure, readability, security, and performance
 - ✅ Suggests improvements
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs  in Jira Findings and Recommendations.
 - ❌ Does NOT make direct changes
 - ❌ Does NOT explore external docs
 
@@ -205,8 +188,6 @@ Maintain clear transitions between modes.
 - ✅ Summarizes what was done, why, and how (often can work with the SPRINT mode)
 - ✅ Great for changelogs or project handoffs
 - ✅ Perfoms after each interact a SNRs (Summary, NextStep, Request for next Role)
-- ✅ Logs Time in Jira
-- ✅ Logs  in Jira Summaries Recommendations.-
 - ❌ Does NOT suggest or write new code
 
 
@@ -227,8 +208,6 @@ Maintain clear transitions between modes.
 - ✅ May suggest smaller gaps of knowlege and is honest about the problems
 - ✅ Can only perform and assess, and present findings.
 - ✅ Offically receomentd (if approparte the BUILDER or similar modes)
-- ✅ Logs Time in Jira
-- ✅ Logs in Jira  Assessments
 - ❌ Does NOT introduce new business logic or code
 - ❌ Dees not Change code or mission - just assess where we are now.
 ---
@@ -248,9 +227,7 @@ Maintain clear transitions between modes.
 - ✅ is the sole role who can GIT Merges <Branches> to DEVL TEST and PROD
 - ✅ when envoked, must read AI-Guild/Playbooks/Lifecycle/MergeEvents.md
 - ✅ Follows the MergeEvents guidelines
-- ✅ DOES NOT Perfoms after each interact a SNRs but stays in package mode till instructued to switch
-- ✅ Logs Time in Jira
-- ✅ Logs in Jira Completions and issues 
+- ✅ DOES NOT Perfoms after each interact a SNRs but stays in package mode till instructued to switch 
 - ❌ Does not create Branches only merges.
 - ❌ Does NOT make decisions
 - ❌ Does NOT change implementation
@@ -264,9 +241,7 @@ Maintain clear transitions between modes.
 - ✅ Clearly marks speculative or unvetted ideas as such
 - ✅ Summarizes and clusters ideas for clarity and follow-up
 - ✅ Invites user feedback to narrow or select promising directions
-- ✅ DOES NOT Perfoms after each interact a SNRs but stays in brainsrom mode till instructued to switch
-- ✅ Logs Time in Jira
-- ✅ Logs Jira Thoguth paths and Recommendations.
+- ✅ DOES NOT Perfoms after each interact a SNRs but stays in brainsrom mode till instructued to switch 
 - ❌ Does NOT make final decisions or select a single solution
 - ❌ Does NOT modify code or documentation directly
 - ❌ Does NOT commit to implementation or output
@@ -288,8 +263,6 @@ Maintain clear transitions between modes.
 - ✅ Explains the thought process and reasoning behind a chosen option or approach
 - ✅ Can revisit and clarify why a particular path was selected over alternatives
 - ✅ Useful for transparency, teaching, or justifying decisions
-- ✅ Logs Time in Jira
-- ✅ Logs Jira What we explained or agreed
 - ❌ Does NOT propose new solutions
 - ❌ Does NOT modify code or documentation
 - ❌ Does NOT make decisions or select options

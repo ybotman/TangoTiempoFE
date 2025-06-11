@@ -3,7 +3,7 @@ set -euo pipefail
 
 # === CONFIG ===
 REPO_URL="https://github.com/ybotman/ai-guild.git"
-SPARSE_PATH="Claude/3.7 with code/AI-Guild"
+SPARSE_PATH="Claude/4.0 with Code and Jira/AI-Guild"
 TARGET_DIR="public/AI-Guild"
 BRANCH="main"
 
@@ -51,12 +51,12 @@ cp -r "$TEMP_DIR/$SPARSE_PATH"/* "$TARGET_DIR/"
 rm -rf "$TEMP_DIR"
 
 # 10. Copy NewCLAUDE.md to root claude.md (if it exists)
-if [[ -f "$TARGET_DIR/setup/NewCLAUDE.md" ]]; then
+if [[ -f "$TARGET_DIR/Setup/NewCLAUDE.md" ]]; then
   echo "📝 Copying NewCLAUDE.md to ./claude.md"
-  cp "$TARGET_DIR/setup/NewCLAUDE.md" "./claude.md"
+  cp "$TARGET_DIR/Setup/NewCLAUDE.md" "./claude.md"
   echo "✅ Updated claude.md with latest version"
 else
-  echo "⚠️  Warning: $TARGET_DIR/setup/NewCLAUDE.md not found - skipping claude.md update"
+  echo "⚠️  Warning: $TARGET_DIR/Setup/NewCLAUDE.md not found - skipping claude.md update"
 fi
 
 echo "✅ Sparse-checkout of '$SPARSE_PATH' imported into $TARGET_DIR/"
