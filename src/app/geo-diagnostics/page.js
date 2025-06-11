@@ -168,6 +168,11 @@ export default function GeoDiagnosticsPage() {
                     <Typography variant="body2" color={cfGeoData.city ? 'success.main' : 'error.main'}>
                       Status: {cfGeoData.city ? '✅ Available' : '❌ Not Available'}
                     </Typography>
+                    {cfGeoData.workerActive && (
+                      <Typography variant="body2" color="info.main" sx={{ mt: 1 }}>
+                        🔧 Cloudflare Worker: Active (X-Geo-* headers)
+                      </Typography>
+                    )}
                   </Box>
                 </Box>
               ) : (

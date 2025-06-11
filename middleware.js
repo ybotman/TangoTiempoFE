@@ -12,17 +12,20 @@ export function middleware(request) {
     });
     console.log('ALL Headers received:', allHeaders);
 
-    // Extract Cloudflare headers (including automatic ones)
+    // Extract Cloudflare headers - try both CF-* and X-Geo-* prefixes
+    // X-Geo-* headers are from Cloudflare Worker (bypass Vercel stripping)
     const cfHeaders = {
-      city: request.headers.get('cf-ipcity') || null,
-      country: request.headers.get('cf-ipcountry') || null,
-      continent: request.headers.get('cf-ipcontinent') || null,
-      timezone: request.headers.get('cf-timezone') || null,
-      region: request.headers.get('cf-region') || null,
+      city: request.headers.get('cf-ipcity') || request.headers.get('x-geo-city') || null,
+      country: request.headers.get('cf-ipcountry') || request.headers.get('x-geo-country') || null,
+      continent: request.headers.get('cf-ipcontinent') || request.headers.get('x-geo-continent') || null,
+      timezone: request.headers.get('cf-timezone') || request.headers.get('x-geo-timezone') || null,
+      region: request.headers.get('cf-region') || request.headers.get('x-geo-region') || null,
+      regionCode: request.headers.get('x-geo-region-code') || null,
       ip: request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || null,
-      latitude: request.headers.get('cf-iplat') || null,
-      longitude: request.headers.get('cf-iplon') || null,
-      postalCode: request.headers.get('cf-postal-code') || null,
+      latitude: request.headers.get('cf-iplat') || request.headers.get('x-geo-latitude') || null,
+      longitude: request.headers.get('cf-iplon') || request.headers.get('x-geo-longitude') || null,
+      postalCode: request.headers.get('cf-postal-code') || request.headers.get('x-geo-postal-code') || null,
+      workerActive: request.headers.get('x-geo-worker') || null,
     };
 
     // Log what headers we actually received

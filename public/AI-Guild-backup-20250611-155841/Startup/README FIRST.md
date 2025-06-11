@@ -1,4 +1,4 @@
-ch#!/bin/bash
+#!/bin/bash
 echo "🔍 Checking AI Guild version..."
 
 # Fetch latest info
@@ -29,4 +29,4 @@ After that summerzie you findings
 AI-Guild/Playbooks/Applications/
 -- List and number ach folder.
 -- if the users resonds with the Number OR the fodler then
--- cat all the *.md for each folder and read the combined-appl-playbooks-<appl>.md
+-- cat all the *.md and read the combined-appl-playbooks.md
