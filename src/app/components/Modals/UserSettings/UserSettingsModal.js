@@ -54,7 +54,15 @@ const UserSettingsModal = ({ open, onClose }) => {
 
         <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
           {/* Tab Navigation */}
-          <Tabs value={currentTab} onChange={handleTabChange} aria-label="User Settings Tabs" variant="scrollable">
+          <Tabs 
+            value={currentTab} 
+            onChange={handleTabChange} 
+            aria-label="User Settings Tabs" 
+            variant="scrollable"
+            scrollButtons="on"
+            allowScrollButtonsMobile
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
             <Tab label="Name" value="name" />
             <Tab label="Favs" value="favorites" />
             <Tab label="Notifications" value="notifications" />

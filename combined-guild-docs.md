@@ -783,22 +783,79 @@ source .jira-config && JIRA_API_TOKEN=$(security find-generic-password -a "$(who
 
 ---
 
+## 📝 JIRA Comment Best Practices
+
+### ✅ What Works - Use This Format:
+
+**Comment Format: `./jira-comment.sh <ticket> <ROLE> <comment>`**
+```bash
+# ❌ Wrong: ./jira-comment.sh TIEMPO-60 "Comment text"
+# ✅ Right: ./jira-comment.sh TIEMPO-60 Scout "Investigated login issue. Root cause: session timeout."
+
+./jira-comment.sh TIEMPO-60 Architect "Design decision: Use Material-UI Dialog. Benefits: mobile responsive."
+./jira-comment.sh TIEMPO-60 Builder "Implementation complete. Added CSS fixes for modal headers."
+```
+
+### ❌ What Fails - Avoid These:
+```bash
+# Multi-line comments with newlines
+"Investigation findings:\n1. CSS issue\n2. Mobile viewport\n3. Z-index conflict"
+
+# Numbered lists or bullet points  
+"Steps taken: • Reviewed code • Tested mobile • Found solution"
+
+# Complex formatting or special characters
+"Analysis:\n- Issue A\n- Issue B\n\nRecommendation: Fix X"
+```
+
+### 🚨 Important: Always Verify Comments
+- **If you see "JSON parsing error" + "✅ Comment added"** → Check JIRA to confirm
+- **The comment MAY NOT have been added** despite success message
+- **Break complex information into multiple simple comments**
+
+### 📏 Comment Format Template:
+```
+Role: Brief action or finding. Key points: A, B, C.
+```
+
+**Examples:**
+- `Scout: Reproduced bug on iOS Safari. Issue occurs during form submission.`
+- `Architect: Recommending context refactor. Current state: fragmented, proposed: unified provider.`
+- `Builder: Feature implemented with tests. Changes: component updates, API integration, validation.`
+
+---
+
 ## 🔧 How to Use JIRA Tools Correctly
 
 ### Script Usage (Always run from project root)
+
+#### **🚨 CRITICAL: ROLE Parameter Required**
+**All worklog and comment commands REQUIRE the AI-Guild role parameter in specific positions**
+
 ```bash
-# Comments
-./public/AI-Guild/Scripts/jira-tools/jira-comment.sh TIEMPO-60 CRK "Your comment"
+# JIRA WORKLOG - Format: ./jira-worklog.sh add <ticket> <ROLE> <time> <description>
+# ❌ Wrong: ./jira-worklog.sh add TIEMPO-60 15m "Description"
+# ✅ Right: ./jira-worklog.sh add TIEMPO-60 Builder 15m "Description"
 
-# Worklog
-./public/AI-Guild/Scripts/jira-tools/jira-worklog.sh add TIEMPO-60 Builder "2h" "Fixed modal"
+# JIRA COMMENT - Format: ./jira-comment.sh <ticket> <ROLE> <comment>
+# ❌ Wrong: ./jira-comment.sh TIEMPO-60 "Comment text"  
+# ✅ Right: ./jira-comment.sh TIEMPO-60 Builder "Comment text"
 
-# Search
+# Examples with different roles:
+./public/AI-Guild/Scripts/jira-tools/jira-comment.sh TIEMPO-60 Scout "Investigated modal issue. Found CSS z-index conflict."
+./public/AI-Guild/Scripts/jira-tools/jira-worklog.sh add TIEMPO-60 Architect "1h" "Designed solution architecture"
+
+# Search and Summary (no role needed)
 ./public/AI-Guild/Scripts/jira-tools/jira-search.sh "assignee=currentUser()"
-
-# Ticket Summary
 ./public/AI-Guild/Scripts/jira-tools/jira-ticket-summary.sh TIEMPO-60
 ```
+
+#### **Valid AI-Guild Roles:**
+- `Scout` - Investigation and research
+- `Architect` - Design and planning
+- `Builder` - Implementation and coding
+- `CRK` - Code review and verification
+- `Kanban` - Process management
 
 ### What Happens Behind the Scenes
 1. `jira-common.sh` sources `.jira-config`
@@ -806,10 +863,11 @@ source .jira-config && JIRA_API_TOKEN=$(security find-generic-password -a "$(who
 3. All scripts use this `JIRA_TOKEN` internally
 4. **No need to set JIRA_API_TOKEN manually**
 
-### Known "Error" Messages (Ignore These)
-- **"JSON parsing error"** is cosmetic - the `jq` command parsing the response
-- **As long as you see "✅ Comment added" or "✅ Logged time", it worked**
-- **No fix needed - just ignore the JSON error message**
+### Known "Error" Messages (Important Details)
+- **"JSON parsing error"** appears with complex comment formatting
+- **If you see "JSON parsing error" + "✅ Comment added"** - the comment MAY have worked
+- **Always check JIRA to verify** if the comment was actually added
+- **Use simple formatting** to avoid JSON parsing issues
 
 ---
 
@@ -895,20 +953,22 @@ AI-Guild Role: Builder
 ## AI-Guild Role Integration
 
 ### Time Logging by Role
+**Format: `./jira-worklog.sh add <ticket> <ROLE> <time> <description>`**
+
 Always log work with the appropriate AI-Guild role:
 
 ```bash
 # Scout investigation
-./jira-worklog.sh add "TIEMPO-123" "Scout" "30m" "Investigated existing code and requirements"
+./jira-worklog.sh add TIEMPO-123 Scout "30m" "Investigated existing code and requirements"
 
 # Architect design
-./jira-worklog.sh add "TIEMPO-123" "Architect" "1h" "Designed component architecture and data flow"
+./jira-worklog.sh add TIEMPO-123 Architect "1h" "Designed component architecture and data flow"
 
 # Builder implementation
-./jira-worklog.sh add "TIEMPO-123" "Builder" "2h" "Implemented feature with tests"
+./jira-worklog.sh add TIEMPO-123 Builder "2h" "Implemented feature with tests"
 
 # CRK review
-./jira-worklog.sh add "TIEMPO-123" "CRK" "45m" "Code review and knowledge documentation"
+./jira-worklog.sh add TIEMPO-123 CRK "45m" "Code review and knowledge documentation"
 ```
 
 ### Role Workflow in JIRA
@@ -1019,9 +1079,33 @@ Use JIRA's Epic functionality:
   ./jira-search.sh "project=TIEMPO" | jq '.issues[] | select(.fields.status.name == "To Do")'
   ```
 
+#### "Missing parameters" errors
+- **Cause**: Omitting the required ROLE parameter in worklog or comment commands
+- **Root Issue**: ROLE must be in specific position in parameter list
+- **Solution**: Always include the AI-Guild role in the correct position
+
+**Common Mistakes:**
+```bash
+# WORKLOG ERRORS:
+# ❌ Wrong: ./jira-worklog.sh add TIEMPO-60 15m "Description"
+# ✅ Right: ./jira-worklog.sh add TIEMPO-60 Builder 15m "Description"
+
+# COMMENT ERRORS:  
+# ❌ Wrong: ./jira-comment.sh TIEMPO-60 "Comment text"
+# ✅ Right: ./jira-comment.sh TIEMPO-60 Builder "Comment text"
+
+# The ROLE parameter (Builder, Scout, Architect, CRK, Kanban) cannot be omitted
+```
 #### "JSON parsing errors in output"
-- **Cause**: Cosmetic jq parsing issue in script output
-- **Solution**: **Ignore these - look for ✅ success messages**
+- **Cause**: Complex comment formatting with newlines, lists, or special characters
+- **Solution**: 
+  - **Use simple, single-line comments under 200 characters**
+  - **Always check JIRA to verify comment was added**
+  - **If comment failed, repost with simpler formatting**
+  ```bash
+  # Correct format with required ROLE parameter:
+  ./jira-comment.sh TIEMPO-60 Scout "Found CSS conflict in mobile viewport affecting modal z-index"
+  ```
 
 ### Best Practices for Debugging
 1. **Start simple**: Use basic queries first

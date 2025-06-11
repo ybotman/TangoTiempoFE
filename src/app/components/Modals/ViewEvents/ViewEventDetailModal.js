@@ -307,7 +307,14 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           )}
 
           {/* Tabs */}
-          <Tabs value={currentTab} onChange={(_, value) => setCurrentTab(value)}>
+          <Tabs 
+            value={currentTab} 
+            onChange={(_, value) => setCurrentTab(value)}
+            variant="scrollable"
+            scrollButtons="on"
+            allowScrollButtonsMobile
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
             <Tab label="Basic" value="Basic" />
             <Tab label="More" value="More" />
             <Tab label="Images" value="Images" />
