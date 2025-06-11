@@ -25,7 +25,17 @@
       "Bash(git fetch:*)",
       "Bash(gh pr merge:*)",
       "Bash(git rm:*)",
-      "WebFetch(domain:fullcalendar.io)"
+      "WebFetch(domain:fullcalendar.io)",
+      "Bash(node:*)",
+      "Bash(chmod:*)",
+      "Bash(./jira-search.sh:*)",
+      "Bash(./jira-tools/jira-startup-check.sh:*)",
+      "Bash(./jira-transition.sh:*)",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-search.sh:*)",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-ticket-summary.sh:*)",
+      "Bash(source:*)",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-worklog.sh:*)",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-comment.sh:*)"
     ],
     "deny": []
   },

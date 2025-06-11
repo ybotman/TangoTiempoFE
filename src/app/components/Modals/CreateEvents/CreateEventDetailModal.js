@@ -391,7 +391,15 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         )}
 
         {/* Tabs for different sections */}
-        <Tabs value={currentTab} onChange={handleTabChange} aria-label="event details tabs" sx={{ mb: 2 }}>
+        <Tabs 
+          value={currentTab} 
+          onChange={handleTabChange} 
+          aria-label="event details tabs" 
+          variant="scrollable"
+          scrollButtons="on"
+          allowScrollButtonsMobile
+          sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+        >
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
           <Tab label="Other" value="other" />

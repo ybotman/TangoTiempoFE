@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Grid, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip, useTheme, useMediaQuery } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,29 +16,40 @@ import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
 // Legacy component removed as part of transition
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
+import ModalHeader from '@/components/UI/ModalHeader';
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90%',
-  maxWidth: '600px',
+const getModalStyle = (isMobile) => ({
+  position: isMobile ? 'fixed' : 'absolute',
+  top: isMobile ? 0 : '50%',
+  left: isMobile ? 0 : '50%',
+  transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+  width: isMobile ? '100vw' : '90%',
+  maxWidth: isMobile ? '100%' : '600px',
+  height: isMobile ? '100vh' : 'auto',
+  maxHeight: isMobile ? '100vh' : '90vh',
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 3,
-  maxHeight: '90vh',
-  overflowY: 'auto',
+  p: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
   zIndex: 1300,
-};
+  ...(isMobile && {
+    paddingTop: 'env(safe-area-inset-top, 0px)',
+    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+  }),
+});
 
 const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) => {
   const [currentTab, setCurrentTab] = useState('basic');
-  const [showFullTitle, setShowFullTitle] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [showImageTab, setShowImageTab] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Mobile detection
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   // Get user context to check permissions
   const { user } = useContext(AuthContext);
@@ -48,7 +59,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
-      setShowFullTitle(false); // Reset title expansion when modal is reopened
     }
   }, [open]);
 
@@ -144,8 +154,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     );
   };
 
-  // Function to truncate the title to 30 characters
-  const truncatedTitle = eventTitle.length > 30 && !showFullTitle ? eventTitle.slice(0, 30) + '...' : eventTitle;
   
   // Check if the user has permissions to edit and delete this event
   // User must be logged in, the event must have an owner ID, and the user must have the RegionalOrganizer role
@@ -203,59 +211,55 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
   // No longer needed - editMode is handled by parent component
 
+  // Create header actions for edit/delete buttons
+  const headerActions = canEditEvent ? (
+    <>
+      <Button
+        onClick={handleEditClick}
+        size="small"
+        startIcon={<EditIcon fontSize="small" />}
+        sx={{ fontSize: '0.875rem' }}
+      >
+        Edit
+      </Button>
+      <Button
+        onClick={handleDeleteClick}
+        size="small"
+        color="error"
+        startIcon={<DeleteIcon fontSize="small" />}
+        sx={{ fontSize: '0.875rem' }}
+      >
+        Delete
+      </Button>
+    </>
+  ) : null;
+
   return (
     <>
       <Modal open={open} onClose={onClose}>
-        <Box sx={modalStyle}>
-          {/* Title and Date */}
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item xs={8}>
-              <Typography variant="h5" component="h2">
-                {truncatedTitle}
-                {eventTitle.length > 30 && (
-                  <Button size="small" onClick={() => setShowFullTitle(!showFullTitle)} sx={{ ml: 1 }}>
-                    {showFullTitle ? 'Show Less' : 'Show More'}
-                  </Button>
-                )}
-              </Typography>
-              <Box sx={{ position: 'absolute', top: '2px', right: '8px', zIndex: '1000', display: 'flex', gap: 1 }}>
-                {/* Only show Edit/Delete when user has RegionalOrganizer role */}
-                {canEditEvent && (
-                  <>
-                    <Button
-                      onClick={handleEditClick}
-                      size="small"
-                      startIcon={<EditIcon fontSize="small" />}
-                      sx={{ fontSize: '0.75rem' }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={handleDeleteClick}
-                      size="small"
-                      color="error"
-                      startIcon={<DeleteIcon fontSize="small" />}
-                      sx={{ fontSize: '0.75rem' }}
-                    >
-                      Delete
-                    </Button>
-                  </>
-                )}
-                <Button
-                  onClick={onClose}
-                  size="small"
-                  sx={{ fontSize: '0.75rem' }}
-                >
-                  Close
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={4} style={{ textAlign: 'right' }}>
-              <Typography variant="h5" component="h5">
-                {startDate && new Date(startDate).toLocaleDateString()}
-              </Typography>
-            </Grid>
-          </Grid>
+        <Box sx={getModalStyle(isMobile)}>
+          {/* Modal Header */}
+          <ModalHeader 
+            title={eventTitle} 
+            onClose={onClose}
+            actions={headerActions}
+          />
+          
+          {/* Modal Content */}
+          <Box sx={{ 
+            flex: 1, 
+            overflow: 'auto',
+            p: isMobile ? 2 : 3 
+          }}>
+            {/* Date Display */}
+            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+              {startDate && new Date(startDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </Typography>
 
           {/* Category Display */}
           {renderCategoryChips()}
@@ -303,7 +307,14 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           )}
 
           {/* Tabs */}
-          <Tabs value={currentTab} onChange={(_, value) => setCurrentTab(value)}>
+          <Tabs 
+            value={currentTab} 
+            onChange={(_, value) => setCurrentTab(value)}
+            variant="scrollable"
+            scrollButtons="on"
+            allowScrollButtonsMobile
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
             <Tab label="Basic" value="Basic" />
             <Tab label="More" value="More" />
             <Tab label="Images" value="Images" />
@@ -318,9 +329,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           {currentTab === 'repeating' && <ViewEventDetailsRepeating eventDetails={eventDetails} />}
           {currentTab === 'More' && <ViewEventDetailsMore eventDetails={eventDetails} />}
           {currentTab === 'Organizer' && <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />}
-          {currentTab === 'Venue' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />
-          /* Old tab kept for compatibility during transition */
-          }{currentTab === 'Location' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />}
+          {currentTab === 'Venue' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />}
+          {/* Old tab kept for compatibility during transition */}
+          {currentTab === 'Location' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />}
+          </Box>
         </Box>
       </Modal>
       

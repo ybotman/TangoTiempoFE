@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Box, Typography, Tabs, Tab, Button } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab } from '@mui/material';
+import ModalHeader from '@/components/UI/ModalHeader';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
 import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
 import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
@@ -18,11 +19,14 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxWidth: '600px',
+  width: '90%',
+  maxWidth: '700px',
+  maxHeight: '90vh',
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 3,
+  borderRadius: '8px',
+  display: 'flex',
+  flexDirection: 'column',
 };
 
 const UserSettingsModal = ({ open, onClose }) => {
@@ -43,45 +47,51 @@ const UserSettingsModal = ({ open, onClose }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          User Settings
-        </Typography>
+        <ModalHeader 
+          title="User Settings" 
+          onClose={onClose}
+        />
 
-        {/* Tab Navigation */}
-        <Tabs value={currentTab} onChange={handleTabChange} aria-label="User Settings Tabs" variant="scrollable">
-          <Tab label="Name" value="name" />
-          <Tab label="Favs" value="favorites" />
-          <Tab label="Notifications" value="notifications" />
-          <Tab label="Location" value="geolocation" />
-          <Tab label="Apply" value="apply" />
-        </Tabs>
+        <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
+          {/* Tab Navigation */}
+          <Tabs 
+            value={currentTab} 
+            onChange={handleTabChange} 
+            aria-label="User Settings Tabs" 
+            variant="scrollable"
+            scrollButtons="on"
+            allowScrollButtonsMobile
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab label="Name" value="name" />
+            <Tab label="Favs" value="favorites" />
+            <Tab label="Notifications" value="notifications" />
+            <Tab label="Location" value="geolocation" />
+            <Tab label="Apply" value="apply" />
+          </Tabs>
 
-        {/* Content Based on Selected Tab */}
-        {loading ? (
-          <Typography>Loading...</Typography>
-        ) : error ? (
-          <Typography color="error">Error loading user data</Typography>
-        ) : (
-          <>
-            {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
-            {currentTab === 'favorites' && (
-              <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
+          {/* Content Based on Selected Tab */}
+          <Box sx={{ p: 3, flex: 1, overflow: 'auto' }}>
+            {loading ? (
+              <Typography>Loading...</Typography>
+            ) : error ? (
+              <Typography color="error">Error loading user data</Typography>
+            ) : (
+              <>
+                {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
+                {currentTab === 'favorites' && (
+                  <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
+                )}
+                {currentTab === 'notifications' && (
+                  <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
+                )}
+                {currentTab === 'geolocation' && (
+                  <UserSettingsGeoLocation userData={userData} geoLocation={geoLocation} />
+                )}
+                {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
+              </>
             )}
-            {currentTab === 'notifications' && (
-              <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
-            )}
-            {currentTab === 'geolocation' && (
-              <UserSettingsGeoLocation userData={userData} geoLocation={geoLocation} />
-            )}
-            {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
-          </>
-        )}
-
-        {/* Modal Actions */}
-        <Box display="flex" justifyContent="flex-end" gap={2} sx={{ mt: 3 }}>
-          <Button onClick={onClose} color="secondary">
-            Done
-          </Button>
+          </Box>
         </Box>
       </Box>
     </Modal>
