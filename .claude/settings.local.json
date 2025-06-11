@@ -35,7 +35,9 @@
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-ticket-summary.sh:*)",
       "Bash(source:*)",
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-worklog.sh:*)",
-      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-comment.sh:*)"
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-comment.sh:*)",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-transition.sh:*)",
+      "Bash(git stash show:*)"
     ],
     "deny": []
   },

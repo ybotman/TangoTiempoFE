@@ -117,6 +117,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   }
 
   const eventTitle = eventDetails?.title || 'Event Details';
+  const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
   const startDate = eventDetails?._instance?.range?.start || null;
   const endDate = eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
@@ -240,7 +241,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         <Box sx={getModalStyle(isMobile)}>
           {/* Modal Header */}
           <ModalHeader 
-            title={eventTitle} 
+            title={eventShortTitle} 
             onClose={onClose}
             actions={headerActions}
           />
@@ -251,6 +252,13 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             overflow: 'auto',
             p: isMobile ? 2 : 3 
           }}>
+            {/* Full Title Display (if different from short title) */}
+            {eventShortTitle !== eventTitle && (
+              <Typography variant="h6" gutterBottom sx={{ fontSize: '1.1rem' }}>
+                {eventTitle}
+              </Typography>
+            )}
+            
             {/* Date Display */}
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
               {startDate && new Date(startDate).toLocaleDateString('en-US', {
@@ -269,17 +277,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
               <Typography variant="h6" color="textSecondary">
                 Time:{' '}
-                {new Date(startDate).toLocaleTimeString([], {
+                {new Date(startDate).toLocaleTimeString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                   timeZoneName: 'short'
                 })}
               </Typography>
               <ArrowForwardIcon sx={{ verticalAlign: 'middle', mx: 1 }} />
               <Typography variant="h6" color="textSecondary">
-                {new Date(endDate).toLocaleTimeString([], {
+                {new Date(endDate).toLocaleTimeString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                   timeZoneName: 'short'
                 })}
               </Typography>
@@ -311,9 +321,26 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             value={currentTab} 
             onChange={(_, value) => setCurrentTab(value)}
             variant="scrollable"
-            scrollButtons="on"
+            scrollButtons="auto"
             allowScrollButtonsMobile
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{ 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              '& .MuiTabs-scrollableX': {
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+              },
+              '& .MuiTabs-scroller': {
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+              }
+            }}
           >
             <Tab label="Basic" value="Basic" />
             <Tab label="More" value="More" />

@@ -70,9 +70,26 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               onChange={handleTabChange}
               aria-label="Regional Organizer Settings Tabs"
               variant="scrollable"
-              scrollButtons="on"
+              scrollButtons="auto"
               allowScrollButtonsMobile
-              sx={{ borderBottom: 1, borderColor: 'divider' }}
+              sx={{ 
+                borderBottom: 1, 
+                borderColor: 'divider',
+                '& .MuiTabs-scrollableX': {
+                  overflowX: 'auto',
+                  scrollbarWidth: 'none',
+                  '&::-webkit-scrollbar': {
+                    display: 'none',
+                  },
+                },
+                '& .MuiTabs-scroller': {
+                  overflowX: 'auto',
+                  scrollbarWidth: 'none',
+                  '&::-webkit-scrollbar': {
+                    display: 'none',
+                  },
+                }
+              }}
             >
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
