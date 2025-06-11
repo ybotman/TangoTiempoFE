@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Box, Typography, Tabs, Tab, AppBar, Toolbar, IconButton, useMediaQuery, useTheme } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Modal, Box, Tabs, Tab, useMediaQuery, useTheme } from '@mui/material';
+import ModalHeader from '@/components/UI/ModalHeader';
 import { useVenues } from '@/hooks/useVenues';
 import VenueModalList from './VenueModalList';
 import VenueModalAdd from './VenueModalAdd';
@@ -43,16 +43,10 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle(isMobile)}>
-        <AppBar position="static" color="default">
-          <Toolbar variant="dense">
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Venues Management
-            </Typography>
-            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+        <ModalHeader 
+          title="Venues Management" 
+          onClose={onClose}
+        />
 
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Tabs

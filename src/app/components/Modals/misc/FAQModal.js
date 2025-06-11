@@ -1,36 +1,39 @@
 // components/Modals/misc/FAQModal.js
 
 import React from 'react';
-import { Modal, Box, Typography, Button } from '@mui/material';
+import { Modal, Box, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
+import ModalHeader from '../../UI/ModalHeader';
 
 const modalStyle = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxWidth: '400px',
+  width: '90%',
+  maxWidth: '500px',
   bgcolor: 'background.paper',
   borderRadius: '8px',
   boxShadow: 24,
-  p: 4,
+  display: 'flex',
+  flexDirection: 'column',
+  maxHeight: '90vh',
 };
 
 const FAQModal = ({ open, onClose }) => {
-  // Changed handleClose to onClose here
   return (
     <Modal
       open={open}
-      onClose={onClose} // Updated here as well
+      onClose={onClose}
       aria-labelledby="help-modal-title"
       aria-describedby="help-modal-description"
     >
       <Box sx={modalStyle}>
-        <Typography id="help-modal-title" variant="h6" component="h2">
-          Help & Information
-        </Typography>
-        <Box sx={{ mt: 2 }}>
+        <ModalHeader 
+          title="Help & Information" 
+          onClose={onClose}
+        />
+        <Box sx={{ p: 3, overflow: 'auto' }}>
           <Typography>
             <strong>How can I become a Regional Organizer?</strong>
           </Typography>
@@ -51,9 +54,6 @@ const FAQModal = ({ open, onClose }) => {
           </Typography>
           <Typography>No, we do not sell or share your information with third parties.</Typography>
         </Box>
-        <Button onClick={onClose} variant="contained" sx={{ mt: 3 }}>
-          Close
-        </Button>
       </Box>
     </Modal>
   );

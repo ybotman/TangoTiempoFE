@@ -3,29 +3,33 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Box, Typography, Button } from '@mui/material';
+import { Modal, Box, Typography } from '@mui/material';
+import ModalHeader from '../../UI/ModalHeader';
 
 const modalStyle = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxWidth: '600px',
-  maxHeight: '80vh', // Restrict height for scrolling
+  width: '90%',
+  maxWidth: '700px',
+  maxHeight: '90vh',
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 3,
-  overflowY: 'auto', // Enable scrolling for overflow content
+  borderRadius: '8px',
+  display: 'flex',
+  flexDirection: 'column',
 };
 
 const PrivacyPolicyModal = ({ open, onClose }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Privacy Policy
-        </Typography>
+        <ModalHeader 
+          title="Privacy Policy" 
+          onClose={onClose}
+        />
+        <Box sx={{ p: 3, overflowY: 'auto' }}>
         <Typography variant="h6">
           We never sell, give away, or misuse your data. Period.
           <br />
@@ -106,11 +110,6 @@ const PrivacyPolicyModal = ({ open, onClose }) => {
           <br />
           We may update this policy periodically. Any changes will be communicated through the app and our website.
         </Typography>
-
-        <Box display="flex" justifyContent="flex-end" sx={{ mt: 3 }}>
-          <Button onClick={onClose} variant="contained" color="primary">
-            Close
-          </Button>
         </Box>
       </Box>
     </Modal>
