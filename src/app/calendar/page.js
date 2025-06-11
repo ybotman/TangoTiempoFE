@@ -78,7 +78,8 @@ const CalendarPage = () => {
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}`;
+      const suffix = hours >= 12 ? 'p' : 'a';
+      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
     };
     
     const startTime = formatTime(start);
@@ -86,14 +87,14 @@ const CalendarPage = () => {
     return { startTime, endTime };
   };
 
-  // Format time display with P/A suffix for list view
+  // Format time display with p/a suffix for list view
   const formatTimeForListView = (start, end) => {
     const formatTime = (date) => {
       if (!date) return '';
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-      const suffix = hours >= 12 ? 'P' : 'A';
+      const suffix = hours >= 12 ? 'p' : 'a';
       return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
     };
     

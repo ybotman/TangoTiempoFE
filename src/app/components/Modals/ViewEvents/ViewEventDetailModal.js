@@ -276,20 +276,25 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           {!allDay && startDate && endDate && (
             <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
               <Typography variant="h6" color="textSecondary">
-                Time:{' '}
-                {new Date(startDate).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZoneName: 'short'
-                })}
-              </Typography>
-              <ArrowForwardIcon sx={{ verticalAlign: 'middle', mx: 1 }} />
-              <Typography variant="h6" color="textSecondary">
-                {new Date(endDate).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZoneName: 'short'
-                })}
+                <strong>
+                  {(() => {
+                    const date = new Date(startDate);
+                    const hours = date.getHours();
+                    const minutes = date.getMinutes();
+                    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                    const suffix = hours >= 12 ? 'p' : 'a';
+                    return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+                  })()}
+                </strong>
+                {'-'}
+                {(() => {
+                  const date = new Date(endDate);
+                  const hours = date.getHours();
+                  const minutes = date.getMinutes();
+                  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                  const suffix = hours >= 12 ? 'p' : 'a';
+                  return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+                })()}
               </Typography>
             </Box>
           )}
