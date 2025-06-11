@@ -9,6 +9,7 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
   // Safely access event details with optional chaining
   const description = eventDetails?.extendedProps?.description || 'No description available';
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
+  const eventTitle = eventDetails?.title || '';
 
   // Get venue information - using both new venueID and legacy locationID fields for backward compatibility
   const venueName = eventDetails?.extendedProps?.venueName ||
@@ -23,6 +24,13 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
 
   return (
     <Box>
+      {/* Event Title (in small letters above description) */}
+      {eventTitle && (
+        <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 2 }}>
+          {eventTitle}
+        </Typography>
+      )}
+
       {/* Event Description */}
       <Typography variant="h6" component="h3" gutterBottom>
         Description

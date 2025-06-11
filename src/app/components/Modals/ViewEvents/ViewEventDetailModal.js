@@ -280,7 +280,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 {new Date(startDate).toLocaleTimeString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit',
-                  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                   timeZoneName: 'short'
                 })}
               </Typography>
@@ -289,7 +288,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 {new Date(endDate).toLocaleTimeString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit',
-                  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                   timeZoneName: 'short'
                 })}
               </Typography>
