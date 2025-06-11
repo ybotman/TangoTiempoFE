@@ -118,8 +118,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
   const eventTitle = eventDetails?.title || 'Event Details';
   const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
-  const startDate = eventDetails?._instance?.range?.start || null;
-  const endDate = eventDetails?._instance?.range?.end || null;
+  // Get dates from either _instance.range or direct start/end properties
+  const startDate = eventDetails?._instance?.range?.start || eventDetails?.start || null;
+  const endDate = eventDetails?._instance?.range?.end || eventDetails?.end || null;
   const allDay = eventDetails?.allDay || false;
 
   // Get category information for display
@@ -261,12 +262,15 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             
             {/* Date Display */}
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && new Date(startDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              {startDate && (() => {
+                const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
+                return date.toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                });
+              })()}
             </Typography>
 
           {/* Category Display */}
@@ -278,7 +282,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
               <Typography variant="h6" color="textSecondary">
                 <strong>
                   {(() => {
-                    const date = new Date(startDate);
+                    const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
                     const hours = date.getHours();
                     const minutes = date.getMinutes();
                     const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
@@ -288,7 +292,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 </strong>
                 {'-'}
                 {(() => {
-                  const date = new Date(endDate);
+                  const date = typeof endDate === 'string' ? new Date(endDate) : endDate;
                   const hours = date.getHours();
                   const minutes = date.getMinutes();
                   const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;

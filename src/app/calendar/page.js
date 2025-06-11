@@ -139,11 +139,11 @@ const CalendarPage = () => {
             {startTime && (
               <div style={{ 
                 fontSize: '0.8rem', 
-                fontWeight: 'normal',
                 lineHeight: '1.0',
                 flexShrink: 0
               }}>
-                {startTime}{endTime && `-`}<span style={{ fontSize: '0.75rem' }}>{endTime}</span>
+                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
               </div>
             )}
             <CategoryCircles eventProps={event.extendedProps} />
