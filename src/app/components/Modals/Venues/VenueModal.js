@@ -54,9 +54,26 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
             onChange={handleTabChange}
             aria-label="Venues Management Tabs"
             variant="scrollable"
-            scrollButtons="on"
+            scrollButtons="auto"
             allowScrollButtonsMobile
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{ 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              '& .MuiTabs-scrollableX': {
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+              },
+              '& .MuiTabs-scroller': {
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+              }
+            }}
           >
             <Tab label="List" value="list" />
             <Tab label="Add" value="add" />
