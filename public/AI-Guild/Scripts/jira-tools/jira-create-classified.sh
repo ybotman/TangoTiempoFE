@@ -83,6 +83,9 @@ if [ "$1" = "demo" ]; then
     
     echo
     echo "Demo tickets created with proper classification!"
+elif [ $# -ge 4 ]; then
+    # Create ticket with provided parameters
+    create_ticket "$1" "$2" "$3" "$4" "${5:-Task}"
 else
     echo "Usage: $0 demo"
     echo "   or: $0 <title> <work_type> <domain> <description> [issue_type]"
