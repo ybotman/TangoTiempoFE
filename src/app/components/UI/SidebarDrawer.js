@@ -35,6 +35,7 @@ import MessageIcon from '@mui/icons-material/Message';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
 import BusinessIcon from '@mui/icons-material/Business';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -330,18 +331,32 @@ const SidebarDrawer = ({ open, onClose }) => {
             </>
           )}
           {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
-            <ListItem
-              button="true"
-              onClick={() => {
-                setSystemAdminOpen(true);
-                onClose();
-              }}
-            >
-              <ListItemIcon>
-                <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
-              </ListItemIcon>
-              <ListItemText primary="System Admin" />
-            </ListItem>
+            <>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setSystemAdminOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <AdminPanelSettingsIcon sx={{ color: 'purple' }} />
+                </ListItemIcon>
+                <ListItemText primary="System Admin" />
+              </ListItem>
+              
+              <Link href="/geo-diagnostics" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <GpsFixedIcon sx={{ color: 'orange' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Geo-Diagnostics" />
+                </ListItem>
+              </Link>
+            </>
           )}
           {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
             <>
@@ -364,6 +379,18 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 <ListItemText primary="System Owner" />
               </ListItem>
+              
+              <Link href="/geo-diagnostics" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <GpsFixedIcon sx={{ color: 'orange' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Geo-Diagnostics" />
+                </ListItem>
+              </Link>
             </>
           )}
           <Divider />
