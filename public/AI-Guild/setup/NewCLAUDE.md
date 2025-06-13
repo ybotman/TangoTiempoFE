@@ -1,7 +1,8 @@
 Step one is to READ from the root directory (./):
 1) .jira-config
 2) .guild-config
-STOP if you cannot see them.S
+STOP if you cannot see them.
+Expplain what .<>-config files are use public/AI-Guild/Setup for the exmaple config files.
 
 
 ## Roles and Playbook
