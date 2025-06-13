@@ -38,15 +38,7 @@
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-comment.sh:*)",
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-transition.sh:*)",
       "Bash(git stash show:*)",
-      "Bash(jq:*)",
-      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)",
-      "Bash(cd public/AI-Guild/Scripts/jira-tools)",
-      "Bash(./jira-search.sh \"project = TIEMPO ORDER BY created DESC\")",
-      "Bash(cat:*)",
-      "Bash(./jira-ticket-summary.sh:*)",
-      "Bash(./jira-create-classified.sh:*)",
-      "Bash(./jira-comment.sh:*)",
-      "Bash(gh pr create:*)"
+      "Bash(git stash push:*)"
     ],
     "deny": []
   },
