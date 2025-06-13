@@ -1,11 +1,11 @@
 # Git Promotion and CI/CD Strategy for JIRA Management
 
 ## 🌐 Environment Promotion Flow
-- is defined in the .guild-config :
-- <local> GIT Lifecycle
-- <origin> GIT Lifecycle
-- follow the .guild.config GIT_General_Stategy phase.  The over rides this sections
 
+
+DEVELOPMENT → BRANCHES → DEVELOPMENT
+DEVELOPMENT → TESTING → PRODUCTION
+(Branch names as defined in .guild-config)
 
 ---
 

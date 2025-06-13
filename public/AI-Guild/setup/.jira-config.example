@@ -1,0 +1,27 @@
+# JIRA Configuration Example
+# Copy this to .jira-config in your project root and update with your values
+
+# JIRA Instance
+JIRA_URL="https://yourcompany.atlassian.net"
+JIRA_EMAIL="your.email@example.com"
+
+# Main project - default for most work
+PROJECT="TIEMPO"
+
+# Optional: Define additional projects for different work streams
+# Uncomment and modify as needed:
+# PROJECT_FRONTEND="TIEMPO-FE"
+# PROJECT_BACKEND="TIEMPO-BE"
+# PROJECT_INFRA="INFRA"
+# PROJECT_MOBILE="MOBILE"
+# PROJECT_DOCS="DOCS"
+
+# Guild improvement tickets (if you have access)
+# Used for AI-Guild system improvements and retrospectives
+PROJECTGUILD="AIGUILD"
+
+# API Token Storage (DO NOT store token in this file)
+# Store your token securely in macOS keychain by running:
+# security add-generic-password -a "$(whoami)" -s "jira-api-token" -w "your-actual-token-here"
+
+# The scripts will automatically retrieve the token from keychain
