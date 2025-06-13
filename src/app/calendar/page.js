@@ -79,7 +79,7 @@ const CalendarPage = () => {
       const minutes = date.getMinutes();
       const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
       const suffix = hours >= 12 ? 'p' : 'a';
-      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+      return `${displayHours}:${minutes.toString().padStart(2, '0')}${suffix}`;
     };
     
     const startTime = formatTime(start);
@@ -95,7 +95,7 @@ const CalendarPage = () => {
       const minutes = date.getMinutes();
       const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
       const suffix = hours >= 12 ? 'p' : 'a';
-      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+      return `${displayHours}:${minutes.toString().padStart(2, '0')}${suffix}`;
     };
     
     const startTime = formatTime(start);
@@ -148,17 +148,35 @@ const CalendarPage = () => {
             )}
             <CategoryCircles eventProps={event.extendedProps} />
             {organizerShort && (
-              <div style={{
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                color: '#666',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                lineHeight: '1.0'
-              }}>
-                {organizerShort}
-              </div>
+              <>
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 'normal',
+                  color: '#666',
+                  overflow: 'visible',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 1,
+                  lineHeight: '1.0'
+                }}>
+                  {organizerShort}
+                </div>
+                {eventShortTitle && (
+                  <>
+                    <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      color: '#333',
+                      overflow: 'visible',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 1,
+                      lineHeight: '1.0'
+                    }}>
+                      {eventShortTitle}
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </div>
           
@@ -214,30 +232,35 @@ const CalendarPage = () => {
             {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
             {organizerShort && (
-              <div style={{
-                fontSize: '0.85rem',
-                fontWeight: 'bold',
-                color: '#666',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                lineHeight: '1.2'
-              }}>
-                {organizerShort}
-              </div>
-            )}
-            {eventShortTitle && (
-              <div style={{
-                fontSize: '0.85rem',
-                fontWeight: 'normal',
-                color: '#444',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                lineHeight: '1.2'
-              }}>
-                {eventShortTitle}
-              </div>
+              <>
+                <div style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 'normal',
+                  color: '#666',
+                  overflow: 'visible',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 1,
+                  lineHeight: '1.2'
+                }}>
+                  {organizerShort}
+                </div>
+                {eventShortTitle && (
+                  <>
+                    <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
+                    <div style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      color: '#333',
+                      overflow: 'visible',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 1,
+                      lineHeight: '1.2'
+                    }}>
+                      {eventShortTitle}
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </div>
           
