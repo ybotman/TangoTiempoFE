@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Typography, Paper, Grid, Box, Alert, Button, Switch, FormControlLabel } from '@mui/material';
+import { Container, Typography, Paper, Grid, Box, Alert, Button, Switch, FormControlLabel, AppBar, Toolbar, IconButton, useTheme, useMediaQuery } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useGeoLocation } from '../contexts/GeoLocationContext';
 import { useMasteredLocation } from '../contexts/MasteredLocationContext';
 import { AuthContext } from '../contexts/AuthContext';
@@ -11,6 +12,8 @@ import styles from './page.module.css';
 
 export default function GeoDiagnosticsPage() {
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useContext(AuthContext);
   const geoContext = useGeoLocation();
   const masteredContext = useMasteredLocation();
@@ -136,11 +139,31 @@ export default function GeoDiagnosticsPage() {
 
   return (
     <div>
-      <SiteHeader />
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Geolocation Diagnostics
-        </Typography>
+      {isMobile ? (
+        <AppBar position="static" color="default" elevation={1}>
+          <Toolbar>
+            <IconButton 
+              edge="start" 
+              color="inherit" 
+              onClick={() => router.push('/')} 
+              aria-label="back"
+            >
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              Geo-Diagnostics
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      ) : (
+        <SiteHeader />
+      )}
+      <Container maxWidth={isMobile ? false : "lg"} sx={{ mt: isMobile ? 2 : 4, mb: 4, px: isMobile ? 2 : 3 }}>
+        {!isMobile && (
+          <Typography variant="h4" gutterBottom>
+            Geolocation Diagnostics
+          </Typography>
+        )}
         
         <Alert severity="info" sx={{ mb: 3 }}>
           This page displays all geolocation data for debugging and testing purposes.
@@ -217,8 +240,9 @@ export default function GeoDiagnosticsPage() {
               <Typography variant="h6" gutterBottom>
                 System Comparison
               </Typography>
-              <table className={styles.comparisonTable}>
-                <thead>
+              <Box sx={{ overflowX: 'auto', width: '100%' }}>
+                <table className={styles.comparisonTable}>
+                  <thead>
                   <tr>
                     <th>Metric</th>
                     <th>Current System</th>
@@ -258,7 +282,8 @@ export default function GeoDiagnosticsPage() {
                     <td>✅ Edge</td>
                   </tr>
                 </tbody>
-              </table>
+                </table>
+              </Box>
             </Paper>
           </Grid>
 

@@ -2,6 +2,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 16px;
+  min-width: 500px;
 }
 
 .comparisonTable th,
@@ -9,11 +10,15 @@
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .comparisonTable th {
   background-color: #f5f5f5;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .comparisonTable tr:nth-child(even) {
@@ -22,6 +27,14 @@
 
 .comparisonTable tr:hover {
   background-color: #f0f0f0;
+}
+
+@media (max-width: 600px) {
+  .comparisonTable th,
+  .comparisonTable td {
+    padding: 6px;
+    font-size: 0.875rem;
+  }
 }
 
 .diagnosticsContainer {

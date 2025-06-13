@@ -2,6 +2,7 @@
 
 ## STARTUP TEST (Important First STEP to JIRA connection)
 **You must TEST the JIRA tools to check connection when you have read this document**
+- Add you your check list the JIRA TEST
 
 ### Quick Connection Test
 ```bash
@@ -375,9 +376,8 @@ Use JIRA's Epic functionality:
 ## Migration from IFE to JIRA
 
 ### IFE Timeline
-- In Jun 2025 we migrated from the IFE (Issues, Features, Epics) to JIRA
-- Migration occurred and the old IFE is deprecated
-- You may see legacy JIRA tickets from this migration
+- In Jun 2025 we migrated from the IFE (Issues, Features, Epics) to JIRA. Migration occurred and the old IFE is deprecated
+- You may see legacy JIRA tickets from this migration. But no further talk about IFE
 
 ### Mapping IFE to JIRA
 
