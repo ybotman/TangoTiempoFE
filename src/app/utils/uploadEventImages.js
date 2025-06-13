@@ -20,9 +20,7 @@ export const uploadEventImage = async (file, authToken = null) => {
     formData.append('appId', process.env.NEXT_PUBLIC_APPLICATION_ID);
     
     // Configure headers, including authentication if available
-    const headers = {
-      'Content-Type': 'multipart/form-data',
-    };
+    const headers = {};
     
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
