@@ -1,32 +1,23 @@
-ch#!/bin/bash
-echo "🔍 Checking AI Guild version..."
+When reading this file, 
+**First check** - that .guild-config and .jira-config exist in the root directory
+**Tell the user** - you are checking the version of the GUILD
+**immediately check** - if the local repository is up to date with the remote by running:
+1. git fetch origin
+2. git status -uno
+3. git rev-list HEAD...origin/main --count
 
-# Fetch latest info
-git fetch origin 2>/dev/null
+Report to the user:
+- If local is behind remote (and by how many commits)
+- If local is ahead of remote (and by how many commits)  
+- If local has uncommitted changes
+- If local is up to date with remote
 
-# Check status in simple terms
-if git status -uno | grep -q "up to date"; then
-    echo "✅ You're using the current AI Guild from GitHub"
-elif git status -uno | grep -q "behind"; then
-    echo "⚠️ Your AI Guild is outdated - please run: git pull"
-elif git status -uno | grep -q "ahead"; then
-    echo "📝 You have local AI Guild changes not pushed to GitHub"
-else
-    echo "❓ AI Guild status unclear - check 'git status'"
-fi
+you must do this in not techical terms
 
-Upon agreeement of above (if there is not changes that go right to this step)
+Repository URL: https://github.com/ybotman/ai-guild.git
 
-Then you are to 
-**STARTUP the GIULD**
-# Concatenate all startup and lifecycle docs into one file
-cat public/AI-Guild/Startup/*.md public/AI-Guild/Lifecycle/*.md > combined-guild-docs.md
 
-# Then read the single combined file
-After that summerzie you findings
-
-# then you are to ask if there is any Appl Playbooks to read they are in 
-AI-Guild/Playbooks/Applications/
--- List and number ach folder.
--- if the users resonds with the Number OR the fodler then
--- cat all the *.md for each folder and read the combined-appl-playbooks-<appl>.md
+Add you your list the full startup. You must startup the GUILD by reading and compling with all the guild is. The LifeCylce Docuemns must be read
+1) concatenate all the Startup/*.md files and read them as one.
+2) concatenate all the Playbooks/Lifecycles/*.md files and read them as one.
+3) Inform the user the AI_Guild<Vers> is ready but is not aware of the users applcitions playbooks. They have to isntruct where to read them if thye want source applcition specific ifnromationy.

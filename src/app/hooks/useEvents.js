@@ -275,7 +275,7 @@ export function useEventsLegacy(selectedRegion, selectedDivision, selectedCity, 
 }
 
 export function useEventOperations() {
-  const { user, getIdToken } = useContext(AuthContext);
+  const { user, getIdToken, selectedRole } = useContext(AuthContext);
   
   // Create event
   const createEvent = async (eventData) => {
@@ -307,12 +307,15 @@ export function useEventOperations() {
       const preparedData = {
         ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        selectedRole: selectedRole, // Include the user's selected role for backend validation
         // The backend requires ownerOrganizerID specifically
         ownerOrganizerID: cleanedEventData.ownerOrganizerID || cleanedEventData.grantedOrganizer,
         // Make sure we use masteredRegionName
         masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
         // Set default ownerOrganizerName if not provided
         ownerOrganizerName: cleanedEventData.ownerOrganizerName || "Event Organizer",
+        // Add ownerOrganizerShortName (required by backend)
+        ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Handle both venue and location fields for transitional compatibility
@@ -470,6 +473,7 @@ export function useEventOperations() {
       const preparedData = {
         ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        selectedRole: selectedRole, // Include the user's selected role for backend validation
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields

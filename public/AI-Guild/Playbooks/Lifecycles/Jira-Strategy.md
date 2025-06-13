@@ -16,6 +16,23 @@ source .jira-config
 - **API token is stored in macOS keychain** (not in .jira-config file)
 - Scripts handle authentication automatically via `jira-common.sh`
 
+### PROJECT Configuration in .jira-config
+- **Default variable**: `PROJECT` - This is your main JIRA project for regular work
+- **Additional projects**: Users may define `PROJECT_FRONTEND`, `PROJECT_BACKEND`, `PROJECT_INFRA`, etc.
+- **Guild project**: `PROJECTGUILD` - Reserved for AI-Guild system improvement tickets
+
+### Intelligent Project Selection
+- As you work through issues, I will suggest if work might belong in a different project
+- For example: "This infrastructure task might belong in PROJECT_INFRA instead of main PROJECT"
+- You can define multiple PROJECT variables in .jira-config for different work streams
+- I'll help track which project is most appropriate based on the work type
+
+### NOTE: Guild-Specific Tickets
+- Some users may have the ability to add tickets to the AI-Guild JIRA project
+- Use the `PROJECTGUILD` value from `.jira-config` for Guild improvement tickets
+- This is separate from your main project tickets and is used for AI-Guild system improvements
+- Most users will only use the main `PROJECT` value for their work tickets
+
 ### Full Authentication Flow (if needed)
 ```bash
 source .jira-config && JIRA_API_TOKEN=$(security find-generic-password -a "$(whoami)" -s "jira-api-token" -w)
@@ -114,10 +131,10 @@ Role: Brief action or finding. Key points: A, B, C.
 ## Core Concepts
 
 ### JIRA Issue Types
-- **Bug**: Defects, fixes, small improvements (replaces IFE Issues)
+- **Bug**: Defects, fixes, small improvements
 - **Task**: Technical work items, refactoring, documentation
-- **Story**: User-facing features and enhancements (replaces IFE Features)
-- **Epic**: Large multi-phase efforts with architectural impact (replaces IFE Epics)
+- **Story**: User-facing features and enhancements
+- **Epic**: Large multi-phase efforts with architectural impact
 
 ### JIRA Workflow States
 1. **To Do**: Work not yet started
@@ -169,13 +186,13 @@ Every ticket should have:
 | Epic | `epic/PROJ-123-phase-N-description` | `epic/TIEMPO-104-phase-1-db-migration` |
 
 ### Git Workflow
-1. **Start from DEVL branch**
+1. **Start from DEVELOPMENT branch (as defined in .guild-config)**
 2. **Create feature branch** with JIRA ticket number
 3. **First commit** must reference JIRA ticket
 4. **Update JIRA status** as work progresses
 5. **Log time by role** using jira-worklog.sh
 6. **Create PR** with JIRA ticket in title
-7. **Merge to DEVL** after review
+7. **Merge to DEVELOPMENT branch** after review
 8. **Update JIRA to Done**
 
 ### Commit Message Format
@@ -222,7 +239,7 @@ Always log work with the appropriate AI-Guild role:
 ## Epic Management
 
 ### Epic Structure in JIRA
-Epics in JIRA maintain the phased approach from IFE:
+Epics in JIRA maintain a phased approach:
 
 1. **Create Epic** with clear phases defined in description
 2. **Create child tickets** for each phase
@@ -373,24 +390,11 @@ Use JIRA's Epic functionality:
 
 ---
 
-## Migration from IFE to JIRA
-
-### IFE Timeline
-- In Jun 2025 we migrated from the IFE (Issues, Features, Epics) to JIRA. Migration occurred and the old IFE is deprecated
-- You may see legacy JIRA tickets from this migration. But no further talk about IFE
-
-### Mapping IFE to JIRA
-
-| IFE Type | JIRA Type | Number Range | Notes |
-|----------|-----------|--------------|--------|
-| Issue (1001+) | Bug/Task | N/A | Use JIRA auto-numbering |
-| Feature (3001+) | Story | N/A | Add feature labels |
-| Epic (5001+) | Epic | N/A | Maintain phased approach |
 
 ### Historical Reference
-- Keep completed IFE docs for reference
-- New work uses JIRA exclusively
-- No new IFE documents created
+- Keep completed documentation for reference
+- All work uses JIRA exclusively
+- Track all work items through JIRA
 
 ---
 

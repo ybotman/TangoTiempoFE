@@ -31,11 +31,25 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken } = useContext(AuthContext);
   const [currentTab, setCurrentTab] = useState('basic');
-  // Create initial date/time values from selectedDate using dayjs
-  const initialStartDate = selectedDate ? dayjs(selectedDate) : dayjs();
   
-  // Set end date to be 2 hours after start date by default
-  const initialEndDate = selectedDate ? dayjs(selectedDate).add(2, 'hour') : dayjs().add(2, 'hour');
+  // Helper function to get default start time (7pm of selected date or next day if past 7pm)
+  const getDefaultStartTime = (date) => {
+    const selectedDay = date ? dayjs(date) : dayjs();
+    const sevenPM = selectedDay.hour(19).minute(0).second(0);
+    const now = dayjs();
+    
+    // If current time is past 7pm today, use tomorrow at 7pm
+    if (now.isAfter(sevenPM)) {
+      return sevenPM.add(1, 'day');
+    }
+    return sevenPM;
+  };
+  
+  // Create initial date/time values from selectedDate using dayjs
+  const initialStartDate = getDefaultStartTime(selectedDate);
+  
+  // Set end date to be 3 hours after start date by default
+  const initialEndDate = initialStartDate.add(3, 'hour');
   
   const [eventData, setEventData] = useState({
     title: '',
@@ -151,8 +165,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         let updatedEndDate = prev => prev.endDate;
         
         if (selectedDate) {
-          updatedStartDate = dayjs(selectedDate);
-          updatedEndDate = dayjs(selectedDate).add(2, 'hour');
+          updatedStartDate = getDefaultStartTime(selectedDate);
+          updatedEndDate = updatedStartDate.add(3, 'hour');
         }
         
         setEventData(prev => ({
@@ -323,7 +337,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
       
       // Close the modal on successful save
-      onClose();
+      handleClose();
     } catch (error) {
       console.error('Error saving event:', error);
       setSaveError(error.message || 'Error saving event');
@@ -332,7 +346,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     }
   };
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (_, newValue) => {
     setCurrentTab(newValue);
   };
 
@@ -343,8 +357,49 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     }));
   };
 
+  // Handle modal close - clear form data
+  const handleClose = () => {
+    // Reset form to initial state when closing (only in create mode)
+    if (!editMode) {
+      setEventData({
+        title: '',
+        description: '',
+        startDate: getDefaultStartTime(null),
+        endDate: getDefaultStartTime(null).add(3, 'hour'),
+        cost: '',
+        venueId: '',
+        venueName: '',
+        locationID: '',
+        categoryFirst: '',
+        categoryFirstId: '',
+        categorySecond: '',
+        categorySecondId: '',
+        categoryThird: '',
+        categoryThirdId: '',
+        ownerOrganizerID: '',
+        ownerOrganizerName: '',
+        grantedOrganizerID: '',
+        grantedOrganizerName: '',
+        alternateOrganizerID: '',
+        alternateOrganizerName: '',
+        isRepeating: false,
+        imageFile: null,
+        imagePreviewUrl: null,
+        shortName: '',
+        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
+        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
+        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
+        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+      });
+      setCurrentTab('basic');
+      setSaveError(null);
+    }
+    onClose();
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <Box sx={modalStyle}>
         <Box display="flex" justifyContent="space-between" flexWrap="wrap">
           <Typography variant="h5" component="h2">
@@ -442,7 +497,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           >
             {saving ? 'Saving...' : (editMode ? 'Update Event' : 'Save Event')}
           </Button>
-          <Button onClick={onClose} variant="outlined" color="secondary">
+          <Button onClick={handleClose} variant="outlined" color="secondary">
             Close
           </Button>
         </Box>

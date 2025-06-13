@@ -1,12 +1,12 @@
 # AI GUILD — System Overview
-# VERSION 1.04
+# VERSION 1.05
 
 The **AI GUILD** is a structured, role-driven development system that integrates AI agents and human contributors to deliver high-quality software efficiently. It is organized around three core concepts:
 
 ---
 ## 0. Minimns
-- DEVL is priamary starting branch.
-- The AI-GUILD is a developement team of AI Playbooks.  Whieh i can setich branches. the primary brnach this guild oepratws in is DEVL, if you find youself in a branch that is NOT dev for a reason you do not know, then tell tue user and ask if you should continue
+- DEVELOPMENT (variable) is priamary starting branch.
+- The AI-GUILD is a developement team of AI Playbooks.  Whieh i can setich branches. the primary brnach this guild oepratws in is DEVELOPMENT, if you find youself in a branch that is NOT DEVELOPMENT for a reason you do not know, then tell tue user and ask if you should continue
 
 ---
 
@@ -37,19 +37,6 @@ The **AI GUILD** is a structured, role-driven development system that integrates
 - Only one role is active at a time; transitions are explicit and documented.
 - Roles ensure clear separation of duties, quality control, and traceability.
 - Every interaction ends with an SNR (Summarize, Next Steps, Request Role) block for transparency and workflow continuity.
-
----
-
-## 4. IFE Tracking
-### (I) Issues bugs and problems , 
-### (F) Features - net new, 
-### (E) Epic - the biggies multi phase
-### are documeted as .md's and the the .md's are held in /public/IFE-Tracking/<Issues>|<Features>|<Epics><docuement>
-
-- **Tracking** provides the standards and rules for managing Issues, Features, and Epics (I/F/E) across the system.
-- It defines naming conventions, branch structure, and workflow for traceable, high-quality development.
-- All tracking documentation and policies are maintained in this directory for reference and enforcement.
-
 
 
 ---
