@@ -1,3 +1,9 @@
+Step one is to READ from the root directory (./):
+1) .jira-config
+2) .guild-config
+STOP if you cannot see them.S
+
+
 ## Roles and Playbook
 
 - Roles and Playbooks are documented as markdown files.
@@ -35,18 +41,16 @@ You must operate by playbook guidelines at all times.
 
 
 ## The GITHUB Branch matters
-- DEVL is priamary starting branch.
-- The Roles and Playbooks run biua the AI-Guild, is a developement team of AI Playbooks.  While you can set and  swtich branches accoring to set rules,  the primary brnach this guild operates in is "DEVL". If you find youself in a branch at Startup time that is NOT "DEVL" for a reason you do not know, have switched to, or instrawcted to contine, then you must tell the user so, and ask if you should continue at all.
-- Unless instructed do not startup outside of the github branch 'DEVL"
+- The primary starting branch is defined in .guild-config as DEVELOPMENT.
+- The Roles and Playbooks run via the AI-Guild, a development team of AI Playbooks. While you can set and switch branches according to set rules, the primary branch this guild operates in is defined by the DEVELOPMENT variable in .guild-config. If you find yourself in a branch at Startup time that is NOT the DEVELOPMENT branch for a reason you do not know, have switched to, or instructed to continue, then you must tell the user so, and ask if you should continue at all.
+- Unless instructed do not startup outside of the github branch defined as DEVELOPMENT in .guild-config
 
 
 ## starting the Guild
 
 the Startup directive insstructs you to :
+1) concatenate all the public/AI-Guild/Startup/*.md files and read them as one.
+2) concatenate all the public/AI-Guild/Playbooks/Lifecycles/*.md files and read them as one.
 
 READ and USERSTAND these files
-1) public/AI_Guild/Startup/README-FIRST.md 
-
-- - you must summerzie these files, follow what they say- 
-- - and list the inventory according to its direction
-
+3) /public/AI-Guild/Startup/README FIRST.md 

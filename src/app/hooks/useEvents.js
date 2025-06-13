@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 /**
@@ -276,6 +277,7 @@ export function useEventsLegacy(selectedRegion, selectedDivision, selectedCity, 
 
 export function useEventOperations() {
   const { user, getIdToken } = useContext(AuthContext);
+  const { selectedRole } = useContext(RoleContext);
   
   // Create event
   const createEvent = async (eventData) => {
@@ -303,16 +305,34 @@ export function useEventOperations() {
       // Clean up the event data by converting empty strings for ObjectId fields to null
       const cleanedEventData = sanitizeObjectIdFields(eventData);
       
+      // Log debugging information
+      console.log('Event creation debug info:', {
+        selectedRole: selectedRole,
+        userId: user?.uid,
+        userRoles: user?.roles,
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
+        organizerName: user?.backendInfo?.regionalOrganizerInfo?.organizerName,
+        hasRORole: user?.roles?.includes('RegionalOrganizer'),
+        eventOwnerOrganizerID: cleanedEventData.ownerOrganizerID
+      });
+      
       // Prepare the event data for submission
       const preparedData = {
         ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
-        // The backend requires ownerOrganizerID specifically
-        ownerOrganizerID: cleanedEventData.ownerOrganizerID || cleanedEventData.grantedOrganizer,
+        selectedRole: selectedRole, // Include the user's selected role for backend validation
+        // The backend requires ownerOrganizerID specifically - use the user's organizerId if they're a Regional Organizer
+        ownerOrganizerID: cleanedEventData.ownerOrganizerID || 
+                         (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerId : null) ||
+                         cleanedEventData.grantedOrganizer,
         // Make sure we use masteredRegionName
         masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
-        // Set default ownerOrganizerName if not provided
-        ownerOrganizerName: cleanedEventData.ownerOrganizerName || "Event Organizer",
+        // Set default ownerOrganizerName if not provided - use the user's organizer name if they're a Regional Organizer
+        ownerOrganizerName: cleanedEventData.ownerOrganizerName || 
+                           (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerName : null) ||
+                           "Event Organizer",
+        // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
+        ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Handle both venue and location fields for transitional compatibility
@@ -470,6 +490,7 @@ export function useEventOperations() {
       const preparedData = {
         ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        selectedRole: selectedRole, // Include the user's selected role for backend validation
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields

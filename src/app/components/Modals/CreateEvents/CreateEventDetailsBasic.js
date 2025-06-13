@@ -254,6 +254,23 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           </FormControl>
         </Grid>
 
+        {/* Short Title Input */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <TextField 
+              label="Short Title (15 chars max)" 
+              value={eventData.shortTitle || eventData.shortName || ''} 
+              onChange={(e) => {
+                const value = e.target.value.slice(0, 15); // Enforce 15 char limit
+                setEventData({ ...eventData, shortTitle: value, shortName: value });
+              }}
+              inputProps={{ maxLength: 15 }}
+              helperText={`${(eventData.shortTitle || eventData.shortName || '').length}/15 characters`}
+              fullWidth
+            />
+          </FormControl>
+        </Grid>
+
         {/* Category Selection */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>

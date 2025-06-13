@@ -278,27 +278,33 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
           {/* Time Range */}
           {!allDay && startDate && endDate && (
-            <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
-              <Typography variant="h6" color="textSecondary">
-                <strong>
+            <Box sx={{ mt: 2 }}>
+              <Box display="flex" alignItems="center">
+                <Typography variant="h6" color="textSecondary">
+                  <strong>
+                    {(() => {
+                      const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
+                      const hours = date.getHours();
+                      const minutes = date.getMinutes();
+                      const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                      const suffix = hours >= 12 ? 'p' : 'a';
+                      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+                    })()}
+                  </strong>
+                  {'-'}
                   {(() => {
-                    const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
+                    const date = typeof endDate === 'string' ? new Date(endDate) : endDate;
                     const hours = date.getHours();
                     const minutes = date.getMinutes();
                     const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
                     const suffix = hours >= 12 ? 'p' : 'a';
                     return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
                   })()}
-                </strong>
-                {'-'}
-                {(() => {
-                  const date = typeof endDate === 'string' ? new Date(endDate) : endDate;
-                  const hours = date.getHours();
-                  const minutes = date.getMinutes();
-                  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-                  const suffix = hours >= 12 ? 'p' : 'a';
-                  return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
-                })()}
+                </Typography>
+                <ArrowForwardIcon sx={{ color: 'red', ml: 1, fontSize: '1.2rem' }} />
+              </Box>
+              <Typography variant="caption" sx={{ color: 'red', fontStyle: 'italic', display: 'block', mt: 0.5 }}>
+                Note: These times are shown in the wrong timezone (we are working on a fix)
               </Typography>
             </Box>
           )}

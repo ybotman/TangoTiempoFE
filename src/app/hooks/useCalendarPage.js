@@ -179,6 +179,17 @@ export const useCalendarPage = () => {
   };
 
   const handleDateClick = (arg) => {
+    // Check if clicked date is in the past
+    const clickedDate = new Date(arg.dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (clickedDate < today) {
+      // Don't allow creating events in the past
+      console.log('Cannot create events in the past');
+      return;
+    }
+    
     setClickedDate(arg.dateStr);
 
     // Track date click

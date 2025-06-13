@@ -1,0 +1,25 @@
+
+# Branch Names
+DEVELOPMENT="DEVL"
+TESTING="TEST"
+PRODUCTION="PROD"
+
+# Default working branch
+DEFAULT_BRANCH="DEVL"
+
+# <local> GIT Lifecycle
+DEVL—><branch>—>DEVL
+
+# <origin> GIT Lifecycle
+DEVL—>TEST—>PROD
+# Over arching GIT strategy (Fill in your own words like “Dont MERGE or PR”_
+GIT_General_Stategy = ‘follow the GIT-Strategy.md’
+
+
+# Application Playbooks (Optional)
+# Define paths to application-specific documentation
+# Can be either a folder (all .md files will be concatenated) or a single file
+
+Appl_Playbook_TangoTiempo = ‘public/Playbook/tango-tiempo/‘
+Appl_Playbook_MasterCalendar = ‘public/Playbook/MasterCalendar/‘
+Appl_Playbook_CalendarBE = ‘public/Playbook/calendar-be/‘
