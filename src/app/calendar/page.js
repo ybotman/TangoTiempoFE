@@ -71,6 +71,30 @@ const CalendarPage = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
   };
 
+  // Generate placeholder events for list view to show all dates
+  const generatePlaceholderEvents = (startDate, endDate) => {
+    const placeholders = [];
+    const current = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (current <= end) {
+      placeholders.push({
+        id: `placeholder-${current.toISOString()}`,
+        title: '',
+        start: new Date(current),
+        allDay: true,
+        display: 'none', // Hide the placeholder visually
+        classNames: ['fc-placeholder-event'],
+        extendedProps: {
+          isPlaceholder: true
+        }
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return placeholders;
+  };
+
   // Format time display without AM/PM for monthly view
   const formatTimeForMonthly = (start, end) => {
     const formatTime = (date) => {
@@ -279,6 +303,36 @@ const CalendarPage = () => {
       );
     }
   };
+  // Combine real events with placeholder events for list view
+  const [eventsWithPlaceholders, setEventsWithPlaceholders] = React.useState(coloredFilteredEvents);
+  
+  useEffect(() => {
+    // Update events whenever the view or date range changes
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      const view = calendarApi.view;
+      
+      // Only add placeholders for list views
+      if (view && (view.type === 'list21Days' || view.type === 'listMonth')) {
+        const startDate = view.currentStart;
+        const endDate = view.currentEnd;
+        
+        // Generate placeholders for the current view range
+        const placeholders = generatePlaceholderEvents(startDate, endDate);
+        
+        // Combine with real events
+        const combined = [...coloredFilteredEvents, ...placeholders];
+        setEventsWithPlaceholders(combined);
+      } else {
+        // For other views, just use the real events
+        setEventsWithPlaceholders(coloredFilteredEvents);
+      }
+    } else {
+      // If calendar is not ready yet, just use the real events
+      setEventsWithPlaceholders(coloredFilteredEvents);
+    }
+  }, [coloredFilteredEvents]);
+
   //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
     const handleWindowResize = () => {
@@ -371,13 +425,31 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
         //        initialView="dayGridMonth"
         initialView={getInitialView()}
-        events={coloredFilteredEvents}
-        datesSet={handleDatesSet}
+        events={eventsWithPlaceholders}
+        datesSet={(dateInfo) => {
+          handleDatesSet(dateInfo);
+          // Trigger re-calculation of events when view changes
+          if (calendarRef.current) {
+            const view = calendarRef.current.getApi().view;
+            if (view.type === 'list21Days' || view.type === 'listMonth') {
+              const placeholders = generatePlaceholderEvents(view.currentStart, view.currentEnd);
+              setEventsWithPlaceholders([...coloredFilteredEvents, ...placeholders]);
+            } else {
+              setEventsWithPlaceholders(coloredFilteredEvents);
+            }
+          }
+        }}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
+          // Handle placeholder events
+          if (eventInfo.event.extendedProps.isPlaceholder) {
+            // Hide the placeholder event completely
+            eventInfo.el.style.display = 'none';
+          }
+          
           // Remove background color for list view to avoid double category display
           if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'list21Days') {
             eventInfo.el.style.backgroundColor = 'transparent';
@@ -398,6 +470,17 @@ const CalendarPage = () => {
             // Alternative: hide the entire time column border-left which contains the color indicator
             eventInfo.el.style.borderLeft = 'none';
           }
+        }}
+        listDayDidMount={(info) => {
+          // Make the day header clickable in list view
+          const dayEl = info.el;
+          dayEl.style.cursor = 'pointer';
+          dayEl.addEventListener('click', () => {
+            handleDateClick({ 
+              dateStr: info.date.toISOString().split('T')[0],
+              jsEvent: { clientX: 0, clientY: 0 }
+            });
+          });
         }}
         ref={calendarRef}
         headerToolbar={false}
