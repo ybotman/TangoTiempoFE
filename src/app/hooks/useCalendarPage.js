@@ -27,7 +27,6 @@ export const useCalendarPage = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const categories = useCategories();
-  console.log('useCalendarPage categories:', categories);
   const { getMenuItems } = useMenuItems();
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
@@ -74,7 +73,6 @@ export const useCalendarPage = () => {
   // Initialize event operations
   const { getEventById } = useEventOperations();
 
-  console.log('uCP GeoLocation: ', regionName, '>>', divisionName, '>>', cityName, '>>', datesSet?.start, datesSet?.end);
 
   const handleDatesSet = (dateInfo) => {
     setDatesSet({
@@ -186,7 +184,6 @@ export const useCalendarPage = () => {
     
     if (clickedDate < today) {
       // Don't allow creating events in the past
-      console.log('Cannot create events in the past');
       return;
     }
     

@@ -33,8 +33,6 @@ export function useVenues() {
       // We'll just fetch all venues and filter them on the client side if needed
       // This ensures we always have venues to display
       
-      // Log all params for debugging
-      console.log('Looking for venues with region:', masteredRegionId, 'division:', masteredDivisionId, 'city:', masteredCityId);
       
       console.log('Fetching venues with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });

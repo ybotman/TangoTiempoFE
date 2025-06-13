@@ -292,26 +292,6 @@ const LocationContextModal = ({ open, onClose }) => {
   const hasError = citiesError;
   const hasCities = citiesWithCoords && citiesWithCoords.length > 0;
 
-  // For debugging
-  console.log('Render state:', {
-    isLoading,
-    hasError: hasError ? citiesError : null,
-    hasCities,
-    hasNearestCity: !!nearestCity,
-    cityCount: citiesWithCoords?.length || 0,
-    loadingState: {
-      componentLoading: loading,
-      citiesLoading,
-      nearestCityLoading,
-      mapReady
-    },
-    nearestCityInfo: nearestCity ? {
-      id: nearestCity.cityID,
-      name: nearestCity.cityName,
-      coordinates: [nearestCity.latitude, nearestCity.longitude]
-    } : 'missing'
-  });
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Select Nearest City</DialogTitle>

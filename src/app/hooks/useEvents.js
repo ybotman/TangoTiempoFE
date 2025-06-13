@@ -191,7 +191,6 @@ export function useEvents({
         */
       }
 
-      console.log('Fetching events with params:', params);
 
       // Call the unified endpoint
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
