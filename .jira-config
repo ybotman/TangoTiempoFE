@@ -4,6 +4,10 @@
 JIRA_URL="https://tobybalsley.atlassian.net"
 JIRA_EMAIL="toby.balsley@gmail.com"
 PROJECT="TIEMPO"
+PROJECTGUILD="AIGUILD"
+
+
+
 
 # Token stored separately in keychain for security
 # Run: security add-generic-password -a "$(whoami)" -s "jira-api-token" -w "your-token"
