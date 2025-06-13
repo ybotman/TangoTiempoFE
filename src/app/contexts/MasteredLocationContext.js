@@ -54,7 +54,7 @@ export const MasteredLocationProvider = ({ children }) => {
       };
       
       setNearestCity(bostonFallback);
-      console.log('MasteredLocationContext: Using Boston fallback due to invalid coordinates');
+      // Using Boston fallback due to invalid coordinates
       return bostonFallback;
     }
 
@@ -62,10 +62,7 @@ export const MasteredLocationProvider = ({ children }) => {
     const parsedLatitude = parseFloat(latitude);
     const parsedLongitude = parseFloat(longitude);
 
-    console.log('MasteredLocationContext: fetchNearestCity - Fetching nearest city', { 
-      latitude: parsedLatitude, 
-      longitude: parsedLongitude 
-    });
+    // Fetching nearest city with coordinates
     
     setLoading(true);
     try {
@@ -77,7 +74,7 @@ export const MasteredLocationProvider = ({ children }) => {
       if (!response.ok) {
         // Default to Boston without hardcoded IDs
         if (response.status === 404) {
-          console.log('MasteredLocationContext: No nearby city found, defaulting to Boston');
+          // No nearby city found, defaulting to Boston
           
           // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
           const defaultCity = {
@@ -140,7 +137,7 @@ export const MasteredLocationProvider = ({ children }) => {
       } else {
         // Default to Boston's latitude as fallback
         cityLatitude = 42.3601;
-        console.log('MasteredLocationContext: Using fallback latitude for city data');
+        // Using fallback latitude for city data
       }
       
       if (data.longitude !== undefined && data.longitude !== null && !isNaN(parseFloat(data.longitude))) {
@@ -153,7 +150,7 @@ export const MasteredLocationProvider = ({ children }) => {
       } else {
         // Default to Boston's longitude as fallback
         cityLongitude = -71.0589;
-        console.log('MasteredLocationContext: Using fallback longitude for city data');
+        // Using fallback longitude for city data
       }
 
       const cityData = {
@@ -173,10 +170,7 @@ export const MasteredLocationProvider = ({ children }) => {
                     !data.cityID || !data.regionID || !data.divisionID || !data.countryID
       };
 
-      console.log('MasteredLocationContext: fetchNearestCity - Success', {
-        cityName: cityData.cityName,
-        coords: [cityData.latitude, cityData.longitude]
-      });
+      // Successfully fetched nearest city
 
       setNearestCity(cityData);
       return cityData;
@@ -213,7 +207,7 @@ export const MasteredLocationProvider = ({ children }) => {
 
   // Fetch cities for a specific division or all cities if divisionId is not provided
   const fetchCities = useCallback(async (divisionId, isActive = true) => {
-    console.log('MasteredLocationContext: fetchCities', { divisionId, isActive });
+    // Fetching cities
     setLoading(true);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
@@ -225,7 +219,7 @@ export const MasteredLocationProvider = ({ children }) => {
         url += `&divisionId=${divisionId}`;
       }
 
-      console.log('MasteredLocationContext: Fetching cities from:', url);
+      // Fetching cities from API
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -237,7 +231,7 @@ export const MasteredLocationProvider = ({ children }) => {
       // Handle different API response formats
       let citiesArray = data;
       if (!Array.isArray(data) && data.cities && Array.isArray(data.cities)) {
-        console.log('MasteredLocationContext: API returned cities in data.cities format');
+        // API returned cities in nested format
         citiesArray = data.cities;
       } else if (!Array.isArray(data)) {
         console.error('MasteredLocationContext: Invalid cities data format:', data);
@@ -281,7 +275,7 @@ export const MasteredLocationProvider = ({ children }) => {
                !isNaN(parseFloat(city.longitude))
       );
 
-      console.log(`MasteredLocationContext: Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
+      // Cities fetched successfully
 
       setCities(citiesWithCoordinates);
       return citiesWithCoordinates;
@@ -296,7 +290,7 @@ export const MasteredLocationProvider = ({ children }) => {
 
   // Fetch regions
   const fetchRegions = useCallback(async (countryId, isActive = true) => {
-    console.log('MasteredLocationContext: fetchRegions', { countryId, isActive });
+    // Fetching regions
     setLoading(true);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
@@ -334,7 +328,7 @@ export const MasteredLocationProvider = ({ children }) => {
 
   // Fetch divisions
   const fetchDivisions = useCallback(async (regionId, isActive = true) => {
-    console.log('MasteredLocationContext: fetchDivisions', { regionId, isActive });
+    // Fetching divisions
     setLoading(true);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
@@ -397,7 +391,7 @@ export const MasteredLocationProvider = ({ children }) => {
       console.log('MasteredLocationContext: Boston set as default location');
 
       // Preload cities data for the UI - do this regardless of how we got location
-      console.log('MasteredLocationContext: Preloading cities and regions data');
+      // Preloading cities and regions data
       try {
         // Use Promise.allSettled to load data in parallel without failing if one fails
         await Promise.allSettled([
@@ -409,7 +403,7 @@ export const MasteredLocationProvider = ({ children }) => {
         // Non-fatal, continue with initialization
       }
       
-      console.log('MasteredLocationContext: Context initialization complete');
+      // Context initialization complete
       
     } catch (err) {
       // Handle any errors that happened during the overall initialization process
@@ -421,7 +415,7 @@ export const MasteredLocationProvider = ({ children }) => {
       setError(errorMessage);
 
       // Default to Boston if any other error occurs - without hardcoded IDs
-      console.log('MasteredLocationContext: Defaulting to Boston as emergency fallback');
+      // Defaulting to Boston as emergency fallback
       
       // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
       const emergencyFallback = {
