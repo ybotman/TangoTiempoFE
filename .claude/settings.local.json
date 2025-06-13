@@ -39,7 +39,8 @@
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-transition.sh:*)",
       "Bash(git stash show:*)",
       "Bash(git stash push:*)",
-      "Bash(public/AI-Guild/Scripts/jira-tools/jira-comment.sh TIEMPO-104 \"Scout\" \"Root cause identified: The 403 error occurs because the frontend manually sets Content-Type: 'multipart/form-data' header without the required boundary parameter. When using FormData with axios, the Content-Type header must be omitted so axios can set it automatically with the proper boundary. Fix: Remove line 24 in src/app/utils/uploadEventImages.js that sets 'Content-Type': 'multipart/form-data'\")"
+      "Bash(public/AI-Guild/Scripts/jira-tools/jira-comment.sh TIEMPO-104 \"Scout\" \"Root cause identified: The 403 error occurs because the frontend manually sets Content-Type: 'multipart/form-data' header without the required boundary parameter. When using FormData with axios, the Content-Type header must be omitted so axios can set it automatically with the proper boundary. Fix: Remove line 24 in src/app/utils/uploadEventImages.js that sets 'Content-Type': 'multipart/form-data'\")",
+      "Bash(rg:*)"
     ],
     "deny": []
   },
