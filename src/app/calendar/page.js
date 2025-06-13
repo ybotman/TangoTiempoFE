@@ -2,7 +2,7 @@
 
 'use client'; 
 import Head from 'next/head';
-import React, {useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
@@ -71,6 +71,30 @@ const CalendarPage = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
   };
 
+  // Generate placeholder events for list view to show all dates
+  const generatePlaceholderEvents = (startDate, endDate) => {
+    const placeholders = [];
+    const current = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (current <= end) {
+      placeholders.push({
+        id: `placeholder-${current.toISOString()}`,
+        title: 'Click to add event', // Show instructional text
+        start: new Date(current),
+        allDay: true,
+        display: 'list-item', // Make it visible in list view
+        classNames: ['fc-placeholder-event'],
+        extendedProps: {
+          isPlaceholder: true
+        }
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return placeholders;
+  };
+
   // Format time display without AM/PM for monthly view
   const formatTimeForMonthly = (start, end) => {
     const formatTime = (date) => {
@@ -107,6 +131,25 @@ const CalendarPage = () => {
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
+    
+    // Handle placeholder events specially
+    if (event.extendedProps?.isPlaceholder) {
+      // For list view placeholders, show clickable text
+      if (eventInfo.view.type === 'list21Days' || eventInfo.view.type === 'listMonth') {
+        return (
+          <div style={{
+            padding: '8px 16px',
+            width: '100%',
+            textAlign: 'center',
+            fontSize: '0.9rem'
+          }}>
+            <span style={{ opacity: 0.6 }}>Click to add event</span>
+          </div>
+        );
+      }
+      // Hide placeholders in other views
+      return null;
+    }
     
     // Get organizer short name and event short title with fallbacks
     const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
@@ -279,14 +322,48 @@ const CalendarPage = () => {
       );
     }
   };
+  // State to track current view type
+  const [currentViewType, setCurrentViewType] = useState(null);
+  const [viewDateRange, setViewDateRange] = useState({ start: null, end: null });
+  
+  // Compute events with placeholders based on current view
+  const eventsWithPlaceholders = (() => {
+    if (currentViewType === 'list21Days' || currentViewType === 'listMonth') {
+      if (viewDateRange.start && viewDateRange.end) {
+        // Generate placeholders for the current view range
+        const placeholders = generatePlaceholderEvents(viewDateRange.start, viewDateRange.end);
+        
+        // Filter out dates that already have real events
+        const eventDates = new Set(
+          coloredFilteredEvents.map(event => {
+            const eventDate = new Date(event.start);
+            return eventDate.toDateString();
+          })
+        );
+        
+        const neededPlaceholders = placeholders.filter(placeholder => {
+          const placeholderDate = new Date(placeholder.start);
+          return !eventDates.has(placeholderDate.toDateString());
+        });
+        
+        // Combine with real events
+        return [...coloredFilteredEvents, ...neededPlaceholders];
+      }
+    }
+    // For other views or when date range not set, just use the real events
+    return coloredFilteredEvents;
+  })();
+
   //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
   useEffect(() => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();
       if (window.innerWidth >= 768) {
         calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
+        setCurrentViewType('dayGridMonth');
       } else {
         calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
+        setCurrentViewType('list21Days');
       }
     };
 
@@ -357,10 +434,16 @@ const CalendarPage = () => {
           </div>
 
           <ButtonGroup variant="outlined" aria-label="outlined button group">
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('dayGridMonth')}>
+            <IconButton onClick={() => {
+              calendarRef.current.getApi().changeView('dayGridMonth');
+              setCurrentViewType('dayGridMonth');
+            }}>
               <CalendarMonthIcon />
             </IconButton>
-            <IconButton onClick={() => calendarRef.current.getApi().changeView('list21Days')}>
+            <IconButton onClick={() => {
+              calendarRef.current.getApi().changeView('list21Days');
+              setCurrentViewType('list21Days');
+            }}>
               <ListIcon />
             </IconButton>
           </ButtonGroup>
@@ -371,15 +454,61 @@ const CalendarPage = () => {
         plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
         //        initialView="dayGridMonth"
         initialView={getInitialView()}
-        events={coloredFilteredEvents}
-        datesSet={handleDatesSet}
+        events={eventsWithPlaceholders}
+        datesSet={(dateInfo) => {
+          handleDatesSet(dateInfo);
+          // Track view type and date range
+          if (calendarRef.current) {
+            const view = calendarRef.current.getApi().view;
+            setCurrentViewType(view.type);
+            setViewDateRange({ start: view.currentStart, end: view.currentEnd });
+          }
+        }}
         nextDayThreshold="04:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
+          // Handle placeholder events
+          if (eventInfo.event.extendedProps.isPlaceholder) {
+            // Style placeholder events to look like clickable day entries
+            if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'list21Days') {
+              // Style the placeholder to look like an empty day entry
+              eventInfo.el.style.backgroundColor = '#f8f9fa';
+              eventInfo.el.style.cursor = 'pointer';
+              eventInfo.el.style.opacity = '0.7';
+              eventInfo.el.style.fontStyle = 'italic';
+              eventInfo.el.style.color = '#6c757d';
+              
+              // Add hover effect
+              eventInfo.el.addEventListener('mouseenter', () => {
+                eventInfo.el.style.backgroundColor = '#e9ecef';
+                eventInfo.el.style.opacity = '1';
+              });
+              eventInfo.el.addEventListener('mouseleave', () => {
+                eventInfo.el.style.backgroundColor = '#f8f9fa';
+                eventInfo.el.style.opacity = '0.7';
+              });
+              
+              // Hide the time for placeholder events
+              const timeElement = eventInfo.el.querySelector('.fc-list-event-time');
+              if (timeElement) {
+                timeElement.style.display = 'none';
+              }
+              
+              // Hide the dot/circle indicator
+              const dotElement = eventInfo.el.querySelector('.fc-list-event-dot');
+              if (dotElement) {
+                dotElement.style.display = 'none';
+              }
+            } else {
+              // Hide placeholders in non-list views
+              eventInfo.el.style.display = 'none';
+            }
+          }
+          
           // Remove background color for list view to avoid double category display
-          if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'list21Days') {
+          if (!eventInfo.event.extendedProps.isPlaceholder && (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'list21Days')) {
             eventInfo.el.style.backgroundColor = 'transparent';
             eventInfo.el.style.borderColor = '#ddd';
             
