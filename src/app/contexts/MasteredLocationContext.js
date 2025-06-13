@@ -374,122 +374,27 @@ export const MasteredLocationProvider = ({ children }) => {
     try {
       // Set initial loading state
       setLoading(true);
-      console.log('MasteredLocationContext: Initializing context');
+      console.log('MasteredLocationContext: Initializing with Boston as default');
       
-      let latitude = null;
-      let longitude = null;
-      let useDefaultLocation = false;
-
-      try {
-        // Only attempt to fetch geolocation if we haven't been rate limited
-        // and if we're in a browser environment with sessionStorage
-        const hasRateLimit = typeof window !== 'undefined' && 
-                            typeof sessionStorage !== 'undefined' && 
-                            sessionStorage.getItem('geo_rate_limited');
-                            
-        if (!hasRateLimit) {
-          const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-
-          console.log('MasteredLocationContext: Fetching IP geolocation');
-          try {
-            const ipapiResponse = await fetch(`${baseURL}/api/firebase/geo/ip`, {
-              signal: controller.signal
-            });
-
-            clearTimeout(timeoutId);
-
-            // Handle rate limiting explicitly
-            if (ipapiResponse.status === 429) {
-              console.warn('MasteredLocationContext: Geo IP service rate limited');
-              
-              // Only attempt to use sessionStorage in browser environment
-              if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
-                sessionStorage.setItem('geo_rate_limited', 'true');
-                // Set a timeout to clear the rate limit flag after 5 minutes
-                setTimeout(() => {
-                  sessionStorage.removeItem('geo_rate_limited');
-                }, 5 * 60 * 1000);
-              }
-              
-              throw new Error('Rate limited');
-            }
-
-            if (!ipapiResponse.ok) {
-              throw new Error(`Geolocation Error: ${ipapiResponse.statusText || 'Unknown error'}`);
-            }
-
-            const data = await ipapiResponse.json();
-            console.log('MasteredLocationContext: IP geolocation response received');
-
-            if (data && data.latitude !== undefined && data.longitude !== undefined && 
-                data.latitude !== null && data.longitude !== null &&
-                !isNaN(parseFloat(data.latitude)) && !isNaN(parseFloat(data.longitude))) {
-              
-              latitude = parseFloat(data.latitude);
-              longitude = parseFloat(data.longitude);
-              console.log('MasteredLocationContext: Using coordinates from IP geolocation', { latitude, longitude });
-              
-            } else if (data && data.fallback && 
-                      data.fallback.latitude !== undefined && data.fallback.longitude !== undefined) {
-                      
-              // Use fallback coordinates if provided by proxy
-              latitude = parseFloat(data.fallback.latitude);
-              longitude = parseFloat(data.fallback.longitude);
-              console.log('MasteredLocationContext: Using fallback coordinates from proxy', { latitude, longitude });
-              
-            } else {
-              console.warn('MasteredLocationContext: Invalid geolocation data returned', data);
-              throw new Error('Invalid geolocation data');
-            }
-          } catch (fetchError) {
-            clearTimeout(timeoutId);
-            throw fetchError;
-          }
-        } else {
-          console.log('MasteredLocationContext: Using cached rate limit status, skipping IP geolocation');
-          throw new Error('Using cached rate limit status');
-        }
-      } catch (geoError) {
-        console.warn('MasteredLocationContext: Geolocation failed, using default location:', geoError.message);
-        useDefaultLocation = true;
-      }
-
-      // At this point we either have valid coordinates or need to use default location
-      if (!useDefaultLocation && latitude !== null && longitude !== null) {
-        console.log('MasteredLocationContext: Fetching nearest city with coordinates', { latitude, longitude });
-        try {
-          await fetchNearestCity(latitude, longitude);
-        } catch (nearestCityError) {
-          console.error('MasteredLocationContext: Error fetching nearest city with coordinates:', nearestCityError);
-          useDefaultLocation = true;
-        }
-      }
+      // Set Boston as the immediate default location
+      // This ensures users see content immediately without waiting for geolocation
+      const bostonDefault = {
+        cityID: null, // No hardcoded ID
+        cityName: 'Boston',
+        regionID: null, // No hardcoded ID
+        regionName: 'Northeast',
+        divisionID: null, // No hardcoded ID
+        divisionName: 'New England',
+        countryID: null, // No hardcoded ID
+        countryName: 'United States',
+        latitude: 42.3601,
+        longitude: -71.0589,
+        isDefault: true, // Mark as default (not fallback)
+        isFallback: false // This is intentional default, not a fallback
+      };
       
-      // If we need to use default location or nearest city fetch failed
-      if (useDefaultLocation) {
-        // Default to Boston if geolocation fails - without hardcoded IDs
-        console.log('MasteredLocationContext: Using Boston as fallback city');
-        
-        // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-        const bostonFallback = {
-          cityID: null, // No hardcoded ID
-          cityName: 'Boston',
-          regionID: null, // No hardcoded ID
-          regionName: 'Northeast',
-          divisionID: null, // No hardcoded ID
-          divisionName: 'New England',
-          countryID: null, // No hardcoded ID
-          countryName: 'United States',
-          latitude: 42.3601,
-          longitude: -71.0589,
-          isFallback: true, // Mark as fallback data
-          reason: 'init_fallback' // Add reason for diagnostics
-        };
-        
-        setNearestCity(bostonFallback);
-      }
+      setNearestCity(bostonDefault);
+      console.log('MasteredLocationContext: Boston set as default location');
 
       // Preload cities data for the UI - do this regardless of how we got location
       console.log('MasteredLocationContext: Preloading cities and regions data');
