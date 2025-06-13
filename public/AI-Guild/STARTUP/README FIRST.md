@@ -1,23 +1,28 @@
-When reading this file, 
-**First check** - that .guild-config and .jira-config exist in the root directory
-**Tell the user** - you are checking the version of the GUILD
-**immediately check** - if the local repository is up to date with the remote by running:
-1. git fetch origin
-2. git status -uno
-3. git rev-list HEAD...origin/main --count
+When reading this file:
 
-Report to the user:
-- If local is behind remote (and by how many commits)
-- If local is ahead of remote (and by how many commits)  
-- If local has uncommitted changes
-- If local is up to date with remote
+**1. Check Configuration**
+- Because you have  .guild-config and .jira-config
 
-you must do this in not techical terms
+**2. Display Version**
+- Show local AI-Guild version from .guild-config
+
+**3. Quick Version Check**
+- Run: `git fetch origin && git status -uno`
+- Tell user simply: "Your Guild is up to date" or "Updates available from repository"
 
 Repository URL: https://github.com/ybotman/ai-guild.git
 
+**4. Reading Application Playbooks**
+the .guild-config may have Application PLAYBOOKS labeled Appl_Playbook_<APP>. E.G.
 
-Add you your list the full startup. You must startup the GUILD by reading and compling with all the guild is. The LifeCylce Docuemns must be read
-1) concatenate all the Startup/*.md files and read them as one.
-2) concatenate all the Playbooks/Lifecycles/*.md files and read them as one.
-3) Inform the user the AI_Guild<Vers> is ready but is not aware of the users applcitions playbooks. They have to isntruct where to read them if thye want source applcition specific ifnromationy.
+Appl_Playbook_Appl1 = 'path/folder1' or 'path/file-1.md'
+Appl_Playbook_Appl2 = 'path/folder2' or 'path/file2.md'
+
+- You are to concatenate the folders into 1 file and read as 1
+- or read the path/file-x.md
+
+**5. Guild is Ready**
+- Inform user: "AI-Guild v[VERSION] ready. 
+- Inform user: the Appliction playbooks read
+- If there are no playbooks, the train the user what they could do.
+- List commands, and SNR.

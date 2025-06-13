@@ -1,7 +1,7 @@
 Step one is to READ from the root directory (./):
 1) .jira-config
 2) .guild-config
-STOP if you cannot see them.S
+STOP if you cannot see them.
 
 
 ## Roles and Playbook
@@ -49,8 +49,10 @@ You must operate by playbook guidelines at all times.
 ## starting the Guild
 
 the Startup directive insstructs you to :
-1) concatenate all the public/AI-Guild/Startup/*.md files and read them as one.
-2) concatenate all the public/AI-Guild/Playbooks/Lifecycles/*.md files and read them as one.
 
 READ and USERSTAND these files
-3) /public/AI-Guild/Startup/README FIRST.md 
+1) /public/AI-Guild/Startup/README FIRST.md 
+
+- - you must summerzie these files, follow what they say- 
+- - and list the inventory according to its direction
+
