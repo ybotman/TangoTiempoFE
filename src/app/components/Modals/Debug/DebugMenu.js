@@ -11,7 +11,9 @@ import {
   Typography,
   Tabs,
   Tab,
-  Box
+  Box,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import CodeIcon from '@mui/icons-material/Code';
@@ -26,6 +28,7 @@ import RegionsContextDebug from './RegionsContextDebug';
 import RoleContextDebug from './RoleContextDebug';
 import MasteredLocationContextDebug from './MasteredLocationContextDebug';
 import GeoLocationContextDebug from './GeoLocationContextDebug';
+import ModalHeader from '@/components/UI/ModalHeader';
 
 /**
  * Debug Menu Component
@@ -35,6 +38,8 @@ import GeoLocationContextDebug from './GeoLocationContextDebug';
  */
 const DebugMenu = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -46,27 +51,52 @@ const DebugMenu = ({ open, onClose }) => {
       onClose={onClose} 
       maxWidth="md" 
       fullWidth
+      fullScreen={isMobile}
       PaperProps={{
         sx: {
-          height: '80vh',
-          maxHeight: '80vh',
+          height: isMobile ? '100vh' : '80vh',
+          maxHeight: isMobile ? '100vh' : '80vh',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          ...(isMobile && {
+            margin: 0,
+            borderRadius: 0,
+            paddingTop: 'env(safe-area-inset-top, 0px)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          })
         }
       }}
     >
-      <DialogTitle>
-        <Box display="flex" alignItems="center">
-          <BugReportIcon sx={{ mr: 1, color: 'error.main' }} />
-          <Typography variant="h6">Debug Menu</Typography>
-          <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>
-            (Current environment: {process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.NODE_ENV})
-          </Typography>
-        </Box>
-      </DialogTitle>
+      {isMobile ? (
+        <ModalHeader 
+          title="Debug Menu" 
+          onClose={onClose}
+          actions={
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.NODE_ENV}
+            </Typography>
+          }
+        />
+      ) : (
+        <DialogTitle>
+          <Box display="flex" alignItems="center">
+            <BugReportIcon sx={{ mr: 1, color: 'error.main' }} />
+            <Typography variant="h6">Debug Menu</Typography>
+            <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>
+              (Current environment: {process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.NODE_ENV})
+            </Typography>
+          </Box>
+        </DialogTitle>
+      )}
       
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="debug tabs">
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', px: isMobile ? 1 : 3 }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          aria-label="debug tabs"
+          variant={isMobile ? "scrollable" : "standard"}
+          scrollButtons={isMobile ? "auto" : false}
+          allowScrollButtonsMobile>
           <Tab 
             icon={<CodeIcon />} 
             label="Environment" 
@@ -132,11 +162,13 @@ const DebugMenu = ({ open, onClose }) => {
         </Box>
       </DialogContent>
       
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Close
-        </Button>
-      </DialogActions>
+      {!isMobile && (
+        <DialogActions>
+          <Button onClick={onClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   );
 };

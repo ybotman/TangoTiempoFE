@@ -1,5 +1,0 @@
-# User-specific configuration
-.jira-config
-
-# Don't ignore the example
-!.jira-config.example
