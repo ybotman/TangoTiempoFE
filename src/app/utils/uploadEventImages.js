@@ -26,6 +26,17 @@ export const uploadEventImage = async (file, authToken = null) => {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
     
+    // Log upload attempt details
+    console.log('Attempting image upload:', {
+      url: `${process.env.NEXT_PUBLIC_BE_URL}/api/events/upload-image`,
+      hasAuthToken: !!authToken,
+      authTokenPreview: authToken ? `${authToken.substring(0, 20)}...` : 'none',
+      appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+      fileName: uniqueFilename,
+      fileSize: file.size,
+      fileType: file.type
+    });
+    
     // Upload to our backend API, which will handle Azure storage
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BE_URL}/api/events/upload-image`, 
@@ -40,6 +51,28 @@ export const uploadEventImage = async (file, authToken = null) => {
     };
   } catch (error) {
     console.error('Error uploading image:', error);
-    throw new Error('Failed to upload image. Please try again.');
+    console.error('Upload error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+      config: {
+        url: error.config?.url,
+        headers: error.config?.headers,
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        hasAuthToken: !!authToken
+      }
+    });
+    
+    // Provide more specific error messages
+    if (error.response?.status === 403) {
+      throw new Error('Authentication failed. Please try logging out and back in.');
+    } else if (error.response?.status === 401) {
+      throw new Error('Not authorized. Please check your login status.');
+    } else if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error('Failed to upload image. Please try again.');
+    }
   }
 };
