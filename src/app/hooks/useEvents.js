@@ -393,6 +393,14 @@ export function useEventOperations() {
       // Handle image upload if an image file is present
       if (preparedData.imageFile) {
         try {
+          console.log('Image upload requested, token status:', {
+            hasToken: !!token,
+            tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+            tokenLength: token?.length,
+            fileSize: preparedData.imageFile.size,
+            fileName: preparedData.imageFile.name
+          });
+          
           // Import the upload function dynamically to avoid issues with SSR
           const { uploadEventImage } = await import('@/utils/uploadEventImages');
           
