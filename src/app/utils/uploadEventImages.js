@@ -64,6 +64,11 @@ export const uploadEventImage = async (file, authToken = null) => {
       }
     });
     
+    // Log the actual error message from backend
+    if (error.response?.data) {
+      console.error('Backend error response:', JSON.stringify(error.response.data, null, 2));
+    }
+    
     // Provide more specific error messages
     if (error.response?.status === 403) {
       throw new Error('Authentication failed. Please try logging out and back in.');
