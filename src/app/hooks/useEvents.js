@@ -111,6 +111,19 @@ export function useEvents({
   };
 
   const fetchEvents = useCallback(async () => {
+    // Log what triggered this fetch
+    console.log('useEvents: fetchEvents triggered', {
+      trigger: 'dependency change',
+      role: selectedRole,
+      location: {
+        region: effectiveRegion,
+        division: effectiveDivision,
+        city: effectiveCity
+      },
+      hasUser: !!user,
+      timestamp: new Date().toISOString()
+    });
+    
     setLoading(true);
     setError(null);
 
