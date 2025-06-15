@@ -18,9 +18,7 @@ const useMenuItems = () => {
 
       if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
         return [
-          { label: 'Change Date', action: 'changeDate' },
-          { label: 'Add Single Event', action: 'addSingleEvent' },
-          { label: 'Add Repeating Event', action: 'addRepeatingEvent' },
+          { label: 'Add Event', action: 'addSingleEvent' },
         ];
       }
     }
