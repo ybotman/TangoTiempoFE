@@ -118,9 +118,12 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
   const eventTitle = eventDetails?.title || 'Event Details';
   const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
-  // Get dates from either _instance.range or direct start/end properties
-  const startDate = eventDetails?._instance?.range?.start || eventDetails?.start || null;
-  const endDate = eventDetails?._instance?.range?.end || eventDetails?.end || null;
+  
+  // Get dates with proper timezone handling
+  // Use the direct start/end dates as they have the correct time
+  // The _instance.range dates have timezone offset issues
+  const startDate = eventDetails?.start || eventDetails?._instance?.range?.start || null;
+  const endDate = eventDetails?.end || eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
 
   // Get category information for display
@@ -262,15 +265,12 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             
             {/* Date Display */}
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && (() => {
-                const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
-                return date.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                });
-              })()}
+              {startDate && startDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
             </Typography>
 
           {/* Category Display */}
@@ -283,9 +283,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 <Typography variant="h6" color="textSecondary">
                   <strong>
                     {(() => {
-                      const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
-                      const hours = date.getHours();
-                      const minutes = date.getMinutes();
+                      // Use the already-converted startDate
+                      const hours = startDate.getHours();
+                      const minutes = startDate.getMinutes();
                       const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
                       const suffix = hours >= 12 ? 'p' : 'a';
                       return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
@@ -293,9 +293,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                   </strong>
                   {'-'}
                   {(() => {
-                    const date = typeof endDate === 'string' ? new Date(endDate) : endDate;
-                    const hours = date.getHours();
-                    const minutes = date.getMinutes();
+                    // Use the already-converted endDate
+                    const hours = endDate.getHours();
+                    const minutes = endDate.getMinutes();
                     const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
                     const suffix = hours >= 12 ? 'p' : 'a';
                     return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
@@ -303,9 +303,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 </Typography>
                 <ArrowForwardIcon sx={{ color: 'red', ml: 1, fontSize: '1.2rem' }} />
               </Box>
-              <Typography variant="caption" sx={{ color: 'red', fontStyle: 'italic', display: 'block', mt: 0.5 }}>
-                Note: These times are shown in the wrong timezone (we are working on a fix)
-              </Typography>
             </Box>
           )}
 
