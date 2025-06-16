@@ -118,9 +118,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
   const eventTitle = eventDetails?.title || 'Event Details';
   const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
-  // Get dates from either _instance.range or direct start/end properties
-  const startDate = eventDetails?._instance?.range?.start || eventDetails?.start || null;
-  const endDate = eventDetails?._instance?.range?.end || eventDetails?.end || null;
+  
+  // Helper function to ensure consistent timezone handling
+  const getLocalDate = (instanceDate, fallbackDate) => {
+    // Prefer FullCalendar's pre-converted date from _instance
+    if (instanceDate instanceof Date) return instanceDate;
+    // Fallback to parsing the ISO string, which browser converts to local
+    if (fallbackDate) return new Date(fallbackDate);
+    return null;
+  };
+  
+  // Get dates with proper timezone handling
+  const startDate = getLocalDate(eventDetails?._instance?.range?.start, eventDetails?.start);
+  const endDate = getLocalDate(eventDetails?._instance?.range?.end, eventDetails?.end);
   const allDay = eventDetails?.allDay || false;
 
   // Get category information for display
@@ -303,9 +313,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 </Typography>
                 <ArrowForwardIcon sx={{ color: 'red', ml: 1, fontSize: '1.2rem' }} />
               </Box>
-              <Typography variant="caption" sx={{ color: 'red', fontStyle: 'italic', display: 'block', mt: 0.5 }}>
-                Note: These times are shown in the wrong timezone (we are working on a fix)
-              </Typography>
             </Box>
           )}
 
