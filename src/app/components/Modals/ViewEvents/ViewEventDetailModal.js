@@ -272,15 +272,12 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             
             {/* Date Display */}
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && (() => {
-                const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
-                return date.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                });
-              })()}
+              {startDate && startDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
             </Typography>
 
           {/* Category Display */}
@@ -293,9 +290,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 <Typography variant="h6" color="textSecondary">
                   <strong>
                     {(() => {
-                      const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
-                      const hours = date.getHours();
-                      const minutes = date.getMinutes();
+                      // Use the already-converted startDate
+                      const hours = startDate.getHours();
+                      const minutes = startDate.getMinutes();
                       const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
                       const suffix = hours >= 12 ? 'p' : 'a';
                       return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
@@ -303,9 +300,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                   </strong>
                   {'-'}
                   {(() => {
-                    const date = typeof endDate === 'string' ? new Date(endDate) : endDate;
-                    const hours = date.getHours();
-                    const minutes = date.getMinutes();
+                    // Use the already-converted endDate
+                    const hours = endDate.getHours();
+                    const minutes = endDate.getMinutes();
                     const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
                     const suffix = hours >= 12 ? 'p' : 'a';
                     return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
