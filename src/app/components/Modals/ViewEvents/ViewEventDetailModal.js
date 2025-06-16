@@ -119,18 +119,11 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const eventTitle = eventDetails?.title || 'Event Details';
   const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
   
-  // Helper function to ensure consistent timezone handling
-  const getLocalDate = (instanceDate, fallbackDate) => {
-    // Prefer FullCalendar's pre-converted date from _instance
-    if (instanceDate instanceof Date) return instanceDate;
-    // Fallback to parsing the ISO string, which browser converts to local
-    if (fallbackDate) return new Date(fallbackDate);
-    return null;
-  };
-  
   // Get dates with proper timezone handling
-  const startDate = getLocalDate(eventDetails?._instance?.range?.start, eventDetails?.start);
-  const endDate = getLocalDate(eventDetails?._instance?.range?.end, eventDetails?.end);
+  // Use the direct start/end dates as they have the correct time
+  // The _instance.range dates have timezone offset issues
+  const startDate = eventDetails?.start || eventDetails?._instance?.range?.start || null;
+  const endDate = eventDetails?.end || eventDetails?._instance?.range?.end || null;
   const allDay = eventDetails?.allDay || false;
 
   // Get category information for display
