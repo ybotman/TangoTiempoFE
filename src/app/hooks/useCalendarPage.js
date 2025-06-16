@@ -73,6 +73,9 @@ export const useCalendarPage = () => {
   // Initialize event operations
   const { getEventById } = useEventOperations();
 
+  // Note: Role change refresh is handled automatically by useEvents hook
+  // which has selectedRole in its dependency array
+
 
   const handleDatesSet = (dateInfo) => {
     setDatesSet({
@@ -210,6 +213,20 @@ export const useCalendarPage = () => {
   };
 
   const handleEventClick = (arg) => {
+    // Check if this is a placeholder event (for list views)
+    if (arg.event.extendedProps?.isPlaceholder) {
+      // Treat placeholder clicks as date clicks for RO users
+      if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
+        setClickedDate(arg.event.start);
+        const items = getMenuItems('dateClick');
+        setMenuItems(items);
+        setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+        return;
+      }
+      // For other users, no action on placeholder clicks
+      return;
+    }
+
     setSelectedEventDetails(arg.event);
 
     // Track event click
