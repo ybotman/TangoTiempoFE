@@ -362,6 +362,20 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
             )}
           </FormControl>
         </Grid>
+
+        {/* Cost Input */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <TextField 
+              label="Cost" 
+              value={eventData.cost || ''} 
+              onChange={(e) => setEventData({ ...eventData, cost: e.target.value })}
+              placeholder="e.g., Free, $20, Donation"
+              helperText="Enter the cost or pricing information for the event"
+              fullWidth
+            />
+          </FormControl>
+        </Grid>
       </Grid>
 
       {/* Description Input */}
