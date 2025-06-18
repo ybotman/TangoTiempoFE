@@ -4,6 +4,7 @@ import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
+import ValidationDialog from './ValidationDialog';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -198,11 +199,45 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
 
   // Import event operations hook
   const { createEvent, updateEvent } = useEventOperations();
 
-  const handleSave = async () => {
+  const validateEventData = () => {
+    const errors = [];
+    
+    // Check required fields
+    if (!eventData.title || eventData.title.trim() === '') {
+      errors.push({ field: 'Title', message: 'Event title is required', required: true });
+    }
+    
+    if (!eventData.startDate) {
+      errors.push({ field: 'Start Date', message: 'Event start date is required', required: true });
+    }
+    
+    if (!eventData.endDate) {
+      errors.push({ field: 'End Date', message: 'Event end date is required', required: true });
+    }
+    
+    if (!eventData.venueId) {
+      errors.push({ field: 'Venue', message: 'Please select a venue for the event', required: true });
+    }
+    
+    if (!eventData.description || eventData.description.trim() === '') {
+      errors.push({ field: 'Description', message: 'Event description is required', required: true });
+    }
+    
+    // Check recommended fields
+    if (!eventData.eventImage) {
+      errors.push({ field: 'image', message: 'Adding an image helps attract attendees', required: false });
+    }
+    
+    return errors;
+  };
+
+  const handleSave = async (skipValidation = false) => {
     try {
       setSaving(true);
       setSaveError(null);
@@ -212,9 +247,15 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         throw new Error('You must be logged in to create events');
       }
       
-      // Validate required fields
-      if (!eventData.title) {
-        throw new Error('Event title is required');
+      // Validate fields unless skipping (for "Save Without Image")
+      if (!skipValidation) {
+        const errors = validateEventData();
+        if (errors.length > 0) {
+          setValidationErrors(errors);
+          setValidationDialogOpen(true);
+          setSaving(false);
+          return;
+        }
       }
       
       if (!eventData.masteredRegionName) {
@@ -399,6 +440,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   };
 
   return (
+    <>
     <Modal open={open} onClose={handleClose}>
       <Box sx={modalStyle}>
         <Box display="flex" justifyContent="space-between" flexWrap="wrap">
@@ -503,6 +545,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         </Box>
       </Box>
     </Modal>
+    
+    {/* Validation Dialog */}
+    <ValidationDialog
+      open={validationDialogOpen}
+      onClose={() => setValidationDialogOpen(false)}
+      validationErrors={validationErrors}
+      onSaveAnyway={() => {
+        setValidationDialogOpen(false);
+        handleSave(true); // Skip validation when saving anyway
+      }}
+    />
+    </>
   );
 };
 
