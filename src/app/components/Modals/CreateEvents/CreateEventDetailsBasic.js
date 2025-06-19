@@ -274,16 +274,17 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
 
         {/* Category Selection */}
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
+          <FormControl fullWidth required>
             <InputLabel id="category-label">Category</InputLabel>
             <Select
               labelId="category-label"
               value={eventData.categoryFirstId || ''}
               onChange={handleCategoryChange}
               label="Category"
+              required
             >
-              <MenuItem value="">
-                <em>None (will use &apos;Other&apos;)</em>
+              <MenuItem value="" disabled>
+                <em>Select a category</em>
               </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category._id} value={category._id}>
