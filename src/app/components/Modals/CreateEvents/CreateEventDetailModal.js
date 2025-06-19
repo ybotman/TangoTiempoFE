@@ -78,6 +78,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     isRepeating: false,
     imageFile: null,
     imagePreviewUrl: null,
+    shortTitle: '',
     shortName: '',
     // Use mastered location fields from GeoLocationContext first, then fall back to MasteredLocationContext
     masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
@@ -104,7 +105,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Basic info
           title: eventToEdit.title || '',
           description: eventToEdit.description || '',
-          shortName: eventToEdit.shortName || '',
+          shortTitle: eventToEdit.shortTitle || eventToEdit.shortName || '',
+          shortName: eventToEdit.shortName || eventToEdit.shortTitle || '',
           startDate: startDate,
           endDate: endDate,
           cost: eventToEdit.cost || '',
@@ -390,17 +392,20 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       if (editMode && eventData._id) {
         // Update existing event
         console.log(`Updating existing event with ID: ${eventData._id}`);
-        await updateEvent(eventData._id, eventDataWithDefaults);
-        console.log('Event updated successfully');
+        const result = await updateEvent(eventData._id, eventDataWithDefaults);
+        console.log('Event updated successfully:', result);
+        
+        // Close the modal on successful update
+        handleClose();
       } else {
         // Create new event
         console.log('Creating new event');
-        await createEvent(eventDataWithDefaults);
-        console.log('Event created successfully');
+        const result = await createEvent(eventDataWithDefaults);
+        console.log('Event created successfully:', result);
+        
+        // Close the modal on successful creation
+        handleClose();
       }
-      
-      // Close the modal on successful save
-      handleClose();
     } catch (error) {
       console.error('Error saving event:', error);
       setSaveError(error.message || 'Error saving event');
@@ -448,6 +453,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         isRepeating: false,
         imageFile: null,
         imagePreviewUrl: null,
+        shortTitle: '',
         shortName: '',
         masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
         masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
