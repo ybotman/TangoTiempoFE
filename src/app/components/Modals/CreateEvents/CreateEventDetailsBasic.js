@@ -264,6 +264,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                 const value = e.target.value.slice(0, 15); // Enforce 15 char limit
                 setEventData({ ...eventData, shortTitle: value, shortName: value });
               }}
+              required
               inputProps={{ maxLength: 15 }}
               helperText={`${(eventData.shortTitle || eventData.shortName || '').length}/15 characters`}
               fullWidth
@@ -273,16 +274,17 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
 
         {/* Category Selection */}
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
+          <FormControl fullWidth required>
             <InputLabel id="category-label">Category</InputLabel>
             <Select
               labelId="category-label"
               value={eventData.categoryFirstId || ''}
               onChange={handleCategoryChange}
               label="Category"
+              required
             >
-              <MenuItem value="">
-                <em>None (will use &apos;Other&apos;)</em>
+              <MenuItem value="" disabled>
+                <em>Select a category</em>
               </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category._id} value={category._id}>
@@ -338,6 +340,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                   {...params}
                   label="Venue (type to search)"
                   variant="outlined"
+                  required
                   error={Boolean(errorVenues)}
                   helperText={errorVenues ? "Error loading venues" : ""}
                   InputProps={{
@@ -386,6 +389,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           rows={4}
           value={eventData.description}
           onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+          required
           fullWidth
         />
       </FormControl>
@@ -396,6 +400,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
 CreateEventDetailsBasic.propTypes = {
   eventData: PropTypes.shape({
     title: PropTypes.string,
+    shortTitle: PropTypes.string,
+    shortName: PropTypes.string,
     startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     categoryFirstId: PropTypes.string,
@@ -407,6 +413,7 @@ CreateEventDetailsBasic.propTypes = {
     locationName: PropTypes.string,
     description: PropTypes.string,
     ownerOrganizerName: PropTypes.string,
+    cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
 };

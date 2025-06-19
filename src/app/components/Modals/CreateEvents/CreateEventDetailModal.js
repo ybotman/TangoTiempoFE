@@ -204,6 +204,19 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
   // Import event operations hook
   const { createEvent, updateEvent } = useEventOperations();
+  
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return !!(
+      eventData.title?.trim() &&
+      (eventData.shortTitle?.trim() || eventData.shortName?.trim()) &&
+      eventData.startDate &&
+      eventData.endDate &&
+      eventData.categoryFirstId &&
+      eventData.venueId &&
+      eventData.description?.trim()
+    );
+  };
 
   const validateEventData = () => {
     const errors = [];
@@ -213,12 +226,21 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       errors.push({ field: 'Title', message: 'Event title is required', required: true });
     }
     
+    if ((!eventData.shortTitle || eventData.shortTitle.trim() === '') && 
+        (!eventData.shortName || eventData.shortName.trim() === '')) {
+      errors.push({ field: 'Short Title', message: 'Short title is required (max 15 characters)', required: true });
+    }
+    
     if (!eventData.startDate) {
       errors.push({ field: 'Start Date', message: 'Event start date is required', required: true });
     }
     
     if (!eventData.endDate) {
       errors.push({ field: 'End Date', message: 'Event end date is required', required: true });
+    }
+    
+    if (!eventData.categoryFirstId) {
+      errors.push({ field: 'Category', message: 'Please select a category for the event', required: true });
     }
     
     if (!eventData.venueId) {
@@ -534,7 +556,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             onClick={handleSave} 
             variant="contained" 
             color="primary"
-            disabled={saving}
+            disabled={saving || !isFormValid()}
             startIcon={saving && <CircularProgress size={20} />}
           >
             {saving ? 'Saving...' : (editMode ? 'Update Event' : 'Save Event')}
