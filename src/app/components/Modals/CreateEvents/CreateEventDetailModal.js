@@ -213,6 +213,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       errors.push({ field: 'Title', message: 'Event title is required', required: true });
     }
     
+    if ((!eventData.shortTitle || eventData.shortTitle.trim() === '') && 
+        (!eventData.shortName || eventData.shortName.trim() === '')) {
+      errors.push({ field: 'Short Title', message: 'Short title is required (max 15 characters)', required: true });
+    }
+    
     if (!eventData.startDate) {
       errors.push({ field: 'Start Date', message: 'Event start date is required', required: true });
     }
