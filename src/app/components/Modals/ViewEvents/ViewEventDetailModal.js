@@ -162,9 +162,18 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Check if the user has permissions to edit and delete this event
   // User must be logged in, the event must have an owner ID, and the user must have the RegionalOrganizer role
-  const canEditEvent = user &&
-                       eventDetails?.extendedProps?.ownerOrganizerID &&
-                       selectedRole === 'RegionalOrganizer';
+  // OR be a RegionalAdmin with the event's city in their adminCities
+  const isRegionalOrganizer = user &&
+                              eventDetails?.extendedProps?.ownerOrganizerID &&
+                              selectedRole === 'RegionalOrganizer';
+  
+  const isRegionalAdmin = user &&
+                          selectedRole === 'RegionalAdmin' &&
+                          user.backendInfo?.localAdminInfo?.adminCities &&
+                          eventDetails?.extendedProps?.venueMasteredCityID &&
+                          user.backendInfo.localAdminInfo.adminCities.includes(eventDetails.extendedProps.venueMasteredCityID);
+  
+  const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
   
   // Get truncated description for the delete confirmation
   const truncatedDescription = eventDetails?.extendedProps?.description 
