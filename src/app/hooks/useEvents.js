@@ -292,6 +292,25 @@ export function useEventOperations() {
   const { selectedRole } = useContext(RoleContext);
   
   // Create event
+  // BACKEND TODO: RegionalAdmin Support
+  // The frontend is sending:
+  // - selectedRole: 'RegionalAdmin' 
+  // - adminCities: array of city ObjectIds the admin manages
+  // 
+  // Backend needs to implement:
+  // 1. Check if selectedRole === 'RegionalAdmin'
+  // 2. Get the event's venueMasteredCityID from the venue
+  // 3. Verify venueMasteredCityID is in the adminCities array
+  // 4. If true, allow full CRUD operations (create/update/delete)
+  // 5. RegionalAdmin should bypass ownerOrganizerID checks for events in their cities
+  //
+  // Example validation logic:
+  // if (req.body.selectedRole === 'RegionalAdmin' && req.body.adminCities) {
+  //   const venue = await Venue.findById(event.venueId);
+  //   if (req.body.adminCities.includes(venue.masteredCityID.toString())) {
+  //     // Allow operation
+  //   }
+  // }
   const createEvent = async (eventData) => {
     try {
       // Check if user is authenticated
@@ -347,6 +366,8 @@ export function useEventOperations() {
         ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+        // Include admin cities for RegionalAdmin validation
+        adminCities: selectedRole === 'RegionalAdmin' ? user?.backendInfo?.localAdminInfo?.adminCities : undefined,
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
@@ -511,6 +532,8 @@ export function useEventOperations() {
         ...cleanedEventData,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         selectedRole: selectedRole, // Include the user's selected role for backend validation
+        // Include admin cities for RegionalAdmin validation
+        adminCities: selectedRole === 'RegionalAdmin' ? user?.backendInfo?.localAdminInfo?.adminCities : undefined,
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
@@ -641,8 +664,19 @@ export function useEventOperations() {
       
       console.log('Deleting event:', eventId);
       
+      // Build query parameters including role information
+      const queryParams = new URLSearchParams({
+        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+        selectedRole: selectedRole
+      });
+      
+      // Add adminCities for RegionalAdmin
+      if (selectedRole === 'RegionalAdmin' && user?.backendInfo?.localAdminInfo?.adminCities) {
+        queryParams.append('adminCities', user.backendInfo.localAdminInfo.adminCities.join(','));
+      }
+      
       const response = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
+        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?${queryParams.toString()}`, 
         config
       );
       

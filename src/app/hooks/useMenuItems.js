@@ -16,7 +16,7 @@ const useMenuItems = () => {
         return [{ label: 'Select a region first', action: 'noAction' }];
       }
 
-      if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
+      if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || selectedRole === listOfAllRoles.REGIONAL_ADMIN) {
         return [
           { label: 'Add Event', action: 'addSingleEvent' },
         ];
@@ -25,7 +25,7 @@ const useMenuItems = () => {
 
     if (context === 'eventClick') {
       let menuOptions = [{ label: 'View Event', action: 'viewDetails' }];
-      if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
+      if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || selectedRole === listOfAllRoles.REGIONAL_ADMIN) {
         menuOptions = [
           ...menuOptions,
           { label: 'Edit Event', action: 'editEvent' },
