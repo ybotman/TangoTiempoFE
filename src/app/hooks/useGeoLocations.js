@@ -82,11 +82,25 @@ export function useGeoLocations() {
   }, []);
 
   useEffect(() => {
-    fetchIPLocation();
+    // TIEMPO-135: Disable automatic IP geolocation - always use Boston
+    // fetchIPLocation();  // Disabled per requirements
+    
+    // Set Boston coordinates immediately
+    setLatitude(42.3601);
+    setLongitude(-71.0589);
+    setLoading(false);
+    console.log('useGeoLocations: Using default Boston coordinates (automatic detection disabled)');
   }, [fetchIPLocation]);
 
   const refetch = async () => {
-    await fetchIPLocation();
+    // TIEMPO-135: Refetch also disabled - always return Boston
+    // await fetchIPLocation();  // Disabled per requirements
+    
+    // Just set Boston coordinates again
+    setLatitude(42.3601);
+    setLongitude(-71.0589);
+    setLoading(false);
+    console.log('useGeoLocations refetch: Using default Boston coordinates (automatic detection disabled)');
   };
 
   return {
