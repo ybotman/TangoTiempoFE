@@ -100,7 +100,7 @@ const SignUpPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <EmailIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Email Sign Up<br />(BETA - Don't Use)</Typography>
+                    <Typography variant="h6">Email Sign Up<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Create an account using your email address and a password
@@ -134,7 +134,7 @@ const SignUpPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <FacebookIcon sx={{ mr: 1, color: '#4267B2' }} />
-                    <Typography variant="h6">Facebook Sign Up<br />(BETA - Don't Use)</Typography>
+                    <Typography variant="h6">Facebook Sign Up<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Create an account using your Facebook account credentials
@@ -142,7 +142,7 @@ const SignUpPage = () => {
                 </CardContent>
                 <CardActions>
                   <Button size="small" color="primary" onClick={handleFacebookSignUp} sx={{ ml: 1, mb: 1 }}>
-                    Continue with Facebook (BETA - Don't Use)
+                    <>Continue with Facebook<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</>
                   </Button>
                 </CardActions>
               </Card>

@@ -98,7 +98,7 @@ const LoginPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <EmailIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Email Login<br />(BETA - Don't Use)</Typography>
+                    <Typography variant="h6">Email Login<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Log in with your email address and password
@@ -132,7 +132,7 @@ const LoginPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <FacebookIcon sx={{ mr: 1, color: '#4267B2' }} />
-                    <Typography variant="h6">Facebook Login<br />(BETA - Don't Use)</Typography>
+                    <Typography variant="h6">Facebook Login<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Log in with your Facebook account credentials
@@ -140,7 +140,7 @@ const LoginPage = () => {
                 </CardContent>
                 <CardActions>
                   <Button size="small" color="primary" onClick={handleFacebookLogIn} sx={{ ml: 1, mb: 1 }}>
-                    Continue with Facebook (BETA - Don't Use)
+                    <>Continue with Facebook<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</>
                   </Button>
                 </CardActions>
               </Card>
