@@ -2,16 +2,16 @@
 
 import React, { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Box, 
-  Typography, 
-  Container, 
-  Paper, 
-  Button, 
+import {
+  Box,
+  Typography,
+  Container,
+  Paper,
+  Button,
   Card,
   CardContent,
   CardActions,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -26,7 +26,7 @@ const LoginPage = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authError, setAuthError] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
-  
+
   // Redirect immediately if user is already logged in
   useEffect(() => {
     if (user && !loading) {
@@ -91,31 +91,26 @@ const LoginPage = () => {
           <Typography component="h1" variant="h4" gutterBottom>
             Sign In
           </Typography>
-          
+
           {!showEmailForm ? (
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Card variant="outlined">
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <EmailIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Email Login</Typography>
+                    <Typography variant="h6">Email Login<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Log in with your email address and password
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button 
-                    size="small" 
-                    color="primary" 
-                    onClick={() => setShowEmailForm(true)}
-                    sx={{ ml: 1, mb: 1 }}
-                  >
+                  <Button size="small" color="primary" onClick={() => setShowEmailForm(true)} sx={{ ml: 1, mb: 1 }}>
                     Continue with Email
                   </Button>
                 </CardActions>
               </Card>
-              
+
               <Card variant="outlined">
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -127,56 +122,38 @@ const LoginPage = () => {
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button 
-                    size="small" 
-                    color="primary" 
-                    onClick={handleGoogleLogIn}
-                    sx={{ ml: 1, mb: 1 }}
-                  >
+                  <Button size="small" color="primary" onClick={handleGoogleLogIn} sx={{ ml: 1, mb: 1 }}>
                     Continue with Google
                   </Button>
                 </CardActions>
               </Card>
-              
+
               <Card variant="outlined">
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <FacebookIcon sx={{ mr: 1, color: '#4267B2' }} />
-                    <Typography variant="h6">Facebook Login</Typography>
+                    <Typography variant="h6">Facebook Login<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Log in with your Facebook account credentials
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button 
-                    size="small" 
-                    color="primary" 
-                    onClick={handleFacebookLogIn}
-                    sx={{ ml: 1, mb: 1 }}
-                  >
-                    Continue with Facebook
+                  <Button size="small" color="primary" onClick={handleFacebookLogIn} sx={{ ml: 1, mb: 1 }}>
+                    <>Continue with Facebook<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</>
                   </Button>
                 </CardActions>
               </Card>
             </Box>
           ) : (
             <Box>
-              <Button 
-                variant="text" 
-                onClick={() => setShowEmailForm(false)}
-                sx={{ mb: 2 }}
-              >
+              <Button variant="text" onClick={() => setShowEmailForm(false)} sx={{ mb: 2 }}>
                 ← Back to options
               </Button>
-              <EmailAuthForm 
-                mode="login" 
-                onSubmit={handleEmailLogin} 
-                error={authError || error} 
-              />
+              <EmailAuthForm mode="login" onSubmit={handleEmailLogin} error={authError || error} />
             </Box>
           )}
-          
+
           <Box sx={{ mt: 3, width: '100%', textAlign: 'center' }}>
             <Typography variant="body2">
               Don&apos;t have an account?{' '}
