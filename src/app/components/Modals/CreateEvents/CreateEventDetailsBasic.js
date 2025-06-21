@@ -17,23 +17,28 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
   
-  // Force venue refresh when component mounts and set initial venue input
+  // Force venue refresh when component mounts
   useEffect(() => {
     setIsVenueReady(false);
     fetchVenues().then(() => {
       // Delay setting venue ready to prevent MUI warnings during initial render
       setTimeout(() => setIsVenueReady(true), 100);
     });
-    console.log('CreateEventDetailsBasic: Refreshing venues, current list:', venues?.length || 0);
-    
-    // If we have a venue ID but no venue name (edit mode), set the input value
-    if ((eventData.venueId || eventData.locationID) && !venueInputValue) {
+  }, [fetchVenues]);
+  
+  // Set initial venue input value when venues are loaded or eventData changes
+  useEffect(() => {
+    // If we have a venue ID and venue name from event data, use it
+    if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
+      setVenueInputValue(eventData.venueName || eventData.locationName || '');
+    } else if ((eventData.venueId || eventData.locationID) && venues.length > 0) {
+      // Try to find venue in loaded list
       const currentVenue = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
       if (currentVenue) {
         setVenueInputValue(currentVenue.name || currentVenue.shortName || '');
       }
     }
-  }, [fetchVenues, eventData.venueId, eventData.locationID]);
+  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues]);
   
   // Filter venues based on search input
   useEffect(() => {
@@ -59,7 +64,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     });
     
     setFilteredVenues(filtered);
-    console.log(`Filtered venues: ${filtered.length} of ${venuesArray.length} total`);
   }, [venues, venueInputValue]);
   
   // Set owner organizer info from user context when component mounts
@@ -72,12 +76,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                      (user.backendInfo.localUserInfo && 
                       `${user.backendInfo.localUserInfo.firstName || ''} ${user.backendInfo.localUserInfo.lastName || ''}`.trim());
       
-      console.log('User has regionalOrganizerInfo:', orgInfo);
-      console.log('Organizer flags:', {
-        isActive: orgInfo.isActive,
-        isEnabled: orgInfo.isEnabled,
-        isApproved: orgInfo.isApproved
-      });
       
       // Check if all required flags are set for the regionalOrganizerInfo
       const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
@@ -91,8 +89,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         ownerOrganizerID: orgId,
         ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
       }));
-      
-      console.log('Set owner organizer from user profile:', orgName, 'ID:', orgId);
     }
   }, [user, setEventData]);
 
@@ -132,7 +128,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         venueLatitude: null,
         venueLongitude: null
       });
-      console.log('Venue cleared');
       return;
     }
     
@@ -144,7 +139,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     
     // Store both the ID and the name
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
-    console.log(`Selected venue: ${venueName} (ID: ${newValue._id})`);
     
     // Create updated event data with venue info
     const updatedEventData = { 
@@ -159,11 +153,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     
     // Add the coordinates if available
     if (newValue.latitude && newValue.longitude) {
-      console.log(`Venue has coordinates: [${newValue.longitude}, ${newValue.latitude}]`);
       updatedEventData.venueLatitude = newValue.latitude;
       updatedEventData.venueLongitude = newValue.longitude;
     } else {
-      console.log('Selected venue does not have coordinates');
       // Clear any existing coordinates
       updatedEventData.venueLatitude = null;
       updatedEventData.venueLongitude = null;

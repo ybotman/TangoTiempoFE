@@ -98,7 +98,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       
       // Handle edit mode - populate form with existing event data
       if (editMode && eventToEdit) {
-        console.log('Initializing form with event data for editing:', eventToEdit);
         
         // Convert dates to dayjs objects for form compatibility
         const startDate = eventToEdit.startDate ? dayjs(eventToEdit.startDate) : dayjs();
@@ -117,16 +116,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           
           // Categories
           categoryFirst: eventToEdit.categoryFirst || '',
-          categoryFirstId: eventToEdit.categoryFirstId || '',
+          categoryFirstId: eventToEdit.categoryFirstId || eventToEdit.categoryFirstID || '',
           categorySecond: eventToEdit.categorySecond || '',
-          categorySecondId: eventToEdit.categorySecondId || '',
+          categorySecondId: eventToEdit.categorySecondId || eventToEdit.categorySecondID || '',
           categoryThird: eventToEdit.categoryThird || '',
-          categoryThirdId: eventToEdit.categoryThirdId || '',
+          categoryThirdId: eventToEdit.categoryThirdId || eventToEdit.categoryThirdID || '',
           
-          // Venue/Location - support both new and legacy fields
-          venueId: eventToEdit.venueId || eventToEdit.locationID || '',
+          // Venue/Location - support both new and legacy fields with all variations
+          venueId: eventToEdit.venueId || eventToEdit.venueID || eventToEdit.locationID || '',
           venueName: eventToEdit.venueName || eventToEdit.locationName || '',
-          locationID: eventToEdit.locationID || eventToEdit.venueId || '',
+          locationID: eventToEdit.locationID || eventToEdit.venueId || eventToEdit.venueID || '',
           locationName: eventToEdit.locationName || eventToEdit.venueName || '',
           
           // Venue coordinates if available
@@ -163,11 +162,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           _id: eventToEdit._id || null
         });
         
-        console.log('Form initialized for editing');
         setHasUnsavedChanges(false); // Reset unsaved changes for edit mode
       } else {
         // Create mode - use selected date or defaults
-        console.log('Initializing form for new event creation');
         
         let updatedStartDate = prev => prev.startDate;
         let updatedEndDate = prev => prev.endDate;
@@ -195,12 +192,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
 
       // Log current location for debugging
-      console.log('Current location for event:', {
-        region: selectedLocation.region,
-        division: selectedLocation.division,
-        city: selectedLocation.city,
-        mode: editMode ? 'edit' : 'create'
-      });
     }
   }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
 
