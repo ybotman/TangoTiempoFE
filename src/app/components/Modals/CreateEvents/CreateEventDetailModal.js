@@ -407,7 +407,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         // Show success message for 2 seconds then close
         setTimeout(() => {
           setSaveSuccess(false);
-          handleClose();
+          onClose(); // Call onClose directly instead of handleClose
         }, 2000);
       } else {
         // Create new event
@@ -420,7 +420,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         // Show success message for 2 seconds then close
         setTimeout(() => {
           setSaveSuccess(false);
-          handleClose();
+          onClose(); // Call onClose directly instead of handleClose
         }, 2000);
       }
     } catch (error) {
@@ -451,6 +451,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
   // Handle modal close - clear form data
   const handleClose = () => {
+    // Always clear success/error states when closing
+    setSaveSuccess(false);
+    setSaveError(null);
+    setHasUnsavedChanges(false);
+    
     // Reset form to initial state when closing (only in create mode)
     if (!editMode) {
       setEventData({
@@ -486,7 +491,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
       });
       setCurrentTab('basic');
-      setSaveError(null);
     }
     onClose();
   };
