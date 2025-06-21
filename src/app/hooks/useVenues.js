@@ -20,8 +20,6 @@ export function useVenues() {
 
   // Fetch venues based on selected location
   const fetchVenues = useCallback(async (isActive = true) => {
-    // Debug selected location
-    console.log('Selected location in useVenues:', JSON.stringify(selectedLocation));
     setLoading(true);
     setError(null);
     try {
@@ -34,7 +32,6 @@ export function useVenues() {
       // This ensures we always have venues to display
       
       
-      console.log('Fetching venues with params:', params);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
       // Handle the API response which can come in different formats
@@ -44,11 +41,9 @@ export function useVenues() {
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
-        console.log(`Received ${response.data.length} venues from API (direct array)`);
         setVenues(response.data);
       } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
         // Format: {data: Array, pagination: Object}
-        console.log(`Received ${response.data.data.length} venues from API with pagination:`, response.data.pagination);
         setVenues(response.data.data);
       } else {
         console.error('API returned unknown venues data format:', response.data);

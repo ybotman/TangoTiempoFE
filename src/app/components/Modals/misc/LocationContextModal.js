@@ -222,8 +222,6 @@ const LocationContextModal = ({ open, onClose }) => {
   }, [cities]);
 
   // Log to debug when component renders
-  console.log('LocationContextModal - Cities available:', cities?.length || 0);
-  console.log('LocationContextModal - Current city:', nearestCity);
 
   // Keep track of the city we clicked for updating GeoLocationContext
   const [clickedCityId, setClickedCityId] = useState(null);
