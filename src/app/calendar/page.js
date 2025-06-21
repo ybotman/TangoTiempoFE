@@ -60,10 +60,13 @@ const CalendarPage = () => {
     handleDateClick,
     handleEventClick,
     coloredFilteredEvents,
+    refreshEvents,
     // datesSet,
     handleEventUpdated,
     isEditMode,
     eventToEdit,
+    searchTerm,
+    setSearchTerm,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -382,6 +385,8 @@ const CalendarPage = () => {
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
       <div
         style={{
@@ -576,12 +581,8 @@ const CalendarPage = () => {
         open={isCreateModalOpen}
         onClose={() => {
           setCreateModalOpen(false);
-          // Refresh events after creating/editing
-          if (isEditMode) {
-            handleEventUpdated('edit', eventToEdit?._id);
-          } else {
-            handleEventUpdated('create');
-          }
+          // Just refresh events after modal closes
+          refreshEvents();
         }}
         selectedDate={clickedDate}
         editMode={isEditMode}

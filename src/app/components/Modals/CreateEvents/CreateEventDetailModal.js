@@ -92,9 +92,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   // Refresh event data and related data when modal opens or location changes
   useEffect(() => {
     if (open) {
+      // Clear any previous errors/success when modal opens
+      setSaveError(null);
+      setSaveSuccess(false);
+      
       // Handle edit mode - populate form with existing event data
       if (editMode && eventToEdit) {
-        console.log('Initializing form with event data for editing:', eventToEdit);
         
         // Convert dates to dayjs objects for form compatibility
         const startDate = eventToEdit.startDate ? dayjs(eventToEdit.startDate) : dayjs();
@@ -113,16 +116,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           
           // Categories
           categoryFirst: eventToEdit.categoryFirst || '',
-          categoryFirstId: eventToEdit.categoryFirstId || '',
+          categoryFirstId: eventToEdit.categoryFirstId || eventToEdit.categoryFirstID || '',
           categorySecond: eventToEdit.categorySecond || '',
-          categorySecondId: eventToEdit.categorySecondId || '',
+          categorySecondId: eventToEdit.categorySecondId || eventToEdit.categorySecondID || '',
           categoryThird: eventToEdit.categoryThird || '',
-          categoryThirdId: eventToEdit.categoryThirdId || '',
+          categoryThirdId: eventToEdit.categoryThirdId || eventToEdit.categoryThirdID || '',
           
-          // Venue/Location - support both new and legacy fields
-          venueId: eventToEdit.venueId || eventToEdit.locationID || '',
+          // Venue/Location - support both new and legacy fields with all variations
+          venueId: eventToEdit.venueId || eventToEdit.venueID || eventToEdit.locationID || '',
           venueName: eventToEdit.venueName || eventToEdit.locationName || '',
-          locationID: eventToEdit.locationID || eventToEdit.venueId || '',
+          locationID: eventToEdit.locationID || eventToEdit.venueId || eventToEdit.venueID || '',
           locationName: eventToEdit.locationName || eventToEdit.venueName || '',
           
           // Venue coordinates if available
@@ -159,10 +162,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           _id: eventToEdit._id || null
         });
         
-        console.log('Form initialized for editing');
+        setHasUnsavedChanges(false); // Reset unsaved changes for edit mode
       } else {
         // Create mode - use selected date or defaults
-        console.log('Initializing form for new event creation');
         
         let updatedStartDate = prev => prev.startDate;
         let updatedEndDate = prev => prev.endDate;
@@ -190,12 +192,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
 
       // Log current location for debugging
-      console.log('Current location for event:', {
-        region: selectedLocation.region,
-        division: selectedLocation.division,
-        city: selectedLocation.city,
-        mode: editMode ? 'edit' : 'create'
-      });
     }
   }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
 
@@ -203,6 +199,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [saving, setSaving] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Import event operations hook
   const { createEvent, updateEvent } = useEventOperations();
@@ -324,7 +322,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             }
           );
           
-          console.log('Organizer flags updated:', response.data);
           
           // Update the user's info with the updated flags
           if (response.data.regionalOrganizerInfo) {
@@ -354,7 +351,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
                 }
               );
               
-              console.log('User data refreshed after flag update');
               
               // Try to continue with event creation now that flags are activated
               // No longer need to throw error as flags are now fixed
@@ -381,30 +377,36 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       
       // Try to refresh the auth token before saving
       try {
-        console.log('Refreshing auth token before saving event...');
         await getIdToken(true); // Force token refresh
       } catch (tokenError) {
         console.warn('Could not refresh token, but will continue with existing token:', tokenError);
       }
       
-      console.log('Saving event data:', eventDataWithDefaults);
       
       if (editMode && eventData._id) {
         // Update existing event
-        console.log(`Updating existing event with ID: ${eventData._id}`);
         const result = await updateEvent(eventData._id, eventDataWithDefaults);
-        console.log('Event updated successfully:', result);
+        setSaveSuccess(true);
+        setHasUnsavedChanges(false);
         
-        // Close the modal on successful update
-        handleClose();
+        // Show success message for 2 seconds then close
+        setTimeout(() => {
+          setSaveSuccess(false);
+          onClose(); // Call onClose directly instead of handleClose
+        }, 2000);
       } else {
         // Create new event
         console.log('Creating new event');
         const result = await createEvent(eventDataWithDefaults);
         console.log('Event created successfully:', result);
+        setSaveSuccess(true);
+        setHasUnsavedChanges(false);
         
-        // Close the modal on successful creation
-        handleClose();
+        // Show success message for 2 seconds then close
+        setTimeout(() => {
+          setSaveSuccess(false);
+          onClose(); // Call onClose directly instead of handleClose
+        }, 2000);
       }
     } catch (error) {
       console.error('Error saving event:', error);
@@ -423,10 +425,22 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       ...prevData,
       isRepeating: !prevData.isRepeating,
     }));
+    setHasUnsavedChanges(true);
+  };
+
+  // Wrapper for setEventData to track changes
+  const updateEventData = (newData) => {
+    setEventData(newData);
+    setHasUnsavedChanges(true);
   };
 
   // Handle modal close - clear form data
   const handleClose = () => {
+    // Always clear success/error states when closing
+    setSaveSuccess(false);
+    setSaveError(null);
+    setHasUnsavedChanges(false);
+    
     // Reset form to initial state when closing (only in create mode)
     if (!editMode) {
       setEventData({
@@ -462,7 +476,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
       });
       setCurrentTab('basic');
-      setSaveError(null);
     }
     onClose();
   };
@@ -514,6 +527,13 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             {saveError}
           </Alert>
         )}
+        
+        {/* Success message */}
+        {saveSuccess && (
+          <Alert severity="success" sx={{ my: 1 }}>
+            {editMode ? 'Event updated successfully!' : 'Event created successfully!'}
+          </Alert>
+        )}
 
         {/* Tabs for different sections */}
         <Tabs 
@@ -550,11 +570,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         </Tabs>
 
         {/* Render tab content conditionally */}
-        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={setEventData} />}
-        {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={setEventData} />}
-        {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={setEventData} />}
+        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} />}
+        {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
+        {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'repeating' && (
-          <CreateEventDetailsRepeating eventData={eventData} setEventData={setEventData} />
+          <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
 
         <Box mt={2} display="flex" justifyContent="space-between">
@@ -562,10 +582,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             onClick={handleSave} 
             variant="contained" 
             color="primary"
-            disabled={saving || !isFormValid()}
+            disabled={saving || !isFormValid() || (editMode && !hasUnsavedChanges)}
             startIcon={saving && <CircularProgress size={20} />}
           >
-            {saving ? 'Saving...' : (editMode ? 'Update Event' : 'Save Event')}
+            {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'Update Event' : 'Save Event')}
           </Button>
           <Button onClick={handleClose} variant="outlined" color="secondary">
             Close

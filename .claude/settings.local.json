@@ -41,7 +41,8 @@
       "Bash(git stash push:*)",
       "Bash(public/AI-Guild/Scripts/jira-tools/jira-comment.sh TIEMPO-104 \"Scout\" \"Root cause identified: The 403 error occurs because the frontend manually sets Content-Type: 'multipart/form-data' header without the required boundary parameter. When using FormData with axios, the Content-Type header must be omitted so axios can set it automatically with the proper boundary. Fix: Remove line 24 in src/app/utils/uploadEventImages.js that sets 'Content-Type': 'multipart/form-data'\")",
       "Bash(rg:*)",
-      "Bash(public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh \"Enhance existing Location Defaults tab in User Settings\" enhancement users \"Improve the existing Location Defaults tab functionality in User Settings. Ensure proper saving and loading of default location preferences.\" Task)"
+      "Bash(public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh \"Enhance existing Location Defaults tab in User Settings\" enhancement users \"Improve the existing Location Defaults tab functionality in User Settings. Ensure proper saving and loading of default location preferences.\" Task)",
+      "Bash(git restore:*)"
     ],
     "deny": []
   },
