@@ -35,6 +35,7 @@ export const useCalendarPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventToEdit, setEventToEdit] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const calendarRef = useRef(null);
 
   // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
@@ -93,7 +94,9 @@ export const useCalendarPage = () => {
   const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(
     transformedEvents,
     categories,
-    selectedOrganizers // Pass selectedOrganizers to usePostFilter
+    selectedOrganizers, // Pass selectedOrganizers to usePostFilter
+    [], // selectedTags - not used yet
+    searchTerm // Pass searchTerm for text filtering
   );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
@@ -332,6 +335,9 @@ export const useCalendarPage = () => {
     eventToEdit,
     // Organizer selection state
     selectedOrganizers,
-    setSelectedOrganizers
+    setSelectedOrganizers,
+    // Search state
+    searchTerm,
+    setSearchTerm
   };
 };

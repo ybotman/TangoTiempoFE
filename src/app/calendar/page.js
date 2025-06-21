@@ -64,6 +64,8 @@ const CalendarPage = () => {
     handleEventUpdated,
     isEditMode,
     eventToEdit,
+    searchTerm,
+    setSearchTerm,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -382,6 +384,8 @@ const CalendarPage = () => {
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
         categories={categories}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
       <div
         style={{

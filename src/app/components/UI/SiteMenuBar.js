@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert } from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 
-const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => {
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showSearchField, setShowSearchField] = useState(false);
   
   // Snackbar state for role change message
   const [roleMessageOpen, setRoleMessageOpen] = useState(false);
@@ -68,15 +71,57 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories }) => 
         </IconButton>
       </Box>
 
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
         <PostFilter
           activeCategories={activeCategories}
           handleCategoryChange={handleCategoryChange}
           categories={categories}
         />
+        
+        {showSearchField && (
+          <TextField
+            size="small"
+            placeholder="Search events..."
+            value={searchTerm || ''}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+            sx={{ 
+              width: '200px',
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '20px',
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      onSearchChange?.('');
+                      setShowSearchField(false);
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {!showSearchField && (
+          <Tooltip title="Search events" arrow>
+            <IconButton onClick={() => setShowSearchField(true)}>
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
+        )}
         <Tooltip title="Login here!" arrow open={!user && showTooltip} placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
@@ -117,6 +162,8 @@ SiteMenuBar.propTypes = {
     })
   ).isRequired,
   selectedOrganizer: PropTypes.string,
+  searchTerm: PropTypes.string,
+  onSearchChange: PropTypes.func,
 };
 
 export default SiteMenuBar;
