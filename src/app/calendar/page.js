@@ -60,6 +60,7 @@ const CalendarPage = () => {
     handleDateClick,
     handleEventClick,
     coloredFilteredEvents,
+    refreshEvents,
     // datesSet,
     handleEventUpdated,
     isEditMode,
