@@ -30,12 +30,20 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   useEffect(() => {
     // If we have a venue ID and venue name from event data, use it
     if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
-      setVenueInputValue(eventData.venueName || eventData.locationName || '');
+      const newValue = eventData.venueName || eventData.locationName || '';
+      // Only update if different to prevent loops
+      if (venueInputValue !== newValue) {
+        setVenueInputValue(newValue);
+      }
     } else if ((eventData.venueId || eventData.locationID) && venues.length > 0) {
       // Try to find venue in loaded list
       const currentVenue = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
       if (currentVenue) {
-        setVenueInputValue(currentVenue.name || currentVenue.shortName || '');
+        const newValue = currentVenue.name || currentVenue.shortName || '';
+        // Only update if different to prevent loops
+        if (venueInputValue !== newValue) {
+          setVenueInputValue(newValue);
+        }
       }
     }
   }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues]);
@@ -83,14 +91,20 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         console.warn('Regional organizer flags not all enabled - this will cause permission issues when creating events');
       }
       
-      setEventData(prevData => ({
-        ...prevData,
-        // Owner Organizer data is set automatically from the current user's organization
-        ownerOrganizerID: orgId,
-        ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
-      }));
+      setEventData(prevData => {
+        // Only update if values are different to prevent infinite loops
+        if (prevData.ownerOrganizerID !== orgId || prevData.ownerOrganizerName !== (orgName || orgInfo.fullName || user.displayName || 'Your Organization')) {
+          return {
+            ...prevData,
+            // Owner Organizer data is set automatically from the current user's organization
+            ownerOrganizerID: orgId,
+            ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
+          };
+        }
+        return prevData;
+      });
     }
-  }, [user, setEventData]);
+  }, [user]); // Remove setEventData from dependencies as it's a stable function
 
   // Handle category change
   const handleCategoryChange = (event) => {
