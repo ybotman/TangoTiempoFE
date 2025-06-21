@@ -16,11 +16,19 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   
-  // Force venue refresh when component mounts
+  // Force venue refresh when component mounts and set initial venue input
   useEffect(() => {
     fetchVenues();
     console.log('CreateEventDetailsBasic: Refreshing venues, current list:', venues?.length || 0);
-  }, [fetchVenues]);
+    
+    // If we have a venue ID but no venue name (edit mode), set the input value
+    if ((eventData.venueId || eventData.locationID) && !venueInputValue) {
+      const currentVenue = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
+      if (currentVenue) {
+        setVenueInputValue(currentVenue.name || currentVenue.shortName || '');
+      }
+    }
+  }, [fetchVenues, eventData.venueId, eventData.locationID]);
   
   // Filter venues based on search input
   useEffect(() => {
@@ -320,9 +328,21 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               id="venue-autocomplete"
               options={Array.isArray(filteredVenues) ? filteredVenues : []}
               loading={loadingVenues}
-              value={((eventData.venueId || eventData.locationID) && Array.isArray(venues) 
-                ? venues.find(v => v?._id === (eventData.venueId || eventData.locationID)) || null 
-                : null)}
+              value={(() => {
+                if (!eventData.venueId && !eventData.locationID) return null;
+                if (!Array.isArray(venues) || venues.length === 0) {
+                  // If venues not loaded yet but we have venue data, create a placeholder
+                  if (eventData.venueName || eventData.locationName) {
+                    return {
+                      _id: eventData.venueId || eventData.locationID,
+                      name: eventData.venueName || eventData.locationName,
+                      shortName: eventData.venueName || eventData.locationName
+                    };
+                  }
+                  return null;
+                }
+                return venues.find(v => v?._id === (eventData.venueId || eventData.locationID)) || null;
+              })()}
               onChange={handleVenueChange}
               onInputChange={handleVenueInputChange}
               getOptionLabel={(option) => {
