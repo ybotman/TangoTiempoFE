@@ -580,12 +580,8 @@ const CalendarPage = () => {
         open={isCreateModalOpen}
         onClose={() => {
           setCreateModalOpen(false);
-          // Refresh events after creating/editing
-          if (isEditMode) {
-            handleEventUpdated('edit', eventToEdit?._id);
-          } else {
-            handleEventUpdated('create');
-          }
+          // Just refresh events after modal closes
+          refreshEvents();
         }}
         selectedDate={clickedDate}
         editMode={isEditMode}

@@ -113,7 +113,6 @@ export const useCalendarPage = () => {
   // Tracking-integrated handlers
   // Handle event update actions (create, edit, delete)
   const handleEventUpdated = (action, eventId) => {
-    console.log(`Event ${action}:`, eventId);
     refreshEvents();
     
     // Handle edit case specifically
@@ -125,7 +124,6 @@ export const useCalendarPage = () => {
       // Fetch the event details and open the edit modal
       getEventById(eventId)
         .then(eventData => {
-          console.log('Fetched event details for editing:', eventData);
           setEventToEdit(eventData);
           setCreateModalOpen(true); // Reuse the create modal for editing
         })

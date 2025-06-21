@@ -322,7 +322,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             }
           );
           
-          console.log('Organizer flags updated:', response.data);
           
           // Update the user's info with the updated flags
           if (response.data.regionalOrganizerInfo) {
@@ -352,7 +351,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
                 }
               );
               
-              console.log('User data refreshed after flag update');
               
               // Try to continue with event creation now that flags are activated
               // No longer need to throw error as flags are now fixed
@@ -379,19 +377,15 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       
       // Try to refresh the auth token before saving
       try {
-        console.log('Refreshing auth token before saving event...');
         await getIdToken(true); // Force token refresh
       } catch (tokenError) {
         console.warn('Could not refresh token, but will continue with existing token:', tokenError);
       }
       
-      console.log('Saving event data:', eventDataWithDefaults);
       
       if (editMode && eventData._id) {
         // Update existing event
-        console.log(`Updating existing event with ID: ${eventData._id}`);
         const result = await updateEvent(eventData._id, eventDataWithDefaults);
-        console.log('Event updated successfully:', result);
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
         
