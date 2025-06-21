@@ -15,12 +15,38 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const { user } = useContext(AuthContext); // Get current user info
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
+  const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
   
   // Force venue refresh when component mounts
   useEffect(() => {
-    fetchVenues();
-    console.log('CreateEventDetailsBasic: Refreshing venues, current list:', venues?.length || 0);
+    setIsVenueReady(false);
+    fetchVenues().then(() => {
+      // Delay setting venue ready to prevent MUI warnings during initial render
+      setTimeout(() => setIsVenueReady(true), 100);
+    });
   }, [fetchVenues]);
+  
+  // Set initial venue input value when venues are loaded or eventData changes
+  useEffect(() => {
+    // If we have a venue ID and venue name from event data, use it
+    if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
+      const newValue = eventData.venueName || eventData.locationName || '';
+      // Only update if different to prevent loops
+      if (venueInputValue !== newValue) {
+        setVenueInputValue(newValue);
+      }
+    } else if ((eventData.venueId || eventData.locationID) && venues.length > 0) {
+      // Try to find venue in loaded list
+      const currentVenue = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
+      if (currentVenue) {
+        const newValue = currentVenue.name || currentVenue.shortName || '';
+        // Only update if different to prevent loops
+        if (venueInputValue !== newValue) {
+          setVenueInputValue(newValue);
+        }
+      }
+    }
+  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues]);
   
   // Filter venues based on search input
   useEffect(() => {
@@ -46,7 +72,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     });
     
     setFilteredVenues(filtered);
-    console.log(`Filtered venues: ${filtered.length} of ${venuesArray.length} total`);
   }, [venues, venueInputValue]);
   
   // Set owner organizer info from user context when component mounts
@@ -59,12 +84,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                      (user.backendInfo.localUserInfo && 
                       `${user.backendInfo.localUserInfo.firstName || ''} ${user.backendInfo.localUserInfo.lastName || ''}`.trim());
       
-      console.log('User has regionalOrganizerInfo:', orgInfo);
-      console.log('Organizer flags:', {
-        isActive: orgInfo.isActive,
-        isEnabled: orgInfo.isEnabled,
-        isApproved: orgInfo.isApproved
-      });
       
       // Check if all required flags are set for the regionalOrganizerInfo
       const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
@@ -72,16 +91,20 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         console.warn('Regional organizer flags not all enabled - this will cause permission issues when creating events');
       }
       
-      setEventData(prevData => ({
-        ...prevData,
-        // Owner Organizer data is set automatically from the current user's organization
-        ownerOrganizerID: orgId,
-        ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
-      }));
-      
-      console.log('Set owner organizer from user profile:', orgName, 'ID:', orgId);
+      setEventData(prevData => {
+        // Only update if values are different to prevent infinite loops
+        if (prevData.ownerOrganizerID !== orgId || prevData.ownerOrganizerName !== (orgName || orgInfo.fullName || user.displayName || 'Your Organization')) {
+          return {
+            ...prevData,
+            // Owner Organizer data is set automatically from the current user's organization
+            ownerOrganizerID: orgId,
+            ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
+          };
+        }
+        return prevData;
+      });
     }
-  }, [user, setEventData]);
+  }, [user]); // Remove setEventData from dependencies as it's a stable function
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -119,7 +142,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         venueLatitude: null,
         venueLongitude: null
       });
-      console.log('Venue cleared');
       return;
     }
     
@@ -131,7 +153,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     
     // Store both the ID and the name
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
-    console.log(`Selected venue: ${venueName} (ID: ${newValue._id})`);
     
     // Create updated event data with venue info
     const updatedEventData = { 
@@ -146,11 +167,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     
     // Add the coordinates if available
     if (newValue.latitude && newValue.longitude) {
-      console.log(`Venue has coordinates: [${newValue.longitude}, ${newValue.latitude}]`);
       updatedEventData.venueLatitude = newValue.latitude;
       updatedEventData.venueLongitude = newValue.longitude;
     } else {
-      console.log('Selected venue does not have coordinates');
       // Clear any existing coordinates
       updatedEventData.venueLatitude = null;
       updatedEventData.venueLongitude = null;
@@ -316,13 +335,46 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         {/* Venue Selection - Searchable Autocomplete */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
+            {isVenueReady ? (
             <Autocomplete
               id="venue-autocomplete"
-              options={Array.isArray(filteredVenues) ? filteredVenues : []}
+              options={(() => {
+                const venueOptions = Array.isArray(filteredVenues) ? filteredVenues : [];
+                // If we have a selected venue that's not in the options, add it
+                if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
+                  const venueId = eventData.venueId || eventData.locationID;
+                  const exists = venueOptions.some(v => v?._id === venueId);
+                  if (!exists) {
+                    // Add the placeholder venue to options to prevent MUI warning
+                    return [{
+                      _id: venueId,
+                      name: eventData.venueName || eventData.locationName,
+                      shortName: eventData.venueName || eventData.locationName,
+                      isPlaceholder: true
+                    }, ...venueOptions];
+                  }
+                }
+                return venueOptions;
+              })()}
               loading={loadingVenues}
-              value={((eventData.venueId || eventData.locationID) && Array.isArray(venues) 
-                ? venues.find(v => v?._id === (eventData.venueId || eventData.locationID)) || null 
-                : null)}
+              value={(() => {
+                if (!eventData.venueId && !eventData.locationID) return null;
+                // First check if venue exists in the loaded venues
+                if (Array.isArray(venues) && venues.length > 0) {
+                  const found = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
+                  if (found) return found;
+                }
+                // If not found but we have venue data, create a placeholder
+                if (eventData.venueName || eventData.locationName) {
+                  return {
+                    _id: eventData.venueId || eventData.locationID,
+                    name: eventData.venueName || eventData.locationName,
+                    shortName: eventData.venueName || eventData.locationName,
+                    isPlaceholder: true
+                  };
+                }
+                return null;
+              })()}
               onChange={handleVenueChange}
               onInputChange={handleVenueInputChange}
               getOptionLabel={(option) => {
@@ -358,6 +410,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               loadingText="Loading venues..."
               filterOptions={(x) => Array.isArray(x) ? x : []} // Ensure filter options is always an array
             />
+            ) : (
+              <TextField
+                label="Venue (loading...)"
+                value=""
+                disabled
+                fullWidth
+                required
+              />
+            )}
             {venues && venues.length === 0 && !loadingVenues && !errorVenues && (
               <Alert severity="info" sx={{ mt: 1 }}>
                 No venues found in the selected location. Please select a different region or contact an administrator.

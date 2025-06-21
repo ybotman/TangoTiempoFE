@@ -33,7 +33,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
   // Define role display mapping (backend role -> display name)
   const roleDisplayMap = {
-    'NamedUser': 'Milongerx',
+    'NamedUser': 'Milonger-x',
     'RegionalOrganizer': 'RegionalOrganizer',
     'RegionalAdmin': 'RegionalAdmin', 
     'SystemAdmin': 'SystemAdmin',
@@ -43,15 +43,6 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   // Define the standard role display order for consistency
   const roleDisplayOrder = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
 
-  // Helper function to get role status items (only true values)
-  const getRoleStatusItems = (roleInfo, rolePrefix) => {
-    if (!roleInfo) return [];
-    const items = [];
-    if (roleInfo.isApproved) items.push(`${rolePrefix} : Approved`);
-    if (roleInfo.isEnabled) items.push(`${rolePrefix} : Enabled`);
-    if (roleInfo.isActive) items.push(`${rolePrefix} : Active`);
-    return items;
-  };
 
   // Helper function to get conditional message for Regional Organizer
   const getConditionalMessage = (roInfo) => {
@@ -137,35 +128,9 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
               />
               <Box>
                 <Typography variant="h6">{user.displayName || user.email}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                  Firebase ID: {user.uid}
-                </Typography>
               </Box>
             </Stack>
 
-            {/* Enhanced User Role Status Display */}
-            <Box sx={{ marginTop: 2, marginBottom: 2 }}>
-              <Typography variant="subtitle2" sx={{ marginBottom: 1 }}>Role Status:</Typography>
-              
-              {/* Show only true statuses for each role */}
-              {getRoleStatusItems(user.backendInfo?.localUserInfo, 'NU').map((status, index) => (
-                <Typography key={`nu-${index}`} variant="body2" sx={{ marginBottom: 0.5 }}>
-                  • {status}
-                </Typography>
-              ))}
-              
-              {getRoleStatusItems(user.backendInfo?.regionalOrganizerInfo, 'RO').map((status, index) => (
-                <Typography key={`ro-${index}`} variant="body2" sx={{ marginBottom: 0.5 }}>
-                  • {status}
-                </Typography>
-              ))}
-              
-              {getRoleStatusItems(user.backendInfo?.localAdminInfo, 'Admin').map((status, index) => (
-                <Typography key={`admin-${index}`} variant="body2" sx={{ marginBottom: 0.5 }}>
-                  • {status}
-                </Typography>
-              ))}
-            </Box>
 
             <Box sx={{ marginTop: 2 }}>
               <Typography variant="subtitle1">Select Role:</Typography>

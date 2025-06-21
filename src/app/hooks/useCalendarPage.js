@@ -35,6 +35,7 @@ export const useCalendarPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventToEdit, setEventToEdit] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const calendarRef = useRef(null);
 
   // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
@@ -93,7 +94,9 @@ export const useCalendarPage = () => {
   const { activeCategories, filteredEvents, handleCategoryChange } = usePostFilter(
     transformedEvents,
     categories,
-    selectedOrganizers // Pass selectedOrganizers to usePostFilter
+    selectedOrganizers, // Pass selectedOrganizers to usePostFilter
+    [], // selectedTags - not used yet
+    searchTerm // Pass searchTerm for text filtering
   );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
@@ -110,7 +113,6 @@ export const useCalendarPage = () => {
   // Tracking-integrated handlers
   // Handle event update actions (create, edit, delete)
   const handleEventUpdated = (action, eventId) => {
-    console.log(`Event ${action}:`, eventId);
     refreshEvents();
     
     // Handle edit case specifically
@@ -122,7 +124,6 @@ export const useCalendarPage = () => {
       // Fetch the event details and open the edit modal
       getEventById(eventId)
         .then(eventData => {
-          console.log('Fetched event details for editing:', eventData);
           setEventToEdit(eventData);
           setCreateModalOpen(true); // Reuse the create modal for editing
         })
@@ -332,6 +333,9 @@ export const useCalendarPage = () => {
     eventToEdit,
     // Organizer selection state
     selectedOrganizers,
-    setSelectedOrganizers
+    setSelectedOrganizers,
+    // Search state
+    searchTerm,
+    setSearchTerm
   };
 };

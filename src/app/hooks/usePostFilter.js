@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = []) => {
+export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '') => {
   const [activeCategories, setActiveCategories] = useState([]);
 
   // Initialize activeCategories with all categories when categories change
@@ -43,6 +43,20 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
         return false;
       }
 
+      // Text search filter - search in title, shortTitle, venue, organizer name, and description
+      if (searchTerm && searchTerm.trim() !== '') {
+        const searchLower = searchTerm.toLowerCase();
+        const titleMatch = event.title?.toLowerCase().includes(searchLower);
+        const shortTitleMatch = event.extendedProps?.shortTitle?.toLowerCase().includes(searchLower);
+        const venueMatch = event.extendedProps?.venueName?.toLowerCase().includes(searchLower);
+        const organizerNameMatch = event.extendedProps?.ownerOrganizerName?.toLowerCase().includes(searchLower);
+        const descriptionMatch = event.extendedProps?.eventDescription?.toLowerCase().includes(searchLower);
+        
+        if (!titleMatch && !shortTitleMatch && !venueMatch && !organizerNameMatch && !descriptionMatch) {
+          return false;
+        }
+      }
+
       // Category filter
       const matchesCategory =
         !activeCategories ||
@@ -61,7 +75,7 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
     });
 
     return filtered;
-  }, [events, activeCategories, selectedOrganizers, selectedTags]);
+  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm]);
 
   return {
     activeCategories,
