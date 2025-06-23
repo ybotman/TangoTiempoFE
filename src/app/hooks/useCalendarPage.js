@@ -36,7 +36,7 @@ export const useCalendarPage = () => {
   const [eventToEdit, setEventToEdit] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDiscovered, setShowDiscovered] = useState(false);
+  const [includeAIEvents, setIncludeAIEvents] = useState(false);
   const calendarRef = useRef(null);
 
   // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
@@ -98,7 +98,7 @@ export const useCalendarPage = () => {
     selectedOrganizers, // Pass selectedOrganizers to usePostFilter
     [], // selectedTags - not used yet
     searchTerm, // Pass searchTerm for text filtering
-    showDiscovered // Pass showDiscovered for AI event filtering
+    includeAIEvents // Pass includeAIEvents for AI event filtering
   );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
@@ -339,8 +339,8 @@ export const useCalendarPage = () => {
     // Search state
     searchTerm,
     setSearchTerm,
-    // Discovered events state
-    showDiscovered,
-    setShowDiscovered
+    // AI events inclusion state
+    includeAIEvents,
+    setIncludeAIEvents
   };
 };

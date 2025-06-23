@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '', showDiscovered = false) => {
+export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '', includeAIEvents = false) => {
   const [activeCategories, setActiveCategories] = useState([]);
 
   // Initialize activeCategories with all categories when categories change
@@ -44,8 +44,9 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
       }
 
       // Filter based on isDiscovered flag
-      // Only apply this filter when showDiscovered is ON
-      if (showDiscovered && isDiscovered !== true) {
+      // When AI button is OFF (includeAIEvents=false), exclude AI-discovered events
+      // When AI button is ON (includeAIEvents=true), include all events (ignore isDiscovered)
+      if (!includeAIEvents && isDiscovered === true) {
         return false;
       }
 
@@ -81,7 +82,7 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
     });
 
     return filtered;
-  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm, showDiscovered]);
+  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm, includeAIEvents]);
 
   return {
     activeCategories,
