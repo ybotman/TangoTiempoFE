@@ -156,6 +156,9 @@ const CalendarPage = () => {
       return null;
     }
     
+    // Check if this is an AI-discovered event
+    const isAIDiscovered = event.extendedProps?.isDiscovered === true;
+    
     // Get organizer short name and event short title with fallbacks
     const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
                           event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
@@ -184,44 +187,75 @@ const CalendarPage = () => {
             gap: '3px',
             marginBottom: '1px'
           }}>
-            {startTime && (
-              <div style={{ 
-                fontSize: '0.8rem', 
-                lineHeight: '1.0',
-                flexShrink: 0
-              }}>
-                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
-              </div>
-            )}
-            <CategoryCircles eventProps={event.extendedProps} />
-            {organizerShort && (
+            {isAIDiscovered ? (
               <>
-                <div style={{
+                {/* AI Events: Show "AI-Discovered", first category only, and shortTitle */}
+                <div style={{ 
                   fontSize: '0.75rem',
-                  fontWeight: 'normal',
-                  color: '#666',
-                  overflow: 'visible',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 1,
-                  lineHeight: '1.0'
+                  fontWeight: 'bold',
+                  color: '#1976d2',
+                  flexShrink: 0
                 }}>
-                  {organizerShort}
+                  AI-Discovered
                 </div>
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 {eventShortTitle && (
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    overflow: 'visible',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 1,
+                    lineHeight: '1.0'
+                  }}>
+                    {eventShortTitle}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Regular Events: Show time, all categories, organizer, and shortTitle */}
+                {startTime && (
+                  <div style={{ 
+                    fontSize: '0.8rem', 
+                    lineHeight: '1.0',
+                    flexShrink: 0
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                    {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
+                  </div>
+                )}
+                <CategoryCircles eventProps={event.extendedProps} />
+                {organizerShort && (
                   <>
-                    <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
                     <div style={{
                       fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      color: '#333',
+                      fontWeight: 'normal',
+                      color: '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.0'
                     }}>
-                      {eventShortTitle}
+                      {organizerShort}
                     </div>
+                    {eventShortTitle && (
+                      <>
+                        <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          color: '#333',
+                          overflow: 'visible',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 1,
+                          lineHeight: '1.0'
+                        }}>
+                          {eventShortTitle}
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </>
@@ -261,51 +295,82 @@ const CalendarPage = () => {
             alignItems: 'center',
             gap: '8px'
           }}>
-            {/* Time range */}
-            {startTime && (
-              <div style={{ 
-                fontSize: '0.9rem',
-                lineHeight: '1.2',
-                flexShrink: 0
-              }}>
-                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                {endTime && (
-                  <>
-                    <span> - </span>
-                    <span style={{ fontWeight: 'normal' }}>{endTime}</span>
-                  </>
-                )}
-              </div>
-            )}
-            {/* Category circles */}
-            <CategoryCircles eventProps={event.extendedProps} />
-            {organizerShort && (
+            {isAIDiscovered ? (
               <>
-                <div style={{
+                {/* AI Events: Show "AI-Discovered", first category only, and shortTitle */}
+                <div style={{ 
                   fontSize: '0.85rem',
-                  fontWeight: 'normal',
-                  color: '#666',
-                  overflow: 'visible',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 1,
-                  lineHeight: '1.2'
+                  fontWeight: 'bold',
+                  color: '#1976d2',
+                  flexShrink: 0
                 }}>
-                  {organizerShort}
+                  AI-Discovered
                 </div>
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 {eventShortTitle && (
+                  <div style={{
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    overflow: 'visible',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 1,
+                    lineHeight: '1.2'
+                  }}>
+                    {eventShortTitle}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Regular Events: Show time, all categories, organizer, and shortTitle */}
+                {/* Time range */}
+                {startTime && (
+                  <div style={{ 
+                    fontSize: '0.9rem',
+                    lineHeight: '1.2',
+                    flexShrink: 0
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                    {endTime && (
+                      <>
+                        <span> - </span>
+                        <span style={{ fontWeight: 'normal' }}>{endTime}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                {/* Category circles */}
+                <CategoryCircles eventProps={event.extendedProps} />
+                {organizerShort && (
                   <>
-                    <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
                     <div style={{
                       fontSize: '0.85rem',
-                      fontWeight: 'bold',
-                      color: '#333',
+                      fontWeight: 'normal',
+                      color: '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.2'
                     }}>
-                      {eventShortTitle}
+                      {organizerShort}
                     </div>
+                    {eventShortTitle && (
+                      <>
+                        <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
+                        <div style={{
+                          fontSize: '0.85rem',
+                          fontWeight: 'bold',
+                          color: '#333',
+                          overflow: 'visible',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 1,
+                          lineHeight: '1.2'
+                        }}>
+                          {eventShortTitle}
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </>
