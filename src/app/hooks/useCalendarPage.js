@@ -26,6 +26,8 @@ export const useCalendarPage = () => {
   const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
+  const [isAIDetailModalOpen, setAIDetailModalOpen] = useState(false);
+  const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
   const { nearestCity } = useMasteredLocation();
@@ -230,8 +232,6 @@ export const useCalendarPage = () => {
       return;
     }
 
-    setSelectedEventDetails(arg.event);
-
     // Track event click
     trackEvent({
       action: 'click_event',
@@ -240,15 +240,24 @@ export const useCalendarPage = () => {
       value: arg.event.id,
     });
 
-    // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
-    // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
-    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
-      setViewDetailModalOpen(true);
+    // Check if this is an AI-discovered event
+    if (arg.event.extendedProps?.isDiscovered === true) {
+      setSelectedAIEventDetails(arg.event);
+      setAIDetailModalOpen(true);
     } else {
-      // For other roles, show the submenu
-      const items = getMenuItems('eventClick');
-      setMenuItems(items);
-      setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+      // Regular event handling
+      setSelectedEventDetails(arg.event);
+      
+      // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
+      // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
+      if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
+        setViewDetailModalOpen(true);
+      } else {
+        // For other roles, show the submenu
+        const items = getMenuItems('eventClick');
+        setMenuItems(items);
+        setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+      }
     }
   };
 
@@ -341,6 +350,10 @@ export const useCalendarPage = () => {
     setSearchTerm,
     // AI events inclusion state
     includeAIEvents,
-    setIncludeAIEvents
+    setIncludeAIEvents,
+    // AI event detail modal state
+    isAIDetailModalOpen,
+    setAIDetailModalOpen,
+    selectedAIEventDetails
   };
 };

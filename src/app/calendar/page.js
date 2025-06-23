@@ -20,6 +20,7 @@ import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
+import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
 
 const CalendarPage = () => {
@@ -69,6 +70,9 @@ const CalendarPage = () => {
     setSearchTerm,
     includeAIEvents,
     setIncludeAIEvents,
+    isAIDetailModalOpen,
+    setAIDetailModalOpen,
+    selectedAIEventDetails,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -664,6 +668,12 @@ const CalendarPage = () => {
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
         onEventUpdated={handleEventUpdated}
+      />
+
+      <ViewAIEventDetails
+        open={isAIDetailModalOpen}
+        onClose={() => setAIDetailModalOpen(false)}
+        eventDetails={selectedAIEventDetails}
       />
     </div>
   );
