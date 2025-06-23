@@ -123,7 +123,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             </IconButton>
           </Tooltip>
         )}
-        <Tooltip title={showDiscovered ? "Hide AI discovered events" : "Show AI discovered events"} arrow>
+        <Tooltip title={showDiscovered ? "Showing only AI discovered events" : "Show only AI discovered events"} arrow>
           <IconButton 
             onClick={onDiscoveredToggle}
             sx={{ 

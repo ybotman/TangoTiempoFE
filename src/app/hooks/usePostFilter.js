@@ -44,16 +44,9 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
       }
 
       // Filter based on isDiscovered flag
-      if (showDiscovered) {
-        // When showDiscovered is ON, only show events with isDiscovered === true
-        if (isDiscovered !== true) {
-          return false;
-        }
-      } else {
-        // When showDiscovered is OFF, only show events with isDiscovered !== true
-        if (isDiscovered === true) {
-          return false;
-        }
+      // Only apply this filter when showDiscovered is ON
+      if (showDiscovered && isDiscovered !== true) {
+        return false;
       }
 
       // Text search filter - search in title, shortTitle, venue, organizer name, and description
