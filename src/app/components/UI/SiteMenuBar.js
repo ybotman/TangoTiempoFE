@@ -5,12 +5,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 
-const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange }) => {
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
@@ -122,6 +123,19 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             </IconButton>
           </Tooltip>
         )}
+        <Tooltip title={showDiscovered ? "Hide AI discovered events" : "Show AI discovered events"} arrow>
+          <IconButton 
+            onClick={onDiscoveredToggle}
+            sx={{ 
+              color: showDiscovered ? 'primary.main' : 'text.secondary',
+              '&:hover': {
+                backgroundColor: showDiscovered ? 'primary.light' : 'action.hover',
+              }
+            }}
+          >
+            <SmartToyIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Login here!" arrow open={!user && showTooltip} placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
@@ -164,6 +178,8 @@ SiteMenuBar.propTypes = {
   selectedOrganizer: PropTypes.string,
   searchTerm: PropTypes.string,
   onSearchChange: PropTypes.func,
+  showDiscovered: PropTypes.bool,
+  onDiscoveredToggle: PropTypes.func,
 };
 
 export default SiteMenuBar;

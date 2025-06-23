@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '') => {
+export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '', showDiscovered = false) => {
   const [activeCategories, setActiveCategories] = useState([]);
 
   // Initialize activeCategories with all categories when categories change
@@ -36,11 +36,24 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
 
     // Apply filters only if there are values present
     const filtered = events.filter((event) => {
-      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags, isActive } = event.extendedProps || {};
+      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags, isActive, isDiscovered } = event.extendedProps || {};
 
       // First ensure the event is active
       if (isActive === false) {
         return false;
+      }
+
+      // Filter based on isDiscovered flag
+      if (showDiscovered) {
+        // When showDiscovered is ON, only show events with isDiscovered === true
+        if (isDiscovered !== true) {
+          return false;
+        }
+      } else {
+        // When showDiscovered is OFF, only show events with isDiscovered !== true
+        if (isDiscovered === true) {
+          return false;
+        }
       }
 
       // Text search filter - search in title, shortTitle, venue, organizer name, and description
@@ -75,7 +88,7 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
     });
 
     return filtered;
-  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm]);
+  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm, showDiscovered]);
 
   return {
     activeCategories,
