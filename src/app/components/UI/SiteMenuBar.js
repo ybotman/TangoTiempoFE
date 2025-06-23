@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -16,7 +16,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [showSearchField, setShowSearchField] = useState(false);
   
   // Snackbar state for role change message
@@ -32,12 +31,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
     setRoleMessageOpen(false);
   };
 
-  useEffect(() => {
-    if (!user) {
-      const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -136,7 +129,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             <SmartToyIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Login here!" arrow open={!user && showTooltip} placement="left">
+        <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
       </Box>
