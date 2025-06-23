@@ -26,6 +26,8 @@ export const useCalendarPage = () => {
   const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
+  const [isAIDetailModalOpen, setAIDetailModalOpen] = useState(false);
+  const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
   const { nearestCity } = useMasteredLocation();
@@ -36,6 +38,7 @@ export const useCalendarPage = () => {
   const [eventToEdit, setEventToEdit] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [includeAIEvents, setIncludeAIEvents] = useState(false);
   const calendarRef = useRef(null);
 
   // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
@@ -96,7 +99,8 @@ export const useCalendarPage = () => {
     categories,
     selectedOrganizers, // Pass selectedOrganizers to usePostFilter
     [], // selectedTags - not used yet
-    searchTerm // Pass searchTerm for text filtering
+    searchTerm, // Pass searchTerm for text filtering
+    includeAIEvents // Pass includeAIEvents for AI event filtering
   );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {
@@ -228,8 +232,6 @@ export const useCalendarPage = () => {
       return;
     }
 
-    setSelectedEventDetails(arg.event);
-
     // Track event click
     trackEvent({
       action: 'click_event',
@@ -238,15 +240,24 @@ export const useCalendarPage = () => {
       value: arg.event.id,
     });
 
-    // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
-    // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
-    if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
-      setViewDetailModalOpen(true);
+    // Check if this is an AI-discovered event
+    if (arg.event.extendedProps?.isDiscovered === true) {
+      setSelectedAIEventDetails(arg.event);
+      setAIDetailModalOpen(true);
     } else {
-      // For other roles, show the submenu
-      const items = getMenuItems('eventClick');
-      setMenuItems(items);
-      setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+      // Regular event handling
+      setSelectedEventDetails(arg.event);
+      
+      // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
+      // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
+      if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
+        setViewDetailModalOpen(true);
+      } else {
+        // For other roles, show the submenu
+        const items = getMenuItems('eventClick');
+        setMenuItems(items);
+        setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
+      }
     }
   };
 
@@ -336,6 +347,13 @@ export const useCalendarPage = () => {
     setSelectedOrganizers,
     // Search state
     searchTerm,
-    setSearchTerm
+    setSearchTerm,
+    // AI events inclusion state
+    includeAIEvents,
+    setIncludeAIEvents,
+    // AI event detail modal state
+    isAIDetailModalOpen,
+    setAIDetailModalOpen,
+    selectedAIEventDetails
   };
 };

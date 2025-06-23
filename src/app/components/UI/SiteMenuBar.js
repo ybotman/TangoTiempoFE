@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 
-const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange }) => {
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [showSearchField, setShowSearchField] = useState(false);
   
   // Snackbar state for role change message
@@ -31,12 +31,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
     setRoleMessageOpen(false);
   };
 
-  useEffect(() => {
-    if (!user) {
-      const interval = setInterval(() => setShowTooltip((prev) => !prev), 2000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
 
   const renderUserIcon = () =>
     user && (user.photoURL || user.displayName) ? (
@@ -122,7 +116,20 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             </IconButton>
           </Tooltip>
         )}
-        <Tooltip title="Login here!" arrow open={!user && showTooltip} placement="left">
+        <Tooltip title={showDiscovered ? "Including AI discovered events" : "Excluding AI discovered events"} arrow>
+          <IconButton 
+            onClick={onDiscoveredToggle}
+            sx={{ 
+              color: showDiscovered ? 'primary.main' : 'text.secondary',
+              '&:hover': {
+                backgroundColor: showDiscovered ? 'primary.light' : 'action.hover',
+              }
+            }}
+          >
+            <SmartToyIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
       </Box>
@@ -164,6 +171,8 @@ SiteMenuBar.propTypes = {
   selectedOrganizer: PropTypes.string,
   searchTerm: PropTypes.string,
   onSearchChange: PropTypes.func,
+  showDiscovered: PropTypes.bool,
+  onDiscoveredToggle: PropTypes.func,
 };
 
 export default SiteMenuBar;

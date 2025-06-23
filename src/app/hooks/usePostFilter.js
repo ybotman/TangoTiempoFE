@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '') => {
+export const usePostFilter = (events, categories, selectedOrganizers = [], selectedTags = [], searchTerm = '', includeAIEvents = false) => {
   const [activeCategories, setActiveCategories] = useState([]);
 
   // Initialize activeCategories with all categories when categories change
@@ -36,10 +36,17 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
 
     // Apply filters only if there are values present
     const filtered = events.filter((event) => {
-      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags, isActive } = event.extendedProps || {};
+      const { categoryFirst, categorySecond, categoryThird, organizerId, tags: eventTags, isActive, isDiscovered } = event.extendedProps || {};
 
       // First ensure the event is active
       if (isActive === false) {
+        return false;
+      }
+
+      // Filter based on isDiscovered flag
+      // When AI button is OFF (includeAIEvents=false), exclude AI-discovered events
+      // When AI button is ON (includeAIEvents=true), include all events (ignore isDiscovered)
+      if (!includeAIEvents && isDiscovered === true) {
         return false;
       }
 
@@ -75,7 +82,7 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
     });
 
     return filtered;
-  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm]);
+  }, [events, activeCategories, selectedOrganizers, selectedTags, searchTerm, includeAIEvents]);
 
   return {
     activeCategories,
