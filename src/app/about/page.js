@@ -3,15 +3,17 @@
 import React from 'react';
 import styles from '@/styles/About.module.css';
 import Link from 'next/link';
-import { Button, Box } from '@mui/material';
+import { Button, Box, Typography } from '@mui/material';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import FacebookIcon from '@mui/icons-material/Facebook';
 
 export const metadata = {
   title: 'Tango Tiempo - About Us',
   description:
-    'Making Argentine Tagno Better for US. Tango Tiempo for the US is a comprehensive calendar application designed to help tango dancers and organizers across the nation coordinate and manage tango events.',
+    'We connect Argentine Tango communities across the United States. Tango Tiempo is a comprehensive calendar application designed to help tango dancers and organizers nationwide coordinate and manage tango events.',
   openGraph: {
     title: 'Tango Tiempo - About Us',
-    description: 'Learn more about our company',
+    description: 'We connect Argentine Tango communities across the United States. Tango Tiempo is a comprehensive calendar application designed to help tango dancers and organizers nationwide coordinate and manage tango events.',
     url: 'http://TangoTiempo.com/about',
   },
 };
@@ -20,108 +22,80 @@ export default function About() {
   return (
     <main className={styles.container}>
       <div>
-        <h1>Tango Tiempo - National Tango Calendar App</h1>
-        <h2>Overview</h2>
+        <h1>Welcome to Tango Tiempo</h1>
+        <h2>America&apos;s Argentine Tango Calendar</h2>
 
         <p>
-          Currently, we are in BETA MODE. I am surprised you found this site! If you are an Argentine Tango teacher /
-          host / DJ / studio / etc (meaning, you host events, are a band or a DJ) and are interested in submitting
-          events in Tango Tiempo, please contact me. Its free free free, and we hope all of the US is onboard. We hope
-          to be fullly live by the end of 2024, and will bring on new Tango regions/ area (one area at a time) in
-          January of 2025. If you have found this site, feel free to contact me. Her is my contact info: I will give you
-          my TEXT number: Use the Massachusetts area code, (and you have to find it but you can do it), and text me at 6
-          5 3 dash 9 4 5 2. Yes, you have to go write this down. ;-) <br />
-          <br />
-          <h2>
-            We are very excited about this site for the American Tango Community, and hope it brings us all
-            together.{' '}
-          </h2>{' '}
-          This page will self-desruct when we are up and alive.
+          Tango Tiempo is the free national hub for Argentine tango events. Whether you&apos;re dancing in New Mexico, attending festivals in San Francisco, teaching in Boston, or organizing events in Chicago — this is your place. Our platform is <strong>Live</strong>, <strong>Free</strong>, and managed by tango organizers across the United States. It features <strong>AI discovery</strong> to help dancers find the best tango experiences anywhere in the U.S.
         </p>
+
+        <p>
+          We&apos;re actively engaging tango organizers throughout the United States, expanding city by city. If you host any type of tango events (festivals, milongas, practicas, etc.), are a traveling teacher &quot;Maestro&quot; or tango performer, have a local tango band, or teach Argentine tango — you belong on this site. Just login and apply. It&apos;s always free to search and find events (with some upcoming paid services like targeted event promotions and other advanced features). We want to make tango easier to find, attend, and support. Just click the apply button. Here&apos;s a little secret: it&apos;s automatically approved, but we do use AI to verify events follow our tango guidelines.
+        </p>
+
+        <p>
+          <strong>Want to get in touch?</strong> Connect with us through:
+        </p>
+        
+        <Box display="flex" flexDirection="row" justifyContent="center" gap={2} mb={3}>
+          <Button
+            variant="contained"
+            startIcon={<FacebookIcon />}
+            sx={{ backgroundColor: '#1877F2', '&:hover': { backgroundColor: '#145dbf' } }}
+            href="https://www.facebook.com/tangotiempo"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Facebook Messenger
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<WhatsAppIcon />}
+            sx={{ backgroundColor: '#25D366', '&:hover': { backgroundColor: '#1fb855' } }}
+            href="https://wa.me/message/3E5LRY7JUHE2O1"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </Button>
+        </Box>
+
         <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
           <Link href="/calendar" passHref>
             <Button variant="contained" color="primary">
-              Go to Calendar
+              View the Live Calendar
             </Button>
           </Link>
         </Box>
+
+        <h3>What Makes Tango Tiempo Different?</h3>
+        <ul>
+          <li><strong>Free & Always Will Be:</strong> Our core calendar is free to use, with no strings attached.</li>
+          <li><strong>Nationwide Scope:</strong> Discover milongas, practicas, classes, and festivals coast to coast.</li>
+          <li><strong>AI Discovery:</strong> Smart filters and regional views help you find what you love.</li>
+          <li><strong>Mobile-First:</strong> Use it from your phone, your laptop, or wherever you check your dance plans.</li>
+        </ul>
+
+        <h3>Our Mission</h3>
         <p>
-          Tango Tiempo is a comprehensive calendar application designed to help tango dancers and organizers across the
-          nation coordinate and manage tango events. The application provides multiple views (calendar, list, and
-          upcoming map view) for users to browse events and includes advanced filtering options for a personalized
-          experience.
+          Our mission is to unite and strengthen the U.S. tango community by providing a comprehensive, accessible, and free platform for discovering and sharing tango events. We believe that by connecting dancers, organizers, and venues across the country, we can help Argentine tango thrive in every corner of America.
         </p>
-        <h3>Features</h3>
-        <h4>
-          It&lsquo;s free. It&lsquo;s easy, and it&lsquo;s Modern. We just want to help the tango world. It`&lsquo;s for
-          all of US Argentine Tango.
-        </h4>
-        <h4>It&lsquo;s a Mobile app and Web Version. We hope it&lsquo;s highly interactive.</h4>
-        <h4>It has Facebook integrations, pinging active users when you cancel an event. Merge with your campaigns.</h4>
-        <h4>1. Event Calendar</h4>
-        <ul>
-          <li>
-            <strong>Multiple Views:</strong> Displays events in monthly, weekly, daily, and list formats.
-          </li>
-          <li>
-            <strong>Interactive Events:</strong> Users can click on events to view detailed information in a modal
-            popup.
-          </li>
-          <li>
-            <strong>Category-Based Color Coding:</strong> Events are color-coded based on categories such as Milonga,
-            Practica, Workshop, and more.
-          </li>
-        </ul>
-        <h4>2. Region-Specific Filtering</h4>
-        <ul>
-          <li>
-            <strong>Dynamic Filtering:</strong> The app supports filtering events by masteredRegion.
-          </li>
-          <li>
-            <strong>Region Selection:</strong> Users can select their masteredRegion from a dropdown, updating the
-            calendar to display only relevant events.
-          </li>
-          <li>
-            <strong>Default Region:</strong> The default masteredRegion is set to “BOS” (Boston), but users can change
-            this as needed.
-          </li>
-        </ul>
-        <h4>3. Category Filters</h4>
-        <ul>
-          <li>
-            <strong>Advanced Filtering:</strong> Allows users to show or hide events based on categories such as
-            Milonga, Practica, Class, etc.
-          </li>
-          <li>
-            <strong>User Customization:</strong> Users can easily toggle between categories to customize their event
-            view.
-          </li>
-        </ul>
-        <h4>4. User Roles and Permissions</h4>
-        <ul>
-          <li>
-            <strong>Role-Based Access:</strong> Supports multiple user roles including Anonymous, User, Region
-            Organizer, Region Admin, and System Admin.
-          </li>
-          <li>
-            <strong>Security and Permissions:</strong> Grants different levels of access and functionality based on user
-            roles.
-          </li>
-          <li>
-            <strong>Region-Specific Permissions:</strong> Security grants can be applied per region to ensure proper
-            access control.
-          </li>
-        </ul>
-        <h3>Upcoming Features</h3>
-        <ul>
-          <li>
-            <strong>Map View:</strong> A future feature that will allow users to view events on a map.
-          </li>
-          <li>
-            <strong>Firebase Integration:</strong> Enhancing the app with Firebase for authentication, user roles, and
-            permissions management.
-          </li>
-        </ul>
+
+        <p>
+          Tango Tiempo is built to unite the U.S. tango community. From small practicas to national encuentros, we&apos;re here to support connection through dance.
+        </p>
+
+        <h3>About Our Logo</h3>
+        <p>
+          The Tango Tiempo logo represents the timeless connection between dance partners and the rhythmic pulse of tango music. 
+          The flowing design captures the elegance and passion of Argentine tango, while the modern aesthetic reflects our 
+          commitment to bringing this traditional dance into the digital age. Our logo embodies the spirit of community, 
+          movement, and the shared moments that make tango special.
+        </p>
+        
+        <p>
+          We do not sell your data. We are not ad-driven. We just believe tango deserves better tools.
+        </p>
       </div>
     </main>
   );

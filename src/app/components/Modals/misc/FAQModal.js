@@ -35,7 +35,7 @@ const FAQModal = ({ open, onClose }) => {
         />
         <Box sx={{ p: 3, overflow: 'auto' }}>
           <Typography>
-            <strong>How can I become a Regional Organizer?</strong>
+            <strong>How can I become a Regional Organizer to Add my events?</strong>
           </Typography>
           <Typography>Contact your Regional Admin to request access.</Typography>
 
