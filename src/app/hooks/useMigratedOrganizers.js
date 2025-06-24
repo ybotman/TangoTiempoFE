@@ -74,34 +74,39 @@ export const useMigratedOrganizers = () => {
 
           return {
             _id: organizer._id,
-            organizerName: organizer.organizerName,
-            shortName: organizer.shortName,
-            organizerPhoto: organizer.organizerPhoto,
-            isApproved: organizer.isApproved,
-            authId: userLogin?.localUserInfo?.authId || userLogin?.authId || null,
-            firebaseUserId: userLogin?.firebaseUserId || null,
+            fullName: organizer.fullName || organizer.organizerName || 'N/A',
+            shortName: organizer.shortName || 'N/A',
+            hasPhoto: !!organizer.organizerPhoto,
+            isEnabled: organizer.isEnabled,
+            organizerFirebaseUserId: organizer.firebaseUserId || null,
+            // User login data
             userLoginId: userLogin?._id || null,
-            hasRoleRO: userLogin?.roles?.includes('RegionalOrganizer') || userLogin?.selectedRole === 'RegionalOrganizer',
+            userLoginFirebaseUserId: userLogin?.firebaseUserId || null,
+            // Regional organizer info from userLogin
+            roIsApproved: userLogin?.regionalOrganizerInfo?.isApproved || false,
+            roIsEnabled: userLogin?.regionalOrganizerInfo?.isEnabled || false,
+            roApprovalDate: userLogin?.regionalOrganizerInfo?.ApprovalDate || null,
+            allowedMasteredRegion: userLogin?.regionalOrganizerInfo?.allowedMasteredRegion || null,
+            // Other info
             hasEvents,
             eventCount,
-            createdAt: organizer.createdAt,
-            updatedAt: organizer.updatedAt
+            createdAt: organizer.createdAt
           };
         })
       );
 
       // Sort by migration status (incomplete first) and then by name
       processedOrganizers.sort((a, b) => {
-        const aMigrated = a.authId && a.firebaseUserId && a.hasEvents;
-        const bMigrated = b.authId && b.firebaseUserId && b.hasEvents;
+        const aMigrated = a.roIsApproved && a.roIsEnabled && a.hasEvents;
+        const bMigrated = b.roIsApproved && b.roIsEnabled && b.hasEvents;
         
         if (aMigrated !== bMigrated) {
           return aMigrated ? 1 : -1; // Unmigrated first
         }
         
-        // Handle undefined organizerName
-        const aName = a.organizerName || '';
-        const bName = b.organizerName || '';
+        // Handle undefined fullName
+        const aName = a.fullName || '';
+        const bName = b.fullName || '';
         return aName.localeCompare(bName);
       });
 

@@ -147,7 +147,7 @@ export default function MigratedOrganizersPage() {
               Fully Migrated
             </Typography>
             <Typography variant="h4" color="success.main">
-              {organizers.filter(org => org.authId && org.firebaseUserId && org.hasEvents).length}
+              {organizers.filter(org => org.roIsApproved && org.roIsEnabled && org.hasEvents).length}
             </Typography>
           </CardContent>
         </Card>
@@ -157,7 +157,7 @@ export default function MigratedOrganizersPage() {
               Pending Migration
             </Typography>
             <Typography variant="h4" color="warning.main">
-              {organizers.filter(org => !org.authId || !org.firebaseUserId || !org.hasEvents).length}
+              {organizers.filter(org => !org.roIsApproved || !org.roIsEnabled || !org.hasEvents).length}
             </Typography>
           </CardContent>
         </Card>
@@ -165,22 +165,31 @@ export default function MigratedOrganizersPage() {
 
       {/* Organizers Table */}
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="migrated organizers table">
+        <Table size="small" aria-label="migrated organizers table">
           <TableHead>
             <TableRow>
-              <TableCell>Photo</TableCell>
-              <TableCell>Organizer Name</TableCell>
+              <TableCell>Full Name</TableCell>
               <TableCell>Short Name</TableCell>
-              <TableCell align="center">Auth ID</TableCell>
-              <TableCell align="center">Firebase User ID</TableCell>
-              <TableCell align="center">Approved</TableCell>
-              <TableCell align="center">Has Events</TableCell>
-              <TableCell align="center">Migration Status</TableCell>
+              <TableCell>Org Enabled</TableCell>
+              <TableCell>Org Firebase ID</TableCell>
+              <TableCell>RO Approved</TableCell>
+              <TableCell>RO Enabled</TableCell>
+              <TableCell align="center">Photo</TableCell>
+              <TableCell>Approval Date</TableCell>
+              <TableCell>Allowed Region</TableCell>
+              <TableCell align="center">Events</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {organizers.map((organizer) => {
-              const isMigrated = organizer.authId && organizer.firebaseUserId && organizer.hasEvents;
+              const formatDate = (date) => {
+                if (!date) return 'N/A';
+                return new Date(date).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric', 
+                  year: 'numeric' 
+                });
+              };
               
               return (
                 <TableRow
@@ -188,77 +197,81 @@ export default function MigratedOrganizersPage() {
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell>
-                    <Avatar
-                      src={organizer.organizerPhoto}
-                      alt={organizer.organizerName}
-                      sx={{ width: 40, height: 40 }}
-                    >
-                      <PersonIcon />
-                    </Avatar>
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    <Typography variant="body2" fontWeight="medium">
-                      {organizer.organizerName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      ID: {organizer._id}
+                    <Typography variant="body2" noWrap>
+                      {organizer.fullName}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Chip 
-                      label={organizer.shortName} 
-                      size="small" 
-                      variant="outlined"
-                      icon={<InfoIcon />}
-                      title="Short name cannot be changed"
+                    <Typography variant="body2" noWrap>
+                      {organizer.shortName}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={organizer.isEnabled ? 'Yes' : 'No'}
+                      color={organizer.isEnabled ? 'success' : 'default'}
+                      size="small"
+                      sx={{ minWidth: 40 }}
                     />
                   </TableCell>
-                  <TableCell align="center">
-                    {organizer.authId ? (
-                      <Tooltip title={`Auth ID: ${organizer.authId}`}>
-                        <CheckCircleIcon color="success" fontSize="small" />
+                  <TableCell>
+                    {organizer.organizerFirebaseUserId ? (
+                      <Tooltip title={organizer.organizerFirebaseUserId}>
+                        <Typography variant="caption" noWrap sx={{ maxWidth: 100, display: 'block' }}>
+                          {organizer.organizerFirebaseUserId.substring(0, 8)}...
+                        </Typography>
                       </Tooltip>
                     ) : (
-                      <CancelIcon color="error" fontSize="small" />
-                    )}
-                  </TableCell>
-                  <TableCell align="center">
-                    {organizer.firebaseUserId ? (
-                      <Tooltip title={`Firebase ID: ${organizer.firebaseUserId}`}>
-                        <CheckCircleIcon color="success" fontSize="small" />
-                      </Tooltip>
-                    ) : (
-                      <CancelIcon color="error" fontSize="small" />
+                      <Typography variant="caption" color="error">None</Typography>
                     )}
                   </TableCell>
                   <TableCell align="center">
                     <Chip
-                      label={organizer.isApproved ? 'Approved' : 'Pending'}
-                      color={organizer.isApproved ? 'success' : 'warning'}
+                      label={organizer.roIsApproved ? 'Yes' : 'No'}
+                      color={organizer.roIsApproved ? 'success' : 'default'}
                       size="small"
+                      sx={{ minWidth: 40 }}
                     />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={organizer.roIsEnabled ? 'Yes' : 'No'}
+                      color={organizer.roIsEnabled ? 'success' : 'default'}
+                      size="small"
+                      sx={{ minWidth: 40 }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={organizer.hasPhoto ? 'Yes' : 'No'}
+                      color={organizer.hasPhoto ? 'success' : 'default'}
+                      size="small"
+                      sx={{ minWidth: 40 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" noWrap>
+                      {formatDate(organizer.roApprovalDate)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" noWrap>
+                      {organizer.allowedMasteredRegion || 'N/A'}
+                    </Typography>
                   </TableCell>
                   <TableCell align="center">
                     {organizer.hasEvents ? (
                       <Tooltip title={`${organizer.eventCount} events`}>
-                        <Box display="flex" alignItems="center" justifyContent="center">
-                          <EventIcon color="success" fontSize="small" />
-                          <Typography variant="caption" sx={{ ml: 0.5 }}>
-                            {organizer.eventCount}
-                          </Typography>
-                        </Box>
+                        <Chip 
+                          label={organizer.eventCount} 
+                          size="small" 
+                          color="primary"
+                          sx={{ minWidth: 30 }}
+                        />
                       </Tooltip>
                     ) : (
-                      <CancelIcon color="error" fontSize="small" />
+                      <Typography variant="caption" color="error">0</Typography>
                     )}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={isMigrated ? 'Complete' : 'Pending'}
-                      color={isMigrated ? 'success' : 'warning'}
-                      size="small"
-                      variant={isMigrated ? 'filled' : 'outlined'}
-                    />
                   </TableCell>
                 </TableRow>
               );
