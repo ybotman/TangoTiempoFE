@@ -84,8 +84,12 @@ const SidebarDrawer = ({ open, onClose }) => {
   // Get the organizer selection state from useCalendarPage
   const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
   
-  // Debug menu is now available in all environments for all users
-  const showDebugMenu = true; // Previously restricted to development mode only
+  // Debug menu is only available for Regional Admin, System Admin, and System Owner
+  const showDebugMenu = [
+    listOfAllRoles.REGIONAL_ADMIN,
+    listOfAllRoles.SYSTEM_ADMIN,
+    listOfAllRoles.SYSTEM_OWNER
+  ].includes(selectedRole);
   
   // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
   const [venueSelectionReady, setVenueSelectionReady] = useState(false);
