@@ -30,7 +30,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
       trimmedShortName.length < 3 ||
       trimmedShortName.length > 9 ||
       trimmedShortName === 'CHANGE' ||
-      trimmedShortName === 'TANGO' ||
+      trimmedShortName.toUpperCase().includes('TANGO') ||
       /(^[\s-]|[\s-]$|[-\s]{2,})/.test(trimmedShortName) // Checks for invalid patterns
     );
   };
@@ -61,7 +61,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
     }
     if (isShortNameInvalid()) {
       setErrorMessage(
-        'Short Name must be between 3 and 9 characters, cannot be "CHANGE" or "TANGO", and must not contain invalid patterns like double spaces or hyphens.'
+        'Short Name must be between 3 and 9 characters, cannot be "CHANGE" or contain "TANGO", and must not contain invalid patterns like double spaces or hyphens.'
       );
       return;
     }
@@ -158,7 +158,7 @@ const RegionalOrganizersName = ({ organizerId, organizer, updateOrganizer }) => 
           }}
           helperText={
             isShortNameInvalid()
-              ? 'Short Name must be between 3-9 chars, cannot be "CHANGE" or "TANGO", and must not contain invalid patterns.'
+              ? 'Short Name must be between 3-9 chars, cannot be "CHANGE" or contain "TANGO", and must not contain invalid patterns.'
               : ''
           }
           error={isShortNameInvalid()}

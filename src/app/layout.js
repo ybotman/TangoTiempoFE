@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'Tango Tiempo - The Ultimate Argentine Tango Calendar',
+  title: 'Tango Tiempo - The Premiere Argentine Tango Calendar',
   description:
     "The United States' first fully dedicated Argentine Tango calendar. Open, easy, and free to use.",
   keywords: 'Argentine Tango, Tango Events, Tango Calendar, Tango Tiempo, Community Calendar, Milonga, Tango Workshop',

@@ -78,6 +78,7 @@ export const useMigratedOrganizers = () => {
             shortName: organizer.shortName || 'N/A',
             hasPhoto: !!organizer.organizerPhoto,
             isEnabled: organizer.isEnabled,
+            wantRender: organizer.wantRender || false,
             organizerFirebaseUserId: organizer.firebaseUserId || null,
             // User login data
             userLoginId: userLogin?._id || null,

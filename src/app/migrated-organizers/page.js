@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -15,7 +15,6 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Avatar,
   CircularProgress,
   Alert,
   AlertTitle,
@@ -23,8 +22,7 @@ import {
   CardContent,
   Button,
   Tooltip,
-  IconButton,
-  Divider
+  IconButton
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -126,7 +124,17 @@ export default function MigratedOrganizersPage() {
       </Card>
 
       {/* Summary Stats */}
-      <Box display="flex" gap={2} mb={3}>
+      <Box 
+        display="flex" 
+        gap={2} 
+        mb={3}
+        sx={{
+          flexDirection: { xs: 'column', sm: 'row' },
+          '& > *': {
+            flex: { xs: '1 1 100%', sm: 1 }
+          }
+        }}
+      >
         <Card sx={{ flex: 1 }}>
           <CardContent>
             <Typography color="text.secondary" gutterBottom>
@@ -160,16 +168,48 @@ export default function MigratedOrganizersPage() {
       </Box>
 
       {/* Organizers Table */}
-      <TableContainer component={Paper}>
-        <Table size="small" aria-label="migrated organizers table">
+      <Box sx={{ position: 'relative' }}>
+        {/* Mobile scroll indicator */}
+        <Box 
+          sx={{ 
+            display: { xs: 'block', md: 'none' },
+            textAlign: 'center',
+            mb: 1,
+            color: 'text.secondary',
+            fontSize: '0.875rem'
+          }}
+        >
+          ← Swipe horizontally to see more →
+        </Box>
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            maxWidth: '100%', 
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch', // Enable smooth scrolling on iOS
+            '&::-webkit-scrollbar': {
+              height: 8,
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'rgba(0,0,0,0.1)',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              borderRadius: 4,
+            }
+          }}
+        >
+        <Table size="small" aria-label="migrated organizers table" sx={{ minWidth: 1200 }}>
           <TableHead>
             <TableRow>
               <TableCell>Full Name</TableCell>
               <TableCell>Short Name</TableCell>
-              <TableCell>Org Enabled</TableCell>
-              <TableCell>Org Firebase ID</TableCell>
-              <TableCell>RO Approved</TableCell>
-              <TableCell>RO Enabled</TableCell>
+              <TableCell align="center">Org Enabled</TableCell>
+              <TableCell align="center">Want Render</TableCell>
+              <TableCell align="center">ORG-fID</TableCell>
+              <TableCell align="center">USR-fID</TableCell>
+              <TableCell align="center">RO Approved</TableCell>
+              <TableCell align="center">RO Enabled</TableCell>
               <TableCell align="center">Photo</TableCell>
               <TableCell>Approval Date</TableCell>
               <TableCell>Allowed Region</TableCell>
@@ -210,16 +250,33 @@ export default function MigratedOrganizersPage() {
                       sx={{ minWidth: 40 }}
                     />
                   </TableCell>
-                  <TableCell>
-                    {organizer.organizerFirebaseUserId ? (
-                      <Tooltip title={organizer.organizerFirebaseUserId}>
-                        <Typography variant="caption" noWrap sx={{ maxWidth: 100, display: 'block' }}>
-                          {organizer.organizerFirebaseUserId.substring(0, 8)}...
-                        </Typography>
-                      </Tooltip>
-                    ) : (
-                      <Typography variant="caption" color="error">None</Typography>
-                    )}
+                  <TableCell align="center">
+                    <Chip
+                      label={organizer.wantRender ? 'Yes' : 'No'}
+                      color={organizer.wantRender ? 'success' : 'default'}
+                      size="small"
+                      sx={{ minWidth: 40 }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={organizer.organizerFirebaseUserId || 'No Firebase ID'}>
+                      <Chip
+                        label={organizer.organizerFirebaseUserId ? 'Yes' : 'No'}
+                        color={organizer.organizerFirebaseUserId ? 'success' : 'error'}
+                        size="small"
+                        sx={{ minWidth: 40 }}
+                      />
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={organizer.userLoginFirebaseUserId || 'No Firebase ID'}>
+                      <Chip
+                        label={organizer.userLoginFirebaseUserId ? 'Yes' : 'No'}
+                        color={organizer.userLoginFirebaseUserId ? 'success' : 'error'}
+                        size="small"
+                        sx={{ minWidth: 40 }}
+                      />
+                    </Tooltip>
                   </TableCell>
                   <TableCell align="center">
                     <Chip
@@ -275,6 +332,7 @@ export default function MigratedOrganizersPage() {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
 
       {/* Footer Note */}
       <Box mt={3} p={2} bgcolor="grey.100" borderRadius={1}>

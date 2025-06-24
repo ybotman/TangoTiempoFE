@@ -7,7 +7,7 @@ export default {
   openGraph: {
     type: 'website',
     url: 'https://tangotiempo.com',
-    title: 'Tango Tiempo - The Ultimate Argentine Tango Calendar',
+    title: 'Tango Tiempo - The Premere Argentine Tango Calendar',
     description:
       "The United States' first fully dedicated Argentine Tango calendar. Open, easy, and free to use. Every feature for searching, finding, adding, and managing Tango events is free, forever.",
     images: [
