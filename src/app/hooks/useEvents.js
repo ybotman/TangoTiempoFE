@@ -541,6 +541,16 @@ export function useEventOperations() {
         venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
         locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
         locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
+        // Add required fields that might be missing in update
+        masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
+        // Set default ownerOrganizerName if not provided - use the user's organizer name if they're a Regional Organizer
+        ownerOrganizerName: cleanedEventData.ownerOrganizerName || 
+                           (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerName : null) ||
+                           "Event Organizer",
+        // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
+        ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
+        // Set expiresAt to 1 year after endDate
+        expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
       };
       
       // If venue has coordinates, include them in venueGeolocation
@@ -583,6 +593,11 @@ export function useEventOperations() {
             coordinates: [0, 0]
           };
         }
+      }
+      
+      // Ensure mastered location fields are included
+      if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
+        preparedData.masteredRegionName = preparedData.selectedRegion;
       }
       
       // Convert dayjs objects to ISO strings
