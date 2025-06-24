@@ -26,10 +26,6 @@ import {
   IconButton,
   Divider
 } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import PersonIcon from '@mui/icons-material/Person';
-import EventIcon from '@mui/icons-material/Event';
 import InfoIcon from '@mui/icons-material/Info';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useMigratedOrganizers } from '@/hooks/useMigratedOrganizers';
