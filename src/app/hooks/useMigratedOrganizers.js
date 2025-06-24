@@ -12,25 +12,30 @@ export const useMigratedOrganizers = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch organizers data
-      const organizersResponse = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/organizers?isApproved=true`);
+      // Fetch organizers data - only enabled organizers
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
+      const organizersResponse = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers?appId=${appId}&isApproved=true&isEnabled=true`);
       if (!organizersResponse.ok) {
         throw new Error('Failed to fetch organizers');
       }
-      const organizersData = await organizersResponse.json();
+      const organizersResult = await organizersResponse.json();
+      const organizersData = organizersResult.organizers || [];
 
       // Fetch user logins data to match with organizers
-      const userLoginsResponse = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/userlogins`);
+      const userLoginsResponse = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/all?appId=${appId}`);
       if (!userLoginsResponse.ok) {
         throw new Error('Failed to fetch user logins');
       }
-      const userLoginsData = await userLoginsResponse.json();
+      const userLoginsResult = await userLoginsResponse.json();
+      const userLoginsData = userLoginsResult.users || [];
 
       // Create a map of organizer IDs to user login data
       const userLoginMap = {};
       userLoginsData.forEach(user => {
-        if (user.organizerId) {
-          userLoginMap[user.organizerId] = user;
+        // Check both direct organizerId and regionalOrganizerInfo.organizerId
+        const organizerId = user.organizerId || user.regionalOrganizerInfo?.organizerId;
+        if (organizerId) {
+          userLoginMap[organizerId] = user;
         }
       });
 
@@ -46,7 +51,7 @@ export const useMigratedOrganizers = () => {
           
           try {
             const eventsResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_BE_URL}/events?ownerId=${organizer._id}&limit=1`
+              `${process.env.NEXT_PUBLIC_BE_URL}/api/events?appId=${appId}&ownerId=${organizer._id}&limit=1`
             );
             if (eventsResponse.ok) {
               const eventsData = await eventsResponse.json();
@@ -55,7 +60,7 @@ export const useMigratedOrganizers = () => {
               // If has events, get the actual count
               if (hasEvents) {
                 const countResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_BE_URL}/events/count?ownerId=${organizer._id}`
+                  `${process.env.NEXT_PUBLIC_BE_URL}/api/events/count?appId=${appId}&ownerId=${organizer._id}`
                 );
                 if (countResponse.ok) {
                   const countData = await countResponse.json();
@@ -73,10 +78,10 @@ export const useMigratedOrganizers = () => {
             shortName: organizer.shortName,
             organizerPhoto: organizer.organizerPhoto,
             isApproved: organizer.isApproved,
-            authId: userLogin?.authId || null,
+            authId: userLogin?.localUserInfo?.authId || userLogin?.authId || null,
             firebaseUserId: userLogin?.firebaseUserId || null,
             userLoginId: userLogin?._id || null,
-            hasRoleRO: userLogin?.selectedRole === 'RegionalOrganizer',
+            hasRoleRO: userLogin?.roles?.includes('RegionalOrganizer') || userLogin?.selectedRole === 'RegionalOrganizer',
             hasEvents,
             eventCount,
             createdAt: organizer.createdAt,
@@ -94,7 +99,10 @@ export const useMigratedOrganizers = () => {
           return aMigrated ? 1 : -1; // Unmigrated first
         }
         
-        return a.organizerName.localeCompare(b.organizerName);
+        // Handle undefined organizerName
+        const aName = a.organizerName || '';
+        const bName = b.organizerName || '';
+        return aName.localeCompare(bName);
       });
 
       setOrganizers(processedOrganizers);
