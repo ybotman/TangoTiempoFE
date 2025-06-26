@@ -1,7 +1,7 @@
 // utils/firebase.js
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, FacebookAuthProvider, GoogleAuthProvider, EmailAuthProvider } from 'firebase/auth';
+import { getAuth, FacebookAuthProvider, GoogleAuthProvider, EmailAuthProvider, OAuthProvider } from 'firebase/auth';
 
 // Decode the Base64 encoded JSON string from the environment variable
 const decodedFirebaseConfig = JSON.parse(
@@ -27,4 +27,8 @@ facebookProvider.addScope('public_profile');
 
 const emailProvider = new EmailAuthProvider();
 
-export { auth, facebookProvider, googleProvider, emailProvider };
+const appleProvider = new OAuthProvider('apple.com');
+appleProvider.addScope('email');
+appleProvider.addScope('name');
+
+export { auth, facebookProvider, googleProvider, emailProvider, appleProvider };

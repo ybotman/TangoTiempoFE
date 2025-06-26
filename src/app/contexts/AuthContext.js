@@ -10,6 +10,7 @@ import {
   signOut,
   GoogleAuthProvider,
   FacebookAuthProvider,
+  OAuthProvider,
   linkWithCredential,
   EmailAuthProvider,
   fetchSignInMethodsForEmail,
@@ -17,7 +18,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
-import { auth, facebookProvider, googleProvider } from '@/utils/firebase';
+import { auth, facebookProvider, googleProvider, appleProvider } from '@/utils/firebase';
 import axios from 'axios';
 
 // Create Auth Context
@@ -268,6 +269,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Authenticate with Apple
+  const authenticateWithApple = async () => {
+    if (user) {
+      setError('You are already signed in.');
+      return null;
+    }
+
+    setLoading(true);
+
+    try {
+      signUpOngoing.current = true;
+      const result = await signInWithPopup(auth, appleProvider);
+      console.log('Apple sign-in successful:', result);
+      const firebaseUser = result.user;
+
+      // Fetch or create user in backend
+      await handleBackendUser(firebaseUser);
+
+      signUpOngoing.current = false;
+      await setUserData(firebaseUser); // Set merged user data
+      setLoading(false);
+      return firebaseUser;
+    } catch (err) {
+      console.error('Error in authenticateWithApple:', err);
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        // Handle account linking
+        const user = await handleAccountExistsWithDifferentCredential(err);
+        return user;
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Apple Sign-In is not properly configured. Please try another sign-in method.');
+      } else {
+        setError(err.message || 'An unexpected error occurred.');
+      }
+      setLoading(false);
+      signUpOngoing.current = false;
+      return null;
+    }
+  };
+
   // Function to handle account linking when the error occurs
   const handleAccountExistsWithDifferentCredential = async (error) => {
     const pendingCred = error.credential;
@@ -293,6 +333,8 @@ export const AuthProvider = ({ children }) => {
           existingProvider = new EmailAuthProvider();
         } else if (methods.includes(FacebookAuthProvider.PROVIDER_ID)) {
           existingProvider = new FacebookAuthProvider();
+        } else if (methods.includes('apple.com')) {
+          existingProvider = new OAuthProvider('apple.com');
         } else {
           // Handle unknown providers gracefully
           setError('Please sign in using your existing provider.');
@@ -491,6 +533,7 @@ export const AuthProvider = ({ children }) => {
     logOut,
     authenticateWithGoogle,
     authenticateWithFacebook,
+    authenticateWithApple,
     login,
     signUp,
     getIdToken, // Add method to get a fresh token
