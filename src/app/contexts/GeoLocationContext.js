@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useGeoLocations } from '@/hooks/useGeoLocations';
+// Removed IP-based geolocation hook - TIEMPO-145
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 // RegionsContext is being phased out and will be removed in future versions
 // Simplifying this import to avoid ESLint rule violations
 // Note: We no longer use dynamic import or conditional useContext
-import axios from 'axios';
+// Removed axios - no longer needed after IP geolocation removal (TIEMPO-145)
 
 // Create the GeoLocationContext
 const GeoLocationContext = createContext();
@@ -35,7 +35,8 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Create a placeholder for RegionsContext
   const regionsContext = null;
-  const { latitude, longitude, loading: geoLoading } = useGeoLocations();
+  // TIEMPO-145: Removed IP-based geolocation
+  const geoLoading = false;
 
   console.log('GeoLocationProvider: Initializing with location data', {
     masteredLocationAvailable: !!masteredLocationContext,
@@ -51,8 +52,7 @@ export const GeoLocationProvider = ({ children }) => {
     latitude: null,
     longitude: null,
     accuracy: null,
-    lastUpdated: null,
-    ipBased: true
+    lastUpdated: null
   });
 
   const [selectedLocation, setSelectedLocation] = useState({
@@ -74,22 +74,7 @@ export const GeoLocationProvider = ({ children }) => {
     nearestCity: null
   });
 
-  // Initialize user location from the useGeoLocations hook
-  useEffect(() => {
-    if (latitude && longitude && !geoLoading) {
-      setUserLocation({
-        latitude,
-        longitude,
-        accuracy: null, // IP geolocation doesn't provide accuracy
-        lastUpdated: new Date().toISOString(),
-        ipBased: true
-      });
-      setLoadingState(prev => ({ ...prev, userLocation: false }));
-      setErrorState(prev => ({ ...prev, userLocation: null }));
-    } else if (geoLoading) {
-      setLoadingState(prev => ({ ...prev, userLocation: true }));
-    }
-  }, [latitude, longitude, geoLoading]);
+  // TIEMPO-145: Removed IP-based location initialization
 
   // Initialize selected location from the MasteredLocationContext
   useEffect(() => {
@@ -466,261 +451,61 @@ export const GeoLocationProvider = ({ children }) => {
   }, [nearestCity, userLocation, fetchNearestCityImpl]);
 
   // Function to refresh the user's geolocation (IP-based only, no browser permissions)
-  const refreshUserLocation = useCallback(async () => {
-    console.log('GeoLocationContext: Refreshing user location');
+  // TIEMPO-145: Simplified function to set default Boston location
+  const refreshUserLocation = useCallback(() => {
+    console.log('GeoLocationContext: Setting default Boston location');
     setLoadingState(prev => ({ ...prev, userLocation: true }));
     
-    // Add cache/session storage to reduce API calls to ipapi.co (which has strict rate limits)
-    let cachedLocation = null;
-    let cacheTimestamp = null;
-    const cacheExpiry = 3600000; // 1 hour in milliseconds
-    
-    // Only access sessionStorage in browser environment
-    if (typeof window !== 'undefined') {
-      try {
-        cachedLocation = sessionStorage.getItem('userGeoLocation');
-        cacheTimestamp = sessionStorage.getItem('userGeoLocationTimestamp');
-        console.log('GeoLocationContext: Checking cached location', { hasCachedLocation: !!cachedLocation });
-      } catch (err) {
-        console.error('Error accessing sessionStorage:', err);
-        // Silently fail if sessionStorage is not available
-      }
-    }
-    
     try {
-      // Check if we have a valid cached location
-      if (cachedLocation && cacheTimestamp) {
-        try {
-          const parsedLocation = JSON.parse(cachedLocation);
-          const timestamp = parseInt(cacheTimestamp, 10);
-          const now = Date.now();
-          
-          // If cache is still valid, use it instead of making a new API call
-          if (now - timestamp < cacheExpiry && 
-              parsedLocation && 
-              parsedLocation.latitude && 
-              parsedLocation.longitude) {
-            
-            console.log('GeoLocationContext: Using cached geo location data', parsedLocation);
-            
-            setUserLocation({
-              latitude: parsedLocation.latitude,
-              longitude: parsedLocation.longitude,
-              accuracy: null,
-              lastUpdated: new Date(timestamp).toISOString(),
-              ipBased: true
-            });
-            
-            // Update the nearest city based on cached coordinates
-            console.log('GeoLocationContext: Fetching nearest city from cache', {
-              lat: parsedLocation.latitude,
-              lng: parsedLocation.longitude
-            });
-            // Always use our implementation directly
-            fetchNearestCityImpl(parsedLocation.latitude, parsedLocation.longitude);
-            
-            setErrorState(prev => ({ ...prev, userLocation: null }));
-            setLoadingState(prev => ({ ...prev, userLocation: false }));
-            return;
-          } else {
-            console.log('GeoLocationContext: Cached location expired or invalid');
-          }
-        } catch (parseError) {
-          console.error('Error parsing cached location:', parseError);
-          // Continue if cache parsing fails
-        }
-      }
+      // Set Boston coordinates as default
+      const bostonLat = 42.3601;
+      const bostonLng = -71.0589;
       
-      // If no valid cache, make API request with error handling for rate limits
-      try {
-        console.log('GeoLocationContext: Fetching location from API');
-        // Use the backend proxy to avoid CORS issues
-        const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
-        const { data } = await axios.get(`${baseURL}/api/firebase/geo/ip`, {
-          timeout: 5000,
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        
-        console.log('GeoLocationContext: API response received', { 
-          hasData: !!data,
-          hasLatitude: data?.latitude !== undefined,
-          hasLongitude: data?.longitude !== undefined
-        });
-        
-        if (data && data.latitude && data.longitude) {
-          // Cache the location data - only in browser environment
-          if (typeof window !== 'undefined') {
-            try {
-              const locationData = {
-                latitude: data.latitude,
-                longitude: data.longitude
-              };
-              
-              sessionStorage.setItem('userGeoLocation', JSON.stringify(locationData));
-              sessionStorage.setItem('userGeoLocationTimestamp', Date.now().toString());
-              console.log('GeoLocationContext: Location cached successfully');
-            } catch (storageError) {
-              console.error('Error saving to sessionStorage:', storageError);
-              // Continue even if storage fails
-            }
-          }
-          
-          setUserLocation({
-            latitude: data.latitude,
-            longitude: data.longitude,
-            accuracy: null,
-            lastUpdated: new Date().toISOString(),
-            ipBased: true
-          });
-          
-          // Update the nearest city based on these coordinates
-          console.log('GeoLocationContext: Fetching nearest city from API response', {
-            lat: data.latitude,
-            lng: data.longitude
-          });
-
-          // Directly use our implementation to fetch the nearest city
-          // With the hierarchical model, we're fully responsible for this now
-          fetchNearestCityImpl(data.latitude, data.longitude);
-        } else {
-          console.error('GeoLocationContext: Invalid API response format', data);
-          throw new Error('Unable to retrieve latitude/longitude from IP service');
-        }
-      } catch (error) {
-        console.error('GeoLocationContext: API error fetching location:', error);
-        
-        if (error.response && error.response.status === 429) {
-          console.warn('GeoLocationContext: Rate limit exceeded, using fallback location');
-          setErrorState(prev => ({ 
-            ...prev, 
-            userLocation: 'Rate limit exceeded for location service. Please try again later.' 
-          }));
-          
-          // Fall back to a default location or previously stored location if available
-          if (userLocation.latitude && userLocation.longitude) {
-            // We already have a location, so let's use it
-            console.log('GeoLocationContext: Using existing location as fallback', {
-              lat: userLocation.latitude,
-              lng: userLocation.longitude
-            });
-            
-            // Directly use our implementation as the only option now
-            fetchNearestCityImpl(userLocation.latitude, userLocation.longitude);
-          } else {
-            // Use default locations by region
-            // Northeast region (New York City)
-            const defaultLat = 40.7128;
-            const defaultLng = -74.0060;
-            
-            console.log('GeoLocationContext: Using default NYC location', {
-              lat: defaultLat,
-              lng: defaultLng
-            });
-            
-            setUserLocation({
-              latitude: defaultLat,
-              longitude: defaultLng,
-              accuracy: null,
-              lastUpdated: new Date().toISOString(),
-              ipBased: false
-            });
-            
-            // Call our implementation with the default coordinates
-            fetchNearestCityImpl(defaultLat, defaultLng);
-
-            // Manual fallback for when everything else fails - set Northeast region as default
-            console.log('GeoLocationContext: Using hardcoded Northeast region fallback');
-            // Use names for location without hardcoded IDs
-            setSelectedLocation({
-              country: {
-                id: null, // Following SuccessCriteria - no hardcoded IDs
-                name: 'United States'
-              },
-              region: {
-                id: null, // Following SuccessCriteria - no hardcoded IDs
-                name: 'Northeast'
-              },
-              division: {
-                id: null, // Following SuccessCriteria - no hardcoded IDs
-                name: 'New England'
-              },
-              city: {
-                id: null, // Following SuccessCriteria - no hardcoded IDs
-                name: 'Boston',
-                latitude: 42.3601,
-                longitude: -71.0589
-              }
-            });
-          }
-        } else {
-          console.error('GeoLocationContext: Other API error', error.message);
-          setErrorState(prev => ({ 
-            ...prev, 
-            userLocation: error.message || 'Failed to get user location' 
-          }));
-          
-          // Emergency fallback - Northeast region
-          console.log('GeoLocationContext: Using emergency fallback for Northeast region');
-          // Use names for location without hardcoded IDs
-          setSelectedLocation({
-            country: {
-              id: null, // Following SuccessCriteria - no hardcoded IDs
-              name: 'United States'
-            },
-            region: {
-              id: null, // Following SuccessCriteria - no hardcoded IDs
-              name: 'Northeast'
-            },
-            division: {
-              id: null, // Following SuccessCriteria - no hardcoded IDs
-              name: 'New England'
-            },
-            city: {
-              id: null, // Following SuccessCriteria - no hardcoded IDs
-              name: 'Boston',
-              latitude: 42.3601,
-              longitude: -71.0589
-            }
-          });
-        }
-      }
+      // Update user location state
+      setUserLocation({
+        latitude: bostonLat,
+        longitude: bostonLng,
+        accuracy: null,
+        lastUpdated: new Date().toISOString()
+      });
       
-    } catch (error) {
-      console.error('GeoLocationContext: General error in refreshUserLocation:', error);
-      setErrorState(prev => ({ 
-        ...prev, 
-        userLocation: error.message || 'Failed to get user location' 
-      }));
-      
-      // Last resort fallback - Northeast region
-      console.log('GeoLocationContext: Using last resort fallback for Northeast region');
-      // Use names for location without hardcoded IDs
+      // Set selected location to Boston
       setSelectedLocation({
         country: {
-          id: null, // Following SuccessCriteria - no hardcoded IDs
+          id: null,
           name: 'United States'
         },
         region: {
-          id: null, // Following SuccessCriteria - no hardcoded IDs
+          id: null,
           name: 'Northeast'
         },
         division: {
-          id: null, // Following SuccessCriteria - no hardcoded IDs
+          id: null,
           name: 'New England'
         },
         city: {
-          id: null, // Following SuccessCriteria - no hardcoded IDs
+          id: null,
           name: 'Boston',
-          latitude: 42.3601,
-          longitude: -71.0589
+          latitude: bostonLat,
+          longitude: bostonLng
         }
       });
+      
+      // Clear any errors
+      setErrorState(prev => ({ ...prev, userLocation: null }));
+      
+      console.log('GeoLocationContext: Default Boston location set successfully');
+      
+    } catch (error) {
+      console.error('GeoLocationContext: Error setting default location:', error);
+      setErrorState(prev => ({ 
+        ...prev, 
+        userLocation: 'Failed to set default location' 
+      }));
     } finally {
       setLoadingState(prev => ({ ...prev, userLocation: false }));
     }
-  }, [fetchNearestCityImpl, userLocation, setSelectedLocation]);
+  }, [setSelectedLocation]);
 
   // Mark context as initialized after setup completes
   useEffect(() => {
@@ -787,7 +572,7 @@ export const GeoLocationProvider = ({ children }) => {
       try {
         // Force a refresh of the user location
         console.log('GeoLocationContext: No location available, forcing refresh');
-        await refreshUserLocation();
+        refreshUserLocation();
 
         // After refresh, check if we have a city ID yet
         if (!selectedLocation.city.id) {
