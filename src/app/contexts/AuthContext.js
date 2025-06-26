@@ -271,7 +271,10 @@ export const AuthProvider = ({ children }) => {
 
   // Authenticate with Apple
   const authenticateWithApple = async () => {
+    console.log('=== Starting Apple Sign-In ===');
+    
     if (user) {
+      console.log('User already signed in:', user.uid);
       setError('You are already signed in.');
       return null;
     }
@@ -280,25 +283,63 @@ export const AuthProvider = ({ children }) => {
 
     try {
       signUpOngoing.current = true;
+      
+      // Log provider configuration
+      console.log('Apple Provider Config:', {
+        providerId: appleProvider.providerId,
+        scopes: appleProvider.scopes,
+      });
+      
+      // Log Firebase auth domain
+      console.log('Firebase Auth Domain:', auth.config.authDomain);
+      
+      console.log('Attempting signInWithPopup...');
       const result = await signInWithPopup(auth, appleProvider);
-      console.log('Apple sign-in successful:', result);
+      
+      console.log('Apple sign-in successful:', {
+        uid: result.user.uid,
+        email: result.user.email,
+        displayName: result.user.displayName,
+        providerId: result.providerId,
+        credential: result.credential ? 'Present' : 'Missing',
+        additionalUserInfo: result.additionalUserInfo
+      });
+      
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
+      console.log('Creating/updating user in backend...');
       await handleBackendUser(firebaseUser);
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
       setLoading(false);
+      console.log('=== Apple Sign-In Complete ===');
       return firebaseUser;
     } catch (err) {
-      console.error('Error in authenticateWithApple:', err);
+      console.error('=== Apple Sign-In Error ===');
+      console.error('Error details:', {
+        code: err.code,
+        message: err.message,
+        customData: err.customData,
+        serverResponse: err.serverResponse,
+        fullError: err
+      });
+      
       if (err.code === 'auth/account-exists-with-different-credential') {
         // Handle account linking
+        console.log('Account exists with different credential, attempting to link...');
         const user = await handleAccountExistsWithDifferentCredential(err);
         return user;
       } else if (err.code === 'auth/operation-not-allowed') {
         setError('Apple Sign-In is not properly configured. Please try another sign-in method.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setError('Popup was blocked. Please allow popups for this site.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in cancelled.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        console.error('Unauthorized domain. Current domain:', window.location.hostname);
+        setError('This domain is not authorized for Apple Sign-In.');
       } else {
         setError(err.message || 'An unexpected error occurred.');
       }

@@ -8,7 +8,11 @@ const decodedFirebaseConfig = JSON.parse(
   Buffer.from(process.env.NEXT_PUBLIC_FIREBASE_JSON, 'base64').toString('utf-8')
 );
 
-console.log('Firebase Config:', decodedFirebaseConfig); // Debugging line
+console.log('=== Firebase Configuration ===');
+console.log('Project ID:', decodedFirebaseConfig.projectId);
+console.log('Auth Domain:', decodedFirebaseConfig.authDomain);
+console.log('Current Domain:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
+console.log('Full Firebase Config:', decodedFirebaseConfig);
 
 // Initialize Firebase app
 const app = initializeApp(decodedFirebaseConfig);
@@ -30,5 +34,15 @@ const emailProvider = new EmailAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 appleProvider.addScope('email');
 appleProvider.addScope('name');
+
+// Log Apple provider setup
+console.log('=== Apple Provider Setup ===');
+console.log('Provider ID:', appleProvider.providerId);
+console.log('Scopes:', appleProvider.scopes);
+
+// Set custom parameters if needed (optional)
+// appleProvider.setCustomParameters({
+//   locale: 'en'
+// });
 
 export { auth, facebookProvider, googleProvider, emailProvider, appleProvider };
