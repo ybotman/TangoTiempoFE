@@ -22,7 +22,7 @@ import Link from 'next/link';
 
 const LoginPage = () => {
   const router = useRouter();
-  const { user, loading, error, authenticateWithGoogle, authenticateWithFacebook, login } = useContext(AuthContext);
+  const { user, loading, error, authenticateWithGoogle, login } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authError, setAuthError] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -45,16 +45,6 @@ const LoginPage = () => {
     }
   };
 
-  const handleFacebookLogIn = async () => {
-    setIsRedirecting(true);
-    setAuthError('');
-    const result = await authenticateWithFacebook();
-    if (result) {
-      router.push('/calendar');
-    } else {
-      setIsRedirecting(false);
-    }
-  };
 
   const handleEmailLogin = async ({ email, password }) => {
     setAuthError('');
@@ -98,7 +88,7 @@ const LoginPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <EmailIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Email Login<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
+                    <Typography variant="h6">Email Login</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Log in with your email address and password
@@ -132,15 +122,15 @@ const LoginPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <FacebookIcon sx={{ mr: 1, color: '#4267B2' }} />
-                    <Typography variant="h6">Facebook Login<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
+                    <Typography variant="h6">Facebook Login</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    Log in with your Facebook account credentials
+                    Coming soon - Facebook login will be available shortly
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button size="small" color="primary" onClick={handleFacebookLogIn} sx={{ ml: 1, mb: 1 }}>
-                    <>Continue with Facebook<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</>
+                  <Button size="small" color="primary" disabled sx={{ ml: 1, mb: 1 }}>
+                    Coming Soon
                   </Button>
                 </CardActions>
               </Card>

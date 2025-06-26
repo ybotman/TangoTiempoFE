@@ -24,7 +24,7 @@ import Link from 'next/link';
 
 const SignUpPage = () => {
   const router = useRouter();
-  const { user, loading, error, authenticateWithGoogle, authenticateWithFacebook, signUp } = useContext(AuthContext);
+  const { user, loading, error, authenticateWithGoogle, signUp } = useContext(AuthContext);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authError, setAuthError] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -47,16 +47,6 @@ const SignUpPage = () => {
     }
   };
 
-  const handleFacebookSignUp = async () => {
-    setIsRedirecting(true);
-    setAuthError('');
-    const result = await authenticateWithFacebook();
-    if (result) {
-      router.push('/calendar');
-    } else {
-      setIsRedirecting(false);
-    }
-  };
 
   const handleEmailSignUp = async (formData) => {
     setAuthError('');
@@ -100,7 +90,7 @@ const SignUpPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <EmailIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Email Sign Up<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
+                    <Typography variant="h6">Email Sign Up</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Create an account using your email address and a password
@@ -134,15 +124,15 @@ const SignUpPage = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <FacebookIcon sx={{ mr: 1, color: '#4267B2' }} />
-                    <Typography variant="h6">Facebook Sign Up<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</Typography>
+                    <Typography variant="h6">Facebook Sign Up</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    Create an account using your Facebook account credentials
+                    Coming soon - Facebook sign up will be available shortly
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button size="small" color="primary" onClick={handleFacebookSignUp} sx={{ ml: 1, mb: 1 }}>
-                    <>Continue with Facebook<br />(BETA - <span style={{color: 'red'}}>Don't Use</span>)</>
+                  <Button size="small" color="primary" disabled sx={{ ml: 1, mb: 1 }}>
+                    Coming Soon
                   </Button>
                 </CardActions>
               </Card>
