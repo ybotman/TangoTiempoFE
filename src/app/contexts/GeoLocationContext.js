@@ -42,8 +42,6 @@ export const GeoLocationProvider = ({ children }) => {
     masteredLocationAvailable: !!masteredLocationContext,
     hasNearestCity: !!nearestCity,
     nearestCityName: nearestCity?.cityName,
-    latitude,
-    longitude,
     isInitialized
   });
 
