@@ -307,6 +307,39 @@ export const AuthProvider = ({ children }) => {
       
       const firebaseUser = result.user;
 
+      // Extract name from Apple profile on first login
+      if (result.additionalUserInfo?.isNewUser && result.additionalUserInfo?.profile) {
+        const profile = result.additionalUserInfo.profile;
+        console.log('Apple profile data:', profile);
+        
+        // Apple provides name data differently - could be in various formats
+        let fullName = '';
+        
+        if (profile.name) {
+          // Sometimes Apple provides a name object
+          if (typeof profile.name === 'object') {
+            fullName = `${profile.name.firstName || ''} ${profile.name.lastName || ''}`.trim();
+          } else if (typeof profile.name === 'string') {
+            fullName = profile.name;
+          }
+        } else if (profile.firstName || profile.lastName) {
+          // Sometimes provided as separate fields
+          fullName = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+        } else if (profile.given_name || profile.family_name) {
+          // OAuth standard claims
+          fullName = `${profile.given_name || ''} ${profile.family_name || ''}`.trim();
+        }
+        
+        if (fullName) {
+          console.log('Updating Firebase profile with Apple name:', fullName);
+          await updateProfile(firebaseUser, { displayName: fullName });
+          // Update the local user object to reflect the change
+          firebaseUser.displayName = fullName;
+        } else {
+          console.warn('No name data found in Apple profile');
+        }
+      }
+
       // Fetch or create user in backend
       console.log('Creating/updating user in backend...');
       await handleBackendUser(firebaseUser);
