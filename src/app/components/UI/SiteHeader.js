@@ -1,16 +1,27 @@
 // app/components/UI/SiteHeader.js
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useOrganizers } from '@/hooks/useOrganizers';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal';
 
 const SiteHeader = () => {
   const { selectedLocation } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
+  const { user } = useContext(AuthContext);
+  const { organizer, fetchOrganizerById } = useOrganizers();
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const runNumber = process.env.NEXT_PUBLIC_BUILD_VERSION || 'Local'; // Fallback value if not set
+  
+  // Fetch organizer data when user is a RegionalOrganizer
+  useEffect(() => {
+    if (selectedRole === 'RegionalOrganizer' && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
+      fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+    }
+  }, [selectedRole, user, fetchOrganizerById]);
   
   // Determine which image to use based on role
   let headerImage = '/images/TangoTiempo3.jpg'; // Default image
@@ -77,6 +88,9 @@ const SiteHeader = () => {
           boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
           '&:hover': {
             backgroundColor: '#f0f0f0',
             boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
@@ -91,7 +105,24 @@ const SiteHeader = () => {
           e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
         }}
       >
-        {`City: ${selectedLocation.city?.name || 'Unknown'}`}
+        {/* User name */}
+        {user && (
+          <div style={{ fontSize: '10px', marginBottom: '2px', opacity: 0.8 }}>
+            {user.displayName || user.email?.split('@')[0] || 'User'}
+          </div>
+        )}
+        
+        {/* Organizer shortName if RO role */}
+        {selectedRole === 'RegionalOrganizer' && organizer && (
+          <div style={{ fontSize: '10px', marginBottom: '2px', opacity: 0.8 }}>
+            Organizer: {organizer.shortName || 'N/A'}
+          </div>
+        )}
+        
+        {/* City label */}
+        <div>
+          {`City: ${selectedLocation.city?.name || 'Unknown'}`}
+        </div>
       </div>
       
       {/* Location Context Modal */}
