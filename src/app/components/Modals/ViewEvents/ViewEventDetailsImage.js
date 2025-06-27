@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import PropTypes from 'prop-types';
 
 const ViewEventDetailsImage = () => {
   return (
@@ -32,6 +31,5 @@ const ViewEventDetailsImage = () => {
   );
 };
 
-ViewEventDetailsImage.propTypes = {};
 
 export default ViewEventDetailsImage;
