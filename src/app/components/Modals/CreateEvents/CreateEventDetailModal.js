@@ -288,7 +288,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       const selectedRole = user.backendInfo?.selectedRole || '';
       const isRegionalOrganizer = user.backendInfo?.regionalOrganizerInfo?.organizerId;
       const isRegionalAdmin = selectedRole === 'RegionalAdmin' && 
-                             user.backendInfo?.localAdminInfo?.adminCities?.length > 0;
+                             user.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds?.length > 0;
 
       if (!isRegionalOrganizer && !isRegionalAdmin) {
         // Determine specific error message based on user's roles
@@ -306,7 +306,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         if (hasOrganizerRole) {
           throw new Error('You have the RegionalOrganizer role but no organizer profile. Please contact an administrator.');
         } else if (hasAdminRole) {
-          throw new Error('You have the RegionalAdmin role but no admin cities assigned. Please contact an administrator.');
+          throw new Error('You have the RegionalAdmin role but no allowed admin cities assigned. Please contact an administrator.');
         } else {
           throw new Error('You need the RegionalOrganizer or RegionalAdmin role to create events.');
         }
@@ -384,7 +384,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'), 
         categoryFirst: eventData.categoryFirst || 'Other',
         selectedRole: selectedRole, // Add selectedRole for backend validation
-        adminCities: isRegionalAdmin ? user.backendInfo.localAdminInfo.adminCities : undefined,
+        adminCities: isRegionalAdmin ? user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds : undefined,
         description: eventData.description || ''
       };
       
