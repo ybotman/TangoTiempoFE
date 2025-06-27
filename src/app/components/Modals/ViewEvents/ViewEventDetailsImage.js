@@ -1,35 +1,9 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import Image from 'next/image';
-import PropTypes from 'prop-types';
 
-const ViewEventDetailsImage = ({ eventDetails }) => {
-  // Assuming eventImage is already provided in eventDetails
-  const eventImage = eventDetails?.extendedProps?.eventImage || '/TangoQuestion.jpg';
-
+const ViewEventDetailsImage = () => {
   return (
     <Box sx={{ padding: 2 }}>
-      {/* High-Resolution Image Display */}
-      <Typography variant="h6" gutterBottom>
-        Event Image
-      </Typography>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: 2,
-        }}
-      >
-        <Image
-          src={eventImage}
-          alt="Event Image"
-          width={500}
-          height={300} // Adjust as needed for the modal size
-          style={{ objectFit: 'cover', maxHeight: '100%' }}
-        />
-      </Box>
-
       {/* Placeholder for Gallery */}
       <Typography variant="h6" gutterBottom>
         Gallery (Coming Soon)
@@ -57,12 +31,5 @@ const ViewEventDetailsImage = ({ eventDetails }) => {
   );
 };
 
-ViewEventDetailsImage.propTypes = {
-  eventDetails: PropTypes.shape({
-    extendedProps: PropTypes.shape({
-      eventImage: PropTypes.string,
-    }),
-  }),
-};
 
 export default ViewEventDetailsImage;

@@ -17,6 +17,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateEmail,
+  updatePassword,
+  reauthenticateWithCredential,
 } from 'firebase/auth';
 import { auth, facebookProvider, googleProvider, appleProvider } from '@/utils/firebase';
 import axios from 'axios';
@@ -519,6 +524,16 @@ export const AuthProvider = ({ children }) => {
       await updateProfile(firebaseUser, { displayName });
       console.log('Profile updated successfully');
       
+      // Send email verification
+      console.log('Sending email verification...');
+      try {
+        await sendEmailVerification(firebaseUser);
+        console.log('Email verification sent successfully');
+      } catch (verifyErr) {
+        console.error('Error sending verification email:', verifyErr);
+        // Don't fail signup if verification email fails
+      }
+      
       // Create user in backend
       console.log('Creating user in backend...');
       await handleBackendUser(firebaseUser);
@@ -597,6 +612,60 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Password Reset
+  const resetPassword = async (email) => {
+    console.log('resetPassword called with email:', email);
+    try {
+      setLoading(true);
+      setError('');
+      
+      console.log('Calling sendPasswordResetEmail...');
+      await sendPasswordResetEmail(auth, email);
+      console.log('Password reset email sent successfully!');
+      
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      console.error('Error sending password reset email:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+      
+      let errorMessage = 'Failed to send password reset email.';
+      if (err.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email address.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many requests. Please try again later.';
+      }
+      
+      setError(errorMessage);
+      setLoading(false);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Send Verification Email
+  const sendVerificationEmail = async () => {
+    if (!auth.currentUser) {
+      throw new Error('No authenticated user');
+    }
+    
+    try {
+      await sendEmailVerification(auth.currentUser);
+      return { success: true };
+    } catch (err) {
+      console.error('Error sending verification email:', err);
+      
+      let errorMessage = 'Failed to send verification email.';
+      if (err.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many requests. Please try again later.';
+      }
+      
+      return { success: false, error: errorMessage };
+    }
+  };
+
   // Context Value
   const value = {
     user,
@@ -611,6 +680,8 @@ export const AuthProvider = ({ children }) => {
     login,
     signUp,
     getIdToken, // Add method to get a fresh token
+    resetPassword, // Password reset functionality
+    sendVerificationEmail, // Email verification functionality
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

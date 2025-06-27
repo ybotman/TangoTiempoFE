@@ -17,6 +17,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AppleIcon from '@/components/AppleIcon';
 import EmailAuthForm from '@/components/EmailAuthForm';
 import Link from 'next/link';
@@ -89,6 +90,21 @@ const LoginPage = () => {
             alignItems: 'center',
           }}
         >
+          {/* Mobile back navigation */}
+          <Box sx={{ alignSelf: 'flex-start', width: '100%', mb: 2 }}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={() => router.push('/calendar')}
+              sx={{ 
+                textTransform: 'none',
+                color: 'text.secondary',
+                '&:hover': { backgroundColor: 'action.hover' }
+              }}
+            >
+              Back to Calendar
+            </Button>
+          </Box>
+
           {/* Title with clear SIGN IN label */}
           <Typography component="h1" variant="h3" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             SIGN IN
@@ -215,6 +231,13 @@ const LoginPage = () => {
                 ← Back to options
               </Button>
               <EmailAuthForm mode="login" onSubmit={handleEmailLogin} error={authError || error} />
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Link href="/auth/reset-password" style={{ textDecoration: 'none' }}>
+                  <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                    Forgot Password?
+                  </Typography>
+                </Link>
+              </Box>
             </Box>
           )}
         </Box>

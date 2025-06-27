@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
+import EmailVerificationBanner from '@/components/EmailVerificationBanner';
 import Script from 'next/script';
 import GoogleClientWrapper from '@/components/GoogleAnalytics';
 import './globals.css';
@@ -63,6 +64,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <SidebarDrawer />
           <div style={{ flexGrow: 1, padding: '1rem' }}>
+            <EmailVerificationBanner />
             <GoogleClientWrapper>{children}</GoogleClientWrapper>
           </div>
         </Providers>
