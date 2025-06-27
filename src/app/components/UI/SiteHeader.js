@@ -68,7 +68,7 @@ const SiteHeader = () => {
         style={{
           position: 'absolute',
           bottom: '10px',
-          left: '10px',
+          right: '10px',
           backgroundColor: 'white',
           color: 'black',
           padding: '5px 10px',
