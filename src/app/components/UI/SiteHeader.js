@@ -15,7 +15,7 @@ const SiteHeader = () => {
   if (selectedRole === 'RegionalOrganizer') {
     headerImage = '/images/TangoTiempo4-RO.jpg';
   } else if (selectedRole === 'LocalAdmin' || selectedRole === 'RegionalAdmin') {
-    headerImage = '/images/TangoTiempo4-RA.jpg';
+    headerImage = '/images/TangoTiempo4-RA.jpeg'; // Note: .jpeg extension
   }
 
   return (
