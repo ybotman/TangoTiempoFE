@@ -1,17 +1,27 @@
 // app/components/UI/SiteHeader.js
 
-import React from 'react';
+import React, { useContext } from 'react';
 import Image from 'next/image';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { RoleContext } from '@/contexts/RoleContext';
 
 const SiteHeader = () => {
   const { selectedLocation } = useGeoLocation();
+  const { selectedRole } = useContext(RoleContext);
   const runNumber = process.env.NEXT_PUBLIC_BUILD_VERSION || 'Local'; // Fallback value if not set
+  
+  // Determine which image to use based on role
+  let headerImage = '/images/TangoTiempo3.jpg'; // Default image
+  if (selectedRole === 'RegionalOrganizer') {
+    headerImage = '/images/TangoTiempo4-RO.jpg';
+  } else if (selectedRole === 'LocalAdmin' || selectedRole === 'RegionalAdmin') {
+    headerImage = '/images/TangoTiempo4-RA.jpg';
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
       <Image
-        src="/images/TangoTiempo3.jpg"
+        src={headerImage}
         alt="Tango Tiempo"
         width={1200}
         height={600}
