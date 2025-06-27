@@ -19,6 +19,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AppleIcon from '@/components/AppleIcon';
 import EmailAuthForm from '@/components/EmailAuthForm';
 import Link from 'next/link';
@@ -107,9 +108,12 @@ const SignUpPage = () => {
           </Box>
 
           {/* Title with clear SIGN UP label */}
-          <Typography component="h1" variant="h3" gutterBottom sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
-            SIGN UP
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+            <PersonAddIcon sx={{ fontSize: 48, color: 'secondary.main', mr: 2 }} />
+            <Typography component="h1" variant="h3" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+              SIGN UP
+            </Typography>
+          </Box>
 
           {/* Login prompt at the top */}
           <Box sx={{ mb: 3, textAlign: 'center' }}>
@@ -164,27 +168,9 @@ const SignUpPage = () => {
                   '&:hover': { backgroundColor: '#333333' },
                   textTransform: 'none',
                   fontSize: '1.1rem',
-                  position: 'relative',
                 }}
               >
                 Continue with Apple
-                <Typography 
-                  component="span" 
-                  variant="caption" 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 4, 
-                    right: 8, 
-                    backgroundColor: 'warning.main',
-                    color: 'warning.contrastText',
-                    px: 1,
-                    borderRadius: 1,
-                    fontSize: '0.65rem',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  BETA
-                </Typography>
               </Button>
 
               {/* Facebook Sign Up - Coming Soon */}

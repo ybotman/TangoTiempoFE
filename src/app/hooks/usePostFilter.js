@@ -29,16 +29,7 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
   const filteredEvents = useMemo(() => {
     if (!Array.isArray(events)) return [];
     
-    // Debug logging for RO filtering
-    if (selectedRole === 'RegionalOrganizer') {
-      console.log('[usePostFilter] RO Filtering Active:', {
-        user: !!user,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
-        eventsCount: events.length
-      });
-    }
-
-
+ 
     // Ensure selectedOrganizers and selectedTags are arrays
     const organizers = Array.isArray(selectedOrganizers) ? selectedOrganizers : [];
     const tags = Array.isArray(selectedTags) ? selectedTags : [];

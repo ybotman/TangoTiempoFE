@@ -176,16 +176,6 @@ export function useEvents({
         ) ? 'GeoLocationContext' : 'Direct input'
       });
 
-      // Add detailed debugging for role-based filtering
-      console.log('Role-based filtering debug:', {
-        isLoggedIn: !!user,
-        currentRole: selectedRole,
-        availableRoles: user?.roles || [],
-        hasRORole: user?.roles?.includes('RegionalOrganizer') || false,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId || 'none',
-        isRoleSelected: selectedRole === 'RegionalOrganizer',
-        hasValidId: !!(user?.backendInfo?.regionalOrganizerInfo?.organizerId)
-      });
 
       // Add user role and organizerId if user is a RegionalOrganizer
       if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {

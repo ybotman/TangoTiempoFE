@@ -1,13 +1,15 @@
 // app/components/UI/SiteHeader.js
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Image from 'next/image';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
+import LocationContextModal from '@/components/Modals/misc/LocationContextModal';
 
 const SiteHeader = () => {
   const { selectedLocation } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
   const runNumber = process.env.NEXT_PUBLIC_BUILD_VERSION || 'Local'; // Fallback value if not set
   
   // Determine which image to use based on role
@@ -61,20 +63,42 @@ const SiteHeader = () => {
         {runNumber}
       </div>
       <div
+        onClick={() => setLocationModalOpen(true)}
+        title="Click to select a different city"
         style={{
           position: 'absolute',
           bottom: '10px',
-          left: '10px',
+          right: '10px',
           backgroundColor: 'white',
           color: 'black',
           padding: '5px 10px',
           borderRadius: '3px',
           fontSize: '12px',
           boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            backgroundColor: '#f0f0f0',
+            boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
+          }
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#f0f0f0';
+          e.currentTarget.style.boxShadow = '0px 3px 8px rgba(0, 0, 0, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'white';
+          e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
         }}
       >
         {`City: ${selectedLocation.city?.name || 'Unknown'}`}
       </div>
+      
+      {/* Location Context Modal */}
+      <LocationContextModal
+        open={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+      />
     </div>
   );
 };
