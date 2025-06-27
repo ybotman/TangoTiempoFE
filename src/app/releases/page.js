@@ -102,6 +102,123 @@ export default function ReleaseNotesPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2, px: isMobile ? 1 : 3 }}>
+      {/* AI-Guild and HDTS message */}
+      <Paper 
+        sx={{ 
+          p: 3, 
+          mb: 3, 
+          backgroundColor: 'primary.main',
+          color: 'white',
+          borderRadius: 2,
+          boxShadow: 3
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+          {/* AI-Guild Section */}
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <Box
+              component="img"
+              src="/AI GUILD Base.jpeg"
+              alt="AI Guild"
+              sx={{
+                width: { xs: 60, sm: 80 },
+                height: { xs: 60, sm: 80 },
+                borderRadius: 1,
+                objectFit: 'cover'
+              }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" component="h2" gutterBottom>
+                100% AI-Built Application
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                This entire application is built by AI, with no human-written code. The AI-Guild 
+                handles all development tasks: coding, merging, GitHub operations, JIRA tracking, 
+                dashboarding, error handling, linting, testing, CI/CD, authentication, and promotion. 
+                Humans interact through commands and approvals while the Guild performs all technical implementation.
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* HDTS Section */}
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <Box
+              component="img"
+              src="/HDTS.jpg"
+              alt="HDTS LLC"
+              sx={{
+                width: { xs: 60, sm: 80 },
+                height: { xs: 60, sm: 80 },
+                borderRadius: 1,
+                objectFit: 'contain',
+                backgroundColor: 'white',
+                p: 0.5
+              }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" component="h2" gutterBottom>
+                <Box 
+                  component="a" 
+                  href="https://www.hdtsllc.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  sx={{ 
+                    color: 'inherit',
+                    textDecoration: 'underline',
+                    '&:hover': { textDecoration: 'none' }
+                  }}
+                >
+                  HDTSllc.com
+                </Box>
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                Half Way Down the Stairs, LLC provides AI consulting and development services. 
+                Specializing in generative AI, React-based AI applications, and document processing systems, 
+                HDTS acts as your temporary AI team member for strategic implementation and custom solutions.
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        
+        {/* Links */}
+        <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Box 
+            component="a"
+            href="https://www.linkedin.com/in/toby-balsley-ea-ai-genai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              color: 'white',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              fontSize: '0.875rem',
+              '&:hover': { textDecoration: 'underline' }
+            }}
+          >
+            🔗 Toby Balsley on LinkedIn
+          </Box>
+          <Box 
+            component="a"
+            href="https://www.hdtsllc.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              color: 'white',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              fontSize: '0.875rem',
+              '&:hover': { textDecoration: 'underline' }
+            }}
+          >
+            🌐 Visit HDTSllc.com
+          </Box>
+        </Box>
+      </Paper>
+
       {/* Mobile-friendly header with back button */}
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
         <Link href="/calendar" passHref>

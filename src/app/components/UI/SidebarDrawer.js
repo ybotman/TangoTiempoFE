@@ -402,14 +402,6 @@ const SidebarDrawer = ({ open, onClose }) => {
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Information
           </Typography>
-          <Link href="/about" passHref>
-            <ListItem button="true">
-              <ListItemIcon>
-                <GroupIcon sx={{ color: 'royalBlue' }} />
-              </ListItemIcon>
-              <ListItemText primary="Meet the Team" />
-            </ListItem>
-          </Link>
           <ListItem button="true" onClick={() => setFaqOpen(true)}>
             <ListItemIcon>
               <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
