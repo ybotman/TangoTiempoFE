@@ -36,6 +36,7 @@ import CoPresentIcon from '@mui/icons-material/CoPresent';
 import BusinessIcon from '@mui/icons-material/Business';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
+import UpdateIcon from '@mui/icons-material/Update';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -427,6 +428,14 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <SupportIcon sx={{ color: 'royalBlue' }} />
               </ListItemIcon>
               <ListItemText primary="About" />
+            </ListItem>
+          </Link>
+          <Link href="/releases" passHref>
+            <ListItem button="true" onClick={() => onClose()}>
+              <ListItemIcon>
+                <UpdateIcon sx={{ color: 'royalBlue' }} />
+              </ListItemIcon>
+              <ListItemText primary="Release Notes" />
             </ListItem>
           </Link>
           <Divider />
