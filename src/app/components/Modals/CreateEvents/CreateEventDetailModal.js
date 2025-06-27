@@ -284,27 +284,40 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         throw new Error('Region is required');
       }
       
-      // Check if user has the RegionalOrganizer role and organizerId
-      if (!user.backendInfo?.regionalOrganizerInfo?.organizerId) {
-        // Try to get the user's roles
+      // Check if user can create events (RegionalOrganizer or RegionalAdmin)
+      const selectedRole = user.backendInfo?.selectedRole || '';
+      const isRegionalOrganizer = user.backendInfo?.regionalOrganizerInfo?.organizerId;
+      const isRegionalAdmin = selectedRole === 'RegionalAdmin' && 
+                             user.backendInfo?.localAdminInfo?.adminCities?.length > 0;
+
+      if (!isRegionalOrganizer && !isRegionalAdmin) {
+        // Determine specific error message based on user's roles
         const userRoles = user.backendInfo?.roleIds || [];
-        const hasRoleButNoOrganizer = userRoles.some(role => 
+        const hasOrganizerRole = userRoles.some(role => 
           (typeof role === 'string' && role === 'RegionalOrganizer') ||
           (typeof role === 'object' && role.roleName === 'RegionalOrganizer')
         );
         
-        if (hasRoleButNoOrganizer) {
+        const hasAdminRole = userRoles.some(role => 
+          (typeof role === 'string' && role === 'RegionalAdmin') ||
+          (typeof role === 'object' && role.roleName === 'RegionalAdmin')
+        );
+        
+        if (hasOrganizerRole) {
           throw new Error('You have the RegionalOrganizer role but no organizer profile. Please contact an administrator.');
+        } else if (hasAdminRole) {
+          throw new Error('You have the RegionalAdmin role but no admin cities assigned. Please contact an administrator.');
         } else {
-          throw new Error('You need the RegionalOrganizer role to create events. Please apply to become an organizer.');
+          throw new Error('You need the RegionalOrganizer or RegionalAdmin role to create events.');
         }
       }
       
-      // Check if the user's organizerInfo flags are all enabled
-      const orgInfo = user.backendInfo.regionalOrganizerInfo;
-      const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
-      
-      if (!allFlagsEnabled) {
+      // Check if the user's organizerInfo flags are all enabled (only for RegionalOrganizer)
+      if (isRegionalOrganizer) {
+        const orgInfo = user.backendInfo.regionalOrganizerInfo;
+        const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
+        
+        if (!allFlagsEnabled) {
         console.warn('Attempting to fix regionalOrganizerInfo flags...');
         
         // Try to automatically fix the flags first
@@ -363,12 +376,15 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
         }
       }
+      }
       
       // Apply defaults for optional fields
       const eventDataWithDefaults = {
         ...eventData,
         masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'), 
         categoryFirst: eventData.categoryFirst || 'Other',
+        selectedRole: selectedRole, // Add selectedRole for backend validation
+        adminCities: isRegionalAdmin ? user.backendInfo.localAdminInfo.adminCities : undefined,
         description: eventData.description || ''
       };
       
@@ -385,7 +401,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       
       if (editMode && eventData._id) {
         // Update existing event
-        const result = await updateEvent(eventData._id, eventDataWithDefaults);
+        await updateEvent(eventData._id, eventDataWithDefaults);
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
         
@@ -397,8 +413,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       } else {
         // Create new event
         console.log('Creating new event');
-        const result = await createEvent(eventDataWithDefaults);
-        console.log('Event created successfully:', result);
+        await createEvent(eventDataWithDefaults);
+        console.log('Event created successfully');
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
         
