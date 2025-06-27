@@ -524,6 +524,16 @@ export const AuthProvider = ({ children }) => {
       await updateProfile(firebaseUser, { displayName });
       console.log('Profile updated successfully');
       
+      // Send email verification
+      console.log('Sending email verification...');
+      try {
+        await sendEmailVerification(firebaseUser);
+        console.log('Email verification sent successfully');
+      } catch (verifyErr) {
+        console.error('Error sending verification email:', verifyErr);
+        // Don't fail signup if verification email fails
+      }
+      
       // Create user in backend
       console.log('Creating user in backend...');
       await handleBackendUser(firebaseUser);
@@ -635,6 +645,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Send Verification Email
+  const sendVerificationEmail = async () => {
+    if (!auth.currentUser) {
+      throw new Error('No authenticated user');
+    }
+    
+    try {
+      await sendEmailVerification(auth.currentUser);
+      return { success: true };
+    } catch (err) {
+      console.error('Error sending verification email:', err);
+      
+      let errorMessage = 'Failed to send verification email.';
+      if (err.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many requests. Please try again later.';
+      }
+      
+      return { success: false, error: errorMessage };
+    }
+  };
+
   // Context Value
   const value = {
     user,
@@ -650,6 +681,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     getIdToken, // Add method to get a fresh token
     resetPassword, // Password reset functionality
+    sendVerificationEmail, // Email verification functionality
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

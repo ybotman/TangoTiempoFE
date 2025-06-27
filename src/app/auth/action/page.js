@@ -18,6 +18,7 @@ import { confirmPasswordReset, verifyPasswordResetCode, applyActionCode } from '
 import { auth } from '@/utils/firebase';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Separate component for the action handler content
 const ActionHandlerContent = () => {
@@ -162,6 +163,7 @@ const ActionHandlerContent = () => {
               <Button
                 fullWidth
                 variant="contained"
+                startIcon={<ArrowBackIcon />}
                 onClick={() => router.push('/auth/login')}
                 sx={{ mt: 2 }}
               >
@@ -183,6 +185,7 @@ const ActionHandlerContent = () => {
               <Button
                 fullWidth
                 variant="contained"
+                startIcon={<ArrowBackIcon />}
                 onClick={handleContinue}
                 sx={{ mt: 2 }}
               >
@@ -269,6 +272,7 @@ const ActionHandlerContent = () => {
               <Button
                 fullWidth
                 variant="contained"
+                startIcon={<ArrowBackIcon />}
                 onClick={handleContinue}
                 sx={{ mt: 2 }}
               >

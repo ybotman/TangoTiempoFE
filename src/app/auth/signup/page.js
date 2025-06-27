@@ -18,6 +18,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AppleIcon from '@/components/AppleIcon';
 import EmailAuthForm from '@/components/EmailAuthForm';
 import Link from 'next/link';
@@ -90,6 +91,21 @@ const SignUpPage = () => {
             alignItems: 'center',
           }}
         >
+          {/* Mobile back navigation */}
+          <Box sx={{ alignSelf: 'flex-start', width: '100%', mb: 2 }}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={() => router.push('/calendar')}
+              sx={{ 
+                textTransform: 'none',
+                color: 'text.secondary',
+                '&:hover': { backgroundColor: 'action.hover' }
+              }}
+            >
+              Back to Calendar
+            </Button>
+          </Box>
+
           {/* Title with clear SIGN UP label */}
           <Typography component="h1" variant="h3" gutterBottom sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
             SIGN UP
