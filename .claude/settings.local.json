@@ -43,7 +43,8 @@
       "Bash(rg:*)",
       "Bash(public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh \"Enhance existing Location Defaults tab in User Settings\" enhancement users \"Improve the existing Location Defaults tab functionality in User Settings. Ensure proper saving and loading of default location preferences.\" Task)",
       "Bash(git restore:*)",
-      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)"
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   },

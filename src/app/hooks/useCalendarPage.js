@@ -17,6 +17,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
 import { RoleContext } from '@/contexts/RoleContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
 
 export const useCalendarPage = () => {
@@ -33,6 +34,7 @@ export const useCalendarPage = () => {
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
+  const { user } = useContext(AuthContext);
   const [datesSet, setDatesSet] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventToEdit, setEventToEdit] = useState(null);
@@ -100,7 +102,9 @@ export const useCalendarPage = () => {
     selectedOrganizers, // Pass selectedOrganizers to usePostFilter
     [], // selectedTags - not used yet
     searchTerm, // Pass searchTerm for text filtering
-    includeAIEvents // Pass includeAIEvents for AI event filtering
+    includeAIEvents, // Pass includeAIEvents for AI event filtering
+    user, // Pass user for RO filtering
+    selectedRole // Pass selectedRole for RO filtering
   );
 
   const coloredFilteredEvents = (filteredEvents || []).map((event) => {

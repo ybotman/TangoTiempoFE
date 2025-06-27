@@ -434,12 +434,14 @@ const SidebarDrawer = ({ open, onClose }) => {
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
             Other
           </Typography>
-          <ListItem button="true">
-            <ListItemIcon>
-              <MessageIcon sx={{ color: 'coral' }} />
-            </ListItemIcon>
-            <ListItemText primary="Message Admin" />
-          </ListItem>
+          <Link href="/message-admin" passHref>
+            <ListItem button="true" onClick={() => onClose()}>
+              <ListItemIcon>
+                <MessageIcon sx={{ color: 'coral' }} />
+              </ListItemIcon>
+              <ListItemText primary="Message Admin" />
+            </ListItem>
+          </Link>
           <ListItem
             button="true"
             onClick={() => {
