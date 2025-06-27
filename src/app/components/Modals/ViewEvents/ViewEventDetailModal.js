@@ -69,14 +69,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       img.src = eventDetails.extendedProps.eventImage;
 
       img.onload = function () {
-        if (img.width > img.height) {
-          setImageSrc(eventDetails.extendedProps.eventImage);
-          setShowImageTab(true);
-        } else {
-          // For portrait images, use a special placeholder
-          setImageSrc('/Submit16by9Please.jpeg');
-          setShowImageTab(true);
-        }
+        setImageSrc(eventDetails.extendedProps.eventImage);
+        setShowImageTab(true);
       };
 
       // Handle image load error - try fallback image if available

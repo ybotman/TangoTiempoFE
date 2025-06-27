@@ -215,6 +215,13 @@ const LoginPage = () => {
                 ← Back to options
               </Button>
               <EmailAuthForm mode="login" onSubmit={handleEmailLogin} error={authError || error} />
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Link href="/auth/reset-password" style={{ textDecoration: 'none' }}>
+                  <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                    Forgot Password?
+                  </Typography>
+                </Link>
+              </Box>
             </Box>
           )}
         </Box>
