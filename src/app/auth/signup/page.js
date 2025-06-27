@@ -61,7 +61,7 @@ const SignUpPage = () => {
   const handleEmailSignUp = async ({ email, password, firstName, lastName }) => {
     setAuthError('');
     try {
-      const result = await signUp(email, password, firstName, lastName);
+      const result = await signUp({ email, password, firstName, lastName });
       if (result) {
         router.push('/calendar');
       }
