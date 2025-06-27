@@ -163,9 +163,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&
-                          user.backendInfo?.localAdminInfo?.adminCities &&
+                          user.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds &&
                           eventDetails?.extendedProps?.venueMasteredCityID &&
-                          user.backendInfo.localAdminInfo.adminCities.includes(eventDetails.extendedProps.venueMasteredCityID);
+                          user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds.includes(eventDetails.extendedProps.venueMasteredCityID);
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
   
