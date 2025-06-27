@@ -164,27 +164,9 @@ const SignUpPage = () => {
                   '&:hover': { backgroundColor: '#333333' },
                   textTransform: 'none',
                   fontSize: '1.1rem',
-                  position: 'relative',
                 }}
               >
                 Continue with Apple
-                <Typography 
-                  component="span" 
-                  variant="caption" 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 4, 
-                    right: 8, 
-                    backgroundColor: 'warning.main',
-                    color: 'warning.contrastText',
-                    px: 1,
-                    borderRadius: 1,
-                    fontSize: '0.65rem',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  BETA
-                </Typography>
               </Button>
 
               {/* Facebook Sign Up - Coming Soon */}
