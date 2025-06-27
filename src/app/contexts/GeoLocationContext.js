@@ -38,12 +38,6 @@ export const GeoLocationProvider = ({ children }) => {
   // TIEMPO-145: Removed IP-based geolocation
   const geoLoading = false;
 
-  console.log('GeoLocationProvider: Initializing with location data', {
-    masteredLocationAvailable: !!masteredLocationContext,
-    hasNearestCity: !!nearestCity,
-    nearestCityName: nearestCity?.cityName,
-    isInitialized
-  });
 
   // State for the new unified geo location context
   const [userLocation, setUserLocation] = useState({
