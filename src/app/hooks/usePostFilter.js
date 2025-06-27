@@ -28,6 +28,15 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
   // Memoize filteredEvents to prevent unnecessary computations and infinite loops
   const filteredEvents = useMemo(() => {
     if (!Array.isArray(events)) return [];
+    
+    // Debug logging for RO filtering
+    if (selectedRole === 'RegionalOrganizer') {
+      console.log('[usePostFilter] RO Filtering Active:', {
+        user: !!user,
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
+        eventsCount: events.length
+      });
+    }
 
 
     // Ensure selectedOrganizers and selectedTags are arrays
@@ -80,16 +89,22 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
 
       // RO (Regional Organizer) role filter
       let matchesROFilter = true;
-      if (selectedRole === 'RegionalOrganizer' && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
-        const userOrganizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
-        const { ownerOrganizerID, grantedOrganizerID, alternateOrganizerID } = event.extendedProps || {};
-        
-        // Event must match one of the three organizer fields
-        matchesROFilter = (
-          ownerOrganizerID === userOrganizerId ||
-          grantedOrganizerID === userOrganizerId ||
-          alternateOrganizerID === userOrganizerId
-        );
+      if (selectedRole === 'RegionalOrganizer') {
+        // Check if user and organizerId exist
+        const userOrganizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
+        if (userOrganizerId) {
+          const { ownerOrganizerID, grantedOrganizerID, alternateOrganizerID } = event.extendedProps || {};
+          
+          // Event must match one of the three organizer fields
+          matchesROFilter = (
+            ownerOrganizerID === userOrganizerId ||
+            grantedOrganizerID === userOrganizerId ||
+            alternateOrganizerID === userOrganizerId
+          );
+        } else {
+          // If RO role is selected but no organizerId, don't show any events
+          matchesROFilter = false;
+        }
       }
 
       return matchesCategory && matchesOrganizer && matchesTags && matchesROFilter;

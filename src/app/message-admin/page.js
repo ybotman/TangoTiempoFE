@@ -1,138 +1,49 @@
 // src/app/message-admin/page.js
 
 'use client';
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import Link from 'next/link';
+import { AuthContext } from '@/contexts/AuthContext';
 import {
   Container,
   Box,
   Typography,
   Button,
-  TextField,
-  MenuItem,
   Alert,
   Paper,
   IconButton,
-  Snackbar,
   useTheme,
-  useMediaQuery,
-  CircularProgress
+  useMediaQuery
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
-import SendIcon from '@mui/icons-material/Send';
 import WarningIcon from '@mui/icons-material/Warning';
 
 export default function MessageAdminPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-  
-  const [loading, setLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const subjects = [
-    'General Inquiry',
-    'Technical Issue',
-    'Feature Request',
-    'Report a Problem',
-    'Organizer Support',
-    'Other'
-  ];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-    if (!formData.subject) {
-      newErrors.subject = 'Please select a subject';
-    }
-    if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-    
-    // Simulate sending message (in real implementation, this would call an API)
-    try {
-      // Create mailto link as fallback
-      const mailtoSubject = encodeURIComponent(`[TangoTiempo] ${formData.subject}: ${formData.name}`);
-      const mailtoBody = encodeURIComponent(
-        `From: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
-      );
-      
-      // In production, this would be an API call to send the email
-      // For now, we'll use mailto as a fallback
-      window.location.href = `mailto:admin@tangotiempo.com?subject=${mailtoSubject}&body=${mailtoBody}`;
-      
-      setShowSuccess(true);
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setShowError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { user } = useContext(AuthContext);
 
   return (
-    <Container maxWidth="md" sx={{ py: 2, px: isMobile ? 1 : 3 }}>
-      {/* Header with back button */}
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Link href="/calendar" passHref>
-          <IconButton size="small">
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      {/* Header */}
+      <Box display="flex" alignItems="center" mb={3} gap={2}>
+        <Link href="/" passHref>
+          <IconButton 
+            aria-label="back to home"
+            sx={{ 
+              border: '1px solid',
+              borderColor: 'divider',
+              '&:hover': { backgroundColor: 'action.hover' }
+            }}
+          >
             <ArrowBackIcon />
           </IconButton>
         </Link>
-        <Box sx={{ flexGrow: 1, textAlign: isMobile ? 'left' : 'center' }}>
-          <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" gutterBottom>
-            Message Admin
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Contact Admin
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Get in touch with TangoTiempo administrators
@@ -149,7 +60,7 @@ export default function MessageAdminPage() {
         <Typography variant="body2" gutterBottom sx={{ fontWeight: 'bold' }}>
           Important Notice:
         </Typography>
-        <Typography variant="body2" paragraph sx={{ mb: 1 }}>
+        <Typography variant="body2" sx={{ mb: 1 }}>
           TangoTiempo is NOT responsible for incorrect dates and events. Event information is 
           provided by organizers and may change without notice.
         </Typography>
@@ -187,7 +98,10 @@ export default function MessageAdminPage() {
               '&:hover': { backgroundColor: '#d33b2c' },
               flex: isMobile ? 'none' : 1
             }}
-            href="mailto:admin@tangotiempo.com"
+            href={user 
+              ? `mailto:admin@tangotiempo.com?subject=[TangoTiempo] Contact from ${user.displayName || user.email}&body=From: ${user.displayName || 'User'}%0AEmail: ${user.email}%0A${user.backendInfo?.regionalOrganizerInfo?.organizerId ? 'Role: Regional Organizer%0A' : ''}%0A%0A[Your message here]`
+              : 'mailto:admin@tangotiempo.com'
+            }
             fullWidth={isMobile}
           >
             Email Directly
@@ -195,119 +109,38 @@ export default function MessageAdminPage() {
         </Box>
       </Paper>
 
-      {/* Contact Form */}
+      {/* Future Feature Notice */}
       <Paper sx={{ p: isMobile ? 2 : 3 }}>
         <Typography variant="h6" gutterBottom>
           Send a Message
         </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
-          For all other inquiries, feature requests, or general feedback, please use the form below.
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          For all other inquiries, feature requests, or general feedback, please use the contact options above.
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <TextField
-            fullWidth
-            label="Your Name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            error={!!errors.name}
-            helperText={errors.name}
-            required
-            sx={{ mb: 2 }}
-          />
+        {/* Coming Soon Notice */}
+        <Alert severity="info" sx={{ mt: 3 }}>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+            Two-way messaging coming soon!
+          </Typography>
+          <Typography variant="body2">
+            We're working on a new feature that will allow you to send messages directly through TangoTiempo. 
+            For now, please use the contact options above.
+          </Typography>
+        </Alert>
 
-          <TextField
-            fullWidth
-            label="Your Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={!!errors.email}
-            helperText={errors.email}
-            required
-            sx={{ mb: 2 }}
-          />
-
-          <TextField
-            fullWidth
-            select
-            label="Subject"
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            error={!!errors.subject}
-            helperText={errors.subject}
-            required
-            sx={{ mb: 2 }}
-          >
-            {subjects.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            fullWidth
-            label="Your Message"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            error={!!errors.message}
-            helperText={errors.message}
-            multiline
-            rows={6}
-            required
-            sx={{ mb: 3 }}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
-            disabled={loading}
-            fullWidth={isMobile}
-          >
-            {loading ? 'Sending...' : 'Send Message'}
-          </Button>
-        </Box>
+        {/* Show logged-in user info */}
+        {user && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Logged in as: <strong>{user.displayName || user.email}</strong>
+              {user.backendInfo?.regionalOrganizerInfo?.organizerId && (
+                <> (Regional Organizer)</>
+              )}
+            </Typography>
+          </Box>
+        )}
       </Paper>
-
-      {/* Success Snackbar */}
-      <Snackbar
-        open={showSuccess}
-        autoHideDuration={6000}
-        onClose={() => setShowSuccess(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={() => setShowSuccess(false)} 
-          severity="success" 
-          sx={{ width: '100%' }}
-        >
-          Message sent successfully! We'll get back to you soon.
-        </Alert>
-      </Snackbar>
-
-      {/* Error Snackbar */}
-      <Snackbar
-        open={showError}
-        autoHideDuration={6000}
-        onClose={() => setShowError(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={() => setShowError(false)} 
-          severity="error" 
-          sx={{ width: '100%' }}
-        >
-          Failed to send message. Please try again or use the direct contact options above.
-        </Alert>
-      </Snackbar>
     </Container>
   );
 }
