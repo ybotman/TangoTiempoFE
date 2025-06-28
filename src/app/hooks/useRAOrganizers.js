@@ -85,7 +85,7 @@ export const useRAOrganizers = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, allowedCityIds, getIdToken]);
+  }, [user?.uid, allowedCityIds.join(','), getIdToken]);
 
   // Fetch organizers when user or allowed cities change
   useEffect(() => {
@@ -94,7 +94,7 @@ export const useRAOrganizers = () => {
     }, 100); // Small delay to allow context initialization
 
     return () => clearTimeout(timeoutId);
-  }, [fetchRAOrganizers]);
+  }, [user?.uid, allowedCityIds.join(','), getIdToken]);
 
   return {
     organizers: Array.isArray(organizers) ? organizers : [],

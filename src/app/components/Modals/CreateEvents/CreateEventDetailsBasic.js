@@ -345,7 +345,12 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               <InputLabel id="organizer-label">Event Organizer</InputLabel>
               <Select
                 labelId="organizer-label"
-                value={organizers.some(org => org._id === eventData.ownerOrganizerID) ? eventData.ownerOrganizerID : ''}
+                value={
+                  eventData.ownerOrganizerID && 
+                  organizers.some(org => org._id === eventData.ownerOrganizerID) 
+                    ? eventData.ownerOrganizerID 
+                    : ''
+                }
                 onChange={handleOrganizerChange}
                 label="Event Organizer"
                 required
