@@ -291,19 +291,19 @@ export function useEventOperations() {
   // BACKEND TODO: RegionalAdmin Support
   // The frontend is sending:
   // - selectedRole: 'RegionalAdmin' 
-  // - adminCities: array of city ObjectIds the admin manages
+  // - allowedAdminMasteredCityIds: array of city ObjectIds the admin manages
   // 
   // Backend needs to implement:
   // 1. Check if selectedRole === 'RegionalAdmin'
   // 2. Get the event's venueMasteredCityID from the venue
-  // 3. Verify venueMasteredCityID is in the adminCities array
+  // 3. Verify venueMasteredCityID is in the allowedAdminMasteredCityIds array
   // 4. If true, allow full CRUD operations (create/update/delete)
   // 5. RegionalAdmin should bypass ownerOrganizerID checks for events in their cities
   //
   // Example validation logic:
-  // if (req.body.selectedRole === 'RegionalAdmin' && req.body.adminCities) {
+  // if (req.body.selectedRole === 'RegionalAdmin' && req.body.allowedAdminMasteredCityIds) {
   //   const venue = await Venue.findById(event.venueId);
-  //   if (req.body.adminCities.includes(venue.masteredCityID.toString())) {
+  //   if (req.body.allowedAdminMasteredCityIds.includes(venue.masteredCityID.toString())) {
   //     // Allow operation
   //   }
   // }
@@ -378,7 +378,7 @@ export function useEventOperations() {
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Include admin cities for RegionalAdmin validation
-        adminCities: selectedRole === 'RegionalAdmin' ? 
+        allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ? 
           (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
            user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
         // Handle both venue and location fields for transitional compatibility
@@ -563,7 +563,7 @@ export function useEventOperations() {
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         selectedRole: selectedRole, // Include the user's selected role for backend validation
         // Include admin cities for RegionalAdmin validation
-        adminCities: selectedRole === 'RegionalAdmin' ? 
+        allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ? 
           (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
            user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
         // Handle both venue and location fields for transitional compatibility
@@ -719,11 +719,11 @@ export function useEventOperations() {
         selectedRole: selectedRole
       });
       
-      // Add adminCities for RegionalAdmin
+      // Add allowedAdminMasteredCityIds for RegionalAdmin
       const adminCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
                          user?.backendInfo?.localAdminInfo?.adminCities;
       if (selectedRole === 'RegionalAdmin' && adminCities) {
-        queryParams.append('adminCities', adminCities.join(','));
+        queryParams.append('allowedAdminMasteredCityIds', adminCities.join(','));
       }
       
       // Route to appropriate endpoint based on selected role
