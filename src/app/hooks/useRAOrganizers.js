@@ -15,12 +15,16 @@ export const useRAOrganizers = () => {
 
   // Extract stable primitive value to prevent infinite loops
   const userId = user?.uid;
+  
+  // Extract the array to create a stable reference
+  const cityIdsArray = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds;
+  const cityIdsString = cityIdsArray ? cityIdsArray.join(',') : '';
 
   // Get RA's allowed cities from their localAdminInfo
   // Use useMemo to create a stable array reference and prevent infinite loops
   const allowedCityIds = useMemo(
-    () => user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [],
-    [user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds]
+    () => cityIdsArray || [],
+    [cityIdsString] // Use string representation for stable comparison
   );
 
   const fetchRAOrganizers = useCallback(async () => {
