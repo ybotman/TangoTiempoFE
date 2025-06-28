@@ -244,7 +244,10 @@ export function useEvents({
     lat,
     lng,
     useGeoLocationContext,
-    user,
+    // Use stable primitive values instead of user object to prevent infinite loops
+    userId,
+    userOrganizerId,
+    userRoles,
     selectedRole
     // Removed setState functions to prevent infinite loops
   ]);
