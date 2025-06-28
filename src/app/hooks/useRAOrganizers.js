@@ -13,6 +13,9 @@ export const useRAOrganizers = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Extract stable primitive value to prevent infinite loops
+  const userId = user?.uid;
+
   // Get RA's allowed cities from their localAdminInfo
   // Use useMemo to create a stable array reference and prevent infinite loops
   const allowedCityIds = useMemo(
@@ -22,7 +25,7 @@ export const useRAOrganizers = () => {
 
   const fetchRAOrganizers = useCallback(async () => {
     // Don't fetch if user is not RA or has no allowed cities
-    if (!user || !allowedCityIds.length) {
+    if (!userId || !allowedCityIds.length) {
       setOrganizers([]);
       setLoading(false);
       return;
@@ -89,7 +92,7 @@ export const useRAOrganizers = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.uid, allowedCityIds, getIdToken]);
+  }, [userId, allowedCityIds, getIdToken]);
 
   // Fetch organizers when user or allowed cities change
   useEffect(() => {
