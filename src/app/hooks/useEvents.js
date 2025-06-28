@@ -83,6 +83,11 @@ export function useEvents({
   const [error, setError] = useState(null);
   const { user, selectedRole } = useContext(AuthContext);
   
+  // Extract stable primitive values to prevent infinite loops
+  const userId = user?.uid;
+  const userOrganizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
+  const userRoles = user?.roles;
+  
   // Get location from GeoLocationContext if available
   const geoLocationContext = useGeoLocation();
   
@@ -178,11 +183,11 @@ export function useEvents({
 
 
       // Add user role and organizerId if user is a RegionalOrganizer
-      if (user && selectedRole === 'RegionalOrganizer' && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
-        params.organizerId = user.backendInfo.regionalOrganizerInfo.organizerId;
+      if (userId && selectedRole === 'RegionalOrganizer' && userOrganizerId) {
+        params.organizerId = userOrganizerId;
         params.userRole = 'RegionalOrganizer'; // Make sure we're passing the role to the backend
         console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
-      } else if (user && user.roles?.includes('RegionalOrganizer')) {
+      } else if (userId && userRoles?.includes('RegionalOrganizer')) {
         // If user has RO role but we're not using it, explain why
         /* Commented out to reduce console noise
         console.warn('User has RegionalOrganizer role but',
@@ -240,10 +245,8 @@ export function useEvents({
     lng,
     useGeoLocationContext,
     user,
-    selectedRole,
-    setError,
-    setEventsData,
-    setLoading
+    selectedRole
+    // Removed setState functions to prevent infinite loops
   ]);
 
   // Fetch events when parameters change
@@ -337,15 +340,30 @@ export function useEventOperations() {
         eventOwnerOrganizerID: cleanedEventData.ownerOrganizerID
       });
       
-      // Prepare the event data for submission
-      const preparedData = {
-        ...cleanedEventData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
-        selectedRole: selectedRole, // Include the user's selected role for backend validation
-        // The backend requires ownerOrganizerID specifically - use the user's organizerId if they're a Regional Organizer
-        ownerOrganizerID: cleanedEventData.ownerOrganizerID || 
-                         (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerId : null) ||
-                         cleanedEventData.grantedOrganizer,
+      // Prepare the event data for submission based on role
+      let preparedData;
+      
+      if (selectedRole === 'RegionalAdmin') {
+        // RA endpoint has different requirements - prepare minimal data
+        preparedData = {
+          title: cleanedEventData.title,
+          startDate: cleanedEventData.startDate,
+          endDate: cleanedEventData.endDate,
+          ownerOrganizerID: cleanedEventData.ownerOrganizerID,
+          venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
+          description: cleanedEventData.description || '',
+          cost: cleanedEventData.cost || ''
+        };
+      } else {
+        // RO endpoint uses existing logic
+        preparedData = {
+          ...cleanedEventData,
+          appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+          selectedRole: selectedRole, // Include the user's selected role for backend validation
+          // The backend requires ownerOrganizerID specifically - use the user's organizerId if they're a Regional Organizer
+          ownerOrganizerID: cleanedEventData.ownerOrganizerID || 
+                           (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerId : null) ||
+                           cleanedEventData.grantedOrganizer,
         // Make sure we use masteredRegionName
         masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
         // Set default ownerOrganizerName if not provided - use the user's organizer name if they're a Regional Organizer
@@ -357,7 +375,9 @@ export function useEventOperations() {
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Include admin cities for RegionalAdmin validation
-        adminCities: selectedRole === 'RegionalAdmin' ? user?.backendInfo?.localAdminInfo?.adminCities : undefined,
+        adminCities: selectedRole === 'RegionalAdmin' ? 
+          (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+           user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
@@ -365,7 +385,8 @@ export function useEventOperations() {
         venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
         locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
         locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
-      };
+        };
+      }
       
       // If venue has coordinates, include them in venueGeolocation
       if (eventData.venueLatitude && eventData.venueLongitude) {
@@ -464,6 +485,16 @@ export function useEventOperations() {
         }
       }
 
+      // Validate required fields for RA endpoint
+      if (selectedRole === 'RegionalAdmin') {
+        if (!preparedData.ownerOrganizerID) {
+          throw new Error('RegionalAdmin must specify an ownerOrganizerID for the event');
+        }
+        if (!preparedData.venueID) {
+          throw new Error('RegionalAdmin must specify a venueID for the event');
+        }
+      }
+
       // Log the data being sent
       console.log('Submitting event data to API:', preparedData);
 
@@ -475,7 +506,13 @@ export function useEventOperations() {
       };
       
       console.log('Sending event creation request with auth token');
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`, preparedData, config);
+      // Route to appropriate endpoint based on selected role
+      const endpoint = selectedRole === 'RegionalAdmin' 
+        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/create`
+        : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
+      
+      console.log(`Creating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      const response = await axios.post(endpoint, preparedData, config);
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
@@ -523,7 +560,9 @@ export function useEventOperations() {
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
         selectedRole: selectedRole, // Include the user's selected role for backend validation
         // Include admin cities for RegionalAdmin validation
-        adminCities: selectedRole === 'RegionalAdmin' ? user?.backendInfo?.localAdminInfo?.adminCities : undefined,
+        adminCities: selectedRole === 'RegionalAdmin' ? 
+          (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+           user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
         // Handle both venue and location fields for transitional compatibility
         // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
         // If we only have locationID/locationName, use those and add venueId/venueName fields
@@ -616,11 +655,13 @@ export function useEventOperations() {
       
       console.log('Updating event:', eventId, preparedData);
       
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`, 
-        preparedData, 
-        config
-      );
+      // Route to appropriate endpoint based on selected role
+      const endpoint = selectedRole === 'RegionalAdmin' 
+        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
+        : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`;
+      
+      console.log(`Updating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      const response = await axios.put(endpoint, preparedData, config);
       
       console.log('Event updated successfully:', response.data);
       return response.data;
@@ -676,14 +717,19 @@ export function useEventOperations() {
       });
       
       // Add adminCities for RegionalAdmin
-      if (selectedRole === 'RegionalAdmin' && user?.backendInfo?.localAdminInfo?.adminCities) {
-        queryParams.append('adminCities', user.backendInfo.localAdminInfo.adminCities.join(','));
+      const adminCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+                         user?.backendInfo?.localAdminInfo?.adminCities;
+      if (selectedRole === 'RegionalAdmin' && adminCities) {
+        queryParams.append('adminCities', adminCities.join(','));
       }
       
-      const response = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?${queryParams.toString()}`, 
-        config
-      );
+      // Route to appropriate endpoint based on selected role
+      const endpoint = selectedRole === 'RegionalAdmin' 
+        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
+        : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?${queryParams.toString()}`;
+      
+      console.log(`Deleting event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      const response = await axios.delete(endpoint, config);
       
       console.log('Event deleted successfully:', response.data);
       return response.data;
