@@ -54,7 +54,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         }
       }
     }
-  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues]);
+  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues.length]); // Use venues.length instead of venues to prevent loops
   
   // Filter venues based on search input
   useEffect(() => {

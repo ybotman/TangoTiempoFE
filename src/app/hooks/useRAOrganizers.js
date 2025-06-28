@@ -12,6 +12,7 @@ export const useRAOrganizers = () => {
   const [organizers, setOrganizers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lastFetchKey, setLastFetchKey] = useState(null);
 
   // Extract stable primitive value to prevent infinite loops
   const userId = user?.uid;
@@ -32,6 +33,24 @@ export const useRAOrganizers = () => {
     if (!userId || !allowedCityIds.length) {
       setOrganizers([]);
       setLoading(false);
+      return;
+    }
+    
+    // Additional check: don't fetch if user is not a RegionalAdmin
+    const userRoles = user?.roles || [];
+    const isRegionalAdmin = userRoles.includes('RegionalAdmin') || user?.backendInfo?.selectedRole === 'RegionalAdmin';
+    if (!isRegionalAdmin) {
+      setOrganizers([]);
+      setLoading(false);
+      return;
+    }
+    
+    // Create a unique key for this fetch configuration
+    const fetchKey = `${userId}-${cityIdsString}`;
+    
+    // Skip fetch if we already fetched with the same configuration
+    if (lastFetchKey === fetchKey && organizers.length > 0) {
+      console.log('Skipping RA organizers fetch - data already loaded for same configuration');
       return;
     }
 
@@ -88,6 +107,9 @@ export const useRAOrganizers = () => {
       // Ensure we're setting an array
       const organizersData = allOrganizers;
       setOrganizers(organizersData);
+      
+      // Update the last fetch key
+      setLastFetchKey(fetchKey);
 
     } catch (fetchError) {
       console.error('Error fetching RA organizers:', fetchError);
@@ -96,7 +118,7 @@ export const useRAOrganizers = () => {
     } finally {
       setLoading(false);
     }
-  }, [userId, allowedCityIds, getIdToken]);
+  }, [userId, allowedCityIds, getIdToken, user?.roles, user?.backendInfo?.selectedRole, cityIdsString, lastFetchKey, organizers.length]);
 
   // Fetch organizers when user or allowed cities change
   useEffect(() => {
