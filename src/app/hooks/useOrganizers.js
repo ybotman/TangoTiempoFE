@@ -18,6 +18,7 @@ export const useOrganizers = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [organizerCache, setOrganizerCache] = useState({}); // Cache for individual organizers
 
   // Check and use cached organizers data to reduce API dependency
   const getCachedOrganizers = useCallback(() => {
@@ -143,6 +144,13 @@ export const useOrganizers = () => {
       return;
     }
 
+    // Check cache first
+    if (organizerCache[organizerId]) {
+      console.log('Using cached organizer data for:', organizerId);
+      setOrganizer(organizerCache[organizerId]);
+      return;
+    }
+
     console.log('fetchOrganizerById called with organizerId:', organizerId);
 
     try {
@@ -156,6 +164,12 @@ export const useOrganizers = () => {
       console.log('Organizer fetched successfully:', response.data);
       setOrganizer(response.data);
       setError(null);
+      
+      // Update cache
+      setOrganizerCache(prev => ({
+        ...prev,
+        [organizerId]: response.data
+      }));
 
     } catch (fetchError) {
       console.error('Error fetching organizer:', fetchError);
@@ -164,7 +178,7 @@ export const useOrganizers = () => {
     } finally {
       setFetchLoading(false);
     }
-  }, []);
+  }, [organizerCache]);
 
   // Fetch an organizer by firebaseUserId
   const fetchOrganizerByFirebaseUserId = useCallback(async (firebaseUserId) => {

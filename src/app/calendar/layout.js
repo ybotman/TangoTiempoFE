@@ -9,17 +9,21 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
   const { selectedLocation } = useGeoLocation();
+  
+  // Extract stable values to prevent infinite loops
+  const userDisplayName = user?.displayName;
+  const selectedRegionName = selectedLocation?.region?.name;
 
   useEffect(() => {
-    if (user?.displayName) {
-      console.log('Layout:uE User Name:', user.displayName);
+    if (userDisplayName) {
+      console.log('Layout:uE User Name:', userDisplayName);
     }
 
     // Use GeoLocationContext instead of RegionsContext for logging
-    if (selectedLocation?.region?.name) {
-      console.log('Layout:uE Selected Region:', selectedLocation.region.name);
+    if (selectedRegionName) {
+      console.log('Layout:uE Selected Region:', selectedRegionName);
     }
-  }, [user, selectedLocation]);
+  }, [userDisplayName, selectedRegionName]);
 
   return <>{children}</>;
 };

@@ -192,6 +192,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
 
       // Log current location for debugging
+      console.log(`Modal opened in ${editMode ? 'EDIT' : 'CREATE'} mode`, {
+        mode: editMode ? 'EDIT' : 'CREATE',
+        eventId: eventToEdit?._id || null,
+        selectedRole: user?.backendInfo?.selectedRole,
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId
+      });
     }
   }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
 

@@ -6,13 +6,21 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hook
+import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook for RA selection
+import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
-  const { user } = useContext(AuthContext); // Get current user info
+  const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
+  const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers(); // Fetch organizers for regular use
+  const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
+  
+  // Use appropriate organizers based on selected role
+  const organizers = selectedRole === 'RegionalAdmin' ? raOrganizers : regularOrganizers;
+  const loadingOrganizers = selectedRole === 'RegionalAdmin' ? loadingRAOrganizers : loadingRegularOrganizers;
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
@@ -46,7 +54,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         }
       }
     }
-  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues]);
+  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues.length]); // Use venues.length instead of venues to prevent loops
   
   // Filter venues based on search input
   useEffect(() => {
@@ -74,9 +82,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     setFilteredVenues(filtered);
   }, [venues, venueInputValue]);
   
-  // Set owner organizer info from user context when component mounts
+  // Set owner organizer info from user context when component mounts (only for RegionalOrganizer)
   useEffect(() => {
-    if (user && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+    if (selectedRole === 'RegionalOrganizer' && user && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
       // Extract organizer information
       const orgInfo = user.backendInfo.regionalOrganizerInfo;
       const orgId = user.backendInfo.regionalOrganizerInfo.organizerId;
@@ -104,7 +112,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
         return prevData;
       });
     }
-  }, [user]); // Remove setEventData from dependencies as it's a stable function
+  }, [user, selectedRole]); // Add selectedRole dependency
 
   // Handle category change
   const handleCategoryChange = (event) => {
@@ -125,6 +133,21 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
   const handleTitleChange = (event) => {
     const title = event.target.value;
     setEventData({ ...eventData, title });
+  };
+
+  // Handle organizer selection for RA users
+  const handleOrganizerChange = (event) => {
+    const selectedOrganizerId = event.target.value;
+    
+    // Find the selected organizer to get its name
+    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
+    
+    // Store both the ID and the name
+    setEventData({ 
+      ...eventData, 
+      ownerOrganizerID: selectedOrganizerId,
+      ownerOrganizerName: selectedOrganizer ? selectedOrganizer.fullName : ''
+    });
   };
 
   // Handle venue change from autocomplete
@@ -314,22 +337,57 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
           </FormControl>
         </Grid>
         
-        {/* Owner Organizer Display (not editable) - smaller size */}
+        {/* Owner Organizer - Display for RO, Selection for RA */}
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth size="small">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
-                Created by:
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {eventData.ownerOrganizerName || 
-                 (user?.backendInfo?.regionalOrganizerInfo?.organizerName || 
-                  user?.backendInfo?.regionalOrganizerInfo?.fullName || 
-                  user?.displayName || 
-                  'Your Organization')}
-              </Typography>
-            </Box>
-          </FormControl>
+          {selectedRole === 'RegionalAdmin' ? (
+            // RegionalAdmin: Show organizer selector
+            <FormControl fullWidth required>
+              <InputLabel id="organizer-label">Event Organizer</InputLabel>
+              <Select
+                labelId="organizer-label"
+                value={
+                  eventData.ownerOrganizerID && 
+                  organizers.some(org => org._id === eventData.ownerOrganizerID) 
+                    ? eventData.ownerOrganizerID 
+                    : ''
+                }
+                onChange={handleOrganizerChange}
+                label="Event Organizer"
+                required
+                disabled={loadingOrganizers}
+              >
+                <MenuItem value="" disabled>
+                  <em>{loadingOrganizers ? 'Loading organizers...' : 'Select an organizer'}</em>
+                </MenuItem>
+                {organizers.map((organizer) => (
+                  <MenuItem key={organizer._id} value={organizer._id}>
+                    {organizer.fullName || organizer.organizerName || organizer.name} ({organizer.shortName || organizer.organizerShortName})
+                  </MenuItem>
+                ))}
+              </Select>
+              {organizers.length === 0 && !loadingOrganizers && (
+                <Alert severity="info" sx={{ mt: 1 }}>
+                  No organizers available in your administrative regions. Contact an administrator if this seems incorrect.
+                </Alert>
+              )}
+            </FormControl>
+          ) : (
+            // RegionalOrganizer: Show display only
+            <FormControl fullWidth size="small">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
+                  Created by:
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                  {eventData.ownerOrganizerName || 
+                   (user?.backendInfo?.regionalOrganizerInfo?.organizerName || 
+                    user?.backendInfo?.regionalOrganizerInfo?.fullName || 
+                    user?.displayName || 
+                    'Your Organization')}
+                </Typography>
+              </Box>
+            </FormControl>
+          )}
         </Grid>
 
         {/* Venue Selection - Searchable Autocomplete */}

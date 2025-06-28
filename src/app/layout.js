@@ -6,7 +6,6 @@ import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import EmailVerificationBanner from '@/components/EmailVerificationBanner';
 import Script from 'next/script';
-import GoogleClientWrapper from '@/components/GoogleAnalytics';
 import './globals.css';
 import { Analytics } from "@vercel/analytics/react";
 import { Inter } from 'next/font/google';
@@ -65,7 +64,7 @@ export default function RootLayout({ children }) {
           <SidebarDrawer />
           <div style={{ flexGrow: 1, padding: '1rem' }}>
             <EmailVerificationBanner />
-            <GoogleClientWrapper>{children}</GoogleClientWrapper>
+            {children}
           </div>
         </Providers>
           <Analytics />
