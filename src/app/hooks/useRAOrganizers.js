@@ -1,5 +1,5 @@
 // src/hooks/useRAOrganizers.js
-import { useCallback, useEffect, useState, useContext } from 'react';
+import { useCallback, useEffect, useState, useContext, useMemo } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 
@@ -14,7 +14,11 @@ export const useRAOrganizers = () => {
   const [error, setError] = useState(null);
 
   // Get RA's allowed cities from their localAdminInfo
-  const allowedCityIds = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
+  // Use useMemo to create a stable array reference and prevent infinite loops
+  const allowedCityIds = useMemo(
+    () => user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [],
+    [user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds]
+  );
 
   const fetchRAOrganizers = useCallback(async () => {
     // Don't fetch if user is not RA or has no allowed cities
@@ -85,7 +89,7 @@ export const useRAOrganizers = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.uid, allowedCityIds.join(','), getIdToken]);
+  }, [user?.uid, allowedCityIds, getIdToken]);
 
   // Fetch organizers when user or allowed cities change
   useEffect(() => {
@@ -94,7 +98,7 @@ export const useRAOrganizers = () => {
     }, 100); // Small delay to allow context initialization
 
     return () => clearTimeout(timeoutId);
-  }, [user?.uid, allowedCityIds.join(','), getIdToken]);
+  }, [fetchRAOrganizers]);
 
   return {
     organizers: Array.isArray(organizers) ? organizers : [],
