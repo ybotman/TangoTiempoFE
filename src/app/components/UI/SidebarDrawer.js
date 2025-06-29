@@ -279,6 +279,23 @@ const SidebarDrawer = ({ open, onClose }) => {
               />
             </ListItem>
           )}
+          
+          {/* Apply as Organizer Menu Item */}
+          <Link href="/organizers/apply" passHref>
+            <ListItem
+              button="true"
+              onClick={() => onClose()}
+            >
+              <ListItemIcon>
+                <GroupIcon sx={{ color: 'indigo' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Apply as Organizer" 
+                secondary="Become a TangoTiempo organizer"
+              />
+            </ListItem>
+          </Link>
+          
           <Divider />
 
           <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
