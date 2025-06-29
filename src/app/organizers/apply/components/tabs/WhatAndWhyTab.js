@@ -130,41 +130,6 @@ const WhatAndWhyTab = () => {
         </Grid>
       </Paper>
 
-      {/* Success Stories */}
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        Success Stories
-      </Typography>
-      
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom color="primary">
-              "Doubled Our Attendance"
-            </Typography>
-            <Typography variant="body2" paragraph>
-              "Since joining TangoTiempo, our weekly milonga attendance has doubled. Dancers visiting 
-              Buenos Aires now find us easily, and we've connected with organizers worldwide."
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              - Maria, Milonga Organizer, Buenos Aires
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom color="primary">
-              "Global Teaching Opportunities"
-            </Typography>
-            <Typography variant="body2" paragraph>
-              "TangoTiempo helped me connect with organizers across Europe. I now teach workshops 
-              in 10 different countries and have built an international student base."
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              - Carlos, Tango Maestro, Barcelona
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
 
       {/* Call to Action */}
       <Box sx={{ mt: 4, p: 3, backgroundColor: 'secondary.light', borderRadius: 2, textAlign: 'center' }}>

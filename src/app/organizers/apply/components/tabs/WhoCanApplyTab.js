@@ -36,18 +36,6 @@ const organizerTypes = [
     color: '#e3f2fd'
   },
   {
-    title: 'Venues',
-    subtitle: 'Dance Studios & Event Spaces',
-    icon: <BusinessIcon sx={{ fontSize: 40, color: '#388e3c' }} />,
-    requirements: [
-      'Physical space suitable for tango',
-      'Appropriate dance flooring',
-      'Capacity for social dancing',
-      'Liability insurance coverage'
-    ],
-    color: '#e8f5e9'
-  },
-  {
     title: 'DJs',
     subtitle: 'Tango Music Specialists',
     icon: <HeadphonesIcon sx={{ fontSize: 40, color: '#f57c00' }} />,
@@ -118,6 +106,18 @@ const organizerTypes = [
       'Communication abilities'
     ],
     color: '#fbe9e7'
+  },
+  {
+    title: 'Venues',
+    subtitle: 'Dance Studios & Event Spaces',
+    icon: <BusinessIcon sx={{ fontSize: 40, color: '#388e3c' }} />,
+    requirements: [
+      'Physical space suitable for tango',
+      'Appropriate dance flooring',
+      'Capacity for social dancing',
+      'Liability insurance coverage'
+    ],
+    color: '#e8f5e9'
   }
 ];
 

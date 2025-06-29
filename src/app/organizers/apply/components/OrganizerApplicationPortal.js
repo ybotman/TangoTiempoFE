@@ -9,8 +9,12 @@ import {
   Typography,
   Paper,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  IconButton,
+  Chip
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 
 // Import tab components
@@ -56,6 +60,7 @@ const OrganizerApplicationPortal = () => {
   const [activeTab, setActiveTab] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const router = useRouter();
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -72,6 +77,27 @@ const OrganizerApplicationPortal = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Back button and Work in Progress */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+        <IconButton 
+          onClick={() => router.push('/calendar')}
+          sx={{ 
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover'
+            }
+          }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
+        <Chip 
+          label="WORK IN PROGRESS" 
+          color="warning" 
+          variant="outlined"
+        />
+      </Box>
+
       {/* SEO-friendly header */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography 
