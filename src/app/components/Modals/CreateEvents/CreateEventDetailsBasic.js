@@ -399,21 +399,45 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
               id="venue-autocomplete"
               options={(() => {
                 const venueOptions = Array.isArray(filteredVenues) ? filteredVenues : [];
-                // If we have a selected venue that's not in the options, add it
+                
+                // Separate active and inactive venues
+                const activeVenues = venueOptions.filter(v => v?.isActive !== false);
+                const inactiveVenues = venueOptions.filter(v => v?.isActive === false);
+                
+                // Create grouped options
+                let groupedOptions = [];
+                
+                // Add active venues
+                if (activeVenues.length > 0) {
+                  groupedOptions = [...activeVenues];
+                }
+                
+                // Add separator if we have both active and inactive
+                if (activeVenues.length > 0 && inactiveVenues.length > 0) {
+                  groupedOptions.push({ _id: 'divider', isDivider: true });
+                }
+                
+                // Add inactive venues
+                if (inactiveVenues.length > 0) {
+                  groupedOptions = [...groupedOptions, ...inactiveVenues];
+                }
+                
+                // If we have a selected venue that's not in the options, add it at the beginning
                 if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
                   const venueId = eventData.venueId || eventData.locationID;
                   const exists = venueOptions.some(v => v?._id === venueId);
                   if (!exists) {
-                    // Add the placeholder venue to options to prevent MUI warning
-                    return [{
+                    // Add the placeholder venue to the beginning
+                    groupedOptions.unshift({
                       _id: venueId,
                       name: eventData.venueName || eventData.locationName,
                       shortName: eventData.venueName || eventData.locationName,
                       isPlaceholder: true
-                    }, ...venueOptions];
+                    });
                   }
                 }
-                return venueOptions;
+                
+                return groupedOptions;
               })()}
               loading={loadingVenues}
               value={(() => {
@@ -446,6 +470,35 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                 if (!option || !value || typeof option !== 'object' || typeof value !== 'object') return false;
                 return option._id === value._id;
               }}
+              renderOption={(props, option) => {
+                // Handle divider
+                if (option.isDivider) {
+                  return (
+                    <li key="divider" style={{ padding: 0 }}>
+                      <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
+                      <Typography variant="caption" color="textSecondary" sx={{ px: 2, py: 0.5, display: 'block' }}>
+                        Non-Active Venues
+                      </Typography>
+                    </li>
+                  );
+                }
+                
+                // Regular venue rendering
+                return (
+                  <li {...props} key={option._id}>
+                    <Typography
+                      sx={{
+                        color: option.isActive === false ? 'text.secondary' : 'text.primary',
+                        fontStyle: option.isActive === false ? 'italic' : 'normal'
+                      }}
+                    >
+                      {option.name || option.shortName || `Venue ${option._id}`}
+                      {option.isActive === false && ' (Inactive)'}
+                    </Typography>
+                  </li>
+                );
+              }}
+              getOptionDisabled={(option) => option.isDivider}
               renderInput={(params) => (
                 <TextField
                   {...params}

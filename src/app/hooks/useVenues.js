@@ -19,12 +19,16 @@ export function useVenues() {
   const masteredCityId = selectedLocation?.city?.id || null;
 
   // Fetch venues based on selected location
-  const fetchVenues = useCallback(async (isActive = true) => {
+  const fetchVenues = useCallback(async (isActive = null) => {
     setLoading(true);
     setError(null);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const params = { appId, isActive };
+      const params = { appId };
+      // Only add isActive parameter if explicitly set
+      if (isActive !== null) {
+        params.isActive = isActive;
+      }
       
       // Add location filters from GeoLocationContext
       // Don't filter by location - the backend's query parameter handling is different

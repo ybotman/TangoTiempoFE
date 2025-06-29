@@ -45,7 +45,10 @@
       "Bash(git restore:*)",
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)",
       "Bash(curl:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:localhost)",
+      "Bash(curl:*)",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)"
     ],
     "deny": []
   },
