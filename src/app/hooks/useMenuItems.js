@@ -28,6 +28,7 @@ const useMenuItems = () => {
       if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || selectedRole === listOfAllRoles.REGIONAL_ADMIN) {
         menuOptions = [
           ...menuOptions,
+          { label: 'Add Event', action: 'addSingleEvent' },
           { label: 'Edit Event', action: 'editEvent' },
           { label: 'Delete Event', action: 'deleteEvent' },
           { label: 'Add Photos', action: 'addPhotos' },
