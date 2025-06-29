@@ -142,11 +142,12 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     // Find the selected organizer to get its name
     const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
     
-    // Store both the ID and the name
+    // Store the ID, name, and shortName (use fullName as fallback for shortName)
     setEventData({ 
       ...eventData, 
       ownerOrganizerID: selectedOrganizerId,
-      ownerOrganizerName: selectedOrganizer ? selectedOrganizer.fullName : ''
+      ownerOrganizerName: selectedOrganizer ? selectedOrganizer.fullName : '',
+      ownerOrganizerShortName: selectedOrganizer ? (selectedOrganizer.shortName || selectedOrganizer.fullName) : ''
     });
   };
 

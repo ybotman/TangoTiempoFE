@@ -46,48 +46,63 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     return sevenPM;
   };
   
-  // Create initial date/time values from selectedDate using dayjs
-  const initialStartDate = getDefaultStartTime(selectedDate);
+  // Helper function to get initial event data for CREATE mode
+  const getInitialEventData = (date, location, city) => {
+    const startDate = getDefaultStartTime(date);
+    const endDate = startDate.add(3, 'hour');
+    
+    return {
+      title: '',
+      description: '',
+      startDate: startDate,
+      endDate: endDate,
+      cost: '',
+      // Venue fields
+      venueId: '',
+      venueName: '',
+      locationID: '',
+      locationName: '',
+      venueLatitude: null,
+      venueLongitude: null,
+      // Categories
+      categoryFirst: '',
+      categoryFirstId: '',
+      categorySecond: '',
+      categorySecondId: '',
+      categoryThird: '',
+      categoryThirdId: '',
+      // Organizer fields
+      ownerOrganizerID: '',
+      ownerOrganizerName: '',
+      ownerOrganizerShortName: '', // Added for RO CREATE fix
+      grantedOrganizerID: '',
+      grantedOrganizerName: '',
+      alternateOrganizerID: '',
+      alternateOrganizerName: '',
+      // Other fields
+      isRepeating: false,
+      imageFile: null,
+      imagePreviewUrl: null,
+      eventImage: null,
+      fallbackImageUrl: null,
+      shortTitle: '',
+      shortName: '',
+      // Location hierarchy - preserve user's selected location
+      masteredRegionName: location?.region?.name || city?.regionName || '',
+      masteredDivisionName: location?.division?.name || city?.divisionName || '',
+      masteredCityName: location?.city?.name || city?.cityName || '',
+      // Legacy fields
+      selectedRegion: location?.region?.name || city?.regionName || '',
+      selectedRegionID: location?.region?.id || city?.regionID || '',
+      // ID field
+      _id: null
+    };
+  };
   
-  // Set end date to be 3 hours after start date by default
-  const initialEndDate = initialStartDate.add(3, 'hour');
-  
-  const [eventData, setEventData] = useState({
-    title: '',
-    description: '',
-    startDate: initialStartDate,
-    endDate: initialEndDate,
-    cost: '',
-    // Use both new venue fields and legacy location fields for compatibility
-    venueId: '',
-    venueName: '',
-    locationID: '',
-    categoryFirst: '',
-    categoryFirstId: '',
-    categorySecond: '',
-    categorySecondId: '',
-    categoryThird: '',
-    categoryThirdId: '',
-    // Organizer fields - ownerOrganizerID will be set automatically by the backend
-    ownerOrganizerID: '',
-    ownerOrganizerName: '',
-    grantedOrganizerID: '',
-    grantedOrganizerName: '',
-    alternateOrganizerID: '',
-    alternateOrganizerName: '',
-    isRepeating: false,
-    imageFile: null,
-    imagePreviewUrl: null,
-    shortTitle: '',
-    shortName: '',
-    // Use mastered location fields from GeoLocationContext first, then fall back to MasteredLocationContext
-    masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
-    masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
-    masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
-    // Keep old fields for backward compatibility
-    selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
-    selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
-  });
+  // Initialize event data with helper function
+  const [eventData, setEventData] = useState(() => 
+    getInitialEventData(selectedDate, selectedLocation, nearestCity)
+  );
 
   // Refresh event data and related data when modal opens or location changes
   useEffect(() => {
@@ -164,31 +179,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         
         setHasUnsavedChanges(false); // Reset unsaved changes for edit mode
       } else {
-        // Create mode - use selected date or defaults
-        
-        let updatedStartDate = prev => prev.startDate;
-        let updatedEndDate = prev => prev.endDate;
-        
-        if (selectedDate) {
-          updatedStartDate = getDefaultStartTime(selectedDate);
-          updatedEndDate = updatedStartDate.add(3, 'hour');
-        }
-        
-        setEventData(prev => ({
-          ...prev,
-          startDate: selectedDate ? updatedStartDate : prev.startDate,
-          endDate: selectedDate ? updatedEndDate : prev.endDate,
-          masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
-          masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
-          masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
-          // Keep old fields for backward compatibility
-          selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
-          selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
-          // Reset venue selection when location changes to avoid invalid selections
-          venueId: '',
-          venueName: '',
-          locationID: ''
-        }));
+        // Create mode - reset all fields to initial values
+        const initialData = getInitialEventData(selectedDate, selectedLocation, nearestCity);
+        setEventData(initialData);
+        setHasUnsavedChanges(false); // Reset unsaved changes for create mode
       }
 
       // Log current location for debugging
