@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress } from '@mui/material';
+import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress, Tooltip } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
@@ -504,11 +504,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Typography variant="h5" component="h2">
             {editMode ? 'Edit Event' : 'Create Event'}
           </Typography>
-          <FormControlLabel
-            control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" />}
-            label="Repeating"
-            labelPlacement="start"
-          />
+          <Tooltip title="Repeating events feature coming in July 2025">
+            <span>
+              <FormControlLabel
+                control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" disabled />}
+                label="Repeating"
+                labelPlacement="start"
+                disabled
+              />
+            </span>
+          </Tooltip>
         </Box>
 
         {/* Display Current Location Hierarchy */}
