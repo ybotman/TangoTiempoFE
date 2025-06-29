@@ -558,78 +558,101 @@ export function useEventOperations() {
       // Clean up the event data by converting empty strings for ObjectId fields to null
       const cleanedEventData = sanitizeObjectIdFields(eventData);
       
-      const preparedData = {
-        ...cleanedEventData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
-        selectedRole: selectedRole, // Include the user's selected role for backend validation
-        // Include admin cities for RegionalAdmin validation
-        allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ? 
-          (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
-           user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
-        // Handle both venue and location fields for transitional compatibility
-        // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
-        // If we only have locationID/locationName, use those and add venueId/venueName fields
-        venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
-        venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
-        locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
-        locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
-        // Add required fields that might be missing in update
-        masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
-        // Set default ownerOrganizerName if not provided - use the user's organizer name if they're a Regional Organizer
-        ownerOrganizerName: cleanedEventData.ownerOrganizerName || 
-                           (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerName : null) ||
-                           "Event Organizer",
-        // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
-        ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
-        // Set expiresAt to 1 year after endDate
-        expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
-      };
+      let preparedData;
       
-      // If venue has coordinates, include them in venueGeolocation
-      if (eventData.venueLatitude && eventData.venueLongitude) {
-        preparedData.venueGeolocation = {
-          type: "Point",
-          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+      if (selectedRole === 'RegionalAdmin') {
+        // RA endpoint has different requirements - prepare minimal data
+        preparedData = {
+          title: cleanedEventData.title,
+          startDate: cleanedEventData.startDate,
+          endDate: cleanedEventData.endDate,
+          ownerOrganizerID: cleanedEventData.ownerOrganizerID,
+          venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
+          description: cleanedEventData.description || '',
+          cost: cleanedEventData.cost || '',
+          // Include auth fields for RA validation
+          selectedRole: 'RegionalAdmin',
+          allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+                                      user?.backendInfo?.localAdminInfo?.adminCities
         };
-        console.log('Added venue coordinates to venueGeolocation for update:', preparedData.venueGeolocation);
-      } else if (eventData.venueId || eventData.locationID) {
-        // We have a venue but no coordinates - need to fetch them
-        console.log('Venue selected but coordinates not provided for update. Attempting to fetch venue data.');
-        try {
-          // Import the venue service function directly
-          const { getVenueById } = await import('@/services/venueService');
+      } else {
+        // RO endpoint uses full data structure
+        preparedData = {
+          ...cleanedEventData,
+          appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+          selectedRole: selectedRole, // Include the user's selected role for backend validation
+          // Include admin cities for RegionalAdmin validation
+          allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ? 
+            (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+             user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
+          // Handle both venue and location fields for transitional compatibility
+          // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
+          // If we only have locationID/locationName, use those and add venueId/venueName fields
+          venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
+          venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
+          locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
+          locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
+          // Add required fields that might be missing in update
+          masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
+          // Set default ownerOrganizerName if not provided - use the user's organizer name if they're a Regional Organizer
+          ownerOrganizerName: cleanedEventData.ownerOrganizerName || 
+                             (selectedRole === 'RegionalOrganizer' ? user?.backendInfo?.regionalOrganizerInfo?.organizerName : null) ||
+                             "Event Organizer",
+          // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
+          ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
+          // Set expiresAt to 1 year after endDate
+          expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+        };
+      }
+      
+      // Only add venue geolocation and mastered location fields for RO updates
+      if (selectedRole !== 'RegionalAdmin') {
+        // If venue has coordinates, include them in venueGeolocation
+        if (eventData.venueLatitude && eventData.venueLongitude) {
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+          };
+          console.log('Added venue coordinates to venueGeolocation for update:', preparedData.venueGeolocation);
+        } else if (eventData.venueId || eventData.locationID) {
+          // We have a venue but no coordinates - need to fetch them
+          console.log('Venue selected but coordinates not provided for update. Attempting to fetch venue data.');
+          try {
+            // Import the venue service function directly
+            const { getVenueById } = await import('@/services/venueService');
 
-          // Get venue data including coordinates
-          const venueId = eventData.venueId || eventData.locationID;
-          const venueData = await getVenueById(venueId);
+            // Get venue data including coordinates
+            const venueId = eventData.venueId || eventData.locationID;
+            const venueData = await getVenueById(venueId);
 
-          if (venueData && venueData.latitude && venueData.longitude) {
-            preparedData.venueGeolocation = {
-              type: "Point",
-              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
-            };
-            console.log('Retrieved and added venue coordinates for update:', preparedData.venueGeolocation);
-          } else {
-            console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
+            if (venueData && venueData.latitude && venueData.longitude) {
+              preparedData.venueGeolocation = {
+                type: "Point",
+                coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+              };
+              console.log('Retrieved and added venue coordinates for update:', preparedData.venueGeolocation);
+            } else {
+              console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
+              // Fallback to empty coordinates array to prevent schema validation error
+              preparedData.venueGeolocation = {
+                type: "Point",
+                coordinates: [0, 0]
+              };
+            }
+          } catch (venueError) {
+            console.error('Error fetching venue data for update:', venueError);
             // Fallback to empty coordinates array to prevent schema validation error
             preparedData.venueGeolocation = {
               type: "Point",
               coordinates: [0, 0]
             };
           }
-        } catch (venueError) {
-          console.error('Error fetching venue data for update:', venueError);
-          // Fallback to empty coordinates array to prevent schema validation error
-          preparedData.venueGeolocation = {
-            type: "Point",
-            coordinates: [0, 0]
-          };
         }
-      }
-      
-      // Ensure mastered location fields are included
-      if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
-        preparedData.masteredRegionName = preparedData.selectedRegion;
+        
+        // Ensure mastered location fields are included
+        if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
+          preparedData.masteredRegionName = preparedData.selectedRegion;
+        }
       }
       
       // Convert dayjs objects to ISO strings
@@ -656,7 +679,8 @@ export function useEventOperations() {
         }
       };
       
-      console.log('Updating event:', eventId, preparedData);
+      console.log('Updating event:', eventId, 'as role:', selectedRole);
+      console.log('Prepared data for update:', JSON.stringify(preparedData, null, 2));
       
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
