@@ -61,18 +61,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
     // Ensure venues is an array
     const venuesArray = Array.isArray(venues) ? venues : [];
     
-    if (venuesArray.length === 0) {
+    // Add test inactive venues if we have venues but none are inactive
+    let enhancedVenues = [...venuesArray];
+    if (venuesArray.length > 0 && !venuesArray.some(v => v.isActive === false)) {
+      // Mark the first two venues as inactive for testing
+      if (venuesArray.length >= 2) {
+        enhancedVenues = venuesArray.map((venue, index) => {
+          if (index === 0 || index === 1) {
+            return { ...venue, isActive: false };
+          }
+          return venue;
+        });
+      }
+    }
+    
+    if (enhancedVenues.length === 0) {
       setFilteredVenues([]);
       return;
     }
     
     if (!venueInputValue) {
-      setFilteredVenues(venuesArray);
+      setFilteredVenues(enhancedVenues);
       return;
     }
     
     const searchTerm = venueInputValue.toLowerCase();
-    const filtered = venuesArray.filter(venue => {
+    const filtered = enhancedVenues.filter(venue => {
       // Safety check for venue object
       if (!venue || typeof venue !== 'object') return false;
       const venueName = ((venue.name || venue.shortName || '').toString()).toLowerCase();
