@@ -401,24 +401,28 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                 const venueOptions = Array.isArray(filteredVenues) ? filteredVenues : [];
                 
                 // Separate active and inactive venues
-                const activeVenues = venueOptions.filter(v => v?.isActive !== false);
-                const inactiveVenues = venueOptions.filter(v => v?.isActive === false);
+                // Treat undefined/null isActive as active (true)
+                const activeVenues = venueOptions.filter(v => v && (v.isActive === true || v.isActive === undefined || v.isActive === null));
+                const inactiveVenues = venueOptions.filter(v => v && v.isActive === false);
                 
                 // Create grouped options
                 let groupedOptions = [];
                 
-                // Add active venues
-                if (activeVenues.length > 0) {
-                  groupedOptions = [...activeVenues];
+                // Always add a header for active venues if there are any venues at all
+                if (venueOptions.length > 0) {
+                  groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
+                  
+                  // Add active venues
+                  if (activeVenues.length > 0) {
+                    groupedOptions = [...groupedOptions, ...activeVenues];
+                  } else {
+                    groupedOptions.push({ _id: 'no-active', isPlaceholder: true, name: 'No active venues', disabled: true });
+                  }
                 }
                 
-                // Add separator if we have both active and inactive
-                if (activeVenues.length > 0 && inactiveVenues.length > 0) {
-                  groupedOptions.push({ _id: 'divider', isDivider: true });
-                }
-                
-                // Add inactive venues
+                // Add separator and inactive venues if any exist
                 if (inactiveVenues.length > 0) {
+                  groupedOptions.push({ _id: 'divider', isDivider: true });
                   groupedOptions = [...groupedOptions, ...inactiveVenues];
                 }
                 
@@ -471,13 +475,36 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                 return option._id === value._id;
               }}
               renderOption={(props, option) => {
-                // Handle divider
+                // Handle divider/header
                 if (option.isDivider) {
+                  if (option.isHeader) {
+                    // Active venues header
+                    return (
+                      <li key={option._id} style={{ padding: 0 }}>
+                        <Typography variant="caption" color="primary" sx={{ px: 2, py: 0.5, display: 'block', fontWeight: 'bold' }}>
+                          {option.text}
+                        </Typography>
+                      </li>
+                    );
+                  } else {
+                    // Separator between active and inactive
+                    return (
+                      <li key="divider" style={{ padding: 0 }}>
+                        <hr style={{ margin: '8px 0', border: 'none', borderTop: '2px solid #e0e0e0' }} />
+                        <Typography variant="caption" color="textSecondary" sx={{ px: 2, py: 0.5, display: 'block', fontWeight: 'bold' }}>
+                          Inactive Venues
+                        </Typography>
+                      </li>
+                    );
+                  }
+                }
+                
+                // Handle placeholder options
+                if (option.isPlaceholder && option.disabled) {
                   return (
-                    <li key="divider" style={{ padding: 0 }}>
-                      <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
-                      <Typography variant="caption" color="textSecondary" sx={{ px: 2, py: 0.5, display: 'block' }}>
-                        Non-Active Venues
+                    <li key={option._id} style={{ padding: '8px 16px', opacity: 0.5 }}>
+                      <Typography variant="body2" color="textSecondary">
+                        {option.name}
                       </Typography>
                     </li>
                   );
@@ -498,7 +525,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
                   </li>
                 );
               }}
-              getOptionDisabled={(option) => option.isDivider}
+              getOptionDisabled={(option) => option.isDivider || option.disabled}
               renderInput={(params) => (
                 <TextField
                   {...params}
