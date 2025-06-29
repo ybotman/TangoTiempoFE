@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   Box,
   Typography,
@@ -26,10 +26,10 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonIcon from '@mui/icons-material/Person';
 import { useUsers } from '@/hooks/useUsers';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 
 const YourStatusTab = () => {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   const { userData } = useUsers();
 
   // Sample application steps for demonstration

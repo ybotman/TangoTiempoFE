@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   Box,
   Typography,
@@ -16,7 +16,7 @@ import {
   StepLabel,
   StepContent
 } from '@mui/material';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -25,7 +25,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const ApplicationFormTab = () => {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   const { userData } = useUsers();
   const router = useRouter();
 
