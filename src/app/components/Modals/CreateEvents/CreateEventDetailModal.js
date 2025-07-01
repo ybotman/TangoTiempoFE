@@ -9,6 +9,7 @@ import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
+import { useOrganizers } from '@/hooks/useOrganizers';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import axios from 'axios';
@@ -31,6 +32,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken } = useContext(AuthContext);
+  const { organizer, fetchOrganizerById } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('basic');
   
   // Helper function to get default start time (7pm of selected date or next day if past 7pm)
@@ -150,6 +152,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Organizer info
           ownerOrganizerID: eventToEdit.ownerOrganizerID || '',
           ownerOrganizerName: eventToEdit.ownerOrganizerName || '',
+          ownerOrganizerShortName: eventToEdit.ownerOrganizerShortName || '',
           grantedOrganizerID: eventToEdit.grantedOrganizerID || '',
           grantedOrganizerName: eventToEdit.grantedOrganizerName || '',
           alternateOrganizerID: eventToEdit.alternateOrganizerID || '',
@@ -190,10 +193,24 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         mode: editMode ? 'EDIT' : 'CREATE',
         eventId: eventToEdit?._id || null,
         selectedRole: user?.backendInfo?.selectedRole,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
+        organizerInfo: user?.backendInfo?.regionalOrganizerInfo,
+        organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
       });
     }
   }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
+
+  // Fetch organizer data when in create mode and user is RO
+  useEffect(() => {
+    // Check if user has regionalOrganizerInfo with an organizerId (indicates they are an RO)
+    if (!editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
+      console.log('Fetching organizer for CREATE mode:', {
+        organizerId: user.backendInfo.regionalOrganizerInfo.organizerId,
+        hasOrganizerInfo: !!user.backendInfo.regionalOrganizerInfo
+      });
+      fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+    }
+  }, [editMode, user, fetchOrganizerById]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -385,7 +402,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         categoryFirst: eventData.categoryFirst || 'Other',
         selectedRole: selectedRole, // Add selectedRole for backend validation
         adminCities: isRegionalAdmin ? user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds : undefined,
-        description: eventData.description || ''
+        description: eventData.description || '',
+        // Set organizer info if not already set (for create mode)
+        ownerOrganizerID: eventData.ownerOrganizerID || (isRegionalOrganizer ? user.backendInfo.regionalOrganizerInfo.organizerId : ''),
+        ownerOrganizerName: eventData.ownerOrganizerName || (isRegionalOrganizer ? user.backendInfo.regionalOrganizerInfo.organizerName : ''),
+        ownerOrganizerShortName: eventData.ownerOrganizerShortName || (isRegionalOrganizer ? user.backendInfo.regionalOrganizerInfo.organizerShortName : '')
       };
       
       // Update the event data with defaults
@@ -541,6 +562,20 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             />
           )}
         </Box>
+
+        {/* Display User Info and Organizer Short Name for RO role */}
+        {user && (
+          <Box sx={{ my: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              {editMode ? 'Created by' : 'Creating as'}: {user.uid}
+            </Typography>
+            {(editMode ? eventData.ownerOrganizerShortName : organizer?.shortName) && (
+              <Typography variant="body2" color="text.secondary">
+                Organizer: {editMode ? eventData.ownerOrganizerShortName : organizer?.shortName}
+              </Typography>
+            )}
+          </Box>
+        )}
 
         {/* Error message */}
         {saveError && (
