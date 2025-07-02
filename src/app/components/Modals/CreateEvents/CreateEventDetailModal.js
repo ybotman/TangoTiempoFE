@@ -563,20 +563,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           )}
         </Box>
 
-        {/* Display User Info and Organizer Short Name for RO role */}
-        {user && (
-          <Box sx={{ my: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <Typography variant="body2" color="text.secondary">
-              {editMode ? 'Created by' : 'Creating as'}: {user.uid}
-            </Typography>
-            {(editMode ? eventData.ownerOrganizerShortName : organizer?.shortName) && (
-              <Typography variant="body2" color="text.secondary">
-                Organizer: {editMode ? eventData.ownerOrganizerShortName : organizer?.shortName}
-              </Typography>
-            )}
-          </Box>
-        )}
-
         {/* Error message */}
         {saveError && (
           <Alert severity="error" sx={{ my: 1 }}>
@@ -626,7 +612,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         </Tabs>
 
         {/* Render tab content conditionally */}
-        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} />}
+        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'repeating' && (
