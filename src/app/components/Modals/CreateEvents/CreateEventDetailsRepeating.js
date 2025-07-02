@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -98,6 +98,61 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     setOccurrences(''); // Clear occurrences when switching
   };
 
+  // Convert date to RRULE format (YYYYMMDDTHHMMSSZ)
+  const dateToRRuleFormat = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    // Set to end of day in UTC
+    date.setUTCHours(23, 59, 59, 999);
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  };
+
+  // Validate RRULE format
+  const validateRRule = (rrule) => {
+    if (!rrule) return { isValid: false, error: 'No RRULE generated' };
+    
+    // Basic RRULE validation
+    const errors = [];
+    
+    // Check for FREQ
+    if (!rrule.includes('FREQ=')) {
+      errors.push('Missing FREQ parameter');
+    }
+    
+    // Check for valid frequency
+    const validFreqs = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
+    const freqMatch = rrule.match(/FREQ=(\w+)/);
+    if (freqMatch && !validFreqs.includes(freqMatch[1])) {
+      errors.push(`Invalid frequency: ${freqMatch[1]}`);
+    }
+    
+    // If WEEKLY, check for BYDAY
+    if (rrule.includes('FREQ=WEEKLY') && recurrenceDays.length === 0) {
+      errors.push('Weekly recurrence requires at least one day selected');
+    }
+    
+    // If MONTHLY, check for BYDAY
+    if (rrule.includes('FREQ=MONTHLY') && (monthlyDays.length === 0 || monthlyWeeks.length === 0)) {
+      errors.push('Monthly recurrence requires both week and day selection');
+    }
+    
+    // Check for either UNTIL or COUNT (not both)
+    if (rrule.includes('UNTIL=') && rrule.includes('COUNT=')) {
+      errors.push('Cannot have both UNTIL and COUNT');
+    }
+    
+    // Validate UNTIL date format if present
+    const untilMatch = rrule.match(/UNTIL=(\w+)/);
+    if (untilMatch && !/^\d{8}T\d{6}Z$/.test(untilMatch[1])) {
+      errors.push('Invalid UNTIL date format');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors: errors
+    };
+  };
+
   // Generate RRULE Text
   const generateRRule = () => {
     let rrule = `FREQ=${recurrenceType.toUpperCase()};`;
@@ -118,13 +173,39 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         rrule += `BYDAY=${byDay.join(',')};`;
       }
       if (useEndDate && endDate) {
-        rrule += `UNTIL=${endDate};`;
+        rrule += `UNTIL=${dateToRRuleFormat(endDate)};`;
       } else if (!useEndDate && occurrences) {
         rrule += `COUNT=${occurrences};`;
       }
     }
     return rrule;
   };
+
+  // State for validation
+  const [rruleValidation, setRruleValidation] = useState({ isValid: true, errors: [] });
+
+  // Update eventData with RRULE whenever relevant fields change
+  useEffect(() => {
+    const rrule = generateRRule();
+    const validation = validateRRule(rrule);
+    setRruleValidation(validation);
+    
+    // Only update eventData if RRULE is valid
+    if (validation.isValid) {
+      setEventData(prevData => ({
+        ...prevData,
+        recurrenceRule: rrule,
+        // Store recurrence settings for editing
+        recurrenceType,
+        recurrenceDays,
+        monthlyDays,
+        monthlyWeeks,
+        recurrenceEndDate: endDate,
+        recurrenceCount: occurrences,
+        useEndDate
+      }));
+    }
+  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, setEventData]);
 
   return (
     <Box>
@@ -248,24 +329,39 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         </Box>
       )}
 
-      {/* Exclude Clause */}
+      {/* Exclude Clause - Commented out until backend supports it */}
+      {/* Backend does not currently support excludeDates field
       <Box marginTop={2}>
         <TextField
           fullWidth
           label="Exclude Dates (comma separated)"
           value={excludeDates}
           onChange={(e) => setExcludeDates(e.target.value)}
+          helperText="Note: Exclude dates functionality is not yet supported by the backend"
         />
       </Box>
+      */}
 
       {/* Display Generated RRULE */}
       <Box marginTop={2}>
         <Typography variant="subtitle1" color="textSecondary">
           Generated RRULE:
         </Typography>
-        <Typography variant="body2" color="textSecondary">
+        <Typography 
+          variant="body2" 
+          color={rruleValidation.isValid ? "textSecondary" : "error"}
+        >
           {generateRRule()}
         </Typography>
+        {!rruleValidation.isValid && (
+          <Box mt={1}>
+            {rruleValidation.errors.map((error, index) => (
+              <Typography key={index} variant="caption" color="error">
+                • {error}
+              </Typography>
+            ))}
+          </Box>
+        )}
       </Box>
 
       {/* Action Buttons */}
