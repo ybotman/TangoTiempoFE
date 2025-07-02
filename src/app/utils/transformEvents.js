@@ -65,6 +65,11 @@ export function transformEvents(events) {
         tmpVenueId: event.tmpVenueId,
         tmpEventOrgId: event.tmpEventOrgId,
         tmpMix: event.tmpMix,
+        // Add shortTitle and ownerOrganizerShortName for calendar display
+        shortTitle: event.shortTitle || event.shortName || '',
+        ownerOrganizerShortName: event.ownerOrganizerShortName || event.shortName || '',
+        // Add AI event detection
+        isDiscovered: event.isDiscovered || false,
       },
     };
   });
