@@ -77,17 +77,61 @@ export function transformEvents(events) {
 
     // Check if this is a recurring event with RRULE
     if (event.recurrenceRule && event.isRepeating) {
-      // TEMPORARILY DISABLED: Return recurring events as single events to debug RRULE parser issue
-      console.warn('RRULE temporarily disabled for debugging. Event:', event.title, 'RRULE:', event.recurrenceRule);
+      // Clean the RRULE string to remove trailing semicolons
+      let cleanedRRule = event.recurrenceRule.trim();
       
-      // Return as a regular single event
-      return {
-        ...baseEvent,
-        start: event.startDate,
-        end: event.endDate,
-        // Add a visual indicator that this is a recurring event
-        title: event.title + ' 🔄',
-      };
+      // Remove trailing semicolon if present
+      if (cleanedRRule.endsWith(';')) {
+        cleanedRRule = cleanedRRule.slice(0, -1);
+      }
+      
+      // Also remove any empty properties (consecutive semicolons)
+      cleanedRRule = cleanedRRule.replace(/;;+/g, ';');
+      
+      // Validate that we have a valid RRULE
+      if (!cleanedRRule || !cleanedRRule.includes('FREQ=')) {
+        console.warn('Invalid RRULE detected, skipping recurring event:', event.recurrenceRule);
+        // Return as a regular event instead
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+        };
+      }
+      
+      // For recurring events, use RRULE format with DTSTART
+      try {
+        // Format the start date as required by RRULE (YYYYMMDDTHHMMSSZ)
+        const startDate = new Date(event.startDate);
+        const year = startDate.getUTCFullYear();
+        const month = String(startDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(startDate.getUTCDate()).padStart(2, '0');
+        const hours = String(startDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(startDate.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(startDate.getUTCSeconds()).padStart(2, '0');
+        const dtstart = `DTSTART:${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+        
+        // Combine DTSTART with RRULE using newline separator
+        const fullRRule = `${dtstart}\nRRULE:${cleanedRRule}`;
+        
+        console.log('Creating RRULE event:', event.title, 'with format:', fullRRule);
+        
+        return {
+          ...baseEvent,
+          // FullCalendar RRULE plugin expects the full RRULE string with DTSTART
+          rrule: fullRRule,
+          // Duration for each occurrence
+          duration: calculateDuration(event.startDate, event.endDate),
+        };
+      } catch (error) {
+        console.error('Error processing RRULE event:', error, 'RRULE:', cleanedRRule);
+        // If RRULE parsing fails, return as a regular event
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+        };
+      }
     } else {
       // For non-recurring events, use standard format
       return {

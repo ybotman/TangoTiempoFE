@@ -7,7 +7,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-// TEMPORARILY DISABLED: import rrulePlugin from '@fullcalendar/rrule';
+import rrulePlugin from '@fullcalendar/rrule';
 import { ButtonGroup, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -530,7 +530,7 @@ const CalendarPage = () => {
       </div>
 
       <FullCalendar
-        plugins={[dayGridPlugin, listPlugin, interactionPlugin /* TEMPORARILY DISABLED: , rrulePlugin */]}
+        plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
         //        initialView="dayGridMonth"
         initialView={getInitialView()}
         events={eventsWithPlaceholders}
