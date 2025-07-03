@@ -77,49 +77,17 @@ export function transformEvents(events) {
 
     // Check if this is a recurring event with RRULE
     if (event.recurrenceRule && event.isRepeating) {
-      // Clean the RRULE string to remove trailing semicolons
-      let cleanedRRule = event.recurrenceRule.trim();
+      // TEMPORARILY DISABLED: Return recurring events as single events to debug RRULE parser issue
+      console.warn('RRULE temporarily disabled for debugging. Event:', event.title, 'RRULE:', event.recurrenceRule);
       
-      // Remove trailing semicolon if present
-      if (cleanedRRule.endsWith(';')) {
-        cleanedRRule = cleanedRRule.slice(0, -1);
-      }
-      
-      // Also remove any empty properties (consecutive semicolons)
-      cleanedRRule = cleanedRRule.replace(/;;+/g, ';');
-      
-      // Validate that we have a valid RRULE
-      if (!cleanedRRule || !cleanedRRule.includes('FREQ=')) {
-        console.warn('Invalid RRULE detected, skipping recurring event:', event.recurrenceRule);
-        // Return as a regular event instead
-        return {
-          ...baseEvent,
-          start: event.startDate,
-          end: event.endDate,
-        };
-      }
-      
-      // For recurring events, use RRULE format
-      try {
-        // For FullCalendar RRULE plugin v6
-        return {
-          ...baseEvent,
-          // FullCalendar RRULE plugin expects these specific fields
-          rrule: cleanedRRule,
-          // Need to include start date for RRULE events
-          start: event.startDate,
-          // Use duration instead of end date for recurring events
-          duration: calculateDuration(event.startDate, event.endDate),
-        };
-      } catch (error) {
-        console.error('Error processing RRULE event:', error, 'RRULE:', cleanedRRule);
-        // If RRULE parsing fails, return as a regular event
-        return {
-          ...baseEvent,
-          start: event.startDate,
-          end: event.endDate,
-        };
-      }
+      // Return as a regular single event
+      return {
+        ...baseEvent,
+        start: event.startDate,
+        end: event.endDate,
+        // Add a visual indicator that this is a recurring event
+        title: event.title + ' 🔄',
+      };
     } else {
       // For non-recurring events, use standard format
       return {
