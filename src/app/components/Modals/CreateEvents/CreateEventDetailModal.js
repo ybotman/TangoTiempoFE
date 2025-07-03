@@ -525,13 +525,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Typography variant="h5" component="h2">
             {editMode ? 'Edit Event' : 'Create Event'}
           </Typography>
-          <Tooltip title="Repeating events feature coming in July 2025">
+          <Tooltip title={selectedRole === 'RegionalOrganizer' ? "Enable recurring events (Beta for RO)" : "Repeating events feature coming in July 2025"}>
             <span>
               <FormControlLabel
-                control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" disabled />}
+                control={<Switch 
+                  checked={eventData.isRepeating} 
+                  onChange={handleToggleRepeating} 
+                  color="primary" 
+                  disabled={selectedRole !== 'RegionalOrganizer'}
+                />}
                 label="Repeating"
                 labelPlacement="start"
-                disabled
+                disabled={selectedRole !== 'RegionalOrganizer'}
               />
             </span>
           </Tooltip>
