@@ -155,10 +155,11 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
 
   // Generate RRULE Text
   const generateRRule = () => {
-    let rrule = `FREQ=${recurrenceType.toUpperCase()};`;
+    let parts = [`FREQ=${recurrenceType.toUpperCase()}`];
+    
     if (recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') {
       if (recurrenceType === 'weekly' && recurrenceDays.length > 0) {
-        rrule += `BYDAY=${recurrenceDays.join(',')};`;
+        parts.push(`BYDAY=${recurrenceDays.join(',')}`);
       } else if (recurrenceType === 'monthly' && monthlyDays.length > 0 && monthlyWeeks.length > 0) {
         const weekdaysMap = {
           Su: 'SU',
@@ -170,15 +171,17 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           Sa: 'SA',
         };
         const byDay = monthlyWeeks.map((week) => monthlyDays.map((day) => `${week}${weekdaysMap[day]}`)).flat();
-        rrule += `BYDAY=${byDay.join(',')};`;
+        parts.push(`BYDAY=${byDay.join(',')}`);
       }
       if (useEndDate && endDate) {
-        rrule += `UNTIL=${dateToRRuleFormat(endDate)};`;
+        parts.push(`UNTIL=${dateToRRuleFormat(endDate)}`);
       } else if (!useEndDate && occurrences) {
-        rrule += `COUNT=${occurrences};`;
+        parts.push(`COUNT=${occurrences}`);
       }
     }
-    return rrule;
+    
+    // Join parts with semicolon - no trailing semicolon
+    return parts.join(';');
   };
 
   // State for validation
