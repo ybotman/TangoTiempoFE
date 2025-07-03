@@ -6,10 +6,11 @@ export function transformEvents(events) {
   }
 
   return events.map((event) => {
-    // Create standardized venue references
-    // Handle both old locationID/locationName and new venueID/venueId/venueName formats
-    const venueId = event.venueID || event.venueId || event.locationID || null;
-    const venueName = event.venueName || event.locationName || null;
+    try {
+      // Create standardized venue references
+      // Handle both old locationID/locationName and new venueID/venueId/venueName formats
+      const venueId = event.venueID || event.venueId || event.locationID || null;
+      const venueName = event.venueName || event.locationName || null;
     
     // Debug logging removed to reduce console noise
     /*
@@ -107,14 +108,25 @@ export function transformEvents(events) {
       }
       
       // For recurring events, use RRULE format
-      return {
-        ...baseEvent,
-        // FullCalendar RRULE plugin expects these specific fields
-        rrule: cleanedRRule,
-        // Use start time from the event for the recurrence pattern
-        duration: calculateDuration(event.startDate, event.endDate),
-        // Don't include start/end for RRULE events
-      };
+      try {
+        return {
+          ...baseEvent,
+          // FullCalendar RRULE plugin expects these specific fields
+          rrule: cleanedRRule,
+          // Need to include start date for RRULE events
+          start: event.startDate,
+          // Use duration instead of end date for recurring events
+          duration: calculateDuration(event.startDate, event.endDate),
+        };
+      } catch (error) {
+        console.error('Error processing RRULE event:', error, 'RRULE:', cleanedRRule);
+        // If RRULE parsing fails, return as a regular event
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+        };
+      }
     } else {
       // For non-recurring events, use standard format
       return {
@@ -123,7 +135,12 @@ export function transformEvents(events) {
         end: event.endDate, // Map 'endDate' to 'end'
       };
     }
-  });
+    } catch (error) {
+      console.error('Error transforming event:', error, 'Event:', event);
+      // Return null for failed transformations, will be filtered out
+      return null;
+    }
+  }).filter(event => event !== null); // Filter out any failed transformations
 }
 
 // Helper function to calculate event duration for recurring events
