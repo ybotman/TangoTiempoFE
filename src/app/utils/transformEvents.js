@@ -109,14 +109,15 @@ export function transformEvents(events) {
       
       // For recurring events, use RRULE format
       try {
+        // For FullCalendar RRULE plugin v6
         return {
           ...baseEvent,
-          // FullCalendar RRULE plugin expects these specific fields
+          // FullCalendar RRULE plugin - try with just the string
           rrule: cleanedRRule,
-          // Need to include start date for RRULE events
+          // Need start date for the first occurrence
           start: event.startDate,
-          // Use duration instead of end date for recurring events
-          duration: calculateDuration(event.startDate, event.endDate),
+          // Don't include end date for RRULE events
+          // duration: calculateDuration(event.startDate, event.endDate),
         };
       } catch (error) {
         console.error('Error processing RRULE event:', error, 'RRULE:', cleanedRRule);
