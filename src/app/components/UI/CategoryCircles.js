@@ -10,8 +10,31 @@ const CategoryCircles = ({ eventProps }) => {
   const {
     categoryFirst,
     categorySecond,
-    categoryThird
+    categoryThird,
+    isCanceled
   } = eventProps;
+
+  // If event is canceled, show CANCELED text instead of circles
+  if (isCanceled) {
+    return (
+      <Box
+        sx={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          backgroundColor: 'red',
+          color: 'yellow',
+          padding: '0px 4px',
+          borderRadius: '4px',
+          fontSize: '0.7rem',
+          fontWeight: 'bold',
+          marginRight: '4px',
+          flexShrink: 0
+        }}
+      >
+        CANCELED
+      </Box>
+    );
+  }
 
   // Helper function to get circle style
   const getCircleStyle = (category, isPrimary = false) => {
@@ -99,6 +122,7 @@ CategoryCircles.propTypes = {
     categoryFirst: PropTypes.string,
     categorySecond: PropTypes.string,
     categoryThird: PropTypes.string,
+    isCanceled: PropTypes.bool,
   }),
 };
 

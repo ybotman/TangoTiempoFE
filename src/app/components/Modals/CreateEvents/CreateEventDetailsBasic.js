@@ -11,7 +11,7 @@ import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import PropTypes from 'prop-types';
 
-const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
+const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
   const categories = useCategories(); // Fetch categories
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
@@ -388,18 +388,24 @@ const CreateEventDetailsBasic = ({ eventData, setEventData }) => {
             </FormControl>
           ) : (
             // RegionalOrganizer: Show display only
-            <FormControl fullWidth size="small">
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
-                  Created by:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                  {eventData.ownerOrganizerName || 
-                   (user?.backendInfo?.regionalOrganizerInfo?.organizerName || 
-                    user?.backendInfo?.regionalOrganizerInfo?.fullName || 
-                    user?.displayName || 
-                    'Your Organization')}
-                </Typography>
+            <FormControl fullWidth>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
+                    {editMode ? 'Created by:' : 'Creating as:'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                    {user?.displayName || user?.email || 'User'}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
+                    Organizer:
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                    {editMode ? eventData.ownerOrganizerShortName : organizer?.shortName || 'Loading...'}
+                  </Typography>
+                </Box>
               </Box>
             </FormControl>
           )}
@@ -630,6 +636,8 @@ CreateEventDetailsBasic.propTypes = {
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
+  editMode: PropTypes.bool,
+  organizer: PropTypes.object,
 };
 
 export default CreateEventDetailsBasic;

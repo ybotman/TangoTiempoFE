@@ -9,6 +9,7 @@ import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
+import { useOrganizers } from '@/hooks/useOrganizers';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import axios from 'axios';
@@ -30,7 +31,8 @@ const modalStyle = {
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
-  const { user, getIdToken } = useContext(AuthContext);
+  const { user, getIdToken, selectedRole } = useContext(AuthContext);
+  const { organizer, fetchOrganizerById } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('basic');
   
   // Helper function to get default start time (7pm of selected date or next day if past 7pm)
@@ -81,6 +83,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       alternateOrganizerName: '',
       // Other fields
       isRepeating: false,
+      isCanceled: false,
       imageFile: null,
       imagePreviewUrl: null,
       eventImage: null,
@@ -150,6 +153,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Organizer info
           ownerOrganizerID: eventToEdit.ownerOrganizerID || '',
           ownerOrganizerName: eventToEdit.ownerOrganizerName || '',
+          ownerOrganizerShortName: eventToEdit.ownerOrganizerShortName || '',
           grantedOrganizerID: eventToEdit.grantedOrganizerID || '',
           grantedOrganizerName: eventToEdit.grantedOrganizerName || '',
           alternateOrganizerID: eventToEdit.alternateOrganizerID || '',
@@ -173,6 +177,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Repeating event settings
           isRepeating: eventToEdit.isRepeating || false,
           
+          // Cancellation status
+          isCanceled: eventToEdit.isCanceled || false,
+          
           // Maintain the original ID for updates
           _id: eventToEdit._id || null
         });
@@ -190,10 +197,32 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         mode: editMode ? 'EDIT' : 'CREATE',
         eventId: eventToEdit?._id || null,
         selectedRole: user?.backendInfo?.selectedRole,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId
+        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
+        organizerInfo: user?.backendInfo?.regionalOrganizerInfo,
+        organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
       });
     }
   }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
+
+  // Fetch organizer data when in create mode and user is RO
+  useEffect(() => {
+    // Check if user has regionalOrganizerInfo with an organizerId (indicates they are an RO)
+    if (!editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
+      console.log('Fetching organizer for CREATE mode:', {
+        organizerId: user.backendInfo.regionalOrganizerInfo.organizerId,
+        hasOrganizerInfo: !!user.backendInfo.regionalOrganizerInfo
+      });
+      fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
+    }
+  }, [editMode, user, fetchOrganizerById]);
+
+  // Validate current tab when isRepeating changes
+  useEffect(() => {
+    // If we're on the repeating tab but isRepeating is false, switch to basic
+    if (currentTab === 'repeating' && !eventData.isRepeating) {
+      setCurrentTab('basic');
+    }
+  }, [eventData.isRepeating, currentTab]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -385,7 +414,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         categoryFirst: eventData.categoryFirst || 'Other',
         selectedRole: selectedRole, // Add selectedRole for backend validation
         adminCities: isRegionalAdmin ? user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds : undefined,
-        description: eventData.description || ''
+        description: eventData.description || '',
+        // Set organizer info if not already set (for create mode)
+        ownerOrganizerID: eventData.ownerOrganizerID || (isRegionalOrganizer ? user.backendInfo.regionalOrganizerInfo.organizerId : ''),
+        ownerOrganizerName: eventData.ownerOrganizerName || (isRegionalOrganizer ? user.backendInfo.regionalOrganizerInfo.organizerName : ''),
+        ownerOrganizerShortName: eventData.ownerOrganizerShortName || (isRegionalOrganizer ? user.backendInfo.regionalOrganizerInfo.organizerShortName : '')
       };
       
       // Update the event data with defaults
@@ -441,6 +474,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       ...prevData,
       isRepeating: !prevData.isRepeating,
     }));
+    // If turning off repeating and we're on the repeating tab, go back to basic
+    if (eventData.isRepeating && currentTab === 'repeating') {
+      setCurrentTab('basic');
+    }
     setHasUnsavedChanges(true);
   };
 
@@ -504,13 +541,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Typography variant="h5" component="h2">
             {editMode ? 'Edit Event' : 'Create Event'}
           </Typography>
-          <Tooltip title="Repeating events feature coming in July 2025">
+          <Tooltip title={selectedRole === 'RegionalOrganizer' ? "Enable recurring events (Beta for RO)" : "Repeating events feature coming in July 2025"}>
             <span>
               <FormControlLabel
-                control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" disabled />}
+                control={<Switch 
+                  checked={eventData.isRepeating} 
+                  onChange={handleToggleRepeating} 
+                  color="primary" 
+                  disabled={selectedRole !== 'RegionalOrganizer'}
+                />}
                 label="Repeating"
                 labelPlacement="start"
-                disabled
+                disabled={selectedRole !== 'RegionalOrganizer'}
               />
             </span>
           </Tooltip>
@@ -587,11 +629,22 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
           <Tab label="Other" value="other" />
-          {eventData.isRepeating && <Tab label="Repeating" value="repeating" />}
+          {eventData.isRepeating && (
+            <Tab 
+              label="Repeating" 
+              value="repeating" 
+              sx={{ 
+                color: eventData.isRepeating ? 'error.main' : 'inherit',
+                '&.Mui-selected': {
+                  color: 'error.main'
+                }
+              }}
+            />
+          )}
         </Tabs>
 
         {/* Render tab content conditionally */}
-        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} />}
+        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'repeating' && (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -76,12 +76,12 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
   const [monthlyWeeks, setMonthlyWeeks] = useState(eventData.monthlyWeeks || []);
   const [excludeDates, setExcludeDates] = useState(eventData.excludeDates || '');
-  const [endDate, setEndDate] = useState(eventData.endDate || '');
-  const [occurrences, setOccurrences] = useState(eventData.occurrences || '');
+  const [endDate, setEndDate] = useState(eventData.recurrenceEndDate || '');
+  const [occurrences, setOccurrences] = useState(eventData.recurrenceCount || '');
   const [sendReminder, setSendReminder] = useState(eventData.sendReminder || false);
 
   // State to handle switching between End Date and Occurrences
-  const [useEndDate, setUseEndDate] = useState(true); // Default to using End Date
+  const [useEndDate, setUseEndDate] = useState(eventData.useEndDate !== undefined ? eventData.useEndDate : true);
 
   // Handle Recurrence Type Change
   const handleRecurrenceTypeChange = (e) => {
@@ -98,12 +98,68 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     setOccurrences(''); // Clear occurrences when switching
   };
 
+  // Convert date to RRULE format (YYYYMMDDTHHMMSSZ)
+  const dateToRRuleFormat = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    // Set to end of day in UTC
+    date.setUTCHours(23, 59, 59, 999);
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  };
+
+  // Validate RRULE format
+  const validateRRule = (rrule) => {
+    if (!rrule) return { isValid: false, error: 'No RRULE generated' };
+    
+    // Basic RRULE validation
+    const errors = [];
+    
+    // Check for FREQ
+    if (!rrule.includes('FREQ=')) {
+      errors.push('Missing FREQ parameter');
+    }
+    
+    // Check for valid frequency
+    const validFreqs = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
+    const freqMatch = rrule.match(/FREQ=(\w+)/);
+    if (freqMatch && !validFreqs.includes(freqMatch[1])) {
+      errors.push(`Invalid frequency: ${freqMatch[1]}`);
+    }
+    
+    // If WEEKLY, check for BYDAY
+    if (rrule.includes('FREQ=WEEKLY') && recurrenceDays.length === 0) {
+      errors.push('Weekly recurrence requires at least one day selected');
+    }
+    
+    // If MONTHLY, check for BYDAY
+    if (rrule.includes('FREQ=MONTHLY') && (monthlyDays.length === 0 || monthlyWeeks.length === 0)) {
+      errors.push('Monthly recurrence requires both week and day selection');
+    }
+    
+    // Check for either UNTIL or COUNT (not both)
+    if (rrule.includes('UNTIL=') && rrule.includes('COUNT=')) {
+      errors.push('Cannot have both UNTIL and COUNT');
+    }
+    
+    // Validate UNTIL date format if present
+    const untilMatch = rrule.match(/UNTIL=(\w+)/);
+    if (untilMatch && !/^\d{8}T\d{6}Z$/.test(untilMatch[1])) {
+      errors.push('Invalid UNTIL date format');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors: errors
+    };
+  };
+
   // Generate RRULE Text
   const generateRRule = () => {
-    let rrule = `FREQ=${recurrenceType.toUpperCase()};`;
+    let parts = [`FREQ=${recurrenceType.toUpperCase()}`];
+    
     if (recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') {
       if (recurrenceType === 'weekly' && recurrenceDays.length > 0) {
-        rrule += `BYDAY=${recurrenceDays.join(',')};`;
+        parts.push(`BYDAY=${recurrenceDays.join(',')}`);
       } else if (recurrenceType === 'monthly' && monthlyDays.length > 0 && monthlyWeeks.length > 0) {
         const weekdaysMap = {
           Su: 'SU',
@@ -115,57 +171,126 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           Sa: 'SA',
         };
         const byDay = monthlyWeeks.map((week) => monthlyDays.map((day) => `${week}${weekdaysMap[day]}`)).flat();
-        rrule += `BYDAY=${byDay.join(',')};`;
+        parts.push(`BYDAY=${byDay.join(',')}`);
       }
       if (useEndDate && endDate) {
-        rrule += `UNTIL=${endDate};`;
+        parts.push(`UNTIL=${dateToRRuleFormat(endDate)}`);
       } else if (!useEndDate && occurrences) {
-        rrule += `COUNT=${occurrences};`;
+        parts.push(`COUNT=${occurrences}`);
       }
     }
-    return rrule;
+    
+    // Join parts with semicolon - no trailing semicolon
+    return parts.join(';');
   };
+
+  // State for validation
+  const [rruleValidation, setRruleValidation] = useState({ isValid: true, errors: [] });
+
+  // Update eventData with RRULE whenever relevant fields change
+  useEffect(() => {
+    const rrule = generateRRule();
+    const validation = validateRRule(rrule);
+    setRruleValidation(validation);
+    
+    // Only update eventData if RRULE is valid
+    if (validation.isValid) {
+      setEventData(prevData => ({
+        ...prevData,
+        recurrenceRule: rrule,
+        // Store recurrence settings for editing
+        recurrenceType,
+        recurrenceDays,
+        monthlyDays,
+        monthlyWeeks,
+        recurrenceEndDate: endDate,
+        recurrenceCount: occurrences,
+        useEndDate
+      }));
+    }
+  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate]); // Removed setEventData from dependencies
 
   return (
     <Box>
       <Typography variant="h6">Repeating Rules</Typography>
+      
+      {/* Warning message about repeating events not working */}
+      <Box sx={{ 
+        backgroundColor: 'red', 
+        color: 'yellow', 
+        padding: '8px 16px', 
+        borderRadius: '4px', 
+        mt: 1, 
+        mb: 2,
+        fontWeight: 'bold',
+        fontSize: '0.875rem'
+      }}>
+        Repeating events is not Working
+      </Box>
+      
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        Configure how often this event repeats. The event's duration (from Basic tab) stays the same for each occurrence.
+      </Typography>
 
-      {/* Date and Recurrence Type on one line */}
+      {/* Recurrence Type */}
       <Box display="flex" flexWrap="wrap" gap={2} marginTop={2}>
-        <TextField
-          label="Start Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={eventData.startDate ? eventData.startDate.toISOString().split('T')[0] : ''}
-          onChange={(e) => setEventData({ ...eventData, startDate: new Date(e.target.value) })}
-        />
-        <TextField label="Recurrence Type" select value={recurrenceType} onChange={handleRecurrenceTypeChange}>
+        <TextField 
+          label="Recurrence Pattern" 
+          select 
+          value={recurrenceType} 
+          onChange={handleRecurrenceTypeChange}
+          sx={{ minWidth: 200 }}
+        >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
           <MenuItem value="monthly">Monthly</MenuItem>
         </TextField>
+        {eventData.startDate && (
+          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+            Starting from: {new Date(eventData.startDate).toLocaleDateString()}
+          </Typography>
+        )}
       </Box>
 
-      {/* End Date, Number of Occurrences, and Switch on one line */}
-      <Box display="flex" alignItems="center" gap={2} marginTop={2}>
-        <TextField
-          label="End Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          disabled={!useEndDate}
-        />
-        <MaterialUISwitch checked={useEndDate} onChange={handleSwitchChange} />
-        <TextField
-          label="Number of Occurrences"
-          type="number"
-          inputProps={{ min: 1, max: 52 }}
-          value={occurrences}
-          onChange={(e) => setOccurrences(e.target.value)}
-          sx={{ width: '150px' }}
-          disabled={useEndDate}
-        />
+      {/* End Date vs Number of Occurrences */}
+      <Box marginTop={3}>
+        <Typography variant="subtitle2" gutterBottom>
+          When should the recurrence end?
+        </Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <TextField
+            label="Repeat Until Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            disabled={!useEndDate}
+            helperText={useEndDate ? "Events will repeat until this date" : ""}
+            sx={{ opacity: useEndDate ? 1 : 0.5 }}
+          />
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <Typography variant="caption" color={useEndDate ? "primary" : "text.secondary"}>
+              Until Date
+            </Typography>
+            <MaterialUISwitch 
+              checked={!useEndDate} 
+              onChange={() => handleSwitchChange()} 
+            />
+            <Typography variant="caption" color={!useEndDate ? "primary" : "text.secondary"}>
+              Count
+            </Typography>
+          </Box>
+          <TextField
+            label="Number of Occurrences"
+            type="number"
+            inputProps={{ min: 1, max: 365 }}
+            value={occurrences}
+            onChange={(e) => setOccurrences(e.target.value)}
+            sx={{ width: '180px', opacity: !useEndDate ? 1 : 0.5 }}
+            disabled={useEndDate}
+            helperText={!useEndDate ? "Repeat this many times" : ""}
+          />
+        </Box>
       </Box>
 
       {/* Send Reminder Switch */}
@@ -248,32 +373,42 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         </Box>
       )}
 
-      {/* Exclude Clause */}
+      {/* Exclude Clause - Commented out until backend supports it */}
+      {/* Backend does not currently support excludeDates field
       <Box marginTop={2}>
         <TextField
           fullWidth
           label="Exclude Dates (comma separated)"
           value={excludeDates}
           onChange={(e) => setExcludeDates(e.target.value)}
+          helperText="Note: Exclude dates functionality is not yet supported by the backend"
         />
       </Box>
+      */}
 
       {/* Display Generated RRULE */}
       <Box marginTop={2}>
         <Typography variant="subtitle1" color="textSecondary">
           Generated RRULE:
         </Typography>
-        <Typography variant="body2" color="textSecondary">
+        <Typography 
+          variant="body2" 
+          color={rruleValidation.isValid ? "textSecondary" : "error"}
+        >
           {generateRRule()}
         </Typography>
+        {!rruleValidation.isValid && (
+          <Box mt={1}>
+            {rruleValidation.errors.map((error, index) => (
+              <Typography key={index} variant="caption" color="error">
+                • {error}
+              </Typography>
+            ))}
+          </Box>
+        )}
       </Box>
 
-      {/* Action Buttons */}
-      <Box marginTop={2} display="flex" justifyContent="space-between">
-        <Button variant="contained" color="success">
-          Verify
-        </Button>
-      </Box>
+      {/* Remove Action Buttons - not needed */}
     </Box>
   );
 };

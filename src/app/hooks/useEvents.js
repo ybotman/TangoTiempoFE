@@ -90,6 +90,7 @@ export function useEvents({
   
   // Get location from GeoLocationContext if available
   const geoLocationContext = useGeoLocation();
+  const { isInitialized } = geoLocationContext || {};
   
   // Use context values if explicitly provided parameters are missing
   const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
@@ -248,14 +249,39 @@ export function useEvents({
     userId,
     userOrganizerId,
     userRoles,
-    selectedRole
+    selectedRole,
+    isInitialized
     // Removed setState functions to prevent infinite loops
   ]);
 
   // Fetch events when parameters change
   useEffect(() => {
+    // Skip if using context and not initialized
+    if (useGeoLocationContext && !isInitialized) {
+      console.log('useEvents: Waiting for GeoLocationContext initialization');
+      return;
+    }
+    
+    // Additional validation for location data quality
+    if (useGeoLocationContext) {
+      // Check if we have valid location data
+      const hasValidCity = effectiveCity && effectiveCity !== "Unknown";
+      const hasValidRegion = effectiveRegion && effectiveRegion !== "Unknown";
+      const hasValidCoords = effectiveLat && effectiveLng && 
+                            !(effectiveLat === 0 && effectiveLng === 0);
+      
+      if (!hasValidCity && !hasValidRegion && !hasValidCoords) {
+        console.log('useEvents: No valid location data available yet', {
+          city: effectiveCity,
+          region: effectiveRegion,
+          coords: [effectiveLat, effectiveLng]
+        });
+        return;
+      }
+    }
+    
     fetchEvents();
-  }, [fetchEvents]);
+  }, [fetchEvents, isInitialized, useGeoLocationContext, effectiveCity, effectiveRegion, effectiveLat, effectiveLng]);
 
   return { 
     events: eventsData.events || [], 
