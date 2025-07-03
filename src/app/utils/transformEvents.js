@@ -76,11 +76,41 @@ export function transformEvents(events) {
 
     // Check if this is a recurring event with RRULE
     if (event.recurrenceRule && event.isRepeating) {
+      // Log the original RRULE for debugging
+      console.log('Processing RRULE:', event.recurrenceRule, 'for event:', event.title);
+      
+      // Clean the RRULE string to remove trailing semicolons
+      let cleanedRRule = event.recurrenceRule.trim();
+      
+      // Remove trailing semicolon if present
+      if (cleanedRRule.endsWith(';')) {
+        cleanedRRule = cleanedRRule.slice(0, -1);
+      }
+      
+      // Also remove any empty properties (consecutive semicolons)
+      cleanedRRule = cleanedRRule.replace(/;;+/g, ';');
+      
+      // Log cleaned RRULE
+      if (cleanedRRule !== event.recurrenceRule) {
+        console.log('Cleaned RRULE from:', event.recurrenceRule, 'to:', cleanedRRule);
+      }
+      
+      // Validate that we have a valid RRULE
+      if (!cleanedRRule || !cleanedRRule.includes('FREQ=')) {
+        console.warn('Invalid RRULE detected, skipping recurring event:', event.recurrenceRule);
+        // Return as a regular event instead
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+        };
+      }
+      
       // For recurring events, use RRULE format
       return {
         ...baseEvent,
         // FullCalendar RRULE plugin expects these specific fields
-        rrule: event.recurrenceRule,
+        rrule: cleanedRRule,
         // Use start time from the event for the recurrence pattern
         duration: calculateDuration(event.startDate, event.endDate),
         // Don't include start/end for RRULE events
