@@ -7,6 +7,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
+import rrulePlugin from '@fullcalendar/rrule';
 import { ButtonGroup, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -163,6 +164,9 @@ const CalendarPage = () => {
     // Check if this is an AI-discovered event
     const isAIDiscovered = event.extendedProps?.isDiscovered === true;
     
+    // Check if this event is canceled
+    const isCanceled = event.extendedProps?.isCanceled === true;
+    
     // Get organizer short name and event short title with fallbacks
     const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
                           event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
@@ -240,7 +244,8 @@ const CalendarPage = () => {
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
-                      lineHeight: '1.0'
+                      lineHeight: '1.0',
+                      textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
                       {organizerShort}
                     </div>
@@ -254,7 +259,8 @@ const CalendarPage = () => {
                           overflow: 'visible',
                           whiteSpace: 'nowrap',
                           flexShrink: 1,
-                          lineHeight: '1.0'
+                          lineHeight: '1.0',
+                          textDecoration: isCanceled ? 'line-through' : 'none'
                         }}>
                           {eventShortTitle}
                         </div>
@@ -274,7 +280,8 @@ const CalendarPage = () => {
             wordWrap: 'break-word',
             hyphens: 'auto',
             flex: 1,
-            color: '#555'
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.title}
           </div>
@@ -355,7 +362,8 @@ const CalendarPage = () => {
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
-                      lineHeight: '1.2'
+                      lineHeight: '1.2',
+                      textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
                       {organizerShort}
                     </div>
@@ -369,7 +377,8 @@ const CalendarPage = () => {
                           overflow: 'visible',
                           whiteSpace: 'nowrap',
                           flexShrink: 1,
-                          lineHeight: '1.2'
+                          lineHeight: '1.2',
+                          textDecoration: isCanceled ? 'line-through' : 'none'
                         }}>
                           {eventShortTitle}
                         </div>
@@ -388,7 +397,8 @@ const CalendarPage = () => {
             lineHeight: '1.2',
             wordWrap: 'break-word',
             hyphens: 'auto',
-            color: '#555'
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.title}
           </div>
@@ -529,7 +539,7 @@ const CalendarPage = () => {
       </div>
 
       <FullCalendar
-        plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
         //        initialView="dayGridMonth"
         initialView={getInitialView()}
         events={eventsWithPlaceholders}

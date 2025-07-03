@@ -31,7 +31,7 @@ const modalStyle = {
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
   const { nearestCity } = useMasteredLocation();
   const { selectedLocation } = useGeoLocation();
-  const { user, getIdToken } = useContext(AuthContext);
+  const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('basic');
   
@@ -83,6 +83,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       alternateOrganizerName: '',
       // Other fields
       isRepeating: false,
+      isCanceled: false,
       imageFile: null,
       imagePreviewUrl: null,
       eventImage: null,
@@ -176,6 +177,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Repeating event settings
           isRepeating: eventToEdit.isRepeating || false,
           
+          // Cancellation status
+          isCanceled: eventToEdit.isCanceled || false,
+          
           // Maintain the original ID for updates
           _id: eventToEdit._id || null
         });
@@ -211,6 +215,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
     }
   }, [editMode, user, fetchOrganizerById]);
+
+  // Validate current tab when isRepeating changes
+  useEffect(() => {
+    // If we're on the repeating tab but isRepeating is false, switch to basic
+    if (currentTab === 'repeating' && !eventData.isRepeating) {
+      setCurrentTab('basic');
+    }
+  }, [eventData.isRepeating, currentTab]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -462,6 +474,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       ...prevData,
       isRepeating: !prevData.isRepeating,
     }));
+    // If turning off repeating and we're on the repeating tab, go back to basic
+    if (eventData.isRepeating && currentTab === 'repeating') {
+      setCurrentTab('basic');
+    }
     setHasUnsavedChanges(true);
   };
 
@@ -525,13 +541,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Typography variant="h5" component="h2">
             {editMode ? 'Edit Event' : 'Create Event'}
           </Typography>
-          <Tooltip title="Repeating events feature coming in July 2025">
+          <Tooltip title={selectedRole === 'RegionalOrganizer' ? "Enable recurring events (Beta for RO)" : "Repeating events feature coming in July 2025"}>
             <span>
               <FormControlLabel
-                control={<Switch checked={eventData.isRepeating} onChange={handleToggleRepeating} color="primary" disabled />}
+                control={<Switch 
+                  checked={eventData.isRepeating} 
+                  onChange={handleToggleRepeating} 
+                  color="primary" 
+                  disabled={selectedRole !== 'RegionalOrganizer'}
+                />}
                 label="Repeating"
                 labelPlacement="start"
-                disabled
+                disabled={selectedRole !== 'RegionalOrganizer'}
               />
             </span>
           </Tooltip>
@@ -608,7 +629,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
           <Tab label="Other" value="other" />
-          {eventData.isRepeating && <Tab label="Repeating" value="repeating" />}
+          {eventData.isRepeating && (
+            <Tab 
+              label="Repeating" 
+              value="repeating" 
+              sx={{ 
+                color: eventData.isRepeating ? 'error.main' : 'inherit',
+                '&.Mui-selected': {
+                  color: 'error.main'
+                }
+              }}
+            />
+          )}
         </Tabs>
 
         {/* Render tab content conditionally */}
