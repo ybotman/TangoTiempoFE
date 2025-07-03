@@ -240,18 +240,14 @@ const CalendarPage = () => {
                     <div style={{
                       fontSize: '0.75rem',
                       fontWeight: 'normal',
-                      color: isCanceled ? 'red' : '#666',
+                      color: '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.0',
-                      backgroundColor: isCanceled ? 'red' : 'transparent',
-                      color: isCanceled ? 'yellow' : '#666',
-                      padding: isCanceled ? '0px 4px' : '0',
-                      borderRadius: isCanceled ? '4px' : '0',
-                      fontWeight: isCanceled ? 'bold' : 'normal'
+                      textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {isCanceled ? 'CANCELED' : organizerShort}
+                      {organizerShort}
                     </div>
                     {eventShortTitle && (
                       <>
@@ -362,18 +358,14 @@ const CalendarPage = () => {
                     <div style={{
                       fontSize: '0.85rem',
                       fontWeight: 'normal',
-                      color: isCanceled ? 'red' : '#666',
+                      color: '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.2',
-                      backgroundColor: isCanceled ? 'red' : 'transparent',
-                      color: isCanceled ? 'yellow' : '#666',
-                      padding: isCanceled ? '0px 4px' : '0',
-                      borderRadius: isCanceled ? '4px' : '0',
-                      fontWeight: isCanceled ? 'bold' : 'normal'
+                      textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {isCanceled ? 'CANCELED' : organizerShort}
+                      {organizerShort}
                     </div>
                     {eventShortTitle && (
                       <>
