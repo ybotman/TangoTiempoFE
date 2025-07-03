@@ -208,7 +208,7 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
           />
           {eventData.isCanceled && (
             <Typography variant="caption" color="error" display="block" sx={{ ml: 2 }}>
-              This event will be marked as canceled and may be hidden from public views
+              This event will be marked as Canceled but still shown
             </Typography>
           )}
         </Grid>
