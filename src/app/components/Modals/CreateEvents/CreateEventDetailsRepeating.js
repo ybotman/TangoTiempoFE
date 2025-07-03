@@ -213,6 +213,21 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   return (
     <Box>
       <Typography variant="h6">Repeating Rules</Typography>
+      
+      {/* Warning message about repeating events not working */}
+      <Box sx={{ 
+        backgroundColor: 'red', 
+        color: 'yellow', 
+        padding: '8px 16px', 
+        borderRadius: '4px', 
+        mt: 1, 
+        mb: 2,
+        fontWeight: 'bold',
+        fontSize: '0.875rem'
+      }}>
+        Repeating events is not Working
+      </Box>
+      
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
         Configure how often this event repeats. The event's duration (from Basic tab) stays the same for each occurrence.
       </Typography>
