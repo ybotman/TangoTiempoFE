@@ -205,7 +205,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         useEndDate
       }));
     }
-  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, setEventData]);
+  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate]); // Removed setEventData from dependencies
 
   return (
     <Box>
