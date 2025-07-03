@@ -1,7 +1,7 @@
 // src/components/OtherEventDetails.js
 
 import React from 'react';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid, CircularProgress } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid, CircularProgress, Switch, FormControlLabel } from '@mui/material';
 import PropTypes from 'prop-types';
 import useCategories from '@/hooks/useCategories';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -187,6 +187,30 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
               )}
             </Select>
           </FormControl>
+        </Grid>
+
+        {/* Event Canceled Switch */}
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={eventData.isCanceled || false}
+                onChange={(e) => setEventData({ ...eventData, isCanceled: e.target.checked })}
+                color="error"
+              />
+            }
+            label={
+              <Typography sx={{ color: eventData.isCanceled ? 'error.main' : 'inherit' }}>
+                Event Canceled
+              </Typography>
+            }
+            sx={{ mt: 2 }}
+          />
+          {eventData.isCanceled && (
+            <Typography variant="caption" color="error" display="block" sx={{ ml: 2 }}>
+              This event will be marked as canceled and may be hidden from public views
+            </Typography>
+          )}
         </Grid>
       </Grid>
     </Box>

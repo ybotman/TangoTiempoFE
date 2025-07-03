@@ -83,6 +83,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       alternateOrganizerName: '',
       // Other fields
       isRepeating: false,
+      isCanceled: false,
       imageFile: null,
       imagePreviewUrl: null,
       eventImage: null,
@@ -175,6 +176,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           
           // Repeating event settings
           isRepeating: eventToEdit.isRepeating || false,
+          
+          // Cancellation status
+          isCanceled: eventToEdit.isCanceled || false,
           
           // Maintain the original ID for updates
           _id: eventToEdit._id || null
