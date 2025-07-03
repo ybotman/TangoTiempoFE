@@ -76,12 +76,12 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
   const [monthlyWeeks, setMonthlyWeeks] = useState(eventData.monthlyWeeks || []);
   const [excludeDates, setExcludeDates] = useState(eventData.excludeDates || '');
-  const [endDate, setEndDate] = useState(eventData.endDate || '');
-  const [occurrences, setOccurrences] = useState(eventData.occurrences || '');
+  const [endDate, setEndDate] = useState(eventData.recurrenceEndDate || '');
+  const [occurrences, setOccurrences] = useState(eventData.recurrenceCount || '');
   const [sendReminder, setSendReminder] = useState(eventData.sendReminder || false);
 
   // State to handle switching between End Date and Occurrences
-  const [useEndDate, setUseEndDate] = useState(true); // Default to using End Date
+  const [useEndDate, setUseEndDate] = useState(eventData.useEndDate !== undefined ? eventData.useEndDate : true);
 
   // Handle Recurrence Type Change
   const handleRecurrenceTypeChange = (e) => {
@@ -211,42 +211,65 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     <Box>
       <Typography variant="h6">Repeating Rules</Typography>
 
-      {/* Date and Recurrence Type on one line */}
+      {/* Recurrence Type */}
       <Box display="flex" flexWrap="wrap" gap={2} marginTop={2}>
-        <TextField
-          label="Start Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={eventData.startDate ? eventData.startDate.toISOString().split('T')[0] : ''}
-          onChange={(e) => setEventData({ ...eventData, startDate: new Date(e.target.value) })}
-        />
-        <TextField label="Recurrence Type" select value={recurrenceType} onChange={handleRecurrenceTypeChange}>
+        <TextField 
+          label="Recurrence Pattern" 
+          select 
+          value={recurrenceType} 
+          onChange={handleRecurrenceTypeChange}
+          sx={{ minWidth: 200 }}
+        >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
           <MenuItem value="monthly">Monthly</MenuItem>
         </TextField>
+        {eventData.startDate && (
+          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+            Starting from: {new Date(eventData.startDate).toLocaleDateString()}
+          </Typography>
+        )}
       </Box>
 
-      {/* End Date, Number of Occurrences, and Switch on one line */}
-      <Box display="flex" alignItems="center" gap={2} marginTop={2}>
-        <TextField
-          label="End Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          disabled={!useEndDate}
-        />
-        <MaterialUISwitch checked={useEndDate} onChange={handleSwitchChange} />
-        <TextField
-          label="Number of Occurrences"
-          type="number"
-          inputProps={{ min: 1, max: 52 }}
-          value={occurrences}
-          onChange={(e) => setOccurrences(e.target.value)}
-          sx={{ width: '150px' }}
-          disabled={useEndDate}
-        />
+      {/* End Date vs Number of Occurrences */}
+      <Box marginTop={3}>
+        <Typography variant="subtitle2" gutterBottom>
+          When should the recurrence end?
+        </Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <TextField
+            label="Repeat Until Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            disabled={!useEndDate}
+            helperText={useEndDate ? "Events will repeat until this date" : ""}
+            sx={{ opacity: useEndDate ? 1 : 0.5 }}
+          />
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <Typography variant="caption" color={useEndDate ? "primary" : "text.secondary"}>
+              Until Date
+            </Typography>
+            <MaterialUISwitch 
+              checked={!useEndDate} 
+              onChange={() => handleSwitchChange()} 
+            />
+            <Typography variant="caption" color={!useEndDate ? "primary" : "text.secondary"}>
+              Count
+            </Typography>
+          </Box>
+          <TextField
+            label="Number of Occurrences"
+            type="number"
+            inputProps={{ min: 1, max: 365 }}
+            value={occurrences}
+            onChange={(e) => setOccurrences(e.target.value)}
+            sx={{ width: '180px', opacity: !useEndDate ? 1 : 0.5 }}
+            disabled={useEndDate}
+            helperText={!useEndDate ? "Repeat this many times" : ""}
+          />
+        </Box>
       </Box>
 
       {/* Send Reminder Switch */}
