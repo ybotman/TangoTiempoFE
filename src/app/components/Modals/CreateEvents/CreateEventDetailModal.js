@@ -212,6 +212,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     }
   }, [editMode, user, fetchOrganizerById]);
 
+  // Validate current tab when isRepeating changes
+  useEffect(() => {
+    // If we're on the repeating tab but isRepeating is false, switch to basic
+    if (currentTab === 'repeating' && !eventData.isRepeating) {
+      setCurrentTab('basic');
+    }
+  }, [eventData.isRepeating, currentTab]);
+
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
@@ -462,6 +470,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       ...prevData,
       isRepeating: !prevData.isRepeating,
     }));
+    // If turning off repeating and we're on the repeating tab, go back to basic
+    if (eventData.isRepeating && currentTab === 'repeating') {
+      setCurrentTab('basic');
+    }
     setHasUnsavedChanges(true);
   };
 
