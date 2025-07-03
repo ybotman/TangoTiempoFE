@@ -164,6 +164,9 @@ const CalendarPage = () => {
     // Check if this is an AI-discovered event
     const isAIDiscovered = event.extendedProps?.isDiscovered === true;
     
+    // Check if this event is canceled
+    const isCanceled = event.extendedProps?.isCanceled === true;
+    
     // Get organizer short name and event short title with fallbacks
     const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
                           event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
@@ -237,13 +240,18 @@ const CalendarPage = () => {
                     <div style={{
                       fontSize: '0.75rem',
                       fontWeight: 'normal',
-                      color: '#666',
+                      color: isCanceled ? 'red' : '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
-                      lineHeight: '1.0'
+                      lineHeight: '1.0',
+                      backgroundColor: isCanceled ? 'red' : 'transparent',
+                      color: isCanceled ? 'yellow' : '#666',
+                      padding: isCanceled ? '0px 4px' : '0',
+                      borderRadius: isCanceled ? '4px' : '0',
+                      fontWeight: isCanceled ? 'bold' : 'normal'
                     }}>
-                      {organizerShort}
+                      {isCanceled ? 'CANCELED' : organizerShort}
                     </div>
                     {eventShortTitle && (
                       <>
@@ -255,7 +263,8 @@ const CalendarPage = () => {
                           overflow: 'visible',
                           whiteSpace: 'nowrap',
                           flexShrink: 1,
-                          lineHeight: '1.0'
+                          lineHeight: '1.0',
+                          textDecoration: isCanceled ? 'line-through' : 'none'
                         }}>
                           {eventShortTitle}
                         </div>
@@ -275,7 +284,8 @@ const CalendarPage = () => {
             wordWrap: 'break-word',
             hyphens: 'auto',
             flex: 1,
-            color: '#555'
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.title}
           </div>
@@ -352,13 +362,18 @@ const CalendarPage = () => {
                     <div style={{
                       fontSize: '0.85rem',
                       fontWeight: 'normal',
-                      color: '#666',
+                      color: isCanceled ? 'red' : '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
-                      lineHeight: '1.2'
+                      lineHeight: '1.2',
+                      backgroundColor: isCanceled ? 'red' : 'transparent',
+                      color: isCanceled ? 'yellow' : '#666',
+                      padding: isCanceled ? '0px 4px' : '0',
+                      borderRadius: isCanceled ? '4px' : '0',
+                      fontWeight: isCanceled ? 'bold' : 'normal'
                     }}>
-                      {organizerShort}
+                      {isCanceled ? 'CANCELED' : organizerShort}
                     </div>
                     {eventShortTitle && (
                       <>
@@ -370,7 +385,8 @@ const CalendarPage = () => {
                           overflow: 'visible',
                           whiteSpace: 'nowrap',
                           flexShrink: 1,
-                          lineHeight: '1.2'
+                          lineHeight: '1.2',
+                          textDecoration: isCanceled ? 'line-through' : 'none'
                         }}>
                           {eventShortTitle}
                         </div>
@@ -389,7 +405,8 @@ const CalendarPage = () => {
             lineHeight: '1.2',
             wordWrap: 'break-word',
             hyphens: 'auto',
-            color: '#555'
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.title}
           </div>
