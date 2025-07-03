@@ -76,6 +76,8 @@ export function transformEvents(events) {
     };
 
     // Check if this is a recurring event with RRULE
+    // TEMPORARILY DISABLED: RRULE parser has compatibility issues with FullCalendar v6
+    // TODO: Investigate alternative RRULE implementations or wait for plugin update
     if (event.recurrenceRule && event.isRepeating) {
       // Clean the RRULE string to remove trailing semicolons
       let cleanedRRule = event.recurrenceRule.trim();
@@ -99,39 +101,26 @@ export function transformEvents(events) {
         };
       }
       
-      // For recurring events, use RRULE format with DTSTART
-      try {
-        // Format the start date as required by RRULE (YYYYMMDDTHHMMSSZ)
-        const startDate = new Date(event.startDate);
-        const year = startDate.getUTCFullYear();
-        const month = String(startDate.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(startDate.getUTCDate()).padStart(2, '0');
-        const hours = String(startDate.getUTCHours()).padStart(2, '0');
-        const minutes = String(startDate.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(startDate.getUTCSeconds()).padStart(2, '0');
-        const dtstart = `DTSTART:${year}${month}${day}T${hours}${minutes}${seconds}Z`;
-        
-        // Combine DTSTART with RRULE using newline separator
-        const fullRRule = `${dtstart}\nRRULE:${cleanedRRule}`;
-        
-        console.log('Creating RRULE event:', event.title, 'with format:', fullRRule);
-        
-        return {
-          ...baseEvent,
-          // FullCalendar RRULE plugin expects the full RRULE string with DTSTART
-          rrule: fullRRule,
-          // Duration for each occurrence
-          duration: calculateDuration(event.startDate, event.endDate),
-        };
-      } catch (error) {
-        console.error('Error processing RRULE event:', error, 'RRULE:', cleanedRRule);
-        // If RRULE parsing fails, return as a regular event
-        return {
-          ...baseEvent,
-          start: event.startDate,
-          end: event.endDate,
-        };
-      }
+      // For recurring events, add defensive handling
+      console.warn('RRULE detected but currently disabled due to parser issues:', {
+        title: event.title,
+        rrule: cleanedRRule,
+        startDate: event.startDate
+      });
+      
+      // TEMPORARY: Return as single event with indicator until RRULE parser issue is resolved
+      return {
+        ...baseEvent,
+        start: event.startDate,
+        end: event.endDate,
+        // Add visual indicator and tooltip
+        title: event.title + ' 🔄',
+        extendedProps: {
+          ...baseEvent.extendedProps,
+          isRecurring: true,
+          recurrenceRule: cleanedRRule,
+        }
+      };
     } else {
       // For non-recurring events, use standard format
       return {
