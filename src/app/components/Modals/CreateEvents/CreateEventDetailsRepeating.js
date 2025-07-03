@@ -210,6 +210,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   return (
     <Box>
       <Typography variant="h6">Repeating Rules</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        Configure how often this event repeats. The event's duration (from Basic tab) stays the same for each occurrence.
+      </Typography>
 
       {/* Recurrence Type */}
       <Box display="flex" flexWrap="wrap" gap={2} marginTop={2}>
@@ -387,12 +390,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         )}
       </Box>
 
-      {/* Action Buttons */}
-      <Box marginTop={2} display="flex" justifyContent="space-between">
-        <Button variant="contained" color="success">
-          Verify
-        </Button>
-      </Box>
+      {/* Remove Action Buttons - not needed */}
     </Box>
   );
 };
