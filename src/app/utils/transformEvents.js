@@ -77,9 +77,6 @@ export function transformEvents(events) {
 
     // Check if this is a recurring event with RRULE
     if (event.recurrenceRule && event.isRepeating) {
-      // Log the original RRULE for debugging
-      console.log('Processing RRULE:', event.recurrenceRule, 'for event:', event.title);
-      
       // Clean the RRULE string to remove trailing semicolons
       let cleanedRRule = event.recurrenceRule.trim();
       
@@ -90,11 +87,6 @@ export function transformEvents(events) {
       
       // Also remove any empty properties (consecutive semicolons)
       cleanedRRule = cleanedRRule.replace(/;;+/g, ';');
-      
-      // Log cleaned RRULE
-      if (cleanedRRule !== event.recurrenceRule) {
-        console.log('Cleaned RRULE from:', event.recurrenceRule, 'to:', cleanedRRule);
-      }
       
       // Validate that we have a valid RRULE
       if (!cleanedRRule || !cleanedRRule.includes('FREQ=')) {
@@ -112,12 +104,11 @@ export function transformEvents(events) {
         // For FullCalendar RRULE plugin v6
         return {
           ...baseEvent,
-          // FullCalendar RRULE plugin - try with just the string
+          // FullCalendar RRULE plugin expects these specific fields
           rrule: cleanedRRule,
-          // Need start date for the first occurrence
-          start: event.startDate,
-          // Don't include end date for RRULE events
-          // duration: calculateDuration(event.startDate, event.endDate),
+          // Use start time from the event for the recurrence pattern
+          duration: calculateDuration(event.startDate, event.endDate),
+          // Don't include start/end for RRULE events
         };
       } catch (error) {
         console.error('Error processing RRULE event:', error, 'RRULE:', cleanedRRule);
