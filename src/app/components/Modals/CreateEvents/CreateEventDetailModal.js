@@ -625,7 +625,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Tab label="Basic" value="basic" />
           <Tab label="Image" value="image" />
           <Tab label="Other" value="other" />
-          {eventData.isRepeating && <Tab label="Repeating" value="repeating" />}
+          {eventData.isRepeating && (
+            <Tab 
+              label="Repeating" 
+              value="repeating" 
+              sx={{ 
+                color: eventData.isRepeating ? 'error.main' : 'inherit',
+                '&.Mui-selected': {
+                  color: 'error.main'
+                }
+              }}
+            />
+          )}
         </Tabs>
 
         {/* Render tab content conditionally */}
