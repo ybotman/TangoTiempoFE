@@ -25,10 +25,9 @@ export function transformEvents(events) {
     }
     */
     
-    return {
+    // For FullCalendar RRULE plugin, we need to handle recurring events differently
+    const baseEvent = {
       title: event.title, // Use the 'title' field from the API
-      start: event.startDate, // Map 'startDate' to 'start'
-      end: event.endDate, // Map 'endDate' to 'end'
       extendedProps: {
         // Any additional data
         _id: event._id,
@@ -70,9 +69,45 @@ export function transformEvents(events) {
         ownerOrganizerShortName: event.ownerOrganizerShortName || event.shortName || '',
         // Add AI event detection
         isDiscovered: event.isDiscovered || false,
+        // Add isRepeating flag
+        isRepeating: event.isRepeating || false,
       },
     };
+
+    // Check if this is a recurring event with RRULE
+    if (event.recurrenceRule && event.isRepeating) {
+      // For recurring events, use RRULE format
+      return {
+        ...baseEvent,
+        // FullCalendar RRULE plugin expects these specific fields
+        rrule: event.recurrenceRule,
+        // Use start time from the event for the recurrence pattern
+        duration: calculateDuration(event.startDate, event.endDate),
+        // Don't include start/end for RRULE events
+      };
+    } else {
+      // For non-recurring events, use standard format
+      return {
+        ...baseEvent,
+        start: event.startDate, // Map 'startDate' to 'start'
+        end: event.endDate, // Map 'endDate' to 'end'
+      };
+    }
   });
+}
+
+// Helper function to calculate event duration for recurring events
+function calculateDuration(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const durationMs = end - start;
+  
+  // Convert to hours and minutes
+  const hours = Math.floor(durationMs / (1000 * 60 * 60));
+  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+  
+  // Return duration in format "HH:MM"
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
 /*
