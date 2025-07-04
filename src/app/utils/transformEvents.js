@@ -111,8 +111,8 @@ export function transformEvents(events) {
           rrule: rruleObj,
           // duration is calculated from start to end time
           duration: calculateDuration(event.startDate, event.endDate),
-          // Add visual indicator
-          title: event.title + ' 🔄',
+          // Keep original title (icon will be handled in display)
+          title: event.title,
           extendedProps: {
             ...baseEvent.extendedProps,
             isRecurring: true,
@@ -126,7 +126,7 @@ export function transformEvents(events) {
           ...baseEvent,
           start: event.startDate,
           end: event.endDate,
-          title: event.title + ' 🔄',
+          title: event.title,
           extendedProps: {
             ...baseEvent.extendedProps,
             isRecurring: true,

@@ -272,7 +272,7 @@ const CalendarPage = () => {
             )}
           </div>
           
-          {/* Row 2: Event title - SMALLER */}
+          {/* Row 2: Event title with recurring indicator - SMALLER */}
           <div style={{ 
             fontSize: '0.65rem', 
             fontWeight: 'normal',
@@ -283,7 +283,7 @@ const CalendarPage = () => {
             color: '#555',
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
-            {event.title}
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
           </div>
         </div>
       );
@@ -390,7 +390,7 @@ const CalendarPage = () => {
             )}
           </div>
           
-          {/* Row 2: Event title - SMALLER */}
+          {/* Row 2: Event title with recurring indicator - SMALLER */}
           <div style={{ 
             fontSize: '0.7rem', 
             fontWeight: 'normal',
@@ -400,7 +400,7 @@ const CalendarPage = () => {
             color: '#555',
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
-            {event.title}
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
           </div>
         </div>
       );
