@@ -7,6 +7,7 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal';
+import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
   const { selectedLocation } = useGeoLocation();
@@ -14,7 +15,7 @@ const SiteHeader = () => {
   const { user } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [locationModalOpen, setLocationModalOpen] = useState(false);
-  const appVersion = 'v1.1.0'; // From package.json
+  const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
   
   // Fetch organizer data when user is a RegionalOrganizer
   useEffect(() => {
