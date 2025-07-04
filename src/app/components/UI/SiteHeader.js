@@ -14,7 +14,7 @@ const SiteHeader = () => {
   const { user } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [locationModalOpen, setLocationModalOpen] = useState(false);
-  const appVersion = 'v1.0.45'; // From package.json
+  const appVersion = 'v1.1.0'; // From package.json
   
   // Fetch organizer data when user is a RegionalOrganizer
   useEffect(() => {
