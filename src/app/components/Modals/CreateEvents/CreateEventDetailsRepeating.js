@@ -159,7 +159,18 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     
     if (recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') {
       if (recurrenceType === 'weekly' && recurrenceDays.length > 0) {
-        parts.push(`BYDAY=${recurrenceDays.join(',')}`);
+        // Convert day abbreviations to uppercase for RFC 5545 compliance
+        const weekdaysMap = {
+          Su: 'SU',
+          Mo: 'MO',
+          Tu: 'TU',
+          We: 'WE',
+          Th: 'TH',
+          Fr: 'FR',
+          Sa: 'SA',
+        };
+        const uppercaseDays = recurrenceDays.map(day => weekdaysMap[day] || day.toUpperCase());
+        parts.push(`BYDAY=${uppercaseDays.join(',')}`);
       } else if (recurrenceType === 'monthly' && monthlyDays.length > 0 && monthlyWeeks.length > 0) {
         const weekdaysMap = {
           Su: 'SU',

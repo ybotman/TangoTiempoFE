@@ -76,8 +76,6 @@ export function transformEvents(events) {
     };
 
     // Check if this is a recurring event with RRULE
-    // TEMPORARILY DISABLED: RRULE parser has compatibility issues with FullCalendar v6
-    // TODO: Investigate alternative RRULE implementations or wait for plugin update
     if (event.recurrenceRule && event.isRepeating) {
       // Clean the RRULE string to remove trailing semicolons
       let cleanedRRule = event.recurrenceRule.trim();
@@ -101,26 +99,41 @@ export function transformEvents(events) {
         };
       }
       
-      // For recurring events, add defensive handling
-      console.warn('RRULE detected but currently disabled due to parser issues:', {
-        title: event.title,
-        rrule: cleanedRRule,
-        startDate: event.startDate
-      });
-      
-      // TEMPORARY: Return as single event with indicator until RRULE parser issue is resolved
-      return {
-        ...baseEvent,
-        start: event.startDate,
-        end: event.endDate,
-        // Add visual indicator and tooltip
-        title: event.title + ' 🔄',
-        extendedProps: {
-          ...baseEvent.extendedProps,
-          isRecurring: true,
-          recurrenceRule: cleanedRRule,
-        }
-      };
+      try {
+        // Parse RRULE string to FullCalendar v6 object format
+        const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
+        
+        console.log('Parsed RRULE for event:', event.title, rruleObj);
+        
+        // Return event with rrule object format for FullCalendar
+        return {
+          ...baseEvent,
+          rrule: rruleObj,
+          // duration is calculated from start to end time
+          duration: calculateDuration(event.startDate, event.endDate),
+          // Add visual indicator
+          title: event.title + ' 🔄',
+          extendedProps: {
+            ...baseEvent.extendedProps,
+            isRecurring: true,
+            recurrenceRule: cleanedRRule,
+          }
+        };
+      } catch (error) {
+        console.error('Error parsing RRULE, falling back to single event:', error);
+        // Fallback to single event with indicator
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+          title: event.title + ' 🔄',
+          extendedProps: {
+            ...baseEvent.extendedProps,
+            isRecurring: true,
+            recurrenceRule: cleanedRRule,
+          }
+        };
+      }
     } else {
       // For non-recurring events, use standard format
       return {
@@ -135,6 +148,55 @@ export function transformEvents(events) {
       return null;
     }
   }).filter(event => event !== null); // Filter out any failed transformations
+}
+
+// Parse RRULE string to FullCalendar v6 object format
+function parseRRuleToObject(rruleString, startDate, endDate) {
+  const parts = rruleString.split(';');
+  const rruleObj = {
+    dtstart: startDate // Use event's startDate as dtstart
+  };
+  
+  parts.forEach(part => {
+    const [key, value] = part.split('=');
+    switch(key) {
+      case 'FREQ':
+        rruleObj.freq = value.toLowerCase();
+        break;
+      case 'BYDAY':
+        // Convert to lowercase array for FullCalendar
+        rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
+        break;
+      case 'UNTIL':
+        // Convert RRULE date format to ISO format
+        rruleObj.until = convertRRuleDateToISO(value);
+        break;
+      case 'COUNT':
+        rruleObj.count = parseInt(value);
+        break;
+      case 'INTERVAL':
+        rruleObj.interval = parseInt(value);
+        break;
+    }
+  });
+  
+  return rruleObj;
+}
+
+// Convert RRULE date format (YYYYMMDDTHHMMSSZ) to ISO format
+function convertRRuleDateToISO(rruleDate) {
+  // Handle the YYYYMMDDTHHMMSSZ format
+  if (rruleDate.length >= 15) {
+    const year = rruleDate.substring(0, 4);
+    const month = rruleDate.substring(4, 6);
+    const day = rruleDate.substring(6, 8);
+    const hour = rruleDate.substring(9, 11);
+    const minute = rruleDate.substring(11, 13);
+    const second = rruleDate.substring(13, 15);
+    
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+  }
+  return rruleDate; // Return as-is if format doesn't match
 }
 
 // Helper function to calculate event duration for recurring events
