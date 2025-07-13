@@ -6,10 +6,11 @@ export function transformEvents(events) {
   }
 
   return events.map((event) => {
-    // Create standardized venue references
-    // Handle both old locationID/locationName and new venueID/venueId/venueName formats
-    const venueId = event.venueID || event.venueId || event.locationID || null;
-    const venueName = event.venueName || event.locationName || null;
+    try {
+      // Create standardized venue references
+      // Handle both old locationID/locationName and new venueID/venueId/venueName formats
+      const venueId = event.venueID || event.venueId || event.locationID || null;
+      const venueName = event.venueName || event.locationName || null;
     
     // Debug logging removed to reduce console noise
     /*
@@ -25,10 +26,9 @@ export function transformEvents(events) {
     }
     */
     
-    return {
+    // For FullCalendar RRULE plugin, we need to handle recurring events differently
+    const baseEvent = {
       title: event.title, // Use the 'title' field from the API
-      start: event.startDate, // Map 'startDate' to 'start'
-      end: event.endDate, // Map 'endDate' to 'end'
       extendedProps: {
         // Any additional data
         _id: event._id,
@@ -65,9 +65,152 @@ export function transformEvents(events) {
         tmpVenueId: event.tmpVenueId,
         tmpEventOrgId: event.tmpEventOrgId,
         tmpMix: event.tmpMix,
+        // Add shortTitle and ownerOrganizerShortName for calendar display
+        shortTitle: event.shortTitle || event.shortName || '',
+        ownerOrganizerShortName: event.ownerOrganizerShortName || event.shortName || '',
+        // Add AI event detection
+        isDiscovered: event.isDiscovered || false,
+        // Add isRepeating flag
+        isRepeating: event.isRepeating || false,
       },
     };
+
+    // Check if this is a recurring event with RRULE
+    if (event.recurrenceRule && event.isRepeating) {
+      // Clean the RRULE string to remove trailing semicolons
+      let cleanedRRule = event.recurrenceRule.trim();
+      
+      // Remove trailing semicolon if present
+      if (cleanedRRule.endsWith(';')) {
+        cleanedRRule = cleanedRRule.slice(0, -1);
+      }
+      
+      // Also remove any empty properties (consecutive semicolons)
+      cleanedRRule = cleanedRRule.replace(/;;+/g, ';');
+      
+      // Validate that we have a valid RRULE
+      if (!cleanedRRule || !cleanedRRule.includes('FREQ=')) {
+        console.warn('Invalid RRULE detected, skipping recurring event:', event.recurrenceRule);
+        // Return as a regular event instead
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+        };
+      }
+      
+      try {
+        // Parse RRULE string to FullCalendar v6 object format
+        const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
+        
+        console.log('Parsed RRULE for event:', event.title, rruleObj);
+        
+        // Return event with rrule object format for FullCalendar
+        return {
+          ...baseEvent,
+          rrule: rruleObj,
+          // duration is calculated from start to end time
+          duration: calculateDuration(event.startDate, event.endDate),
+          // Keep original title (icon will be handled in display)
+          title: event.title,
+          extendedProps: {
+            ...baseEvent.extendedProps,
+            isRecurring: true,
+            recurrenceRule: cleanedRRule,
+          }
+        };
+      } catch (error) {
+        console.error('Error parsing RRULE, falling back to single event:', error);
+        // Fallback to single event with indicator
+        return {
+          ...baseEvent,
+          start: event.startDate,
+          end: event.endDate,
+          title: event.title,
+          extendedProps: {
+            ...baseEvent.extendedProps,
+            isRecurring: true,
+            recurrenceRule: cleanedRRule,
+          }
+        };
+      }
+    } else {
+      // For non-recurring events, use standard format
+      return {
+        ...baseEvent,
+        start: event.startDate, // Map 'startDate' to 'start'
+        end: event.endDate, // Map 'endDate' to 'end'
+      };
+    }
+    } catch (error) {
+      console.error('Error transforming event:', error, 'Event:', event);
+      // Return null for failed transformations, will be filtered out
+      return null;
+    }
+  }).filter(event => event !== null); // Filter out any failed transformations
+}
+
+// Parse RRULE string to FullCalendar v6 object format
+function parseRRuleToObject(rruleString, startDate, endDate) {
+  const parts = rruleString.split(';');
+  const rruleObj = {
+    dtstart: startDate // Use event's startDate as dtstart
+  };
+  
+  parts.forEach(part => {
+    const [key, value] = part.split('=');
+    switch(key) {
+      case 'FREQ':
+        rruleObj.freq = value.toLowerCase();
+        break;
+      case 'BYDAY':
+        // Convert to lowercase array for FullCalendar
+        rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
+        break;
+      case 'UNTIL':
+        // Convert RRULE date format to ISO format
+        rruleObj.until = convertRRuleDateToISO(value);
+        break;
+      case 'COUNT':
+        rruleObj.count = parseInt(value);
+        break;
+      case 'INTERVAL':
+        rruleObj.interval = parseInt(value);
+        break;
+    }
   });
+  
+  return rruleObj;
+}
+
+// Convert RRULE date format (YYYYMMDDTHHMMSSZ) to ISO format
+function convertRRuleDateToISO(rruleDate) {
+  // Handle the YYYYMMDDTHHMMSSZ format
+  if (rruleDate.length >= 15) {
+    const year = rruleDate.substring(0, 4);
+    const month = rruleDate.substring(4, 6);
+    const day = rruleDate.substring(6, 8);
+    const hour = rruleDate.substring(9, 11);
+    const minute = rruleDate.substring(11, 13);
+    const second = rruleDate.substring(13, 15);
+    
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+  }
+  return rruleDate; // Return as-is if format doesn't match
+}
+
+// Helper function to calculate event duration for recurring events
+function calculateDuration(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const durationMs = end - start;
+  
+  // Convert to hours and minutes
+  const hours = Math.floor(durationMs / (1000 * 60 * 60));
+  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+  
+  // Return duration in format "HH:MM"
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
 /*
