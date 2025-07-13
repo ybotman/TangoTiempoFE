@@ -103,7 +103,11 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        console.log('Parsed RRULE for event:', event.title, rruleObj);
+        console.log('Parsed RRULE for event:', event.title, {
+          ...rruleObj,
+          originalUTC: event.startDate,
+          adjustedLocal: rruleObj.dtstart
+        });
         
         // Return event with rrule object format for FullCalendar
         return {
@@ -153,8 +157,21 @@ export function transformEvents(events) {
 // Parse RRULE string to FullCalendar v6 object format
 function parseRRuleToObject(rruleString, startDate, endDate) {
   const parts = rruleString.split(';');
+  
+  // IMPORTANT: When FullCalendar is in 'local' mode (default), the dtstart needs to be 
+  // in local time, not UTC. Since the backend stores UTC times, we need to convert
+  // the UTC time to a local time string without the 'Z' suffix.
+  // This ensures recurring events appear on the correct day in the user's timezone.
+  
+  // Remove the 'Z' suffix if present to treat as local time
+  let localStartDate = startDate;
+  if (typeof startDate === 'string' && startDate.endsWith('Z')) {
+    // Convert UTC to local by removing 'Z' - FullCalendar will interpret as local
+    localStartDate = startDate.slice(0, -1);
+  }
+  
   const rruleObj = {
-    dtstart: startDate // Use event's startDate as dtstart
+    dtstart: localStartDate // Use local time for correct day display
   };
   
   parts.forEach(part => {
