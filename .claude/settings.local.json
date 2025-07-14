@@ -48,7 +48,9 @@
       "WebFetch(domain:localhost)",
       "WebFetch(domain:localhost)",
       "Bash(curl:*)",
-      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)"
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)",
+      "Bash(jira --config ./.jira.d/config.yml list --query=\"assignee = currentUser() AND status != Done\" --columns=key,type,status,summary)",
+      "Bash(jira:*)"
     ],
     "deny": []
   },

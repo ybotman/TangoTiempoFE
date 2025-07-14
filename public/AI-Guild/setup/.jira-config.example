@@ -1,9 +1,11 @@
 # JIRA Configuration Example
 # Copy this to .jira-config in your project root and update with your values
 
-# JIRA Instance
+# JIRA API
 JIRA_URL="https://yourcompany.atlassian.net"
 JIRA_EMAIL="your.email@example.com"
+
+# JIRA CLI
 
 # Main project - default for most work
 PROJECT="TIEMPO"

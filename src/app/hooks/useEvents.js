@@ -541,11 +541,14 @@ export function useEventOperations() {
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
       
       console.log(`Creating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      console.log('PreparedData being sent:', JSON.stringify(preparedData, null, 2));
       const response = await axios.post(endpoint, preparedData, config);
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating event:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error response status:', error.response?.status);
       
       // Enhance error message based on response
       if (error.response) {

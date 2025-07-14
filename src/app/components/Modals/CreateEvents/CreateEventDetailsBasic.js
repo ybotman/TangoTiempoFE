@@ -116,17 +116,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       setEventData(prevData => {
         // Only update if values are different to prevent infinite loops
         if (prevData.ownerOrganizerID !== orgId || prevData.ownerOrganizerName !== (orgName || orgInfo.fullName || user.displayName || 'Your Organization')) {
+          // Use the fetched organizer data if available
+          const organizerData = organizer || orgInfo;
+          const shortName = organizerData?.shortName || organizerData?.fullName || orgName || 'Event Organizer';
+          
           return {
             ...prevData,
             // Owner Organizer data is set automatically from the current user's organization
             ownerOrganizerID: orgId,
-            ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization'
+            ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization',
+            ownerOrganizerShortName: shortName
           };
         }
         return prevData;
       });
     }
-  }, [user, selectedRole]); // Add selectedRole dependency
+  }, [user, selectedRole, organizer, setEventData]); // Add selectedRole and organizer dependencies
 
   // Handle category change
   const handleCategoryChange = (event) => {

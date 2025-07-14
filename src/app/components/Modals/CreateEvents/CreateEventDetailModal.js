@@ -3,7 +3,7 @@ import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Al
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
-import CreateEventDetailsRepeating from './CreateEventDetailsRepeating';
+import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
 import ValidationDialog from './ValidationDialog';
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
@@ -176,6 +176,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           
           // Repeating event settings
           isRepeating: eventToEdit.isRepeating || false,
+          recurrenceRule: eventToEdit.recurrenceRule || '',
           
           // Cancellation status
           isCanceled: eventToEdit.isCanceled || false,
@@ -183,6 +184,15 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Maintain the original ID for updates
           _id: eventToEdit._id || null
         });
+        
+        // If this is a recurring event, parse the RRULE to populate the repeating fields
+        if (eventToEdit.recurrenceRule) {
+          const recurrenceFields = parseRRuleToUIFields(eventToEdit.recurrenceRule);
+          setEventData(prevData => ({
+            ...prevData,
+            ...recurrenceFields
+          }));
+        }
         
         setHasUnsavedChanges(false); // Reset unsaved changes for edit mode
       } else {

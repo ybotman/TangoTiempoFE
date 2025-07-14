@@ -14,6 +14,122 @@ import {
 import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 
+// Parse RRULE string back to UI fields for editing
+export function parseRRuleToUIFields(rruleString) {
+  if (!rruleString) return {};
+  
+  const fields = {
+    recurrenceType: 'weekly', // default
+    recurrenceDays: [],
+    monthlyDays: [],
+    monthlyWeeks: [],
+    recurrenceEndDate: '',
+    recurrenceCount: '',
+    useEndDate: true
+  };
+
+  const parts = rruleString.split(';');
+  
+  parts.forEach(part => {
+    const [key, value] = part.split('=');
+    
+    switch(key) {
+      case 'FREQ':
+        fields.recurrenceType = value.toLowerCase();
+        break;
+        
+      case 'BYDAY':
+        if (fields.recurrenceType === 'weekly') {
+          // Convert SU,MO,TU to ['Su', 'Mo', 'Tu']
+          fields.recurrenceDays = parseWeeklyDays(value);
+        } else if (fields.recurrenceType === 'monthly') {
+          // Parse monthly format like 1MO,3FR
+          const { days, weeks } = parseMonthlyDays(value);
+          fields.monthlyDays = days;
+          fields.monthlyWeeks = weeks;
+        }
+        break;
+        
+      case 'UNTIL':
+        fields.recurrenceEndDate = parseRRuleDate(value);
+        fields.useEndDate = true;
+        break;
+        
+      case 'COUNT':
+        fields.recurrenceCount = value;
+        fields.useEndDate = false;
+        break;
+    }
+  });
+  
+  return fields;
+}
+
+// Helper: Convert RRULE day format to UI format
+function parseWeeklyDays(dayString) {
+  const dayMap = {
+    'SU': 'Su',
+    'MO': 'Mo',
+    'TU': 'Tu',
+    'WE': 'We',
+    'TH': 'Th',
+    'FR': 'Fr',
+    'SA': 'Sa'
+  };
+  
+  return dayString.split(',').map(day => dayMap[day.toUpperCase()] || day);
+}
+
+// Helper: Parse monthly BYDAY format (e.g., "1MO,3FR,-1SU")
+function parseMonthlyDays(dayString) {
+  const dayMap = {
+    'SU': 'Su',
+    'MO': 'Mo',
+    'TU': 'Tu',
+    'WE': 'We',
+    'TH': 'Th',
+    'FR': 'Fr',
+    'SA': 'Sa'
+  };
+  
+  const days = [];
+  const weeks = [];
+  
+  const entries = dayString.split(',');
+  entries.forEach(entry => {
+    // Extract week number and day (e.g., "1MO" -> week="1", day="MO")
+    const match = entry.match(/^(-?\d)([A-Z]{2})$/);
+    if (match) {
+      const [, week, day] = match;
+      if (!weeks.includes(week)) {
+        weeks.push(week);
+      }
+      const uiDay = dayMap[day];
+      if (uiDay && !days.includes(uiDay)) {
+        days.push(uiDay);
+      }
+    }
+  });
+  
+  return { days, weeks };
+}
+
+// Helper: Convert RRULE date format to YYYY-MM-DD
+function parseRRuleDate(rruleDate) {
+  // Handle YYYYMMDDTHHMMSSZ format
+  if (rruleDate.length >= 8) {
+    const year = rruleDate.substring(0, 4);
+    const month = rruleDate.substring(4, 6);
+    const day = rruleDate.substring(6, 8);
+    return `${year}-${month}-${day}`;
+  }
+  // Handle ISO format if already converted
+  if (rruleDate.includes('-')) {
+    return rruleDate.split('T')[0];
+  }
+  return rruleDate;
+}
+
 // Custom MaterialUISwitch definition
 const MaterialUISwitch = styled(Switch)(() => ({
   width: 62,
@@ -224,20 +340,6 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   return (
     <Box>
       <Typography variant="h6">Repeating Rules</Typography>
-      
-      {/* Warning message about repeating events not working */}
-      <Box sx={{ 
-        backgroundColor: 'red', 
-        color: 'yellow', 
-        padding: '8px 16px', 
-        borderRadius: '4px', 
-        mt: 1, 
-        mb: 2,
-        fontWeight: 'bold',
-        fontSize: '0.875rem'
-      }}>
-        Repeating events is not Working
-      </Box>
       
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
         Configure how often this event repeats. The event's duration (from Basic tab) stays the same for each occurrence.
