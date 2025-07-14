@@ -381,7 +381,10 @@ export function useEventOperations() {
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
           venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
           description: cleanedEventData.description || '',
-          cost: cleanedEventData.cost || ''
+          cost: cleanedEventData.cost || '',
+          // Include recurring event fields if present
+          recurrenceRule: cleanedEventData.recurrenceRule || undefined,
+          excludedDates: cleanedEventData.excludedDates || undefined
         };
       } else {
         // RO endpoint uses existing logic

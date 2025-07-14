@@ -15,7 +15,7 @@ import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 
 // Parse RRULE string back to UI fields for editing
-export function parseRRuleToUIFields(rruleString) {
+export function parseRRuleToUIFields(rruleString, eventData) {
   if (!rruleString) return {};
   
   const fields = {
@@ -25,8 +25,24 @@ export function parseRRuleToUIFields(rruleString) {
     monthlyWeeks: [],
     recurrenceEndDate: '',
     recurrenceCount: '',
-    useEndDate: true
+    useEndDate: true,
+    excludeDates: '',
+    excludeDatesString: ''
   };
+
+  // Handle excluded dates from eventData
+  if (eventData && eventData.excludedDates && Array.isArray(eventData.excludedDates)) {
+    // Convert ISO dates back to YYYY-MM-DD format for display
+    const dateStrings = eventData.excludedDates.map(isoDate => {
+      const date = new Date(isoDate);
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+    fields.excludeDates = dateStrings.join(', ');
+    fields.excludeDatesString = fields.excludeDates;
+  }
 
   const parts = rruleString.split(';');
   
@@ -314,17 +330,35 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   // State for validation
   const [rruleValidation, setRruleValidation] = useState({ isValid: true, errors: [] });
 
+  // Helper function to parse excluded dates string to array
+  const parseExcludedDates = (dateString) => {
+    if (!dateString || !dateString.trim()) return [];
+    
+    return dateString.split(',').map(date => {
+      const trimmed = date.trim();
+      if (!trimmed) return null;
+      
+      // Parse YYYY-MM-DD format and convert to ISO string
+      const parsedDate = new Date(trimmed + 'T00:00:00Z');
+      return parsedDate.toISOString();
+    }).filter(date => date !== null);
+  };
+
   // Update eventData with RRULE whenever relevant fields change
   useEffect(() => {
     const rrule = generateRRule();
     const validation = validateRRule(rrule);
     setRruleValidation(validation);
     
+    // Parse excluded dates
+    const parsedExcludedDates = parseExcludedDates(excludeDates);
+    
     // Only update eventData if RRULE is valid
     if (validation.isValid) {
       setEventData(prevData => ({
         ...prevData,
         recurrenceRule: rrule,
+        excludedDates: parsedExcludedDates,
         // Store recurrence settings for editing
         recurrenceType,
         recurrenceDays,
@@ -332,10 +366,11 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         monthlyWeeks,
         recurrenceEndDate: endDate,
         recurrenceCount: occurrences,
-        useEndDate
+        useEndDate,
+        excludeDatesString: excludeDates // Store the string version for editing
       }));
     }
-  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate]); // Removed setEventData from dependencies
+  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, excludeDates]); // Removed setEventData from dependencies
 
   return (
     <Box>
@@ -486,18 +521,16 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         </Box>
       )}
 
-      {/* Exclude Clause - Commented out until backend supports it */}
-      {/* Backend does not currently support excludeDates field
+      {/* Exclude Dates - Backend now supports this! */}
       <Box marginTop={2}>
         <TextField
           fullWidth
-          label="Exclude Dates (comma separated)"
+          label="Exclude Dates (comma separated, format: YYYY-MM-DD)"
           value={excludeDates}
           onChange={(e) => setExcludeDates(e.target.value)}
-          helperText="Note: Exclude dates functionality is not yet supported by the backend"
+          helperText="Enter dates to skip in YYYY-MM-DD format, separated by commas (e.g., 2024-12-25, 2024-12-31)"
         />
       </Box>
-      */}
 
       {/* Display Generated RRULE */}
       <Box marginTop={2}>

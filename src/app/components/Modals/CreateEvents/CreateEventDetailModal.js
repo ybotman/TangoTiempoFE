@@ -187,7 +187,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         
         // If this is a recurring event, parse the RRULE to populate the repeating fields
         if (eventToEdit.recurrenceRule) {
-          const recurrenceFields = parseRRuleToUIFields(eventToEdit.recurrenceRule);
+          const recurrenceFields = parseRRuleToUIFields(eventToEdit.recurrenceRule, eventToEdit);
           setEventData(prevData => ({
             ...prevData,
             ...recurrenceFields
