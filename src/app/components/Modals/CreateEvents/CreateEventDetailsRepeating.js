@@ -217,16 +217,25 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   const [useEndDate, setUseEndDate] = useState(eventData.useEndDate !== undefined ? eventData.useEndDate : true);
 
   // Update local state when eventData changes (for edit mode)
+  // Only run once when component mounts or eventData._id changes
   useEffect(() => {
-    if (eventData.excludeDatesString !== undefined) {
+    if (eventData.excludeDatesString !== undefined && eventData.excludeDatesString !== excludeDates) {
       setExcludeDates(eventData.excludeDatesString);
       // Also parse and validate the dates for immediate use
       const parsedDates = parseExcludedDates(eventData.excludeDatesString);
       setValidatedExcludeDates(parsedDates);
-    }
-    if (eventData.excludedDates !== undefined && Array.isArray(eventData.excludedDates)) {
-      // If we have the array directly, use it
+    } else if (eventData.excludedDates !== undefined && Array.isArray(eventData.excludedDates) && eventData.excludedDates.length > 0) {
+      // If we have the array directly, use it and convert back to string
       setValidatedExcludeDates(eventData.excludedDates);
+      // Convert ISO dates back to YYYY-MM-DD format for display
+      const dateStrings = eventData.excludedDates.map(isoDate => {
+        const date = new Date(isoDate);
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      });
+      setExcludeDates(dateStrings.join(', '));
     }
     if (eventData.recurrenceType !== undefined) {
       setRecurrenceType(eventData.recurrenceType);
@@ -249,7 +258,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     if (eventData.useEndDate !== undefined) {
       setUseEndDate(eventData.useEndDate);
     }
-  }, [eventData]);
+  }, [eventData._id]); // Only re-run when editing a different event
 
   // Handle Recurrence Type Change
   const handleRecurrenceTypeChange = (e) => {
