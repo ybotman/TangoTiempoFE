@@ -103,7 +103,7 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        console.log('Parsed RRULE for event:', event.title, rruleObj);
+        //console.log('Parsed RRULE for event:', event.title, rruleObj);
         
         // Return event with rrule object format for FullCalendar
         return {
@@ -154,7 +154,9 @@ export function transformEvents(events) {
 function parseRRuleToObject(rruleString, startDate, endDate) {
   const parts = rruleString.split(';');
   const rruleObj = {
-    dtstart: startDate // Use event's startDate as dtstart
+    // Strip Z suffix to treat as local time instead of UTC
+    // This prevents recurring events from shifting to previous day in local timezones
+    dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
   };
   
   parts.forEach(part => {
@@ -168,8 +170,9 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
         rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
         break;
       case 'UNTIL':
-        // Convert RRULE date format to ISO format
-        rruleObj.until = convertRRuleDateToISO(value);
+        // Convert RRULE date format to ISO format and strip timezone
+        const isoDate = convertRRuleDateToISO(value);
+        rruleObj.until = stripTimezoneIndicator(isoDate);
         break;
       case 'COUNT':
         rruleObj.count = parseInt(value);
@@ -194,9 +197,28 @@ function convertRRuleDateToISO(rruleDate) {
     const minute = rruleDate.substring(11, 13);
     const second = rruleDate.substring(13, 15);
     
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+    // Return without Z suffix to treat as local time
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
   }
   return rruleDate; // Return as-is if format doesn't match
+}
+
+// Strip timezone indicator (Z suffix) from date strings
+// This makes FullCalendar treat the time as local instead of UTC
+function stripTimezoneIndicator(dateString) {
+  if (!dateString) return dateString;
+  
+  // Handle ISO string format with Z suffix
+  if (typeof dateString === 'string' && dateString.endsWith('Z')) {
+    return dateString.slice(0, -1);
+  }
+  
+  // Handle other timezone indicators like +00:00
+  if (typeof dateString === 'string' && /[+-]\d{2}:\d{2}$/.test(dateString)) {
+    return dateString.replace(/[+-]\d{2}:\d{2}$/, '');
+  }
+  
+  return dateString;
 }
 
 // Helper function to calculate event duration for recurring events
