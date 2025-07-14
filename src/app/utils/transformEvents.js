@@ -72,6 +72,8 @@ export function transformEvents(events) {
         isDiscovered: event.isDiscovered || false,
         // Add isRepeating flag
         isRepeating: event.isRepeating || false,
+        // Add excludedDates for edit mode
+        excludedDates: event.excludedDates || [],
       },
     };
 
@@ -103,10 +105,10 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        console.log('Parsed RRULE for event:', event.title, rruleObj);
+        //console.log('Parsed RRULE for event:', event.title, rruleObj);
         
-        // Return event with rrule object format for FullCalendar
-        return {
+        // Create the event object
+        const recurringEvent = {
           ...baseEvent,
           rrule: rruleObj,
           // duration is calculated from start to end time
@@ -117,8 +119,27 @@ export function transformEvents(events) {
             ...baseEvent.extendedProps,
             isRecurring: true,
             recurrenceRule: cleanedRRule,
+            excludedDates: event.excludedDates || [],
           }
         };
+        
+        // Add exdate if there are excluded dates
+        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0) {
+          // Extract time from the event's start date
+          const eventStartTime = event.startDate.split('T')[1]; // Gets "23:00:00.000Z"
+          
+          // Transform each excluded date to match the event's start time
+          recurringEvent.exdate = event.excludedDates.map(excludedDate => {
+            const excludedDateOnly = excludedDate.split('T')[0]; // Gets "2025-10-10"
+            // Combine excluded date with event's start time
+            const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
+            return stripTimezoneIndicator(exdateWithTime);
+          });
+          
+          console.log(`Added exdate for ${event.title}:`, recurringEvent.exdate);
+        }
+        
+        return recurringEvent;
       } catch (error) {
         console.error('Error parsing RRULE, falling back to single event:', error);
         // Fallback to single event with indicator
@@ -153,8 +174,11 @@ export function transformEvents(events) {
 // Parse RRULE string to FullCalendar v6 object format
 function parseRRuleToObject(rruleString, startDate, endDate) {
   const parts = rruleString.split(';');
+  
   const rruleObj = {
-    dtstart: startDate // Use event's startDate as dtstart
+    // Strip Z suffix to treat as local time instead of UTC
+    // This prevents recurring events from shifting to previous day in local timezones
+    dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
   };
   
   parts.forEach(part => {
@@ -168,8 +192,9 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
         rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
         break;
       case 'UNTIL':
-        // Convert RRULE date format to ISO format
-        rruleObj.until = convertRRuleDateToISO(value);
+        // Convert RRULE date format to ISO format and strip timezone
+        const isoDate = convertRRuleDateToISO(value);
+        rruleObj.until = stripTimezoneIndicator(isoDate);
         break;
       case 'COUNT':
         rruleObj.count = parseInt(value);
@@ -194,9 +219,28 @@ function convertRRuleDateToISO(rruleDate) {
     const minute = rruleDate.substring(11, 13);
     const second = rruleDate.substring(13, 15);
     
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+    // Return without Z suffix to treat as local time
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
   }
   return rruleDate; // Return as-is if format doesn't match
+}
+
+// Strip timezone indicator (Z suffix) from date strings
+// This makes FullCalendar treat the time as local instead of UTC
+function stripTimezoneIndicator(dateString) {
+  if (!dateString) return dateString;
+  
+  // Handle ISO string format with Z suffix
+  if (typeof dateString === 'string' && dateString.endsWith('Z')) {
+    return dateString.slice(0, -1);
+  }
+  
+  // Handle other timezone indicators like +00:00
+  if (typeof dateString === 'string' && /[+-]\d{2}:\d{2}$/.test(dateString)) {
+    return dateString.replace(/[+-]\d{2}:\d{2}$/, '');
+  }
+  
+  return dateString;
 }
 
 // Helper function to calculate event duration for recurring events

@@ -381,7 +381,10 @@ export function useEventOperations() {
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
           venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
           description: cleanedEventData.description || '',
-          cost: cleanedEventData.cost || ''
+          cost: cleanedEventData.cost || '',
+          // Include recurring event fields if present
+          recurrenceRule: cleanedEventData.recurrenceRule || undefined,
+          excludedDates: cleanedEventData.excludedDates || undefined
         };
       } else {
         // RO endpoint uses existing logic
@@ -459,6 +462,11 @@ export function useEventOperations() {
         }
       }
 
+      // Clean up fields that shouldn't be sent to backend
+      delete preparedData.excludeDates; // Remove the typo field (without 'd')
+      delete preparedData.excludeDatesString; // Remove the UI-only string field
+      // Ensure we only have excludedDates (with 'd')
+      
       // Ensure mastered location fields are included
       if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
         preparedData.masteredRegionName = preparedData.selectedRegion;
@@ -541,11 +549,14 @@ export function useEventOperations() {
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
       
       console.log(`Creating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      console.log('PreparedData being sent:', JSON.stringify(preparedData, null, 2));
       const response = await axios.post(endpoint, preparedData, config);
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating event:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error response status:', error.response?.status);
       
       // Enhance error message based on response
       if (error.response) {
@@ -630,6 +641,11 @@ export function useEventOperations() {
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         };
       }
+      
+      // Clean up fields that shouldn't be sent to backend
+      delete preparedData.excludeDates; // Remove the typo field (without 'd')
+      delete preparedData.excludeDatesString; // Remove the UI-only string field
+      // Ensure we only have excludedDates (with 'd')
       
       // Only add venue geolocation and mastered location fields for RO updates
       if (selectedRole !== 'RegionalAdmin') {
