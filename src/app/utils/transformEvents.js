@@ -77,16 +77,6 @@ export function transformEvents(events) {
       },
     };
 
-    // Debug logging for exclude dates
-    if (event.title === 'DEVEL' || event.title === 'DEVE') {
-      console.log('Processing event:', {
-        title: event.title,
-        isRepeating: event.isRepeating,
-        recurrenceRule: event.recurrenceRule,
-        excludedDates: event.excludedDates
-      });
-    }
-    
     // Check if this is a recurring event with RRULE
     if (event.recurrenceRule && event.isRepeating) {
       // Clean the RRULE string to remove trailing semicolons
@@ -117,8 +107,8 @@ export function transformEvents(events) {
         
         //console.log('Parsed RRULE for event:', event.title, rruleObj);
         
-        // Return event with rrule object format for FullCalendar
-        return {
+        // Create the event object
+        const recurringEvent = {
           ...baseEvent,
           rrule: rruleObj,
           // duration is calculated from start to end time
@@ -132,6 +122,24 @@ export function transformEvents(events) {
             excludedDates: event.excludedDates || [],
           }
         };
+        
+        // Add exdate if there are excluded dates
+        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0) {
+          // Extract time from the event's start date
+          const eventStartTime = event.startDate.split('T')[1]; // Gets "23:00:00.000Z"
+          
+          // Transform each excluded date to match the event's start time
+          recurringEvent.exdate = event.excludedDates.map(excludedDate => {
+            const excludedDateOnly = excludedDate.split('T')[0]; // Gets "2025-10-10"
+            // Combine excluded date with event's start time
+            const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
+            return stripTimezoneIndicator(exdateWithTime);
+          });
+          
+          console.log(`Added exdate for ${event.title}:`, recurringEvent.exdate);
+        }
+        
+        return recurringEvent;
       } catch (error) {
         console.error('Error parsing RRULE, falling back to single event:', error);
         // Fallback to single event with indicator
