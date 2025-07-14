@@ -10,6 +10,7 @@ import {
   Switch,
   Tooltip,
   Button,
+  Alert,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
@@ -565,6 +566,12 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
 
       {/* Exclude Dates - Backend now supports this! */}
       <Box marginTop={2}>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>Note:</strong> Recurring events are working, but the exclude dates feature is not yet functional on the backend. 
+            You can enter dates here, but they will not be excluded from the recurring series at this time.
+          </Typography>
+        </Alert>
         <TextField
           fullWidth
           label="Exclude Dates (comma separated, format: YYYY-MM-DD)"
