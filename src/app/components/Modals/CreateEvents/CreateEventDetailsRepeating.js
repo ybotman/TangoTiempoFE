@@ -220,6 +220,13 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   useEffect(() => {
     if (eventData.excludeDatesString !== undefined) {
       setExcludeDates(eventData.excludeDatesString);
+      // Also parse and validate the dates for immediate use
+      const parsedDates = parseExcludedDates(eventData.excludeDatesString);
+      setValidatedExcludeDates(parsedDates);
+    }
+    if (eventData.excludedDates !== undefined && Array.isArray(eventData.excludedDates)) {
+      // If we have the array directly, use it
+      setValidatedExcludeDates(eventData.excludedDates);
     }
     if (eventData.recurrenceType !== undefined) {
       setRecurrenceType(eventData.recurrenceType);
@@ -370,7 +377,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       // Validate date format (YYYY-MM-DD)
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(trimmed)) {
-        console.warn('Invalid date format:', trimmed);
+        // Don't log during typing, only return null
         return null;
       }
       
@@ -379,12 +386,21 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       
       // Check if date is valid
       if (isNaN(parsedDate.getTime())) {
-        console.warn('Invalid date:', trimmed);
+        // Don't log during typing, only return null
         return null;
       }
       
       return parsedDate.toISOString();
     }).filter(date => date !== null);
+  };
+
+  // State for validated exclude dates
+  const [validatedExcludeDates, setValidatedExcludeDates] = useState([]);
+
+  // Validate and parse exclude dates when user is done typing (on blur)
+  const handleExcludeDatesBlur = () => {
+    const parsedDates = parseExcludedDates(excludeDates);
+    setValidatedExcludeDates(parsedDates);
   };
 
   // Update eventData with RRULE whenever relevant fields change
@@ -393,15 +409,12 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     const validation = validateRRule(rrule);
     setRruleValidation(validation);
     
-    // Parse excluded dates
-    const parsedExcludedDates = parseExcludedDates(excludeDates);
-    
     // Only update eventData if RRULE is valid
     if (validation.isValid) {
       setEventData(prevData => ({
         ...prevData,
         recurrenceRule: rrule,
-        excludedDates: parsedExcludedDates,
+        excludedDates: validatedExcludeDates, // Use validated dates, not parsing on every keystroke
         // Store recurrence settings for editing
         recurrenceType,
         recurrenceDays,
@@ -413,7 +426,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         // Don't send excludeDatesString to backend - it's only for UI state
       }));
     }
-  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, excludeDates]); // Removed setEventData from dependencies
+  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, validatedExcludeDates]); // Use validatedExcludeDates instead
 
   return (
     <Box>
@@ -577,6 +590,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           label="Exclude Dates (comma separated, format: YYYY-MM-DD)"
           value={excludeDates}
           onChange={(e) => setExcludeDates(e.target.value)}
+          onBlur={handleExcludeDatesBlur}
           helperText="Enter dates to skip in YYYY-MM-DD format, separated by commas (e.g., 2024-12-25, 2024-12-31)"
         />
       </Box>
