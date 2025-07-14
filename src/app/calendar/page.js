@@ -557,6 +557,21 @@ const CalendarPage = () => {
         dateClick={handleDateClick}
         eventContent={renderEventContent}
         eventDidMount={(eventInfo) => {
+          // Handle excluded dates for recurring events
+          if (eventInfo.event.extendedProps.isRecurring && eventInfo.event.extendedProps.excludedDates) {
+            const eventDate = eventInfo.event.start.toISOString().split('T')[0];
+            const isExcluded = eventInfo.event.extendedProps.excludedDates.some(excludeDate => {
+              const compareDate = excludeDate.split('T')[0];
+              return eventDate === compareDate;
+            });
+            
+            if (isExcluded) {
+              // Hide this instance of the recurring event
+              eventInfo.el.style.display = 'none';
+              return; // Skip further processing
+            }
+          }
+          
           // Handle placeholder events
           if (eventInfo.event.extendedProps.isPlaceholder) {
             // Style placeholder events to look like clickable day entries
