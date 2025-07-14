@@ -174,6 +174,7 @@ export function transformEvents(events) {
 // Parse RRULE string to FullCalendar v6 object format
 function parseRRuleToObject(rruleString, startDate, endDate) {
   const parts = rruleString.split(';');
+  
   const rruleObj = {
     // Strip Z suffix to treat as local time instead of UTC
     // This prevents recurring events from shifting to previous day in local timezones
