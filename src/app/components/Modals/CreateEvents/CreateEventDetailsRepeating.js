@@ -410,7 +410,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         recurrenceEndDate: endDate,
         recurrenceCount: occurrences,
         useEndDate,
-        excludeDatesString: excludeDates // Store the string version for editing
+        // Don't send excludeDatesString to backend - it's only for UI state
       }));
     }
   }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, excludeDates]); // Removed setEventData from dependencies

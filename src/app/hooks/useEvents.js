@@ -462,6 +462,11 @@ export function useEventOperations() {
         }
       }
 
+      // Clean up fields that shouldn't be sent to backend
+      delete preparedData.excludeDates; // Remove the typo field (without 'd')
+      delete preparedData.excludeDatesString; // Remove the UI-only string field
+      // Ensure we only have excludedDates (with 'd')
+      
       // Ensure mastered location fields are included
       if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
         preparedData.masteredRegionName = preparedData.selectedRegion;
@@ -636,6 +641,11 @@ export function useEventOperations() {
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         };
       }
+      
+      // Clean up fields that shouldn't be sent to backend
+      delete preparedData.excludeDates; // Remove the typo field (without 'd')
+      delete preparedData.excludeDatesString; // Remove the UI-only string field
+      // Ensure we only have excludedDates (with 'd')
       
       // Only add venue geolocation and mastered location fields for RO updates
       if (selectedRole !== 'RegionalAdmin') {
