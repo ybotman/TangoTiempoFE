@@ -207,13 +207,41 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   const [recurrenceDays, setRecurrenceDays] = useState(eventData.recurrenceDays || []);
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
   const [monthlyWeeks, setMonthlyWeeks] = useState(eventData.monthlyWeeks || []);
-  const [excludeDates, setExcludeDates] = useState(eventData.excludeDates || '');
+  const [excludeDates, setExcludeDates] = useState(eventData.excludeDatesString || eventData.excludeDates || '');
   const [endDate, setEndDate] = useState(eventData.recurrenceEndDate || '');
   const [occurrences, setOccurrences] = useState(eventData.recurrenceCount || '');
   const [sendReminder, setSendReminder] = useState(eventData.sendReminder || false);
 
   // State to handle switching between End Date and Occurrences
   const [useEndDate, setUseEndDate] = useState(eventData.useEndDate !== undefined ? eventData.useEndDate : true);
+
+  // Update local state when eventData changes (for edit mode)
+  useEffect(() => {
+    if (eventData.excludeDatesString !== undefined) {
+      setExcludeDates(eventData.excludeDatesString);
+    }
+    if (eventData.recurrenceType !== undefined) {
+      setRecurrenceType(eventData.recurrenceType);
+    }
+    if (eventData.recurrenceDays !== undefined) {
+      setRecurrenceDays(eventData.recurrenceDays);
+    }
+    if (eventData.monthlyDays !== undefined) {
+      setMonthlyDays(eventData.monthlyDays);
+    }
+    if (eventData.monthlyWeeks !== undefined) {
+      setMonthlyWeeks(eventData.monthlyWeeks);
+    }
+    if (eventData.recurrenceEndDate !== undefined) {
+      setEndDate(eventData.recurrenceEndDate);
+    }
+    if (eventData.recurrenceCount !== undefined) {
+      setOccurrences(eventData.recurrenceCount);
+    }
+    if (eventData.useEndDate !== undefined) {
+      setUseEndDate(eventData.useEndDate);
+    }
+  }, [eventData]);
 
   // Handle Recurrence Type Change
   const handleRecurrenceTypeChange = (e) => {
