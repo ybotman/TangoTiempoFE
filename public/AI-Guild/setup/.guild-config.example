@@ -1,13 +1,51 @@
 # Guild Configuration File Example
 # Copy this to .guild-config in your project root and update with your values
 
-# Branch Names
+# Startup Config Prompts : uTNC, uGS, uGR, uGC, uJC, uJA
+
+# -----  Trigger a new Concatenated Files
+createNewConcatenatedTriggerFile  = "./.TriggerConcatenated"
+
+# ----- STARTUP
+useGuildStartup = "YES"
+useGuildCustomStartup = "NO"
+
+# ----- LIFECYCLE
+useGuildLifeCycle = "YES"
+useCustomGuildLifeCycles = "NO"
+
+# ----- ROLES
+useGuildRoles = "YES"
+useCustomRoles  = "NO"
+GuildRolesPath
+CustomGuildRolesPath
+
+# ----- COMMANDS
+useGuildCommands = "YES"
+useCustomGuildCommands  = "NO"
+
+# ----- JIRA
+
+useJIRA = "YES"
+useJjiraCLI = "YES" 
+useJiraAPI = "NO"
+JiraConfigPath = "./"
+
+JiraCLIBase = "jira --config ./.jira.d/config.yml"
+#JiraCLIBase = "jira"
+
+
+
+# ----- BRANCH
+useBranchLogic = "YES"
 DEVELOPMENT="DEVL"
 TESTING="TEST"
 PRODUCTION="PROD"
-
-# Default working branch
 DEFAULT_BRANCH="DEVL"
+
+
+# ----- Application PLAYBOOKS
+useApplicationPlaybooks = "YES"
 
 # Application Playbooks (Optional)
 # Define paths to application-specific documentation
@@ -16,3 +54,5 @@ DEFAULT_BRANCH="DEVL"
 # Examples:
 # Appl_Playbook_ItsJustMagic='public/Playbooks/Magic/'
 # Appl_Playbook_MobileApp='mobile/documentation/playbook.md'
+
+

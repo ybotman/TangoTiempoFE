@@ -90,6 +90,7 @@ export function useEvents({
   
   // Get location from GeoLocationContext if available
   const geoLocationContext = useGeoLocation();
+  const { isInitialized } = geoLocationContext || {};
   
   // Use context values if explicitly provided parameters are missing
   const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
@@ -248,14 +249,39 @@ export function useEvents({
     userId,
     userOrganizerId,
     userRoles,
-    selectedRole
+    selectedRole,
+    isInitialized
     // Removed setState functions to prevent infinite loops
   ]);
 
   // Fetch events when parameters change
   useEffect(() => {
+    // Skip if using context and not initialized
+    if (useGeoLocationContext && !isInitialized) {
+      console.log('useEvents: Waiting for GeoLocationContext initialization');
+      return;
+    }
+    
+    // Additional validation for location data quality
+    if (useGeoLocationContext) {
+      // Check if we have valid location data
+      const hasValidCity = effectiveCity && effectiveCity !== "Unknown";
+      const hasValidRegion = effectiveRegion && effectiveRegion !== "Unknown";
+      const hasValidCoords = effectiveLat && effectiveLng && 
+                            !(effectiveLat === 0 && effectiveLng === 0);
+      
+      if (!hasValidCity && !hasValidRegion && !hasValidCoords) {
+        console.log('useEvents: No valid location data available yet', {
+          city: effectiveCity,
+          region: effectiveRegion,
+          coords: [effectiveLat, effectiveLng]
+        });
+        return;
+      }
+    }
+    
     fetchEvents();
-  }, [fetchEvents]);
+  }, [fetchEvents, isInitialized, useGeoLocationContext, effectiveCity, effectiveRegion, effectiveLat, effectiveLng]);
 
   return { 
     events: eventsData.events || [], 
@@ -355,7 +381,10 @@ export function useEventOperations() {
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
           venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
           description: cleanedEventData.description || '',
-          cost: cleanedEventData.cost || ''
+          cost: cleanedEventData.cost || '',
+          // Include recurring event fields if present
+          recurrenceRule: cleanedEventData.recurrenceRule || undefined,
+          excludedDates: cleanedEventData.excludedDates || undefined
         };
       } else {
         // RO endpoint uses existing logic
@@ -433,6 +462,11 @@ export function useEventOperations() {
         }
       }
 
+      // Clean up fields that shouldn't be sent to backend
+      delete preparedData.excludeDates; // Remove the typo field (without 'd')
+      delete preparedData.excludeDatesString; // Remove the UI-only string field
+      // Ensure we only have excludedDates (with 'd')
+      
       // Ensure mastered location fields are included
       if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
         preparedData.masteredRegionName = preparedData.selectedRegion;
@@ -515,11 +549,14 @@ export function useEventOperations() {
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
       
       console.log(`Creating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      console.log('PreparedData being sent:', JSON.stringify(preparedData, null, 2));
       const response = await axios.post(endpoint, preparedData, config);
       console.log('Event created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating event:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error response status:', error.response?.status);
       
       // Enhance error message based on response
       if (error.response) {
@@ -604,6 +641,11 @@ export function useEventOperations() {
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         };
       }
+      
+      // Clean up fields that shouldn't be sent to backend
+      delete preparedData.excludeDates; // Remove the typo field (without 'd')
+      delete preparedData.excludeDatesString; // Remove the UI-only string field
+      // Ensure we only have excludedDates (with 'd')
       
       // Only add venue geolocation and mastered location fields for RO updates
       if (selectedRole !== 'RegionalAdmin') {

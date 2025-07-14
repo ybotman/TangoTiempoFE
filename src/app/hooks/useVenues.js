@@ -31,10 +31,13 @@ export function useVenues() {
       }
       
       // Add location filters from GeoLocationContext
-      // Don't filter by location - the backend's query parameter handling is different
-      // We'll just fetch all venues and filter them on the client side if needed
-      // This ensures we always have venues to display
+      // Filter by masteredDivisionId if available to get venues for the selected location
+      if (masteredDivisionId) {
+        params.masteredDivisionId = masteredDivisionId;
+      }
       
+      // Add 'all=true' to get all venues without pagination
+      params.all = true;
       
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
