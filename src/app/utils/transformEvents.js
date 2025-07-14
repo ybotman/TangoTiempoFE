@@ -77,6 +77,16 @@ export function transformEvents(events) {
       },
     };
 
+    // Debug logging for exclude dates
+    if (event.title === 'DEVEL' || event.title === 'DEVE') {
+      console.log('Processing event:', {
+        title: event.title,
+        isRepeating: event.isRepeating,
+        recurrenceRule: event.recurrenceRule,
+        excludedDates: event.excludedDates
+      });
+    }
+    
     // Check if this is a recurring event with RRULE
     if (event.recurrenceRule && event.isRepeating) {
       // Clean the RRULE string to remove trailing semicolons
