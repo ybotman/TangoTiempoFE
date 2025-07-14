@@ -72,6 +72,8 @@ export function transformEvents(events) {
         isDiscovered: event.isDiscovered || false,
         // Add isRepeating flag
         isRepeating: event.isRepeating || false,
+        // Add excludedDates for edit mode
+        excludedDates: event.excludedDates || [],
       },
     };
 
@@ -103,6 +105,13 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
+        // Add exclude dates (exdate) if present
+        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0) {
+          // Convert excluded dates to the same format as dtstart (without timezone indicator)
+          rruleObj.exdate = event.excludedDates.map(date => stripTimezoneIndicator(date));
+          console.log('Added exdate to RRULE:', rruleObj.exdate);
+        }
+        
         //console.log('Parsed RRULE for event:', event.title, rruleObj);
         
         // Return event with rrule object format for FullCalendar
@@ -117,6 +126,7 @@ export function transformEvents(events) {
             ...baseEvent.extendedProps,
             isRecurring: true,
             recurrenceRule: cleanedRRule,
+            excludedDates: event.excludedDates || [],
           }
         };
       } catch (error) {

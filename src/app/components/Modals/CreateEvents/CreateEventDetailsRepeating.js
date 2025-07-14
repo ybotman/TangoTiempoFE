@@ -566,10 +566,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
 
       {/* Exclude Dates - Backend now supports this! */}
       <Box marginTop={2}>
-        <Alert severity="warning" sx={{ mb: 2 }}>
+        <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="body2">
-            <strong>Note:</strong> Recurring events are working, but the exclude dates feature is not yet functional on the backend. 
-            You can enter dates here, but they will not be excluded from the recurring series at this time.
+            <strong>Beta Feature:</strong> Exclude dates are now supported! Enter specific dates to skip in your recurring series. 
+            Dates must be in YYYY-MM-DD format (e.g., 2025-10-10).
           </Typography>
         </Alert>
         <TextField
