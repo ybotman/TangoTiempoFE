@@ -141,17 +141,17 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
     
     // Store both the ID and the name - the ID in categoryFirstId (new field) and the name in categoryFirst
-    setEventData({ 
-      ...eventData, 
+    setEventData(prevData => ({ 
+      ...prevData, 
       categoryFirstId: selectedCategoryId,
       categoryFirst: selectedCategory ? selectedCategory.categoryName : '' 
-    });
+    }));
   };
 
   // Handle title change
   const handleTitleChange = (event) => {
     const title = event.target.value;
-    setEventData({ ...eventData, title });
+    setEventData(prevData => ({ ...prevData, title }));
   };
 
   // Handle organizer selection for RA users
@@ -162,20 +162,20 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
     
     // Store the ID, name, and shortName (use fullName as fallback for shortName)
-    setEventData({ 
-      ...eventData, 
+    setEventData(prevData => ({ 
+      ...prevData, 
       ownerOrganizerID: selectedOrganizerId,
       ownerOrganizerName: selectedOrganizer ? selectedOrganizer.fullName : '',
       ownerOrganizerShortName: selectedOrganizer ? (selectedOrganizer.shortName || selectedOrganizer.fullName) : ''
-    });
+    }));
   };
 
   // Handle venue change from autocomplete
   const handleVenueChange = (event, newValue) => {
     if (!newValue) {
       // Clear venue selection
-      setEventData({
-        ...eventData,
+      setEventData(prevData => ({
+        ...prevData,
         // Use both new venue fields and legacy location fields for compatibility
         venueId: '',
         venueName: '',
@@ -184,7 +184,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         // Clear coordinates
         venueLatitude: null,
         venueLongitude: null
-      });
+      }));
       return;
     }
     
@@ -198,27 +198,29 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
     
     // Create updated event data with venue info
-    const updatedEventData = { 
-      ...eventData, 
-      // Use new standardized venue fields
-      venueId: newValue._id,
-      venueName: venueName,
-      // Also keep legacy fields for backward compatibility
-      locationID: newValue._id,
-      locationName: venueName
-    };
-    
-    // Add the coordinates if available
-    if (newValue.latitude && newValue.longitude) {
-      updatedEventData.venueLatitude = newValue.latitude;
-      updatedEventData.venueLongitude = newValue.longitude;
-    } else {
-      // Clear any existing coordinates
-      updatedEventData.venueLatitude = null;
-      updatedEventData.venueLongitude = null;
-    }
-    
-    setEventData(updatedEventData);
+    setEventData(prevData => {
+      const updatedEventData = { 
+        ...prevData, 
+        // Use new standardized venue fields
+        venueId: newValue._id,
+        venueName: venueName,
+        // Also keep legacy fields for backward compatibility
+        locationID: newValue._id,
+        locationName: venueName
+      };
+      
+      // Add the coordinates if available
+      if (newValue.latitude && newValue.longitude) {
+        updatedEventData.venueLatitude = newValue.latitude;
+        updatedEventData.venueLongitude = newValue.longitude;
+      } else {
+        // Clear any existing coordinates
+        updatedEventData.venueLatitude = null;
+        updatedEventData.venueLongitude = null;
+      }
+      
+      return updatedEventData;
+    });
   };
   
   // Handle venue input change for filtering
@@ -234,13 +236,13 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     
     // If end date is before the new start date, update end date to match start date
     if (currentEndDate.isBefore(newDayjsDate)) {
-      setEventData({ 
-        ...eventData, 
+      setEventData(prevData => ({ 
+        ...prevData, 
         startDate: newDate,
         endDate: newDate
-      });
+      }));
     } else {
-      setEventData({ ...eventData, startDate: newDate });
+      setEventData(prevData => ({ ...prevData, startDate: newDate }));
     }
   };
   
@@ -256,7 +258,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       console.warn('End date cannot be before start date');
       return;
     }
-    setEventData({ ...eventData, endDate: newDate });
+    setEventData(prevData => ({ ...prevData, endDate: newDate }));
   };
 
   return (
@@ -324,7 +326,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               value={eventData.shortTitle || eventData.shortName || ''} 
               onChange={(e) => {
                 const value = e.target.value.slice(0, 15); // Enforce 15 char limit
-                setEventData({ ...eventData, shortTitle: value, shortName: value });
+                setEventData(prevData => ({ ...prevData, shortTitle: value, shortName: value }));
               }}
               required
               inputProps={{ maxLength: 15 }}
@@ -597,7 +599,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             <TextField 
               label="Cost" 
               value={eventData.cost || ''} 
-              onChange={(e) => setEventData({ ...eventData, cost: e.target.value })}
+              onChange={(e) => setEventData(prevData => ({ ...prevData, cost: e.target.value }))}
               placeholder="e.g., Free, $20, Donation"
               helperText="Enter the cost or pricing information for the event"
               fullWidth
@@ -613,7 +615,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           multiline
           rows={4}
           value={eventData.description}
-          onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+          onChange={(e) => setEventData(prevData => ({ ...prevData, description: e.target.value }))}
           required
           fullWidth
         />

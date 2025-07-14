@@ -568,31 +568,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           </Tooltip>
         </Box>
 
-        {/* Display Current Location Hierarchy */}
-        <Box sx={{ my: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          <Chip 
-            label={`Region: ${eventData.masteredRegionName || 'Not selected'}`} 
-            color="primary" 
-            variant={eventData.masteredDivisionName ? "outlined" : "filled"}
-            size="small"
-          />
-          {eventData.masteredDivisionName && (
-            <Chip 
-              label={`Division: ${eventData.masteredDivisionName}`} 
-              color="primary" 
-              variant={eventData.masteredCityName ? "outlined" : "filled"}
-              size="small"
-            />
-          )}
-          {eventData.masteredCityName && (
-            <Chip 
-              label={`City: ${eventData.masteredCityName}`} 
-              color="primary" 
-              variant="filled"
-              size="small"
-            />
-          )}
-        </Box>
 
         {/* Error message */}
         {saveError && (
@@ -637,8 +612,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           }}
         >
           <Tab label="Basic" value="basic" />
-          <Tab label="Image" value="image" />
-          <Tab label="Other" value="other" />
           {eventData.isRepeating && (
             <Tab 
               label="Repeating" 
@@ -651,15 +624,17 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
               }}
             />
           )}
+          <Tab label="Image" value="image" />
+          <Tab label="Other" value="other" />
         </Tabs>
 
         {/* Render tab content conditionally */}
         {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />}
-        {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
-        {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'repeating' && (
           <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
+        {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
+        {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
 
         <Box mt={2} display="flex" justifyContent="space-between">
           <Button 

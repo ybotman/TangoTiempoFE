@@ -410,6 +410,48 @@ const CalendarPage = () => {
   const [currentViewType, setCurrentViewType] = useState(null);
   const [viewDateRange, setViewDateRange] = useState({ start: null, end: null });
   
+  // Touch handling state
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  
+  // Touch handlers
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+  
+  const onTouchMove = (e) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
+    const isLeftSwipe = distanceX > minSwipeDistance;
+    const isRightSwipe = distanceX < -minSwipeDistance;
+    
+    // Only handle horizontal swipes, let vertical swipes pass through for scrolling
+    if (isHorizontalSwipe && (isLeftSwipe || isRightSwipe)) {
+      if (isLeftSwipe && calendarRef.current) {
+        calendarRef.current.getApi().next();
+      }
+      if (isRightSwipe && calendarRef.current) {
+        calendarRef.current.getApi().prev();
+      }
+    }
+  };
+  
   // Compute events with placeholders based on current view
   const eventsWithPlaceholders = (() => {
     if (currentViewType === 'list21Days' || currentViewType === 'listMonth') {
@@ -460,7 +502,7 @@ const CalendarPage = () => {
   }, [calendarRef]); // Add calendarRef to the dependency array
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <SiteHeader />
       <SiteMenuBar
         activeCategories={activeCategories}
@@ -538,12 +580,25 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      <FullCalendar
-        plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
-        //        initialView="dayGridMonth"
-        initialView={getInitialView()}
-        events={eventsWithPlaceholders}
-        datesSet={(dateInfo) => {
+      <div
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          position: 'relative',
+        }}
+      >
+        <FullCalendar
+          plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
+          //        initialView="dayGridMonth"
+          initialView={getInitialView()}
+          events={eventsWithPlaceholders}
+          datesSet={(dateInfo) => {
           handleDatesSet(dateInfo);
           // Track view type and date range
           if (calendarRef.current) {
@@ -650,6 +705,7 @@ const CalendarPage = () => {
           }
         }}
       />
+      </div>
       
       
       {/* SubMenu */}

@@ -18,11 +18,11 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
     const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
     
     // Store both the ID and the name
-    setEventData({ 
-      ...eventData, 
+    setEventData(prevData => ({ 
+      ...prevData, 
       categorySecondId: selectedCategoryId,
       categorySecond: selectedCategory ? selectedCategory.categoryName : '' 
-    });
+    }));
   };
 
   // Handle third category change
@@ -33,11 +33,11 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
     const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
     
     // Store both the ID and the name
-    setEventData({ 
-      ...eventData, 
+    setEventData(prevData => ({ 
+      ...prevData, 
       categoryThirdId: selectedCategoryId,
       categoryThird: selectedCategory ? selectedCategory.categoryName : '' 
-    });
+    }));
   };
 
   // Handle granted organizer change
@@ -48,11 +48,11 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
     const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
     
     // Store both the ID and the name
-    setEventData({ 
-      ...eventData, 
+    setEventData(prevData => ({ 
+      ...prevData, 
       grantedOrganizerID: selectedOrganizerId,
       grantedOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : '' 
-    });
+    }));
   };
 
   // Handle alternate organizer change
@@ -63,11 +63,11 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
     const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
     
     // Store both the ID and the name
-    setEventData({ 
-      ...eventData, 
+    setEventData(prevData => ({ 
+      ...prevData, 
       alternateOrganizerID: selectedOrganizerId,
       alternateOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : '' 
-    });
+    }));
   };
 
   return (
@@ -200,7 +200,7 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
                 control={
                   <Switch
                     checked={eventData.isCanceled || false}
-                    onChange={(e) => setEventData({ ...eventData, isCanceled: e.target.checked })}
+                    onChange={(e) => setEventData(prevData => ({ ...prevData, isCanceled: e.target.checked }))}
                     color="error"
                     disabled={eventData.isRepeating || !!eventData.recurrenceRule}
                   />
