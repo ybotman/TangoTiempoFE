@@ -35,10 +35,12 @@ export function parseRRuleToUIFields(rruleString, eventData) {
   if (eventData && eventData.excludedDates && Array.isArray(eventData.excludedDates)) {
     // Convert ISO dates back to YYYY-MM-DD format for display
     const dateStrings = eventData.excludedDates.map(isoDate => {
-      const date = new Date(isoDate);
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
+      // Parse as local date, not UTC - strip Z suffix if present
+      const localIsoDate = isoDate.endsWith('Z') ? isoDate.slice(0, -1) : isoDate;
+      const date = new Date(localIsoDate);
+      const year = date.getFullYear(); // Use local methods, not UTC
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     });
     fields.excludeDates = dateStrings.join(', ');
@@ -229,10 +231,14 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       setValidatedExcludeDates(eventData.excludedDates);
       // Convert ISO dates back to YYYY-MM-DD format for display
       const dateStrings = eventData.excludedDates.map(isoDate => {
-        const date = new Date(isoDate);
-        const year = date.getUTCFullYear();
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(date.getUTCDate()).padStart(2, '0');
+        // Parse as local date, not UTC
+        // If the date has 'Z' suffix, remove it to treat as local
+        const localIsoDate = isoDate.endsWith('Z') ? isoDate.slice(0, -1) : isoDate;
+        const date = new Date(localIsoDate);
+        const year = date.getFullYear(); // Use local methods, not UTC
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        console.log('Exclude date conversion:', { isoDate, localIsoDate, year, month, day });
         return `${year}-${month}-${day}`;
       });
       setExcludeDates(dateStrings.join(', '));
