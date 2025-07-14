@@ -21,10 +21,10 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MapIcon from '@mui/icons-material/Map';
 import PersonIcon from '@mui/icons-material/Person';
-import LanguageIcon from '@mui/icons-material/Language';
+import CloudIcon from '@mui/icons-material/Cloud';
 import EnvVariablesDebug from './EnvVariablesDebug';
 import AuthContextDebug from './AuthContextDebug';
-import RegionsContextDebug from './RegionsContextDebug';
+import CloudFlareDebug from './CloudFlareDebug';
 import RoleContextDebug from './RoleContextDebug';
 import MasteredLocationContextDebug from './MasteredLocationContextDebug';
 import GeoLocationContextDebug from './GeoLocationContextDebug';
@@ -110,8 +110,8 @@ const DebugMenu = ({ open, onClose }) => {
             aria-controls="debug-tabpanel-1"
           />
           <Tab 
-            icon={<LanguageIcon />} 
-            label="Regions" 
+            icon={<CloudIcon />} 
+            label="CloudFlare" 
             id="debug-tab-2" 
             aria-controls="debug-tabpanel-2"
           />
@@ -146,7 +146,7 @@ const DebugMenu = ({ open, onClose }) => {
         </Box>
         
         <Box role="tabpanel" hidden={activeTab !== 2} id="debug-tabpanel-2" aria-labelledby="debug-tab-2" sx={{ p: 3 }}>
-          {activeTab === 2 && <RegionsContextDebug />}
+          {activeTab === 2 && <CloudFlareDebug />}
         </Box>
         
         <Box role="tabpanel" hidden={activeTab !== 3} id="debug-tabpanel-3" aria-labelledby="debug-tab-3" sx={{ p: 3 }}>
