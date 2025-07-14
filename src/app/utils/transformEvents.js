@@ -105,7 +105,11 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        //console.log('Parsed RRULE for event:', event.title, rruleObj);
+        console.log('Parsed RRULE for event:', event.title, {
+          originalRule: cleanedRRule,
+          parsedObj: rruleObj,
+          isMonthly: rruleObj.freq === 'monthly'
+        });
         
         // Create the event object
         const recurringEvent = {
@@ -173,14 +177,24 @@ export function transformEvents(events) {
 
 // Parse RRULE string to FullCalendar v6 object format
 function parseRRuleToObject(rruleString, startDate, endDate) {
-  const parts = rruleString.split(';');
+  try {
+    const parts = rruleString.split(';');
+    
+    const rruleObj = {
+      // Strip Z suffix to treat as local time instead of UTC
+      // This prevents recurring events from shifting to previous day in local timezones
+      dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
+    };
   
-  const rruleObj = {
-    // Strip Z suffix to treat as local time instead of UTC
-    // This prevents recurring events from shifting to previous day in local timezones
-    dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
-  };
-  
+  // First pass: get frequency
+  let frequency = null;
+  parts.forEach(part => {
+    const [key, value] = part.split('=');
+    if (key === 'FREQ') {
+      frequency = value.toLowerCase();
+    }
+  });
+
   parts.forEach(part => {
     const [key, value] = part.split('=');
     switch(key) {
@@ -188,8 +202,17 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
         rruleObj.freq = value.toLowerCase();
         break;
       case 'BYDAY':
-        // Convert to lowercase array for FullCalendar
-        rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
+        // Handle differently based on frequency
+        if (frequency === 'monthly') {
+          // For monthly, keep the original format (e.g., '2TH', '-1MO')
+          // FullCalendar's rrule plugin expects this format for monthly patterns
+          rruleObj.byweekday = value.split(',');
+          console.log('Monthly BYDAY - keeping original format:', value, '→', rruleObj.byweekday);
+        } else {
+          // For weekly, convert to lowercase array
+          rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
+          console.log('Weekly BYDAY - converting to lowercase:', value, '→', rruleObj.byweekday);
+        }
         break;
       case 'UNTIL':
         // Convert RRULE date format to ISO format and strip timezone
@@ -206,6 +229,14 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
   });
   
   return rruleObj;
+  } catch (error) {
+    console.error('Error parsing RRULE:', rruleString, error);
+    // Return a basic object to prevent crashes
+    return {
+      freq: 'weekly',
+      dtstart: stripTimezoneIndicator(startDate)
+    };
+  }
 }
 
 // Convert RRULE date format (YYYYMMDDTHHMMSSZ) to ISO format
