@@ -338,8 +338,22 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       const trimmed = date.trim();
       if (!trimmed) return null;
       
+      // Validate date format (YYYY-MM-DD)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(trimmed)) {
+        console.warn('Invalid date format:', trimmed);
+        return null;
+      }
+      
       // Parse YYYY-MM-DD format and convert to ISO string
       const parsedDate = new Date(trimmed + 'T00:00:00Z');
+      
+      // Check if date is valid
+      if (isNaN(parsedDate.getTime())) {
+        console.warn('Invalid date:', trimmed);
+        return null;
+      }
+      
       return parsedDate.toISOString();
     }).filter(date => date !== null);
   };
