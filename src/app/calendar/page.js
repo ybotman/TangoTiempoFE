@@ -502,7 +502,7 @@ const CalendarPage = () => {
   }, [calendarRef]); // Add calendarRef to the dependency array
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <SiteHeader />
       <SiteMenuBar
         activeCategories={activeCategories}
@@ -586,9 +586,11 @@ const CalendarPage = () => {
         onTouchEnd={onTouchEnd}
         style={{
           width: '100%',
+          maxWidth: '100%',
           overflowX: 'hidden',
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
+          position: 'relative',
         }}
       >
         <FullCalendar

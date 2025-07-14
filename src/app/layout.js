@@ -58,11 +58,11 @@ export default function RootLayout({ children }) {
           `}
         </Script>
       </head>
-      <body style={{ display: 'flex' }}>
+      <body style={{ display: 'flex', overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
         {/* Wrap everything in Providers so that SidebarDrawer and its Modals have context */}
         <Providers>
           <SidebarDrawer />
-          <div style={{ flexGrow: 1, padding: '1rem' }}>
+          <div style={{ flexGrow: 1, padding: '1rem', width: '100%', boxSizing: 'border-box' }}>
             <EmailVerificationBanner />
             {children}
           </div>
