@@ -206,7 +206,9 @@ const MaterialUISwitch = styled(Switch)(() => ({
 }));
 
 const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
-  const [recurrenceType, setRecurrenceType] = useState(eventData.recurrenceType || 'weekly');
+  // Default to weekly if monthly is selected (since monthly is disabled)
+  const initialType = eventData.recurrenceType === 'monthly' ? 'weekly' : (eventData.recurrenceType || 'weekly');
+  const [recurrenceType, setRecurrenceType] = useState(initialType);
   const [recurrenceDays, setRecurrenceDays] = useState(eventData.recurrenceDays || []);
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
   const [monthlyWeeks, setMonthlyWeeks] = useState(eventData.monthlyWeeks || []);
@@ -268,6 +270,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
 
   // Handle Recurrence Type Change
   const handleRecurrenceTypeChange = (e) => {
+    // Prevent selection of monthly (it's disabled but just in case)
+    if (e.target.value === 'monthly') {
+      return;
+    }
     setRecurrenceType(e.target.value);
     setRecurrenceDays([]);
     setMonthlyDays([]);
@@ -462,7 +468,12 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
-          <MenuItem value="monthly">Monthly</MenuItem>
+          <MenuItem value="monthly" disabled>
+            <Box display="flex" alignItems="center" gap={1}>
+              <span>Monthly</span>
+              <Typography variant="caption" color="text.secondary">(Coming Soon)</Typography>
+            </Box>
+          </MenuItem>
         </TextField>
         {eventData.startDate && (
           <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
