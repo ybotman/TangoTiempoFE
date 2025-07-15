@@ -251,7 +251,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         Delete
       </Button>
     </>
-  ) : null;
+  ) : (selectedRole === 'RegionalAdmin' ? (
+    <Typography 
+      variant="caption" 
+      color="text.secondary"
+      sx={{ 
+        fontStyle: 'italic',
+        fontSize: '0.75rem',
+        px: 2
+      }}
+    >
+      Event not in your assigned cities
+    </Typography>
+  ) : null);
 
   return (
     <>
