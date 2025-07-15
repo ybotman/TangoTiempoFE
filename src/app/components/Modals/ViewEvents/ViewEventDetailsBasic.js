@@ -16,8 +16,11 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
                    eventDetails?.extendedProps?.locationName ||
                    'Venue not specified';
 
+  // Convert line breaks to HTML <br> tags for proper display
+  const descriptionWithBreaks = description.replace(/\n/g, '<br>');
+  
   // Sanitize the description using DOMPurify
-  const sanitizedDescription = DOMPurify.sanitize(description);
+  const sanitizedDescription = DOMPurify.sanitize(descriptionWithBreaks);
 
   // Function to toggle "Show More"
   const toggleShowMore = () => setShowMore(!showMore);
