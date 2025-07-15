@@ -12,7 +12,14 @@ export function transformEvents(events) {
       const venueId = event.venueID || event.venueId || event.locationID || null;
       const venueName = event.venueName || event.locationName || null;
     
-    // Debug logging removed to reduce console noise
+    // Debug logging for RA city mapping
+    if (events.indexOf(event) < 3) {
+      console.log(`Event Transform Debug - ${event.title}:`, {
+        masteredCityId: event.masteredCityId,
+        masteredCityName: event.masteredCityName,
+        willMapTo: event.masteredCityId // This will become venueMasteredCityID
+      });
+    }
     /*
     if (events.indexOf(event) < 3) {
       console.log(`Event ${event.title}:`, {

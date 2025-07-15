@@ -165,6 +165,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                           eventDetails?.extendedProps?.venueMasteredCityID &&
                           user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds.includes(eventDetails.extendedProps.venueMasteredCityID);
   
+  // Debug logging for RA permissions
+  if (selectedRole === 'RegionalAdmin') {
+    console.log('RA Permission Debug:', {
+      selectedRole,
+      hasUser: !!user,
+      hasAllowedCities: !!user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
+      allowedCities: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
+      eventVenueMasteredCityID: eventDetails?.extendedProps?.venueMasteredCityID,
+      isIncluded: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds?.includes(eventDetails?.extendedProps?.venueMasteredCityID),
+      isRegionalAdmin
+    });
+  }
+  
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
   
   // Get truncated description for the delete confirmation
