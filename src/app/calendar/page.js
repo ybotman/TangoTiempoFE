@@ -418,6 +418,11 @@ const CalendarPage = () => {
   const minSwipeDistance = 50;
   
   const onTouchStart = (e) => {
+    // Don't interfere with calendar event clicks
+    if (e.target.closest('.fc-event')) {
+      return;
+    }
+    
     setTouchEnd(null);
     setTouchStart({
       x: e.targetTouches[0].clientX,
@@ -426,13 +431,21 @@ const CalendarPage = () => {
   };
   
   const onTouchMove = (e) => {
+    // Don't track if touch started on event
+    if (!touchStart) return;
+    
     setTouchEnd({
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY
     });
   };
   
-  const onTouchEnd = () => {
+  const onTouchEnd = (e) => {
+    // Don't interfere with calendar event clicks
+    if (e.target.closest('.fc-event')) {
+      return;
+    }
+    
     if (!touchStart || !touchEnd) return;
     
     const distanceX = touchStart.x - touchEnd.x;
