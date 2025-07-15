@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TextField, Grid, CircularProgress, Alert, Autocomplete } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -133,20 +133,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
   }, [user, selectedRole, organizer, setEventData]); // Add selectedRole and organizer dependencies
 
-  // Handle category change
-  const handleCategoryChange = (event) => {
-    const selectedCategoryId = event.target.value;
-    
-    // Find the selected category to get its name
-    const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
-    
-    // Store both the ID and the name - the ID in categoryFirstId (new field) and the name in categoryFirst
-    setEventData(prevData => ({ 
-      ...prevData, 
-      categoryFirstId: selectedCategoryId,
-      categoryFirst: selectedCategory ? selectedCategory.categoryName : '' 
-    }));
-  };
+  // Category change is now handled inline in the Autocomplete component
 
   // Handle title change
   const handleTitleChange = (event) => {
@@ -336,27 +323,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           </FormControl>
         </Grid>
 
-        {/* Category Selection */}
+        {/* Category Selection - Autocomplete with type-ahead */}
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth required>
-            <InputLabel id="category-label">Category</InputLabel>
-            <Select
-              labelId="category-label"
-              value={eventData.categoryFirstId || ''}
-              onChange={handleCategoryChange}
-              label="Category"
-              required
-            >
-              <MenuItem value="" disabled>
-                <em>Select a category</em>
-              </MenuItem>
-              {categories.map((category) => (
-                <MenuItem key={category._id} value={category._id}>
-                  {category.categoryName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            options={categories}
+            getOptionLabel={(option) => option.categoryName || ''}
+            value={categories.find(cat => cat._id === eventData.categoryFirstId) || null}
+            onChange={(event, newValue) => {
+              setEventData(prevData => ({ 
+                ...prevData, 
+                categoryFirstId: newValue ? newValue._id : '',
+                categoryFirst: newValue ? newValue.categoryName : '' 
+              }));
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Category"
+                required
+                error={!eventData.categoryFirstId}
+                helperText={!eventData.categoryFirstId ? "Category is required" : ""}
+              />
+            )}
+            fullWidth
+            disablePortal
+            isOptionEqualToValue={(option, value) => option._id === value?._id}
+          />
         </Grid>
         
         {/* Owner Organizer - Display for RO, Selection for RA */}

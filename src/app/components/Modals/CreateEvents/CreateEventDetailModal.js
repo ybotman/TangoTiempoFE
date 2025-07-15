@@ -246,7 +246,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   
   // Check if all required fields are filled
   const isFormValid = () => {
-    return !!(
+    // Basic validation for all events
+    const basicValidation = !!(
       eventData.title?.trim() &&
       (eventData.shortTitle?.trim() || eventData.shortName?.trim()) &&
       eventData.startDate &&
@@ -255,6 +256,45 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       eventData.venueId &&
       eventData.description?.trim()
     );
+
+    // If not a repeating event, basic validation is enough
+    if (!eventData.isRepeating) {
+      return basicValidation;
+    }
+
+    // Additional validation for repeating events
+    const hasRecurrenceType = eventData.recurrenceType && eventData.recurrenceType !== '';
+    
+    // Check if at least one day is selected for weekly events
+    const hasRecurrenceDays = eventData.recurrenceType === 'weekly' 
+      ? eventData.recurrenceDays && eventData.recurrenceDays.length > 0
+      : true; // For daily events, no day selection needed
+
+    // Check end conditions
+    let hasValidEndCondition = false;
+    if (eventData.useEndDate) {
+      // Check if end date is provided and not more than 1 year out
+      if (eventData.recurrenceEndDate) {
+        const endDate = new Date(eventData.recurrenceEndDate);
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        hasValidEndCondition = endDate <= oneYearFromNow;
+      }
+    } else {
+      // Check count limits
+      const count = parseInt(eventData.recurrenceCount);
+      if (!isNaN(count)) {
+        if (eventData.recurrenceType === 'daily') {
+          hasValidEndCondition = count <= 8;
+        } else if (eventData.recurrenceType === 'weekly') {
+          hasValidEndCondition = count <= 53;
+        } else if (eventData.recurrenceType === 'monthly') {
+          hasValidEndCondition = count <= 12;
+        }
+      }
+    }
+
+    return basicValidation && hasRecurrenceType && hasRecurrenceDays && hasValidEndCondition;
   };
 
   const validateEventData = () => {
@@ -293,6 +333,44 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     // Check recommended fields
     if (!eventData.eventImage) {
       errors.push({ field: 'image', message: 'Adding an image helps attract attendees', required: false });
+    }
+    
+    // Validate recurring event settings
+    if (eventData.isRepeating) {
+      if (!eventData.recurrenceType) {
+        errors.push({ field: 'Recurrence', message: 'Please select a recurrence type', required: true });
+      }
+      
+      if (eventData.recurrenceType === 'weekly' && (!eventData.recurrenceDays || eventData.recurrenceDays.length === 0)) {
+        errors.push({ field: 'Recurrence Days', message: 'Please select at least one day for weekly recurrence', required: true });
+      }
+      
+      // Validate end conditions
+      if (eventData.useEndDate) {
+        if (!eventData.recurrenceEndDate) {
+          errors.push({ field: 'End Date', message: 'Please specify when the recurring events should end', required: true });
+        } else {
+          const endDate = new Date(eventData.recurrenceEndDate);
+          const oneYearFromNow = new Date();
+          oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+          if (endDate > oneYearFromNow) {
+            errors.push({ field: 'End Date', message: 'Recurring events cannot be scheduled more than 1 year in advance', required: true });
+          }
+        }
+      } else {
+        if (!eventData.recurrenceCount) {
+          errors.push({ field: 'Occurrences', message: 'Please specify how many times the event should repeat', required: true });
+        } else {
+          const count = parseInt(eventData.recurrenceCount);
+          if (eventData.recurrenceType === 'daily' && count > 8) {
+            errors.push({ field: 'Occurrences', message: 'Daily events cannot repeat more than 8 times', required: true });
+          } else if (eventData.recurrenceType === 'weekly' && count > 53) {
+            errors.push({ field: 'Occurrences', message: 'Weekly events cannot repeat more than 53 times', required: true });
+          } else if (eventData.recurrenceType === 'monthly' && count > 12) {
+            errors.push({ field: 'Occurrences', message: 'Monthly events cannot repeat more than 12 times', required: true });
+          }
+        }
+      }
     }
     
     return errors;

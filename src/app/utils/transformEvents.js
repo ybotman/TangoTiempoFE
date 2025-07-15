@@ -96,8 +96,8 @@ export function transformEvents(events) {
         // Return as a regular event instead
         return {
           ...baseEvent,
-          start: event.startDate,
-          end: event.endDate,
+          start: stripTimezoneIndicator(event.startDate),
+          end: stripTimezoneIndicator(event.endDate),
         };
       }
       
@@ -105,7 +105,7 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        //console.log('Parsed RRULE for event:', event.title, rruleObj);
+        // Debug logging removed to reduce console noise
         
         // Create the event object
         const recurringEvent = {
@@ -136,7 +136,7 @@ export function transformEvents(events) {
             return stripTimezoneIndicator(exdateWithTime);
           });
           
-          console.log(`Added exdate for ${event.title}:`, recurringEvent.exdate);
+          // Excluded dates processed and added to event
         }
         
         return recurringEvent;
@@ -145,8 +145,8 @@ export function transformEvents(events) {
         // Fallback to single event with indicator
         return {
           ...baseEvent,
-          start: event.startDate,
-          end: event.endDate,
+          start: stripTimezoneIndicator(event.startDate),
+          end: stripTimezoneIndicator(event.endDate),
           title: event.title,
           extendedProps: {
             ...baseEvent.extendedProps,
@@ -159,8 +159,8 @@ export function transformEvents(events) {
       // For non-recurring events, use standard format
       return {
         ...baseEvent,
-        start: event.startDate, // Map 'startDate' to 'start'
-        end: event.endDate, // Map 'endDate' to 'end'
+        start: stripTimezoneIndicator(event.startDate), // Map 'startDate' to 'start'
+        end: stripTimezoneIndicator(event.endDate), // Map 'endDate' to 'end'
       };
     }
     } catch (error) {
@@ -173,14 +173,24 @@ export function transformEvents(events) {
 
 // Parse RRULE string to FullCalendar v6 object format
 function parseRRuleToObject(rruleString, startDate, endDate) {
-  const parts = rruleString.split(';');
+  try {
+    const parts = rruleString.split(';');
+    
+    const rruleObj = {
+      // Strip Z suffix to treat as local time instead of UTC
+      // This prevents recurring events from shifting to previous day in local timezones
+      dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
+    };
   
-  const rruleObj = {
-    // Strip Z suffix to treat as local time instead of UTC
-    // This prevents recurring events from shifting to previous day in local timezones
-    dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
-  };
-  
+  // First pass: get frequency
+  let frequency = null;
+  parts.forEach(part => {
+    const [key, value] = part.split('=');
+    if (key === 'FREQ') {
+      frequency = value.toLowerCase();
+    }
+  });
+
   parts.forEach(part => {
     const [key, value] = part.split('=');
     switch(key) {
@@ -188,8 +198,17 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
         rruleObj.freq = value.toLowerCase();
         break;
       case 'BYDAY':
-        // Convert to lowercase array for FullCalendar
-        rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
+        // Handle differently based on frequency
+        if (frequency === 'monthly') {
+          // For monthly, keep the original format (e.g., '2TH', '-1MO')
+          // FullCalendar's rrule plugin expects this format for monthly patterns
+          rruleObj.byweekday = value.split(',');
+          // Keeping original format for monthly BYDAY (e.g., '2TH', '-1MO')
+        } else {
+          // For weekly, convert to lowercase array
+          rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
+          // Converting to lowercase for FullCalendar compatibility
+        }
         break;
       case 'UNTIL':
         // Convert RRULE date format to ISO format and strip timezone
@@ -206,6 +225,14 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
   });
   
   return rruleObj;
+  } catch (error) {
+    console.error('Error parsing RRULE:', rruleString, error);
+    // Return a basic object to prevent crashes
+    return {
+      freq: 'weekly',
+      dtstart: stripTimezoneIndicator(startDate)
+    };
+  }
 }
 
 // Convert RRULE date format (YYYYMMDDTHHMMSSZ) to ISO format
@@ -226,18 +253,25 @@ function convertRRuleDateToISO(rruleDate) {
 }
 
 // Strip timezone indicator (Z suffix) from date strings
-// This makes FullCalendar treat the time as local instead of UTC
+// Convert UTC date to local time and format as ISO string without timezone indicator
+// This makes FullCalendar treat the time as the actual local time equivalent
 function stripTimezoneIndicator(dateString) {
   if (!dateString) return dateString;
   
-  // Handle ISO string format with Z suffix
+  // Handle ISO string format with Z suffix (UTC)
   if (typeof dateString === 'string' && dateString.endsWith('Z')) {
-    return dateString.slice(0, -1);
+    const utcDate = new Date(dateString);
+    // Get the local time equivalent by using the local timezone offset
+    const localISOString = new Date(utcDate.getTime() - (utcDate.getTimezoneOffset() * 60000)).toISOString();
+    // Remove the Z suffix to get local time format
+    return localISOString.slice(0, -1);
   }
   
   // Handle other timezone indicators like +00:00
   if (typeof dateString === 'string' && /[+-]\d{2}:\d{2}$/.test(dateString)) {
-    return dateString.replace(/[+-]\d{2}:\d{2}$/, '');
+    const utcDate = new Date(dateString);
+    const localISOString = new Date(utcDate.getTime() - (utcDate.getTimezoneOffset() * 60000)).toISOString();
+    return localISOString.slice(0, -1);
   }
   
   return dateString;
