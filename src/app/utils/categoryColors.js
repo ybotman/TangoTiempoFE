@@ -4,11 +4,11 @@ export const categoryColors = {
   Festival: 'Red',
   Milonga: 'DodgerBlue',
   Practica: 'cyan',
+  Marathon: 'Orange',
   Class: 'yellow',
   Workshop: 'HotPink',
-  Trip: 'yellowGreen',
-  Virtual: 'Orange',
   DayWorkshop: 'PaleGreen',
+  Trip: 'yellowGreen',
   Unknown: 'lightGrey',
 
   // AppId 2 Categories (Barbershop)
