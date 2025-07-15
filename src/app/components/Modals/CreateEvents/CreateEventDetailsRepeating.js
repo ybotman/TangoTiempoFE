@@ -486,7 +486,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       {/* Monthly Disabled Notice */}
       <Box sx={{ mt: 2, p: 1.5, bgcolor: 'warning.light', borderRadius: 1, display: 'flex', alignItems: 'center' }}>
         <Typography variant="body2" color="warning.dark">
-          ⚠️ Monthly recurrence is temporarily disabled while we improve its functionality. Please use weekly or daily patterns instead.
+          ⚠️ Monthly recurrence is temporarily disabled while we improve its functionality. Please use non-repeating events instead of monthly.
         </Typography>
       </Box>
 
