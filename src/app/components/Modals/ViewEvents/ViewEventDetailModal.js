@@ -159,11 +159,27 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                               eventDetails?.extendedProps?.ownerOrganizerID &&
                               selectedRole === 'RegionalOrganizer';
   
+  // For Regional Admin, only check localAdminInfo allowed cities
+  const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
+  
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&
-                          user.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds &&
+                          raAllowedCities.length > 0 &&
                           eventDetails?.extendedProps?.venueMasteredCityID &&
-                          user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds.includes(eventDetails.extendedProps.venueMasteredCityID);
+                          raAllowedCities.includes(eventDetails.extendedProps.venueMasteredCityID);
+  
+  // Debug logging for RA permissions
+  if (selectedRole === 'RegionalAdmin') {
+    console.log('RA Permission Debug:', {
+      selectedRole,
+      hasUser: !!user,
+      raAllowedCities,
+      allowedCitiesFromLocalAdmin: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
+      eventVenueMasteredCityID: eventDetails?.extendedProps?.venueMasteredCityID,
+      isIncluded: raAllowedCities.includes(eventDetails?.extendedProps?.venueMasteredCityID),
+      isRegionalAdmin
+    });
+  }
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
   
@@ -238,7 +254,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         Delete
       </Button>
     </>
-  ) : null;
+  ) : (selectedRole === 'RegionalAdmin' ? (
+    <Typography 
+      variant="caption" 
+      color="text.secondary"
+      sx={{ 
+        fontStyle: 'italic',
+        fontSize: '0.75rem',
+        px: 2
+      }}
+    >
+      {eventDetails?.extendedProps?.masteredCityName || 'City'} - not in your assigned cities
+    </Typography>
+  ) : null);
 
   return (
     <>

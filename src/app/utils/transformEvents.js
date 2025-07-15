@@ -12,7 +12,16 @@ export function transformEvents(events) {
       const venueId = event.venueID || event.venueId || event.locationID || null;
       const venueName = event.venueName || event.locationName || null;
     
-    // Debug logging removed to reduce console noise
+    // Debug logging for RA city mapping
+    if (events.indexOf(event) < 3) {
+      console.log(`Event Transform Debug - ${event.title}:`, {
+        masteredCityId: event.masteredCityId,
+        masteredCityIdType: typeof event.masteredCityId,
+        masteredCityId_id: event.masteredCityId?._id,
+        masteredCityName: event.masteredCityName,
+        willMapTo: event.masteredCityId?._id || event.masteredCityId || null
+      });
+    }
     /*
     if (events.indexOf(event) < 3) {
       console.log(`Event ${event.title}:`, {
@@ -49,6 +58,8 @@ export function transformEvents(events) {
         masteredRegionName: event.masteredRegionName,
         masteredDivisionName: event.masteredDivisionName,
         masteredCityName: event.masteredCityName,
+        // Handle both populated object and string ID
+        venueMasteredCityID: event.masteredCityId?._id || event.masteredCityId || null, // For RA permission checks
         active: event.active || event.isActive, // Legacy field
         isActive: event.isActive || event.active, // Current field
         canceled: event.canceled || event.isCanceled,
