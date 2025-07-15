@@ -726,7 +726,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             onClick={handleSave} 
             variant="contained" 
             color="primary"
-            disabled={saving || !isFormValid() || (editMode && !hasUnsavedChanges)}
+            disabled={saving || !isFormValid()}
             startIcon={saving && <CircularProgress size={20} />}
           >
             {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'UPDATE' : 'Save Event')}
