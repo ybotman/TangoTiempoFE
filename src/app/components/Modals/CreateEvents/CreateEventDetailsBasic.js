@@ -1,5 +1,5 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete } from '@mui/material';
+import React, { useEffect, useContext, useState, useMemo } from 'react';
+import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete, Select, MenuItem } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -54,7 +54,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         }
       }
     }
-  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues.length]); // Use venues.length instead of venues to prevent loops
+  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues.length, venueInputValue]); // Add venueInputValue to dependencies
   
   // Filter venues based on search input
   useEffect(() => {
@@ -248,6 +248,87 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, endDate: newDate }));
   };
 
+  // Memoize the organizer select value to prevent re-computation during render
+  const organizerSelectValue = useMemo(() => {
+    if (!eventData.ownerOrganizerID) return '';
+    return organizers.some(org => org._id === eventData.ownerOrganizerID) 
+      ? eventData.ownerOrganizerID 
+      : '';
+  }, [eventData.ownerOrganizerID, organizers]);
+
+  // Memoize the selected category to prevent re-computation during render
+  const selectedCategory = useMemo(() => {
+    return categories.find(cat => cat._id === eventData.categoryFirstId) || null;
+  }, [categories, eventData.categoryFirstId]);
+
+  // Memoize the selected venue to prevent re-computation during render
+  const selectedVenue = useMemo(() => {
+    if (!eventData.venueId && !eventData.locationID) return null;
+    // First check if venue exists in the loaded venues
+    if (Array.isArray(venues) && venues.length > 0) {
+      const found = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
+      if (found) return found;
+    }
+    // If not found but we have venue data, create a placeholder
+    if (eventData.venueName || eventData.locationName) {
+      return {
+        _id: eventData.venueId || eventData.locationID,
+        name: eventData.venueName || eventData.locationName,
+        shortName: eventData.venueName || eventData.locationName,
+        isPlaceholder: true
+      };
+    }
+    return null;
+  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues]);
+
+  // Memoize venue options to prevent re-computation during render
+  const venueOptions = useMemo(() => {
+    const venueOptionsArray = Array.isArray(filteredVenues) ? filteredVenues : [];
+    
+    // Separate active and inactive venues
+    // Treat undefined/null isActive as active (true)
+    const activeVenues = venueOptionsArray.filter(v => v && (v.isActive === true || v.isActive === undefined || v.isActive === null));
+    const inactiveVenues = venueOptionsArray.filter(v => v && v.isActive === false);
+    
+    // Create grouped options
+    let groupedOptions = [];
+    
+    // Always add a header for active venues if there are any venues at all
+    if (venueOptionsArray.length > 0) {
+      groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
+      
+      // Add active venues
+      if (activeVenues.length > 0) {
+        groupedOptions = [...groupedOptions, ...activeVenues];
+      } else {
+        groupedOptions.push({ _id: 'no-active', isPlaceholder: true, name: 'No active venues', disabled: true });
+      }
+    }
+    
+    // Add separator and inactive venues if any exist
+    if (inactiveVenues.length > 0) {
+      groupedOptions.push({ _id: 'divider', isDivider: true });
+      groupedOptions = [...groupedOptions, ...inactiveVenues];
+    }
+    
+    // If we have a selected venue that's not in the options, add it at the beginning
+    if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
+      const venueId = eventData.venueId || eventData.locationID;
+      const exists = venueOptionsArray.some(v => v?._id === venueId);
+      if (!exists) {
+        // Add the placeholder venue to the beginning
+        groupedOptions.unshift({
+          _id: venueId,
+          name: eventData.venueName || eventData.locationName,
+          shortName: eventData.venueName || eventData.locationName,
+          isPlaceholder: true
+        });
+      }
+    }
+    
+    return groupedOptions;
+  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName]);
+
   return (
     <Box>
       <Typography variant="h5" component="h2">
@@ -328,7 +409,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           <Autocomplete
             options={categories}
             getOptionLabel={(option) => option.categoryName || ''}
-            value={categories.find(cat => cat._id === eventData.categoryFirstId) || null}
+            value={selectedCategory}
             onChange={(event, newValue) => {
               setEventData(prevData => ({ 
                 ...prevData, 
@@ -359,12 +440,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               <InputLabel id="organizer-label">Event Organizer</InputLabel>
               <Select
                 labelId="organizer-label"
-                value={
-                  eventData.ownerOrganizerID && 
-                  organizers.some(org => org._id === eventData.ownerOrganizerID) 
-                    ? eventData.ownerOrganizerID 
-                    : ''
-                }
+                value={organizerSelectValue}
                 onChange={handleOrganizerChange}
                 label="Event Organizer"
                 required
@@ -416,71 +492,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             {isVenueReady ? (
             <Autocomplete
               id="venue-autocomplete"
-              options={(() => {
-                const venueOptions = Array.isArray(filteredVenues) ? filteredVenues : [];
-                
-                // Separate active and inactive venues
-                // Treat undefined/null isActive as active (true)
-                const activeVenues = venueOptions.filter(v => v && (v.isActive === true || v.isActive === undefined || v.isActive === null));
-                const inactiveVenues = venueOptions.filter(v => v && v.isActive === false);
-                
-                // Create grouped options
-                let groupedOptions = [];
-                
-                // Always add a header for active venues if there are any venues at all
-                if (venueOptions.length > 0) {
-                  groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
-                  
-                  // Add active venues
-                  if (activeVenues.length > 0) {
-                    groupedOptions = [...groupedOptions, ...activeVenues];
-                  } else {
-                    groupedOptions.push({ _id: 'no-active', isPlaceholder: true, name: 'No active venues', disabled: true });
-                  }
-                }
-                
-                // Add separator and inactive venues if any exist
-                if (inactiveVenues.length > 0) {
-                  groupedOptions.push({ _id: 'divider', isDivider: true });
-                  groupedOptions = [...groupedOptions, ...inactiveVenues];
-                }
-                
-                // If we have a selected venue that's not in the options, add it at the beginning
-                if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
-                  const venueId = eventData.venueId || eventData.locationID;
-                  const exists = venueOptions.some(v => v?._id === venueId);
-                  if (!exists) {
-                    // Add the placeholder venue to the beginning
-                    groupedOptions.unshift({
-                      _id: venueId,
-                      name: eventData.venueName || eventData.locationName,
-                      shortName: eventData.venueName || eventData.locationName,
-                      isPlaceholder: true
-                    });
-                  }
-                }
-                
-                return groupedOptions;
-              })()}
+              options={venueOptions}
               loading={loadingVenues}
-              value={(() => {
-                if (!eventData.venueId && !eventData.locationID) return null;
-                // First check if venue exists in the loaded venues
-                if (Array.isArray(venues) && venues.length > 0) {
-                  const found = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
-                  if (found) return found;
-                }
-                // If not found but we have venue data, create a placeholder
-                if (eventData.venueName || eventData.locationName) {
-                  return {
-                    _id: eventData.venueId || eventData.locationID,
-                    name: eventData.venueName || eventData.locationName,
-                    shortName: eventData.venueName || eventData.locationName,
-                    isPlaceholder: true
-                  };
-                }
-                return null;
-              })()}
+              value={selectedVenue}
               onChange={handleVenueChange}
               onInputChange={handleVenueInputChange}
               getOptionLabel={(option) => {

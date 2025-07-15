@@ -105,11 +105,6 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        console.log('Monthly RRULE debug:', {
-          original: cleanedRRule,
-          parsed: rruleObj,
-          eventTitle: event.title
-        });
         
         // Create the event object
         const recurringEvent = {
@@ -223,7 +218,6 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
             // Some RRULE parsers need these separated
             rruleObj.bysetpos = positionalDays.map(pd => pd.pos);
             rruleObj.byweekday = positionalDays.map(pd => pd.day);
-            console.log('Monthly parsed with bysetpos:', rruleObj.bysetpos, 'and byweekday:', rruleObj.byweekday);
           }
         } else {
           // For weekly, convert to lowercase array
