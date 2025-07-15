@@ -8,8 +8,6 @@ import {
   FormControlLabel,
   FormGroup,
   Switch,
-  Tooltip,
-  Button,
   Alert,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -215,7 +213,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   const [excludeDates, setExcludeDates] = useState(eventData.excludeDatesString || eventData.excludeDates || '');
   const [endDate, setEndDate] = useState(eventData.recurrenceEndDate || '');
   const [occurrences, setOccurrences] = useState(eventData.recurrenceCount || '');
-  const [sendReminder, setSendReminder] = useState(eventData.sendReminder || false);
+  // sendReminder feature removed - was not implemented
 
   // State to handle switching between End Date and Occurrences
   const [useEndDate, setUseEndDate] = useState(eventData.useEndDate !== undefined ? eventData.useEndDate : true);
@@ -287,13 +285,15 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     setOccurrences(''); // Clear occurrences when switching
   };
 
-  // Convert date to RRULE format (YYYYMMDDTHHMMSSZ)
+  // Convert date to RRULE format (YYYYMMDDTHHMMSS - local time)
   const dateToRRuleFormat = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    // Set to end of day in UTC
-    date.setUTCHours(23, 59, 59, 999);
-    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    // Use local end of day (23:59:59) not UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}${month}${day}T235959`;
   };
 
   // Validate RRULE format
@@ -402,8 +402,8 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         return null;
       }
       
-      // Parse YYYY-MM-DD format and convert to ISO string
-      const parsedDate = new Date(trimmed + 'T00:00:00Z');
+      // Parse YYYY-MM-DD format and keep as local time
+      const parsedDate = new Date(trimmed + 'T00:00:00');
       
       // Check if date is valid
       if (isNaN(parsedDate.getTime())) {
@@ -411,7 +411,8 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         return null;
       }
       
-      return parsedDate.toISOString();
+      // Return ISO string without Z suffix to maintain local time
+      return parsedDate.toISOString().slice(0, -1);
     }).filter(date => date !== null);
   };
 
@@ -523,17 +524,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         </Box>
       </Box>
 
-      {/* Send Reminder Switch */}
-      <Box marginTop={2}>
-        <Tooltip title="Send a reminder 1 month before the end date">
-          <FormControlLabel
-            control={
-              <Switch checked={sendReminder} onChange={(e) => setSendReminder(e.target.checked)} color="primary" />
-            }
-            label="Send Reminder"
-          />
-        </Tooltip>
-      </Box>
+      {/* Send Reminder feature removed - was not implemented */}
 
       {/* Weekly Options */}
       {recurrenceType === 'weekly' && (
@@ -657,7 +648,7 @@ RepeatingEventDetails.propTypes = {
     excludeDates: PropTypes.string,
     endDate: PropTypes.string,
     occurrences: PropTypes.string,
-    sendReminder: PropTypes.bool,
+    // sendReminder: PropTypes.bool, // Removed - feature not implemented
     startDate: PropTypes.instanceOf(Date),
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
