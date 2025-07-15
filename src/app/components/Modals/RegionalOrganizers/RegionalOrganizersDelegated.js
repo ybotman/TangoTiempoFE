@@ -3,7 +3,8 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, Button, CircularProgress, Select, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
+import { Box, Typography, Button, CircularProgress, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
+import Select from '@mui/material/Select';
 import axios from 'axios';
 
 const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds = [], organizers = [], updateOrganizer }) => {
