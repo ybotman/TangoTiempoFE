@@ -204,8 +204,8 @@ const MaterialUISwitch = styled(Switch)(() => ({
 }));
 
 const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
-  // Default to weekly if monthly is selected (since monthly is disabled)
-  const initialType = eventData.recurrenceType === 'monthly' ? 'weekly' : (eventData.recurrenceType || 'weekly');
+  // Initialize recurrence type
+  const initialType = eventData.recurrenceType || 'weekly';
   const [recurrenceType, setRecurrenceType] = useState(initialType);
   const [recurrenceDays, setRecurrenceDays] = useState(eventData.recurrenceDays || []);
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
@@ -268,10 +268,6 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
 
   // Handle Recurrence Type Change
   const handleRecurrenceTypeChange = (e) => {
-    // Prevent selection of monthly (it's disabled but just in case)
-    if (e.target.value === 'monthly') {
-      return;
-    }
     setRecurrenceType(e.target.value);
     setRecurrenceDays([]);
     setMonthlyDays([]);
