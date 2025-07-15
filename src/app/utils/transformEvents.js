@@ -49,6 +49,7 @@ export function transformEvents(events) {
         masteredRegionName: event.masteredRegionName,
         masteredDivisionName: event.masteredDivisionName,
         masteredCityName: event.masteredCityName,
+        venueMasteredCityID: event.masteredCityId, // For RA permission checks
         active: event.active || event.isActive, // Legacy field
         isActive: event.isActive || event.active, // Current field
         canceled: event.canceled || event.isCanceled,
