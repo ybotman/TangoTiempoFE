@@ -17,8 +17,13 @@ export function transformEvents(events) {
       console.log(`Event Transform Debug - ${event.title}:`, {
         masteredCityId: event.masteredCityId,
         masteredCityName: event.masteredCityName,
+        venueMasteredCityId: event.venueMasteredCityId,
+        venueMasteredCityID: event.venueMasteredCityID,
+        venue: event.venue,
         willMapTo: event.masteredCityId // This will become venueMasteredCityID
       });
+      // Log all event keys to find the right field
+      console.log('Event keys:', Object.keys(event).filter(key => key.toLowerCase().includes('city') || key.toLowerCase().includes('master')));
     }
     /*
     if (events.indexOf(event) < 3) {
