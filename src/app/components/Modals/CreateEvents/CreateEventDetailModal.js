@@ -265,10 +265,17 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     // Additional validation for repeating events
     const hasRecurrenceType = eventData.recurrenceType && eventData.recurrenceType !== '';
     
-    // Check if at least one day is selected for weekly events
-    const hasRecurrenceDays = eventData.recurrenceType === 'weekly' 
-      ? eventData.recurrenceDays && eventData.recurrenceDays.length > 0
-      : true; // For daily events, no day selection needed
+    // Check if required days are selected based on recurrence type
+    let hasRecurrenceDays = true;
+    if (eventData.recurrenceType === 'weekly') {
+      hasRecurrenceDays = eventData.recurrenceDays && eventData.recurrenceDays.length > 0;
+    } else if (eventData.recurrenceType === 'monthly') {
+      // For monthly, both day of week AND week position must be selected
+      hasRecurrenceDays = (
+        eventData.monthlyDays && eventData.monthlyDays.length > 0 &&
+        eventData.monthlyWeeks && eventData.monthlyWeeks.length > 0
+      );
+    }
 
     // Check end conditions
     let hasValidEndCondition = false;
@@ -722,7 +729,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             disabled={saving || !isFormValid() || (editMode && !hasUnsavedChanges)}
             startIcon={saving && <CircularProgress size={20} />}
           >
-            {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'Update Event' : 'Save Event')}
+            {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'UPDATE' : 'Save Event')}
           </Button>
           <Button onClick={handleClose} variant="outlined" color="secondary">
             Close
