@@ -697,6 +697,37 @@ export function useEventOperations() {
         }
       }
       
+      // Handle image upload if an image file is present
+      if (preparedData.imageFile) {
+        try {
+          console.log('Image upload requested for update, token status:', {
+            hasToken: !!token,
+            tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+            tokenLength: token?.length,
+            fileSize: preparedData.imageFile.size,
+            fileName: preparedData.imageFile.name
+          });
+          
+          // Import the upload function dynamically to avoid issues with SSR
+          const { uploadEventImage } = await import('@/utils/uploadEventImages');
+          
+          // Upload the image and get the URLs (primary and fallback)
+          // Pass the fresh auth token for authentication
+          const uploadResult = await uploadEventImage(preparedData.imageFile, token);
+          
+          // Store the image URL in the event data
+          preparedData.eventImage = uploadResult.imageUrl;
+          preparedData.fallbackImageUrl = uploadResult.fallbackUrl || '/TangoQuestion.jpg';
+          
+          // Remove the file object from the data being sent to the API
+          delete preparedData.imageFile;
+          delete preparedData.imagePreviewUrl;
+        } catch (imageError) {
+          console.error('Error uploading image during update:', imageError);
+          // Continue without the image if upload fails
+        }
+      }
+      
       // Convert dayjs objects to ISO strings
       if (preparedData.startDate) {
         if (typeof preparedData.startDate.toISOString === 'function') {
