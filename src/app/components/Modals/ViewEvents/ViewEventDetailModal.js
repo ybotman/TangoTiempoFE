@@ -159,21 +159,26 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                               eventDetails?.extendedProps?.ownerOrganizerID &&
                               selectedRole === 'RegionalOrganizer';
   
+  // For Regional Admin, check both possible locations for allowed cities
+  const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+                          user?.backendInfo?.regionalOrganizerInfo?.allowedMasteredCityIds || 
+                          [];
+  
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&
-                          user.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds &&
+                          raAllowedCities.length > 0 &&
                           eventDetails?.extendedProps?.venueMasteredCityID &&
-                          user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds.includes(eventDetails.extendedProps.venueMasteredCityID);
+                          raAllowedCities.includes(eventDetails.extendedProps.venueMasteredCityID);
   
   // Debug logging for RA permissions
   if (selectedRole === 'RegionalAdmin') {
     console.log('RA Permission Debug:', {
       selectedRole,
       hasUser: !!user,
-      hasAllowedCities: !!user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
-      allowedCities: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
+      raAllowedCities,
+      allowedCitiesSource: raAllowedCities === user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ? 'localAdminInfo' : 'regionalOrganizerInfo',
       eventVenueMasteredCityID: eventDetails?.extendedProps?.venueMasteredCityID,
-      isIncluded: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds?.includes(eventDetails?.extendedProps?.venueMasteredCityID),
+      isIncluded: raAllowedCities.includes(eventDetails?.extendedProps?.venueMasteredCityID),
       isRegionalAdmin
     });
   }
