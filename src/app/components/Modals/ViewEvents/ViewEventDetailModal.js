@@ -159,10 +159,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                               eventDetails?.extendedProps?.ownerOrganizerID &&
                               selectedRole === 'RegionalOrganizer';
   
-  // For Regional Admin, check both possible locations for allowed cities
-  const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
-                          user?.backendInfo?.regionalOrganizerInfo?.allowedMasteredCityIds || 
-                          [];
+  // For Regional Admin, only check localAdminInfo allowed cities
+  const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
   
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&
@@ -176,7 +174,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       selectedRole,
       hasUser: !!user,
       raAllowedCities,
-      allowedCitiesSource: raAllowedCities === user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ? 'localAdminInfo' : 'regionalOrganizerInfo',
+      allowedCitiesFromLocalAdmin: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
       eventVenueMasteredCityID: eventDetails?.extendedProps?.venueMasteredCityID,
       isIncluded: raAllowedCities.includes(eventDetails?.extendedProps?.venueMasteredCityID),
       isRegionalAdmin
