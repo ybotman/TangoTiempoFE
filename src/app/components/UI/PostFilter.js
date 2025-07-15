@@ -24,7 +24,6 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
     'Workshop',
     'DayWorkshop',
     'Trip',
-    'Virtual',
     'Other',
     'Unknown',
   ];
