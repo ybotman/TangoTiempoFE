@@ -469,12 +469,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
-          <MenuItem value="monthly" disabled>
-            <Box display="flex" alignItems="center" gap={1}>
-              <span>Monthly</span>
-              <Typography variant="caption" color="text.secondary">(Coming Soon)</Typography>
-            </Box>
-          </MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
         </TextField>
         {eventData.startDate && (
           <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
