@@ -8,11 +8,9 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
-import ViewEventDetailsRepeating from './ViewEventDetailsRepeating';
-import ViewEventDetailsMore from './ViewEventDetailsMore';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
-import ViewEventDetailsOrganizerOther from './ViewEventDetailsOrganizerOther';
-import ViewEventDetailsVenueOther from './ViewEventDetailsVenueOther';
+import ViewEventDetailsOrganizer from './ViewEventDetailsOrganizer';
+import ViewEventDetailsVenue from './ViewEventDetailsVenue';
 // Legacy component removed as part of transition
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
@@ -356,22 +354,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             }}
           >
             <Tab label="Basic" value="Basic" />
-            <Tab label="More" value="More" />
             <Tab label="Images" value="Images" />
-            <Tab label="Repeating" value="repeating" />
-            <Tab label="Organizer" value="Organizer" />
             <Tab label="Venue" value="Venue" />
+            <Tab label="Organizer" value="Organizer" />
           </Tabs>
 
           {/* Tab Content */}
           {currentTab === 'Basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
           {currentTab === 'Images' && <ViewEventDetailsImage eventDetails={eventDetails} />}
-          {currentTab === 'repeating' && <ViewEventDetailsRepeating eventDetails={eventDetails} />}
-          {currentTab === 'More' && <ViewEventDetailsMore eventDetails={eventDetails} />}
-          {currentTab === 'Organizer' && <ViewEventDetailsOrganizerOther eventDetails={eventDetails} />}
-          {currentTab === 'Venue' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />}
-          {/* Old tab kept for compatibility during transition */}
-          {currentTab === 'Location' && <ViewEventDetailsVenueOther eventDetails={eventDetails} />}
+          {currentTab === 'Organizer' && <ViewEventDetailsOrganizer eventDetails={eventDetails} />}
+          {currentTab === 'Venue' && <ViewEventDetailsVenue eventDetails={eventDetails} />}
           </Box>
         </Box>
       </Modal>
