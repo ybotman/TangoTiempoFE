@@ -1,7 +1,19 @@
 // src/components/OtherEventDetails.js
 
 import React from 'react';
-import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid, CircularProgress, Switch, FormControlLabel, Tooltip } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  FormControl, 
+  InputLabel, 
+  MenuItem, 
+  Grid, 
+  CircularProgress, 
+  Switch, 
+  FormControlLabel, 
+  Tooltip 
+} from '@mui/material';
+import Select from '@mui/material/Select';
 import PropTypes from 'prop-types';
 import useCategories from '@/hooks/useCategories';
 import { useOrganizers } from '@/hooks/useOrganizers';
