@@ -18,12 +18,13 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
   const orderedCategories = [
     'Milonga',
     'Practica',
+    'Class',
+    'Marathon',
     'Festival',
     'Workshop',
     'DayWorkshop',
-    'Class',
     'Trip',
-    'Virtual',
+    'Other',
     'Unknown',
   ];
 
