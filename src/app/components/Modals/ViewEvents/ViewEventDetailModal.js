@@ -261,7 +261,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         px: 2
       }}
     >
-      Event not in your assigned cities
+      {eventDetails?.extendedProps?.masteredCityName || 'City'} - not in your assigned cities
     </Typography>
   ) : null);
 
