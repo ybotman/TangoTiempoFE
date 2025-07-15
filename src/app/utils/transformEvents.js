@@ -16,14 +16,11 @@ export function transformEvents(events) {
     if (events.indexOf(event) < 3) {
       console.log(`Event Transform Debug - ${event.title}:`, {
         masteredCityId: event.masteredCityId,
+        masteredCityIdType: typeof event.masteredCityId,
+        masteredCityId_id: event.masteredCityId?._id,
         masteredCityName: event.masteredCityName,
-        venueMasteredCityId: event.venueMasteredCityId,
-        venueMasteredCityID: event.venueMasteredCityID,
-        venue: event.venue,
-        willMapTo: event.masteredCityId // This will become venueMasteredCityID
+        willMapTo: event.masteredCityId?._id || event.masteredCityId || null
       });
-      // Log all event keys to find the right field
-      console.log('Event keys:', Object.keys(event).filter(key => key.toLowerCase().includes('city') || key.toLowerCase().includes('master')));
     }
     /*
     if (events.indexOf(event) < 3) {
@@ -61,7 +58,8 @@ export function transformEvents(events) {
         masteredRegionName: event.masteredRegionName,
         masteredDivisionName: event.masteredDivisionName,
         masteredCityName: event.masteredCityName,
-        venueMasteredCityID: event.masteredCityId, // For RA permission checks
+        // Handle both populated object and string ID
+        venueMasteredCityID: event.masteredCityId?._id || event.masteredCityId || null, // For RA permission checks
         active: event.active || event.isActive, // Legacy field
         isActive: event.isActive || event.active, // Current field
         canceled: event.canceled || event.isCanceled,
