@@ -105,7 +105,11 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
         
-        // Debug logging removed to reduce console noise
+        console.log('Monthly RRULE debug:', {
+          original: cleanedRRule,
+          parsed: rruleObj,
+          eventTitle: event.title
+        });
         
         // Create the event object
         const recurringEvent = {
@@ -141,17 +145,19 @@ export function transformEvents(events) {
         
         return recurringEvent;
       } catch (error) {
-        console.error('Error parsing RRULE, falling back to single event:', error);
+        console.error('Error parsing RRULE, falling back to single event:', error, 'for event:', event.title);
+        console.error('Failed RRULE was:', cleanedRRule);
         // Fallback to single event with indicator
         return {
           ...baseEvent,
           start: stripTimezoneIndicator(event.startDate),
           end: stripTimezoneIndicator(event.endDate),
-          title: event.title,
+          title: event.title + ' (⚠️ Recurring)',
           extendedProps: {
             ...baseEvent.extendedProps,
             isRecurring: true,
             recurrenceRule: cleanedRRule,
+            parsingError: true
           }
         };
       }
@@ -203,7 +209,22 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
           // For monthly, keep the original format (e.g., '2TH', '-1MO')
           // FullCalendar's rrule plugin expects this format for monthly patterns
           rruleObj.byweekday = value.split(',');
-          // Keeping original format for monthly BYDAY (e.g., '2TH', '-1MO')
+          // Also add bysetpos and byweekday separately for FullCalendar
+          // This helps with certain RRULE parsers that expect split format
+          const positionalDays = value.split(',').map(item => {
+            const match = item.match(/^([+-]?\d+)([A-Z]{2})$/);
+            if (match) {
+              return { pos: parseInt(match[1]), day: match[2].toLowerCase() };
+            }
+            return null;
+          }).filter(Boolean);
+          
+          if (positionalDays.length > 0) {
+            // Some RRULE parsers need these separated
+            rruleObj.bysetpos = positionalDays.map(pd => pd.pos);
+            rruleObj.byweekday = positionalDays.map(pd => pd.day);
+            console.log('Monthly parsed with bysetpos:', rruleObj.bysetpos, 'and byweekday:', rruleObj.byweekday);
+          }
         } else {
           // For weekly, convert to lowercase array
           rruleObj.byweekday = value.split(',').map(day => day.toLowerCase());
@@ -228,6 +249,15 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
   } catch (error) {
     console.error('Error parsing RRULE:', rruleString, error);
     // Return a basic object to prevent crashes
+    // For monthly rules that fail, return a simple non-recurring format
+    if (frequency === 'monthly') {
+      console.warn('Monthly RRULE failed to parse, falling back to single event');
+      return {
+        freq: 'daily',
+        count: 1,
+        dtstart: stripTimezoneIndicator(startDate)
+      };
+    }
     return {
       freq: 'weekly',
       dtstart: stripTimezoneIndicator(startDate)
