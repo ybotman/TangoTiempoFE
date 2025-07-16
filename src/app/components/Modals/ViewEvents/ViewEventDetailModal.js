@@ -382,9 +382,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             }}
           >
             <Tab label="Basic" value="Basic" />
-            <Tab label="Images" value="Images" />
             <Tab label="Venue" value="Venue" />
             <Tab label="Organizer" value="Organizer" />
+            <Tab label="Images" value="Images" />
           </Tabs>
 
           {/* Tab Content */}
