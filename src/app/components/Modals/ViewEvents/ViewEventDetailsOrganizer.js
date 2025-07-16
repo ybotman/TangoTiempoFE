@@ -398,8 +398,16 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
                           <AccessTimeIcon fontSize="small" color="action" sx={{ fontSize: 16 }} />
                           <Typography variant="body2" color="text.secondary">
                             {(() => {
-                              const eventDate = event.start || event.startDate || event.date;
-                              if (!eventDate) return 'Date not available';
+                              // API returns dates as 'startDate' field
+                              const eventDate = event.startDate || event.start || event.date;
+                              if (!eventDate) {
+                                console.warn('No date field found for event:', event.title, {
+                                  startDate: event.startDate,
+                                  start: event.start,
+                                  date: event.date
+                                });
+                                return 'Date not available';
+                              }
                               
                               const date = new Date(eventDate);
                               if (isNaN(date.getTime())) {
