@@ -74,6 +74,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
       });
       
       if (response.data && response.data.events) {
+        console.log('Upcoming events data:', response.data.events);
         setUpcomingEvents(response.data.events);
       }
     } catch (err) {
@@ -374,7 +375,12 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
           </Box>
         ) : upcomingEvents.length > 0 ? (
           <List>
-            {upcomingEvents.map((event, index) => (
+            {upcomingEvents.map((event, index) => {
+              // Debug first event to see structure
+              if (index === 0) {
+                console.log('Event structure:', event);
+              }
+              return (
               <React.Fragment key={event._id || index}>
                 <ListItem alignItems="flex-start" sx={{ px: 0 }}>
                   <ListItemText
@@ -391,7 +397,18 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <AccessTimeIcon fontSize="small" color="action" sx={{ fontSize: 16 }} />
                           <Typography variant="body2" color="text.secondary">
-                            {new Date(event.start).toLocaleDateString()} at {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {(() => {
+                              const eventDate = event.start || event.startDate || event.date;
+                              if (!eventDate) return 'Date not available';
+                              
+                              const date = new Date(eventDate);
+                              if (isNaN(date.getTime())) {
+                                console.warn('Invalid date for event:', event.title, eventDate);
+                                return 'Date not available';
+                              }
+                              
+                              return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                            })()}
                           </Typography>
                         </Box>
                         {event.extendedProps?.venueName && (
@@ -415,7 +432,8 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
                 </ListItem>
                 {index < upcomingEvents.length - 1 && <Divider component="li" />}
               </React.Fragment>
-            ))}
+              );
+            })}
           </List>
         ) : (
           <Typography variant="body2" color="text.secondary">
