@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, Chip, CircularProgress, Tooltip } from '@mui/material';
+import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, CircularProgress, Tooltip } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
@@ -195,6 +195,31 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }
         
         setHasUnsavedChanges(false); // Reset unsaved changes for edit mode
+        
+        // Validate Regional Admin city access for edit mode
+        if (selectedRole === 'RegionalAdmin') {
+          const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
+          // Check multiple possible field names for city ID
+          const eventCityId = eventToEdit.masteredCityId?._id || 
+                             eventToEdit.masteredCityId || 
+                             eventToEdit.venueMasteredCityID ||
+                             eventToEdit.venueMasteredCityId;
+          
+          console.log('RA Edit Validation:', {
+            selectedRole,
+            raAllowedCities,
+            eventCityId,
+            eventToEdit,
+            hasAccess: eventCityId && raAllowedCities.includes(eventCityId)
+          });
+          
+          if (!eventCityId || !raAllowedCities.includes(eventCityId)) {
+            setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
+            // Prevent the modal from being usable
+            setEventData(getInitialEventData(selectedDate, selectedLocation, nearestCity));
+            return;
+          }
+        }
       } else {
         // Create mode - reset all fields to initial values
         const initialData = getInitialEventData(selectedDate, selectedLocation, nearestCity);
@@ -212,7 +237,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
       });
     }
-  }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit]);
+  }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
   // Fetch organizer data when in create mode and user is RO
   useEffect(() => {
@@ -668,6 +693,21 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           </Alert>
         )}
 
+        {/* Block content if RA doesn't have permission */}
+        {saveError && saveError.includes('permission') && selectedRole === 'RegionalAdmin' ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography color="error" gutterBottom>
+              Access Denied
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              You can only edit events in your assigned cities.
+            </Typography>
+            <Button onClick={handleClose} sx={{ mt: 2 }} variant="contained">
+              Close
+            </Button>
+          </Box>
+        ) : (
+        <>
         {/* Tabs for different sections */}
         <Tabs 
           value={currentTab} 
@@ -735,6 +775,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             Close
           </Button>
         </Box>
+        </>
+        )}
       </Box>
     </Modal>
     
