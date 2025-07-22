@@ -124,6 +124,18 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
       try {
         const venueData = await getVenueById(venueId, true); // Add true to populate references
         if (venueData) {
+          console.log('Fetched venue data:', {
+            name: venueData.name,
+            address: venueData.address,
+            address1: venueData.address1,
+            address2: venueData.address2,
+            city: venueData.city,
+            state: venueData.state,
+            zip: venueData.zip,
+            phone: venueData.phone,
+            phoneNumber: venueData.phoneNumber,
+            website: venueData.website
+          });
           setVenue(venueData);
         } else {
           setError('Venue details not found');
@@ -210,9 +222,11 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
               {venue.address2 && (
                 <Typography variant="body2">{venue.address2}</Typography>
               )}
-              <Typography variant="body2">
-                {[venue.city, venue.state, venue.zip].filter(Boolean).join(', ')}
-              </Typography>
+              {(venue.city || venue.state || venue.zip) && (
+                <Typography variant="body2">
+                  {[venue.city, venue.state, venue.zip].filter(Boolean).join(', ')}
+                </Typography>
+              )}
             </Box>
           </Box>
         )}
