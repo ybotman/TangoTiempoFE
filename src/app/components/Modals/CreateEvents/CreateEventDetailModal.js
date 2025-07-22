@@ -201,10 +201,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
           // Check multiple possible field names for city ID
           // Also check venue object for city information
+          // Extract city ID - handle both object and string formats from backend
           const eventCityId = eventToEdit.masteredCityId?._id || 
                              eventToEdit.masteredCityId || 
-                             eventToEdit.venueMasteredCityID ||
-                             eventToEdit.venueMasteredCityId ||
                              eventToEdit.venue?.masteredCityId?._id ||
                              eventToEdit.venue?.masteredCityId ||
                              eventToEdit.venueInfo?.masteredCityId?._id ||
@@ -232,8 +231,6 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             'eventToEdit._id': eventToEdit._id,
             'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
             'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
-            'eventToEdit.venueMasteredCityID': eventToEdit.venueMasteredCityID,
-            'eventToEdit.venueMasteredCityId': eventToEdit.venueMasteredCityId,
             'eventToEdit.masteredCityName': eventToEdit.masteredCityName,
             'eventToEdit.locationID': eventToEdit.locationID,
             'eventToEdit.venueId': eventToEdit.venueId,
