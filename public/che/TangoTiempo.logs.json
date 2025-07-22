@@ -1,0 +1,1988 @@
+[{
+  "_id": {
+    "$oid": "687fd1fed387a8ab384da1c3"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:01:33.257Z"
+  },
+  "level": "info",
+  "action": "CREATE",
+  "resource": "event",
+  "userId": "wuhzfpG3s0UArWrYfDtWKTUWEQz1",
+  "status": "success",
+  "httpStatus": 201,
+  "details": {
+    "title": "pdf",
+    "organizer": {
+      "$oid": "680d9a06e0cc7a532a560552"
+    },
+    "venue": "680c510fef6308b31e5b563a",
+    "startDate": "2025-07-26T23:00:00.000Z",
+    "endDate": "2025-07-27T02:00:00.000Z",
+    "isRepeating": false,
+    "category": null
+  },
+  "metadata": {
+    "ip": "127.0.0.1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+    "appId": "1",
+    "roles": [
+      "66cb85ac74dca51e34e268ed",
+      "66cb85ac74dca51e34e268eb",
+      "66cb85ac74dca51e34e268ec"
+    ],
+    "endpoint": "/api/events/post",
+    "method": "POST"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3a6c8e72aebc5991efa"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:08:37.466Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3a6c8e72aebc5991efb"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:08:37.467Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3a6c8e72aebc5991efc"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:08:37.467Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3a6c8e72aebc5991efd"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:08:37.467Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3a6c8e72aebc5991efe"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:08:37.887Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3a6c8e72aebc5991eff"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:08:37.887Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c1e96ed402ecffb79c"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:04.017Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c1e96ed402ecffb79d"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:04.018Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c1e96ed402ecffb79e"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:04.018Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c1e96ed402ecffb79f"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:04.018Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c1e96ed402ecffb7a0"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:04.449Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c1e96ed402ecffb7a1"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:04.449Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c84fee3f4ca57348d2"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:11.157Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c84fee3f4ca57348d3"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:11.158Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c84fee3f4ca57348d4"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:11.158Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c84fee3f4ca57348d5"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:11.158Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c94fee3f4ca57348f3"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:12.316Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3c94fee3f4ca57348f4"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:12.316Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3e17c0781135ab809e4"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:36.111Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3e17c0781135ab809e5"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:36.112Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3e17c0781135ab809e6"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:36.112Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3e17c0781135ab809e7"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:36.112Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3e17c0781135ab809e8"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:36.546Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd3e17c0781135ab809e9"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:09:36.546Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd40ec5390f06f35bef44"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:21.264Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd40ec5390f06f35bef45"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:21.265Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd40ec5390f06f35bef46"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:21.265Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd40ec5390f06f35bef47"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:21.265Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd40ec5390f06f35bef48"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:21.677Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd40ec5390f06f35bef49"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:21.677Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd41e6315e5c4f9252586"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:37.914Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd41e6315e5c4f9252587"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:37.915Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd41e6315e5c4f9252588"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:37.915Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd41e6315e5c4f9252589"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:37.915Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd41e6315e5c4f925258a"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:38.325Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd41e6315e5c4f925258b"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:38.325Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd42caad178f5a612d122"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:51.816Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd42caad178f5a612d123"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:51.817Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd42caad178f5a612d124"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:51.817Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd42caad178f5a612d125"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:51.817Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd42caad178f5a612d126"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:52.236Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd42caad178f5a612d127"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:10:52.236Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4446bb441efd8b9a26a"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:15.922Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4446bb441efd8b9a26b"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:15.923Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4446bb441efd8b9a26c"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:15.923Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4446bb441efd8b9a26d"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:15.923Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4446bb441efd8b9a26e"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:16.322Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4446bb441efd8b9a26f"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:16.322Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd45613376986e8f127c7"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:33.286Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd45613376986e8f127c8"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:33.287Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd45613376986e8f127c9"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:33.287Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd45613376986e8f127ca"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:33.287Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd45613376986e8f127cb"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:33.741Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd45613376986e8f127cc"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:33.741Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd469f8f2aa5ed0bb2796"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:52.130Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd469f8f2aa5ed0bb2797"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:52.130Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd469f8f2aa5ed0bb2798"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:52.131Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd469f8f2aa5ed0bb2799"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:52.131Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd46af8f2aa5ed0bb27bf"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:53.293Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd46af8f2aa5ed0bb27c0"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:11:53.293Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4c81e67158d9e174874"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:27.795Z"
+  },
+  "level": "error",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Error loading server.js: {}"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4c81e67158d9e174875"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:27.796Z"
+  },
+  "level": "error",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Stack trace: OverwriteModelError: Cannot overwrite `userlogins` model once compiled.\n    at Mongoose.model (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/node_modules/mongoose/lib/mongoose.js:610:13)\n    at Object.<anonymous> (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/models/userLogins.js:187:27)\n    at Module._compile (node:internal/modules/cjs/loader:1358:14)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)\n    at Module.load (node:internal/modules/cjs/loader:1208:32)\n    at Module._load (node:internal/modules/cjs/loader:1024:12)\n    at Module.require (node:internal/modules/cjs/loader:1233:19)\n    at Module.patchedRequire [as require] (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/node_modules/diagnostic-channel/dist/src/patchRequire.js:16:46)\n    at require (node:internal/modules/helpers:179:18)\n    at Object.<anonymous> (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/middleware/requireRegionalAdmin.js:3:20)"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4c81e67158d9e174876"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:28.170Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4c81e67158d9e174877"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:28.171Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4d1e0e64a2e479801e0"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:36.916Z"
+  },
+  "level": "error",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Error loading server.js: {}"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4d1e0e64a2e479801e1"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:36.917Z"
+  },
+  "level": "error",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Stack trace: OverwriteModelError: Cannot overwrite `userlogins` model once compiled.\n    at Mongoose.model (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/node_modules/mongoose/lib/mongoose.js:610:13)\n    at Object.<anonymous> (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/models/userLogins.js:187:27)\n    at Module._compile (node:internal/modules/cjs/loader:1358:14)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)\n    at Module.load (node:internal/modules/cjs/loader:1208:32)\n    at Module._load (node:internal/modules/cjs/loader:1024:12)\n    at Module.require (node:internal/modules/cjs/loader:1233:19)\n    at Module.patchedRequire [as require] (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/node_modules/diagnostic-channel/dist/src/patchRequire.js:16:46)\n    at require (node:internal/modules/helpers:179:18)\n    at Object.<anonymous> (/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/calendar-be/middleware/requireRegionalAdmin.js:3:20)"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4d1e0e64a2e479801e2"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:37.316Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd4d1e0e64a2e479801e3"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:13:37.316Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd50fc32f72a1ea25f2e1"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:14:38.843Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd50fc32f72a1ea25f2e2"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:14:38.843Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd50fc32f72a1ea25f2e3"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:14:38.844Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd50fc32f72a1ea25f2e4"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:14:38.844Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd510c32f72a1ea25f308"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:14:39.972Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd510c32f72a1ea25f309"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:14:39.972Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd536c32f72a1ea25f3db"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:15:17.485Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "[EVENT DELETE] User: wuhzfpG3s0UArWrYfDtWKTUWEQz1, EventId: 6876e587bdc38a8ba5619ec7, Title: \"ava\", AppId: 1"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd536c32f72a1ea25f3dc"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:15:17.546Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "[EVENT DELETE SUCCESS] EventId: 6876e587bdc38a8ba5619ec7"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd536c32f72a1ea25f3dd"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:15:17.546Z"
+  },
+  "level": "info",
+  "action": "DELETE",
+  "resource": "event",
+  "resourceId": {
+    "$oid": "6876e587bdc38a8ba5619ec7"
+  },
+  "userId": "wuhzfpG3s0UArWrYfDtWKTUWEQz1",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "title": "ava",
+    "organizer": {
+      "$oid": "680d9a06e0cc7a532a560552"
+    },
+    "venue": {
+      "$oid": "680c5122ef6308b31e5b57c1"
+    },
+    "deletedBy": "owner",
+    "startDate": {
+      "$date": "2025-07-30T23:00:00.000Z"
+    }
+  },
+  "metadata": {
+    "ip": "127.0.0.1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+    "appId": "1",
+    "roles": [
+      "66cb85ac74dca51e34e268ed",
+      "66cb85ac74dca51e34e268eb",
+      "66cb85ac74dca51e34e268ec"
+    ],
+    "endpoint": "/api/events/6876e587bdc38a8ba5619ec7?appId=1&selectedRole=RegionalOrganizer",
+    "method": "DELETE",
+    "userName": "Toby Balsley",
+    "userEmail": "toby.balsley@gmail.com",
+    "organizerName": "Toby Balsley",
+    "organizerId": "680d9a06e0cc7a532a560552",
+    "organizerCities": [
+      "6751f58a5db435dd8005e46a"
+    ],
+    "organizerRegions": [],
+    "organizerDivisions": [
+      "6751f58a5db435dd8005e460"
+    ]
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd56fe6a983fd28aeddad"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:16:14.506Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server loaded successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd56fe6a983fd28aeddae"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:16:14.507Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Server running on port 3010"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd56fe6a983fd28aeddaf"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:16:14.507Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Environment: "
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd56fe6a983fd28aeddb0"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:16:14.507Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB URI exists: true"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd56fe6a983fd28aeddb1"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:16:15.387Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "MongoDB connected successfully"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687fd56fe6a983fd28aeddb2"
+  },
+  "timestamp": {
+    "$date": "2025-07-22T18:16:15.387Z"
+  },
+  "level": "console",
+  "action": "CONSOLE_LOG",
+  "resource": "system",
+  "status": "success",
+  "httpStatus": 200,
+  "details": {
+    "message": "Database connection initialized"
+  },
+  "metadata": {
+    "appId": "1",
+    "roles": [],
+    "organizerCities": [],
+    "organizerRegions": [],
+    "organizerDivisions": []
+  },
+  "__v": 0
+}]

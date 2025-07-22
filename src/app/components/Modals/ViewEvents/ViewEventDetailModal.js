@@ -162,11 +162,22 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   // For Regional Admin, only check localAdminInfo allowed cities
   const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
   
+  // Extract city ID from event - handle both object and string formats
+  const eventCityId = eventDetails?.extendedProps?.masteredCityId?._id || 
+                     eventDetails?.extendedProps?.masteredCityId;
+  
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&
                           raAllowedCities.length > 0 &&
-                          eventDetails?.extendedProps?.venueMasteredCityID &&
-                          raAllowedCities.includes(eventDetails.extendedProps.venueMasteredCityID);
+                          eventCityId &&
+                          raAllowedCities.some(city => {
+                            if (typeof city === 'string') {
+                              return city === eventCityId;
+                            } else if (city && typeof city === 'object') {
+                              return city._id === eventCityId || city.id === eventCityId;
+                            }
+                            return false;
+                          });
   
   // Debug logging for RA permissions
   if (selectedRole === 'RegionalAdmin') {
@@ -174,9 +185,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       selectedRole,
       hasUser: !!user,
       raAllowedCities,
-      allowedCitiesFromLocalAdmin: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds,
-      eventVenueMasteredCityID: eventDetails?.extendedProps?.venueMasteredCityID,
-      isIncluded: raAllowedCities.includes(eventDetails?.extendedProps?.venueMasteredCityID),
+      raAllowedCitiesType: Array.isArray(raAllowedCities) ? (raAllowedCities.length > 0 ? typeof raAllowedCities[0] : 'empty') : 'not-array',
+      eventCityId,
+      eventCityIdType: typeof eventCityId,
+      masteredCityIdRaw: eventDetails?.extendedProps?.masteredCityId,
       isRegionalAdmin
     });
   }

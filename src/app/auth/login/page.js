@@ -22,10 +22,12 @@ import LoginIcon from '@mui/icons-material/Login';
 import AppleIcon from '@/components/AppleIcon';
 import EmailAuthForm from '@/components/EmailAuthForm';
 import Link from 'next/link';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 const LoginPage = () => {
   const router = useRouter();
   const { user, loading, error, authenticateWithGoogle, authenticateWithApple, login } = useContext(AuthContext);
+  const { logAuthEvent } = useActivityLogger();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authError, setAuthError] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -40,10 +42,31 @@ const LoginPage = () => {
   const handleGoogleLogIn = async () => {
     setIsRedirecting(true);
     setAuthError('');
-    const result = await authenticateWithGoogle();
-    if (result) {
-      router.push('/calendar');
-    } else {
+    try {
+      const result = await authenticateWithGoogle();
+      if (result) {
+        // Log successful login
+        await logAuthEvent('LOGIN', true, {
+          method: 'google',
+          provider: 'google.com'
+        });
+        router.push('/calendar');
+      } else {
+        // Log failed login
+        await logAuthEvent('LOGIN_FAILED', false, {
+          method: 'google',
+          provider: 'google.com',
+          reason: 'Authentication failed'
+        });
+        setIsRedirecting(false);
+      }
+    } catch (error) {
+      // Log error during login
+      await logAuthEvent('LOGIN_FAILED', false, {
+        method: 'google',
+        provider: 'google.com',
+        error: error.message
+      });
       setIsRedirecting(false);
     }
   };
@@ -51,10 +74,31 @@ const LoginPage = () => {
   const handleAppleLogIn = async () => {
     setIsRedirecting(true);
     setAuthError('');
-    const result = await authenticateWithApple();
-    if (result) {
-      router.push('/calendar');
-    } else {
+    try {
+      const result = await authenticateWithApple();
+      if (result) {
+        // Log successful login
+        await logAuthEvent('LOGIN', true, {
+          method: 'apple',
+          provider: 'apple.com'
+        });
+        router.push('/calendar');
+      } else {
+        // Log failed login
+        await logAuthEvent('LOGIN_FAILED', false, {
+          method: 'apple',
+          provider: 'apple.com',
+          reason: 'Authentication failed'
+        });
+        setIsRedirecting(false);
+      }
+    } catch (error) {
+      // Log error during login
+      await logAuthEvent('LOGIN_FAILED', false, {
+        method: 'apple',
+        provider: 'apple.com',
+        error: error.message
+      });
       setIsRedirecting(false);
     }
   };
@@ -64,10 +108,23 @@ const LoginPage = () => {
     try {
       const result = await login(email, password);
       if (result) {
+        // Log successful login
+        await logAuthEvent('LOGIN', true, {
+          method: 'email',
+          provider: 'password',
+          email: email // Include email for tracking
+        });
         router.push('/calendar');
       }
       return result;
     } catch (error) {
+      // Log failed login
+      await logAuthEvent('LOGIN_FAILED', false, {
+        method: 'email',
+        provider: 'password',
+        email: email,
+        error: error.message || 'Login failed'
+      });
       setAuthError(error.message || 'Login failed');
       return null;
     }

@@ -1,0 +1,45 @@
+Field,Record A (Visible),Record B (Duplicate)
+_id,6877ed2156b4e944a75e175f,6877ed2156b4e944a75e175f
+appId,1,1
+title,(Fixed) CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…,(Fixed) CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…
+shortTitle,CHE TANGO,CHE TANGO
+description,"""UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMA…""","""UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMA…"""
+startDate,2025-07-19T23:00:00.000+00:00,2025-07-19T23:00:00.000+00:00
+endDate,2025-07-20T02:00:00.000+00:00,2025-07-20T02:00:00.000+00:00
+isAllDay,False,False
+categoryFirst,Practica,Practica
+categorySecond,,
+categoryThird,,
+categoryFirstId,66c4d370a87a956db06c49ea,66c4d370a87a956db06c49ea
+categorySecondId,None,None
+categoryThirdId,None,None
+ownerOrganizerID,680d9a06e0cc7a532a560552,680d9a06e0cc7a532a560552
+ownerOrganizerName,Toby Balsley,Toby Balsley
+ownerOrganizerShortName,YBOTMAN,YBOTMAN
+grantedOrganizerID,None,None
+grantedOrganizerName,,
+alternateOrganizerID,None,None
+alternateOrganizerName,,
+ownerOrganizer,"{'id': '680d9a06e0cc7a532a560552', 'name': 'Toby Balsley', 'shortName': 'YBOTMAN', 'eventRole': 'Owner'}","{'id': '680d9a06e0cc7a532a560552', 'name': 'Toby Balsley', 'shortName': 'YBOTMAN', 'eventRole': 'Owner'}"
+alternateOrganizers,[],[]
+locationName,Ultimate Tango Studio,Ultimate Tango Studio
+masteredRegionName,Northeast,Northeast
+masteredDivisionName,New England,New England
+masteredCityName,Boston,Boston
+masteredCityGeolocation,"{'type': 'Point', 'coordinates': [-71.0589, 42.3601]}","{'type': 'Point', 'coordinates': [-71.0589, 42.3601]}"
+eventImage,None,None
+seriesImages,[],[]
+venueID,68190f7b05c983fb8798381b,68190f7b05c983fb8798381b
+venueGeolocation,"{'type': 'Point', 'coordinates': [-71.0714035, 42.4387386]}","{'type': 'Point', 'coordinates': [-71.0714035, 42.4387386]}"
+recurrenceRule,FREQ=WEEKLY;BYDAY=SA;COUNT=4,FREQ=WEEKLY;BYDAY=SA;COUNT=4
+isDiscovered,False,False
+isOwnerManaged,True,True
+isActive,True,True
+isFeatured,False,False
+isBtcImported,False,False
+isAiGenerated,False,False
+isCanceled,False,False
+isRepeating,True,True
+cost,,
+expiresAt,2026-07-20T02:00:00.000+00:00,2026-07-20T02:00:00.000+00:00
+__v,0,0

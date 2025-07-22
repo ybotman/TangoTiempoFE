@@ -200,20 +200,47 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         if (selectedRole === 'RegionalAdmin') {
           const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
           // Check multiple possible field names for city ID
+          // Also check venue object for city information
+          // Extract city ID - handle both object and string formats from backend
           const eventCityId = eventToEdit.masteredCityId?._id || 
                              eventToEdit.masteredCityId || 
-                             eventToEdit.venueMasteredCityID ||
-                             eventToEdit.venueMasteredCityId;
+                             eventToEdit.venue?.masteredCityId?._id ||
+                             eventToEdit.venue?.masteredCityId ||
+                             eventToEdit.venueInfo?.masteredCityId?._id ||
+                             eventToEdit.venueInfo?.masteredCityId;
           
-          console.log('RA Edit Validation:', {
-            selectedRole,
-            raAllowedCities,
-            eventCityId,
-            eventToEdit,
-            hasAccess: eventCityId && raAllowedCities.includes(eventCityId)
+          // Check if RA has access to this city
+          // Handle both string IDs and object formats in raAllowedCities
+          const hasAccess = eventCityId && raAllowedCities.some(city => {
+            if (typeof city === 'string') {
+              return city === eventCityId;
+            } else if (city && typeof city === 'object') {
+              return city._id === eventCityId || city.id === eventCityId;
+            }
+            return false;
           });
           
-          if (!eventCityId || !raAllowedCities.includes(eventCityId)) {
+          // Enhanced debug logging to diagnose field issues
+          console.log('RA Edit Validation - Enhanced Debug:', {
+            selectedRole,
+            raAllowedCities,
+            'raAllowedCities type': Array.isArray(raAllowedCities) ? 'array' : typeof raAllowedCities,
+            'raAllowedCities sample': raAllowedCities.length > 0 ? raAllowedCities[0] : 'empty',
+            eventCityId,
+            'eventCityId type': typeof eventCityId,
+            'eventToEdit._id': eventToEdit._id,
+            'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
+            'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
+            'eventToEdit.masteredCityName': eventToEdit.masteredCityName,
+            'eventToEdit.locationID': eventToEdit.locationID,
+            'eventToEdit.venueId': eventToEdit.venueId,
+            'eventToEdit.venue': eventToEdit.venue,
+            'eventToEdit.venueInfo': eventToEdit.venueInfo,
+            'All eventToEdit fields': Object.keys(eventToEdit),
+            hasAccess: hasAccess
+          });
+          
+          if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
             // Prevent the modal from being usable
             setEventData(getInitialEventData(selectedDate, selectedLocation, nearestCity));

@@ -22,10 +22,12 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
+  const { logAuthEvent, logRoleChange, logActivity } = useActivityLogger();
   // Fetch roles using useRoles hook
   // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
@@ -91,8 +93,36 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
     }
   }, [roles]);
 
-  const handleRoleChange = (event) => {
+  const handleRoleChange = async (event) => {
     const newRole = event.target.value;
+    const previousRole = selectedRole;
+    
+    // Get display names for logging
+    const previousRoleDisplay = roleDisplayMap[previousRole] || previousRole;
+    const newRoleDisplay = roleDisplayMap[newRole] || newRole;
+    
+    // Log the role change with detailed information
+    await logRoleChange(previousRole, newRole, {
+      changedBy: 'user', // User initiated change
+      location: 'UserDrawer',
+      previousRoleDisplay: previousRoleDisplay,
+      newRoleDisplay: newRoleDisplay,
+      userId: user?.uid,
+      userEmail: user?.email,
+      userName: user?.displayName || `${user?.localUserInfo?.firstName} ${user?.localUserInfo?.lastName}`.trim() || 'Unknown User',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Also log as a generic activity for better tracking
+    await logActivity('ROLE_SELECTION', 'user_role', user?.uid, {
+      from: previousRole,
+      to: newRole,
+      fromDisplay: previousRoleDisplay,
+      toDisplay: newRoleDisplay,
+      action: 'manual_switch',
+      interface: 'drawer_menu'
+    });
+    
     selectRole(newRole);
     handleUserDrawerClose(); // Close drawer after selection
     showRoleMessage(newRole); // Trigger message independently
@@ -180,7 +210,18 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 <Button onClick={() => setLogoutConfirmOpen(false)} color="primary">
                   No
                 </Button>
-                <Button onClick={logOut} color="secondary" autoFocus>
+                <Button 
+                  onClick={async () => {
+                    // Log the logout event
+                    await logAuthEvent('LOGOUT', true, {
+                      userRole: selectedRole,
+                      userId: user?.uid
+                    });
+                    // Perform the logout
+                    logOut();
+                  }} 
+                  color="secondary" 
+                  autoFocus>
                   Yes
                 </Button>
               </DialogActions>
