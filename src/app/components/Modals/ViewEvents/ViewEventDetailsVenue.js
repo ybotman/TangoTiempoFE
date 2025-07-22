@@ -242,7 +242,7 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
           </Box>
         )}
 
-        {!venue.address && !venue.address1 && !venue.phoneNumber && !venue.phone && !venue.website && (
+        {!venue.address && !venue.address1 && !venue.city && !venue.state && !venue.phoneNumber && !venue.phone && !venue.website && (
           <Typography variant="body2" color="text.secondary">
             No contact information available
           </Typography>
