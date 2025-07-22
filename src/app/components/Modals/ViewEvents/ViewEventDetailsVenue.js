@@ -19,10 +19,34 @@ import { useVenues } from '@/hooks/useVenues';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamic imports for react-leaflet (no SSR)
-const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { 
+    ssr: false,
+    loading: () => <CircularProgress size={24} />
+  }
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { 
+    ssr: false,
+    loading: () => null
+  }
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { 
+    ssr: false,
+    loading: () => null
+  }
+);
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { 
+    ssr: false,
+    loading: () => null
+  }
+);
 
 // Fix for default markers in Leaflet - only run on client
 if (typeof window !== 'undefined') {
@@ -33,6 +57,8 @@ if (typeof window !== 'undefined') {
       iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     });
+  }).catch(err => {
+    console.error('Failed to load leaflet:', err);
   });
 }
 
@@ -41,6 +67,7 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [mapError, setMapError] = useState(false);
   const { getVenueById } = useVenues();
 
   // Handle various ways venue might be provided
@@ -95,8 +122,20 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
       setLoading(true);
       setError(null);
       try {
-        const venueData = await getVenueById(venueId);
+        const venueData = await getVenueById(venueId, true); // Add true to populate references
         if (venueData) {
+          console.log('Fetched venue data:', {
+            name: venueData.name,
+            address: venueData.address,
+            address1: venueData.address1,
+            address2: venueData.address2,
+            city: venueData.city,
+            state: venueData.state,
+            zip: venueData.zip,
+            phone: venueData.phone,
+            phoneNumber: venueData.phoneNumber,
+            website: venueData.website
+          });
           setVenue(venueData);
         } else {
           setError('Venue details not found');
@@ -173,26 +212,31 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
         </Typography>
         
         {/* Address */}
-        {(venue.address || venue.city || venue.state) && (
+        {(venue.address || venue.address1 || venue.address2 || venue.city || venue.state) && (
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
             <LocationOnIcon color="action" fontSize="small" sx={{ mt: 0.5 }} />
             <Box>
-              {venue.address && (
-                <Typography variant="body2">{venue.address}</Typography>
+              {(venue.address || venue.address1) && (
+                <Typography variant="body2">{venue.address || venue.address1}</Typography>
               )}
-              <Typography variant="body2">
-                {[venue.city, venue.state, venue.zip].filter(Boolean).join(', ')}
-              </Typography>
+              {venue.address2 && (
+                <Typography variant="body2">{venue.address2}</Typography>
+              )}
+              {(venue.city || venue.state || venue.zip) && (
+                <Typography variant="body2">
+                  {[venue.city, venue.state, venue.zip].filter(Boolean).join(', ')}
+                </Typography>
+              )}
             </Box>
           </Box>
         )}
 
         {/* Phone */}
-        {venue.phoneNumber && (
+        {(venue.phoneNumber || venue.phone) && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <PhoneIcon color="action" fontSize="small" />
-            <Link href={`tel:${venue.phoneNumber}`} underline="hover">
-              <Typography variant="body2">{venue.phoneNumber}</Typography>
+            <Link href={`tel:${venue.phoneNumber || venue.phone}`} underline="hover">
+              <Typography variant="body2">{venue.phoneNumber || venue.phone}</Typography>
             </Link>
           </Box>
         )}
@@ -212,7 +256,7 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
           </Box>
         )}
 
-        {!venue.address && !venue.phoneNumber && !venue.website && (
+        {!venue.address && !venue.address1 && !venue.city && !venue.state && !venue.phoneNumber && !venue.phone && !venue.website && (
           <Typography variant="body2" color="text.secondary">
             No contact information available
           </Typography>
@@ -220,48 +264,164 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
       </Paper>
 
       {/* Map */}
-      {hasValidCoordinates && mounted && (
+      {hasValidCoordinates && mounted && !mapError && (
         <Paper sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             Location Map
           </Typography>
           <Box sx={{ height: 400, width: '100%', position: 'relative' }}>
-            <MapContainer
-              center={[parseFloat(venue.latitude), parseFloat(venue.longitude)]}
-              zoom={15}
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={false}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker position={[parseFloat(venue.latitude), parseFloat(venue.longitude)]}>
-                <Popup>
-                  <Box>
-                    <Typography variant="subtitle2">
-                      {venue.name || venue.shortName || 'Venue'}
+            {(() => {
+              try {
+                return (
+                  <MapContainer
+                    center={[parseFloat(venue.latitude), parseFloat(venue.longitude)]}
+                    zoom={15}
+                    style={{ height: '100%', width: '100%' }}
+                    scrollWheelZoom={false}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[parseFloat(venue.latitude), parseFloat(venue.longitude)]}>
+                      <Popup>
+                        <Box>
+                          <Typography variant="subtitle2">
+                            {venue.name || venue.shortName || 'Venue'}
+                          </Typography>
+                          {(venue.address || venue.address1) && (
+                            <Typography variant="body2">{venue.address || venue.address1}</Typography>
+                          )}
+                        </Box>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
+                );
+              } catch (err) {
+                console.error('Map loading error:', err);
+                setMapError(true);
+                return (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '100%',
+                    backgroundColor: 'action.hover'
+                  }}>
+                    <Typography color="text.secondary">
+                      Map could not be loaded
                     </Typography>
-                    {venue.address && (
-                      <Typography variant="body2">{venue.address}</Typography>
-                    )}
                   </Box>
-                </Popup>
-              </Marker>
-            </MapContainer>
+                );
+              }
+            })()}
           </Box>
         </Paper>
       )}
 
       {/* Additional Information */}
-      {venue.notes && (
+      {(venue.notes || venue.comments) && (
         <Paper sx={{ p: 2, mt: 3 }}>
           <Typography variant="h6" gutterBottom>
-            Additional Notes
+            Additional Information
           </Typography>
-          <Typography variant="body2">
-            {venue.notes}
+          {venue.notes && (
+            <Box sx={{ mb: venue.comments ? 2 : 0 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Notes
+              </Typography>
+              <Typography variant="body2">
+                {venue.notes}
+              </Typography>
+            </Box>
+          )}
+          {venue.comments && (
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Comments
+              </Typography>
+              <Typography variant="body2">
+                {venue.comments}
+              </Typography>
+            </Box>
+          )}
+        </Paper>
+      )}
+
+      {/* Venue Details */}
+      <Paper sx={{ p: 2, mt: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Venue Details
+        </Typography>
+        
+        {/* Creation and Update Info */}
+        <Box sx={{ mb: 2 }}>
+          {venue.createdAt && (
+            <Typography variant="body2" color="text.secondary">
+              Created: {new Date(venue.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </Typography>
+          )}
+          {venue.updatedAt && (
+            <Typography variant="body2" color="text.secondary">
+              Last Updated: {new Date(venue.updatedAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Location Validation Status */}
+        {venue.isValidVenueGeolocation !== undefined && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Location Validated: {venue.isValidVenueGeolocation ? 'Yes' : 'No'}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Venue ID */}
+        {venue._id && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Venue ID: {venue._id}
+            </Typography>
+          </Box>
+        )}
+      </Paper>
+
+      {/* Location Hierarchy */}
+      {(venue.masteredRegionId || venue.masteredDivisionId || venue.masteredCountryId) && (
+        <Paper sx={{ p: 2, mt: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Location Hierarchy
           </Typography>
+          
+          {venue.masteredCountryId && (
+            <Typography variant="body2" color="text.secondary">
+              Country: {venue.masteredCountryId.countryName || venue.masteredCountryId}
+            </Typography>
+          )}
+          {venue.masteredRegionId && (
+            <Typography variant="body2" color="text.secondary">
+              Region: {venue.masteredRegionId.regionName || venue.masteredRegionId}
+            </Typography>
+          )}
+          {venue.masteredDivisionId && (
+            <Typography variant="body2" color="text.secondary">
+              Division: {venue.masteredDivisionId.divisionName || venue.masteredDivisionId}
+            </Typography>
+          )}
+          {venue.masteredCityId && (
+            <Typography variant="body2" color="text.secondary">
+              City: {venue.masteredCityId.cityName || venue.masteredCityId}
+            </Typography>
+          )}
         </Paper>
       )}
     </Box>
@@ -271,10 +431,12 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
 ViewEventDetailsVenue.propTypes = {
   eventDetails: PropTypes.shape({
     extendedProps: PropTypes.shape({
-      venueID: PropTypes.string,
-      locationID: PropTypes.string,
+      venueID: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+      locationID: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
       venueName: PropTypes.string,
       locationName: PropTypes.string,
+      venue: PropTypes.object,
+      location: PropTypes.object,
     }),
   }),
 };

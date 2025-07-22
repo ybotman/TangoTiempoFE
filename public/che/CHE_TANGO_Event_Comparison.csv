@@ -1,0 +1,54 @@
+Field,Visible Record (A),Older Record (B)
+__v,0,
+_id,6877ed2156b4e944a75e175f,68532f5fa1e3cfb6f8bb9cd2
+alternateOrganizerID,None,
+alternateOrganizerName,,
+alternateOrganizers,[],
+appId,1,1
+categoryFirst,Practica,Practica
+categoryFirstId,66c4d370a87a956db06c49ea,66c4d370a87a956db06c49ea
+categorySecond,,None
+categorySecondId,None,None
+categoryThird,,None
+categoryThirdId,None,None
+cost,,$15 – $20
+description,"""UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMA…""","<div class=""xdj266r x11i5rnm xat24cr x1mh8g0r x1vvkbs""><span class=""ht…"
+discoveredComments,,utils/btcImport/simple-import.js
+discoveredFirstDate,,2025-06-18T21:27:59.462+00:00
+endDate,2025-07-20T02:00:00.000+00:00,2025-06-28T22:00:00.000+00:00
+eventImage,None,https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/02/4…
+expiresAt,2026-07-20T02:00:00.000+00:00,None
+grantedOrganizerID,None,
+grantedOrganizerName,,
+isActive,True,True
+isAiGenerated,False,
+isAllDay,False,
+isBtcImported,False,True
+isCanceled,False,False
+isDiscovered,False,False
+isFeatured,False,
+isOwnerManaged,True,False
+isRepeating,True,
+locationName,Ultimate Tango Studio,
+masteredCityGeolocation,"{'type': 'Point', 'coordinates': [-71.0589, 42.3601]}","{'type': 'Point', 'coordinates': [-71.0589, 42.3601]}"
+masteredCityId,,6751f58a5db435dd8005e46a
+masteredCityName,Boston,Boston
+masteredDivisionId,,6751f58a5db435dd8005e460
+masteredDivisionName,New England,New England
+masteredRegionId,,6751f58a5db435dd8005e45b
+masteredRegionName,Northeast,Northeast
+ownerOrganizer,"{'id': '680d9a06e0cc7a532a560552', 'name': 'Toby Balsley', 'shortName': 'YBOTMAN', 'eventRole': 'Owner'}",
+ownerOrganizerID,680d9a06e0cc7a532a560552,680d9a06e0cc7a532a560556
+ownerOrganizerName,Toby Balsley,Ultimate Tango
+ownerOrganizerShortName,YBOTMAN,ULTIMATE
+recurrenceRule,FREQ=WEEKLY;BYDAY=SA;COUNT=4,
+reocurranceRule,,FREQ=WEEKLY;BYDAY=SA;COUNT=4
+seriesImages,[],
+shortTitle,CHE TANGO,UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…
+standardsTitle,,UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…
+startDate,2025-07-19T23:00:00.000+00:00,2025-06-28T19:00:00.000+00:00
+title,(Fixed) CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…,UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…
+updatedAt,,2025-06-23T15:23:00.237+00:00
+venueCityName,,Malden
+venueGeolocation,"{'type': 'Point', 'coordinates': [-71.0714035, 42.4387386]}","{'type': 'Point', 'coordinates': [-71.0589, 42.3601]}"
+venueID,68190f7b05c983fb8798381b,68190f7b05c983fb8798381b

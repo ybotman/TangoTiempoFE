@@ -321,8 +321,8 @@ export function useEventOperations() {
   // 
   // Backend needs to implement:
   // 1. Check if selectedRole === 'RegionalAdmin'
-  // 2. Get the event's venueMasteredCityID from the venue
-  // 3. Verify venueMasteredCityID is in the allowedAdminMasteredCityIds array
+  // 2. Get the event's masteredCityId from the venue
+  // 3. Verify masteredCityId is in the allowedAdminMasteredCityIds array
   // 4. If true, allow full CRUD operations (create/update/delete)
   // 5. RegionalAdmin should bypass ownerOrganizerID checks for events in their cities
   //

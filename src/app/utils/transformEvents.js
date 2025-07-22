@@ -58,8 +58,8 @@ export function transformEvents(events) {
         masteredRegionName: event.masteredRegionName,
         masteredDivisionName: event.masteredDivisionName,
         masteredCityName: event.masteredCityName,
-        // Handle both populated object and string ID
-        venueMasteredCityID: event.masteredCityId?._id || event.masteredCityId || null, // For RA permission checks
+        // Store the backend's masteredCityId directly - can be either object or string
+        masteredCityId: event.masteredCityId, // For RA permission checks
         active: event.active || event.isActive, // Legacy field
         isActive: event.isActive || event.active, // Current field
         canceled: event.canceled || event.isCanceled,
