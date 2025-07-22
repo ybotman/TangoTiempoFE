@@ -210,11 +210,25 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
                              eventToEdit.venueInfo?.masteredCityId?._id ||
                              eventToEdit.venueInfo?.masteredCityId;
           
+          // Check if RA has access to this city
+          // Handle both string IDs and object formats in raAllowedCities
+          const hasAccess = eventCityId && raAllowedCities.some(city => {
+            if (typeof city === 'string') {
+              return city === eventCityId;
+            } else if (city && typeof city === 'object') {
+              return city._id === eventCityId || city.id === eventCityId;
+            }
+            return false;
+          });
+          
           // Enhanced debug logging to diagnose field issues
           console.log('RA Edit Validation - Enhanced Debug:', {
             selectedRole,
             raAllowedCities,
+            'raAllowedCities type': Array.isArray(raAllowedCities) ? 'array' : typeof raAllowedCities,
+            'raAllowedCities sample': raAllowedCities.length > 0 ? raAllowedCities[0] : 'empty',
             eventCityId,
+            'eventCityId type': typeof eventCityId,
             'eventToEdit._id': eventToEdit._id,
             'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
             'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
@@ -226,10 +240,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             'eventToEdit.venue': eventToEdit.venue,
             'eventToEdit.venueInfo': eventToEdit.venueInfo,
             'All eventToEdit fields': Object.keys(eventToEdit),
-            hasAccess: eventCityId && raAllowedCities.includes(eventCityId)
+            hasAccess: hasAccess
           });
           
-          if (!eventCityId || !raAllowedCities.includes(eventCityId)) {
+          if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
             // Prevent the modal from being usable
             setEventData(getInitialEventData(selectedDate, selectedLocation, nearestCity));

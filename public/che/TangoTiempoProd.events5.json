@@ -1,0 +1,1671 @@
+[{
+  "_id": {
+    "$oid": "68617bd97c347bfff322d816"
+  },
+  "appId": "1",
+  "title": "TangoSpark: Beginner Level Series",
+  "shortTitle": "SPARK: Beginner",
+  "description": "Ready to take your first steps in Argentine tango?\n\nOur Beginner series is a fun, welcoming introduction designed for absolute beginners.\n\nThe series consists of 6 weekly lessons, each an hour long. You’ll learn the foundations of connection, walking together, ochos, the tango embrace, and simple turns—all at a relaxed pace that makes learning enjoyable.\n\n🗓 Class Schedule\nTuesdays, July 1 – August 5, 8-9 pm\n\nWhere:\nDance Complex* | 536 Massachusetts Ave., Cambridge, MA 02139\n\n💲 Pricing\n- Six-Class Package: $70 (Save up to 30%!)\nOur most popular option covers the whole six class series —perfect for committing to your tango journey.\nBeginner Series comes with a free entrance to our Tango social – Practica Spark ($10 value), the ideal place to practice the class material.\n\n- Drop-in (per class): $15\nPrefer to try it out first? Drop-ins are welcome!\n\n👟 What to Bring\n🕺No partner required—just bring your enthusiasm and wear something comfortable. We recommend shoes that are easy to pivot in (leather or suede soles work great!).",
+  "startDate": {
+    "$date": "2025-07-02T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-02T01:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Complex",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6862f3fb0ac53b960834ed90"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.102317,
+      42.3641
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": true,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-02T01:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686e5e360ac53b960835b0f4"
+  },
+  "appId": "1",
+  "title": "Advanced Beginner Series",
+  "shortTitle": "Adv Beg Classes",
+  "description": "When:\nWednesdays, July 2 – August 6, 7-8 pm \n\n\nWhere:\nMango Studio | 112 Bishop Allen Dr, Cambridge, MA 02139\n\n\nBuilding confidence and expanding your tango vocabulary.\n\n\nAfter the Beginner series, continue your journey with our Advanced Beginner level. With four unique rotating series (A to D), you’ll develop your technique, deepen your understanding of connection, and start exploring improvisation. You’ll also be introduced to tango-specific drills and partner dynamics. These series can be taken in any order.\n",
+  "startDate": {
+    "$date": "2025-07-09T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-10T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "UNKNOWN",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/92c9a187-728c-4bdb-bdde-272638408cee-1752063540640_tango_garage.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-10T00:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6862f4700ac53b960834ee57"
+  },
+  "appId": "1",
+  "title": "Tango Práctica Corazón in Lexington",
+  "shortTitle": "Corazón",
+  "description": "Summer is heating up, and we will be back for the Lexington practica on Thursday, July 10th. DJ Anna will be setting the mood with her carefully curated playlist. The practica will take place at the Lexington Community Center from 6:15 pm to 8:45 pm.\n\nThe address is 39 Marrett Rd, Lexington, MA 02421. To reach the Community center, turn from Marrett Road off Massachusetts Avenue, drive up the hill and park your car in the big parking lot in front of the center. Please sign your name at the front desk and pay with cash ($10). Members enter for free with their card. \n\nPlease invite your friends who would like to practice their dancing.\n\nIf you have any questions, email us at minuteman.tango.practica@gmail.com\n\nFacebook group: https://www.facebook.com/groups/1117995259207196/\n\nPlease check Google Calendar for the upcoming events:\n\nhttps://calendar.google.com/calendar/u/1?cid=NDRhYTZhNjYxNTM4YTQ1YWY1N2I4ZjExZDVjMjUyYjM1OTY1MGZkZjcwMTliMDI2MmE0Y2U5OGE4MzkzOTY3MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t\n\n",
+  "startDate": {
+    "$date": "2025-07-10T22:15:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-11T00:45:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Practica",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49ea"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021246c"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Lexington Community Center",
+  "ownerOrganizerName": "Tango Practica Corazón",
+  "ownerOrganizerShortName": "CORAZON",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/a60f873c-041b-4212-80ad-90771561e645-1751315308433_2025-07-10_Tango_Practica_Corazon_event_post_06-30.png",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6852ffeabb550728064284fd"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.2251836,
+      42.4440281
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "$10, free for members",
+  "expiresAt": {
+    "$date": "2026-07-11T00:45:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685ec6dda909d61e4f84b1f7"
+  },
+  "appId": "1",
+  "title": "Noche de Tango Argentino",
+  "shortTitle": "Party",
+  "description": "Join us for a summer tango party in the picturesque seaside village of Wellfleet on Saturday, July 12th. Maestro Guillermo Merlo will be spinning the tunes.                                                                                                                We will have a beautiful venue for dancing, great quality music, delicious snacks, plenty of parking, and of course, a lot of fun.\n\nThe event takes place at Wellfleet Preservation Hall (335 Main St, Wellfleet, Cape Cod, MA). An intro class kicks off the night at 6 pm, followed by a milonga from 7 to 10 pm. The cost for the class and dance party is $20 (pay at the door or online). Entry for just the dance party is $15 (at the door).\n\nPay online: https://www.eventbrite.com/e/learn-to-tango-noche-de-tango-argentino-tickets-1304368985749?aff=oddtdtcreator",
+  "startDate": {
+    "$date": "2025-07-12T22:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-13T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Milonga",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49e9"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021246c"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Wellfleet Preservation Hall",
+  "ownerOrganizerName": "Tango Practica Corazón",
+  "ownerOrganizerShortName": "CORAZON",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/39dabf40-126f-4ad8-b511-3dc88800c47b-1751041501652_Copy_of_Wellfleet_eg_Event_FB_(1920x1005px)_(820_x_360_px).png",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6853000abb550728064284ff"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -70.0311441,
+      41.9380966
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "$20, $15 milonga only",
+  "expiresAt": {
+    "$date": "2026-07-13T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68741a4356b4e944a75d737d"
+  },
+  "appId": "1",
+  "title": "Beginner Summer Tango in Hadley, MA ",
+  "shortTitle": "Beginner Class",
+  "description": "Learn Argentine Tango this summer in Hadley, MA with Brian. This series is designed to brush up on your fundamentals or to learn this dance for the first time. No experience or partner required. Drop in at any time. For best results attend every Monday since each element will be built upon each other.\n\nJuly 14th - Aug 25th\n\nTime:\n\nBeginner class 7:00pm-8pm\n\nPractica 8:00pm-10:30pm\n\nLocation: \n\nEast Street Dance Center\n\n47 East Street, Hadley, MA\n\nhttps://www.abtango.com/summer-tango-hadley2025",
+  "startDate": {
+    "$date": "2025-07-14T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-15T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021247a"
+  },
+  "ownerOrganizerName": "Andi Babbs",
+  "ownerOrganizerShortName": "ANDI",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680669172f9268813021247a"
+    },
+    "name": "Andi Babbs",
+    "shortName": "ANDI",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "East Street Dance Center",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6871bb4c47913efb2936e13d"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -72.582662521262,
+      42.34416246148
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": true,
+  "cost": "$15-25",
+  "expiresAt": {
+    "$date": "2026-07-15T00:00:00.000Z"
+  },
+  "__v": 0,
+  "recurrenceRule": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20250825T235959Z"
+},
+{
+  "_id": {
+    "$oid": "6874237956b4e944a75d8769"
+  },
+  "appId": "1",
+  "title": "Practica del Valle",
+  "shortTitle": "PracticadelVal ",
+  "description": "July 14th - Aug 25th Time: Beginner class 7:00pm-8pm Practica 8:00pm-10:30pm Location: East Street Dance Center 47 East Street, Hadley, MA",
+  "startDate": {
+    "$date": "2025-07-15T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-15T02:30:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Practica",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49ea"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021247a"
+  },
+  "ownerOrganizerName": "Andi Babbs",
+  "ownerOrganizerShortName": "ANDI",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680669172f9268813021247a"
+    },
+    "name": "Andi Babbs",
+    "shortName": "ANDI",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "East Street Dance Center",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6871bb4c47913efb2936e13d"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -72.582662521262,
+      42.34416246148
+    ]
+  },
+  "recurrenceRule": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20250825T235959Z",
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": true,
+  "cost": "$10-15",
+  "expiresAt": {
+    "$date": "2026-07-15T02:30:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68718796109a8420f85379ba"
+  },
+  "appId": "1",
+  "title": "Beginner Classes",
+  "shortTitle": "Beg Series",
+  "description": "Ready to take your first steps in Argentine tango?\n\nOur Beginner series is a fun, welcoming introduction designed for absolute beginners.\n\nThe series consists of 6 weekly lessons, each an hour long. You’ll learn the foundations of connection, walking together, ochos, the tango embrace, and simple turns—all at a relaxed pace that makes learning enjoyable.\n\nWhen: Tuesdays, July 1 – August 5, 8-9 pm\n\nWhere:\n    Dance Complex* | 536 Massachusetts Ave., Cambridge, MA 02139\n\n💲 Pricing\n\nSix-Class Package: $70 (Save upto 30%!)\n        Our most popular option covers the whole six class series —perfect for committing to your tango journey.\n        Beginner Series comes with a free entrance to our Tango social – Practica Spark ($10 value), the ideal place to practice the class material.\n    \nDrop-in (per class): $15\n        Prefer to try it out first? Drop-ins are welcome!\n\nAccepted Payments: Cash | Venmo | Zelle\n\n",
+  "startDate": {
+    "$date": "2025-07-16T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-16T01:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Complex",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/ef5c5268-b0f4-41bb-be2d-32927dbc6b41-1752270740909_neeraj_tango_diego.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6862f3fb0ac53b960834ed90"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.102317,
+      42.3641
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-16T01:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686e5f180ac53b960835b1b8"
+  },
+  "appId": "1",
+  "title": "Advanced Beginner Series",
+  "shortTitle": "Adv Beg Classes",
+  "description": "When:\nWednesdays, July 2 – August 6, 7-8 pm \n\nWhere:\nMango Studio | 112 Bishop Allen Dr, Cambridge, MA 02139\n\nBuilding confidence and expanding your tango vocabulary.\n\nAfter the Beginner series, continue your journey with our Advanced Beginner level. With four unique rotating series (A to D), you’ll develop your technique, deepen your understanding of connection, and start exploring improvisation. You’ll also be introduced to tango-specific drills and partner dynamics. These series can be taken in any order.\n",
+  "startDate": {
+    "$date": "2025-07-16T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-17T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "UNKNOWN",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/28b1ee73-d181-41ad-9f75-4024e23807b5-1752063766709_tango_garage.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-17T00:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687300c356b4e944a75d61df"
+  },
+  "appId": "1",
+  "title": "Practica Arriba",
+  "shortTitle": "Practica Arriba",
+  "description": "Argentine Tango Practica on the Second floor of 1548 Dorchester Avenue business office building from 7:30 pm - 9:30 pm. We keep it simple:\n- Dance floor and DJ for practicing\n- Light snacks and drinks\n- Separate space for onboarding beginners\nFee: $10. Free for Students & MIT Tango Club. We welcome donation\n",
+  "startDate": {
+    "$date": "2025-07-17T23:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-18T01:30:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Practica",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49ea"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "6859b9d0ac05a42297350d85"
+  },
+  "ownerOrganizerName": "Nam Nguyen",
+  "ownerOrganizerShortName": "NAMNGUYEN",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "6859b9d0ac05a42297350d85"
+    },
+    "name": "Nam Nguyen",
+    "shortName": "NAMNGUYEN",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "UNKNOWN",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/95df885b-93db-4cc4-bf31-114b75e0bcc8-1752367295764_DSC00057-Enhanced-NR-2.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "recurrenceRule": "FREQ=WEEKLY;BYDAY=TH;UNTIL=20250814T235959Z",
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": true,
+  "cost": "$10, Free For Students, Donation",
+  "expiresAt": {
+    "$date": "2026-07-18T01:30:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6876bd3f56b4e944a75deeed"
+  },
+  "appId": "1",
+  "title": "Noche de Tango Argentino",
+  "shortTitle": "Noche de Tango",
+  "description": "Get ready to Tango! The summer tango party in Wellfleet returns this Saturday, July 19th. Join us at the Wellfleet Preservation Hall (335 Main St, Wellfleet, Cape Cod, MA) for an evening. Learn the basics and tango history in the intro class at 6 pm, then dance at the milonga from 7 pm to 10 pm. Enjoy the music, practice moves, meet new people, and savor delicious snacks. The cost for the class and dance party is $20 (pay at the door or online). Entry for just the dance party is $15 (at the door).\n\nPay online: https://www.eventbrite.com/e/learn-to-tango-noche-de-tango-argentino-tickets-1304368985749?aff=oddtdtcreator",
+  "startDate": {
+    "$date": "2025-07-19T22:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-20T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Milonga",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49e9"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021246c"
+  },
+  "ownerOrganizerName": "Tango Practica Corazón",
+  "ownerOrganizerShortName": "CORAZON",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680669172f9268813021246c"
+    },
+    "name": "Tango Practica Corazón",
+    "shortName": "CORAZON",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "Wellfleet Preservation Hall",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/c40fc726-cb82-41a6-a28c-ebcbe79755b6-1752611882372_2025-07-15_July19_Noche_de_Tango_Argentino_fb_cover_(820_x_360_px).png",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6853000abb550728064284ff"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -70.0311441,
+      41.9380966
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "$20 class + milonga, $15 milonga only",
+  "expiresAt": {
+    "$date": "2026-07-20T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6877ed2156b4e944a75e175f"
+  },
+  "appId": "1",
+  "title": "(Fixed) CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…",
+  "shortTitle": "CHE TANGO",
+  "description": "\"UT – Open Level –  CHE TANGO! – Saturday Afternoon Practica at ULTIMAT…",
+  "startDate": {
+    "$date": "2025-07-19T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-20T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Practica",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49ea"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560552"
+  },
+  "ownerOrganizerName": "Toby Balsley",
+  "ownerOrganizerShortName": "YBOTMAN",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680d9a06e0cc7a532a560552"
+    },
+    "name": "Toby Balsley",
+    "shortName": "YBOTMAN",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "Ultimate Tango Studio",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "68190f7b05c983fb8798381b"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0714035,
+      42.4387386
+    ]
+  },
+  "recurrenceRule": "FREQ=WEEKLY;BYDAY=SA;COUNT=4",
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": true,
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-07-20T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68753dd756b4e944a75da7c7"
+  },
+  "appId": "1",
+  "title": "Queer Milonga",
+  "shortTitle": "QTB Milonga",
+  "description": "Queer Milonga!\nSunday, July 20, 2025\n6 PM: Pre-milonga class on milonga\n7 pm to 10 pm: Milonga\nLocation: The Allston Abbey, 5 St Lukes Rd, Allston, MA 02134\nDJ: Karen Johnson\n\nPre-Milonga Class + Milonga: $22-$40/ $30 suggested\nMilonga: $12-$30/ $20 suggested\nWe operate using a sliding scale.\n\nHow it works: The suggested amount allows us to break even on operational costs. Donating a little bit extra helps folks who have access to less and pays it forward to our future events.\n\nNo one will be turned away due to lack of funds.\n\nThings to know about our Milonga:\n\nWe’re queer! Be prepared for cabaceos from anyone, and don’t assume role preference based on presentation. All are welcome, as long as you are prepared to be part of a queer-centered event.\n\nQTB endeavors to create a warm and joyful space that is inclusive of dancers of all experience levels and backgrounds. Introduce yourself to new faces!\n\nAccessibility\n\nMasking is optional but encouraged, with masks free at the door. That being said… if you see a mask, wear a mask. We ask that you wear a mask if your partner is wearing one. We hope to have air filters on in the space. If you are sick, please stay home!",
+  "startDate": {
+    "$date": "2025-07-20T22:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-21T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Milonga",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49e9"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669192f926881302124b1"
+  },
+  "ownerOrganizerName": "LGBTQ+ Tango",
+  "ownerOrganizerShortName": "QBT",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680669192f926881302124b1"
+    },
+    "name": "LGBTQ+ Tango",
+    "shortName": "QBT",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "Alliston Abbey",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6875386056b4e944a75da569"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1296649,
+      42.352146
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "$20",
+  "expiresAt": {
+    "$date": "2026-07-21T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687187fc109a8420f8537a28"
+  },
+  "appId": "1",
+  "title": "Beginner Series",
+  "shortTitle": "Beg Classes",
+  "description": "Ready to take your first steps in Argentine tango?\n\nOur Beginner series is a fun, welcoming introduction designed for absolute beginners.\n\nThe series consists of 6 weekly lessons, each an hour long. You’ll learn the foundations of connection, walking together, ochos, the tango embrace, and simple turns—all at a relaxed pace that makes learning enjoyable.\n\nWhen: Tuesdays, July 1 – August 5, 8-9 pm\n\nWhere:\n    Dance Complex* | 536 Massachusetts Ave., Cambridge, MA 02139\n\n💲 Pricing\n\nSix-Class Package: $70 (Save upto 30%!)\n        Our most popular option covers the whole six class series —perfect for committing to your tango journey.\n        Beginner Series comes with a free entrance to our Tango social – Practica Spark ($10 value), the ideal place to practice the class material.\n    \nDrop-in (per class): $15\n        Prefer to try it out first? Drop-ins are welcome!\n\nAccepted Payments: Cash | Venmo | Zelle\n\n",
+  "startDate": {
+    "$date": "2025-07-23T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-23T01:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Complex",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/8c97d77a-b172-417a-a4a0-f600fd7cd42d-1752270843542_neeraj_tango_diego.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6862f3fb0ac53b960834ed90"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.102317,
+      42.3641
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-23T01:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686e5f780ac53b960835b299"
+  },
+  "appId": "1",
+  "title": "Advanced Beginner Series",
+  "shortTitle": "Adv Beg Classes",
+  "description": "When:\nWednesdays, July 2 – August 6, 7-8 pm \n\nWhere:\nMango Studio | 112 Bishop Allen Dr, Cambridge, MA 02139\n\nBuilding confidence and expanding your tango vocabulary.\n\nAfter the Beginner series, continue your journey with our Advanced Beginner level. With four unique rotating series (A to D), you’ll develop your technique, deepen your understanding of connection, and start exploring improvisation. You’ll also be introduced to tango-specific drills and partner dynamics. These series can be taken in any order.\n",
+  "startDate": {
+    "$date": "2025-07-23T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-24T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "UNKNOWN",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-24T00:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "685320ec5f078f0a85f7f225"
+  },
+  "appId": "1",
+  "title": "Tango Práctica Corazón in Lexington",
+  "description": "Argentine Tango Práctica will take place from 6:15pm to 8:45pm at the Lexington Community center.\n\n\nPlease sign your name at the front desk and pay with cash ($10). Members enter for free with their card. Non-resident annual fees are $70 (ages 18-59) and $18 (60+).\n\n\nThe address is 39 Marrett Rd, Lexington, MA 02421. To reach the Community center, turn from Marrett Road off Massachusetts avenue, drive up the hill and park your car in the big parking lot in front of the center.\n\n\nPlease invite your friends who would like to practice their dancing.\n\n\nIf you have any questions, email us at minuteman.tango.practica@gmail.com\nFacebook group: https://www.facebook.com/groups/1117995259207196/\n",
+  "startDate": {
+    "$date": "2025-07-24T22:15:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-25T00:45:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49ea"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021246c"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Lexington Community Center",
+  "ownerOrganizerName": "Tango Practica Corazón",
+  "ownerOrganizerShortName": "CORAZON",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6852ffeabb550728064284fd"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.2251836,
+      42.4440281
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-07-25T00:45:00.000Z"
+  },
+  "__v": 0,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6871885d109a8420f8537a96"
+  },
+  "appId": "1",
+  "title": "Beginner Series",
+  "shortTitle": "Beg Classes",
+  "description": "Ready to take your first steps in Argentine tango?\n\nOur Beginner series is a fun, welcoming introduction designed for absolute beginners.\n\nThe series consists of 6 weekly lessons, each an hour long. You’ll learn the foundations of connection, walking together, ochos, the tango embrace, and simple turns—all at a relaxed pace that makes learning enjoyable.\n\nWhen: Tuesdays, July 1 – August 5, 8-9 pm\n\nWhere:\n    Dance Complex* | 536 Massachusetts Ave., Cambridge, MA 02139\n\n💲 Pricing\n\nSix-Class Package: $70 (Save upto 30%!)\n        Our most popular option covers the whole six class series —perfect for committing to your tango journey.\n        Beginner Series comes with a free entrance to our Tango social – Practica Spark ($10 value), the ideal place to practice the class material.\n    \nDrop-in (per class): $15\n        Prefer to try it out first? Drop-ins are welcome!\n\nAccepted Payments: Cash | Venmo | Zelle",
+  "startDate": {
+    "$date": "2025-07-30T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-30T01:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Complex",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/149b5d07-b6af-4a30-8bc8-1c7277f2c017-1752270941466_neeraj_tango_diego.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6862f3fb0ac53b960834ed90"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.102317,
+      42.3641
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-30T01:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686e5fcd0ac53b960835b335"
+  },
+  "appId": "1",
+  "title": "Advanced Beginner Series",
+  "shortTitle": "Adv Beg Classes",
+  "description": "When:\nWednesdays, July 2 – August 6, 7-8 pm \n\nWhere:\nMango Studio | 112 Bishop Allen Dr, Cambridge, MA 02139\n\nBuilding confidence and expanding your tango vocabulary.\n\nAfter the Beginner series, continue your journey with our Advanced Beginner level. With four unique rotating series (A to D), you’ll develop your technique, deepen your understanding of connection, and start exploring improvisation. You’ll also be introduced to tango-specific drills and partner dynamics. These series can be taken in any order.\n",
+  "startDate": {
+    "$date": "2025-07-30T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-31T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "UNKNOWN",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-31T00:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "687188c2109a8420f8537b20"
+  },
+  "appId": "1",
+  "title": "Beginner Series",
+  "shortTitle": "Beg Classes",
+  "description": "Ready to take your first steps in Argentine tango?\n\nOur Beginner series is a fun, welcoming introduction designed for absolute beginners.\n\nThe series consists of 6 weekly lessons, each an hour long. You’ll learn the foundations of connection, walking together, ochos, the tango embrace, and simple turns—all at a relaxed pace that makes learning enjoyable.\n\nWhen: Tuesdays, July 1 – August 5, 8-9 pm\n\nWhere:\n    Dance Complex* | 536 Massachusetts Ave., Cambridge, MA 02139\n\n💲 Pricing\n\nSix-Class Package: $70 (Save upto 30%!)\n        Our most popular option covers the whole six class series —perfect for committing to your tango journey.\n        Beginner Series comes with a free entrance to our Tango social – Practica Spark ($10 value), the ideal place to practice the class material.\n    \nDrop-in (per class): $15\n        Prefer to try it out first? Drop-ins are welcome!\n\nAccepted Payments: Cash | Venmo | Zelle",
+  "startDate": {
+    "$date": "2025-08-06T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-08-06T01:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Complex",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/e758fee8-6b4e-481f-b25a-33c5de7d84f5-1752271041892_neeraj_tango_diego.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6862f3fb0ac53b960834ed90"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.102317,
+      42.3641
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-08-06T01:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686e602d0ac53b960835b3d1"
+  },
+  "appId": "1",
+  "title": "Advanced Beginner Series",
+  "shortTitle": "Adv Beg Classes",
+  "description": "When:\nWednesdays, July 2 – August 6, 7-8 pm \n\nWhere:\nMango Studio | 112 Bishop Allen Dr, Cambridge, MA 02139\n\nBuilding confidence and expanding your tango vocabulary.\n\nAfter the Beginner series, continue your journey with our Advanced Beginner level. With four unique rotating series (A to D), you’ll develop your technique, deepen your understanding of connection, and start exploring improvisation. You’ll also be introduced to tango-specific drills and partner dynamics. These series can be taken in any order.\n",
+  "startDate": {
+    "$date": "2025-08-06T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-08-07T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "UNKNOWN",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-08-07T00:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68754cd556b4e944a75dad9a"
+  },
+  "appId": "1",
+  "title": "Blue Milonga",
+  "shortTitle": "Blue",
+  "description": "Join us for a welcoming milonga with great ambience and inspiring music!",
+  "startDate": {
+    "$date": "2025-08-10T00:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-08-10T04:30:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Milonga",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49e9"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "6806691a2f926881302124dd"
+  },
+  "ownerOrganizerName": "Hsueh-tze Lee",
+  "ownerOrganizerShortName": "HSUEH-TZE",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "6806691a2f926881302124dd"
+    },
+    "name": "Hsueh-tze Lee",
+    "shortName": "HSUEH-TZE",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "Dance Union",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "$20, $15 (Students, Travelers > 30 miles)",
+  "expiresAt": {
+    "$date": "2026-08-10T04:30:00.000Z"
+  },
+  "__v": 0,
+  "recurrenceRule": ""
+},
+{
+  "_id": {
+    "$oid": "6876e1ce56b4e944a75e00fe"
+  },
+  "appId": "1",
+  "title": "tes",
+  "shortTitle": "tes",
+  "description": "Line1\n\nLine4",
+  "startDate": {
+    "$date": "2025-09-04T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-09-05T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Other",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "6819050705c983fb87983819"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560552"
+  },
+  "ownerOrganizerName": "Toby Balsley",
+  "ownerOrganizerShortName": "YBOTMAN",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680d9a06e0cc7a532a560552"
+    },
+    "name": "Toby Balsley",
+    "shortName": "YBOTMAN",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "FG Dance Academy",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c5115ef6308b31e5b56b2"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1541815,
+      42.3489552
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-09-05T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6876e1d056b4e944a75e014e"
+  },
+  "appId": "1",
+  "title": "tes",
+  "shortTitle": "tes",
+  "description": "Line1\n\nLine4",
+  "startDate": {
+    "$date": "2025-09-04T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-09-05T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Other",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "6819050705c983fb87983819"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560552"
+  },
+  "ownerOrganizerName": "Toby Balsley",
+  "ownerOrganizerShortName": "YBOTMAN",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680d9a06e0cc7a532a560552"
+    },
+    "name": "Toby Balsley",
+    "shortName": "YBOTMAN",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "FG Dance Academy",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c5115ef6308b31e5b56b2"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1541815,
+      42.3489552
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-09-05T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6866fce20ac53b9608354432"
+  },
+  "appId": "1",
+  "title": "VIDA MIA MILONGA",
+  "shortTitle": "VIDA MIA",
+  "description": "<p>Vida Mia Milonga is a very popular milonga in the Boston area, hosted every 4th Friday of the month by Simonida Cekovic-Vuletic, <a href=\"https://tangoaffair.com/\">TangoAffair</a></p>\n<p>Friday, Feb 28, 2025: Come dance with us at the February edition of Vida Mia Milonga! Let’s shake off the winter blues together with amazing traditional tango music from our guest DJ, David Chester. Sveta and I are excited to kick things off with a fun pre-milonga class, where we’ll share our love for tango with you. There will be yummy snacks, great vibes, and lots of warm hugs. Can’t wait to see you there!  <a href=\"https://www.facebook.com/events/460422450484854\">Join us on Facebook</a></p>\n<p><strong>7:30pm – 8:30pm: “RHYTHMIC and MELODIC DANCING”, </strong>a special pre-milonga workshop with Simonida and Sveta, tba. The class is geared towards intermediate/adv. dancers, but all dancers can benefit from the material taught in the class.</p>\n<p><strong>8:30pm – 12:30am: Milonga, DJ David Chester</strong>, yummy refreshments and cordial atmosphere</p>\n<p>Admission (cash at the door or Venmo in advance: TangoAffair, last 4 digits of the phone number are 1550)<br />\n$35 class + milonga; $20 milonga only, $20 class only.<br />\nFull-Time Students with ID and guests who travel long distance (more than 30 miles): $30 class + milonga / $20 class only / $15 milonga only</p>\n<p>**Vida Mia Milonga is happening every 4th Friday of the month. Join Vida Mia Milonga FB group: https://www.facebook.com/groups/122374897796873</p>\n<p>Vida Mia <a href=\"https://tangoaffair.com/vida-mia-milonga/\">website</a></p>\n<p><a href=\"https://tangoaffair.com/vida-mia-milonga/\">Website</a></p>",
+  "startDate": {
+    "$date": "2025-09-26T17:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-09-26T22:30:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Milonga",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49e9"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "6806691a2f926881302124cd"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Union",
+  "ownerOrganizerName": "Tango Affair",
+  "ownerOrganizerShortName": "AFFAIR",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-09-26T22:30:00.000Z"
+  },
+  "__v": 0
+}]

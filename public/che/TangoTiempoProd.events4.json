@@ -1,0 +1,2019 @@
+[{
+  "_id": {
+    "$oid": "68532f89a1e3cfb6f8bb9e20"
+  },
+  "appId": "1",
+  "title": "LA MILONGA Dancing",
+  "standardsTitle": "LA MILONGA Dancing",
+  "shortTitle": "LA MILONGA Dancing",
+  "description": "<p><strong>NORMALLY, “LA MILONGA” WORKS AS FOLLOWS; HOWEVER YOU SHOULD CHECK OUR WEBISTE <a href=\"http://www.bostontango.org/\">AT WWW.BOSTONTANGO.ORG</a> SINCE THERE ARE DIFFERENT EVENTS MONTHLY.</strong></p>\n<p> </p>\n<p><strong>LA MILONGA’ </strong>–Dance Party — 3rd Saturday of the Month<br />\n9:00pm-1am</p>\n<p>La Milonga is the longest running Milonga in the ‘Boston area.</p>\n<p>La Milonga is the Tango Society of Boston’s “dress up” Tango Dance party. It is held on the 3rd Saturday of each month in conjunction with weekend workshops by visiting teachers. Usually features exhibitions or demonstrations by those teachers.</p>\n<p>Schedule<br />\n9pm-1am: La Milonga. Music by Guest DJs . Some times, we will have live music with world re-known orchestras and at other times, we will feature oir local musicians.</p>\n<p>* We have Exquisite hors dóuveres and Drinks to keep our dancers happy and full of energy throughout the night<br />\n* Fantastic door prizes</p>\n<p>Location: Dance Union, 16 Bow St. Union Square, Somrville</p>\n<p><strong>Admission</strong><br />\nGeneral Admission: $15 /$10 Members & students<br />\nPrices will change when we have a special event, Master Teacher.</p>\n<p>Payment options<br />\nOption 1: On site. Pay at Dance Union when you arrive<br />\nOption 2: Online via Paypal or Venmo. (@danceunionstudio)<br />\nSimply chose what you want to buy, and pay through Paypal. Code: info@bostontango.oreg</p>\n<p>Sponsored by the Tango Society of Boston</p>\n<p>For more info contact vicky@bostontango.org<br />\nPhone: 617-721-4872</p>",
+  "ownerOrganizerID": {
+    "$oid": "6806691b2f926881302124e1"
+  },
+  "ownerOrganizerName": "Tango Society of Boston",
+  "ownerOrganizerShortName": "SOCIETY",
+  "startDate": {
+    "$date": "2025-07-20T01:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-20T01:00:00.000Z"
+  },
+  "categoryFirst": "Milonga",
+  "categoryFirstId": "66c4d370a87a956db06c49e9",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2019/07/la-milonga-sign-1.jpg?fit=2048%2C1385&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:41.775Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false,
+  "titleShortName": "LA MILONGA"
+},
+{
+  "_id": {
+    "$oid": "68532f8ba1e3cfb6f8bb9e25"
+  },
+  "appId": "1",
+  "title": "UT Pre-Advanced Argentine Tango – Learn Back Sacadas",
+  "standardsTitle": "UT Pre-Advanced Argentine Tango – Learn Back Sacadas",
+  "shortTitle": "Pre-Adv Back Sacadas",
+  "description": "<p>Sacada means displacement</p>\n<p>Back sacadas require all the tango technique normally necessary to perform regular displacement plus a good understanding of torsions, pivots, timing, and movement delay.</p>\n<p>Torsions, pivots, over-pivoting<br />\nWe will work on torsions, pivots, over pivoting (without disturbing your partner axis and losing connection and balance), ability to walk while in overturned position, plus other necessary elements so the back sacada can be freely introduced during the improvised dance.</p>\n<p>READ MORE: <a href=\"https://www.ultimatetango.com/preadvanced\">https://www.ultimatetango.com/preadvanced</a><br />\nREGISTER: <a href=\"https://UltimateTango.as.me/Pre-Advanced-Course-May2023\">https://UltimateTango.as.me/Pre-Advanced-Course-May2023</a> </p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560556"
+  },
+  "ownerOrganizerName": "Ultimate Tango",
+  "ownerOrganizerShortName": "ULTIMATE",
+  "startDate": {
+    "$date": "2025-07-20T17:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-20T18:30:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "68190f7b05c983fb8798381b"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "venueCityName": "Malden",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2023/04/02-pre-advanced.jpg?fit=1640%2C924&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:43.476Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$120",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false,
+  "titleShortName": "PreAdv Back Sacada"
+},
+{
+  "_id": {
+    "$oid": "68532f8ba1e3cfb6f8bb9e2f"
+  },
+  "appId": "1",
+  "title": "UT Advanced Argentine Tango – Elaborate exploration",
+  "standardsTitle": "UT Advanced Argentine Tango – Elaborate exploration",
+  "shortTitle": "ADV Elaborate exploration",
+  "description": "<p>A challenge</p>\n<p>We can be happy once we speak conversational Tango, or we can yearn for more. If Tango is like language – there surely there must be more! And it is!</p>\n<p>Tango never stops. And that’s the beauty of it. There is always more. And as we become more and more comfortable with the fundamentals, navigation, musicality, new element, and different styles, we look for more.</p>\n<p>The advanced course challenges you to a more elaborate exploration of more advanced tango elements. Each 4 weeks cycle is focused on introducing new intricate variations, investigating new possibilities, and mastering combinations involving elements originally introduced to you during the pre-Advanced courses.</p>\n<p>PLEASE NOTE: The Advanced level freely mixes all elements taught in the Pre-Advanced level and adds more variations. Please be considerate – if you have difficulties with basic to the cross or molinete, call boleo a bolero, and gancho a gaucho – PLEASE do not register for this class. Once you are at this level, you won’t appreciate people randomly showing up and defying the whole purpose of this class. THANK YOU!</p>\n<p>REGISTER HERE: <a href=\"https://UltimateTango.as.me/Advanced-Course-May2023\">https://UltimateTango.as.me/Advanced-Course-May2023</a></p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560556"
+  },
+  "ownerOrganizerName": "Ultimate Tango",
+  "ownerOrganizerShortName": "ULTIMATE",
+  "startDate": {
+    "$date": "2025-07-20T19:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-20T20:30:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "68190f7b05c983fb8798381b"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "venueCityName": "Malden",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2023/04/01-advanced.jpg?fit=1640%2C924&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:43.959Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$120",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f8ba1e3cfb6f8bb9e2a"
+  },
+  "appId": "1",
+  "title": "Boston Weekly Sunday Practica",
+  "standardsTitle": "Boston Weekly Sunday Practica",
+  "shortTitle": "'Sunday Practica'",
+  "description": "<p align=\"center\">Every Sunday afternoon, normally from 3:00 to 6:00 p.m.</p>\n<p>Admission: $10 – Students $5</p>\n<hr />\n<table border=\"0\">\n<tbody>\n<tr>\n<td><center><strong><span style=\"font-size: large;\">Our Current COVID Restrictions:</span></strong></center><br />\n<strong>What we request (via the honor system) is that attendees have any of:</strong></p>\n<ul>\n<li><strong>Being fully vaccinated against Covid</strong></li>\n<li><strong>A recent negative Covid test</strong></li>\n<li><strong>A lab test of elevated antibodies due to a previous infection</strong></li>\n</ul>\n<p><center>We are not checking or tracking any of this information</center></td>\n</tr>\n</tbody>\n</table>\n<p>Boston’s Weekly Sunday Practica. Come dance with us on a large, sprung hardwood floor. Run weekly by one of six committed dancers with an occasional guest DJ. Snacks are provided, as well as filtered water. PLEASE BRING YOUR OWN WATER CONTAINER TO REFILL. COME PRACTICE WITH US! Location: Q Ballroom, 26 New St. #3, Cambridge. If you are new, please go introduce yourself to the person doing the music.</p>",
+  "ownerOrganizerID": {
+    "$oid": "680669182f92688130212493"
+  },
+  "ownerOrganizerName": "Boston Sunday Practica Group",
+  "ownerOrganizerShortName": "SUN-PRAC",
+  "startDate": {
+    "$date": "2025-07-20T19:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-20T22:00:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categoryFirstId": "66c4d370a87a956db06c49ea",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5123ef6308b31e5b57cc"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1404605,
+      42.3878553
+    ]
+  },
+  "venueCityName": "Cambridge",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1404605,
+      42.3878553
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2019/02/title.gif?fit=541%2C109&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:43.726Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$7",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f8ca1e3cfb6f8bb9e34"
+  },
+  "appId": "1",
+  "title": "“PRACTILONGA CAMINITO” –the true Practica in Boston! Every Sunday Class & Practice",
+  "standardsTitle": "“PRACTILONGA CAMINITO” –the true Practica in Boston! Every Sunday Class & Practice",
+  "shortTitle": "CAMINITO",
+  "description": "<div><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span></div>\n<div></div>\n<div></div>\n<div>\n<div class=\"x1pi30zi x1swvt13\">\n<div class=\"x1ni5s2d\">\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>Tangueros,</strong></div>\n</div>\n</div>\n</div>\n<div></div>\n<div></div>\n<div>\n<div class=\"x1pi30zi x1swvt13\">\n<div class=\"x1ni5s2d\">\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>Laura Grandi will be teaching the pre-practica class and making sure she is there at all times to answer your questions during our ‘guided practica’</strong></div>\n<div></div>\n<div>>></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>What will you be able to see when you come to Practilonga Caminito?</strong></div>\n<div>>></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>In each class we will take a fundamental of tango (those movements that you need to know) and we will work on it technically, explaining it in details, and allow your “body to practice it” We will then incorporate it with more options of movements to use in your improvisation.</strong></div>\n<div></div>\n</div>\n</div>\n</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div>\n<div class=\"x1pi30zi x1swvt13\">\n<div class=\"x1ni5s2d\">\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span></strong></div>\n<div>>></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>If you’re interested in either starting your Tango journey, or improving your Tango, come and join us every Sunday.</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>It’s fun and the atmosphere is very friendly and helpful !!!</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>-No partner needed.</strong><br />\n<strong>-All levels are welcome.</strong><br />\n<strong>-Open role</strong></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span></strong></div>\n<div>>></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>We will meet every Sunday from 6-9pm.</strong></div>\n<div>></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span>>6 to 7 PM – Fundamentals of Tango (what we all have to know to be able to dance our beloved Tango) with Laura Grandi.</strong></div>\n</div>\n<div>>></div>\n</div>\n<div></div>\n<div class=\"x1pi30zi x1swvt13\">\n<div class=\"x1ni5s2d\">\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/te/2/16/1f337.png\" alt=\"🌷\" width=\"16\" height=\"16\" /></span>>7 to 9 PM – Guided practice with Laura, where you can ask all the questions you have. </strong><br />\n<strong>This practice is open to everyone, not just those in the class.</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">>></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>We will be waiting for you to share, have fun and learn together! Do not miss it! it’s going to be great!</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>Everything for $15 regular/$10 students</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>No partner necessary. We encourage everyone to come and be a leader and a follower or both.</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>As always, we will have delicious munchies to keep us going!</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>_________</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>PRACTILONGA PASS: $50 FOR 4 SUNDAYS.</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>________________________</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>PAYMENT ONLINE:</strong><br />\n<strong>Cash</strong><br />\n<strong>Checks</strong><br />\n<strong>Venmo: @danceunionstudio</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>You can purchase a Milonga Pass and get a discount!</strong><br />\n<strong>No need to worry about carrying cash all the time when you can carry your milonga pass!</strong></div>\n</div>\n<div></div>\n<div class=\"x1ni5s2d\">\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>_______________________________</strong></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">PROTOCOLS: PLEASE READ<br />\nWe are doing our best to keep the studio clean and safe for everyone to enjoy, but we need your cooperation to make sure it stays safe at all times<br />\nSo, please, let’s all do our part and let’s make Dance Union a safe place to Tango and have fun.<br />\nPLEASE adhere to the protocols. Refusal to present vaccination information will result in you not being allowed to participate in our events.</div>\n</div>\n</div>\n</div>",
+  "ownerOrganizerID": {
+    "$oid": "6806691b2f926881302124e1"
+  },
+  "ownerOrganizerName": "Tango Society of Boston",
+  "ownerOrganizerShortName": "SOCIETY",
+  "startDate": {
+    "$date": "2025-07-20T22:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-21T01:00:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categoryFirstId": "66c4d370a87a956db06c49ea",
+  "categorySecond": "Class",
+  "categorySecondId": "66c4d370a87a956db06c49eb",
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2024/02/practilonga-black-and-white.jpg?fit=1080%2C1080&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:44.204Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$20",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false,
+  "lastModifiedByRA": {
+    "userId": {
+      "$oid": "6862cca07c347bfff322f302"
+    },
+    "firebaseUserId": "dyaKIpuWkhTu67t2KrAPTdZUBNC3",
+    "timestamp": {
+      "$date": "2025-07-15T20:46:35.097Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68753dd756b4e944a75da7c7"
+  },
+  "appId": "1",
+  "title": "Queer Milonga",
+  "shortTitle": "QTB Milonga",
+  "description": "Queer Milonga!\nSunday, July 20, 2025\n6 PM: Pre-milonga class on milonga\n7 pm to 10 pm: Milonga\nLocation: The Allston Abbey, 5 St Lukes Rd, Allston, MA 02134\nDJ: Karen Johnson\n\nPre-Milonga Class + Milonga: $22-$40/ $30 suggested\nMilonga: $12-$30/ $20 suggested\nWe operate using a sliding scale.\n\nHow it works: The suggested amount allows us to break even on operational costs. Donating a little bit extra helps folks who have access to less and pays it forward to our future events.\n\nNo one will be turned away due to lack of funds.\n\nThings to know about our Milonga:\n\nWe’re queer! Be prepared for cabaceos from anyone, and don’t assume role preference based on presentation. All are welcome, as long as you are prepared to be part of a queer-centered event.\n\nQTB endeavors to create a warm and joyful space that is inclusive of dancers of all experience levels and backgrounds. Introduce yourself to new faces!\n\nAccessibility\n\nMasking is optional but encouraged, with masks free at the door. That being said… if you see a mask, wear a mask. We ask that you wear a mask if your partner is wearing one. We hope to have air filters on in the space. If you are sick, please stay home!",
+  "startDate": {
+    "$date": "2025-07-20T22:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-21T02:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Milonga",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49e9"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669192f926881302124b1"
+  },
+  "ownerOrganizerName": "LGBTQ+ Tango",
+  "ownerOrganizerShortName": "QBT",
+  "grantedOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerID": null,
+  "alternateOrganizerName": "",
+  "ownerOrganizer": {
+    "id": {
+      "$oid": "680669192f926881302124b1"
+    },
+    "name": "LGBTQ+ Tango",
+    "shortName": "QBT",
+    "eventRole": "Owner"
+  },
+  "alternateOrganizers": [],
+  "locationName": "Alliston Abbey",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6875386056b4e944a75da569"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1296649,
+      42.352146
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "$20",
+  "expiresAt": {
+    "$date": "2026-07-21T02:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68532f8da1e3cfb6f8bb9e39"
+  },
+  "appId": "1",
+  "title": "Practica Spark",
+  "standardsTitle": "Practica Spark",
+  "shortTitle": "Practica Spark",
+  "description": "<p><span class=\"x193iq5w xeuugli x13faqbe x1vvkbs xlh3980 xvmahel x1n0sxbx x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x6prxxf xvq8zen xo1l8bm xzsf02u\" dir=\"auto\">Whether you’re looking for focused study, connect with the tango community, or simply enjoy a beautiful evening of dancing, this practica promises to be a warm and welcoming space for all.</span></p>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>Where:</strong> Friends Meeting Place| 5 Longfellow Park, Cambridge<br class=\"html-br\" /><strong>When:</strong> Monday | April 7th | 7:00 – 9:45pm<br class=\"html-br\" /><strong>Cost:</strong> $10*</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">The venue is a 12-min walk from Harvard Square and there is plenty of free parking available around the ‘loop’ AFTER 6 pm. In addition, there is metered parking on the street as well.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">* If the cost of attending is holding you back, please send us a message — we’d be happy to work something out with you!</div>\n<div></div>\n<div>Your hosts,<br class=\"html-br\" />Corin, Neeraj, & Joanna</div>\n<p><img data-recalc-dims=\"1\" loading=\"lazy\" decoding=\"async\" src=\"https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/fb4aefef-cd2b-4ecb-9dcd-fa498506b824.jpg?resize=300%2C184&ssl=1\" alt=\"\" width=\"300\" height=\"184\" class=\"aligncenter size-medium wp-image-41239\" srcset=\"https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/fb4aefef-cd2b-4ecb-9dcd-fa498506b824.jpg?resize=300%2C184&ssl=1 300w, https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/fb4aefef-cd2b-4ecb-9dcd-fa498506b824.jpg?resize=600%2C368&ssl=1 600w, https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/fb4aefef-cd2b-4ecb-9dcd-fa498506b824.jpg?resize=768%2C471&ssl=1 768w, https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/fb4aefef-cd2b-4ecb-9dcd-fa498506b824.jpg?w=1436&ssl=1 1436w\" sizes=\"auto, (max-width: 300px) 100vw, 300px\" /></p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "startDate": {
+    "$date": "2025-07-21T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-22T01:45:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categoryFirstId": "66c4d370a87a956db06c49ea",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "venueCityName": "Cambridge",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/f0bbf68f-5647-4402-80ee-86e4328235a1.jpg?fit=1080%2C800&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:45.517Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$10",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f8da1e3cfb6f8bb9e43"
+  },
+  "appId": "1",
+  "title": "UT Learn Tango In One Summer!",
+  "standardsTitle": "UT Learn Tango In One Summer!",
+  "shortTitle": "UT Learn Tango In One Summer!",
+  "description": "<p id=\"yui_3_17_2_1_1748547041396_741\"><strong>Unleash Your Inner Tango Star:</strong><br />\n<strong>Ignite Your Passion with Tango Basics!</strong></p>\n<p> </p>\n<p class=\"\"><strong>No dance experience? No problem! Discover the magic of tango with our beginner program. Learn the essential embrace, connection, and steps in just 10 captivating classes.</strong></p>\n<p> </p>\n<p class=\"\"><strong>Calling all dreamers and dancers!</strong> Are you ready to <strong>unleash your inner tango star</strong> this summer? Our <strong>beginner-friendly program</strong> creates an <strong>unforgettable summer experience</strong>, teaching you the essential <strong>embrace, connection, and key tango steps</strong>.</p>\n<p> </p>\n<p class=\"\">Join the <strong>vibrant Boston tango community</strong> and <strong>discover the joy of movement and connection</strong>. All within a <strong>supportive and welcoming atmosphere</strong>, you’ll:</p>\n<ul>\n<li><strong>Master the Tango:</strong> Build a strong foundation step-by-step.</li>\n<li><strong>Immerse Yourself:</strong> Enjoy exclusive community events, from practice sessions to thrilling milongas.</li>\n<li><strong>Discover the Joy:</strong> Experience the music, movement, and connection that tango offers.</li>\n<li><strong>Transform Yourself:</strong> Boost confidence, improve coordination, and reduce stress.</li>\n</ul>\n<p> </p>\n<p class=\"\">Whether you’re single or partnered, our supportive atmosphere welcomes everyone. Start your tango journey today! Enroll now and ignite your passion for dance!</p>\n<p> </p>\n<p><strong>Join all 10 sessions (8 classes & 2 field trips),<br />\nor drop in at any time!</strong></p>\n<p><strong>Classes:</strong> JULY 7-14-21-28, AUGUST 4-11-18-25<br />\nComplimentary Practica – 9-10pm</p>\n<p> </p>\n<p><strong>Two field trips included:</strong></p>\n<ul data-rte-list=\"default\">\n<li>Saturday, August 2, 3- 6 pm – Practica Che Tango at Ultimate Tango</li>\n<li>Friday, August 22, 7:30pm – 12am, Milonga Vida Mia in Somerville, MA</li>\n</ul>\n<p> </p>\n<p><strong>Register now on https://www.ultimatetango.com/tango-in-the-summer </strong></p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560556"
+  },
+  "ownerOrganizerName": "Ultimate Tango",
+  "ownerOrganizerShortName": "ULTIMATE",
+  "startDate": {
+    "$date": "2025-07-21T23:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-22T01:00:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "68190f7b05c983fb8798381b"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "venueCityName": "Malden",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/05/3to2.jpg?fit=600%2C400&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:45.999Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f8ea1e3cfb6f8bb9e48"
+  },
+  "appId": "1",
+  "title": "Journey (at UT) Summer Version",
+  "standardsTitle": "Journey (at UT) Summer Version",
+  "shortTitle": "Journey (at UT) Summer Version",
+  "description": "<p># Journey: A Guided Tango Práctica</p>\n<p>Join us for **Journey** — a práctica dedicated to exploration, growth, and shared connection in tango.</p>\n<p>**Hosted** (and if you want, guided by Wailing and Toby), this is a space to refine your dance, listen, collaborate and move with intention.</p>\n<p>We’ll often will feature select tracks from the **Tango Lab**, we may break a few small</p>\n<p>Whether you’re here to dive deep or simply enjoy a relaxed dance environment, *Journey* is your space on the path.</p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560552"
+  },
+  "ownerOrganizerName": "Toby Balsley",
+  "ownerOrganizerShortName": "YBOTMAN",
+  "startDate": {
+    "$date": "2025-07-21T23:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-22T03:00:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categoryFirstId": "66c4d370a87a956db06c49ea",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "68190f7b05c983fb8798381b"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "venueCityName": "Malden",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/06/JOURNEY-PRACTICA.png?fit=851%2C315&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:46.237Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f8fa1e3cfb6f8bb9e4d"
+  },
+  "appId": "1",
+  "title": "— TUESDAYS — NOCHE DE PRÁCTICA Guided Tango Practica",
+  "standardsTitle": "— TUESDAYS — NOCHE DE PRÁCTICA Guided Tango Practica",
+  "shortTitle": "Noche de Practica",
+  "description": "<p><em><strong>Every Tuesday from 7:30-10:30pm you will be joining a group of Tangueros that practice with each other and help each other progress. This practica is guided by Maestro Guillermo Merlo, </strong></em></p>\n<p><strong>Highlights:</strong></p>\n<p>– [ ] A weekly guided práctica<br />\n(every Monday)<br />\n– [ ] Support provided for developing your technique and executing figures<br />\n– [ ] Emphasis on musicality<br />\n– [ ] Práctica changes to a milonga in the final hour so you can apply the material<br />\n– [ ] New DJs to be introduced and cultivated to enhance the tango community</p>\n<p>_________________________________<br />\nHosted by <strong>Guillermo Merlo</strong><br />\n7:30pm – 10:30pm Dancing<br />\nDJ – Guillermo Merlo</p>\n<p>Cover Charge – $20<br />\n(cash or venmo: Guillermo-merlo)<br />\n<strong><br />\nLocation: Dance Union<br />\n16 Bow St. Somerville, MA</strong><br />\n________________________________</p>\n<p>***Vaccination information will be required of ALL who come to any event at Dance Union. We will require to see the vaccination card before you enter the studio. You may send it to me ahead of time, if you wish<br />\n.<br />\nThe card will be required only ONCE as the information will be kept on file and there will be no need to show it every time. This information will be kept confidential.</p>\n<p>PLEASE adhere to the protocols. Refusal to present vaccination information will result in you not being allowed to participate in our events.</p>",
+  "ownerOrganizerID": {
+    "$oid": "680669182f92688130212490"
+  },
+  "ownerOrganizerName": "Guillermo Merlo",
+  "ownerOrganizerShortName": "GMERLO",
+  "startDate": {
+    "$date": "2025-07-22T23:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-23T02:30:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categoryFirstId": "66c4d370a87a956db06c49ea",
+  "categorySecond": "Class",
+  "categorySecondId": "66c4d370a87a956db06c49eb",
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2022/05/practica.jpg?fit=960%2C741&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:47.491Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$20",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "687187fc109a8420f8537a28"
+  },
+  "appId": "1",
+  "title": "Beginner Series",
+  "shortTitle": "Beg Classes",
+  "description": "Ready to take your first steps in Argentine tango?\n\nOur Beginner series is a fun, welcoming introduction designed for absolute beginners.\n\nThe series consists of 6 weekly lessons, each an hour long. You’ll learn the foundations of connection, walking together, ochos, the tango embrace, and simple turns—all at a relaxed pace that makes learning enjoyable.\n\nWhen: Tuesdays, July 1 – August 5, 8-9 pm\n\nWhere:\n    Dance Complex* | 536 Massachusetts Ave., Cambridge, MA 02139\n\n💲 Pricing\n\nSix-Class Package: $70 (Save upto 30%!)\n        Our most popular option covers the whole six class series —perfect for committing to your tango journey.\n        Beginner Series comes with a free entrance to our Tango social – Practica Spark ($10 value), the ideal place to practice the class material.\n    \nDrop-in (per class): $15\n        Prefer to try it out first? Drop-ins are welcome!\n\nAccepted Payments: Cash | Venmo | Zelle\n\n",
+  "startDate": {
+    "$date": "2025-07-23T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-23T01:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Dance Complex",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": "https://tangotiempoimagesprod.blob.core.windows.net/event-images/1/8c97d77a-b172-417a-a4a0-f600fd7cd42d-1752270843542_neeraj_tango_diego.jpg",
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6862f3fb0ac53b960834ed90"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.102317,
+      42.3641
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-23T01:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68532f8fa1e3cfb6f8bb9e52"
+  },
+  "appId": "1",
+  "title": "UT – Practica Chiquita",
+  "standardsTitle": "UT – Practica Chiquita",
+  "shortTitle": "UT – Practica Chiquita",
+  "description": "<p>Once you have the basics of Argentine Tango down, it’s time to work on developing your skills. Our tango practice sessions do just that.</p>\n<p><strong><a href=\"https://www.ultimatetango.com/practica-chiquita\" target=\"_blank\" rel=\"noopener\">Practica Chiquita is guided</a></strong>, which means there are instructors present who will advise you on what to practice and how to practice.</p>\n<p>Although the Tango Codigos are respected, it is also OK to simply ask for practice time or approach someone to simply ask questions about technique, steps, musicality, navigation, and codes.</p>\n<p><strong>MORE INFO HERE:</strong> <a href=\"https://www.ultimatetango.com/practica-chiquita\" target=\"_blank\" rel=\"noopener\">https://www.ultimatetango.com/practica-chiquita</a></p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a06e0cc7a532a560556"
+  },
+  "ownerOrganizerName": "Ultimate Tango",
+  "ownerOrganizerShortName": "ULTIMATE",
+  "startDate": {
+    "$date": "2025-07-23T00:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-23T03:30:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categoryFirstId": "66c4d370a87a956db06c49ea",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "68190f7b05c983fb8798381b"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "venueCityName": "Malden",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2021/08/2021-Practica-Chiquita-Facebook-event.jpg?fit=1574%2C590&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:47.739Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$10",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f91a1e3cfb6f8bb9e57"
+  },
+  "appId": "1",
+  "title": "Academy: Absolute Beginner Class + Social",
+  "standardsTitle": "Academy: Absolute Beginner Class + Social",
+  "shortTitle": "BEG: Class+Social",
+  "description": "<p><img data-recalc-dims=\"1\" loading=\"lazy\" decoding=\"async\" class=\"alignnone size-medium wp-image-41289\" src=\"https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/04/IMG_0551.jpeg?resize=200%2C300&ssl=1\" alt=\"\" width=\"200\" height=\"300\" /> <img data-recalc-dims=\"1\" loading=\"lazy\" decoding=\"async\" class=\"alignnone size-medium wp-image-41291\" src=\"https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/04/IMG_0552-1.jpeg?resize=200%2C300&ssl=1\" alt=\"\" width=\"200\" height=\"300\" /></p>\n<table role=\"presentation\" border=\"0\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tbody>\n<tr>\n<td class=\"field-name\"></td>\n</tr>\n<tr class=\"field-textarea\">\n<td class=\"field-value\">Join us every third Wednesday of the month for a community night of Tango at Peka Restaurant! Argentine Tango is meant to be a social activity- this not only means dance, it also means friends, music, food and a glass of good wine. Please join us for a social evening at Peka Restaurant where you can enjoy all of these things together.</p>\n<p>This event is meant to welcome EVERYONE. Join us for an absolute beginner class before hand, and then stay to keep dancing, or just to socialize.</p>\n<p><span dir=\"ltr\">6:00 – 7:00</span> \\\\ Absolute Beginner Class</p>\n<p><span dir=\"ltr\">7:30 – 10:00</span> \\\\ Tango Social (Dancing, Eating + Drinking with friends!)</p>\n<p>$20 – Entrance + 1 drink</p>\n<p>PEKA RESTAURANT <span dir=\"ltr\">304 Washington St., Brighton, MA 02315</span></p>\n<p>Reserve a table: <span dir=\"ltr\">617 – 817 – 0382</span></td>\n</tr>\n</tbody>\n</table>",
+  "ownerOrganizerID": {
+    "$oid": "680669162f92688130212457"
+  },
+  "ownerOrganizerName": "Tango Academy of Boston",
+  "ownerOrganizerShortName": "ACADEMY",
+  "startDate": {
+    "$date": "2025-07-23T22:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-24T02:00:00.000Z"
+  },
+  "categoryFirst": "Milonga",
+  "categoryFirstId": "66c4d370a87a956db06c49e9",
+  "categorySecond": "Class",
+  "categorySecondId": "66c4d370a87a956db06c49eb",
+  "categoryThird": "Other",
+  "categoryThirdId": "6819050705c983fb87983819",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "venueCityName": "brighton",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/04/IMG_0552-e1744739309225.jpeg?fit=200%2C146&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:49.304Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f91a1e3cfb6f8bb9e5c"
+  },
+  "appId": "1",
+  "title": "Wednesday Tango Break– 7pm Beginner Tango Classes",
+  "standardsTitle": "Wednesday Tango Break– 7pm Beginner Tango Classes",
+  "shortTitle": "Beginner Class",
+  "description": "<p>The Tango Society of Boston sponsors Mid-week Tango Dance breaks every Wednesday — Boston’s largest informal Milonga (Tango social dance) and Tango lessons.</p>\n<p>Features a lesson in Argentine Tango for Beginning to intermediate dancers (and open to newcomers). No prior experience or partner required.</p>\n<p>Schedule<br />\n7:00-8:00: Beginners Tango with Guillermo Merlo. This class is for beginners and those wishing to brush up some new techniques.<br />\n8:00-9:00: Adv-Intermediate Tango Class with Guillermo Merlo –Theme changes every month</p>\n<p> </p>\n<div>\n<div class=\"xdj266r x11i5rnm xat24cr x1mh8g0r x1vvkbs\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n</div>\n<div></div>\n<div></div>\n<div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>WELCOME FEBRUARY–THE MONTH OF LOVE AND FRIENDSHIP!!</strong></div>\n</div>\n<div></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑪𝒐𝒎𝒆 𝒋𝒐𝒊𝒏 𝒖𝒔 𝒇𝒐𝒓 𝑪𝒍𝒂𝒔𝒔𝒆𝒔 𝒂𝒏𝒅 𝒅𝒂𝒏𝒄𝒊𝒏𝒈 with 𝑮𝒖𝒊𝒍𝒍𝒆𝒓𝒎𝒐 𝑴𝒆𝒓𝒍𝒐 this week and for the month of February.</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">7-9𝙥𝙢 𝘾𝙡𝙖𝙨𝙨𝙚𝙨</div>\n<div></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">9𝙥𝙢-12𝙖𝙢 – 𝘿𝙖𝙣𝙘𝙞𝙣𝙜 𝙬𝙞𝙩𝙝 𝙜𝙪𝙚𝙨𝙩 DJs</div>\n<div></div>\n<div></div>\n<div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> 7-8𝒑𝒎 — 𝑩𝑬𝑮𝑰𝑵𝑵𝑬𝑹;<br />\n𝑻𝒉𝒆 𝑩𝒂𝒔𝒊𝒄 𝑻𝒂𝒏𝒈𝒐 𝑺𝒕𝒆𝒑𝒔 𝑰𝒇 𝒚𝒐𝒖 𝒉𝒂𝒗𝒆 𝒏𝒆𝒗𝒆𝒓 𝒕𝒂𝒌𝒆𝒏 𝒂 𝑻𝒂𝒏𝒈𝒐 𝒄𝒍𝒂𝒔𝒔, 𝒕𝒉𝒊𝒔 𝒊𝒔 𝒇𝒐𝒓 𝒚𝒐𝒖. 𝒀𝒐𝒖 𝒘𝒊𝒍𝒍 𝒃𝒆 𝒂𝒃𝒍𝒆 𝒕𝒐 𝒂𝒄𝒕𝒖𝒂𝒍𝒍𝒚 𝒈𝒆𝒕 𝒐𝒏 𝒕𝒉𝒆 𝒅𝒂𝒏𝒄𝒆 𝒇𝒍𝒐𝒐𝒓 𝒂𝒏𝒅 𝒔𝒉𝒐𝒘 𝒚𝒐𝒖𝒓 𝒇𝒓𝒊𝒆𝒏𝒅𝒔 𝒉𝒐𝒘 𝒕𝒐 𝑻𝒂𝒏𝒈𝒐!! 𝑨𝒏𝒅—𝒆𝒗𝒆𝒓𝒚𝒐𝒏𝒆 𝒏𝒆𝒆𝒅𝒔 𝒂 𝒍𝒊𝒕𝒕𝒍𝒆 ‘𝒃𝒆𝒈𝒊𝒏𝒏𝒆𝒓 𝒄𝒍𝒂𝒔𝒔’ 𝒊𝒏 𝒕𝒉𝒆𝒊𝒓 𝒍𝒊𝒗𝒆𝒔—𝒆𝒗𝒆𝒏 𝒕𝒉𝒐𝒔𝒆 𝒘𝒉𝒐 𝒂𝒓𝒆 𝒂𝒍𝒓𝒆𝒂𝒅𝒚 𝑻𝒂𝒏𝒈𝒐 𝒂𝒅𝒅𝒊𝒄𝒕𝒔.</div>\n</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div></div>\n<div></div>\n<div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> 8-9𝒑𝒎 — 𝑰𝑵𝑻𝑬𝑹𝑴𝑬𝑫𝑰𝑨𝑻𝑬 + 𝑻𝒂𝒏𝒈𝒐–<br />\n” Ganchos Internos” — see description under the intermediate class</div>\n</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div></div>\n<div></div>\n<div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> 9:00𝒑𝒎-12:00𝒂𝒎—𝑫𝒂𝒏𝒄𝒊𝒏𝒈<br />\n𝑮𝒖𝒆𝒔t DJ: weekly guest DJs</div>\n</div>\n<div></div>\n<div></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑨𝒍𝒍 𝑪𝒍𝒂𝒔𝒔𝒆𝒔 𝒂𝒓𝒆 $20 𝒆𝒂𝒄𝒉 𝒇𝒐𝒓 𝒃𝒆𝒈𝒊𝒏𝒏𝒆𝒓 𝒂𝒏𝒅 𝑰𝒏𝒕𝒆𝒓𝒎𝒆𝒅𝒊𝒂𝒕𝒆.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝘽𝙪𝙮 𝙮𝙤𝙪r 𝙋𝙖𝙘𝙠𝙖𝙜𝙚 𝙤𝙣 the first day of the new cycle 𝙖𝙣𝙙 𝙜𝙚𝙩 𝙖 10% 𝙙𝙞𝙨𝙘𝙤𝙪𝙣𝙩</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑷𝑨𝑪𝑲𝑨𝑮𝑬𝑺<br />\n4 𝒄𝒍𝒂𝒔𝒔𝒆𝒔 = $70 — regular price</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑨𝑫𝑫𝑰𝑻𝑰𝑶𝑵𝑨𝑳 𝑷𝑹𝑰𝑪𝑬 𝑭𝑶𝑹 𝑴𝑰𝑳𝑶𝑵𝑮𝑨:<br />\n$10 𝒇𝒐𝒓 𝒕𝒉𝒆 𝑴𝒊𝒍𝒐𝒏𝒈𝒂 𝒊𝒇 𝒚𝒐𝒖 𝒕𝒂𝒌𝒆 𝒂 𝒄𝒍𝒂𝒔𝒔.<br />\n$5 𝒇𝒐𝒓 𝒔𝒕𝒖𝒅𝒆𝒏𝒕𝒔</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑺𝑷𝑬𝑪𝑰𝑨𝑳: $10 𝒊𝒇 𝒚𝒐𝒖 𝒂𝒓𝒆 𝒕𝒂𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒄𝒍𝒂𝒔𝒔𝒆𝒔 ***𝑺𝑻𝑼𝑫𝑬𝑵𝑻 𝑫𝑰𝑺𝑪𝑶𝑼𝑵𝑻 𝑭𝑶𝑹 𝑫𝑨𝑵𝑪𝑰𝑵𝑮 𝑶𝑵𝑳𝒀</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑫𝒂𝒏𝒄𝒊𝒏𝒈 𝒊𝒔: $15/𝒑𝒆𝒓𝒔𝒐𝒏 –𝒊𝒇 𝒚𝒐𝒖 𝒂𝒓𝒆 𝒏𝒐𝒕 𝒕𝒂𝒌𝒊𝒏𝒈 𝒄𝒍𝒂𝒔𝒔𝒆𝒔<br />\n$10 𝒔𝒕𝒖𝒅𝒆𝒏𝒕𝒔</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑺𝑷𝑬𝑪𝑰𝑨𝑳: $10 𝒊𝒇 𝒚𝒐𝒖 𝒂𝒓𝒆 𝒕𝒂𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒄𝒍𝒂𝒔𝒔𝒆𝒔 ***𝑺𝑻𝑼𝑫𝑬𝑵𝑻 𝑫𝑰𝑺𝑪𝑶𝑼𝑵𝑻 𝑭𝑶𝑹 𝑫𝑨𝑵𝑪𝑰𝑵𝑮 𝑶𝑵𝑳𝒀</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">_________</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">MILONGA PASS: $50 –only to be used on Wednesdays</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">In order to get the full benefit of our classes, we recommend that you advantage of one of the packages. However, drop in are welcome.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">Class card is not refundable and must be used within the month it is bought.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">PAYMENT ONLINE:<br />\nCash<br />\nChecks<br />\nVenmo: @danceunionstudio</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">You can purchase a Milonga Pass and get a discount!<br />\nNo need to worry about carrying cash all the time when you can carry your milonga pass!</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">__________________________________</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">PROTOCOLS: PLEASE READ CAREFULLY<br />\nWe are doing our best to keep the studio clean and safe for everyone to enjoy, but we need your cooperation to make sure it stays safe at all times<br />\nll result in you not being allowed to participate in our events.</div>\n<p> </p>\n<p>**See other posting for Tango Classes information.</p>\n<p>Call Vicky if you have any questions at 617-721-4872</p>\n<p>More information; www.bostontango.org</p>",
+  "ownerOrganizerID": {
+    "$oid": "6806691b2f926881302124e1"
+  },
+  "ownerOrganizerName": "Tango Society of Boston",
+  "ownerOrganizerShortName": "SOCIETY",
+  "startDate": {
+    "$date": "2025-07-23T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-24T00:00:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2024/02/WTB-February-2024.jpg?fit=1640%2C924&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:49.540Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false,
+  "titleShortName": "Wed Tango-Break"
+},
+{
+  "_id": {
+    "$oid": "686e5f780ac53b960835b299"
+  },
+  "appId": "1",
+  "title": "Advanced Beginner Series",
+  "shortTitle": "Adv Beg Classes",
+  "description": "When:\nWednesdays, July 2 – August 6, 7-8 pm \n\nWhere:\nMango Studio | 112 Bishop Allen Dr, Cambridge, MA 02139\n\nBuilding confidence and expanding your tango vocabulary.\n\nAfter the Beginner series, continue your journey with our Advanced Beginner level. With four unique rotating series (A to D), you’ll develop your technique, deepen your understanding of connection, and start exploring improvisation. You’ll also be introduced to tango-specific drills and partner dynamics. These series can be taken in any order.\n",
+  "startDate": {
+    "$date": "2025-07-23T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-24T00:00:00.000Z"
+  },
+  "isAllDay": false,
+  "categoryFirst": "Class",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49eb"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560999"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "UNKNOWN",
+  "ownerOrganizerName": "Practica Spark",
+  "ownerOrganizerShortName": "SPARK",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "eventImage": null,
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isBtcImported": false,
+  "isAiGenerated": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "15",
+  "expiresAt": {
+    "$date": "2026-07-24T00:00:00.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68532f91a1e3cfb6f8bb9e61"
+  },
+  "appId": "1",
+  "title": "Wednesday Tango Break– 8pm Intermediate Tango Classes",
+  "standardsTitle": "Wednesday Tango Break– 8pm Intermediate Tango Classes",
+  "shortTitle": "Intermediate Class",
+  "description": "<div class=\"xdj266r x11i5rnm xat24cr x1mh8g0r x1vvkbs\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>WELCOME FEBRUARY–THE MONTH OF LOVE AND FRIENDSHIP!!</strong></div>\n<div>\n<div class=\"tribe-events-event-image\"></div>\n<div class=\"tribe-events-single-event-description tribe-events-content\">\n<p>The Tango Society of Boston sponsors Mid-week Tango Dance breaks every Wednesday — Boston’s largest informal Milonga (Tango social dance) and Tango lessons.</p>\n<p>Features a lesson in Argentine Tango for Beginning to intermediate dancers (and open to newcomers). No prior experience or partner required.</p>\n<p>Schedule<br />\n7:00-8:00: Beginners Tango with Guillermo Merlo. This class is for beginners and those wishing to brush up some new techniques.<br />\n8:00-9:00: Adv-Intermediate Tango Class with Guillermo Merlo –Theme changes every month</p>\n</div>\n</div>\n<div></div>\n<div><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">This month, the Intermediate+ class wilL work on:</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><strong>“GANCHOS INTERNOS”. (Inside Ganchos)</strong></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">“Ganchos Internos” “inside hooks” are movements where one of the partner’s legs hooks around or behind the partner’s leg in a fluid and coordinated manner.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">These Ganchos can be done by both the leader and the follower, to create a dynamic and expressive connection during the dance. They are also used to add variety and embellishments to the dance as well as to communicate emotions and sensations during the dance</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">Because Ganchos Internos require good control of balance, posture and embrace technique to ensure they are performed safely and harmoniously, Maestro Guillermo will review and emphasize the correct techniques to practice to achieve this.</div>\n<div></div>\n<div></div>\n<div></div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑪𝒐𝒎𝒆 𝒋𝒐𝒊𝒏 𝒖𝒔 𝒇𝒐𝒓 𝑪𝒍𝒂𝒔𝒔𝒆𝒔 𝒂𝒏𝒅 𝒅𝒂𝒏𝒄𝒊𝒏𝒈 with 𝑮𝒖𝒊𝒍𝒍𝒆𝒓𝒎𝒐 𝑴𝒆𝒓𝒍𝒐 this week and for the month of February.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">7-9𝙥𝙢 𝘾𝙡𝙖𝙨𝙨𝙚𝙨<br />\n9𝙥𝙢-12𝙖𝙢 – 𝘿𝙖𝙣𝙘𝙞𝙣𝙜 𝙬𝙞𝙩𝙝 𝙜𝙪𝙚𝙨𝙩</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑨𝒍𝒍 𝑪𝒍𝒂𝒔𝒔𝒆𝒔 𝒂𝒓𝒆 $20 𝒆𝒂𝒄𝒉 𝒇𝒐𝒓 𝒃𝒆𝒈𝒊𝒏𝒏𝒆𝒓 𝒂𝒏𝒅 𝑰𝒏𝒕𝒆𝒓𝒎𝒆𝒅𝒊𝒂𝒕𝒆.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝘽𝙪𝙮 𝙮𝙤𝙪r 𝙋𝙖𝙘𝙠𝙖𝙜𝙚 𝙤𝙣 the first day of the new cycle 𝙖𝙣𝙙 𝙜𝙚𝙩 𝙖 10% 𝙙𝙞𝙨𝙘𝙤𝙪𝙣𝙩</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑷𝑨𝑪𝑲𝑨𝑮𝑬𝑺<br />\n4 𝒄𝒍𝒂𝒔𝒔𝒆𝒔 = $70 — regular price</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑨𝑫𝑫𝑰𝑻𝑰𝑶𝑵𝑨𝑳 𝑷𝑹𝑰𝑪𝑬 𝑭𝑶𝑹 𝑴𝑰𝑳𝑶𝑵𝑮𝑨:<br />\n$10 𝒇𝒐𝒓 𝒕𝒉𝒆 𝑴𝒊𝒍𝒐𝒏𝒈𝒂 𝒊𝒇 𝒚𝒐𝒖 𝒕𝒂𝒌𝒆 𝒂 𝒄𝒍𝒂𝒔𝒔.<br />\n$5 𝒇𝒐𝒓 𝒔𝒕𝒖𝒅𝒆𝒏𝒕𝒔</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑺𝑷𝑬𝑪𝑰𝑨𝑳: $10 𝒊𝒇 𝒚𝒐𝒖 𝒂𝒓𝒆 𝒕𝒂𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒄𝒍𝒂𝒔𝒔𝒆𝒔 ***𝑺𝑻𝑼𝑫𝑬𝑵𝑻 𝑫𝑰𝑺𝑪𝑶𝑼𝑵𝑻 𝑭𝑶𝑹 𝑫𝑨𝑵𝑪𝑰𝑵𝑮 𝑶𝑵𝑳𝒀</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> 7-8𝒑𝒎 — 𝑩𝑬𝑮𝑰𝑵𝑵𝑬𝑹;<br />\n𝑻𝒉𝒆 𝑩𝒂𝒔𝒊𝒄 𝑻𝒂𝒏𝒈𝒐 𝑺𝒕𝒆𝒑𝒔 𝑰𝒇 𝒚𝒐𝒖 𝒉𝒂𝒗𝒆 𝒏𝒆𝒗𝒆𝒓 𝒕𝒂𝒌𝒆𝒏 𝒂 𝑻𝒂𝒏𝒈𝒐 𝒄𝒍𝒂𝒔𝒔, 𝒕𝒉𝒊𝒔 𝒊𝒔 𝒇𝒐𝒓 𝒚𝒐𝒖. 𝒀𝒐𝒖 𝒘𝒊𝒍𝒍 𝒃𝒆 𝒂𝒃𝒍𝒆 𝒕𝒐 𝒂𝒄𝒕𝒖𝒂𝒍𝒍𝒚 𝒈𝒆𝒕 𝒐𝒏 𝒕𝒉𝒆 𝒅𝒂𝒏𝒄𝒆 𝒇𝒍𝒐𝒐𝒓 𝒂𝒏𝒅 𝒔𝒉𝒐𝒘 𝒚𝒐𝒖𝒓 𝒇𝒓𝒊𝒆𝒏𝒅𝒔 𝒉𝒐𝒘 𝒕𝒐 𝑻𝒂𝒏𝒈𝒐!! 𝑨𝒏𝒅—𝒆𝒗𝒆𝒓𝒚𝒐𝒏𝒆 𝒏𝒆𝒆𝒅𝒔 𝒂 𝒍𝒊𝒕𝒕𝒍𝒆 ‘𝒃𝒆𝒈𝒊𝒏𝒏𝒆𝒓 𝒄𝒍𝒂𝒔𝒔’ 𝒊𝒏 𝒕𝒉𝒆𝒊𝒓 𝒍𝒊𝒗𝒆𝒔—𝒆𝒗𝒆𝒏 𝒕𝒉𝒐𝒔𝒆 𝒘𝒉𝒐 𝒂𝒓𝒆 𝒂𝒍𝒓𝒆𝒂𝒅𝒚 𝑻𝒂𝒏𝒈𝒐 𝒂𝒅𝒅𝒊𝒄𝒕𝒔.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> 8-9𝒑𝒎 — 𝑰𝑵𝑻𝑬𝑹𝑴𝑬𝑫𝑰𝑨𝑻𝑬 + 𝑻𝒂𝒏𝒈𝒐–<br />\n” Ganchos Internos” — see description above</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> 9:00𝒑𝒎-12:00𝒂𝒎—𝑫𝒂𝒏𝒄𝒊𝒏𝒈<br />\n𝑮𝒖𝒆𝒔t DJ: TOSHI</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑫𝒂𝒏𝒄𝒊𝒏𝒈 𝒊𝒔: $15/𝒑𝒆𝒓𝒔𝒐𝒏 –𝒊𝒇 𝒚𝒐𝒖 𝒂𝒓𝒆 𝒏𝒐𝒕 𝒕𝒂𝒌𝒊𝒏𝒈 𝒄𝒍𝒂𝒔𝒔𝒆𝒔<br />\n$10 𝒔𝒕𝒖𝒅𝒆𝒏𝒕𝒔</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">𝑺𝑷𝑬𝑪𝑰𝑨𝑳: $10 𝒊𝒇 𝒚𝒐𝒖 𝒂𝒓𝒆 𝒕𝒂𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒄𝒍𝒂𝒔𝒔𝒆𝒔 ***𝑺𝑻𝑼𝑫𝑬𝑵𝑻 𝑫𝑰𝑺𝑪𝑶𝑼𝑵𝑻 𝑭𝑶𝑹 𝑫𝑨𝑵𝑪𝑰𝑵𝑮 𝑶𝑵𝑳𝒀</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">_________</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">MILONGA PASS: $50 –only to be used on Wednesdays</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">In order to get the full benefit of our classes, we recommend that you advantage of one of the packages. However, drop in are welcome.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">Class card is not refundable and must be used within the month it is bought.</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\"></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">_<br />\n<span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span> <span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t2d/2/16/2665.png\" alt=\"♥\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t38/2/16/1f33a.png\" alt=\"🌺\" width=\"16\" height=\"16\" /></span><span class=\"x3nfvp2 x1j61x8r x1fcty0u xdj266r xhhsvwb xat24cr xgzva0m xxymvpz xlup9mm x1kky2od\"><img loading=\"lazy\" decoding=\"async\" class=\"xz74otr\" src=\"https://static.xx.fbcdn.net/images/emoji.php/v9/t10/2/16/1f339.png\" alt=\"🌹\" width=\"16\" height=\"16\" /></span>__________________________</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">PAYMENT ONLINE:<br />\nCash<br />\nChecks<br />\nVenmo: @danceunionstudio</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">You can purchase a Milonga Pass and get a discount!<br />\nNo need to worry about carrying cash all the time when you can carry your milonga pass!</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">__________________________________</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">PROTOCOLS: PLEASE READ CAREFULLY<br />\nWe are doing our best to keep the studio clean and safe for everyone to enjoy, but we need your cooperation to make sure it stays safe at all times<br />\nll result in you not being allowed to participate in our events.</div>",
+  "ownerOrganizerID": {
+    "$oid": "6806691b2f926881302124e1"
+  },
+  "ownerOrganizerName": "Tango Society of Boston",
+  "ownerOrganizerShortName": "SOCIETY",
+  "startDate": {
+    "$date": "2025-07-24T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-24T01:00:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2024/02/WTB-February-2024-1.jpg?fit=1640%2C924&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:49.813Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f92a1e3cfb6f8bb9e66"
+  },
+  "appId": "1",
+  "title": "Wednesday Tango Break  –Dancing",
+  "standardsTitle": "Wednesday Tango Break  –Dancing",
+  "shortTitle": "Wednesday Tango Break  –Dancing",
+  "description": "<p>The Tango Society of Boston sponsors Mid-week Tango Dance breaks every Wednesday. Boston’s largest informal Milonga (Tango social dance).</p>\n<p>9:00-12:00 (Midnight) Social Dance Break Milonga. Tango dancing till 12 Midnight.<br />\nGuest DJ’s every week.</p>\n<p>Features a lesson in Argentine Tango for Beginning to intermediate dancers (and open to newcomers). No prior experience or partner required.</p>\n<p>Schedule<br />\n7:00-8:00: Beginners Tango with Guillermo Merlo. This class is for beginners and those wishing to brush up some new techniques.<br />\n8:00-9:00: Adv-Intermediate Tango Class with Guillermo Merlo –Theme changes every month</p>\n<p>**See other posting for Tango Classes information.</p>\n<p>Call Vicky if you have any questions at 617-721-4872</p>\n<p>More information; www.bostontango.org</p>",
+  "ownerOrganizerID": {
+    "$oid": "6806691b2f926881302124e1"
+  },
+  "ownerOrganizerName": "Tango Society of Boston",
+  "ownerOrganizerShortName": "SOCIETY",
+  "startDate": {
+    "$date": "2025-07-24T01:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-24T04:00:00.000Z"
+  },
+  "categoryFirst": "Milonga",
+  "categoryFirstId": "66c4d370a87a956db06c49e9",
+  "categorySecond": "Class",
+  "categorySecondId": "66c4d370a87a956db06c49eb",
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2019/08/Wednesday-tango-break-2.jpg?fit=768%2C1024&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:50.069Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": null,
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "685320ec5f078f0a85f7f225"
+  },
+  "appId": "1",
+  "title": "Tango Práctica Corazón in Lexington",
+  "description": "Argentine Tango Práctica will take place from 6:15pm to 8:45pm at the Lexington Community center.\n\n\nPlease sign your name at the front desk and pay with cash ($10). Members enter for free with their card. Non-resident annual fees are $70 (ages 18-59) and $18 (60+).\n\n\nThe address is 39 Marrett Rd, Lexington, MA 02421. To reach the Community center, turn from Marrett Road off Massachusetts avenue, drive up the hill and park your car in the big parking lot in front of the center.\n\n\nPlease invite your friends who would like to practice their dancing.\n\n\nIf you have any questions, email us at minuteman.tango.practica@gmail.com\nFacebook group: https://www.facebook.com/groups/1117995259207196/\n",
+  "startDate": {
+    "$date": "2025-07-24T22:15:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-25T00:45:00.000Z"
+  },
+  "categoryFirst": "Practica",
+  "categorySecond": "",
+  "categoryThird": "",
+  "categoryFirstId": {
+    "$oid": "66c4d370a87a956db06c49ea"
+  },
+  "categorySecondId": null,
+  "categoryThirdId": null,
+  "ownerOrganizerID": {
+    "$oid": "680669172f9268813021246c"
+  },
+  "grantedOrganizerID": null,
+  "alternateOrganizerID": null,
+  "grantedOrganizerName": "",
+  "alternateOrganizerName": "",
+  "locationName": "Lexington Community Center",
+  "ownerOrganizerName": "Tango Practica Corazón",
+  "ownerOrganizerShortName": "CORAZON",
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0589,
+      42.3601
+    ]
+  },
+  "seriesImages": [],
+  "venueID": {
+    "$oid": "6852ffeabb550728064284fd"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.2251836,
+      42.4440281
+    ]
+  },
+  "isDiscovered": false,
+  "isOwnerManaged": true,
+  "isActive": true,
+  "isFeatured": false,
+  "isCanceled": false,
+  "isRepeating": false,
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-07-25T00:45:00.000Z"
+  },
+  "__v": 0,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68532f93a1e3cfb6f8bb9e6b"
+  },
+  "appId": "1",
+  "title": "Milonga Sal Azul",
+  "standardsTitle": "Milonga Sal Azul",
+  "shortTitle": "Milonga Sal Azul",
+  "description": "<p><strong>Dear Tango Friends,</strong></p>\n<p>We are thrilled to invite you to <strong>Milonga Sal Azul</strong>, a warm and vibrant Argentine tango gathering every Thursday night at <strong>Blue Salt Restaurant</strong>! 💃🕺</p>\n<p><em>What makes it special?</em><br />\nMilonga Sal Azul is a <strong>community-driven space</strong> where dancers come together to enjoy beautiful tandas, great company, and the magic of tango. Each night offers a unique experience with <strong>rotating hosts and talented DJs</strong> setting the mood.</p>\n<h3>📅 Schedule:</h3>\n<ul>\n<li><strong>7:00 PM – 8:00 PM</strong> | Tango Lesson for Beginners ($10)</li>\n<li><strong>8:00 PM – 12:00 AM</strong> | Milonga ($20, includes a glass of wine 🍷)</li>\n<li>Enjoy a <strong>delicious European fusion dinner</strong> in a cozy and inviting setting. Friends and family are welcome to join for dinner or drinks and watch you dance!</li>\n<li><strong>Plenty of free street parking</strong></li>\n<li><strong>5-minute walk</strong> from the nearest bus stop</li>\n</ul>\n<p>Our goal is to create a <strong>BA-style milonga</strong> where everyone feels at home—whether you’re a seasoned dancer or just beginning your tango journey.</p>\n<p>Come dance with us every Thursday at Blue Salt Restaurant—we can’t wait to share this beautiful experience with you! </p>\n<p>Join our community and stay updated by visiting our <a href=\"https://www.facebook.com/share/g/164N9iXxjU/\" target=\"_blank\"><strong>Facebook group</strong></a>. 💙</p>\n<p>With abrazos,<br />\n<strong>The Milonga Sal Azul Team</strong></p>",
+  "ownerOrganizerID": {
+    "$oid": "680d9a05e0cc7a532a560549"
+  },
+  "ownerOrganizerName": "Milonga Sal Azul Team",
+  "ownerOrganizerShortName": "AZUL",
+  "startDate": {
+    "$date": "2025-07-24T23:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-25T04:00:00.000Z"
+  },
+  "categoryFirst": "Milonga",
+  "categoryFirstId": "66c4d370a87a956db06c49e9",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "venueCityName": "Newton",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/03/480668062_2053493141792484_598107550000165331_n.jpg?fit=1024%2C1024&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:51.169Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$20",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  " isCanceled": true,
+  "isCanceled": true
+},
+{
+  "_id": {
+    "$oid": "68532f94a1e3cfb6f8bb9e70"
+  },
+  "appId": "1",
+  "title": "Special pre-milonga workshop, TangoAffair",
+  "standardsTitle": "Special pre-milonga workshop, TangoAffair",
+  "shortTitle": "Pre-milonga workshop",
+  "description": "<p>Special pre-milonga workshop by Simonida Cekovic-Vuletic and Svetislav Vuletic, <a href=\"https://tangoaffair.com/\">TangoAffair</a><br />\nA workshop is held every 4th Friday of the month, 7:30pm – 8:30pm, followed by Vida Mia Milonga</p>\n<p>Friday, July 25: Join us for a very special July edition of Vida Mia Milonga with guest DJ Boris Hayete! This will be a farewell party for our dear friends and exceptional dancers, Boris and Anna. Their upcoming move to San Diego took us by surprise, and while we’re excited for what lies ahead, we will miss them deeply. Boris and Anna have been an important part of our tango community, and Vida Mia will be their final public appearance before they leave Boston. And it may be a while before we get to enjoy Boris spinning tunes again — so don’t miss it! Come dance, share a warm hug, and send Boris and Anna off with all the love they’ve given us over the years. Please note that there is no class this month, just dancing.  <a href=\"https://www.facebook.com/events/460422450484854\">Join us on Facebook</a></p>\n<p><strong>7:30pm – 8:30pm: “RHYTHMIC and MELODIC DANCING”, </strong>a special pre-milonga workshop with Simonida and Sveta, tba. The class is geared towards intermediate/adv. dancers, but all dancers can benefit from the material taught in the class.</p>\n<p><strong>8:30pm – 12:30am: Milonga, DJ David Chester</strong>, yummy refreshments and cordial atmosphere</p>\n<p>Admission (cash at the door or Venmo in advance: TangoAffair, last 4 digits of the phone number are 1550)<br />\n$35 class + milonga; $20 milonga only, $20 class only.<br />\nFull-Time Students with ID and guests who travel long distance (more than 30 miles): $30 class + milonga / $20 class only / $15 milonga only</p>\n<p>**Vida Mia Milonga is happening every 4th Friday of the month. Join Vida Mia Milonga FB group: https://www.facebook.com/groups/122374897796873</p>\n<p>Vida Mia <a href=\"https://tangoaffair.com/vida-mia-milonga/\">website</a><br />\n**Vida Mia Milonga is happening every 4th Friday of the month. Join Vida Mia Milonga FB group: https://www.facebook.com/groups/122374897796873</p>",
+  "ownerOrganizerID": {
+    "$oid": "6806691a2f926881302124cd"
+  },
+  "ownerOrganizerName": "Tango Affair",
+  "ownerOrganizerShortName": "AFFAIR",
+  "startDate": {
+    "$date": "2025-07-25T23:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-26T00:30:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": "",
+  "categorySecondId": null,
+  "categoryThird": "",
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2022/10/SVETA-I-JA-DAN-MARSHALL.jpg?fit=840%2C540&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:52.455Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-07-25T18:30:00.000Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "__v": 1,
+  "alternateOrganizerName": "",
+  "grantedOrganizerName": "",
+  "isAiGenerated": false,
+  "isAllDay": false,
+  "isCanceled": false,
+  "isFeatured": false,
+  "isRepeating": false,
+  "locationName": null,
+  "seriesImages": []
+},
+{
+  "_id": {
+    "$oid": "68532f94a1e3cfb6f8bb9e75"
+  },
+  "appId": "1",
+  "title": "VIDA MIA MILONGA",
+  "standardsTitle": "VIDA MIA MILONGA",
+  "shortTitle": "VIDA MIA MILONGA",
+  "description": "<p>Vida Mia Milonga is a very popular milonga in the Boston area, hosted every 4th Friday of the month by Simonida Cekovic-Vuletic, <a href=\"https://tangoaffair.com/\">TangoAffair</a></p>\n<p>Friday, Feb 28, 2025: Come dance with us at the February edition of Vida Mia Milonga! Let’s shake off the winter blues together with amazing traditional tango music from our guest DJ, David Chester. Sveta and I are excited to kick things off with a fun pre-milonga class, where we’ll share our love for tango with you. There will be yummy snacks, great vibes, and lots of warm hugs. Can’t wait to see you there!  <a href=\"https://www.facebook.com/events/460422450484854\">Join us on Facebook</a></p>\n<p><strong>7:30pm – 8:30pm: “RHYTHMIC and MELODIC DANCING”, </strong>a special pre-milonga workshop with Simonida and Sveta, tba. The class is geared towards intermediate/adv. dancers, but all dancers can benefit from the material taught in the class.</p>\n<p><strong>8:30pm – 12:30am: Milonga, DJ David Chester</strong>, yummy refreshments and cordial atmosphere</p>\n<p>Admission (cash at the door or Venmo in advance: TangoAffair, last 4 digits of the phone number are 1550)<br />\n$35 class + milonga; $20 milonga only, $20 class only.<br />\nFull-Time Students with ID and guests who travel long distance (more than 30 miles): $30 class + milonga / $20 class only / $15 milonga only</p>\n<p>**Vida Mia Milonga is happening every 4th Friday of the month. Join Vida Mia Milonga FB group: https://www.facebook.com/groups/122374897796873</p>\n<p>Vida Mia <a href=\"https://tangoaffair.com/vida-mia-milonga/\">website</a></p>\n<p><a href=\"https://tangoaffair.com/vida-mia-milonga/\">Website</a></p>",
+  "ownerOrganizerID": {
+    "$oid": "6806691a2f926881302124cd"
+  },
+  "ownerOrganizerName": "Tango Affair",
+  "ownerOrganizerShortName": "AFFAIR",
+  "startDate": {
+    "$date": "2025-07-25T23:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-26T04:30:00.000Z"
+  },
+  "categoryFirst": "Milonga",
+  "categoryFirstId": "66c4d370a87a956db06c49e9",
+  "categorySecond": "",
+  "categorySecondId": null,
+  "categoryThird": "",
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5122ef6308b31e5b57c1"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ]
+  },
+  "venueCityName": "Somerville",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.0972088,
+      42.3807113
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2024/03/VIDA-MIA-GENERAL-POSTER.jpg?fit=600%2C308&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:52.686Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "",
+  "expiresAt": {
+    "$date": "2026-07-25T23:30:00.000Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "__v": 1,
+  "alternateOrganizerName": "",
+  "grantedOrganizerName": "",
+  "isAiGenerated": false,
+  "isAllDay": false,
+  "isCanceled": false,
+  "isFeatured": false,
+  "isRepeating": false,
+  "locationName": null,
+  "seriesImages": []
+},
+{
+  "_id": {
+    "$oid": "68532f96a1e3cfb6f8bb9e7a"
+  },
+  "appId": "1",
+  "title": "Argentine Tango in West Hartford, CT",
+  "standardsTitle": "Argentine Tango in West Hartford, CT",
+  "shortTitle": "W Hartford Classes",
+  "description": "<p class=\"mb-4\">Do you tango? Tango Sueño Academy returns to Hartford area, at the Fred Astaire West Hartford starting April. Join us for weekly Saturday tango!</p>\n<p class=\"mb-4\">– 11:30 – 12:30 am: Essentials for all<br />\n– 12:30 – 1:30 pm: Intermediate tango<br />\nprivates by appointment<br />\n$25 one hour, $40 both (with monthly registration),<br />\nIN APRIL ONLY: first hour $15 (save 40%) second hour $15 ($30 both)<br />\nRegistration and further details: <a class=\"text-viridian\" href=\"http://www.tangosueno.com/?fbclid=IwAR38NYDXSBgfm_rQwsQ-AsKschp5CGeGmJn9i2oHWOqWTDXKLMmSJ6YWFLQ\" target=\"_blank\" rel=\"nofollow noopener ugc\">www.tangosueno.com</a></p>\n<p>__________</p>\n<p>Tango Sueño Academy is the premier Argentine Tango school in Connecticut, serving elite dancers for more than 18 years under the direction of Jorge “Gem” Duras. The group and private lessons focus on authentic Argentine Tango as danced and performed in the halls of Buenos Aires. The classes take place in Stamford, New Haven, Hartford and Danbury metropolitan areas as well as Westchester NY.</p>\n<p>Gem has been dancing Argentine Tango for more than 26 years and teaching professionally since 2003. He trains and encourages his students to acquire the proper tango technique, so that they can create the sensuality, musicality and partner connection that the Argentine Tango is famous for.</p>\n<p>Although Tango Sueño Academy offers choreography and performance classes for more advanced students, the essence of tango “where the two partners become one” is never forgotten, with the goal of enabling the students to dance with others at local tango events and throughout the world including Buenos Aires.</p>",
+  "ownerOrganizerID": {
+    "$oid": "680669172f92688130212480"
+  },
+  "ownerOrganizerName": "Tango Sueño Academy",
+  "ownerOrganizerShortName": "SUENO",
+  "startDate": {
+    "$date": "2025-07-26T15:30:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-26T17:30:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "venueCityName": "West Hartford",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2023/04/west_hartford_class_postcard-1-scaled.jpg?fit=2560%2C1241&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:54.340Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$15",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f96a1e3cfb6f8bb9e7f"
+  },
+  "appId": "1",
+  "title": "TANGO 1: BEGINNER",
+  "standardsTitle": "TANGO 1: BEGINNER",
+  "shortTitle": "TANGO 1: BEGINNER",
+  "description": "<div class=\"xdj266r x11i5rnm xat24cr x1mh8g0r x1vvkbs\">Want to learn Argentine Tango?! Join us at The Fernanda Ghi Dance Academy, a boston- based school that specializes in authentic Argentine Tango.</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">Things to know:<br class=\"html-br\" />– This class is for people with no prior experience, or folks who have danced tango before but want to learn a different role<br class=\"html-br\" />– No partner required<br class=\"html-br\" />– You will have fun</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">DROP INS ARE WELCOME ON THE FIRST CLASS OF THE SERIES:<br class=\"html-br\" />Saturday 3/8| $22<br class=\"html-br\" />OR</div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">REGISTER FOR THE WHOLE SERIES:</div>\n<div></div>\n<div class=\"x11i5rnm xat24cr x1mh8g0r x1vvkbs xtlvy1s\">What to Wear:<br class=\"html-br\" />– Shoes with suede or leather soles, socks, or socks worn over the outside of the shoe. (Shoes should be able to slide and pivot on a wood floor without catching. We do not recommend street shoes with rubber or plastic soles.)<br class=\"html-br\" />​<br class=\"html-br\" />– ​Comfortable clothes that you can move in</div>",
+  "ownerOrganizerID": {
+    "$oid": "680669182f92688130212497"
+  },
+  "ownerOrganizerName": "FG Dance Academy",
+  "ownerOrganizerShortName": "FGDA",
+  "startDate": {
+    "$date": "2025-07-26T16:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-26T17:00:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5115ef6308b31e5b56b2"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1541815,
+      42.3489552
+    ]
+  },
+  "venueCityName": "Brighton",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1541815,
+      42.3489552
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": null,
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:54.571Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$80",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f96a1e3cfb6f8bb9e84"
+  },
+  "appId": "1",
+  "title": "TANGO 2 + 3: INTERMEDIATE",
+  "standardsTitle": "TANGO 2 + 3: INTERMEDIATE",
+  "shortTitle": "TANGO 2 + 3: INTERMEDIATE",
+  "description": "<p>TANGO 2+3: INTERMEDIATE<br />\nAt the beginning of each month a new series on a new topic begins.</p>\n<p>MAR 8, 15, 22, 29 // $100</p>\n<p>– Pre-Registration for is required</p>\n<p>Instructor: Mia Dalglish<br />\n1:15- 2:30pm</p>\n<p>Course Description: This class is for people with a little prior experience in tango. We will be working on building a strong foundation of leading + following techniques so there is clear communication when moving as a couple. This class works on basic vocabulary of tango, and putting it in the line of dance.</p>\n<p>Registration:<br />\nPAYMENT // Cancellation + Purchasing Policy for Group Lessons:</p>\n<p>– Registration for Tango 2 + 3 is done by the series (no drop-ins). Registration is still permitted with up to one class absence per series, however, we must be informed at the time of registration. In this case, the Single Class Pass rate ($30 per session) will be charged for the number of sessions you are attending.</p>\n<p>– Full payment is due on the first day of each series. All payments are non-refundable and non-transferrable to future sessions. Refunds and / or class credit will not be issued for absences that are not planned by the first day of the series. ​</p>\n<p>– Your spot is reserved especially for you, so these classes are not transferable to another person (unless prior consent is given from Instructor).</p>\n<p>– To get the discounted series price, you must register for the full series.</p>\n<p>– If you are unable to complete the class due to an illness, injury or any other circumstance you must notify your instructor to let them know you will be absent. Your instructor will let you know if there is a makeup class that you can attend at another time during the week.</p>",
+  "ownerOrganizerID": {
+    "$oid": "680669182f92688130212497"
+  },
+  "ownerOrganizerName": "FG Dance Academy",
+  "ownerOrganizerShortName": "FGDA",
+  "startDate": {
+    "$date": "2025-07-26T17:15:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-26T18:30:00.000Z"
+  },
+  "categoryFirst": "Class",
+  "categoryFirstId": "66c4d370a87a956db06c49eb",
+  "categorySecond": null,
+  "categorySecondId": null,
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c5115ef6308b31e5b56b2"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1541815,
+      42.3489552
+    ]
+  },
+  "venueCityName": "Brighton",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.1541815,
+      42.3489552
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2023/08/TANGO-2.jpg?fit=2304%2C1728&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:54.793Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$100",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+},
+{
+  "_id": {
+    "$oid": "68532f97a1e3cfb6f8bb9e89"
+  },
+  "appId": "1",
+  "title": "TANGO 2×4 SOCIAL",
+  "standardsTitle": "TANGO 2×4 SOCIAL",
+  "shortTitle": "TANGO 2×4 SOCIAL",
+  "description": "<ul class=\"eventlist-meta event-meta\" data-animation-role=\"date\">\n<li class=\"eventlist-meta-item eventlist-meta-date event-meta-item\">Saturday, March 22, 2025</li>\n<li class=\"eventlist-meta-item eventlist-meta-time event-meta-item\"><span class=\"event-time-localized\">3:00 PM  6:00 PM</span></li>\n</ul>\n<div class=\"eventlist-description\">\n<div id=\"item-67d86aeb5ab8cf6504493448\" class=\"sqs-layout sqs-grid-12 columns-12\" data-layout-label=\"Post Body\" data-type=\"item\">\n<div class=\"row sqs-row\">\n<div class=\"col sqs-col-12 span-12\">\n<div id=\"block-795afaf1755147c8ecdd\" class=\"sqs-block html-block sqs-block-html\" data-block-type=\"2\" data-border-radii=\"{\"topLeft\":{\"unit\":\"px\",\"value\":0.0},\"topRight\":{\"unit\":\"px\",\"value\":0.0},\"bottomLeft\":{\"unit\":\"px\",\"value\":0.0},\"bottomRight\":{\"unit\":\"px\",\"value\":0.0}}\">\n<div class=\"sqs-block-content\">\n<div class=\"sqs-html-content\">\n<p class=\"\">TANGO DOS POR CUATRO is a new kind of social event for tango dancers of all levels! Come to practice, social dance and socialize with your friends in the tango community.</p>\n<p class=\"\"><strong>TWO</strong></p>\n<ul data-rte-list=\"default\">\n<li>\n<p class=\"\">2 Concepts: Practica + Milonga</p>\n</li>\n<li>\n<p class=\"\">2 Lines of Dance: One for Practice + One for Social Dance</p>\n</li>\n<li>\n<p class=\"\">2 Songs at a Time: Instead of tandas + cortinas, songs are played in stylistic pairings</p>\n</li>\n<li>\n<p class=\"\">2 Goals: Dance + Socialize</p>\n</li>\n</ul>\n<p class=\"\">X</p>\n<p class=\"\"><strong>FOUR</strong></p>\n<ul data-rte-list=\"default\">\n<li>\n<p class=\"\">4th Saturday of every month</p>\n</li>\n</ul>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>",
+  "ownerOrganizerID": {
+    "$oid": "680669182f92688130212497"
+  },
+  "ownerOrganizerName": "FG Dance Academy",
+  "ownerOrganizerShortName": "FGDA",
+  "startDate": {
+    "$date": "2025-07-26T19:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-26T22:00:00.000Z"
+  },
+  "categoryFirst": "Milonga",
+  "categoryFirstId": "66c4d370a87a956db06c49e9",
+  "categorySecond": "Practica",
+  "categorySecondId": "66c4d370a87a956db06c49ea",
+  "categoryThird": null,
+  "categoryThirdId": null,
+  "masteredRegionName": "Northeast",
+  "masteredDivisionName": "New England",
+  "masteredCityName": "Boston",
+  "venueID": {
+    "$oid": "680c4f5eef6308b31e5b5583"
+  },
+  "venueGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ]
+  },
+  "venueCityName": "Brighton",
+  "masteredRegionId": {
+    "$oid": "6751f58a5db435dd8005e45b"
+  },
+  "masteredDivisionId": {
+    "$oid": "6751f58a5db435dd8005e460"
+  },
+  "masteredCityId": {
+    "$oid": "6751f58a5db435dd8005e46a"
+  },
+  "masteredCityGeolocation": {
+    "type": "Point",
+    "coordinates": [
+      -71.06588,
+      42.355083
+    ],
+    "masteredCityId": {
+      "$oid": "6751f58a5db435dd8005e46a"
+    },
+    "masteredDivisionId": {
+      "$oid": "6751f58a5db435dd8005e460"
+    },
+    "masteredRegionId": {
+      "$oid": "6751f58a5db435dd8005e45b"
+    }
+  },
+  "eventImage": "https://i0.wp.com/bostontangocalendar.com/wp-content/uploads/2025/02/WhatsApp-Image-2025-03-05-at-12.40.53.jpeg?fit=1066%2C1600&ssl=1",
+  "isDiscovered": false,
+  "isOwnerManaged": false,
+  "isActive": true,
+  "isBtcImported": true,
+  "discoveredFirstDate": {
+    "$date": "2025-06-18T21:28:55.038Z"
+  },
+  "discoveredComments": "utils/btcImport/simple-import.js",
+  "cost": "$20",
+  "expiresAt": null,
+  "updatedAt": {
+    "$date": "2025-06-23T15:23:00.237Z"
+  },
+  "isCanceled": false
+}]
