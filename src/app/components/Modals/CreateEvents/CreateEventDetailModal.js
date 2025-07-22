@@ -200,16 +200,32 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         if (selectedRole === 'RegionalAdmin') {
           const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
           // Check multiple possible field names for city ID
+          // Also check venue object for city information
           const eventCityId = eventToEdit.masteredCityId?._id || 
                              eventToEdit.masteredCityId || 
                              eventToEdit.venueMasteredCityID ||
-                             eventToEdit.venueMasteredCityId;
+                             eventToEdit.venueMasteredCityId ||
+                             eventToEdit.venue?.masteredCityId?._id ||
+                             eventToEdit.venue?.masteredCityId ||
+                             eventToEdit.venueInfo?.masteredCityId?._id ||
+                             eventToEdit.venueInfo?.masteredCityId;
           
-          console.log('RA Edit Validation:', {
+          // Enhanced debug logging to diagnose field issues
+          console.log('RA Edit Validation - Enhanced Debug:', {
             selectedRole,
             raAllowedCities,
             eventCityId,
-            eventToEdit,
+            'eventToEdit._id': eventToEdit._id,
+            'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
+            'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
+            'eventToEdit.venueMasteredCityID': eventToEdit.venueMasteredCityID,
+            'eventToEdit.venueMasteredCityId': eventToEdit.venueMasteredCityId,
+            'eventToEdit.masteredCityName': eventToEdit.masteredCityName,
+            'eventToEdit.locationID': eventToEdit.locationID,
+            'eventToEdit.venueId': eventToEdit.venueId,
+            'eventToEdit.venue': eventToEdit.venue,
+            'eventToEdit.venueInfo': eventToEdit.venueInfo,
+            'All eventToEdit fields': Object.keys(eventToEdit),
             hasAccess: eventCityId && raAllowedCities.includes(eventCityId)
           });
           
