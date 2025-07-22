@@ -125,22 +125,24 @@ export function useVenues() {
   }, []);
 
   // Function to fetch a venue by ID - mimics getLocationById for compatibility
-  const getVenueById = useCallback(async (venueId) => {
+  const getVenueById = useCallback(async (venueId, populate = false) => {
     try {
       setLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       
-      // First check if the venue is already in our local state
-      const existingVenue = venues.find(venue => venue._id === venueId);
-      if (existingVenue) {
-        console.log('Found venue in local cache:', existingVenue.name || existingVenue.shortName);
-        return existingVenue;
+      // First check if the venue is already in our local state (only if not populating)
+      if (!populate) {
+        const existingVenue = venues.find(venue => venue._id === venueId);
+        if (existingVenue) {
+          console.log('Found venue in local cache:', existingVenue.name || existingVenue.shortName);
+          return existingVenue;
+        }
       }
       
       // Otherwise fetch from the API
-      console.log(`Fetching venue with ID: ${venueId}`);
+      console.log(`Fetching venue with ID: ${venueId}${populate ? ' (with populated references)' : ''}`);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${venueId}`, {
-        params: { appId },
+        params: { appId, populate: populate.toString() },
       });
       
       // Handle various response formats
