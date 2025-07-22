@@ -27,7 +27,7 @@ import { useActivityLogger } from '@/hooks/useActivityLogger';
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
-  const { logAuthEvent, logRoleChange } = useActivityLogger();
+  const { logAuthEvent, logRoleChange, logActivity } = useActivityLogger();
   // Fetch roles using useRoles hook
   // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
@@ -97,10 +97,30 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
     const newRole = event.target.value;
     const previousRole = selectedRole;
     
-    // Log the role change
+    // Get display names for logging
+    const previousRoleDisplay = roleDisplayMap[previousRole] || previousRole;
+    const newRoleDisplay = roleDisplayMap[newRole] || newRole;
+    
+    // Log the role change with detailed information
     await logRoleChange(previousRole, newRole, {
       changedBy: 'user', // User initiated change
-      location: 'UserDrawer'
+      location: 'UserDrawer',
+      previousRoleDisplay: previousRoleDisplay,
+      newRoleDisplay: newRoleDisplay,
+      userId: user?.uid,
+      userEmail: user?.email,
+      userName: user?.displayName || `${user?.localUserInfo?.firstName} ${user?.localUserInfo?.lastName}`.trim() || 'Unknown User',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Also log as a generic activity for better tracking
+    await logActivity('ROLE_SELECTION', 'user_role', user?.uid, {
+      from: previousRole,
+      to: newRole,
+      fromDisplay: previousRoleDisplay,
+      toDisplay: newRoleDisplay,
+      action: 'manual_switch',
+      interface: 'drawer_menu'
     });
     
     selectRole(newRole);

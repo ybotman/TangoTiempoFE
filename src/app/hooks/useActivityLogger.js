@@ -16,25 +16,34 @@ export const useActivityLogger = () => {
     }
 
     try {
+      const logData = {
+        action,
+        resource,
+        resourceId,
+        details: {
+          ...details,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          // Include user's current role
+          userRole: user.selectedRole || user.role || 'NamedUser',
+          userId: user.uid
+        }
+      };
+
+      // Log to console for debugging
+      console.log('Frontend Activity Log:', {
+        action: logData.action,
+        resource: logData.resource,
+        details: logData.details
+      });
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/frontend-logs`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          action,
-          resource,
-          resourceId,
-          details: {
-            ...details,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            // Include user's current role
-            userRole: user.selectedRole || user.role || 'NamedUser',
-            userId: user.uid
-          }
-        })
+        body: JSON.stringify(logData)
       });
 
       if (!response.ok) {
