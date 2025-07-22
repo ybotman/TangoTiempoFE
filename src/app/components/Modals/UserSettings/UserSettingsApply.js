@@ -5,6 +5,7 @@ import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgre
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 import ROTermsModal from './UserSettingApplyROTerms.js';
 
 const UserSettingsApply = () => {
@@ -14,6 +15,7 @@ const UserSettingsApply = () => {
   const { userData, updateUserData, loading: userDataLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
   const { createOrganizer } = useOrganizers();
+  const { logRoleChange, logActivity } = useActivityLogger();
 
   const [applicationStatus, setApplicationStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -70,7 +72,21 @@ const UserSettingsApply = () => {
 
         const updatedRoleIds = [...new Set([...existingRoleIds, String(regionalOrganizerRole._id)])];
 
+        // Log the role application
+        await logActivity('ROLE_APPLICATION', 'user', userData._id, {
+          appliedRole: 'RegionalOrganizer',
+          previousRoles: existingRoleIds,
+          action: 'apply'
+        });
+
         await updateUserData({ roleIds: updatedRoleIds });
+        
+        // Log the role change from NU to RO
+        await logRoleChange('NamedUser', 'RegionalOrganizer', {
+          changedBy: 'user',
+          location: 'UserSettingsApply',
+          applicationStatus: 'pending_approval'
+        });
       }
 
       // Create an organizer if needed
@@ -139,6 +155,13 @@ const UserSettingsApply = () => {
 
       await updateUserData({
         regionalOrganizerInfo: updatedRegionalInfo,
+      });
+
+      // Log the terms agreement
+      await logActivity('TERMS_AGREEMENT', 'user', userData._id, {
+        termsType: 'RegionalOrganizerTerms',
+        agreed: agreed,
+        role: 'RegionalOrganizer'
       });
 
       setShowTerms(false);

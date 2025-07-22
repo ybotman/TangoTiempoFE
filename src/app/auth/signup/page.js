@@ -23,10 +23,12 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AppleIcon from '@/components/AppleIcon';
 import EmailAuthForm from '@/components/EmailAuthForm';
 import Link from 'next/link';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 const SignUpPage = () => {
   const router = useRouter();
   const { user, loading, error, authenticateWithGoogle, authenticateWithApple, signUp } = useContext(AuthContext);
+  const { logAuthEvent } = useActivityLogger();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authError, setAuthError] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -41,10 +43,32 @@ const SignUpPage = () => {
   const handleGoogleSignUp = async () => {
     setIsRedirecting(true);
     setAuthError('');
-    const result = await authenticateWithGoogle();
-    if (result) {
-      router.push('/calendar');
-    } else {
+    try {
+      const result = await authenticateWithGoogle();
+      if (result) {
+        // Log successful signup
+        await logAuthEvent('SIGNUP', true, {
+          method: 'google',
+          provider: 'google.com',
+          isNewUser: true
+        });
+        router.push('/calendar');
+      } else {
+        // Log failed signup
+        await logAuthEvent('SIGNUP_FAILED', false, {
+          method: 'google',
+          provider: 'google.com',
+          reason: 'Authentication failed'
+        });
+        setIsRedirecting(false);
+      }
+    } catch (error) {
+      // Log error during signup
+      await logAuthEvent('SIGNUP_FAILED', false, {
+        method: 'google',
+        provider: 'google.com',
+        error: error.message
+      });
       setIsRedirecting(false);
     }
   };
@@ -52,10 +76,32 @@ const SignUpPage = () => {
   const handleAppleSignUp = async () => {
     setIsRedirecting(true);
     setAuthError('');
-    const result = await authenticateWithApple();
-    if (result) {
-      router.push('/calendar');
-    } else {
+    try {
+      const result = await authenticateWithApple();
+      if (result) {
+        // Log successful signup
+        await logAuthEvent('SIGNUP', true, {
+          method: 'apple',
+          provider: 'apple.com',
+          isNewUser: true
+        });
+        router.push('/calendar');
+      } else {
+        // Log failed signup
+        await logAuthEvent('SIGNUP_FAILED', false, {
+          method: 'apple',
+          provider: 'apple.com',
+          reason: 'Authentication failed'
+        });
+        setIsRedirecting(false);
+      }
+    } catch (error) {
+      // Log error during signup
+      await logAuthEvent('SIGNUP_FAILED', false, {
+        method: 'apple',
+        provider: 'apple.com',
+        error: error.message
+      });
       setIsRedirecting(false);
     }
   };
@@ -65,10 +111,26 @@ const SignUpPage = () => {
     try {
       const result = await signUp({ email, password, firstName, lastName });
       if (result) {
+        // Log successful signup
+        await logAuthEvent('SIGNUP', true, {
+          method: 'email',
+          provider: 'password',
+          email: email,
+          isNewUser: true,
+          firstName: firstName,
+          lastName: lastName
+        });
         router.push('/calendar');
       }
       return result;
     } catch (error) {
+      // Log failed signup
+      await logAuthEvent('SIGNUP_FAILED', false, {
+        method: 'email',
+        provider: 'password',
+        email: email,
+        error: error.message || 'Sign up failed'
+      });
       setAuthError(error.message || 'Sign up failed');
       return null;
     }
