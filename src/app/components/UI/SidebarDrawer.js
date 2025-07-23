@@ -21,10 +21,13 @@ import {
   //  Collapse,
   CircularProgress,
   Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
-import ErrorIcon from '@mui/icons-material/Error';
+// import ErrorIcon from '@mui/icons-material/Error';
 import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -37,6 +40,11 @@ import BusinessIcon from '@mui/icons-material/Business';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import UpdateIcon from '@mui/icons-material/Update';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import InfoIcon from '@mui/icons-material/Info';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -46,6 +54,7 @@ import PrivacyPolicyModal from '@/components/Modals/misc/PrivacyPolicyModal';
 import FAQModal from '@/components/Modals/misc/FAQModal';
 import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import { RoleContext } from '@/contexts/RoleContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
@@ -78,6 +87,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
+  const { user } = useContext(AuthContext) || {};
 
   // Get selected location and initialization state from GeoLocationContext
   const { selectedLocation, isInitialized } = useGeoLocation();
@@ -280,50 +290,110 @@ const SidebarDrawer = ({ open, onClose }) => {
             </ListItem>
           )}
           
-          {/* Apply as Organizer Menu Item */}
-          <Link href="/organizers/apply" passHref>
-            <ListItem
-              button="true"
-              onClick={() => onClose()}
-            >
-              <ListItemIcon>
-                <GroupIcon sx={{ color: 'indigo' }} />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Apply as Organizer" 
-                secondary="Become a TangoTiempo organizer"
-              />
-            </ListItem>
-          </Link>
-          
           <Divider />
 
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Role Settings
-          </Typography>
-          {selectedRole === '' && (
-            <ListItem>
-              <ListItemIcon>
-                <ErrorIcon sx={{ color: 'coral' }} />
-              </ListItemIcon>
-              <ListItemText primary="Sign In to Save Settings" />
-            </ListItem>
-          )}
-          {selectedRole !== '' && (
-            <ListItem
-              button="true"
-              onClick={() => {
-                setUserSettingsOpen(true);
-                onClose();
-              }}
-            >
-              <ListItemIcon>
-                <AccountCircleIcon sx={{ color: 'blue' }} />
-              </ListItemIcon>
-              <ListItemText primary="User Settings" />
-            </ListItem>
-          )}
-          {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+          {/* Dynamic Authentication-Based Section */}
+          {!user ? (
+            // Not Logged In Menu Items
+            <>
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
+                Get Started
+              </Typography>
+              <ListItem
+                button="true"
+                sx={{ 
+                  bgcolor: 'primary.main', 
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                  mx: 1,
+                  borderRadius: 1,
+                  mt: 1
+                }}
+              >
+                <ListItemIcon>
+                  <RocketLaunchIcon sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary="Get Started" />
+              </ListItem>
+              
+              <Link href="/organizers/apply" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <GroupIcon sx={{ color: 'indigo' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Apply as Organizer" />
+                </ListItem>
+              </Link>
+              
+              <Divider sx={{ my: 1 }} />
+              
+              <Link href="/auth/login" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <LoginIcon sx={{ color: 'green' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Sign In" />
+                </ListItem>
+              </Link>
+              
+              <Link href="/auth/signup" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <PersonAddIcon sx={{ color: 'blue' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Create Account" />
+                </ListItem>
+              </Link>
+            </>
+          ) : (
+            // Logged In Menu Items
+            <>
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
+                User Settings
+              </Typography>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <AccountCircleIcon sx={{ color: 'blue' }} />
+                </ListItemIcon>
+                <ListItemText primary="User Settings" />
+              </ListItem>
+              
+              {/* Only show Apply as Organizer if user is not already an organizer */}
+              {selectedRole !== listOfAllRoles.REGIONAL_ORGANIZER && 
+               selectedRole !== listOfAllRoles.SYSTEM_ADMIN && 
+               selectedRole !== listOfAllRoles.SYSTEM_OWNER && (
+                <Link href="/organizers/apply" passHref>
+                  <ListItem
+                    button="true"
+                    onClick={() => onClose()}
+                  >
+                    <ListItemIcon>
+                      <GroupIcon sx={{ color: 'indigo' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Apply as Organizer" />
+                  </ListItem>
+                </Link>
+              )}
+              
+              {/* Role-specific menu items */}
+              {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
             <>
               <ListItem
                 button="true"
@@ -415,42 +485,73 @@ const SidebarDrawer = ({ open, onClose }) => {
               </Link>
             </>
           )}
+              
+              {/* Close authentication section */}
+            </>
+          )}
+          
           <Divider />
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Information
-          </Typography>
-          <ListItem button="true" onClick={() => setFaqOpen(true)}>
-            <ListItemIcon>
-              <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
-            </ListItemIcon>
-            <ListItemText primary="FAQ" />
-          </ListItem>
-          <ListItem button="true">
-            <ListItemIcon>
-              <HelpIcon sx={{ color: 'royalBlue' }} />
-            </ListItemIcon>
-            <ListItemText primary="Help" />
-          </ListItem>
-          <Link href="/about" passHref>
-            <ListItem button="true">
-              <ListItemIcon>
-                <SupportIcon sx={{ color: 'royalBlue' }} />
-              </ListItemIcon>
-              <ListItemText primary="About" />
-            </ListItem>
-          </Link>
-          <Link href="/releases" passHref>
-            <ListItem button="true" onClick={() => onClose()}>
-              <ListItemIcon>
-                <UpdateIcon sx={{ color: 'royalBlue' }} />
-              </ListItemIcon>
-              <ListItemText primary="Release Notes" />
-            </ListItem>
-          </Link>
+          
+          {/* Information Accordion - Collapsed by Default */}
+          <Accordion defaultExpanded={false} sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{ px: 2, minHeight: 48 }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <InfoIcon sx={{ color: 'royalBlue', mr: 1 }} />
+                <Typography>Information</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <List dense>
+                <ListItem button="true" onClick={() => { setFaqOpen(true); onClose(); }}>
+                  <ListItemIcon>
+                    <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="FAQ" />
+                </ListItem>
+                <ListItem button="true">
+                  <ListItemIcon>
+                    <HelpIcon sx={{ color: 'royalBlue' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Help" />
+                </ListItem>
+                <Link href="/about" passHref>
+                  <ListItem button="true" onClick={() => onClose()}>
+                    <ListItemIcon>
+                      <SupportIcon sx={{ color: 'royalBlue' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="About" />
+                  </ListItem>
+                </Link>
+                <Link href="/releases" passHref>
+                  <ListItem button="true" onClick={() => onClose()}>
+                    <ListItemIcon>
+                      <UpdateIcon sx={{ color: 'royalBlue' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Release Notes" />
+                  </ListItem>
+                </Link>
+                <ListItem
+                  button="true"
+                  onClick={() => {
+                    setPrivacyPolicyOpen(true);
+                    onClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <LockIcon sx={{ color: 'green' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Privacy Policy" />
+                </ListItem>
+              </List>
+            </AccordionDetails>
+          </Accordion>
+          
           <Divider />
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Other
-          </Typography>
+          
+          {/* Message Admin - Always Available */}
           <Link href="/message-admin" passHref>
             <ListItem button="true" onClick={() => onClose()}>
               <ListItemIcon>
@@ -459,18 +560,6 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="Message Admin" />
             </ListItem>
           </Link>
-          <ListItem
-            button="true"
-            onClick={() => {
-              setPrivacyPolicyOpen(true);
-              onClose();
-            }}
-          >
-            <ListItemIcon>
-              <LockIcon sx={{ color: 'green' }} />
-            </ListItemIcon>
-            <ListItemText primary="Privacy Policy" />
-          </ListItem>
           
           {/* Debug Menu - visible in all environments */}
           {showDebugMenu && (
