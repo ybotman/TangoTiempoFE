@@ -33,7 +33,9 @@ export function useMasteredLocations() {
         const response = await axios.get(`${baseURL}/api/masteredLocations/countries`, {
           params: { isActive, appId },
         });
-        setCountries(response.data);
+        // Handle both array and object with countries property
+        const countriesData = Array.isArray(response.data) ? response.data : (response.data.countries || []);
+        setCountries(countriesData);
       } catch (err) {
         console.error('Error fetching countries:', err.message);
         setError(err.message);
@@ -54,7 +56,9 @@ export function useMasteredLocations() {
         const response = await axios.get(`${baseURL}/api/masteredLocations/regions`, {
           params: { countryId, isActive, appId },
         });
-        setRegions(response.data);
+        // Handle both array and object with regions property
+        const regionsData = Array.isArray(response.data) ? response.data : (response.data.regions || []);
+        setRegions(regionsData);
       } catch (err) {
         console.error('Error fetching regions:', err.message);
         setError(err.message);
@@ -75,7 +79,9 @@ export function useMasteredLocations() {
         const response = await axios.get(`${baseURL}/api/masteredLocations/divisions`, {
           params: { regionId, isActive, appId },
         });
-        setDivisions(response.data);
+        // Handle both array and object with divisions property
+        const divisionsData = Array.isArray(response.data) ? response.data : (response.data.divisions || []);
+        setDivisions(divisionsData);
       } catch (err) {
         console.error('Error fetching divisions:', err.message);
         setError(err.message);
@@ -87,7 +93,7 @@ export function useMasteredLocations() {
   );
 
   const fetchCities = useCallback(
-    async (divisionId, isActive = true) => {
+    async (divisionId, isActive = true, requireCoordinates = true) => {
       console.log('FE: uML fetchCities');
       setLoading(true);
       setError(null);
@@ -103,6 +109,10 @@ export function useMasteredLocations() {
           },
         });
 
+        console.log('Raw API response:', response.data);
+        console.log('Response data type:', typeof response.data);
+        console.log('Is array?', Array.isArray(response.data));
+        
         // Check the response structure - it might be {cities: [...]} format
         let citiesArray = response.data;
         
@@ -117,15 +127,21 @@ export function useMasteredLocations() {
           return;
         }
 
-        // Ensure each city has latitude/longitude for the map
-        let citiesWithCoordinates = citiesArray.filter(
-          (city) => city.latitude !== undefined &&
-                   city.longitude !== undefined &&
-                   city.latitude !== null &&
-                   city.longitude !== null &&
-                   !isNaN(parseFloat(city.latitude)) &&
-                   !isNaN(parseFloat(city.longitude))
-        );
+        // If coordinates are required, filter cities with valid coordinates
+        let citiesWithCoordinates;
+        if (requireCoordinates) {
+          citiesWithCoordinates = citiesArray.filter(
+            (city) => city.latitude !== undefined &&
+                     city.longitude !== undefined &&
+                     city.latitude !== null &&
+                     city.longitude !== null &&
+                     !isNaN(parseFloat(city.latitude)) &&
+                     !isNaN(parseFloat(city.longitude))
+          );
+        } else {
+          // For user settings, return all cities regardless of coordinates
+          citiesWithCoordinates = citiesArray;
+        }
 
         console.log(`Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
 
@@ -134,7 +150,7 @@ export function useMasteredLocations() {
           console.log('Sample city data:', citiesWithCoordinates[0]);
         }
         // If we have cities but none with coordinates, check if this is a real problem
-        else if (citiesArray.length > 0) {
+        else if (citiesArray.length > 0 && requireCoordinates) {
           // Check if any cities have location.coordinates even if not in the expected format
           const citiesWithAnyCoords = citiesArray.filter(
             city => city.location && city.location.coordinates
@@ -172,8 +188,8 @@ export function useMasteredLocations() {
             }
           }
 
-          // Only log this as info if we still have no valid cities
-          if (citiesWithCoordinates.length === 0) {
+          // Only log this as info if we still have no valid cities and coordinates are required
+          if (citiesWithCoordinates.length === 0 && requireCoordinates) {
             console.log('Cities found but none have valid coordinates - this may need investigation');
           }
         }

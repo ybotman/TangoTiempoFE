@@ -5,7 +5,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
@@ -116,19 +115,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             </IconButton>
           </Tooltip>
         )}
-        <Tooltip title={showDiscovered ? "Including AI discovered events" : "Excluding AI discovered events"} arrow>
-          <IconButton 
-            onClick={onDiscoveredToggle}
-            sx={{ 
-              color: showDiscovered ? 'primary.main' : 'text.secondary',
-              '&:hover': {
-                backgroundColor: showDiscovered ? 'primary.light' : 'action.hover',
-              }
-            }}
-          >
-            <SmartToyIcon />
-          </IconButton>
-        </Tooltip>
         <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>

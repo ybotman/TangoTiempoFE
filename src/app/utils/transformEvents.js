@@ -12,29 +12,6 @@ export function transformEvents(events) {
       const venueId = event.venueID || event.venueId || event.locationID || null;
       const venueName = event.venueName || event.locationName || null;
     
-    // Debug logging for RA city mapping
-    if (events.indexOf(event) < 3) {
-      console.log(`Event Transform Debug - ${event.title}:`, {
-        masteredCityId: event.masteredCityId,
-        masteredCityIdType: typeof event.masteredCityId,
-        masteredCityId_id: event.masteredCityId?._id,
-        masteredCityName: event.masteredCityName,
-        willMapTo: event.masteredCityId?._id || event.masteredCityId || null
-      });
-    }
-    /*
-    if (events.indexOf(event) < 3) {
-      console.log(`Event ${event.title}:`, {
-        id: event._id,
-        venueID: event.venueID,
-        venueId: event.venueId,
-        locationID: event.locationID,
-        resolvedVenueId: venueId,
-        isActive: event.isActive
-      });
-    }
-    */
-    
     // For FullCalendar RRULE plugin, we need to handle recurring events differently
     const baseEvent = {
       title: event.title, // Use the 'title' field from the API

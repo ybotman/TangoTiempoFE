@@ -114,7 +114,7 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
                 }}
               />
             )}
-            {currentTab === 'map' && <VenueModalMap venues={venues} />}
+            {currentTab === 'map' && <VenueModalMap venues={venues} selectedVenueId={selectedVenue?._id} />}
           </Box>
         </Box>
       </Box>
