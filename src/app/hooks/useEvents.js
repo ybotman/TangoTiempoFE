@@ -97,13 +97,14 @@ export function useEvents({
   const userDefaults = useLocationPreferences ? userData?.localUserInfo?.userDefaults : null;
   
   // Get location from GeoLocationContext if available
+  // Note: We must call the hook to satisfy React's rules, but we'll only use its data if useGeoLocationContext is true
   const geoLocationContext = useGeoLocation();
   const { isInitialized } = geoLocationContext || {};
   
   // Determine effective location based on priority:
   // 1. Explicitly provided parameters (highest priority)
   // 2. User saved preferences (if useLocationPreferences is true)
-  // 3. GeoLocationContext (if useGeoLocationContext is true)
+  // 3. GeoLocationContext (if useGeoLocationContext is true AND no other location source)
   
   let effectiveRegion = region;
   let effectiveDivision = division;
@@ -135,8 +136,8 @@ export function useEvents({
       console.log('useEvents: No valid location preferences found in userDefaults');
     }
   } 
-  // Fall back to GeoLocationContext if no preferences or explicit params
-  else if (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity && !effectiveLat && !effectiveLng) {
+  // Fall back to GeoLocationContext ONLY if explicitly enabled and no other location source
+  else if (useGeoLocationContext && !useLocationPreferences && !effectiveRegion && !effectiveDivision && !effectiveCity && !effectiveLat && !effectiveLng) {
     console.log('useEvents: Falling back to GeoLocationContext');
     effectiveRegion = geoLocationContext?.selectedLocation?.region?.name || null;
     effectiveDivision = geoLocationContext?.selectedLocation?.division?.name || null;
@@ -331,22 +332,23 @@ export function useEvents({
       return;
     }
     
-    // Skip if using context and not initialized
-    if (useGeoLocationContext && !isInitialized && !useLocationPreferences) {
+    // Skip if explicitly using GeoLocationContext but it's not initialized yet
+    // This should only apply when we're actually using the context as our location source
+    if (useGeoLocationContext && !useLocationPreferences && !isInitialized) {
       console.log('useEvents: Waiting for GeoLocationContext initialization');
       return;
     }
     
-    // Additional validation for location data quality
+    // Additional validation for location data quality when using GeoLocationContext
     if (useGeoLocationContext && !useLocationPreferences) {
-      // Check if we have valid location data
+      // Check if we have valid location data from context
       const hasValidCity = effectiveCity && effectiveCity !== "Unknown";
       const hasValidRegion = effectiveRegion && effectiveRegion !== "Unknown";
       const hasValidCoords = effectiveLat && effectiveLng && 
                             !(effectiveLat === 0 && effectiveLng === 0);
       
       if (!hasValidCity && !hasValidRegion && !hasValidCoords) {
-        console.log('useEvents: No valid location data available yet', {
+        console.log('useEvents: No valid location data available from GeoLocationContext', {
           city: effectiveCity,
           region: effectiveRegion,
           coords: [effectiveLat, effectiveLng]
