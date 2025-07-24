@@ -341,12 +341,16 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData }) => {
           userDefaults: {
             useCenterLocation: useCenterLocation,
             defaultZoomRange: zoomRange,
-            // Always include these fields to ensure proper updates
-            masteredCityIds: !useCenterLocation && selectedCityIds.length > 0 ? selectedCityIds : [],
-            defaultCenterLocation: useCenterLocation && centerLat && centerLng ? {
-              latitude: parseFloat(centerLat),
-              longitude: parseFloat(centerLng)
-            } : null
+            // Preserve existing data when switching modes
+            // Only update the data for the current mode, keep the other mode's data intact
+            masteredCityIds: selectedCityIds.length > 0 ? selectedCityIds : 
+                           (userData?.localUserInfo?.userDefaults?.masteredCityIds || []),
+            defaultCenterLocation: (centerLat && centerLng) ? {
+              latitude: parseFloat(centerLat),  // Backend expects 'latitude'
+              longitude: parseFloat(centerLng),  // Backend expects 'longitude'
+              lat: parseFloat(centerLat),       // Also include 'lat' for useEvents
+              lng: parseFloat(centerLng)        // Also include 'lng' for useEvents
+            } : (userData?.localUserInfo?.userDefaults?.defaultCenterLocation || null)
           }
         }
       };

@@ -112,21 +112,32 @@ export function useEvents({
   let effectiveLng = lng;
   let effectiveCityIds = null;
   
+  // Debug logging - commented out to reduce noise
+  // console.log('useEvents: Location preference check:', {
+  //   useLocationPreferences,
+  //   hasUserDefaults: !!userDefaults,
+  //   userDefaults,
+  //   explicitParams: { region, division, city, lat, lng }
+  // });
+
   // If using location preferences and no explicit params provided
   if (useLocationPreferences && userDefaults && !region && !division && !city && !lat && !lng) {
     if (userDefaults.useCenterLocation && userDefaults.defaultCenterLocation) {
-      // Map center mode
-      effectiveLat = userDefaults.defaultCenterLocation.lat;
-      effectiveLng = userDefaults.defaultCenterLocation.lng;
+      // Map center mode - handle both lat/lng and latitude/longitude formats
+      effectiveLat = userDefaults.defaultCenterLocation.lat || userDefaults.defaultCenterLocation.latitude;
+      effectiveLng = userDefaults.defaultCenterLocation.lng || userDefaults.defaultCenterLocation.longitude;
       console.log('useEvents: Using saved map center location:', { lat: effectiveLat, lng: effectiveLng });
     } else if (userDefaults.masteredCityIds && userDefaults.masteredCityIds.length > 0) {
       // Multi-city mode
       effectiveCityIds = userDefaults.masteredCityIds;
       console.log('useEvents: Using saved city preferences:', effectiveCityIds);
+    } else {
+      console.log('useEvents: No valid location preferences found in userDefaults');
     }
   } 
   // Fall back to GeoLocationContext if no preferences or explicit params
   else if (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity && !effectiveLat && !effectiveLng) {
+    console.log('useEvents: Falling back to GeoLocationContext');
     effectiveRegion = geoLocationContext?.selectedLocation?.region?.name || null;
     effectiveDivision = geoLocationContext?.selectedLocation?.division?.name || null;
     effectiveCity = geoLocationContext?.selectedLocation?.city?.name || null;
@@ -251,6 +262,10 @@ export function useEvents({
         */
       }
 
+
+      // Log the final params being sent
+      console.log('useEvents: Final API Request params:', params);
+      console.log('useEvents: API URL:', `${process.env.NEXT_PUBLIC_BE_URL}/api/events`);
 
       // Call the unified endpoint
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
