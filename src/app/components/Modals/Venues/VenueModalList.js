@@ -123,7 +123,7 @@ const VenueModalList = ({
         {/* Country Dropdown */}
         <TextField select label="Country" value={countryId} onChange={handleCountryChange} sx={{ minWidth: 200 }}>
           <MenuItem value="">Select Country</MenuItem>
-          {countries.map((co) => (
+          {Array.isArray(countries) && countries.map((co) => (
             <MenuItem key={co._id} value={co._id}>
               {co.countryName}
             </MenuItem>
@@ -140,7 +140,7 @@ const VenueModalList = ({
           disabled={!countryId}
         >
           <MenuItem value="">Select Region</MenuItem>
-          {regions.map((r) => (
+          {Array.isArray(regions) && regions.map((r) => (
             <MenuItem key={r._id} value={r._id}>
               {r.regionName}
             </MenuItem>
@@ -157,7 +157,7 @@ const VenueModalList = ({
           disabled={!regionId}
         >
           <MenuItem value="">Select Division</MenuItem>
-          {divisions.map((d) => (
+          {Array.isArray(divisions) && divisions.map((d) => (
             <MenuItem key={d._id} value={d._id}>
               {d.divisionName}
             </MenuItem>
@@ -174,7 +174,7 @@ const VenueModalList = ({
           disabled={!divisionId}
         >
           <MenuItem value="">All Cities</MenuItem>
-          {cities.map((c) => (
+          {Array.isArray(cities) && cities.map((c) => (
             <MenuItem key={c._id} value={c._id}>
               {c.cityName}
             </MenuItem>
@@ -204,13 +204,6 @@ const VenueModalList = ({
                 <ListItem
                   button="true"
                   onDoubleClick={() => onEdit(v)}
-                  secondaryAction={
-                    v.isActive && (
-                      <Button variant="outlined" color="error" onClick={() => handleDeleteVenue(v._id)}>
-                        Deactivate
-                      </Button>
-                    )
-                  }
                 >
                   <ListItemText
                     primary={`${v.name} (${v.shortName})`}

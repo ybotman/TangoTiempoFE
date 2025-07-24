@@ -6,13 +6,10 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab } from '@mui/material';
 import ModalHeader from '@/components/UI/ModalHeader';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
-import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
-import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
+import UserSettingsLocationPreferences from '@/components/Modals/UserSettings/UserSettingsLocationPreferences';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
-import UserSettingsGeoLocation from '@/components/Modals/UserSettings/UserSettingsGeoLocation';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const modalStyle = {
   position: 'absolute',
@@ -32,9 +29,8 @@ const modalStyle = {
 const UserSettingsModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const geoLocation = useGeoLocation();
   const { userData, loading, error, updateUserData } = useUsers();
-  const [currentTab, setCurrentTab] = useState('name');
+  const [currentTab, setCurrentTab] = useState('locationPrefs');
 
   useEffect(() => {
     if (!user) {
@@ -81,9 +77,7 @@ const UserSettingsModal = ({ open, onClose }) => {
             }}
           >
             <Tab label="Name" value="name" />
-            <Tab label="Favs" value="favorites" />
-            <Tab label="Notifications" value="notifications" />
-            <Tab label="Location" value="geolocation" />
+            <Tab label="Location Prefs" value="locationPrefs" />
             <Tab label="Apply" value="apply" />
           </Tabs>
 
@@ -96,14 +90,8 @@ const UserSettingsModal = ({ open, onClose }) => {
             ) : (
               <>
                 {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
-                {currentTab === 'favorites' && (
-                  <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
-                )}
-                {currentTab === 'notifications' && (
-                  <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
-                )}
-                {currentTab === 'geolocation' && (
-                  <UserSettingsGeoLocation userData={userData} geoLocation={geoLocation} />
+                {currentTab === 'locationPrefs' && (
+                  <UserSettingsLocationPreferences userData={userData} updateUserData={updateUserData} />
                 )}
                 {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
               </>
