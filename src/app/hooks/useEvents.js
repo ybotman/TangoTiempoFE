@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useUsers } from '@/hooks/useUsers';
 
 /**
  * Unified useEvents hook - handles both geo-based and organizer-based filtering
@@ -17,6 +18,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
  * @param {Date|string} [options.endDate] - End date for filtering events
  * @param {number} [options.page=1] - Page number for pagination
  * @param {number} [options.limit=100] - Number of items per page
+ * @param {boolean} [options.useLocationPreferences=false] - Use saved user location preferences
  * @returns {Object} Events data, loading state, error state, and refresh function
  */
 /**
@@ -67,7 +69,8 @@ export function useEvents({
   endDate,
   page = 1,
   limit = 100,
-  useGeoLocationContext = true // Flag to control whether to use GeoLocationContext
+  useGeoLocationContext = true, // Flag to control whether to use GeoLocationContext
+  useLocationPreferences = false // Flag to use saved user preferences
 } = {}) {
   const [eventsData, setEventsData] = useState({
     events: [],
@@ -88,20 +91,51 @@ export function useEvents({
   const userOrganizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
   const userRoles = user?.roles;
   
+  // Always call the hook to satisfy React's rules
+  const { userData } = useUsers();
+  // Only use the data if useLocationPreferences is true
+  const userDefaults = useLocationPreferences ? userData?.localUserInfo?.userDefaults : null;
+  
   // Get location from GeoLocationContext if available
   const geoLocationContext = useGeoLocation();
   const { isInitialized } = geoLocationContext || {};
   
-  // Use context values if explicitly provided parameters are missing
-  const effectiveRegion = region || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.region?.name : null);
-  const effectiveDivision = division || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.division?.name : null);
-  const effectiveCity = city || (useGeoLocationContext ? geoLocationContext?.selectedLocation?.city?.name : null);
+  // Determine effective location based on priority:
+  // 1. Explicitly provided parameters (highest priority)
+  // 2. User saved preferences (if useLocationPreferences is true)
+  // 3. GeoLocationContext (if useGeoLocationContext is true)
   
-  // Use coordinates from GeoLocationContext if lat/lng not explicitly provided
-  const effectiveLat = lat || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
-    ? geoLocationContext?.userLocation?.latitude : null);
-  const effectiveLng = lng || (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity 
-    ? geoLocationContext?.userLocation?.longitude : null);
+  let effectiveRegion = region;
+  let effectiveDivision = division;
+  let effectiveCity = city;
+  let effectiveLat = lat;
+  let effectiveLng = lng;
+  let effectiveCityIds = null;
+  
+  // If using location preferences and no explicit params provided
+  if (useLocationPreferences && userDefaults && !region && !division && !city && !lat && !lng) {
+    if (userDefaults.useCenterLocation && userDefaults.defaultCenterLocation) {
+      // Map center mode
+      effectiveLat = userDefaults.defaultCenterLocation.lat;
+      effectiveLng = userDefaults.defaultCenterLocation.lng;
+      console.log('useEvents: Using saved map center location:', { lat: effectiveLat, lng: effectiveLng });
+    } else if (userDefaults.masteredCityIds && userDefaults.masteredCityIds.length > 0) {
+      // Multi-city mode
+      effectiveCityIds = userDefaults.masteredCityIds;
+      console.log('useEvents: Using saved city preferences:', effectiveCityIds);
+    }
+  } 
+  // Fall back to GeoLocationContext if no preferences or explicit params
+  else if (useGeoLocationContext && !effectiveRegion && !effectiveDivision && !effectiveCity && !effectiveLat && !effectiveLng) {
+    effectiveRegion = geoLocationContext?.selectedLocation?.region?.name || null;
+    effectiveDivision = geoLocationContext?.selectedLocation?.division?.name || null;
+    effectiveCity = geoLocationContext?.selectedLocation?.city?.name || null;
+    
+    if (!effectiveRegion && !effectiveDivision && !effectiveCity) {
+      effectiveLat = geoLocationContext?.userLocation?.latitude || null;
+      effectiveLng = geoLocationContext?.userLocation?.longitude || null;
+    }
+  }
   
   // Cache key generation commented out to fix ESLint warnings
   // This was previously used for memoizing/deduplicating requests
@@ -155,31 +189,48 @@ export function useEvents({
         params.end = defaultDates.end;
       }
 
-      // Location-based filtering parameters - using effective values that may come from GeoLocationContext
-      if (effectiveRegion) params.masteredRegionName = effectiveRegion;
-      if (effectiveDivision) params.masteredDivisionName = effectiveDivision;
-      if (effectiveCity) params.masteredCityName = effectiveCity;
+      // Handle multi-city filtering if city IDs are provided
+      if (effectiveCityIds && effectiveCityIds.length > 0) {
+        // Use the new cityIds parameter that Tom implemented
+        params.cityIds = effectiveCityIds;
+        console.log('Using multi-city filtering with cityIds:', effectiveCityIds);
+      } else {
+        // Location-based filtering parameters - using effective values that may come from GeoLocationContext
+        if (effectiveRegion) params.masteredRegionName = effectiveRegion;
+        if (effectiveDivision) params.masteredDivisionName = effectiveDivision;
+        if (effectiveCity) params.masteredCityName = effectiveCity;
+      }
 
       // Geolocation parameters - using effective values that may come from GeoLocationContext
       if (effectiveLat && effectiveLng) {
         params.lat = effectiveLat;
         params.lng = effectiveLng;
+        // Add enhanced geo search parameters when using coordinates
+        if (useLocationPreferences && userDefaults?.useCenterLocation) {
+          params.useGeoSearch = true;
+          params.radius = userDefaults.defaultRadius || '50km';
+          params.sortByDistance = true;
+        }
       }
 
       // Log the actual values used for filtering (from direct input or GeoLocationContext)
       console.log('Using location filters:', {
+        cityIds: effectiveCityIds,
         region: effectiveRegion,
         division: effectiveDivision,
         city: effectiveCity,
         lat: effectiveLat,
         lng: effectiveLng,
-        source: useGeoLocationContext && (
-          effectiveRegion !== region ||
-          effectiveDivision !== division ||
-          effectiveCity !== city ||
-          effectiveLat !== lat ||
-          effectiveLng !== lng
-        ) ? 'GeoLocationContext' : 'Direct input'
+        useGeoSearch: params.useGeoSearch,
+        radius: params.radius,
+        source: useLocationPreferences ? 'User Preferences' :
+                useGeoLocationContext && (
+                  effectiveRegion !== region ||
+                  effectiveDivision !== division ||
+                  effectiveCity !== city ||
+                  effectiveLat !== lat ||
+                  effectiveLng !== lng
+                ) ? 'GeoLocationContext' : 'Direct input'
       });
 
 
@@ -239,12 +290,15 @@ export function useEvents({
     effectiveCity,
     effectiveLat,
     effectiveLng,
+    effectiveCityIds,
     region,
     division,
     city,
     lat,
     lng,
     useGeoLocationContext,
+    useLocationPreferences,
+    userDefaults,
     // Use stable primitive values instead of user object to prevent infinite loops
     userId,
     userOrganizerId,
@@ -256,14 +310,20 @@ export function useEvents({
 
   // Fetch events when parameters change
   useEffect(() => {
+    // Skip if using location preferences but user data not loaded yet
+    if (useLocationPreferences && !userDefaults && user) {
+      console.log('useEvents: Waiting for user preferences to load');
+      return;
+    }
+    
     // Skip if using context and not initialized
-    if (useGeoLocationContext && !isInitialized) {
+    if (useGeoLocationContext && !isInitialized && !useLocationPreferences) {
       console.log('useEvents: Waiting for GeoLocationContext initialization');
       return;
     }
     
     // Additional validation for location data quality
-    if (useGeoLocationContext) {
+    if (useGeoLocationContext && !useLocationPreferences) {
       // Check if we have valid location data
       const hasValidCity = effectiveCity && effectiveCity !== "Unknown";
       const hasValidRegion = effectiveRegion && effectiveRegion !== "Unknown";
@@ -280,8 +340,24 @@ export function useEvents({
       }
     }
     
+    // Check if we have valid location data when using preferences
+    if (useLocationPreferences && userDefaults) {
+      const hasValidCities = effectiveCityIds && effectiveCityIds.length > 0;
+      const hasValidMapCenter = effectiveLat && effectiveLng && 
+                               !(effectiveLat === 0 && effectiveLng === 0);
+      
+      if (!hasValidCities && !hasValidMapCenter) {
+        console.log('useEvents: No valid location preferences set', {
+          cityIds: effectiveCityIds,
+          mapCenter: [effectiveLat, effectiveLng],
+          useCenterLocation: userDefaults.useCenterLocation
+        });
+        return;
+      }
+    }
+    
     fetchEvents();
-  }, [fetchEvents, isInitialized, useGeoLocationContext, effectiveCity, effectiveRegion, effectiveLat, effectiveLng]);
+  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds]);
 
   return { 
     events: eventsData.events || [], 

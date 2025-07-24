@@ -164,7 +164,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Extract city ID from event - handle both object and string formats
   const eventCityId = eventDetails?.extendedProps?.masteredCityId?._id || 
-                     eventDetails?.extendedProps?.masteredCityId;
+                     eventDetails?.extendedProps?.masteredCityId ||
+                     eventDetails?.extendedProps?.venueMasteredCityID ||  // TIEMPO-195: Add missing field
+                     eventDetails?.extendedProps?.venueMasteredCityId;
   
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&

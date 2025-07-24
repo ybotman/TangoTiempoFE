@@ -37,6 +37,8 @@ export function transformEvents(events) {
         masteredCityName: event.masteredCityName,
         // Store the backend's masteredCityId directly - can be either object or string
         masteredCityId: event.masteredCityId, // For RA permission checks
+        venueMasteredCityID: event.venueMasteredCityID, // TIEMPO-195: Add missing field for single-city RAs
+        venueMasteredCityId: event.venueMasteredCityId, // Lowercase variant
         active: event.active || event.isActive, // Legacy field
         isActive: event.isActive || event.active, // Current field
         canceled: event.canceled || event.isCanceled,
