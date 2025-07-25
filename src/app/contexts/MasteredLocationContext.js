@@ -35,27 +35,9 @@ export const MasteredLocationProvider = ({ children }) => {
       const errorMessage = 'Invalid or missing coordinates for nearest city lookup';
       setError(errorMessage);
       
-      // Generate a fallback city without hardcoded MongoDB IDs
-      // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-      // const tempId = `temp_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-      const bostonFallback = {
-        cityID: null,  // No hardcoded ID
-        cityName: 'Boston',
-        regionID: null, // No hardcoded ID
-        regionName: 'Northeast',
-        divisionID: null, // No hardcoded ID
-        divisionName: 'New England',
-        countryID: null, // No hardcoded ID
-        countryName: 'United States',
-        latitude: 42.3601,
-        longitude: -71.0589,
-        isFallback: true, // Mark as fallback data
-        reason: 'invalid_coordinates' // Add reason for diagnostics
-      };
-      
-      setNearestCity(bostonFallback);
-      // Using Boston fallback due to invalid coordinates
-      return bostonFallback;
+      // Don't set any fallback - throw error for invalid coordinates
+      // This prevents hardcoded defaults and allows proper error handling
+      throw new Error(errorMessage);
     }
 
     // Ensure latitude/longitude are parsed as floats for consistency
@@ -74,49 +56,16 @@ export const MasteredLocationProvider = ({ children }) => {
       if (!response.ok) {
         // Default to Boston without hardcoded IDs
         if (response.status === 404) {
-          // No nearby city found, defaulting to Boston
-          
-          // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-          const defaultCity = {
-            cityID: null, // No hardcoded ID
-            cityName: 'Boston',
-            regionID: null, // No hardcoded ID
-            regionName: 'Northeast',
-            divisionID: null, // No hardcoded ID
-            divisionName: 'New England',
-            countryID: null, // No hardcoded ID
-            countryName: 'United States',
-            latitude: 42.3601,
-            longitude: -71.0589,
-            isFallback: true, // Mark as fallback data
-            reason: 'not_found' // Add reason for diagnostics
-          };
-          setNearestCity(defaultCity);
-          return defaultCity;
+          // No nearby city found - let user select location
+          console.log('MasteredLocationContext: No nearby city found');
+          throw new Error('No nearby city found within search radius');
         }
 
         const message = `Error fetching nearest city: ${response.statusText || 'Unknown error'}`;
         setError(message);
         
-        // Create a fallback city without hardcoded IDs
-        // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-        const errorFallbackCity = {
-          cityID: null, // No hardcoded ID
-          cityName: 'Boston',
-          regionID: null, // No hardcoded ID
-          regionName: 'Northeast',
-          divisionID: null, // No hardcoded ID
-          divisionName: 'New England',
-          countryID: null, // No hardcoded ID
-          countryName: 'United States',
-          latitude: 42.3601,
-          longitude: -71.0589,
-          isFallback: true, // Mark as fallback data
-          reason: 'api_error' // Add reason for diagnostics
-        };
-        
-        setNearestCity(errorFallbackCity);
-        return errorFallbackCity;
+        // Don't set any fallback - throw error
+        throw new Error(message);
       }
 
       const data = await response.json();
@@ -135,9 +84,9 @@ export const MasteredLocationProvider = ({ children }) => {
                 !isNaN(parseFloat(data.location.coordinates[1]))) {
         cityLatitude = parseFloat(data.location.coordinates[1]);
       } else {
-        // Default to Boston's latitude as fallback
-        cityLatitude = 42.3601;
-        // Using fallback latitude for city data
+        // No valid latitude found in response
+        console.warn('MasteredLocationContext: No valid latitude in response');
+        cityLatitude = null;
       }
       
       if (data.longitude !== undefined && data.longitude !== null && !isNaN(parseFloat(data.longitude))) {
@@ -148,14 +97,14 @@ export const MasteredLocationProvider = ({ children }) => {
                 !isNaN(parseFloat(data.location.coordinates[0]))) {
         cityLongitude = parseFloat(data.location.coordinates[0]);
       } else {
-        // Default to Boston's longitude as fallback
-        cityLongitude = -71.0589;
-        // Using fallback longitude for city data
+        // No valid longitude found in response
+        console.warn('MasteredLocationContext: No valid longitude in response');
+        cityLongitude = null;
       }
 
       const cityData = {
         cityID: data.cityID || data._id, // Use _id as fallback but don't hardcode
-        cityName: data.cityName || data.name || 'Boston', // Use name as fallback
+        cityName: data.cityName || data.name || 'Unknown', // Use name as fallback
         regionID: data.regionID || data.masteredRegionId,
         regionName: data.regionName || 'Northeast',
         divisionID: data.divisionID || data.masteredDivisionId,
@@ -166,7 +115,7 @@ export const MasteredLocationProvider = ({ children }) => {
         latitude: cityLatitude,
         longitude: cityLongitude,
         // Mark if we had to use any fallbacks
-        isFallback: (cityLatitude === 42.3601 && cityLongitude === -71.0589) || 
+        isFallback: !cityLatitude || !cityLongitude || 
                     !data.cityID || !data.regionID || !data.divisionID || !data.countryID
       };
 
@@ -181,25 +130,9 @@ export const MasteredLocationProvider = ({ children }) => {
       console.error('MasteredLocationContext: Error fetching nearest city:', errorMessage);
       setError(errorMessage);
 
-      // Create a fallback city without hardcoded IDs
-      // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-      const fallbackCity = {
-        cityID: null, // No hardcoded ID
-        cityName: 'Boston',
-        regionID: null, // No hardcoded ID
-        regionName: 'Northeast',
-        divisionID: null, // No hardcoded ID
-        divisionName: 'New England',
-        countryID: null, // No hardcoded ID
-        countryName: 'United States',
-        latitude: 42.3601,
-        longitude: -71.0589,
-        isFallback: true, // Mark as fallback data
-        reason: 'exception' // Add reason for diagnostics
-      };
-      
-      setNearestCity(fallbackCity);
-      return fallbackCity;
+      // Don't set any fallback - re-throw the error
+      // This prevents hardcoded defaults and allows proper error handling
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -368,27 +301,13 @@ export const MasteredLocationProvider = ({ children }) => {
     try {
       // Set initial loading state
       setLoading(true);
-      console.log('MasteredLocationContext: Initializing with Boston as default');
+      console.log('MasteredLocationContext: Initializing context');
       
-      // Set Boston as the immediate default location
-      // This ensures users see content immediately without waiting for geolocation
-      const bostonDefault = {
-        cityID: null, // No hardcoded ID
-        cityName: 'Boston',
-        regionID: null, // No hardcoded ID
-        regionName: 'Northeast',
-        divisionID: null, // No hardcoded ID
-        divisionName: 'New England',
-        countryID: null, // No hardcoded ID
-        countryName: 'United States',
-        latitude: 42.3601,
-        longitude: -71.0589,
-        isDefault: true, // Mark as default (not fallback)
-        isFallback: false // This is intentional default, not a fallback
-      };
-      
-      setNearestCity(bostonDefault);
-      console.log('MasteredLocationContext: Boston set as default location');
+      // Don't set any default location - wait for:
+      // 1. User's saved preferences
+      // 2. Browser geolocation
+      // 3. User manual selection
+      // This respects user preferences and prevents hardcoded defaults
 
       // Preload cities data for the UI - do this regardless of how we got location
       // Preloading cities and regions data
@@ -414,26 +333,8 @@ export const MasteredLocationProvider = ({ children }) => {
       console.error('MasteredLocationContext: Error initializing context:', errorMessage);
       setError(errorMessage);
 
-      // Default to Boston if any other error occurs - without hardcoded IDs
-      // Defaulting to Boston as emergency fallback
-      
-      // Following SuccessCriteria #11: Never use hardcoded MongoDB IDs
-      const emergencyFallback = {
-        cityID: null, // No hardcoded ID
-        cityName: 'Boston',
-        regionID: null, // No hardcoded ID  
-        regionName: 'Northeast',
-        divisionID: null, // No hardcoded ID
-        divisionName: 'New England',
-        countryID: null, // No hardcoded ID
-        countryName: 'United States',
-        latitude: 42.3601,
-        longitude: -71.0589,
-        isFallback: true, // Mark as fallback data
-        reason: 'emergency_fallback' // Add reason for diagnostics
-      };
-      
-      setNearestCity(emergencyFallback);
+      // Don't set any default location - let the UI handle the error state
+      // This prevents hardcoded defaults and allows proper error handling
     } finally {
       // Always make sure to reset loading state
       setLoading(false);

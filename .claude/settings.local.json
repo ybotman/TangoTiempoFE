@@ -55,7 +55,8 @@
       "mcp__atlassian__transitionJiraIssue",
       "mcp__atlassian__searchJiraIssuesUsingJql",
       "mcp__atlassian__createJiraIssue",
-      "mcp__atlassian__addCommentToJiraIssue"
+      "mcp__atlassian__addCommentToJiraIssue",
+      "mcp__atlassian__getJiraIssue"
     ],
     "deny": []
   },

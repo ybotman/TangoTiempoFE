@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useUsers } from '@/hooks/useUsers';
+import { useEventDiscovery } from '@/contexts/EventDiscoveryContext';
 
 /**
  * Unified useEvents hook - handles both geo-based and organizer-based filtering
@@ -86,6 +87,11 @@ export function useEvents({
   const [error, setError] = useState(null);
   const { user, selectedRole } = useContext(AuthContext);
   
+  // Refs for smarter logging
+  const lastLoggedLocation = useRef(null);
+  const lastFetchTimestamp = useRef(null);
+  const hasLoggedWaiting = useRef({});
+  
   // Extract stable primitive values to prevent infinite loops
   const userId = user?.uid;
   const userOrganizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
@@ -100,6 +106,13 @@ export function useEvents({
   // Note: We must call the hook to satisfy React's rules, but we'll only use its data if useGeoLocationContext is true
   const geoLocationContext = useGeoLocation();
   const { isInitialized } = geoLocationContext || {};
+  
+  // Get EventDiscovery context for AI filter settings
+  const eventDiscoveryContext = useEventDiscovery();
+  const { state: eventDiscoveryState } = eventDiscoveryContext || {};
+  const includeAiGenerated = eventDiscoveryState?.filters?.aiRecommendations || 
+                             userData?.localUserInfo?.userDefaults?.searchSettings?.includeAiGenerated || 
+                             false;
   
   // Determine effective location based on priority:
   // 1. Explicitly provided parameters (highest priority)
@@ -127,18 +140,36 @@ export function useEvents({
       // Map center mode - handle both lat/lng and latitude/longitude formats
       effectiveLat = userDefaults.defaultCenterLocation.lat || userDefaults.defaultCenterLocation.latitude;
       effectiveLng = userDefaults.defaultCenterLocation.lng || userDefaults.defaultCenterLocation.longitude;
-      console.log('useEvents: Using saved map center location:', { lat: effectiveLat, lng: effectiveLng });
+      // Only log if location actually changed
+      const locationKey = `map:${effectiveLat},${effectiveLng}`;
+      if (lastLoggedLocation.current !== locationKey) {
+        console.log('useEvents: Using saved map center location:', { lat: effectiveLat, lng: effectiveLng });
+        lastLoggedLocation.current = locationKey;
+      }
     } else if (userDefaults.masteredCityIds && userDefaults.masteredCityIds.length > 0) {
       // Multi-city mode
       effectiveCityIds = userDefaults.masteredCityIds;
-      console.log('useEvents: Using saved city preferences:', effectiveCityIds);
+      // Only log if cities actually changed
+      const locationKey = `cities:${effectiveCityIds.join(',')}`;
+      if (lastLoggedLocation.current !== locationKey) {
+        console.log('useEvents: Using saved city preferences:', effectiveCityIds);
+        lastLoggedLocation.current = locationKey;
+      }
     } else {
-      console.log('useEvents: No valid location preferences found in userDefaults');
+      // Only log once per session
+      if (lastLoggedLocation.current !== 'no-prefs') {
+        console.log('useEvents: No valid location preferences found in userDefaults');
+        lastLoggedLocation.current = 'no-prefs';
+      }
     }
   } 
   // Fall back to GeoLocationContext ONLY if explicitly enabled and no other location source
   else if (useGeoLocationContext && !useLocationPreferences && !effectiveRegion && !effectiveDivision && !effectiveCity && !effectiveLat && !effectiveLng) {
-    console.log('useEvents: Falling back to GeoLocationContext');
+    // Only log once per session
+    if (lastLoggedLocation.current !== 'geo-fallback') {
+      console.log('useEvents: Falling back to GeoLocationContext');
+      lastLoggedLocation.current = 'geo-fallback';
+    }
     effectiveRegion = geoLocationContext?.selectedLocation?.region?.name || null;
     effectiveDivision = geoLocationContext?.selectedLocation?.division?.name || null;
     effectiveCity = geoLocationContext?.selectedLocation?.city?.name || null;
@@ -163,18 +194,22 @@ export function useEvents({
   };
 
   const fetchEvents = useCallback(async () => {
-    // Log what triggered this fetch
-    console.log('useEvents: fetchEvents triggered', {
-      trigger: 'dependency change',
-      role: selectedRole,
-      location: {
-        region: effectiveRegion,
-        division: effectiveDivision,
-        city: effectiveCity
-      },
-      hasUser: !!user,
-      timestamp: new Date().toISOString()
-    });
+    // Rate limit logging to once every 5 seconds
+    const now = Date.now();
+    if (!lastFetchTimestamp.current || now - lastFetchTimestamp.current > 5000) {
+      console.log('useEvents: fetchEvents triggered', {
+        trigger: 'dependency change',
+        role: selectedRole,
+        location: {
+          region: effectiveRegion,
+          division: effectiveDivision,
+          city: effectiveCity
+        },
+        hasUser: !!user,
+        timestamp: new Date().toISOString()
+      });
+      lastFetchTimestamp.current = now;
+    }
     
     setLoading(true);
     setError(null);
@@ -225,6 +260,11 @@ export function useEvents({
         }
       }
 
+      // Add AI-generated events filter
+      if (includeAiGenerated) {
+        params.includeAiGenerated = true;
+      }
+
       // Log the actual values used for filtering (from direct input or GeoLocationContext)
       console.log('Using location filters:', {
         cityIds: effectiveCityIds,
@@ -264,9 +304,17 @@ export function useEvents({
       }
 
 
-      // Log the final params being sent
-      console.log('useEvents: Final API Request params:', params);
-      console.log('useEvents: API URL:', `${process.env.NEXT_PUBLIC_BE_URL}/api/events`);
+      // Log API call details only in development and only for unique requests
+      if (process.env.NODE_ENV === 'development') {
+        const requestKey = JSON.stringify({ cityIds: params.cityIds, start: params.start, end: params.end });
+        if (lastLoggedLocation.current !== `api:${requestKey}`) {
+          console.log('useEvents: API Request:', {
+            url: `${process.env.NEXT_PUBLIC_BE_URL}/api/events`,
+            params
+          });
+          lastLoggedLocation.current = `api:${requestKey}`;
+        }
+      }
 
       // Call the unified endpoint
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
@@ -320,7 +368,8 @@ export function useEvents({
     userOrganizerId,
     userRoles,
     selectedRole,
-    isInitialized
+    isInitialized,
+    includeAiGenerated
     // Removed setState functions to prevent infinite loops
   ]);
 
@@ -328,14 +377,20 @@ export function useEvents({
   useEffect(() => {
     // Skip if using location preferences but user data not loaded yet
     if (useLocationPreferences && !userDefaults && user) {
-      console.log('useEvents: Waiting for user preferences to load');
+      if (!hasLoggedWaiting.current.userPrefs) {
+        console.log('useEvents: Waiting for user preferences to load');
+        hasLoggedWaiting.current.userPrefs = true;
+      }
       return;
     }
     
     // Skip if explicitly using GeoLocationContext but it's not initialized yet
     // This should only apply when we're actually using the context as our location source
     if (useGeoLocationContext && !useLocationPreferences && !isInitialized) {
-      console.log('useEvents: Waiting for GeoLocationContext initialization');
+      if (!hasLoggedWaiting.current.geoInit) {
+        console.log('useEvents: Waiting for GeoLocationContext initialization');
+        hasLoggedWaiting.current.geoInit = true;
+      }
       return;
     }
     
@@ -348,11 +403,14 @@ export function useEvents({
                             !(effectiveLat === 0 && effectiveLng === 0);
       
       if (!hasValidCity && !hasValidRegion && !hasValidCoords) {
-        console.log('useEvents: No valid location data available from GeoLocationContext', {
-          city: effectiveCity,
-          region: effectiveRegion,
-          coords: [effectiveLat, effectiveLng]
-        });
+        if (!hasLoggedWaiting.current.noLocationData) {
+          console.log('useEvents: No valid location data available from GeoLocationContext', {
+            city: effectiveCity,
+            region: effectiveRegion,
+            coords: [effectiveLat, effectiveLng]
+          });
+          hasLoggedWaiting.current.noLocationData = true;
+        }
         return;
       }
     }
@@ -364,17 +422,20 @@ export function useEvents({
                                !(effectiveLat === 0 && effectiveLng === 0);
       
       if (!hasValidCities && !hasValidMapCenter) {
-        console.log('useEvents: No valid location preferences set', {
-          cityIds: effectiveCityIds,
-          mapCenter: [effectiveLat, effectiveLng],
-          useCenterLocation: userDefaults.useCenterLocation
-        });
+        if (!hasLoggedWaiting.current.noPreferences) {
+          console.log('useEvents: No valid location preferences set', {
+            cityIds: effectiveCityIds,
+            mapCenter: [effectiveLat, effectiveLng],
+            useCenterLocation: userDefaults.useCenterLocation
+          });
+          hasLoggedWaiting.current.noPreferences = true;
+        }
         return;
       }
     }
     
     fetchEvents();
-  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds]);
+  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds, includeAiGenerated]);
 
   return { 
     events: eventsData.events || [], 

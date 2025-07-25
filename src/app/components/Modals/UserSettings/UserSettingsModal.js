@@ -8,6 +8,7 @@ import ModalHeader from '@/components/UI/ModalHeader';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
 import UserSettingsLocationPreferences from '@/components/Modals/UserSettings/UserSettingsLocationPreferences';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
+import UserSettingsSearch from '@/components/Modals/UserSettings/UserSettingsSearch';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 
@@ -78,6 +79,7 @@ const UserSettingsModal = ({ open, onClose }) => {
           >
             <Tab label="Name" value="name" />
             <Tab label="Location Prefs" value="locationPrefs" />
+            <Tab label="Search" value="search" />
             <Tab label="Apply" value="apply" />
           </Tabs>
 
@@ -91,7 +93,18 @@ const UserSettingsModal = ({ open, onClose }) => {
               <>
                 {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
                 {currentTab === 'locationPrefs' && (
-                  <UserSettingsLocationPreferences userData={userData} updateUserData={updateUserData} />
+                  <UserSettingsLocationPreferences 
+                    userData={userData} 
+                    updateUserData={updateUserData} 
+                    onSaveSuccess={onClose}
+                  />
+                )}
+                {currentTab === 'search' && (
+                  <UserSettingsSearch 
+                    userData={userData} 
+                    updateUserData={updateUserData} 
+                    onSaveSuccess={onClose}
+                  />
                 )}
                 {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
               </>

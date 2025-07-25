@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useContext } from 'react';
+import { useCallback, useEffect, useState, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 
@@ -7,10 +7,17 @@ export const useUsers = () => {
   const { user } = auth || {};
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Refs for smarter logging
+  const hasLoggedFetch = useRef(false);
+  const lastLoggedDefaults = useRef(null);
 
   const fetchUserData = useCallback(async () => {
     if (!user?.uid) {
-      console.log('UU: AuthContext or user not yet initialized.');
+      // Only log this once
+      if (!hasLoggedFetch.current) {
+        console.log('useUsers: Waiting for user authentication');
+      }
       setLoading(false); // Ensure loading is set to false
       return;
     }
@@ -20,21 +27,32 @@ export const useUsers = () => {
 
     try {
       setLoading(true);
-      console.log('UU: Fetching user data from:', endpoint, 'with appId:', appId);
+      // Only log initial fetch
+      if (!hasLoggedFetch.current) {
+        console.log('useUsers: Fetching user data for:', user.uid);
+        hasLoggedFetch.current = true;
+      }
 
       // Include appId as a query parameter
       const response = await axios.get(endpoint, {
         params: { appId },
       });
 
-      console.log('UU:fetch user data fetched:', response.data);
-      console.log('UU:fetch userDefaults:', response.data?.localUserInfo?.userDefaults);
+      // Only log if defaults changed
+      const currentDefaults = JSON.stringify(response.data?.localUserInfo?.userDefaults);
+      if (lastLoggedDefaults.current !== currentDefaults) {
+        console.log('useUsers: User preferences loaded:', {
+          hasCityPreferences: !!(response.data?.localUserInfo?.userDefaults?.masteredCityIds?.length),
+          hasMapPreferences: !!response.data?.localUserInfo?.userDefaults?.useCenterLocation
+        });
+        lastLoggedDefaults.current = currentDefaults;
+      }
       setUserData(response.data);
     } catch (error) {
       console.error('UU: Error fetching user data:', error);
     } finally {
       setLoading(false);
-      console.log('UU: Finished fetching user data. Loading is now false.');
+      // Remove verbose logging
     }
   }, [user?.uid]);
 
@@ -57,8 +75,8 @@ export const useUsers = () => {
           ...(isNested ? updatedData : { ...updatedData }), // Use the data as-is if nested, otherwise spread it
         };
 
-        console.log('UU:Updt Attempting to update user data with:', dataToUpdate);
-        console.log('UU:Updt Data structure type:', isNested ? 'nested' : 'dot notation');
+        // Log updates concisely
+        console.log('useUsers: Updating user preferences');
 
         // Use the optimized endpoint PUT /api/userlogins/updateUserInfo
         // This endpoint expects firebaseUserId and appId in the request body
@@ -71,14 +89,13 @@ export const useUsers = () => {
 
         const updatedUserData = response.data.updatedUser || response.data;
         setUserData(updatedUserData);
-        console.log('UU:Updt User data updated successfully');
-        console.log('UU:Updt Updated user data:', updatedUserData?.localUserInfo?.userDefaults);
-        
-        // Log the specific fields we care about for debugging
-        if (updatedUserData?.localUserInfo?.userDefaults) {
-          console.log('UU:Updt masteredCityIds:', updatedUserData.localUserInfo.userDefaults.masteredCityIds);
-          console.log('UU:Updt useCenterLocation:', updatedUserData.localUserInfo.userDefaults.useCenterLocation);
-          console.log('UU:Updt defaultCenterLocation:', updatedUserData.localUserInfo.userDefaults.defaultCenterLocation);
+        // Log update success with key info only
+        const prefs = updatedUserData?.localUserInfo?.userDefaults;
+        if (prefs) {
+          console.log('useUsers: Preferences updated:', {
+            mode: prefs.useCenterLocation ? 'map' : 'cities',
+            cityCount: prefs.masteredCityIds?.length || 0
+          });
         }
       } catch (error) {
         console.error('UU:Updt Error updating user data:', error);
@@ -92,7 +109,7 @@ export const useUsers = () => {
     if (user?.uid) {
       fetchUserData();
     } else {
-      console.log('UU:uE User not available yet.');
+      // Remove redundant logging
       setLoading(false);
     }
   }, [fetchUserData, user?.uid]);

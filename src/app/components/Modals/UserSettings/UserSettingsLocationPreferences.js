@@ -37,7 +37,7 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 import 'leaflet/dist/leaflet.css';
 
-const UserSettingsLocationPreferences = ({ userData, updateUserData }) => {
+const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSuccess }) => {
   const { cities, fetchCities, fetchDivisions, fetchRegions, fetchCountries } = useMasteredLocations();
   
   // Map references
@@ -373,6 +373,15 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData }) => {
       });
       
       setMessage({ type: 'success', text: 'Location preferences saved successfully!' });
+      
+      // Close modal and refresh after a short delay to show success message
+      setTimeout(() => {
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
+        // Refresh the page to reload calendar data with new preferences
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       console.error('Error saving location preferences:', error);
       setMessage({ type: 'error', text: 'Failed to save preferences. Please try again.' });
@@ -837,6 +846,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData }) => {
 UserSettingsLocationPreferences.propTypes = {
   userData: PropTypes.object,
   updateUserData: PropTypes.func.isRequired,
+  onSaveSuccess: PropTypes.func,
 };
 
 export default UserSettingsLocationPreferences;

@@ -1,7 +1,7 @@
 //@/calendar/layout.js
 'use client'; // Enable client-side rendering
 
-import { React, useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types'; // Import prop-types
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
