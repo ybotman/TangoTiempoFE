@@ -4,9 +4,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import PropTypes from 'prop-types';
 // Removed IP-based geolocation hook - TIEMPO-145
 import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
-// RegionsContext is being phased out and will be removed in future versions
-// Simplifying this import to avoid ESLint rule violations
-// Note: We no longer use dynamic import or conditional useContext
 // Removed axios - no longer needed after IP geolocation removal (TIEMPO-145)
 
 // Create the GeoLocationContext
@@ -15,28 +12,17 @@ const GeoLocationContext = createContext();
 /**
  * GeoLocationProvider - Provides a unified context for geo-location functionality
  * 
- * This provider combines functionality from RegionsContext and MasteredLocationContext
- * while maintaining backward compatibility. It will initially defer to the existing
- * contexts, but gradually take over functionality as it is implemented.
- * 
- * IMPORTANT: After the provider order change in Providers.js, this context now initializes
- * BEFORE MasteredLocationContext, so we need to handle the case where nearestCity is null
- * more gracefully and rely more on our direct geolocation methods.
+ * This provider is the primary source of truth for location state in the application.
+ * It initializes before MasteredLocationContext and handles all location-related functionality.
  */
 export const GeoLocationProvider = ({ children }) => {
-  // Connect to existing contexts for backward compatibility
-  // Note: useMasteredLocation might return null values since we now initialize before it
+  // Connect to MasteredLocationContext for data services
   const masteredLocationContext = useMasteredLocation();
   const nearestCity = masteredLocationContext?.nearestCity || null;
 
   // For tracking initialization state
   const [isInitialized, setIsInitialized] = useState(false);
   const initializationAttempted = useRef(false);
-
-  // Create a placeholder for RegionsContext
-  const regionsContext = null;
-  // TIEMPO-145: Removed IP-based geolocation
-  const geoLoading = false;
 
 
   // State for the new unified geo location context
@@ -113,87 +99,7 @@ export const GeoLocationProvider = ({ children }) => {
     }
   }, [nearestCity, selectedLocation.region.id, setSelectedLocation]);
 
-  // Initialize from RegionsContext when someone changes the selection there
-  // This useEffect will be removed in a future version when RegionsContext is fully deprecated
-  useEffect(() => {
-    // Skip sync if RegionsContext isn't present or if data isn't available
-    if (!regionsContext || !regionsContext.selectedRegion) {
-      console.log('GeoLocationContext: RegionsContext not available or missing selectedRegion');
-      return;
-    }
 
-    // Use console.log instead of console.warn to reduce console noise during normal operation
-    console.log(
-      "RegionsContext is deprecated and will be migrated to GeoLocationContext in a future version."
-    );
-
-    console.log('GeoLocationContext: Syncing from RegionsContext', {
-      region: regionsContext.selectedRegion,
-      regionId: regionsContext.selectedRegionID,
-      division: regionsContext.selectedDivision,
-      city: regionsContext.selectedCity
-    });
-
-    if (regionsContext.selectedRegion && regionsContext.selectedRegionID) {
-      setSelectedLocation(prev => ({
-        ...prev,
-        region: {
-          id: regionsContext.selectedRegionID,
-          name: regionsContext.selectedRegion
-        },
-        division: {
-          id: null,
-          name: regionsContext.selectedDivision || null
-        },
-        city: {
-          id: null,
-          name: regionsContext.selectedCity || null,
-          latitude: null,
-          longitude: null
-        }
-      }));
-    }
-  }, [
-    regionsContext,
-    setSelectedLocation
-  ]);
-
-  // Function to update the RegionsContext when our selection changes for backward compatibility
-  // This useEffect will be removed in a future version when RegionsContext is fully deprecated
-  useEffect(() => {
-    // Skip sync if RegionsContext isn't present or if we don't have location data
-    if (!regionsContext || !selectedLocation.region.name) {
-      return;
-    }
-
-    try {
-      // Update the RegionsContext to maintain compatibility
-      if (regionsContext.selectedRegion !== selectedLocation.region.name) {
-        regionsContext.setSelectedRegion(selectedLocation.region.name);
-      }
-
-      if (regionsContext.selectedRegionID !== selectedLocation.region.id) {
-        regionsContext.setSelectedRegionID(selectedLocation.region.id);
-      }
-
-      if (regionsContext.selectedDivision !== selectedLocation.division.name) {
-        regionsContext.setSelectedDivision(selectedLocation.division.name || '');
-      }
-
-      if (regionsContext.selectedCity !== selectedLocation.city.name) {
-        regionsContext.setSelectedCity(selectedLocation.city.name || '');
-      }
-    } catch (error) {
-      console.error("Error syncing with RegionsContext:", error);
-      // If RegionsContext is missing methods, we can safely continue without it
-    }
-  }, [
-    selectedLocation.region.name,
-    selectedLocation.region.id,
-    selectedLocation.division.name,
-    selectedLocation.city.name,
-    regionsContext
-  ]);
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {

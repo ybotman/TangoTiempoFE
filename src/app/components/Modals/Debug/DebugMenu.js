@@ -21,10 +21,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MapIcon from '@mui/icons-material/Map';
 import PersonIcon from '@mui/icons-material/Person';
-import LanguageIcon from '@mui/icons-material/Language';
 import EnvVariablesDebug from './EnvVariablesDebug';
 import AuthContextDebug from './AuthContextDebug';
-import RegionsContextDebug from './RegionsContextDebug';
 import RoleContextDebug from './RoleContextDebug';
 import MasteredLocationContextDebug from './MasteredLocationContextDebug';
 import GeoLocationContextDebug from './GeoLocationContextDebug';
@@ -110,28 +108,22 @@ const DebugMenu = ({ open, onClose }) => {
             aria-controls="debug-tabpanel-1"
           />
           <Tab 
-            icon={<LanguageIcon />} 
-            label="Regions" 
+            icon={<PersonIcon />} 
+            label="Role" 
             id="debug-tab-2" 
             aria-controls="debug-tabpanel-2"
           />
           <Tab 
-            icon={<PersonIcon />} 
-            label="Role" 
+            icon={<LocationOnIcon />} 
+            label="Mastered Location" 
             id="debug-tab-3" 
             aria-controls="debug-tabpanel-3"
           />
           <Tab 
-            icon={<LocationOnIcon />} 
-            label="Mastered Location" 
-            id="debug-tab-4" 
-            aria-controls="debug-tabpanel-4"
-          />
-          <Tab 
             icon={<MapIcon />} 
             label="Geo Location" 
-            id="debug-tab-5" 
-            aria-controls="debug-tabpanel-5"
+            id="debug-tab-4" 
+            aria-controls="debug-tabpanel-4"
           />
         </Tabs>
       </Box>
@@ -146,19 +138,15 @@ const DebugMenu = ({ open, onClose }) => {
         </Box>
         
         <Box role="tabpanel" hidden={activeTab !== 2} id="debug-tabpanel-2" aria-labelledby="debug-tab-2" sx={{ p: 3 }}>
-          {activeTab === 2 && <RegionsContextDebug />}
+          {activeTab === 2 && <RoleContextDebug />}
         </Box>
         
         <Box role="tabpanel" hidden={activeTab !== 3} id="debug-tabpanel-3" aria-labelledby="debug-tab-3" sx={{ p: 3 }}>
-          {activeTab === 3 && <RoleContextDebug />}
+          {activeTab === 3 && <MasteredLocationContextDebug />}
         </Box>
         
         <Box role="tabpanel" hidden={activeTab !== 4} id="debug-tabpanel-4" aria-labelledby="debug-tab-4" sx={{ p: 3 }}>
-          {activeTab === 4 && <MasteredLocationContextDebug />}
-        </Box>
-        
-        <Box role="tabpanel" hidden={activeTab !== 5} id="debug-tabpanel-5" aria-labelledby="debug-tab-5" sx={{ p: 3 }}>
-          {activeTab === 5 && <GeoLocationContextDebug />}
+          {activeTab === 4 && <GeoLocationContextDebug />}
         </Box>
       </DialogContent>
       

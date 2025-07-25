@@ -33,21 +33,6 @@ jest.mock('@/contexts/MasteredLocationContext', () => ({
   }),
 }));
 
-jest.mock('@/contexts/RegionsContext', () => ({
-  __esModule: true,
-  RegionsContext: {
-    Consumer: ({ children }) => children({
-      selectedRegion: 'Northeast',
-      selectedRegionID: '456',
-      selectedDivision: 'New England',
-      selectedCity: 'Boston',
-      setSelectedRegion: jest.fn(),
-      setSelectedRegionID: jest.fn(),
-      setSelectedDivision: jest.fn(),
-      setSelectedCity: jest.fn(),
-    }),
-  },
-}));
 
 // Test component that uses the GeoLocationContext
 const TestComponent = () => {
