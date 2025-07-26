@@ -139,10 +139,10 @@ const UserSettingsSearch = ({ userData, updateUserData, onSaveSuccess }) => {
           label={
             <Box>
               <Typography variant="body1">
-                Include AI-generated events in search results
+                Include AI discovered events in search results
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Show events that have been automatically created or suggested by AI alongside regular events
+                Show events discovered by AI through scanning the internet, social media, and other online sources
               </Typography>
             </Box>
           }

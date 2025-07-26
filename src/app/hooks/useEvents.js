@@ -260,7 +260,7 @@ export function useEvents({
         }
       }
 
-      // Add AI-generated events filter
+      // Add AI discovered events filter
       if (includeAiGenerated) {
         params.includeAiGenerated = true;
       }

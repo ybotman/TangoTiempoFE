@@ -639,7 +639,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
                   />
                   <ListItemText 
                     primary={option.cityName}
-                    secondary={option.regionName || 'Unknown Region'}
+                    secondary={option.divisionName || option.regionName || ''}
                   />
                 </li>
               );
