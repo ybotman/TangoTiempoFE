@@ -6,16 +6,23 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
+import { useUsers } from '@/hooks/useUsers';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import MapIcon from '@mui/icons-material/Map';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
   const { selectedLocation } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
+  const { userData } = useUsers();
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
+  
+  // Determine if user is in map mode or city mode
+  const isMapMode = userData?.localUserInfo?.userDefaults?.useCenterLocation || false;
   
   // Fetch organizer data when user is a RegionalOrganizer
   useEffect(() => {
@@ -75,7 +82,7 @@ const SiteHeader = () => {
       </div>
       <div
         onClick={() => setLocationModalOpen(true)}
-        title="Click to select a different city"
+        title={isMapMode ? "Map center mode - Click to change location" : "City list mode - Click to change location"}
         style={{
           position: 'absolute',
           bottom: '10px',
@@ -119,9 +126,14 @@ const SiteHeader = () => {
           </div>
         )}
         
-        {/* City label */}
-        <div>
-          {`City: ${selectedLocation.city?.name || 'Unknown'}`}
+        {/* Location with icon */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          {isMapMode ? (
+            <MapIcon style={{ fontSize: '16px', color: '#1976d2' }} />
+          ) : (
+            <LocationOnIcon style={{ fontSize: '16px', color: '#1976d2' }} />
+          )}
+          {selectedLocation.city?.name || 'Unknown'}
         </div>
       </div>
       
