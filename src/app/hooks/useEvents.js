@@ -7,6 +7,104 @@ import { useUsers } from '@/hooks/useUsers';
 import { useEventDiscovery } from '@/contexts/EventDiscoveryContext';
 
 /**
+ * Helper function to resolve location parameters based on various sources
+ * @param {Object} options Configuration object
+ * @returns {Object} Resolved location parameters
+ */
+function resolveLocationParameters(options) {
+  const {
+    explicitParams = {},
+    userDefaults = null,
+    geoLocationContext = null,
+    useLocationPreferences = false,
+    useGeoLocationContext = false
+  } = options;
+
+  // Priority 1: Explicit parameters always win
+  if (explicitParams.region || explicitParams.division || explicitParams.city || 
+      explicitParams.lat || explicitParams.lng) {
+    return {
+      region: explicitParams.region,
+      division: explicitParams.division,
+      city: explicitParams.city,
+      lat: explicitParams.lat,
+      lng: explicitParams.lng,
+      cityIds: null,
+      source: 'explicit'
+    };
+  }
+
+  // Priority 2: User preferences if enabled
+  if (useLocationPreferences && userDefaults) {
+    if (userDefaults.useCenterLocation && userDefaults.defaultCenterLocation) {
+      // Map center mode
+      const lat = userDefaults.defaultCenterLocation.lat || 
+                  userDefaults.defaultCenterLocation.latitude;
+      const lng = userDefaults.defaultCenterLocation.lng || 
+                  userDefaults.defaultCenterLocation.longitude;
+      
+      return {
+        region: null,
+        division: null,
+        city: null,
+        lat,
+        lng,
+        cityIds: null,
+        source: 'userPreferences-map'
+      };
+    } else if (userDefaults.masteredCityIds?.length > 0) {
+      // Multi-city mode
+      return {
+        region: null,
+        division: null,
+        city: null,
+        lat: null,
+        lng: null,
+        cityIds: userDefaults.masteredCityIds,
+        source: 'userPreferences-cities'
+      };
+    }
+  }
+
+  // Priority 3: GeoLocationContext if enabled
+  if (useGeoLocationContext && geoLocationContext) {
+    const location = geoLocationContext.selectedLocation;
+    if (location?.region || location?.division || location?.city) {
+      return {
+        region: location.region?.name,
+        division: location.division?.name,
+        city: location.city?.name,
+        lat: null,
+        lng: null,
+        cityIds: null,
+        source: 'geoContext-location'
+      };
+    } else if (geoLocationContext.userLocation) {
+      return {
+        region: null,
+        division: null,
+        city: null,
+        lat: geoLocationContext.userLocation.latitude,
+        lng: geoLocationContext.userLocation.longitude,
+        cityIds: null,
+        source: 'geoContext-userLocation'
+      };
+    }
+  }
+
+  // Priority 4: Default (no location)
+  return {
+    region: null,
+    division: null,
+    city: null,
+    lat: null,
+    lng: null,
+    cityIds: null,
+    source: 'none'
+  };
+}
+
+/**
  * Unified useEvents hook - handles both geo-based and organizer-based filtering
  * 
  * @param {Object} options - Configuration options
@@ -114,70 +212,34 @@ export function useEvents({
                              userData?.localUserInfo?.userDefaults?.searchSettings?.includeAiGenerated || 
                              false;
   
-  // Determine effective location based on priority:
-  // 1. Explicitly provided parameters (highest priority)
-  // 2. User saved preferences (if useLocationPreferences is true)
-  // 3. GeoLocationContext (if useGeoLocationContext is true AND no other location source)
-  
-  let effectiveRegion = region;
-  let effectiveDivision = division;
-  let effectiveCity = city;
-  let effectiveLat = lat;
-  let effectiveLng = lng;
-  let effectiveCityIds = null;
-  
-  // Debug logging - commented out to reduce noise
-  // console.log('useEvents: Location preference check:', {
-  //   useLocationPreferences,
-  //   hasUserDefaults: !!userDefaults,
-  //   userDefaults,
-  //   explicitParams: { region, division, city, lat, lng }
-  // });
+  // Use the helper function to resolve location parameters
+  const locationParams = resolveLocationParameters({
+    explicitParams: { region, division, city, lat, lng },
+    userDefaults,
+    geoLocationContext,
+    useLocationPreferences,
+    useGeoLocationContext
+  });
 
-  // If using location preferences and no explicit params provided
-  if (useLocationPreferences && userDefaults && !region && !division && !city && !lat && !lng) {
-    if (userDefaults.useCenterLocation && userDefaults.defaultCenterLocation) {
-      // Map center mode - handle both lat/lng and latitude/longitude formats
-      effectiveLat = userDefaults.defaultCenterLocation.lat || userDefaults.defaultCenterLocation.latitude;
-      effectiveLng = userDefaults.defaultCenterLocation.lng || userDefaults.defaultCenterLocation.longitude;
-      // Only log if location actually changed
-      const locationKey = `map:${effectiveLat},${effectiveLng}`;
-      if (lastLoggedLocation.current !== locationKey) {
-        console.log('useEvents: Using saved map center location:', { lat: effectiveLat, lng: effectiveLng });
-        lastLoggedLocation.current = locationKey;
-      }
-    } else if (userDefaults.masteredCityIds && userDefaults.masteredCityIds.length > 0) {
-      // Multi-city mode
-      effectiveCityIds = userDefaults.masteredCityIds;
-      // Only log if cities actually changed
-      const locationKey = `cities:${effectiveCityIds.join(',')}`;
-      if (lastLoggedLocation.current !== locationKey) {
-        console.log('useEvents: Using saved city preferences:', effectiveCityIds);
-        lastLoggedLocation.current = locationKey;
-      }
-    } else {
-      // Only log once per session
-      if (lastLoggedLocation.current !== 'no-prefs') {
-        console.log('useEvents: No valid location preferences found in userDefaults');
-        lastLoggedLocation.current = 'no-prefs';
-      }
-    }
-  } 
-  // Fall back to GeoLocationContext ONLY if explicitly enabled and no other location source
-  else if (useGeoLocationContext && !useLocationPreferences && !effectiveRegion && !effectiveDivision && !effectiveCity && !effectiveLat && !effectiveLng) {
-    // Only log once per session
-    if (lastLoggedLocation.current !== 'geo-fallback') {
-      console.log('useEvents: Falling back to GeoLocationContext');
-      lastLoggedLocation.current = 'geo-fallback';
-    }
-    effectiveRegion = geoLocationContext?.selectedLocation?.region?.name || null;
-    effectiveDivision = geoLocationContext?.selectedLocation?.division?.name || null;
-    effectiveCity = geoLocationContext?.selectedLocation?.city?.name || null;
-    
-    if (!effectiveRegion && !effectiveDivision && !effectiveCity) {
-      effectiveLat = geoLocationContext?.userLocation?.latitude || null;
-      effectiveLng = geoLocationContext?.userLocation?.longitude || null;
-    }
+  // Extract resolved values
+  const effectiveRegion = locationParams.region;
+  const effectiveDivision = locationParams.division;
+  const effectiveCity = locationParams.city;
+  const effectiveLat = locationParams.lat;
+  const effectiveLng = locationParams.lng;
+  const effectiveCityIds = locationParams.cityIds;
+
+  // Log location source if it changed
+  if (lastLoggedLocation.current !== locationParams.source) {
+    console.log(`useEvents: Using location from ${locationParams.source}`, {
+      region: effectiveRegion,
+      division: effectiveDivision,
+      city: effectiveCity,
+      lat: effectiveLat,
+      lng: effectiveLng,
+      cityIds: effectiveCityIds
+    });
+    lastLoggedLocation.current = locationParams.source;
   }
   
   // Cache key generation commented out to fix ESLint warnings

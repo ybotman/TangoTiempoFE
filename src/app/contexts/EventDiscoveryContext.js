@@ -11,6 +11,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { AuthContext } from './AuthContext';
+import { useUsers } from '@/hooks/useUsers';
 
 /**
  * Default filter values
@@ -84,8 +85,14 @@ function eventDiscoveryReducer(state, action) {
       return {
         ...state,
         preferences: action.payload,
-        locationMode: action.payload.locationMode,
-        filters: action.payload.defaultFilters,
+        filters: {
+          ...state.filters,
+          aiRecommendations: action.payload.aiRecommendations || false,
+          categories: action.payload.categories || [],
+          venues: action.payload.venues || [],
+          organizers: action.payload.organizers || [],
+          searchTerm: action.payload.searchTerm || '',
+        },
         isLoadingPreferences: false,
         hasUnsavedChanges: false,
       };
@@ -148,19 +155,37 @@ export function EventDiscoveryProvider({ children }) {
   const { user } = authContext || {};
   const isAuthenticated = !!user;
   const saveTimeoutRef = useRef();
+  
+  // Get userData and updateUserData from useUsers hook
+  const { userData, updateUserData } = useUsers();
 
   /**
    * Load user preferences
    */
-  const loadPreferences = useCallback(async () => {
-    if (!isAuthenticated || !user?.preferences?.eventDiscovery) {
+  const loadPreferences = useCallback(() => {
+    if (!isAuthenticated || !userData?.localUserInfo?.userDefaults) {
       return;
     }
 
     dispatch({ type: 'LOAD_PREFERENCES_START' });
 
     try {
-      const preferences = user.preferences.eventDiscovery;
+      const userDefaults = userData.localUserInfo.userDefaults;
+      
+      // Load AI preference from searchSettings
+      const aiRecommendations = userDefaults.searchSettings?.includeAiGenerated || false;
+      
+      // Load event discovery filters if they exist
+      const eventFilters = userDefaults.eventDiscoveryFilters || {};
+      
+      const preferences = {
+        aiRecommendations,
+        categories: eventFilters.categories || [],
+        venues: eventFilters.venues || [],
+        organizers: eventFilters.organizers || [],
+        searchTerm: eventFilters.searchTerm || '',
+      };
+      
       dispatch({ type: 'LOAD_PREFERENCES_SUCCESS', payload: preferences });
     } catch (error) {
       console.error('Failed to load event discovery preferences:', error);
@@ -169,37 +194,51 @@ export function EventDiscoveryProvider({ children }) {
         payload: 'Failed to load preferences',
       });
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, userData]);
 
   /**
    * Save user preferences
    */
   const savePreferences = useCallback(async () => {
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user || !updateUserData) {
       return;
     }
 
     dispatch({ type: 'SAVE_PREFERENCES_START' });
 
     try {
-      const preferences = {
-        locationMode: state.locationMode,
-        defaultFilters: state.filters,
-        // savedSearches: [], // TODO: Implement saved searches
+      // Prepare the update data structure
+      const updateData = {
+        localUserInfo: {
+          userDefaults: {
+            // Update AI preference in searchSettings
+            searchSettings: {
+              includeAiGenerated: state.filters.aiRecommendations
+            },
+            // Store other event discovery filters
+            eventDiscoveryFilters: {
+              categories: state.filters.categories,
+              venues: state.filters.venues,
+              organizers: state.filters.organizers,
+              searchTerm: state.filters.searchTerm
+            }
+          }
+        }
       };
 
-      // TODO: Implement API call to save preferences
-      // await api.updateUserPreferences({ eventDiscovery: preferences });
-
+      // Call the updateUserData function from useUsers hook
+      await updateUserData(updateData);
+      
+      console.log('EventDiscoveryContext: Preferences saved successfully');
       dispatch({ type: 'SAVE_PREFERENCES_SUCCESS' });
     } catch (error) {
       console.error('Failed to save event discovery preferences:', error);
       dispatch({
         type: 'SAVE_PREFERENCES_ERROR',
-        payload: 'Failed to save preferences',
+        payload: error.message || 'Failed to save preferences',
       });
     }
-  }, [isAuthenticated, user, state.locationMode, state.filters, state.preferences]);
+  }, [isAuthenticated, user, state.filters, updateUserData]);
 
   /**
    * Auto-save preferences with debouncing
@@ -228,13 +267,13 @@ export function EventDiscoveryProvider({ children }) {
   }, [state.hasUnsavedChanges, isAuthenticated, savePreferences]);
 
   /**
-   * Load preferences when user logs in
+   * Load preferences when user logs in or userData changes
    */
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && userData) {
       loadPreferences();
     }
-  }, [isAuthenticated, user, loadPreferences]);
+  }, [isAuthenticated, userData, loadPreferences]);
 
   /**
    * Action handlers

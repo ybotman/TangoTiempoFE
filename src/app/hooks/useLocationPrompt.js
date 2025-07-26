@@ -20,28 +20,9 @@ export const useLocationPrompt = () => {
   const { userData } = useUsers();
   
   useEffect(() => {
-    // Check if user has saved location preferences
-    const hasLocationPreferences = userData?.localUserInfo?.userDefaults && (
-      // Has map center preferences
-      (userData.localUserInfo.userDefaults.useCenterLocation && 
-       userData.localUserInfo.userDefaults.defaultCenterLocation?.latitude) ||
-      // Has city preferences
-      (!userData.localUserInfo.userDefaults.useCenterLocation && 
-       userData.localUserInfo.userDefaults.masteredCityIds?.length > 0)
-    );
-    
-    // Only prompt logged-in users after context initialization who don't have preferences
-    if (isInitialized && user && !selectedLocation.region?.id && !hasLocationPreferences) {
-      console.log('useLocationPrompt: No location selected and no preferences, showing selector');
-      setShowLocationSelector(true);
-    } else if (selectedLocation.region?.id || hasLocationPreferences) {
-      console.log('useLocationPrompt: Location selected or preferences exist:', {
-        selectedCity: selectedLocation.city?.name,
-        hasPreferences: hasLocationPreferences
-      });
-      setShowLocationSelector(false);
-    }
-  }, [isInitialized, user, selectedLocation.region?.id, selectedLocation.city?.name, userData]);
+    // Never show the location selector - use defaults
+    setShowLocationSelector(false);
+  }, []);
   
   const closeLocationSelector = () => {
     setShowLocationSelector(false);
