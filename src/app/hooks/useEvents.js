@@ -255,7 +255,9 @@ export function useEvents({
         // Add enhanced geo search parameters when using coordinates
         if (useLocationPreferences && userDefaults?.useCenterLocation) {
           params.useGeoSearch = true;
-          params.radius = userDefaults.defaultRadius || '50km';
+          // Convert defaultZoomRange (miles) to km for the API
+          const radiusInMiles = userDefaults.defaultZoomRange || 50;
+          params.radius = `${Math.round(radiusInMiles * 1.60934)}km`;
           params.sortByDistance = true;
         }
       }

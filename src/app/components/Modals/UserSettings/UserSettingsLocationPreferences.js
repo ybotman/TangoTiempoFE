@@ -240,7 +240,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
             // Add circle to show the radius
             circleRef.current = L.circle([lat, lng], {
-              radius: zoomRange * 1609.34, // Convert miles to meters
+              radius: zoomRange * 1609.34, // Convert miles to meters for map display
               fillColor: '#1976d2',
               fillOpacity: 0.1,
               color: '#1976d2',
