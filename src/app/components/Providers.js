@@ -7,7 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { MasteredLocationProvider } from '@/contexts/MasteredLocationContext';
+import { LocationAPIProvider } from '@/contexts/LocationAPIContext';
 import { GeoLocationProvider } from '@/contexts/GeoLocationContext';
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
@@ -20,11 +20,11 @@ const Providers = ({ children }) => {
         <RoleProvider>
           {/*
             Hierarchical provider model:
-            MasteredLocationProvider provides the data service layer
-            GeoLocationProvider uses MasteredLocationProvider for data
+            LocationAPIProvider provides the data service layer
+            GeoLocationProvider uses LocationAPIProvider for data
             MasteredLocationLogger must be inside both contexts to access data
           */}
-          <MasteredLocationProvider>
+          <LocationAPIProvider>
             <GeoLocationProvider>
               <EventDiscoveryProvider>
                 <MasteredLocationLogger />
@@ -32,7 +32,7 @@ const Providers = ({ children }) => {
                 {children}
               </EventDiscoveryProvider>
             </GeoLocationProvider>
-          </MasteredLocationProvider>
+          </LocationAPIProvider>
         </RoleProvider>
       </LocalizationProvider>
     </AuthProvider>

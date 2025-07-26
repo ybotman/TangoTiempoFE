@@ -2,30 +2,30 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-// Removed IP-based geolocation hook - TIEMPO-145
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
-// Removed axios - no longer needed after IP geolocation removal (TIEMPO-145)
+import { useLocationAPI } from '@/contexts/LocationAPIContext';
+import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
 
 // Create the GeoLocationContext
 const GeoLocationContext = createContext();
 
 /**
- * GeoLocationProvider - Provides a unified context for geo-location functionality
+ * GeoLocationProvider - Manages all location state for the application
  * 
- * This provider is the primary source of truth for location state in the application.
- * It initializes before MasteredLocationContext and handles all location-related functionality.
+ * This provider is the single source of truth for location state.
+ * It subscribes to LocationEventBus events from LocationAPIContext
+ * and manages user location selection, preferences, and updates.
+ * 
+ * No circular dependencies - uses events instead of direct imports.
  */
 export const GeoLocationProvider = ({ children }) => {
-  // Connect to MasteredLocationContext for data services
-  const masteredLocationContext = useMasteredLocation();
-  const nearestCity = masteredLocationContext?.nearestCity || null;
+  // Get API functions from LocationAPIContext (no circular dependency)
+  const locationAPI = useLocationAPI();
 
   // For tracking initialization state
   const [isInitialized, setIsInitialized] = useState(false);
   const initializationAttempted = useRef(false);
 
-
-  // State for the new unified geo location context
+  // State for user's physical location (from browser or IP)
   const [userLocation, setUserLocation] = useState({
     latitude: null,
     longitude: null,
@@ -33,11 +33,19 @@ export const GeoLocationProvider = ({ children }) => {
     lastUpdated: null
   });
 
+  // State for selected location (for filtering events)
   const [selectedLocation, setSelectedLocation] = useState({
     country: { id: null, name: null },
     region: { id: null, name: null },
     division: { id: null, name: null },
     city: { id: null, name: null, latitude: null, longitude: null }
+  });
+
+  // State for cached location data
+  const [locationData, setLocationData] = useState({
+    cities: [],
+    regions: [],
+    divisions: []
   });
 
   const [loadingState, setLoadingState] = useState({
@@ -52,392 +60,263 @@ export const GeoLocationProvider = ({ children }) => {
     nearestCity: null
   });
 
-  // TIEMPO-145: Removed IP-based location initialization
-
-  // Initialize selected location from the MasteredLocationContext
+  // Subscribe to location events on mount
   useEffect(() => {
-    console.log('GeoLocationContext: Checking for nearestCity update', {
-      hasNearestCity: !!nearestCity,
-      nearestCityName: nearestCity?.cityName,
-      hasRegionId: !!selectedLocation.region.id
-    });
+    console.log('[GeoLocationContext] Setting up event subscriptions');
 
-    if (nearestCity) {
-      // Update from nearest city if we don't have a selection yet
-      if (!selectedLocation.region.id) {
-        console.log('GeoLocationContext: Setting location from nearestCity', {
-          city: nearestCity.cityName,
-          division: nearestCity.divisionName,
-          region: nearestCity.regionName
-        });
-
+    // Subscribe to nearest city fetched event
+    const unsubscribeNearestCity = locationEventBus.on(
+      LOCATION_EVENTS.NEAREST_CITY_FETCHED,
+      ({ cityData, coordinates }) => {
+        console.log('[GeoLocationContext] Received NEAREST_CITY_FETCHED event:', cityData.cityName);
+        
+        // Update selected location with the fetched city
         setSelectedLocation({
           country: {
-            id: nearestCity.countryID,
-            name: nearestCity.countryName
+            id: cityData.countryID,
+            name: cityData.countryName
           },
           region: {
-            id: nearestCity.regionID,
-            name: nearestCity.regionName
+            id: cityData.regionID,
+            name: cityData.regionName
           },
           division: {
-            id: nearestCity.divisionID,
-            name: nearestCity.divisionName
+            id: cityData.divisionID,
+            name: cityData.divisionName
           },
           city: {
-            id: nearestCity.cityID,
-            name: nearestCity.cityName,
-            latitude: nearestCity.latitude,
-            longitude: nearestCity.longitude
+            id: cityData.cityID,
+            name: cityData.cityName,
+            latitude: cityData.latitude,
+            longitude: cityData.longitude
           }
         });
-      } else {
-        console.log('GeoLocationContext: Already have a region selected, not updating from nearestCity');
+
+        // Clear any nearestCity errors
+        setErrorState(prev => ({ ...prev, nearestCity: null }));
       }
-    } else {
-      console.log('GeoLocationContext: No nearestCity available yet');
-    }
-  }, [nearestCity, selectedLocation.region.id, setSelectedLocation]);
+    );
 
+    // Subscribe to cities fetched event
+    const unsubscribeCities = locationEventBus.on(
+      LOCATION_EVENTS.CITIES_FETCHED,
+      ({ cities }) => {
+        console.log(`[GeoLocationContext] Received CITIES_FETCHED event: ${cities.length} cities`);
+        setLocationData(prev => ({ ...prev, cities }));
+      }
+    );
 
+    // Subscribe to regions fetched event
+    const unsubscribeRegions = locationEventBus.on(
+      LOCATION_EVENTS.REGIONS_FETCHED,
+      ({ regions }) => {
+        console.log(`[GeoLocationContext] Received REGIONS_FETCHED event: ${regions.length} regions`);
+        setLocationData(prev => ({ ...prev, regions }));
+      }
+    );
+
+    // Subscribe to divisions fetched event
+    const unsubscribeDivisions = locationEventBus.on(
+      LOCATION_EVENTS.DIVISIONS_FETCHED,
+      ({ divisions }) => {
+        console.log(`[GeoLocationContext] Received DIVISIONS_FETCHED event: ${divisions.length} divisions`);
+        setLocationData(prev => ({ ...prev, divisions }));
+      }
+    );
+
+    // Subscribe to location error events
+    const unsubscribeLocationError = locationEventBus.on(
+      LOCATION_EVENTS.LOCATION_ERROR,
+      ({ error, operation, details }) => {
+        console.error(`[GeoLocationContext] Location error in ${operation}:`, error);
+        
+        // Update appropriate error state based on operation
+        if (operation === 'fetchNearestCity') {
+          setErrorState(prev => ({ ...prev, nearestCity: error }));
+        } else {
+          setErrorState(prev => ({ ...prev, locationData: error }));
+        }
+      }
+    );
+
+    // Subscribe to loading events
+    const unsubscribeLoadingStarted = locationEventBus.on(
+      LOCATION_EVENTS.LOADING_STARTED,
+      ({ operation }) => {
+        console.log(`[GeoLocationContext] Loading started: ${operation}`);
+        
+        if (operation === 'fetchNearestCity') {
+          setLoadingState(prev => ({ ...prev, nearestCity: true }));
+        } else {
+          setLoadingState(prev => ({ ...prev, locationData: true }));
+        }
+      }
+    );
+
+    const unsubscribeLoadingCompleted = locationEventBus.on(
+      LOCATION_EVENTS.LOADING_COMPLETED,
+      ({ operation }) => {
+        console.log(`[GeoLocationContext] Loading completed: ${operation}`);
+        
+        if (operation === 'fetchNearestCity') {
+          setLoadingState(prev => ({ ...prev, nearestCity: false }));
+        } else {
+          setLoadingState(prev => ({ ...prev, locationData: false }));
+        }
+      }
+    );
+
+    // Mark as initialized
+    setIsInitialized(true);
+
+    // Cleanup subscriptions on unmount
+    return () => {
+      console.log('[GeoLocationContext] Cleaning up event subscriptions');
+      unsubscribeNearestCity();
+      unsubscribeCities();
+      unsubscribeRegions();
+      unsubscribeDivisions();
+      unsubscribeLocationError();
+      unsubscribeLoadingStarted();
+      unsubscribeLoadingCompleted();
+    };
+  }, []); // Empty deps array - only run on mount
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {
+    console.log('[GeoLocationContext] Manual location selection:', location);
+    
     setSelectedLocation(prev => ({
       ...prev,
       ...location
     }));
+
+    // Emit location selected event
+    locationEventBus.emit(LOCATION_EVENTS.LOCATION_SELECTED, location);
   }, []);
 
-  // Function to reset to the nearest detected location
-  // Removed registerMasteredLocationFunctions - no longer needed with hierarchical model
-
-  // Primary implementation of fetchNearestCity - the central function for location selection
-  const fetchNearestCityImpl = useCallback(async (latitude, longitude, maxDistance = 500000) => {
-    // Validate coordinates - ensure they're valid numbers
-    if (!latitude || !longitude || isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude))) {
-      console.error('GeoLocationContext: fetchNearestCity - Invalid coordinates', { latitude, longitude });
-      throw new Error('Invalid coordinates provided');
-    }
-
-    // Ensure coordinates are numbers
-    latitude = parseFloat(latitude);
-    longitude = parseFloat(longitude);
-
-    console.log('GeoLocationContext: fetchNearestCity - Fetching nearest city', { latitude, longitude });
-
-    setLoadingState(prev => ({ ...prev, nearestCity: true }));
-    try {
-      // Try to fetch from MasteredLocationContext first if available
-      if (masteredLocationContext?.fetchNearestCity) {
-        console.log('GeoLocationContext: Using MasteredLocationContext.fetchNearestCity');
-        try {
-          const cityData = await masteredLocationContext.fetchNearestCity(latitude, longitude, maxDistance);
-
-          if (cityData) {
-            console.log('GeoLocationContext: Got city data from MasteredLocationContext', {
-              cityName: cityData.cityName,
-              coords: [cityData.latitude, cityData.longitude]
-            });
-
-            // Update the location with the fetched data
-            setSelectedLocation({
-              country: {
-                id: cityData.countryID,
-                name: cityData.countryName
-              },
-              region: {
-                id: cityData.regionID,
-                name: cityData.regionName
-              },
-              division: {
-                id: cityData.divisionID,
-                name: cityData.divisionName
-              },
-              city: {
-                id: cityData.cityID,
-                name: cityData.cityName,
-                latitude: cityData.latitude,
-                longitude: cityData.longitude
-              }
-            });
-
-            setLoadingState(prev => ({ ...prev, nearestCity: false }));
-            setErrorState(prev => ({ ...prev, nearestCity: null }));
-            return cityData;
-          }
-        } catch (masteredErr) {
-          console.warn('GeoLocationContext: MasteredLocationContext fetch failed, falling back to direct API call', masteredErr);
-          // Continue with direct API call fallback
-        }
-      }
-
-      // Direct API call if MasteredLocationContext is not available or fails
-      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
-      const url = `${baseURL}/api/masteredLocations/nearestMastered?latitude=${latitude}&longitude=${longitude}&maxDistance=${maxDistance}&isActive=true&appId=${appId}`;
-
-      console.log('GeoLocationContext: Calling API directly', { url });
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        // No nearby city found - let user select location
-        if (response.status === 404) {
-          console.log('GeoLocationContext: No nearby city found');
-          setLoadingState(prev => ({ ...prev, nearestCity: false }));
-          throw new Error('No nearby city found within search radius');
-        }
-
-        throw new Error(`Error fetching nearest city: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      // Ensure we have valid coordinates
-      const cityLatitude = data.latitude ||
-                          (data.location?.coordinates ? data.location.coordinates[1] : null) ||
-                          latitude;
-      const cityLongitude = data.longitude ||
-                          (data.location?.coordinates ? data.location.coordinates[0] : null) ||
-                          longitude;
-
-      // Create properly formatted location object
-      const locationData = {
-        country: {
-          id: data.countryID,
-          name: data.countryName
-        },
-        region: {
-          id: data.regionID,
-          name: data.regionName
-        },
-        division: {
-          id: data.divisionID,
-          name: data.divisionName
-        },
-        city: {
-          id: data.cityID,
-          name: data.cityName,
-          latitude: cityLatitude,
-          longitude: cityLongitude
-        }
-      };
-
-      // Update the location with the fetched data
-      setSelectedLocation(locationData);
-      setLoadingState(prev => ({ ...prev, nearestCity: false }));
-      setErrorState(prev => ({ ...prev, nearestCity: null }));
-
-      // Return in format compatible with MasteredLocationContext
-      return {
-        cityID: data.cityID,
-        cityName: data.cityName,
-        regionID: data.regionID,
-        regionName: data.regionName,
-        divisionID: data.divisionID,
-        divisionName: data.divisionName,
-        countryID: data.countryID,
-        countryName: data.countryName,
-        latitude: cityLatitude,
-        longitude: cityLongitude
-      };
-    } catch (err) {
-      console.error('GeoLocationContext: Error in fetchNearestCity:', err.message);
-      setErrorState(prev => ({ ...prev, nearestCity: err.message }));
-      setLoadingState(prev => ({ ...prev, nearestCity: false }));
-      
-      // Don't set any default location - let the UI handle the error state
-      // This prevents hardcoded defaults and respects user control
-      throw err;
-    }
-  }, [masteredLocationContext]);
-
-  // Reset to nearest location using either masteredLocationContext data or default
-  const resetToNearestLocation = useCallback(() => {
-    if (nearestCity) {
-      setSelectedLocation({
-        country: {
-          id: nearestCity.countryID,
-          name: nearestCity.countryName
-        },
-        region: {
-          id: nearestCity.regionID,
-          name: nearestCity.regionName
-        },
-        division: {
-          id: nearestCity.divisionID,
-          name: nearestCity.divisionName
-        },
-        city: {
-          id: nearestCity.cityID,
-          name: nearestCity.cityName,
-          latitude: nearestCity.latitude,
-          longitude: nearestCity.longitude
-        }
-      });
-    } else if (userLocation.latitude && userLocation.longitude) {
-      // If we don't have a nearest city but have user location, fetch one directly
-      fetchNearestCityImpl(userLocation.latitude, userLocation.longitude);
-    }
-  }, [nearestCity, userLocation, fetchNearestCityImpl]);
-
-  // Function to refresh the user's geolocation (IP-based only, no browser permissions)
-  // TIEMPO-145: Simplified function to set location
-  const refreshUserLocation = useCallback(() => {
-    console.log('GeoLocationContext: Refreshing user location');
-    setLoadingState(prev => ({ ...prev, userLocation: true }));
+  // Function to clear selected location
+  const clearLocation = useCallback(() => {
+    console.log('[GeoLocationContext] Clearing selected location');
     
-    try {
-      // Don't set any default location - wait for either:
-      // 1. User's saved preferences to load
-      // 2. Browser geolocation
-      // 3. User manual selection
-      // This prevents race conditions and respects user preferences
-      
-      // Just mark as loaded without setting coordinates
-      setLoadingState(prev => ({ ...prev, userLocation: false }));
-      
-      // Don't set any default location - let user choose or use saved preferences
-      // This prevents the "Unknown" issue and respects user choices
-      
-      // Clear any errors
-      setErrorState(prev => ({ ...prev, userLocation: null }));
-      
-      console.log('GeoLocationContext: Ready for location selection');
-      
-    } catch (error) {
-      console.error('GeoLocationContext: Error setting default location:', error);
-      setErrorState(prev => ({ 
-        ...prev, 
-        userLocation: 'Failed to set default location' 
-      }));
-    } finally {
-      setLoadingState(prev => ({ ...prev, userLocation: false }));
-    }
-  }, [setSelectedLocation]);
+    setSelectedLocation({
+      country: { id: null, name: null },
+      region: { id: null, name: null },
+      division: { id: null, name: null },
+      city: { id: null, name: null, latitude: null, longitude: null }
+    });
 
-  // Mark context as initialized after setup completes
-  useEffect(() => {
-    if (!isInitialized && selectedLocation?.city?.id) {
-      console.log('GeoLocationContext: Marking as initialized', { selectedCity: selectedLocation.city.name });
-      setIsInitialized(true);
-    }
-  }, [isInitialized, selectedLocation.city?.id, selectedLocation.city?.name]);
-
-  // Add an explicit initialization effect to force location refresh on mount
-  // This will help ensure we always have a city selected
-  // This effect should only run once on mount
-  useEffect(() => {
-    // Only run initialization once
-    if (initializationAttempted.current) {
-      return;
-    }
-
-    // Mark that we've attempted initialization
-    initializationAttempted.current = true;
-    console.log('GeoLocationContext: Component mounted, initializing location');
-
-    const initializeLocation = async () => {
-      // Check if we already have a selected location
-      if (selectedLocation.city.id) {
-        console.log('GeoLocationContext: Already have a city selected, skipping initialization', {
-          city: selectedLocation.city.name
-        });
-        return;
-      }
-
-      // Check if we already have a nearest city from context
-      if (nearestCity) {
-        console.log('GeoLocationContext: Using nearestCity from context for initialization', {
-          city: nearestCity.cityName
-        });
-
-        // Explicitly set the selected location from nearestCity data
-        // This ensures we have a city even if the useEffect watching nearestCity hasn't run yet
-        setSelectedLocation({
-          country: {
-            id: nearestCity.countryID,
-            name: nearestCity.countryName
-          },
-          region: {
-            id: nearestCity.regionID,
-            name: nearestCity.regionName
-          },
-          division: {
-            id: nearestCity.divisionID,
-            name: nearestCity.divisionName
-          },
-          city: {
-            id: nearestCity.cityID,
-            name: nearestCity.cityName,
-            latitude: nearestCity.latitude,
-            longitude: nearestCity.longitude
-          }
-        });
-
-        return;
-      }
-
-      try {
-        // Force a refresh of the user location
-        console.log('GeoLocationContext: No location available, forcing refresh');
-        refreshUserLocation();
-
-        // Don't set any default location - let user choose or load saved preferences
-        // This prevents hardcoded defaults and respects user choices
-
-      } catch (error) {
-        console.error('GeoLocationContext: Error in initialization process', error);
-        // Don't set any default location - let the user choose
-        // This prevents hardcoded defaults and allows proper error handling
-      }
-    };
-
-    // Run initialization
-    initializeLocation();
-
-    // Run once on mount
-    // This effect should only run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Emit location cleared event
+    locationEventBus.emit(LOCATION_EVENTS.LOCATION_CLEARED, {});
   }, []);
-  
-  // Determine overall loading and error states
-  // Only show errors that are critical and would prevent functionality
-  const isLoading = loadingState.userLocation || loadingState.locationData || loadingState.nearestCity;
-  
-  // Don't treat the IP-based location errors as critical since we have fallbacks
-  const hasError = (errorState.userLocation && !userLocation.latitude) || 
-                   errorState.locationData || 
-                   (errorState.nearestCity && !nearestCity);
 
-  // Get display text for current location
-  const locationDisplayText = selectedLocation.city.name 
-    ? `${selectedLocation.city.name}, ${selectedLocation.division.name}, ${selectedLocation.region.name}`
-    : selectedLocation.division.name
-      ? `${selectedLocation.division.name}, ${selectedLocation.region.name}`
-      : selectedLocation.region.name
-        ? selectedLocation.region.name
-        : 'Location not selected';
+  // Fetch nearest city using LocationAPIContext
+  const fetchNearestCity = useCallback(async (latitude, longitude, maxDistance = 500000) => {
+    if (!locationAPI?.fetchNearestCity) {
+      console.error('[GeoLocationContext] LocationAPIContext not available');
+      throw new Error('Location API not available');
+    }
 
-  // Values to provide through the context
+    try {
+      // The API will emit events, we just need to call it
+      const result = await locationAPI.fetchNearestCity(latitude, longitude, maxDistance);
+      return result;
+    } catch (error) {
+      console.error('[GeoLocationContext] Error fetching nearest city:', error);
+      throw error;
+    }
+  }, [locationAPI]);
+
+  // Function to refresh user's browser location
+  const refreshUserLocation = useCallback(async () => {
+    console.log('[GeoLocationContext] Refreshing user location');
+    setLoadingState(prev => ({ ...prev, userLocation: true }));
+    setErrorState(prev => ({ ...prev, userLocation: null }));
+
+    try {
+      // Try to get browser location
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude, accuracy } = position.coords;
+            
+            setUserLocation({
+              latitude,
+              longitude,
+              accuracy,
+              lastUpdated: new Date().toISOString()
+            });
+
+            // Emit user location updated event
+            locationEventBus.emit(LOCATION_EVENTS.USER_LOCATION_UPDATED, {
+              latitude,
+              longitude,
+              accuracy
+            });
+
+            // Automatically fetch nearest city
+            try {
+              await fetchNearestCity(latitude, longitude);
+            } catch (err) {
+              console.error('[GeoLocationContext] Error fetching nearest city:', err);
+            }
+
+            setLoadingState(prev => ({ ...prev, userLocation: false }));
+          },
+          (error) => {
+            console.error('[GeoLocationContext] Geolocation error:', error);
+            setErrorState(prev => ({ ...prev, userLocation: error.message }));
+            setLoadingState(prev => ({ ...prev, userLocation: false }));
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+          }
+        );
+      } else {
+        throw new Error('Geolocation not supported');
+      }
+    } catch (error) {
+      console.error('[GeoLocationContext] Error getting user location:', error);
+      setErrorState(prev => ({ ...prev, userLocation: error.message }));
+      setLoadingState(prev => ({ ...prev, userLocation: false }));
+    }
+  }, [fetchNearestCity]);
+
+  // Compute location display text
+  const locationDisplayText = selectedLocation.city.name || 
+                             selectedLocation.division.name || 
+                             selectedLocation.region.name || 
+                             'Select Location';
+
+  // Combined loading state
+  const isLoading = loadingState.userLocation || 
+                   loadingState.locationData || 
+                   loadingState.nearestCity;
+
+  // Context value
   const contextValue = {
-    // Location state
+    // State
     userLocation,
     selectedLocation,
-    isLoading,
-    hasError,
-    locationDisplayText,
+    locationData,
     isInitialized,
-
-    // Methods
-    selectLocation,
-    resetToNearestLocation,
-    refreshUserLocation,
-    fetchNearestCity: fetchNearestCityImpl, // Renamed to be clearer - this is THE source of truth
-
-    // Debug info
+    isLoading,
     loadingState,
-    errorState
+    errorState,
+    locationDisplayText,
+    
+    // Functions
+    selectLocation,
+    clearLocation,
+    fetchNearestCity,
+    refreshUserLocation,
+    
+    // Direct access to API functions (if needed)
+    fetchCities: locationAPI?.fetchCities,
+    fetchRegions: locationAPI?.fetchRegions,
+    fetchDivisions: locationAPI?.fetchDivisions
   };
 
   return (
@@ -451,7 +330,7 @@ GeoLocationProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-// Custom hook to use the GeoLocationContext
+// Hook to use the GeoLocationContext
 export const useGeoLocation = () => {
   const context = useContext(GeoLocationContext);
   if (!context) {
@@ -459,5 +338,3 @@ export const useGeoLocation = () => {
   }
   return context;
 };
-
-export default GeoLocationContext;

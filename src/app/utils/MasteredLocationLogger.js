@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const MasteredLocationLogger = () => {
-  const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
 
   useEffect(() => {
-    console.log('Current MasteredLocationContext City:', nearestCity?.cityName || 'Unknown');
-  }, [nearestCity]);
+    console.log('Current GeoLocationContext City:', selectedLocation?.city?.name || 'Unknown');
+  }, [selectedLocation]);
 
   return null;
 };

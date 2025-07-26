@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Typography, Box } from '@mui/material';
 import { useMasteredLocations } from '@/hooks/useMasteredLocations';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
@@ -24,7 +24,9 @@ const ZoomControl = dynamic(() => import('react-leaflet').then((mod) => mod.Zoom
 
 const LocationContextModal = ({ open, onClose }) => {
   const { cities, fetchCities, loading: citiesLoading, error: citiesError } = useMasteredLocations();
-  const { nearestCity, fetchNearestCity, loading: nearestCityLoading } = useMasteredLocation();
+  const { fetchNearestCity, loading: nearestCityLoading } = useLocationAPI();
+  // Get nearest city from GeoLocationContext instead
+  const { selectedLocation: nearestCity } = useGeoLocation();
   const { selectLocation } = useGeoLocation();
   const [loading, setLoading] = useState(false);
   const [mapReady, setMapReady] = useState(false);
@@ -282,8 +284,8 @@ const LocationContextModal = ({ open, onClose }) => {
 
   // Ensure we have a valid center
   const center =
-    nearestCity && nearestCity.latitude && nearestCity.longitude
-      ? [nearestCity.latitude, nearestCity.longitude]
+    nearestCity?.city?.latitude && nearestCity?.city?.longitude
+      ? [nearestCity.city.latitude, nearestCity.city.longitude]
       : [39.8283, -98.5795]; // Default fallback center (USA approx)
 
   const isLoading = loading || citiesLoading || nearestCityLoading || !mapReady;
@@ -328,7 +330,7 @@ const LocationContextModal = ({ open, onClose }) => {
               </Button>
             </Box>
           </Box>
-        ) : !nearestCity ? (
+        ) : !nearestCity?.city ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
             <Typography gutterBottom>Missing current city information</Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
@@ -368,7 +370,7 @@ const LocationContextModal = ({ open, onClose }) => {
               style={{ height: '100%', width: '100%' }}
               zoomControl={false}
               // Use both keys to ensure proper rendering
-              key={`map-${mapContainerKey}-${nearestCity?.cityID || 'default'}`}
+              key={`map-${mapContainerKey}-${nearestCity?.city?.id || 'default'}`}
               // Add whenCreated callback to debug map initialization
               whenCreated={(map) => {
                 console.log('Map created successfully', map);
@@ -387,7 +389,7 @@ const LocationContextModal = ({ open, onClose }) => {
               
               {/* Render both markers and circle markers for better visibility */}
               {citiesWithCoords.map((city) => {
-                const isCurrent = city._id === nearestCity.cityID;
+                const isCurrent = city._id === nearestCity?.city?.id;
                 const color = isCurrent ? 'green' : 'blue';
                 
                 //console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);

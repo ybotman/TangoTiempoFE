@@ -5,7 +5,7 @@ import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
 import ValidationDialog from './ValidationDialog';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
@@ -29,7 +29,7 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
-  const { nearestCity } = useMasteredLocation();
+  const { loading: apiLoading } = useLocationAPI();
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
@@ -104,7 +104,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   
   // Initialize event data with helper function
   const [eventData, setEventData] = useState(() => 
-    getInitialEventData(selectedDate, selectedLocation, nearestCity)
+    getInitialEventData(selectedDate, selectedLocation, null)
   );
 
   // Refresh event data and related data when modal opens or location changes
@@ -166,13 +166,13 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           fallbackImageUrl: eventToEdit.fallbackImageUrl || null,
           
           // Location hierarchy
-          masteredRegionName: eventToEdit.masteredRegionName || selectedLocation.region.name || (nearestCity?.regionName || ''),
-          masteredDivisionName: eventToEdit.masteredDivisionName || selectedLocation.division.name || (nearestCity?.divisionName || ''),
-          masteredCityName: eventToEdit.masteredCityName || selectedLocation.city.name || (nearestCity?.cityName || ''),
+          masteredRegionName: eventToEdit.masteredRegionName || selectedLocation.region.name || '',
+          masteredDivisionName: eventToEdit.masteredDivisionName || selectedLocation.division.name || '',
+          masteredCityName: eventToEdit.masteredCityName || selectedLocation.city.name || '',
           
           // Legacy fields for backward compatibility
-          selectedRegion: eventToEdit.selectedRegion || selectedLocation.region.name || (nearestCity?.regionName || ''),
-          selectedRegionID: eventToEdit.selectedRegionID || selectedLocation.region.id || (nearestCity?.regionID || ''),
+          selectedRegion: eventToEdit.selectedRegion || selectedLocation.region.name || '',
+          selectedRegionID: eventToEdit.selectedRegionID || selectedLocation.region.id || '',
           
           // Repeating event settings
           isRepeating: eventToEdit.isRepeating || false,
@@ -247,13 +247,13 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
             // Prevent the modal from being usable
-            setEventData(getInitialEventData(selectedDate, selectedLocation, nearestCity));
+            setEventData(getInitialEventData(selectedDate, selectedLocation, null));
             return;
           }
         }
       } else {
         // Create mode - reset all fields to initial values
-        const initialData = getInitialEventData(selectedDate, selectedLocation, nearestCity);
+        const initialData = getInitialEventData(selectedDate, selectedLocation, null);
         setEventData(initialData);
         setHasUnsavedChanges(false); // Reset unsaved changes for create mode
       }
@@ -268,7 +268,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
       });
     }
-  }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit, selectedRole, user]);
+  }, [open, selectedLocation, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
   // Fetch organizer data when in create mode and user is RO
   useEffect(() => {
@@ -673,11 +673,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         imagePreviewUrl: null,
         shortTitle: '',
         shortName: '',
-        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
-        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
-        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
-        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
-        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+        masteredRegionName: selectedLocation.region.name || '',
+        masteredDivisionName: selectedLocation.division.name || '',
+        masteredCityName: selectedLocation.city.name || '',
+        selectedRegion: selectedLocation.region.name || '',
+        selectedRegionID: selectedLocation.region.id || '',
       });
       setCurrentTab('basic');
     }

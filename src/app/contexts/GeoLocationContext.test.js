@@ -15,21 +15,14 @@ jest.mock('@/hooks/useGeoLocations', () => ({
   }),
 }));
 
-jest.mock('@/contexts/MasteredLocationContext', () => ({
-  useMasteredLocation: () => ({
-    nearestCity: {
-      cityID: '123',
-      cityName: 'Boston',
-      regionID: '456',
-      regionName: 'Northeast',
-      divisionID: '789',
-      divisionName: 'New England',
-      countryID: '012',
-      countryName: 'United States',
-      latitude: 42.3601,
-      longitude: -71.0589,
-    },
+jest.mock('@/contexts/LocationAPIContext', () => ({
+  useLocationAPI: () => ({
     fetchNearestCity: jest.fn(),
+    fetchCities: jest.fn(),
+    fetchRegions: jest.fn(),
+    fetchDivisions: jest.fn(),
+    loading: false,
+    error: null,
   }),
 }));
 

@@ -20,11 +20,11 @@ import {
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useLocationAPI } from '@/contexts/LocationAPIContext';
 
 const LocationSelector = ({ open, onClose }) => {
   const { selectLocation, fetchNearestCity } = useGeoLocation();
-  const { regions, divisions, cities, fetchDivisions, fetchCities, loading } = useMasteredLocation();
+  const { regions, divisions, cities, fetchDivisions, fetchCities, loading } = useLocationAPI();
   
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedDivision, setSelectedDivision] = useState('');
