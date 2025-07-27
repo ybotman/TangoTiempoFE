@@ -120,19 +120,8 @@ const UserSettingsBookmarks = ({ userData, updateUserData, onSaveSuccess }) => {
     <ListItem key={event.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
       <ListItemText
         primary={event.name}
-        secondary={
-          <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              {event.date}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              •
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {event.location}
-            </Typography>
-          </Box>
-        }
+        secondary={`${event.date} • ${event.location}`}
+        secondaryTypographyProps={{ variant: 'caption' }}
       />
       {editMode && (
         <ListItemSecondaryAction>
@@ -174,19 +163,8 @@ const UserSettingsBookmarks = ({ userData, updateUserData, onSaveSuccess }) => {
     <ListItem key={city.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
       <ListItemText
         primary={city.name}
-        secondary={
-          <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              {city.country}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              •
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {city.eventCount} events
-            </Typography>
-          </Box>
-        }
+        secondary={`${city.country} • ${city.eventCount} events`}
+        secondaryTypographyProps={{ variant: 'caption' }}
       />
       {editMode && (
         <ListItemSecondaryAction>
