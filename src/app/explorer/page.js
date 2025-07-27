@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import dynamic from 'next/dynamic';
 import { 
   Box, 
@@ -65,7 +65,6 @@ const ExplorerPage = () => {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const mapRef = useRef(null);
   const { user, getIdToken } = useContext(AuthContext) || {};
   
   // State
@@ -163,9 +162,8 @@ const ExplorerPage = () => {
   // Handle region selection
   const handleRegionSelect = (region) => {
     setSelectedRegion(region);
-    if (region && mapRef.current) {
-      mapRef.current.fitBounds(region.bounds);
-    }
+    // TODO: Implement map bounds update without ref
+    // Dynamic imports don't support refs properly
   };
   
   // Handle category toggle
@@ -327,7 +325,6 @@ const ExplorerPage = () => {
           }}
         >
           <MapContainer
-            ref={mapRef}
             center={mapCenter}
             zoom={mapZoom}
             style={{ height: '100%', width: '100%' }}
@@ -353,12 +350,8 @@ const ExplorerPage = () => {
                 icon={createClusterIcon(cluster.eventCount)}
                 eventHandlers={{
                   click: () => {
-                    if (mapRef.current && cluster.bounds) {
-                      mapRef.current.fitBounds([
-                        [cluster.bounds.south, cluster.bounds.west],
-                        [cluster.bounds.north, cluster.bounds.east]
-                      ]);
-                    }
+                    // TODO: Implement zoom to cluster without ref
+                    // Dynamic imports don't support refs properly
                   }
                 }}
               >
