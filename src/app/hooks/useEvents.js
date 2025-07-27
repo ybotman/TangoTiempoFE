@@ -36,7 +36,8 @@ function resolveLocationParameters(options) {
 
   // Priority 2: User preferences if enabled
   if (useLocationPreferences && userDefaults) {
-    if (userDefaults.useCenterLocation && userDefaults.defaultCenterLocation) {
+    // FORCE MAP CENTER MODE
+    if (userDefaults.defaultCenterLocation) {
       // Map center mode
       const lat = userDefaults.defaultCenterLocation.lat || 
                   userDefaults.defaultCenterLocation.latitude;
@@ -315,7 +316,8 @@ export function useEvents({
         params.lat = effectiveLat;
         params.lng = effectiveLng;
         // Add enhanced geo search parameters when using coordinates
-        if (useLocationPreferences && userDefaults?.useCenterLocation) {
+        // FORCE MAP CENTER MODE
+        if (useLocationPreferences && userDefaults?.defaultCenterLocation) {
           params.useGeoSearch = true;
           // Convert defaultZoomRange (miles) to km for the API
           const radiusInMiles = userDefaults.defaultZoomRange || 50;
@@ -490,7 +492,7 @@ export function useEvents({
           console.log('useEvents: No valid location preferences set', {
             cityIds: effectiveCityIds,
             mapCenter: [effectiveLat, effectiveLng],
-            useCenterLocation: userDefaults.useCenterLocation
+            useCenterLocation: true // FORCED TO TRUE
           });
           hasLoggedWaiting.current.noPreferences = true;
         }

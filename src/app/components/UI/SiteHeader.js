@@ -22,7 +22,7 @@ const SiteHeader = () => {
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
   
   // Determine if user is in map mode or city mode
-  const isMapMode = userData?.localUserInfo?.userDefaults?.useCenterLocation || false;
+  const isMapMode = true; // FORCED TO TRUE - Always use map mode
   
   // Fetch organizer data when user is a RegionalOrganizer
   useEffect(() => {

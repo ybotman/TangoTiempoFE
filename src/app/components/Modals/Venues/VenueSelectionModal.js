@@ -17,6 +17,7 @@ import {
 // Removed unused import: categoryColors
 import { useVenueSelection } from '@/hooks/useVenueSelection';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useUsers } from '@/hooks/useUsers';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
 // Dynamic imports for react-leaflet (no SSR)
@@ -33,6 +34,7 @@ import VenueUpcomingEvents from './VenueUpcomingEvents';
 
 const VenueSelectionModal = ({ open, onClose }) => {
   const { selectedLocation, isInitialized } = useGeoLocation();
+  const { userData } = useUsers();
   const {
     filteredVenues,
     selectedVenue,
@@ -49,12 +51,19 @@ const VenueSelectionModal = ({ open, onClose }) => {
   const [mapContainerKey, setMapContainerKey] = useState(Date.now()); // Force re-render key
   const mapRef = useRef(null); // Direct map instance reference
   
+  // Use user's saved map center location preferences if available
+  const userDefaults = userData?.localUserInfo?.userDefaults;
+  const defaultCenter = userDefaults?.defaultCenterLocation;
+  
   // Fetch venues when modal opens
   useEffect(() => {
     const loadVenues = async () => {
       // Only attempt to load venues if GeoLocation context is initialized
-      // and we have a selected city
-      if (open && hasSelectedCity && isInitialized) {
+      // and we have either a map center location or selected city
+      const hasMapCenter = defaultCenter?.latitude && defaultCenter?.longitude;
+      const hasLocationToUse = hasMapCenter || hasSelectedCity;
+      
+      if (open && hasLocationToUse && isInitialized) {
         setLoading(true);
         try {
           console.log('VenueSelectionModal: Loading venues for city', selectedLocation?.city?.name);
@@ -70,6 +79,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
       } else if (open) {
         console.log('VenueSelectionModal: Not ready to load venues yet', {
           hasSelectedCity,
+          hasMapCenter,
           isInitialized,
           cityName: selectedLocation?.city?.name
         });
@@ -89,7 +99,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
     }, 5000); // 5 second timeout
     
     return () => clearTimeout(timeoutId);
-  }, [open, refreshVenues, hasSelectedCity, loading, isInitialized, selectedLocation?.city?.name]);
+  }, [open, refreshVenues, hasSelectedCity, loading, isInitialized, selectedLocation?.city?.name, defaultCenter]);
 
   // Set map ready when filtered venues change
   useEffect(() => {
@@ -110,11 +120,17 @@ const VenueSelectionModal = ({ open, onClose }) => {
     console.log(`Selected venue: ${venue.name || venue.shortName}`);
   };
 
-  // Ensure we have a valid center based on the selected city
-  const center =
-    selectedLocation?.city?.latitude && selectedLocation?.city?.longitude
-      ? [selectedLocation.city.latitude, selectedLocation.city.longitude]
-      : [39.8283, -98.5795]; // Default fallback center (USA approx)
+  let center;
+  if (defaultCenter?.latitude && defaultCenter?.longitude) {
+    // Use saved map center location
+    center = [defaultCenter.latitude, defaultCenter.longitude];
+  } else if (selectedLocation?.city?.latitude && selectedLocation?.city?.longitude) {
+    // Fallback to selected city if no saved preferences
+    center = [selectedLocation.city.latitude, selectedLocation.city.longitude];
+  } else {
+    // Default fallback center (USA approx)
+    center = [39.8283, -98.5795];
+  }
 
   const isLoading = loading || venuesLoading || !mapReady;
   const hasError = venuesError;
@@ -135,16 +151,14 @@ const VenueSelectionModal = ({ open, onClose }) => {
               Please wait while we set up the venue selection system.
             </Typography>
           </Box>
-        ) : !hasSelectedCity ? (
+        ) : !hasSelectedCity && !(defaultCenter?.latitude && defaultCenter?.longitude) ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
-            <Typography color="primary" variant="h6" gutterBottom>Please select a city first</Typography>
+            <Typography color="primary" variant="h6" gutterBottom>Please set your location preferences</Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
-              You need to select a city before you can choose a venue.
-              Use the &quot;Select Nearest City&quot; option in the main menu.
+              You need to set your map center location in User Settings before you can choose a venue.
             </Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
-              This is needed even if location detection is enabled,
-              as we need to know which city&apos;s venues to display.
+              Go to User Settings → Location Prefs and click on the map to set your center location.
             </Typography>
             <Button onClick={onClose} color="primary" variant="contained">
               Go Back to Menu
