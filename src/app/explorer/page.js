@@ -331,13 +331,10 @@ const ExplorerPage = () => {
             zoomControl={true}
           >
             <TileLayer
-              url={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN 
-                ? `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
-                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-              }
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              tileSize={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? 512 : 256}
-              zoomOffset={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? -1 : 0}
+              url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`}
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+              tileSize={512}
+              zoomOffset={-1}
             />
             
             <MapEventHandler 

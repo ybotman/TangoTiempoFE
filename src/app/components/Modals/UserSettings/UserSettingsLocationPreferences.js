@@ -105,32 +105,14 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         }
 
         // Add tile layer
-        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-        console.log('Mapbox token available:', !!mapboxToken);
-        console.log('Mapbox token length:', mapboxToken?.length || 0);
-        
-        // Use OpenStreetMap as fallback if no Mapbox token
-        let tileUrl;
-        let tileOptions;
-        
-        if (mapboxToken) {
-          tileUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxToken}`;
-          tileOptions = {
+        L.tileLayer(
+          `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
+          {
             maxZoom: 18,
             tileSize: 512,
             zoomOffset: -1,
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-          };
-        } else {
-          console.warn('Using OpenStreetMap fallback - no Mapbox token found');
-          tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-          tileOptions = {
-            maxZoom: 18,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          };
-        }
-        
-        L.tileLayer(tileUrl, tileOptions).addTo(mapInstanceRef.current);
+          }
+        ).addTo(mapInstanceRef.current);
 
         // Add click handler to set location
         mapInstanceRef.current.on('click', function(e) {
