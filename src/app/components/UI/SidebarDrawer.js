@@ -64,6 +64,7 @@ import { listOfAllRoles } from '@/utils/masterData';
 import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
+import PublicIcon from '@mui/icons-material/Public';
 import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
 import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
 import RegionalOrganizerSelection from '@/components/Modals/RegionalOrganizers/RegionalOrganizerSelection'; // ORGANIZER SELECTION
@@ -269,6 +270,23 @@ const SidebarDrawer = ({ open, onClose }) => {
                     secondary="Filter by organizer (Coming soon)"
                   />
                 </ListItem>
+
+                {/* Event Explorer */}
+                <Link href="/explorer" passHref>
+                  <ListItem
+                    button="true"
+                    onClick={() => onClose()}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon>
+                      <PublicIcon sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Event Explorer" 
+                      secondary="Discover events worldwide"
+                    />
+                  </ListItem>
+                </Link>
               </List>
             </AccordionDetails>
           </Accordion>
