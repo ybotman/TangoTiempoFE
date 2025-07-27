@@ -56,7 +56,8 @@
       "mcp__atlassian__searchJiraIssuesUsingJql",
       "mcp__atlassian__createJiraIssue",
       "mcp__atlassian__addCommentToJiraIssue",
-      "mcp__atlassian__getJiraIssue"
+      "mcp__atlassian__getJiraIssue",
+      "Bash(security find-generic-password:*)"
     ],
     "deny": []
   },

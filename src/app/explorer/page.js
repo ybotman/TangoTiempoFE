@@ -18,7 +18,6 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import PublicIcon from '@mui/icons-material/Public';
@@ -26,9 +25,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { format, addMonths } from 'date-fns';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import { createClusterIcon } from '@/components/EventDiscovery/clusterIcon';
-import { defaultIcon } from '@/components/EventDiscovery/markerIcon';
 import { AuthContext } from '@/contexts/AuthContext';
 
 // Dynamic imports for Leaflet (no SSR)
@@ -76,7 +73,7 @@ const ExplorerPage = () => {
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState([]);
   const [clusters, setClusters] = useState([]);
-  const [mapCenter, setMapCenter] = useState([20, 0]); // World center
+  const [mapCenter] = useState([20, 0]); // World center
   const [mapZoom, setMapZoom] = useState(2);
   const [mapBounds, setMapBounds] = useState(null);
   
@@ -160,6 +157,7 @@ const ExplorerPage = () => {
       
       return () => clearTimeout(debounceTimer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapBounds, mapZoom, dateRange, selectedCategories, selectedRegion, includeAIEvents]);
   
   // Handle region selection

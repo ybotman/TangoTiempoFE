@@ -1,6 +1,7 @@
 'use client';
 
 import { useMapEvents } from 'react-leaflet';
+import PropTypes from 'prop-types';
 
 const MapEventHandler = ({ onBoundsChange, onZoomChange }) => {
   useMapEvents({
@@ -33,6 +34,11 @@ const MapEventHandler = ({ onBoundsChange, onZoomChange }) => {
   });
   
   return null;
+};
+
+MapEventHandler.propTypes = {
+  onBoundsChange: PropTypes.func,
+  onZoomChange: PropTypes.func
 };
 
 export default MapEventHandler;

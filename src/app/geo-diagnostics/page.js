@@ -4,7 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Typography, Paper, Grid, Box, Alert, Button, Switch, FormControlLabel, AppBar, Toolbar, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useGeoLocation } from '../contexts/GeoLocationContext';
-import { useMasteredLocation } from '../contexts/MasteredLocationContext';
+import { useLocationAPI } from '../contexts/LocationAPIContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import SiteHeader from '../components/UI/SiteHeader';
@@ -16,7 +16,7 @@ export default function GeoDiagnosticsPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useContext(AuthContext);
   const geoContext = useGeoLocation();
-  const masteredContext = useMasteredLocation();
+  const locationAPIContext = useLocationAPI();
   
   const [cfGeoData, setCfGeoData] = useState(null);
   const [currentSystemData, setCurrentSystemData] = useState(null);
@@ -313,15 +313,15 @@ export default function GeoDiagnosticsPage() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" gutterBottom>
-                    MasteredLocationContext:
+                    LocationAPIContext:
                   </Typography>
                   <Box sx={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>
-                    {masteredContext ? (
+                    {locationAPIContext ? (
                       <>
-                        <div>Current City: {masteredContext.currentCity?.city || 'N/A'}</div>
-                        <div>Division: {masteredContext.currentDivision?.division || 'N/A'}</div>
-                        <div>Region: {masteredContext.currentRegion?.region || 'N/A'}</div>
-                        <div>Country: {masteredContext.currentCountry?.country || 'N/A'}</div>
+                        <div>Current City: {locationAPIContext.currentCity?.city || 'N/A'}</div>
+                        <div>Division: {locationAPIContext.currentDivision?.division || 'N/A'}</div>
+                        <div>Region: {locationAPIContext.currentRegion?.region || 'N/A'}</div>
+                        <div>Country: {locationAPIContext.currentCountry?.country || 'N/A'}</div>
                       </>
                     ) : (
                       <div>Context not available</div>
