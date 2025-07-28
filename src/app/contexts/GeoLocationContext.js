@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import PropTypes from 'prop-types';
 import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
+import { userSettingsEvent } from '@/utils/UserSettingsEvent';
 
 // Create the GeoLocationContext
 const GeoLocationContext = createContext();
@@ -59,6 +60,32 @@ export const GeoLocationProvider = ({ children }) => {
     locationData: null,
     nearestCity: null
   });
+
+  // State for user's saved map preferences (synced from userData)
+  const [userMapPreferences, setUserMapPreferences] = useState({
+    centerLocation: { lat: null, lng: null },
+    zoomRange: 50,
+    useCenterLocation: true
+  });
+
+  // State for temporary location preferences (non-logged users)
+  const [temporaryLocation, setTemporaryLocationState] = useState(() => {
+    // Load from sessionStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('tempLocationPrefs');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('[GeoLocationContext] Error parsing saved temp location:', e);
+        }
+      }
+    }
+    return null;
+  });
+
+  // State for MapCenterModal
+  const [mapCenterModalOpen, setMapCenterModalOpen] = useState(false);
 
   // Subscribe to location events on mount
   useEffect(() => {
@@ -254,12 +281,9 @@ export const GeoLocationProvider = ({ children }) => {
               accuracy
             });
 
-            // Automatically fetch nearest city
-            try {
-              await fetchNearestCity(latitude, longitude);
-            } catch (err) {
-              console.error('[GeoLocationContext] Error fetching nearest city:', err);
-            }
+            // In map mode, we don't need to automatically fetch nearest city
+            // Only fetch if explicitly requested from hamburger menu
+            console.log('[GeoLocationContext] Skipping automatic nearest city fetch in map mode');
 
             setLoadingState(prev => ({ ...prev, userLocation: false }));
           },
@@ -284,6 +308,61 @@ export const GeoLocationProvider = ({ children }) => {
     }
   }, [fetchNearestCity]);
 
+  // Load user's saved map preferences from userData
+  const loadUserMapPreferences = useCallback((userData) => {
+    if (!userData?.localUserInfo?.userDefaults) return;
+    
+    const defaults = userData.localUserInfo.userDefaults;
+    console.log('[GeoLocationContext] Loading user map preferences:', defaults);
+    
+    setUserMapPreferences({
+      centerLocation: {
+        lat: defaults.defaultCenterLocation?.lat || 
+             defaults.defaultCenterLocation?.latitude || 
+             null,
+        lng: defaults.defaultCenterLocation?.lng || 
+             defaults.defaultCenterLocation?.longitude || 
+             null
+      },
+      zoomRange: defaults.defaultZoomRange || 50,
+      useCenterLocation: defaults.useCenterLocation !== false // Default true
+    });
+  }, []);
+
+  // Open location settings modal
+  const openLocationSettings = useCallback((tab = 'locationPrefs') => {
+    console.log('[GeoLocationContext] Opening location settings, tab:', tab);
+    // Use userSettingsEvent to trigger the modal in SidebarDrawer
+    userSettingsEvent.openModal(tab);
+  }, []);
+
+  // Close location settings modal
+  const closeLocationSettings = useCallback(() => {
+    console.log('[GeoLocationContext] Closing location settings');
+    // Note: Modal closing is handled by SidebarDrawer directly
+  }, []);
+
+  // Open MapCenterModal
+  const openMapCenterModal = useCallback(() => {
+    console.log('[GeoLocationContext] Opening MapCenterModal');
+    setMapCenterModalOpen(true);
+  }, []);
+
+  // Close MapCenterModal
+  const closeMapCenterModal = useCallback(() => {
+    console.log('[GeoLocationContext] Closing MapCenterModal');
+    setMapCenterModalOpen(false);
+  }, []);
+
+  // Set temporary location for non-logged users
+  const setTemporaryLocation = useCallback((locationData) => {
+    console.log('[GeoLocationContext] Setting temporary location:', locationData);
+    setTemporaryLocationState(locationData);
+    
+    // Emit event to trigger refresh
+    locationEventBus.emit(LOCATION_EVENTS.TEMPORARY_LOCATION_SET, locationData);
+  }, []);
+
   // Compute location display text
   const locationDisplayText = selectedLocation.city.name || 
                              selectedLocation.division.name || 
@@ -294,6 +373,51 @@ export const GeoLocationProvider = ({ children }) => {
   const isLoading = loadingState.userLocation || 
                    loadingState.locationData || 
                    loadingState.nearestCity;
+
+  // Check if we're in Boston Tango Calendar iframe
+  useEffect(() => {
+    const isBostonCalendar = typeof window !== 'undefined' && 
+      (window.location.hostname.toLowerCase().includes('bostontangocalendar') ||
+       window.parent !== window && document.referrer.toLowerCase().includes('bostontangocalendar'));
+    
+    if (isBostonCalendar && locationAPI?.fetchCities) {
+      console.log('[GeoLocationContext] Detected Boston Tango Calendar iframe - selecting Boston city');
+      
+      // Fetch cities and find Boston
+      locationAPI.fetchCities().then(cities => {
+        const bostonCity = cities.find(city => 
+          city.cityName.toLowerCase() === 'boston' && 
+          city.divisionName.toLowerCase() === 'massachusetts'
+        );
+        
+        if (bostonCity) {
+          console.log('[GeoLocationContext] Found Boston city:', bostonCity);
+          selectLocation({
+            country: {
+              id: bostonCity.countryID,
+              name: bostonCity.countryName
+            },
+            region: {
+              id: bostonCity.regionID,
+              name: bostonCity.regionName
+            },
+            division: {
+              id: bostonCity.divisionID,
+              name: bostonCity.divisionName
+            },
+            city: {
+              id: bostonCity.cityID,
+              name: bostonCity.cityName,
+              latitude: bostonCity.latitude,
+              longitude: bostonCity.longitude
+            }
+          });
+        }
+      }).catch(error => {
+        console.error('[GeoLocationContext] Error fetching cities for Boston selection:', error);
+      });
+    }
+  }, [locationAPI, selectLocation]);
 
   // Context value
   const contextValue = {
@@ -306,12 +430,21 @@ export const GeoLocationProvider = ({ children }) => {
     loadingState,
     errorState,
     locationDisplayText,
+    userMapPreferences,
+    temporaryLocation,
+    mapCenterModalOpen,
     
     // Functions
     selectLocation,
     clearLocation,
     fetchNearestCity,
     refreshUserLocation,
+    loadUserMapPreferences,
+    openLocationSettings,
+    closeLocationSettings,
+    openMapCenterModal,
+    closeMapCenterModal,
+    setTemporaryLocation,
     
     // Direct access to API functions (if needed)
     fetchCities: locationAPI?.fetchCities,

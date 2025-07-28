@@ -1,7 +1,7 @@
 // src/components/Modals/UserSettings/UserSettingsLocationPreferences.js
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -16,8 +16,14 @@ import SaveIcon from '@mui/icons-material/Save';
 import MapIcon from '@mui/icons-material/Map';
 import InfoIcon from '@mui/icons-material/Info';
 import 'leaflet/dist/leaflet.css';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSuccess }) => {
+  // Get auth context to check if user is logged in
+  const { user } = useContext(AuthContext);
+  const { setTemporaryLocation } = useGeoLocation();
+  const isLoggedIn = !!user;
   
   // Map references
   const mapRef = useRef(null);
@@ -42,8 +48,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
     zoomRange: 50
   });
 
-  // Load user's existing preferences
+  // Load user's existing preferences or temporary location
   useEffect(() => {
+    // First check if logged-in user has preferences
     if (userData?.localUserInfo?.userDefaults) {
       const defaults = userData.localUserInfo.userDefaults;
       
@@ -63,8 +70,33 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         centerLng: defaults.defaultCenterLocation?.longitude?.toString() || '',
         zoomRange: defaults.defaultZoomRange || 50
       });
+    } else if (!isLoggedIn) {
+      // For non-logged users, check sessionStorage for temporary location
+      const savedTemp = sessionStorage.getItem('tempLocationPrefs');
+      if (savedTemp) {
+        try {
+          const tempLocation = JSON.parse(savedTemp);
+          console.log('Loading temporary location from sessionStorage:', tempLocation);
+          
+          if (tempLocation.centerLocation) {
+            setCenterLat(tempLocation.centerLocation.lat?.toString() || '');
+            setCenterLng(tempLocation.centerLocation.lng?.toString() || '');
+            setZoomRange(tempLocation.zoomRange || 50);
+            setCoordinatesLoaded(true);
+            
+            // Store as original values so hasChanges() works correctly
+            setOriginalValues({
+              centerLat: tempLocation.centerLocation.lat?.toString() || '',
+              centerLng: tempLocation.centerLocation.lng?.toString() || '',
+              zoomRange: tempLocation.zoomRange || 50
+            });
+          }
+        } catch (e) {
+          console.error('Error loading temporary location:', e);
+        }
+      }
     }
-  }, [userData]);
+  }, [userData, isLoggedIn]);
 
   const isValidLatLng = () => {
     const lat = parseFloat(centerLat);
@@ -168,11 +200,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
             iconAnchor: [15, 15]
           });
 
-          // Add new marker with custom icon
+          // Add new marker with custom icon (no popup)
           markerRef.current = L.marker([lat, lng], { icon: customIcon })
-            .addTo(mapInstanceRef.current)
-            .bindPopup(`<strong>Map Center Location</strong><br/>Lat: ${lat.toFixed(5)}<br/>Lng: ${lng.toFixed(5)}<br/><em>Events will be filtered within ${zoomRange} miles of this point</em>`)
-            .openPopup();
+            .addTo(mapInstanceRef.current);
 
           // Add circle to show the radius
           circleRef.current = L.circle([lat, lng], {
@@ -278,10 +308,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
           iconAnchor: [15, 15]
         });
 
-        // Add marker for current coordinates
+        // Add marker for current coordinates (no popup)
         markerRef.current = L.marker([lat, lng], { icon: customIcon })
-          .addTo(mapInstanceRef.current)
-          .bindPopup(`<strong>Current Map Center</strong><br/>Lat: ${lat.toFixed(5)}<br/>Lng: ${lng.toFixed(5)}<br/><em>Events will be filtered within ${zoomRange} miles of this point</em>`);
+          .addTo(mapInstanceRef.current);
 
         // Add circle to show the radius
         circleRef.current = L.circle([lat, lng], {
@@ -319,15 +348,6 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
       // Update the circle radius
       circleRef.current.setRadius(zoomRange * 1609.34);
       
-      // Update popup text if marker exists
-      if (markerRef.current) {
-        const lat = parseFloat(centerLat);
-        const lng = parseFloat(centerLng);
-        markerRef.current.setPopupContent(
-          `<strong>Map Center Location</strong><br/>Lat: ${lat.toFixed(5)}<br/>Lng: ${lng.toFixed(5)}<br/><em>Events will be filtered within ${zoomRange} miles of this point</em>`
-        );
-      }
-      
       // Recenter and zoom to show the updated radius
       let targetZoom;
       if (zoomRange <= 10) targetZoom = 10;
@@ -350,49 +370,89 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
     setMessage(null);
 
     try {
-      // Prepare the update data with proper nested structure
-      const updateData = {
-        localUserInfo: {
-          userDefaults: {
-            useCenterLocation: true, // ALWAYS TRUE
-            defaultZoomRange: zoomRange,
-            // Clear city selections since we're forcing map mode
-            masteredCityIds: [],
-            defaultCenterLocation: (centerLat && centerLng) ? {
-              latitude: parseFloat(centerLat),  // Backend expects 'latitude'
-              longitude: parseFloat(centerLng),  // Backend expects 'longitude'
-              lat: parseFloat(centerLat),       // Also include 'lat' for useEvents
-              lng: parseFloat(centerLng)        // Also include 'lng' for useEvents
-            } : null
+      if (isLoggedIn) {
+        // LOGGED IN USER: SAVE to backend
+        // Prepare the update data with proper nested structure
+        const updateData = {
+          localUserInfo: {
+            userDefaults: {
+              useCenterLocation: true, // ALWAYS TRUE
+              defaultZoomRange: zoomRange,
+              // Clear city selections since we're forcing map mode
+              masteredCityIds: [],
+              defaultCenterLocation: (centerLat && centerLng) ? {
+                latitude: parseFloat(centerLat),  // Backend expects 'latitude'
+                longitude: parseFloat(centerLng),  // Backend expects 'longitude'
+                lat: parseFloat(centerLat),       // Also include 'lat' for useEvents
+                lng: parseFloat(centerLng)        // Also include 'lng' for useEvents
+              } : null
+            }
           }
-        }
-      };
+        };
 
-      console.log('Saving location preferences with nested structure:', updateData);
-      
-      // Call the update function
-      await updateUserData(updateData);
-      
-      // Update original values after successful save
-      setOriginalValues({
-        centerLat: centerLat,
-        centerLng: centerLng,
-        zoomRange
-      });
-      
-      setMessage({ type: 'success', text: 'Location preferences saved successfully!' });
-      
-      // Close modal and refresh after a short delay to show success message
-      setTimeout(() => {
-        if (onSaveSuccess) {
-          onSaveSuccess();
+        console.log('Saving location preferences to backend (logged in user):', updateData);
+        
+        // Call the update function
+        await updateUserData(updateData);
+        
+        // Update original values after successful save
+        setOriginalValues({
+          centerLat: centerLat,
+          centerLng: centerLng,
+          zoomRange
+        });
+        
+        setMessage({ type: 'success', text: 'Location preferences saved successfully!' });
+        
+        // Close modal and refresh after a short delay to show success message
+        setTimeout(() => {
+          if (onSaveSuccess) {
+            onSaveSuccess();
+          }
+          // Refresh the page to reload calendar data with new preferences
+          window.location.reload();
+        }, 1500);
+      } else {
+        // NON-LOGGED USER: SET in context only (no backend save, no reload)
+        const locationData = {
+          centerLocation: {
+            lat: parseFloat(centerLat),
+            lng: parseFloat(centerLng)
+          },
+          zoomRange: zoomRange,
+          useCenterLocation: true
+        };
+
+        console.log('Setting temporary location (non-logged user):', locationData);
+        
+        // Set temporary location in context
+        setTemporaryLocation(locationData);
+        
+        // Store in sessionStorage for persistence across page refreshes
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('tempLocationPrefs', JSON.stringify(locationData));
         }
-        // Refresh the page to reload calendar data with new preferences
-        window.location.reload();
-      }, 1500);
+        
+        // Update original values
+        setOriginalValues({
+          centerLat: centerLat,
+          centerLng: centerLng,
+          zoomRange
+        });
+        
+        setMessage({ type: 'success', text: 'Location set for this session!' });
+        
+        // Close modal WITHOUT reload - just trigger event refresh
+        setTimeout(() => {
+          if (onSaveSuccess) {
+            onSaveSuccess();
+          }
+          // NO RELOAD - events will refresh automatically via context
+        }, 1000);
+      }
     } catch (error) {
-      console.error('Error saving location preferences:', error);
-      setMessage({ type: 'error', text: 'Failed to save preferences. Please try again.' });
+      console.error('Error saving/setting location preferences:', error);
+      setMessage({ type: 'error', text: isLoggedIn ? 'Failed to save preferences. Please try again.' : 'Failed to set location. Please try again.' });
     } finally {
       setSaving(false);
     }
@@ -428,7 +488,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
             transition: 'opacity 0.3s'
           }}
         >
-          {saving ? 'Saving...' : hasChanges() ? 'Save Changes' : 'Save'}
+          {saving ? (isLoggedIn ? 'Saving...' : 'Setting...') : 
+           hasChanges() ? (isLoggedIn ? 'Save Changes' : 'Set Location') : 
+           (isLoggedIn ? 'Save' : 'Set')}
         </Button>
       </Box>
       

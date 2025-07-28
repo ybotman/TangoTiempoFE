@@ -129,6 +129,7 @@ export const LOCATION_EVENTS = {
   // User interaction events
   LOCATION_SELECTED: 'locationSelected',
   LOCATION_CLEARED: 'locationCleared',
+  TEMPORARY_LOCATION_SET: 'temporaryLocationSet',
   
   // Error events
   LOCATION_ERROR: 'locationError',

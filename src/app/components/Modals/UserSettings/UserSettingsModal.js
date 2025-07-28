@@ -27,17 +27,34 @@ const modalStyle = {
   flexDirection: 'column',
 };
 
-const UserSettingsModal = ({ open, onClose }) => {
+const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
   const { userData, loading, error, updateUserData } = useUsers();
   const [currentTab, setCurrentTab] = useState('locationPrefs');
+
+  // Map tab names to actual tab values
+  const tabMapping = {
+    'general': 'name',
+    'locationPrefs': 'locationPrefs',
+    'bookmarks': 'bookmarks',
+    'apply': 'apply'
+  };
 
   useEffect(() => {
     if (!user) {
       console.log('User is not authenticated or AuthContext is not initialized yet.');
     }
   }, [user]);
+
+  // Update current tab when defaultTab changes
+  useEffect(() => {
+    if (defaultTab && open) {
+      const mappedTab = tabMapping[defaultTab] || defaultTab;
+      console.log('[UserSettingsModal] Setting tab to:', mappedTab);
+      setCurrentTab(mappedTab);
+    }
+  }, [defaultTab, open]);
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
@@ -120,6 +137,7 @@ const UserSettingsModal = ({ open, onClose }) => {
 UserSettingsModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  defaultTab: PropTypes.string,
 };
 
 export default UserSettingsModal;

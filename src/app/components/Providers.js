@@ -8,10 +8,22 @@ import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocationAPIProvider } from '@/contexts/LocationAPIContext';
-import { GeoLocationProvider } from '@/contexts/GeoLocationContext';
+import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationContext';
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 import LocationPromptManager from '@/components/LocationPromptManager';
+import MapCenterModal from '@/components/Modals/misc/MapCenterModal';
+
+// Wrapper component to render MapCenterModal with context access
+const MapCenterModalWrapper = () => {
+  const { mapCenterModalOpen, closeMapCenterModal } = useGeoLocation();
+  return (
+    <MapCenterModal 
+      open={mapCenterModalOpen} 
+      onClose={closeMapCenterModal}
+    />
+  );
+};
 
 const Providers = ({ children }) => {
   return (
@@ -29,6 +41,7 @@ const Providers = ({ children }) => {
               <EventDiscoveryProvider>
                 <MasteredLocationLogger />
                 <LocationPromptManager />
+                <MapCenterModalWrapper />
                 {children}
               </EventDiscoveryProvider>
             </GeoLocationProvider>

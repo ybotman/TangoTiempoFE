@@ -70,7 +70,7 @@ export const useCalendarPage = () => {
 
   // Use the updated useEvents hook with location preferences
   // No longer force location from GeoLocationContext - use saved user preferences instead
-  const { events, loading: eventsLoading, error: eventsError, refreshEvents } = useEvents({
+  const { events, loading: eventsLoading, error: eventsError, noLocationSelected, refreshEvents } = useEvents({
     startDate: datesSet?.start, 
     endDate: datesSet?.end,
     limit: 200, // Increase the limit to ensure we get all events
@@ -341,6 +341,7 @@ export const useCalendarPage = () => {
     // Add loading and error states
     eventsLoading,
     eventsError,
+    noLocationSelected,
     // Location info
     regionName,
     divisionName,

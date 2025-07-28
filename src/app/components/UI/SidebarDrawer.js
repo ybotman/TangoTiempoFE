@@ -65,12 +65,14 @@ import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
 import PublicIcon from '@mui/icons-material/Public';
-import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
+// Removed LocationContextModal import - using map center mode only
+// MapCenterModal moved to Providers for centralized rendering
 import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
 import RegionalOrganizerSelection from '@/components/Modals/RegionalOrganizers/RegionalOrganizerSelection'; // ORGANIZER SELECTION
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import { useVenueSelection } from '@/hooks/useVenueSelection';
+import { userSettingsEvent } from '@/utils/UserSettingsEvent';
 
 const SidebarDrawer = ({ open, onClose }) => {
   //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -80,9 +82,10 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  // const [locationModalOpen, setLocationModalOpen] = useState(false); // Removed - using map center mode only
   const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
   const [organizerSelectionModalOpen, setOrganizerSelectionModalOpen] = useState(false);
+  const [requestedTab, setRequestedTab] = useState(null);
 
   // NEW STATE FOR DEBUG MENU
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
@@ -91,7 +94,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const { user } = useContext(AuthContext) || {};
 
   // Get selected location and initialization state from GeoLocationContext
-  const { selectedLocation, isInitialized } = useGeoLocation();
+  const { selectedLocation, isInitialized, openLocationSettings, openMapCenterModal, userMapPreferences } = useGeoLocation();
 
   // Get the organizer selection state from useCalendarPage
   const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
@@ -108,6 +111,23 @@ const SidebarDrawer = ({ open, onClose }) => {
   
   // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
   const [venueSelectionReady, setVenueSelectionReady] = useState(false);
+  
+  // Subscribe to user settings event
+  useEffect(() => {
+    const handleUserSettingsRequest = ({ open, tab }) => {
+      console.log('[SidebarDrawer] Received user settings request:', { open, tab });
+      if (open) {
+        setRequestedTab(tab);
+        setUserSettingsOpen(true);
+      }
+    };
+
+    const unsubscribe = userSettingsEvent.subscribe(handleUserSettingsRequest);
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
   
   // Effect to handle venue selection readiness
   useEffect(() => {
@@ -191,41 +211,21 @@ const SidebarDrawer = ({ open, onClose }) => {
             </AccordionSummary>
             <AccordionDetails sx={{ padding: 0 }}>
               <List disablePadding>
-                {/* Nearest City */}
+                {/* Map Center - Opens temporary location modal */}
                 <ListItem
                   button="true"
                   onClick={() => {
-                    setLocationModalOpen(true);
+                    openMapCenterModal();
                     onClose();
                   }}
                   sx={{ pl: 4 }}
                 >
                   <ListItemIcon>
-                    <LocationCityIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Nearest City"
-                    secondary={
-                      selectedLocation?.city?.name
-                        ? `Current: ${selectedLocation.city.name}${
-                            selectedLocation.division?.name ? `, ${selectedLocation.division.name}` : ''
-                          }`
-                        : 'Find events by city'
-                    }
-                  />
-                  {selectedLocation?.city?.name && !selectedVenue && (
-                    <CheckIcon fontSize="small" color="primary" />
-                  )}
-                </ListItem>
-
-                {/* Map Point - Coming Soon */}
-                <ListItem disabled sx={{ pl: 4 }}>
-                  <ListItemIcon>
                     <MyLocationIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Map Point"
-                    secondary="Set custom location (Coming soon)"
+                    primary="Map Center"
+                    secondary="Explore events in other areas"
                   />
                 </ListItem>
 
@@ -298,36 +298,27 @@ const SidebarDrawer = ({ open, onClose }) => {
             // Not Logged In Menu Items
             <>
               <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
-                Get Started
+                Why Join? It's FREE!
               </Typography>
-              <ListItem
-                button="true"
-                sx={{ 
-                  bgcolor: 'primary.main', 
-                  color: 'white',
-                  '&:hover': {
-                    bgcolor: 'primary.dark',
-                  },
-                  mx: 1,
-                  borderRadius: 1,
-                  mt: 1
-                }}
-              >
-                <ListItemIcon>
-                  <RocketLaunchIcon sx={{ color: 'white' }} />
-                </ListItemIcon>
-                <ListItemText primary="Get Started" />
-              </ListItem>
-              
-              <Link href="/organizers/apply" passHref>
+              <Link href="/benefits" passHref>
                 <ListItem
                   button="true"
                   onClick={() => onClose()}
+                  sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    },
+                    mx: 1,
+                    borderRadius: 1,
+                    mt: 1
+                  }}
                 >
                   <ListItemIcon>
-                    <GroupIcon sx={{ color: 'indigo' }} />
+                    <RocketLaunchIcon sx={{ color: 'white' }} />
                   </ListItemIcon>
-                  <ListItemText primary="Apply as Organizer" />
+                  <ListItemText primary="Milonguero-X Benefits" />
                 </ListItem>
               </Link>
               
@@ -586,13 +577,21 @@ const SidebarDrawer = ({ open, onClose }) => {
         </List>
       </Drawer>
       {/* Modals */}
-      <UserSettingsModal open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} />
+      <UserSettingsModal 
+        open={userSettingsOpen} 
+        onClose={() => {
+          setUserSettingsOpen(false);
+          setRequestedTab(null);
+        }}
+        defaultTab={requestedTab}
+      />
       <RegionalOrganizersModal open={regionalOrganizerOpen} onClose={() => setRegionalOrganizerOpen(false)} />
       <SystemAdminModal open={systemAdminOpen} onClose={() => setSystemAdminOpen(false)} />
       <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
-      <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
+      {/* LocationContextModal removed - using map center mode only */}
+      {/* MapCenterModal moved to Providers for centralized rendering */}
       <VenueSelectionModal open={venueSelectionModalOpen} onClose={() => setVenueSelectionModalOpen(false)} />
       <RegionalOrganizerSelection
         open={organizerSelectionModalOpen}

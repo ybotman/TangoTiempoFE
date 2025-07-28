@@ -2,7 +2,7 @@
 
 'use client'; 
 import Head from 'next/head';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
@@ -23,6 +23,8 @@ import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEvent
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { AuthContext } from '@/contexts/AuthContext';
 
 const CalendarPage = () => {
   <Head>
@@ -38,6 +40,15 @@ const CalendarPage = () => {
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.tangotiempo.com" />
   </Head>;
+
+  // State to track if we've auto-opened the map
+  const [hasAutoOpenedMap, setHasAutoOpenedMap] = useState(false);
+  
+  // Get GeoLocation context for auto-opening map
+  const { openLocationSettings, openMapCenterModal } = useGeoLocation();
+  
+  // Get auth context to check if user is logged in
+  const { user } = useContext(AuthContext);
 
   // Regions data is now handled by useCalendarPage
   const {
@@ -74,6 +85,7 @@ const CalendarPage = () => {
     isAIDetailModalOpen,
     setAIDetailModalOpen,
     selectedAIEventDetails,
+    noLocationSelected,
   } = useCalendarPage();
 
   // Function to determine the initial view based on screen size
@@ -514,6 +526,25 @@ const CalendarPage = () => {
     };
   }, [calendarRef]); // Add calendarRef to the dependency array
 
+  // Auto-open map if no location is selected
+  useEffect(() => {
+    if (noLocationSelected && !hasAutoOpenedMap) {
+      // Small delay to ensure page is loaded
+      const timer = setTimeout(() => {
+        if (!user) {
+          // Non-logged user: Open MapCenterModal
+          openMapCenterModal();
+        } else {
+          // Logged-in user: Open UserSettings to location preferences
+          openLocationSettings('locationPrefs');
+        }
+        setHasAutoOpenedMap(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [noLocationSelected, hasAutoOpenedMap, openLocationSettings, openMapCenterModal, user]);
+
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <SiteHeader />
@@ -593,20 +624,36 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      <div
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        style={{
-          width: '100%',
-          maxWidth: '100%',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          position: 'relative',
-        }}
-      >
-        <FullCalendar
+      {noLocationSelected ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '60px 20px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '8px',
+          margin: '20px',
+        }}>
+          <h2 style={{ marginBottom: '20px', color: '#666' }}>
+            Loading Map Settings...
+          </h2>
+          <p style={{ fontSize: '16px', color: '#777' }}>
+            Opening location selector
+          </p>
+        </div>
+      ) : (
+        <div
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          style={{
+            width: '100%',
+            maxWidth: '100%',
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            position: 'relative',
+          }}
+        >
+          <FullCalendar
           plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
@@ -718,8 +765,8 @@ const CalendarPage = () => {
           }
         }}
       />
-      </div>
-      
+        </div>
+      )}
       
       {/* SubMenu */}
       <CalendarSubMenu

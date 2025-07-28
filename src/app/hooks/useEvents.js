@@ -16,6 +16,7 @@ function resolveLocationParameters(options) {
     explicitParams = {},
     userDefaults = null,
     geoLocationContext = null,
+    temporaryLocation = null,
     useLocationPreferences = false,
     useGeoLocationContext = false
   } = options;
@@ -34,7 +35,21 @@ function resolveLocationParameters(options) {
     };
   }
 
-  // Priority 2: User preferences if enabled
+  // Priority 2: Temporary location for non-logged users
+  if (!userDefaults && temporaryLocation && temporaryLocation.centerLocation) {
+    return {
+      region: null,
+      division: null,
+      city: null,
+      lat: temporaryLocation.centerLocation.lat,
+      lng: temporaryLocation.centerLocation.lng,
+      cityIds: null,
+      zoomRange: temporaryLocation.zoomRange,
+      source: 'temporaryLocation'
+    };
+  }
+
+  // Priority 3: User preferences if enabled
   if (useLocationPreferences && userDefaults) {
     // FORCE MAP CENTER MODE
     if (userDefaults.defaultCenterLocation) {
@@ -184,6 +199,7 @@ export function useEvents({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [noLocationSelected, setNoLocationSelected] = useState(false);
   const { user, selectedRole } = useContext(AuthContext);
   
   // Refs for smarter logging
@@ -204,7 +220,7 @@ export function useEvents({
   // Get location from GeoLocationContext if available
   // Note: We must call the hook to satisfy React's rules, but we'll only use its data if useGeoLocationContext is true
   const geoLocationContext = useGeoLocation();
-  const { isInitialized } = geoLocationContext || {};
+  const { isInitialized, temporaryLocation } = geoLocationContext || {};
   
   // Get EventDiscovery context for AI filter settings
   const eventDiscoveryContext = useEventDiscovery();
@@ -218,6 +234,7 @@ export function useEvents({
     explicitParams: { region, division, city, lat, lng },
     userDefaults,
     geoLocationContext,
+    temporaryLocation,
     useLocationPreferences,
     useGeoLocationContext
   });
@@ -229,6 +246,7 @@ export function useEvents({
   const effectiveLat = locationParams.lat;
   const effectiveLng = locationParams.lng;
   const effectiveCityIds = locationParams.cityIds;
+  const effectiveZoomRange = locationParams.zoomRange;
 
   // Log location source if it changed
   if (lastLoggedLocation.current !== locationParams.source) {
@@ -274,6 +292,28 @@ export function useEvents({
       lastFetchTimestamp.current = now;
     }
     
+    // Check if we have any location parameters at all
+    if (!effectiveRegion && !effectiveDivision && !effectiveCity && 
+        !effectiveLat && !effectiveLng && (!effectiveCityIds || effectiveCityIds.length === 0)) {
+      console.log('useEvents: No location selected, skipping event fetch');
+      setEventsData({
+        events: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: limit,
+          pages: 0
+        },
+        filterType: null
+      });
+      setLoading(false);
+      setNoLocationSelected(true);
+      return;
+    }
+    
+    // Clear the no location flag if we have location parameters
+    setNoLocationSelected(false);
+
     setLoading(true);
     setError(null);
 
@@ -317,10 +357,11 @@ export function useEvents({
         params.lng = effectiveLng;
         // Add enhanced geo search parameters when using coordinates
         // FORCE MAP CENTER MODE
-        if (useLocationPreferences && userDefaults?.defaultCenterLocation) {
+        if (useLocationPreferences && (userDefaults?.defaultCenterLocation || temporaryLocation)) {
           params.useGeoSearch = true;
           // Convert defaultZoomRange (miles) to km for the API
-          const radiusInMiles = userDefaults.defaultZoomRange || 50;
+          // Use effectiveZoomRange if available (from temporary location), otherwise userDefaults
+          const radiusInMiles = effectiveZoomRange || userDefaults?.defaultZoomRange || 50;
           params.radius = `${Math.round(radiusInMiles * 1.60934)}km`;
           params.sortByDistance = true;
         }
@@ -501,7 +542,7 @@ export function useEvents({
     }
     
     fetchEvents();
-  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds, includeAiGenerated]);
+  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds, includeAiGenerated, temporaryLocation]);
 
   return { 
     events: eventsData.events || [], 
@@ -513,7 +554,8 @@ export function useEvents({
     },
     filterType: eventsData.filterType,
     loading, 
-    error, 
+    error,
+    noLocationSelected,
     refreshEvents: fetchEvents 
   };
 }

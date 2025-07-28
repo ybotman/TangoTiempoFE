@@ -1,24 +1,22 @@
 // app/components/UI/SiteHeader.js
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Image from 'next/image';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import { useUsers } from '@/hooks/useUsers';
-import LocationContextModal from '@/components/Modals/misc/LocationContextModal';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MapIcon from '@mui/icons-material/Map';
 import packageJson from '../../../../package.json';
+// Removed userSettingsEvent - using GeoLocationContext instead
 
 const SiteHeader = () => {
-  const { selectedLocation } = useGeoLocation();
+  const { selectedLocation, openMapCenterModal } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const { userData } = useUsers();
   const { organizer, fetchOrganizerById } = useOrganizers();
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
   
   // Determine if user is in map mode or city mode
@@ -81,8 +79,8 @@ const SiteHeader = () => {
         {appVersion}
       </div>
       <div
-        onClick={() => setLocationModalOpen(true)}
-        title={isMapMode ? "Map center mode - Click to change location" : "City list mode - Click to change location"}
+        onClick={() => openMapCenterModal()}
+        title="Click to explore other locations"
         style={{
           position: 'absolute',
           bottom: '10px',
@@ -116,12 +114,6 @@ const SiteHeader = () => {
         {/* Just the icon */}
         <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
       </div>
-      
-      {/* Location Context Modal */}
-      <LocationContextModal
-        open={locationModalOpen}
-        onClose={() => setLocationModalOpen(false)}
-      />
     </div>
   );
 };
