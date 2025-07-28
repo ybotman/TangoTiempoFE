@@ -89,15 +89,16 @@ const SiteHeader = () => {
           right: '10px',
           backgroundColor: 'white',
           color: 'black',
-          padding: '5px 10px',
-          borderRadius: '3px',
-          fontSize: '12px',
+          padding: '8px',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
           boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
+          alignItems: 'center',
+          justifyContent: 'center',
           '&:hover': {
             backgroundColor: '#f0f0f0',
             boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
@@ -112,29 +113,8 @@ const SiteHeader = () => {
           e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
         }}
       >
-        {/* User name */}
-        {user && (
-          <div style={{ fontSize: '10px', marginBottom: '2px', opacity: 0.8 }}>
-            {user.displayName || user.email?.split('@')[0] || 'User'}
-          </div>
-        )}
-        
-        {/* Organizer shortName if RO role */}
-        {selectedRole === 'RegionalOrganizer' && organizer && (
-          <div style={{ fontSize: '10px', marginBottom: '2px', opacity: 0.8 }}>
-            Organizer: {organizer.shortName || 'N/A'}
-          </div>
-        )}
-        
-        {/* Location with icon */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          {isMapMode ? (
-            <MapIcon style={{ fontSize: '16px', color: '#1976d2' }} />
-          ) : (
-            <LocationOnIcon style={{ fontSize: '16px', color: '#1976d2' }} />
-          )}
-          {selectedLocation.city?.name || 'Unknown'}
-        </div>
+        {/* Just the icon */}
+        <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
       </div>
       
       {/* Location Context Modal */}

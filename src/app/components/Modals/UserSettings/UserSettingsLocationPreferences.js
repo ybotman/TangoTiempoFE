@@ -98,7 +98,18 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
           mapInstanceRef.current = L.map(mapRef.current, {
             center: initialCenter,
             zoom: initialZoom,
+            scrollWheelZoom: true,
+            zoomControl: true,
+            // Prevent map from growing beyond container
+            preferCanvas: true,
           });
+          
+          // Force map to respect container size
+          setTimeout(() => {
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.invalidateSize();
+            }
+          }, 100);
         } catch (error) {
           console.error('Error creating map:', error);
           return;
@@ -191,6 +202,19 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         });
 
         setMapInitialized(true);
+        
+        // Add resize observer to handle container size changes
+        if (window.ResizeObserver && mapRef.current) {
+          const resizeObserver = new ResizeObserver(() => {
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.invalidateSize();
+            }
+          });
+          resizeObserver.observe(mapRef.current);
+          
+          // Store observer for cleanup
+          mapRef.current._resizeObserver = resizeObserver;
+        }
       }).catch((error) => {
         console.error('Error loading Leaflet:', error);
         setMessage({ type: 'error', text: 'Failed to load map' });
@@ -199,6 +223,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
     // Cleanup function
     return () => {
+      if (mapRef.current?._resizeObserver) {
+        mapRef.current._resizeObserver.disconnect();
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -416,7 +443,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
       )}
 
       {/* Map Center Location Mode */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Paper variant="outlined" sx={{ p: 2, mb: 2, overflow: 'hidden' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <MapIcon color="primary" />
           <Typography variant="subtitle1">
@@ -429,7 +456,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         </Typography>
 
         {/* Interactive Map */}
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2, position: 'relative' }}>
           <Box sx={{ mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
               Click anywhere on the map to set your center location
@@ -439,12 +466,19 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
             ref={mapRef}
             sx={{
               width: '100%',
-              height: 400,
+              height: { xs: 300, sm: 350, md: 400 }, // Responsive height
+              maxHeight: '50vh', // Never exceed 50% of viewport
               borderRadius: 1,
               border: '2px solid',
               borderColor: 'primary.main',
               position: 'relative',
               cursor: 'crosshair',
+              overflow: 'hidden', // Prevent map from overflowing
+              // Ensure Leaflet container respects our height
+              '& .leaflet-container': {
+                height: '100% !important',
+                maxHeight: '100% !important',
+              },
               '&::after': centerLat && centerLng && isValidLatLng() ? {} : {
                 content: '"Click to place marker"',
                 position: 'absolute',

@@ -188,13 +188,10 @@ PUT /api/userlogins/updateUserInfo
 
 ## Testing Infrastructure
 
-### Test Page: `/test-contexts`
-Interactive testing interface featuring:
-- Real-time state monitoring
-- Event bus activity log
-- Test controls for all features
-- Persistence verification
-- Manual save trigger
+### Testing Infrastructure
+- EventDiscoveryContext has built-in auto-save with 2-second debounce
+- Preferences persist via useUsers hook
+- Event bus provides real-time communication between contexts
 
 ### Test Scenarios Covered
 1. AI filter toggle and persistence
@@ -213,7 +210,6 @@ Interactive testing interface featuring:
 ### Supporting Files
 - `/src/app/utils/LocationEventBus.js` - New event bus singleton
 - `/src/app/hooks/useEvents.js` - Simplified with helper function
-- `/src/app/test-contexts/page.js` - New test interface
 
 ### Component Updates
 - `LocationSelector.js` - Updated to use new context names
