@@ -35,8 +35,8 @@ function resolveLocationParameters(options) {
     };
   }
 
-  // Priority 2: Temporary location for non-logged users
-  if (!userDefaults && temporaryLocation && temporaryLocation.centerLocation) {
+  // Priority 2: Temporary location ALWAYS overrides when set (both logged and non-logged users)
+  if (temporaryLocation && temporaryLocation.centerLocation) {
     return {
       region: null,
       division: null,
@@ -357,7 +357,8 @@ export function useEvents({
         params.lng = effectiveLng;
         // Add enhanced geo search parameters when using coordinates
         // FORCE MAP CENTER MODE
-        if (useLocationPreferences && (userDefaults?.defaultCenterLocation || temporaryLocation)) {
+        // Check for temporaryLocation OR user preferences with map center
+        if (temporaryLocation || (useLocationPreferences && userDefaults?.defaultCenterLocation)) {
           params.useGeoSearch = true;
           // Convert defaultZoomRange (miles) to km for the API
           // Use effectiveZoomRange if available (from temporary location), otherwise userDefaults
