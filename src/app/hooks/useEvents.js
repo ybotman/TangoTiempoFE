@@ -14,9 +14,7 @@ import { useEventDiscovery } from '@/contexts/EventDiscoveryContext';
 function resolveLocationParameters(options) {
   const {
     explicitParams = {},
-    userDefaults = null,
-    geoLocationContext = null,
-    temporaryLocation = null,
+    currentLocation = null,
     useLocationPreferences = false,
     useGeoLocationContext = false
   } = options;
@@ -35,80 +33,21 @@ function resolveLocationParameters(options) {
     };
   }
 
-  // Priority 2: Temporary location ALWAYS overrides when set (both logged and non-logged users)
-  if (temporaryLocation && temporaryLocation.centerLocation) {
+  // Priority 2: Current location (single source of truth)
+  if (currentLocation && currentLocation.lat && currentLocation.lng) {
     return {
       region: null,
       division: null,
       city: null,
-      lat: temporaryLocation.centerLocation.lat,
-      lng: temporaryLocation.centerLocation.lng,
+      lat: currentLocation.lat,
+      lng: currentLocation.lng,
       cityIds: null,
-      zoomRange: temporaryLocation.zoomRange,
-      source: 'temporaryLocation'
+      zoomRange: currentLocation.zoomRange,
+      source: 'currentLocation'
     };
   }
 
-  // Priority 3: User preferences if enabled
-  if (useLocationPreferences && userDefaults) {
-    // FORCE MAP CENTER MODE
-    if (userDefaults.defaultCenterLocation) {
-      // Map center mode
-      const lat = userDefaults.defaultCenterLocation.lat || 
-                  userDefaults.defaultCenterLocation.latitude;
-      const lng = userDefaults.defaultCenterLocation.lng || 
-                  userDefaults.defaultCenterLocation.longitude;
-      
-      return {
-        region: null,
-        division: null,
-        city: null,
-        lat,
-        lng,
-        cityIds: null,
-        source: 'userPreferences-map'
-      };
-    } else if (userDefaults.masteredCityIds?.length > 0) {
-      // Multi-city mode
-      return {
-        region: null,
-        division: null,
-        city: null,
-        lat: null,
-        lng: null,
-        cityIds: userDefaults.masteredCityIds,
-        source: 'userPreferences-cities'
-      };
-    }
-  }
-
-  // Priority 3: GeoLocationContext if enabled
-  if (useGeoLocationContext && geoLocationContext) {
-    const location = geoLocationContext.selectedLocation;
-    if (location?.region || location?.division || location?.city) {
-      return {
-        region: location.region?.name,
-        division: location.division?.name,
-        city: location.city?.name,
-        lat: null,
-        lng: null,
-        cityIds: null,
-        source: 'geoContext-location'
-      };
-    } else if (geoLocationContext.userLocation) {
-      return {
-        region: null,
-        division: null,
-        city: null,
-        lat: geoLocationContext.userLocation.latitude,
-        lng: geoLocationContext.userLocation.longitude,
-        cityIds: null,
-        source: 'geoContext-userLocation'
-      };
-    }
-  }
-
-  // Priority 4: Default (no location)
+  // Priority 3: Fallback - no location set
   return {
     region: null,
     division: null,
@@ -116,6 +55,7 @@ function resolveLocationParameters(options) {
     lat: null,
     lng: null,
     cityIds: null,
+    zoomRange: null,
     source: 'none'
   };
 }
@@ -220,7 +160,7 @@ export function useEvents({
   // Get location from GeoLocationContext if available
   // Note: We must call the hook to satisfy React's rules, but we'll only use its data if useGeoLocationContext is true
   const geoLocationContext = useGeoLocation();
-  const { isInitialized, temporaryLocation } = geoLocationContext || {};
+  const { isInitialized, currentLocation } = geoLocationContext || {};
   
   // Get EventDiscovery context for AI filter settings
   const eventDiscoveryContext = useEventDiscovery();
@@ -232,9 +172,7 @@ export function useEvents({
   // Use the helper function to resolve location parameters
   const locationParams = resolveLocationParameters({
     explicitParams: { region, division, city, lat, lng },
-    userDefaults,
-    geoLocationContext,
-    temporaryLocation,
+    currentLocation: useGeoLocationContext ? currentLocation : null,
     useLocationPreferences,
     useGeoLocationContext
   });
@@ -357,12 +295,11 @@ export function useEvents({
         params.lng = effectiveLng;
         // Add enhanced geo search parameters when using coordinates
         // FORCE MAP CENTER MODE
-        // Check for temporaryLocation OR user preferences with map center
-        if (temporaryLocation || (useLocationPreferences && userDefaults?.defaultCenterLocation)) {
+        // Check for currentLocation (single source of truth)
+        if (currentLocation?.lat && currentLocation?.lng) {
           params.useGeoSearch = true;
-          // Convert defaultZoomRange (miles) to km for the API
-          // Use effectiveZoomRange if available (from temporary location), otherwise userDefaults
-          const radiusInMiles = effectiveZoomRange || userDefaults?.defaultZoomRange || 50;
+          // Convert zoomRange (miles) to km for the API
+          const radiusInMiles = effectiveZoomRange || 50;
           params.radius = `${Math.round(radiusInMiles * 1.60934)}km`;
           params.sortByDistance = true;
         }
@@ -463,6 +400,7 @@ export function useEvents({
     effectiveLat,
     effectiveLng,
     effectiveCityIds,
+    effectiveZoomRange,
     region,
     division,
     city,
@@ -477,7 +415,8 @@ export function useEvents({
     userRoles,
     selectedRole,
     isInitialized,
-    includeAiGenerated
+    includeAiGenerated,
+    currentLocation
     // Removed setState functions to prevent infinite loops
   ]);
 
@@ -543,7 +482,7 @@ export function useEvents({
     }
     
     fetchEvents();
-  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds, includeAiGenerated, temporaryLocation]);
+  }, [fetchEvents, isInitialized, useGeoLocationContext, useLocationPreferences, userDefaults, user, effectiveCity, effectiveRegion, effectiveLat, effectiveLng, effectiveCityIds, includeAiGenerated, currentLocation]);
 
   return { 
     events: eventsData.events || [], 

@@ -24,7 +24,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 
 const MapCenterModal = ({ open, onClose }) => {
   const { user } = useContext(AuthContext);
-  const { setTemporaryLocation, temporaryLocation, userMapPreferences } = useGeoLocation();
+  const { setSessionLocation, currentLocation, savedLocation } = useGeoLocation();
   
   // Map references
   const mapRef = useRef(null);
@@ -43,36 +43,20 @@ const MapCenterModal = ({ open, onClose }) => {
   // Load initial location when modal opens
   useEffect(() => {
     if (open) {
-      // First priority: existing temporary location
-      if (temporaryLocation?.centerLocation) {
-        setCenterLat(temporaryLocation.centerLocation.lat?.toString() || '');
-        setCenterLng(temporaryLocation.centerLocation.lng?.toString() || '');
-        setZoomRange(temporaryLocation.zoomRange || 50);
+      // First priority: current location
+      if (currentLocation?.lat) {
+        setCenterLat(currentLocation.lat?.toString() || '');
+        setCenterLng(currentLocation.lng?.toString() || '');
+        setZoomRange(currentLocation.zoomRange || 50);
       }
-      // Second priority: user's saved preferences (for logged-in users)
-      else if (user && userMapPreferences?.centerLocation?.lat) {
-        setCenterLat(userMapPreferences.centerLocation.lat?.toString() || '');
-        setCenterLng(userMapPreferences.centerLocation.lng?.toString() || '');
-        setZoomRange(userMapPreferences.zoomRange || 50);
-      }
-      // Third priority: check sessionStorage
-      else if (!user) {
-        const saved = sessionStorage.getItem('tempLocationPrefs');
-        if (saved) {
-          try {
-            const temp = JSON.parse(saved);
-            if (temp.centerLocation) {
-              setCenterLat(temp.centerLocation.lat?.toString() || '');
-              setCenterLng(temp.centerLocation.lng?.toString() || '');
-              setZoomRange(temp.zoomRange || 50);
-            }
-          } catch (e) {
-            console.error('Error loading temp location:', e);
-          }
-        }
+      // Second priority: saved location (for logged-in users)
+      else if (user && savedLocation?.lat) {
+        setCenterLat(savedLocation.lat?.toString() || '');
+        setCenterLng(savedLocation.lng?.toString() || '');
+        setZoomRange(savedLocation.zoomRange || 50);
       }
     }
-  }, [open, temporaryLocation, userMapPreferences, user]);
+  }, [open, currentLocation, savedLocation, user]);
   
   // Initialize map when modal opens and is visible
   useEffect(() => {
@@ -248,19 +232,13 @@ const MapCenterModal = ({ open, onClose }) => {
     }
     
     const locationData = {
-      centerLocation: {
-        lat: parseFloat(centerLat),
-        lng: parseFloat(centerLng)
-      },
-      zoomRange: zoomRange,
-      useCenterLocation: true
+      lat: parseFloat(centerLat),
+      lng: parseFloat(centerLng),
+      zoomRange: zoomRange
     };
 
-    // Set temporary location in context
-    setTemporaryLocation(locationData);
-    
-    // Also store in sessionStorage for persistence
-    sessionStorage.setItem('tempLocationPrefs', JSON.stringify(locationData));
+    // Set location for current session
+    setSessionLocation(locationData);
     
     setMessage({ type: 'success', text: 'Location set for this session!' });
     

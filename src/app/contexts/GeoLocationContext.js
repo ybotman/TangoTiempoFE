@@ -61,27 +61,28 @@ export const GeoLocationProvider = ({ children }) => {
     nearestCity: null
   });
 
-  // State for user's saved map preferences (synced from userData)
-  const [userMapPreferences, setUserMapPreferences] = useState({
-    centerLocation: { lat: null, lng: null },
-    zoomRange: 50,
-    useCenterLocation: true
+  // State for saved location (from backend, persisted)
+  const [savedLocation, setSavedLocation] = useState({
+    lat: null,
+    lng: null,
+    zoomRange: 50
   });
 
-  // State for temporary location preferences (non-logged users)
-  const [temporaryLocation, setTemporaryLocationState] = useState(() => {
+  // State for current active location (single source of truth)
+  const [currentLocation, setCurrentLocationState] = useState(() => {
     // Load from sessionStorage if available
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('tempLocationPrefs');
+      const saved = sessionStorage.getItem('currentLocation');
       if (saved) {
         try {
           return JSON.parse(saved);
         } catch (e) {
-          console.error('[GeoLocationContext] Error parsing saved temp location:', e);
+          console.error('[GeoLocationContext] Error parsing saved location:', e);
+          return { lat: null, lng: null, zoomRange: 50 };
         }
       }
     }
-    return null;
+    return { lat: null, lng: null, zoomRange: 50 };
   });
 
   // State for MapCenterModal
@@ -315,19 +316,24 @@ export const GeoLocationProvider = ({ children }) => {
     const defaults = userData.localUserInfo.userDefaults;
     console.log('[GeoLocationContext] Loading user map preferences:', defaults);
     
-    setUserMapPreferences({
-      centerLocation: {
-        lat: defaults.defaultCenterLocation?.lat || 
-             defaults.defaultCenterLocation?.latitude || 
-             null,
-        lng: defaults.defaultCenterLocation?.lng || 
-             defaults.defaultCenterLocation?.longitude || 
-             null
-      },
-      zoomRange: defaults.defaultZoomRange || 50,
-      useCenterLocation: defaults.useCenterLocation !== false // Default true
-    });
-  }, []);
+    const location = {
+      lat: defaults.defaultCenterLocation?.lat || 
+           defaults.defaultCenterLocation?.latitude || 
+           null,
+      lng: defaults.defaultCenterLocation?.lng || 
+           defaults.defaultCenterLocation?.longitude || 
+           null,
+      zoomRange: defaults.defaultZoomRange || 50
+    };
+    
+    // Update both saved and current location
+    setSavedLocation(location);
+    
+    // Only update current location if it hasn't been set by user this session
+    if (!currentLocation.lat && !currentLocation.lng) {
+      setCurrentLocationState(location);
+    }
+  }, [currentLocation]);
 
   // Open location settings modal
   const openLocationSettings = useCallback((tab = 'locationPrefs') => {
@@ -354,13 +360,58 @@ export const GeoLocationProvider = ({ children }) => {
     setMapCenterModalOpen(false);
   }, []);
 
-  // Set temporary location for non-logged users
-  const setTemporaryLocation = useCallback((locationData) => {
-    console.log('[GeoLocationContext] Setting temporary location:', locationData);
-    setTemporaryLocationState(locationData);
+  // Set location for current session (used by MapCenterModal)
+  const setSessionLocation = useCallback((locationData) => {
+    console.log('[GeoLocationContext] Setting session location:', locationData);
+    
+    const location = {
+      lat: locationData.centerLocation?.lat || locationData.lat,
+      lng: locationData.centerLocation?.lng || locationData.lng,
+      zoomRange: locationData.zoomRange || 50
+    };
+    
+    setCurrentLocationState(location);
+    
+    // Save to sessionStorage
+    sessionStorage.setItem('currentLocation', JSON.stringify(location));
     
     // Emit event to trigger refresh
-    locationEventBus.emit(LOCATION_EVENTS.TEMPORARY_LOCATION_SET, locationData);
+    locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+  }, []);
+
+  // Save location to backend and set as current (used by UserSettings)
+  const saveAndSetLocation = useCallback(async (locationData, updateUserData) => {
+    console.log('[GeoLocationContext] Saving and setting location:', locationData);
+    
+    const location = {
+      lat: locationData.centerLocation?.lat || locationData.lat,
+      lng: locationData.centerLocation?.lng || locationData.lng,
+      zoomRange: locationData.zoomRange || 50
+    };
+    
+    // Update both saved and current
+    setSavedLocation(location);
+    setCurrentLocationState(location);
+    
+    // Save to sessionStorage
+    sessionStorage.setItem('currentLocation', JSON.stringify(location));
+    
+    // Save to backend if updateUserData provided
+    if (updateUserData) {
+      const updateData = {
+        'localUserInfo.userDefaults.defaultCenterLocation': {
+          lat: location.lat,
+          lng: location.lng
+        },
+        'localUserInfo.userDefaults.defaultZoomRange': location.zoomRange,
+        'localUserInfo.userDefaults.useCenterLocation': true
+      };
+      
+      await updateUserData(updateData);
+    }
+    
+    // Emit event to trigger refresh
+    locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
   }, []);
 
   // Compute location display text
@@ -430,8 +481,8 @@ export const GeoLocationProvider = ({ children }) => {
     loadingState,
     errorState,
     locationDisplayText,
-    userMapPreferences,
-    temporaryLocation,
+    savedLocation,
+    currentLocation,
     mapCenterModalOpen,
     
     // Functions
@@ -444,7 +495,8 @@ export const GeoLocationProvider = ({ children }) => {
     closeLocationSettings,
     openMapCenterModal,
     closeMapCenterModal,
-    setTemporaryLocation,
+    setSessionLocation,
+    saveAndSetLocation,
     
     // Direct access to API functions (if needed)
     fetchCities: locationAPI?.fetchCities,

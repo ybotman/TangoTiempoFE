@@ -22,7 +22,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSuccess }) => {
   // Get auth context to check if user is logged in
   const { user } = useContext(AuthContext);
-  const { setTemporaryLocation } = useGeoLocation();
+  const { saveAndSetLocation } = useGeoLocation();
   const isLoggedIn = !!user;
   
   // Map references
@@ -371,29 +371,17 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
     try {
       if (isLoggedIn) {
-        // LOGGED IN USER: SAVE to backend
-        // Prepare the update data with proper nested structure
-        const updateData = {
-          localUserInfo: {
-            userDefaults: {
-              useCenterLocation: true, // ALWAYS TRUE
-              defaultZoomRange: zoomRange,
-              // Clear city selections since we're forcing map mode
-              masteredCityIds: [],
-              defaultCenterLocation: (centerLat && centerLng) ? {
-                latitude: parseFloat(centerLat),  // Backend expects 'latitude'
-                longitude: parseFloat(centerLng),  // Backend expects 'longitude'
-                lat: parseFloat(centerLat),       // Also include 'lat' for useEvents
-                lng: parseFloat(centerLng)        // Also include 'lng' for useEvents
-              } : null
-            }
-          }
+        // LOGGED IN USER: SAVE to backend and set as current
+        const locationData = {
+          lat: parseFloat(centerLat),
+          lng: parseFloat(centerLng),
+          zoomRange: zoomRange
         };
-
-        console.log('Saving location preferences to backend (logged in user):', updateData);
         
-        // Call the update function
-        await updateUserData(updateData);
+        console.log('Saving location preferences (logged in user):', locationData);
+        
+        // Save to backend and update current location
+        await saveAndSetLocation(locationData, updateUserData);
         
         // Update original values after successful save
         setOriginalValues({
@@ -404,51 +392,16 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         
         setMessage({ type: 'success', text: 'Location preferences saved successfully!' });
         
-        // Close modal and refresh after a short delay to show success message
+        // Close modal after a short delay to show success message
         setTimeout(() => {
           if (onSaveSuccess) {
             onSaveSuccess();
           }
-          // Refresh the page to reload calendar data with new preferences
-          window.location.reload();
         }, 1500);
       } else {
-        // NON-LOGGED USER: SET in context only (no backend save, no reload)
-        const locationData = {
-          centerLocation: {
-            lat: parseFloat(centerLat),
-            lng: parseFloat(centerLng)
-          },
-          zoomRange: zoomRange,
-          useCenterLocation: true
-        };
-
-        console.log('Setting temporary location (non-logged user):', locationData);
-        
-        // Set temporary location in context
-        setTemporaryLocation(locationData);
-        
-        // Store in sessionStorage for persistence across page refreshes
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('tempLocationPrefs', JSON.stringify(locationData));
-        }
-        
-        // Update original values
-        setOriginalValues({
-          centerLat: centerLat,
-          centerLng: centerLng,
-          zoomRange
-        });
-        
-        setMessage({ type: 'success', text: 'Location set for this session!' });
-        
-        // Close modal WITHOUT reload - just trigger event refresh
-        setTimeout(() => {
-          if (onSaveSuccess) {
-            onSaveSuccess();
-          }
-          // NO RELOAD - events will refresh automatically via context
-        }, 1000);
+        // This should not happen - UserSettings is for logged-in users only
+        console.error('UserSettingsLocationPreferences accessed by non-logged user');
+        setMessage({ type: 'error', text: 'Please log in to save location preferences' });
       }
     } catch (error) {
       console.error('Error saving/setting location preferences:', error);
