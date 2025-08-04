@@ -101,8 +101,8 @@ const UserSettingsApply = () => {
           fullName: `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`,
           organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
           isActive: true,
-          isEnabled: true,
-          wantRender: true,
+          isEnabled: false,  // Requires manual enable for safety
+          wantRender: false, // Not searchable until enabled
           organizerTypes: {
             isEventOrganizer: true,
             isVenue: false,
@@ -121,8 +121,8 @@ const UserSettingsApply = () => {
 
         const updatedRegionalInfo = {
           organizerId: newOrganizer._id,
-          isApproved: false,
-          isEnabled: true,
+          isApproved: true,  // Auto-approved after ROE acceptance
+          isEnabled: false,  // Requires manual enable for safety
           isActive: true,
         };
 
