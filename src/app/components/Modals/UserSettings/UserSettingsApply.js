@@ -191,7 +191,12 @@ const UserSettingsApply = () => {
     isApproved,
     isLoading,
     userData: !!userData,
+    userDataDetails: userData,
     regionalOrganizerRole: !!regionalOrganizerRole,
+    regionalOrganizerRoleDetails: regionalOrganizerRole,
+    rolesArray: roles,
+    rolesLoading,
+    userDataLoading,
     buttonDisabled: isLoading || !userData || !regionalOrganizerRole
   });
 
