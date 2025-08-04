@@ -33,6 +33,7 @@ import { useUsers } from '@/hooks/useUsers';
 import { AuthContext } from '@/contexts/AuthContext';
 import ROTermsModal from '@/components/Modals/UserSettings/UserSettingApplyROTerms';
 import RestartRequiredModal from './RestartRequiredModal';
+import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 
 const YourStatusTab = () => {
   const { user } = useContext(AuthContext);
@@ -69,6 +70,8 @@ const YourStatusTab = () => {
 
   // Phase-specific action handlers
   const handleStartApplication = () => {
+    // Check if we're in the organizer application page context
+    // If not, we might need to open User Settings modal instead
     setShowROEModal(true);
   };
 
@@ -159,24 +162,19 @@ const YourStatusTab = () => {
 
     readyToApply: (
       <Card elevation={2}>
-        <CardContent sx={{ textAlign: 'center', p: 4 }}>
-          <RocketLaunchIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h5" gutterBottom>
-            Ready to Become an Organizer?
-          </Typography>
-          <Typography variant="body1" color="text.secondary" paragraph>
-            Start your journey as a Regional Organizer for Argentine Tango events.
-            The process takes about 20 minutes from start to finish.
-          </Typography>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            size="large"
-            onClick={handleStartApplication}
-            startIcon={<RocketLaunchIcon />}
-          >
-            Start Application
-          </Button>
+        <CardContent sx={{ p: 4 }}>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <RocketLaunchIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h5" gutterBottom>
+              Ready to Become an Organizer?
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              Start your journey as a Regional Organizer for Argentine Tango events.
+              The process takes about 20 minutes from start to finish.
+            </Typography>
+          </Box>
+          <Divider sx={{ my: 3 }} />
+          <UserSettingsApply />
         </CardContent>
       </Card>
     ),

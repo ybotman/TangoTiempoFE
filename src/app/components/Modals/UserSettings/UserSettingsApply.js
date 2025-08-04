@@ -24,7 +24,11 @@ const UserSettingsApply = () => {
 
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
-    if (!Array.isArray(roles)) return null;
+    if (!Array.isArray(roles)) {
+      console.log('Roles not loaded or not an array:', roles);
+      return null;
+    }
+    console.log('Available roles:', roles.map(r => r?.roleName));
     return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
@@ -180,6 +184,16 @@ const UserSettingsApply = () => {
 
   // Determine the overall loading state
   const isLoading = userDataLoading || rolesLoading || applicationStatus === 'loading';
+  
+  // Debug logging
+  console.log('UserSettingsApply Debug:', {
+    hasOrganizerId,
+    isApproved,
+    isLoading,
+    userData: !!userData,
+    regionalOrganizerRole: !!regionalOrganizerRole,
+    buttonDisabled: isLoading || !userData || !regionalOrganizerRole
+  });
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
