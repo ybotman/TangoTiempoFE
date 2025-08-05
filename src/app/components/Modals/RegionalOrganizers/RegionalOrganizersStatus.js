@@ -194,68 +194,46 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         </Alert>
       )}
 
-      {/* Account Information - Moved from Settings */}
+      {/* User Information - Moved from Settings */}
       <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
-        <CardContent>
-          <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box display="flex" alignItems="center" sx={{ mb: 1.5 }}>
             <AccountCircleIcon sx={{ mr: 1 }} />
             <Typography variant="subtitle1" fontWeight="bold">
-              Account Information
+              User Information
             </Typography>
           </Box>
           
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Email</Typography>
-              <Typography variant="body1">{email}</Typography>
+              <Typography variant="caption" color="text.secondary">Email</Typography>
+              <Typography variant="body2">{email}</Typography>
             </Grid>
             
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Firebase ID</Typography>
-              <Typography variant="body1" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.85rem',
-                wordBreak: 'break-all' 
-              }}>
-                {firebaseUserId}
-              </Typography>
+              <Typography variant="caption" color="text.secondary">Approval Date</Typography>
+              <Typography variant="body2">{approvalDate}</Typography>
             </Grid>
             
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Organizer ID</Typography>
-              <Typography variant="body1" sx={{ 
+              <Typography variant="caption" color="text.secondary">Organizer ID</Typography>
+              <Typography variant="body2" sx={{ 
                 fontFamily: 'monospace', 
-                fontSize: '0.85rem' 
+                fontSize: '0.75rem' 
               }}>
                 {organizerId || 'Not set'}
               </Typography>
             </Grid>
             
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Approval Date</Typography>
-              <Typography variant="body1">{approvalDate}</Typography>
-            </Grid>
-
-            <Grid item xs={6}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body1">ROE Approved</Typography>
-                <Chip 
-                  label={isApprovedFromUserLogin ? "Yes" : "No"} 
-                  color={isApprovedFromUserLogin ? "success" : "default"}
-                  size="small"
-                />
-              </Box>
-            </Grid>
-            
-            <Grid item xs={6}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body1">Account Active</Typography>
-                <Chip 
-                  label={isActiveFromUserLogin ? "Yes" : "No"} 
-                  color={isActiveFromUserLogin ? "success" : "default"}
-                  size="small"
-                />
-              </Box>
+              <Typography variant="caption" color="text.secondary">Firebase ID</Typography>
+              <Typography variant="body2" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.75rem',
+                wordBreak: 'break-all' 
+              }}>
+                {firebaseUserId}
+              </Typography>
             </Grid>
           </Grid>
         </CardContent>
