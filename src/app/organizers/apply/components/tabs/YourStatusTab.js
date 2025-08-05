@@ -89,8 +89,9 @@ const YourStatusTab = () => {
   };
 
   const handleEnableProfile = () => {
-    // Navigate to settings - this would be handled by parent component
-    window.location.href = '/user-settings#organizer';
+    // For now, show an alert with instructions
+    // In a proper implementation, this would trigger the RegionalOrganizersModal
+    alert('To enable your profile:\n\n1. Open the menu (☰)\n2. Click on "Organizer Settings"\n3. Go to the "Status" tab\n4. Toggle "Enable Profile" and save\n5. Restart the app');
   };
 
   const handleRestartComplete = () => {

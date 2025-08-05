@@ -10,6 +10,7 @@ import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
 import RegionalOrganizersImages from './RegionalOrganizersImages';
 import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
 import RegionalOrganizerTypes from './RegionalOrganizersTypes'; // Import the new component
+import RegionalOrganizersStatus from './RegionalOrganizersStatus';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import modalStyle from '@/components/Styles/modalStyles';
@@ -20,11 +21,11 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
   const { organizers, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
-  const [currentTab, setCurrentTab] = useState('name');
+  const [currentTab, setCurrentTab] = useState('status');
 
   useEffect(() => {
     if (open) {
-      setCurrentTab('name');
+      setCurrentTab('status');
 
       const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
 
@@ -40,7 +41,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
     }
   }, [open, user, fetchOrganizerById]);
 
-  const handleTabChange = (event, newValue) => setCurrentTab(newValue);
+  const handleTabChange = (event, newValue) => {
+    // For now, just switch tabs. In a future update, we could add unsaved changes detection
+    setCurrentTab(newValue);
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -91,9 +95,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                 }
               }}
             >
+              <Tab label="Status" value="status" />
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
-              <Tab label="Types" value="types" /> {/* New Tab */}
+              <Tab label="Types" value="types" />
               <Tab label="Delegated" value="delegated" />
               <Tab label="Images" value="images" />
               <Tab label="Profile Images" value="profileImages" />
@@ -111,6 +116,13 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                   p: 2,
                 }}
               >
+                {currentTab === 'status' && (
+                  <RegionalOrganizersStatus
+                    organizerId={organizer?._id}
+                    organizer={organizer}
+                    updateOrganizer={updateOrganizer}
+                  />
+                )}
                 {currentTab === 'name' && (
                   <RegionalOrganizersName
                     organizerId={organizer?._id}
