@@ -412,6 +412,7 @@ export const GeoLocationProvider = ({ children }) => {
         }
       };
       
+      console.log('[GeoLocationContext] Sending update to backend:', updateData);
       await updateUserData(updateData);
     }
     

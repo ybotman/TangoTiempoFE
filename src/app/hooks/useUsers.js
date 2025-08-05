@@ -94,7 +94,9 @@ export const useUsers = () => {
         if (prefs) {
           console.log('useUsers: Preferences updated:', {
             mode: prefs.useCenterLocation ? 'map' : 'cities',
-            cityCount: prefs.masteredCityIds?.length || 0
+            cityCount: prefs.masteredCityIds?.length || 0,
+            hasDefaultCenterLocation: !!prefs.defaultCenterLocation,
+            defaultCenterLocation: prefs.defaultCenterLocation
           });
         }
       } catch (error) {
