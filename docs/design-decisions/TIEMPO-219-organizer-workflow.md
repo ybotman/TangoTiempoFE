@@ -148,23 +148,25 @@ This document tracks the implementation of the automated organizer application w
    - ✅ Set `regionalOrganizerInfo.isEnabled = true` (for future AI control)
    - ✅ Keeps existing `isApproved = true` logic
 
-#### 🚧 Pending Changes
-1. **Name/Address Tab** - Need to merge into single tab
-   - Combine Name and Address tabs
-   - Remove crawlable toggle (already moved to Settings)
-   - Keep all name and address fields
+#### ✅ Additional Completed Changes
+1. **Profile Tab** - Merged Name and Address tabs
+   - ✅ Combined all name fields (full name, short name, description, URL)
+   - ✅ Combined all address fields (phone, email, street, city, state, zip)
+   - ✅ Removed crawlable toggle (already moved to Settings)
+   - ✅ Organized into two sections: "Organizer Identity" and "Contact Information"
+   - ✅ Single save button for all profile information
 
-2. **Remove Tabs**
-   - Delegated tab (functionality already moved to Settings)
+2. **Removed Tabs**
+   - ✅ Delegated tab (functionality moved to Settings)
+   - ✅ Name tab (merged into Profile)
+   - ✅ Address tab (merged into Profile)
 
-#### Current Tab Order
+#### Final Tab Order
 1. Status (read-only dashboard) ✅
 2. Settings (all controls) ✅
-3. Name (needs merge with Address) 🚧
-4. Address (needs merge with Name) 🚧
-5. Types
-6. Delegated (needs removal) 🚧
-7. Profile Images
+3. Profile (merged Name & Address) ✅
+4. Types ✅
+5. Profile Images ✅
 
 ### City Display Hierarchical Solution (2025-01-05)
 

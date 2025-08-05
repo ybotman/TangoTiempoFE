@@ -4,9 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, useMediaQuery, useTheme, AppBar, Toolbar, IconButton } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import RegionalOrganizersName from './RegionalOrganizersName';
-import RegionalOrganizersAddress from './RegionalOrganizersAddress';
-import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
+import RegionalOrganizersProfile from './RegionalOrganizersProfile';
 import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
 import RegionalOrganizerTypes from './RegionalOrganizersTypes';
 import RegionalOrganizersStatus from './RegionalOrganizersStatus';
@@ -97,10 +95,8 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
             >
               <Tab label="Status" value="status" />
               <Tab label="Settings" value="settings" />
-              <Tab label="Name" value="name" />
-              <Tab label="Address" value="address" />
+              <Tab label="Profile" value="profile" />
               <Tab label="Types" value="types" />
-              <Tab label="Delegated" value="delegated" />
               <Tab label="Profile Images" value="profileImages" />
             </Tabs>
 
@@ -127,17 +123,11 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                   <RegionalOrganizersSettings
                     organizerId={organizer?._id}
                     organizer={organizer}
-                  />
-                )}
-                {currentTab === 'name' && (
-                  <RegionalOrganizersName
-                    organizerId={organizer?._id}
-                    organizer={organizer}
                     updateOrganizer={updateOrganizer}
                   />
                 )}
-                {currentTab === 'address' && (
-                  <RegionalOrganizersAddress
+                {currentTab === 'profile' && (
+                  <RegionalOrganizersProfile
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
@@ -147,16 +137,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                   <RegionalOrganizerTypes
                     organizerId={organizer?._id}
                     organizer={organizer}
-                    updateOrganizer={updateOrganizer}
-                  />
-                )}
-                {currentTab === 'delegated' && (
-                  <RegionalOrganizersDelegated
-                    organizerId={organizer?._id || ''}
-                    delegatedOrganizerIds={organizer && Array.isArray(organizer.delegatedOrganizerIds)
-                      ? organizer.delegatedOrganizerIds
-                      : []}
-                    organizers={Array.isArray(organizers) ? organizers : []}
                     updateOrganizer={updateOrganizer}
                   />
                 )}
