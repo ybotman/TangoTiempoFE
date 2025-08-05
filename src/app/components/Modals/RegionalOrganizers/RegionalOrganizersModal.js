@@ -7,10 +7,10 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersName from './RegionalOrganizersName';
 import RegionalOrganizersAddress from './RegionalOrganizersAddress';
 import RegionalOrganizersDelegated from './RegionalOrganizersDelegated';
-import RegionalOrganizersImages from './RegionalOrganizersImages';
 import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
-import RegionalOrganizerTypes from './RegionalOrganizersTypes'; // Import the new component
+import RegionalOrganizerTypes from './RegionalOrganizersTypes';
 import RegionalOrganizersStatus from './RegionalOrganizersStatus';
+import RegionalOrganizersSettings from './RegionalOrganizersSettings';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import modalStyle from '@/components/Styles/modalStyles';
@@ -96,11 +96,11 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               }}
             >
               <Tab label="Status" value="status" />
+              <Tab label="Settings" value="settings" />
               <Tab label="Name" value="name" />
               <Tab label="Address" value="address" />
               <Tab label="Types" value="types" />
               <Tab label="Delegated" value="delegated" />
-              <Tab label="Images" value="images" />
               <Tab label="Profile Images" value="profileImages" />
             </Tabs>
 
@@ -121,6 +121,12 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
+                  />
+                )}
+                {currentTab === 'settings' && (
+                  <RegionalOrganizersSettings
+                    organizerId={organizer?._id}
+                    organizer={organizer}
                   />
                 )}
                 {currentTab === 'name' && (
@@ -151,13 +157,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                       ? organizer.delegatedOrganizerIds
                       : []}
                     organizers={Array.isArray(organizers) ? organizers : []}
-                    updateOrganizer={updateOrganizer}
-                  />
-                )}
-                {currentTab === 'images' && (
-                  <RegionalOrganizersImages
-                    organizerId={organizer?._id}
-                    organizer={organizer}
                     updateOrganizer={updateOrganizer}
                   />
                 )}

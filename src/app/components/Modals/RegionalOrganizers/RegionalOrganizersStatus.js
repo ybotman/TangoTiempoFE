@@ -75,21 +75,10 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     setShowSuccessMessage(false);
     
     try {
-      // Update organizer collection
+      // Update organizer collection only
       await updateOrganizer(organizerId, { 
         isEnabled
       });
-      
-      // Update userLogin collection if isEnabled changed
-      if (isEnabled !== initialIsEnabled && userData) {
-        const updatedRegionalInfo = {
-          ...roInfo,
-          isEnabled: isEnabled
-        };
-        await updateUserData({
-          regionalOrganizerInfo: updatedRegionalInfo
-        });
-      }
       
       setInitialIsEnabled(isEnabled);
       setShowSuccessMessage(true);
@@ -277,6 +266,9 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
                     : "Enable to start creating events"
                   }
                 </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 5, mt: 0.5, display: 'block' }}>
+                  Note: To manage account-level enable setting, use the Settings tab
+                </Typography>
               </Box>
             </Box>
           </Card>
@@ -322,7 +314,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
           <InfoIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-          Status data is synchronized between your user profile and organizer profile. 
+          This tab manages profile visibility settings. For account-level settings, use the Settings tab.
           Changes may require an app restart to take full effect.
         </Typography>
       </Box>
