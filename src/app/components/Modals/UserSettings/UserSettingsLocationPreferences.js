@@ -19,10 +19,21 @@ import 'leaflet/dist/leaflet.css';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
+/**
+ * UserSettingsLocationPreferences - For logged-in users to save permanent location preferences
+ * 
+ * This component manages the user's saved location preferences that persist across sessions.
+ * It's different from MapCenterModal which sets temporary session locations.
+ * 
+ * Data flow:
+ * 1. Loads saved preferences from userData (backend)
+ * 2. Falls back to savedLocation from GeoLocationContext if userData not loaded yet
+ * 3. Saves to backend via updateUserData and updates current session via saveAndSetLocation
+ */
 const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSuccess }) => {
   // Get auth context to check if user is logged in
   const { user } = useContext(AuthContext);
-  const { saveAndSetLocation } = useGeoLocation();
+  const { saveAndSetLocation, savedLocation } = useGeoLocation();
   const isLoggedIn = !!user;
   
   // Map references
@@ -93,33 +104,27 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         centerLng: defaults.defaultCenterLocation?.lng?.toString() || '',
         zoomRange: defaults.defaultZoomRange || 50
       });
-    } else if (!isLoggedIn) {
-      // For non-logged users, check sessionStorage for temporary location
-      const savedTemp = sessionStorage.getItem('tempLocationPrefs');
-      if (savedTemp) {
-        try {
-          const tempLocation = JSON.parse(savedTemp);
-          console.log('Loading temporary location from sessionStorage:', tempLocation);
-          
-          if (tempLocation.centerLocation) {
-            setCenterLat(tempLocation.centerLocation.lat?.toString() || '');
-            setCenterLng(tempLocation.centerLocation.lng?.toString() || '');
-            setZoomRange(tempLocation.zoomRange || 50);
-            setCoordinatesLoaded(true);
-            
-            // Store as original values so hasChanges() works correctly
-            setOriginalValues({
-              centerLat: tempLocation.centerLocation.lat?.toString() || '',
-              centerLng: tempLocation.centerLocation.lng?.toString() || '',
-              zoomRange: tempLocation.zoomRange || 50
-            });
-          }
-        } catch (e) {
-          console.error('Error loading temporary location:', e);
-        }
-      }
     }
   }, [userData, isLoggedIn]);
+
+  // Also check savedLocation from GeoLocationContext as a fallback
+  useEffect(() => {
+    // Only use savedLocation if we haven't loaded from userData yet
+    if (!coordinatesLoaded && savedLocation?.lat && savedLocation?.lng) {
+      console.log('[LocationPrefs] Using savedLocation from GeoLocationContext:', savedLocation);
+      setCenterLat(savedLocation.lat?.toString() || '');
+      setCenterLng(savedLocation.lng?.toString() || '');
+      setZoomRange(savedLocation.zoomRange || 50);
+      setCoordinatesLoaded(true);
+      
+      // Store as original values
+      setOriginalValues({
+        centerLat: savedLocation.lat?.toString() || '',
+        centerLng: savedLocation.lng?.toString() || '',
+        zoomRange: savedLocation.zoomRange || 50
+      });
+    }
+  }, [savedLocation, coordinatesLoaded]);
 
   const isValidLatLng = () => {
     const lat = parseFloat(centerLat);
