@@ -77,9 +77,10 @@ This document tracks the implementation of the automated organizer application w
 
 #### City Dropdown Display Format
 **Issue**: Cities showing as "- Boston, - Portland" instead of "MA - Boston, OR - Portland"  
-**Root Cause**: State abbreviation not being displayed properly  
-**Status**: Under investigation  
-**Fix Applied**: Updated API endpoint to correct `/api/masteredLocations/cities` (2025-01-05)
+**Root Cause**: Cities API doesn't include state abbreviations  
+**Status**: Implementing hierarchical display solution  
+**Fix Applied**: Updated API endpoint to correct `/api/masteredLocations/cities` (2025-01-05)  
+**New Solution**: Display as "Country - Region - Division - City" with active/inactive filter (2025-01-05)
 
 ## Technical Implementation Details
 
@@ -114,10 +115,46 @@ This document tracks the implementation of the automated organizer application w
 - [ ] App restart after enabling shows organizer features
 
 ## Next Steps
-1. Fix city dropdown state abbreviation display
+1. ~~Fix city dropdown state abbreviation display~~ Implementing hierarchical display
 2. Test complete workflow with fresh user account
 3. Verify venue selection respects selected cities
 4. Consider adding validation for profile completeness
+
+### City Display Hierarchical Solution (2025-01-05)
+
+#### Design Decision
+Instead of just showing "State - City", implement full hierarchical display:
+- Format: `Country - Region - Division - City`
+- Example: `US - Northeast - New England - Boston`
+- Add active/inactive toggle to show all cities or just active ones
+
+#### Implementation Plan
+1. **Data Fetching**:
+   - Fetch countries, regions, divisions, and cities in parallel
+   - Build lookup maps for efficient hierarchy building
+   - Support filtering by active status
+
+2. **Display Enhancement**:
+   - Transform city objects to include `displayName` with full hierarchy
+   - Sort alphabetically by display name
+   - Show in dropdown with proper formatting
+
+3. **UI Updates**:
+   - Add toggle switch: "Show inactive cities"
+   - Pass active filter to API calls
+   - Update dropdown to show hierarchical names
+
+#### API Endpoints Used
+- GET `/api/masteredLocations/countries?appId=1`
+- GET `/api/masteredLocations/regions?appId=1`
+- GET `/api/masteredLocations/divisions?appId=1`
+- GET `/api/masteredLocations/cities?appId=1`
+
+#### Benefits
+- Better geographic context for users
+- Clear organization hierarchy
+- Ability to see inactive cities for future planning
+- No backend changes required
 
 ## Notes
 - JIRA integration is currently experiencing issues, using this document for tracking
