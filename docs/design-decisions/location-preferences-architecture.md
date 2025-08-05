@@ -18,11 +18,11 @@ The TangoTiempo application uses a dual location system to provide flexibility f
 userLogins.localUserInfo.userDefaults = {
   useCenterLocation: true,  // Always true in current implementation
   defaultCenterLocation: {
-    lat: 42.3601,
-    lng: -71.0589
+    latitude: 42.3601,      // Note: Backend uses 'latitude' not 'lat'
+    longitude: -71.0589     // Note: Backend uses 'longitude' not 'lng'
   },
-  defaultZoomRange: 50,  // Miles radius
-  masteredCityIds: []    // Legacy city-based filtering (deprecated)
+  defaultZoomRange: 50,     // Miles radius
+  masteredCityIds: []       // Legacy city-based filtering (deprecated)
 }
 ```
 

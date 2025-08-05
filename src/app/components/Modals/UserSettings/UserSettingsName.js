@@ -71,7 +71,10 @@ const UserSettingsName = ({ userData, updateUserData }) => {
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h6">Update Your Name</Typography>
+      <Typography variant="h6">Update Your Public Facing Name</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        This name will be displayed publicly when you create events or interact with other users on the platform.
+      </Typography>
       
       {/* Error message for API errors */}
       {error && (

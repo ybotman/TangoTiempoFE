@@ -66,17 +66,15 @@ export const useUsers = () => {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
 
       try {
-        // Check if the data is already properly nested or if it's using dot notation
-        const isNested = updatedData.localUserInfo && typeof updatedData.localUserInfo === 'object';
-        
+        // Data should now always be properly structured (no dot notation)
         const dataToUpdate = {
           firebaseUserId: user.uid,
-          appId, // Include appId in the update payload
-          ...(isNested ? updatedData : { ...updatedData }), // Use the data as-is if nested, otherwise spread it
+          appId,
+          ...updatedData
         };
 
-        // Log updates concisely
-        console.log('useUsers: Updating user preferences');
+        // Log updates with payload details
+        console.log('useUsers: Updating user preferences with data:', JSON.stringify(dataToUpdate, null, 2));
 
         // Use the optimized endpoint PUT /api/userlogins/updateUserInfo
         // This endpoint expects firebaseUserId and appId in the request body

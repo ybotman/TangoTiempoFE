@@ -105,6 +105,12 @@ Both must be `true` for an organizer to be fully functional (future state).
 
 ### 🐛 Current Issues
 
+#### Location Preferences Field Name Mismatch (Fixed 2025-01-05)
+**Issue**: Location preferences not saving to backend  
+**Root Cause**: Frontend sending `lat/lng` but backend expects `latitude/longitude`  
+**Fix**: Updated GeoLocationContext and UserSettingsLocationPreferences to use correct field names
+**Status**: ✅ Fixed
+
 #### City Dropdown Display Format
 **Issue**: Cities showing as "- Boston, - Portland" instead of "MA - Boston, OR - Portland"  
 **Root Cause**: Cities API doesn't include state abbreviations  

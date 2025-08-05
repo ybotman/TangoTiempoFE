@@ -317,12 +317,8 @@ export const GeoLocationProvider = ({ children }) => {
     console.log('[GeoLocationContext] Loading user map preferences:', defaults);
     
     const location = {
-      lat: defaults.defaultCenterLocation?.lat || 
-           defaults.defaultCenterLocation?.latitude || 
-           null,
-      lng: defaults.defaultCenterLocation?.lng || 
-           defaults.defaultCenterLocation?.longitude || 
-           null,
+      lat: defaults.defaultCenterLocation?.latitude || null,   // Backend stores as 'latitude'
+      lng: defaults.defaultCenterLocation?.longitude || null,  // Backend stores as 'longitude'
       zoomRange: defaults.defaultZoomRange || 50
     };
     
@@ -398,22 +394,19 @@ export const GeoLocationProvider = ({ children }) => {
     
     // Save to backend if updateUserData provided
     if (updateUserData) {
-      // Use properly nested structure instead of dot notation
-      const updateData = {
+      // Use nested structure that backend expects
+      await updateUserData({
         localUserInfo: {
           userDefaults: {
             defaultCenterLocation: {
-              lat: location.lat,
-              lng: location.lng
+              latitude: location.lat,    // Backend expects 'latitude', not 'lat'
+              longitude: location.lng    // Backend expects 'longitude', not 'lng'
             },
             defaultZoomRange: location.zoomRange,
             useCenterLocation: true
           }
         }
-      };
-      
-      console.log('[GeoLocationContext] Sending update to backend:', updateData);
-      await updateUserData(updateData);
+      });
     }
     
     // Emit event to trigger refresh

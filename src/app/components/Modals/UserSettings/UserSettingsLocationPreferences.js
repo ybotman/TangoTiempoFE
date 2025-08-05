@@ -80,12 +80,13 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
       
       // Always load coordinates if they exist (since we're forcing map center mode)
       if (defaults.defaultCenterLocation) {
-        setCenterLat(defaults.defaultCenterLocation.lat?.toString() || '');
-        setCenterLng(defaults.defaultCenterLocation.lng?.toString() || '');
+        // Backend stores as 'latitude' and 'longitude'
+        setCenterLat(defaults.defaultCenterLocation.latitude?.toString() || '');
+        setCenterLng(defaults.defaultCenterLocation.longitude?.toString() || '');
         setCoordinatesLoaded(true);
         console.log('[LocationPrefs] Loaded map center coordinates:', {
-          lat: defaults.defaultCenterLocation.lat,
-          lng: defaults.defaultCenterLocation.lng,
+          lat: defaults.defaultCenterLocation.latitude,
+          lng: defaults.defaultCenterLocation.longitude,
           useCenterLocation: defaults.useCenterLocation
         });
       } else if (defaults.useCenterLocation) {
@@ -408,10 +409,13 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
           zoomRange: zoomRange
         };
         
-        console.log('Saving location preferences (logged in user):', locationData);
+        console.log('[LocationPrefs] handleSave - Starting save for logged in user:', locationData);
+        console.log('[LocationPrefs] handleSave - updateUserData function available:', !!updateUserData);
         
         // Save to backend and update current location
         await saveAndSetLocation(locationData, updateUserData);
+        
+        console.log('[LocationPrefs] handleSave - Save completed');
         
         // Update original values after successful save
         setOriginalValues({
@@ -434,8 +438,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setMessage({ type: 'error', text: 'Please log in to save location preferences' });
       }
     } catch (error) {
-      console.error('Error saving/setting location preferences:', error);
-      setMessage({ type: 'error', text: isLoggedIn ? 'Failed to save preferences. Please try again.' : 'Failed to set location. Please try again.' });
+      console.error('[LocationPrefs] handleSave - Error:', error);
+      console.error('[LocationPrefs] handleSave - Error details:', error.response?.data || error.message);
+      setMessage({ type: 'error', text: isLoggedIn ? `Failed to save preferences: ${error.message}` : 'Failed to set location. Please try again.' });
     } finally {
       setSaving(false);
     }
