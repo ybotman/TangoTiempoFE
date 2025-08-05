@@ -115,10 +115,44 @@ This document tracks the implementation of the automated organizer application w
 - [ ] App restart after enabling shows organizer features
 
 ## Next Steps
-1. ~~Fix city dropdown state abbreviation display~~ Implementing hierarchical display
-2. Test complete workflow with fresh user account
-3. Verify venue selection respects selected cities
-4. Consider adding validation for profile completeness
+1. ~~Fix city dropdown state abbreviation display~~ Implemented hierarchical display
+2. Reorganize tabs based on new requirements (2025-01-05)
+3. Test complete workflow with fresh user account
+4. Verify venue selection respects selected cities
+
+### Tab Reorganization Plan (2025-01-05)
+
+#### Major Changes
+1. **Status Tab** - Becomes read-only dashboard
+   - Move account settings display here from Settings
+   - Show all status indicators (mandatory and optional)
+   - Keep enable/disable toggle for organizer profile
+   - Display: delegated count, profile image, crawlable, visible, address
+
+2. **Settings Tab** - Becomes control center for all editable items
+   - Cities selection (keep existing)
+   - Visible toggle (move from elsewhere)
+   - Crawlable/searchable toggle (move from Name tab)
+   - Delegated organizers management (move from Delegated tab)
+
+3. **Name/Address Tab** - Merge into single tab
+   - Combine Name and Address tabs
+   - Remove crawlable toggle (move to Settings)
+   - Keep all name and address fields
+
+4. **Remove Tabs**
+   - Delegated tab (functionality moves to Settings)
+
+5. **Apply Button Enhancement**
+   - Set `regionalOrganizerInfo.isEnabled = true` (for future AI control)
+   - Keep existing `isApproved = true` logic
+
+#### New Tab Order
+1. Status (read-only dashboard)
+2. Settings (all controls)
+3. Name & Address (merged)
+4. Types
+5. Profile Images
 
 ### City Display Hierarchical Solution (2025-01-05)
 
