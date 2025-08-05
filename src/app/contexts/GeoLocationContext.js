@@ -398,13 +398,18 @@ export const GeoLocationProvider = ({ children }) => {
     
     // Save to backend if updateUserData provided
     if (updateUserData) {
+      // Use properly nested structure instead of dot notation
       const updateData = {
-        'localUserInfo.userDefaults.defaultCenterLocation': {
-          lat: location.lat,
-          lng: location.lng
-        },
-        'localUserInfo.userDefaults.defaultZoomRange': location.zoomRange,
-        'localUserInfo.userDefaults.useCenterLocation': true
+        localUserInfo: {
+          userDefaults: {
+            defaultCenterLocation: {
+              lat: location.lat,
+              lng: location.lng
+            },
+            defaultZoomRange: location.zoomRange,
+            useCenterLocation: true
+          }
+        }
       };
       
       await updateUserData(updateData);
