@@ -395,22 +395,9 @@ const SidebarDrawer = ({ open, onClose }) => {
                 }}
               >
                 <ListItemIcon>
-                  <EventAvailableIcon sx={{ color: 'green' }} />
+                  <GroupIcon sx={{ color: 'green' }} />
                 </ListItemIcon>
-                <ListItemText primary="Regional Organizer" />
-              </ListItem>
-
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setVenueModalOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <EventAvailableIcon sx={{ color: 'teal' }} />
-                </ListItemIcon>
-                <ListItemText primary="Venues" />
+                <ListItemText primary="Organizer Settings" />
               </ListItem>
             </>
           )}
@@ -479,6 +466,28 @@ const SidebarDrawer = ({ open, onClose }) => {
           )}
               
               {/* Close authentication section */}
+            </>
+          )}
+          
+          {/* Venues - Top level for Regional Organizers */}
+          {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+            <>
+              <Divider />
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
+                Event Management
+              </Typography>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setVenueModalOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <BusinessIcon sx={{ color: 'teal' }} />
+                </ListItemIcon>
+                <ListItemText primary="Venues" />
+              </ListItem>
             </>
           )}
           

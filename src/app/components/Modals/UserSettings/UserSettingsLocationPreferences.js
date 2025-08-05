@@ -19,10 +19,21 @@ import 'leaflet/dist/leaflet.css';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
+/**
+ * UserSettingsLocationPreferences - For logged-in users to save permanent location preferences
+ * 
+ * This component manages the user's saved location preferences that persist across sessions.
+ * It's different from MapCenterModal which sets temporary session locations.
+ * 
+ * Data flow:
+ * 1. Loads saved preferences from userData (backend)
+ * 2. Falls back to savedLocation from GeoLocationContext if userData not loaded yet
+ * 3. Saves to backend via updateUserData and updates current session via saveAndSetLocation
+ */
 const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSuccess }) => {
   // Get auth context to check if user is logged in
   const { user } = useContext(AuthContext);
-  const { saveAndSetLocation } = useGeoLocation();
+  const { saveAndSetLocation, savedLocation } = useGeoLocation();
   const isLoggedIn = !!user;
   
   // Map references
@@ -32,7 +43,6 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
   const circleRef = useRef(null);
   
   // State for location preferences - FORCE MAP CENTER MODE
-  const useCenterLocation = true; // FORCED TO TRUE
   const [centerLat, setCenterLat] = useState('');
   const [centerLng, setCenterLng] = useState('');
   const [zoomRange, setZoomRange] = useState(50);
@@ -50,53 +60,72 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
   // Load user's existing preferences or temporary location
   useEffect(() => {
+    console.log('[LocationPrefs] useEffect triggered:', {
+      hasUserData: !!userData,
+      hasLocalUserInfo: !!userData?.localUserInfo,
+      hasUserDefaults: !!userData?.localUserInfo?.userDefaults,
+      userData: userData
+    });
+    
     // First check if logged-in user has preferences
     if (userData?.localUserInfo?.userDefaults) {
       const defaults = userData.localUserInfo.userDefaults;
       
-      console.log('Loading user defaults:', defaults);
+      console.log('[LocationPrefs] Loading user defaults:', defaults);
+      console.log('[LocationPrefs] defaultCenterLocation:', defaults.defaultCenterLocation);
+      console.log('[LocationPrefs] useCenterLocation:', defaults.useCenterLocation);
+      console.log('[LocationPrefs] masteredCityIds:', defaults.masteredCityIds);
       
       setZoomRange(defaults.defaultZoomRange || 50);
       
+      // Always load coordinates if they exist (since we're forcing map center mode)
       if (defaults.defaultCenterLocation) {
+        // Backend stores as 'latitude' and 'longitude'
         setCenterLat(defaults.defaultCenterLocation.latitude?.toString() || '');
         setCenterLng(defaults.defaultCenterLocation.longitude?.toString() || '');
         setCoordinatesLoaded(true);
+        console.log('[LocationPrefs] Loaded map center coordinates:', {
+          lat: defaults.defaultCenterLocation.latitude,
+          lng: defaults.defaultCenterLocation.longitude,
+          useCenterLocation: defaults.useCenterLocation
+        });
+      } else if (defaults.useCenterLocation) {
+        // User has map center enabled but no coordinates saved yet
+        console.log('[LocationPrefs] Map center enabled but no coordinates saved');
+      } else {
+        console.log('[LocationPrefs] No map center location found:', {
+          useCenterLocation: defaults.useCenterLocation,
+          hasDefaultCenterLocation: !!defaults.defaultCenterLocation
+        });
       }
       
       // Store original values for change detection
       setOriginalValues({
-        centerLat: defaults.defaultCenterLocation?.latitude?.toString() || '',
-        centerLng: defaults.defaultCenterLocation?.longitude?.toString() || '',
+        centerLat: defaults.defaultCenterLocation?.lat?.toString() || '',
+        centerLng: defaults.defaultCenterLocation?.lng?.toString() || '',
         zoomRange: defaults.defaultZoomRange || 50
       });
-    } else if (!isLoggedIn) {
-      // For non-logged users, check sessionStorage for temporary location
-      const savedTemp = sessionStorage.getItem('tempLocationPrefs');
-      if (savedTemp) {
-        try {
-          const tempLocation = JSON.parse(savedTemp);
-          console.log('Loading temporary location from sessionStorage:', tempLocation);
-          
-          if (tempLocation.centerLocation) {
-            setCenterLat(tempLocation.centerLocation.lat?.toString() || '');
-            setCenterLng(tempLocation.centerLocation.lng?.toString() || '');
-            setZoomRange(tempLocation.zoomRange || 50);
-            setCoordinatesLoaded(true);
-            
-            // Store as original values so hasChanges() works correctly
-            setOriginalValues({
-              centerLat: tempLocation.centerLocation.lat?.toString() || '',
-              centerLng: tempLocation.centerLocation.lng?.toString() || '',
-              zoomRange: tempLocation.zoomRange || 50
-            });
-          }
-        } catch (e) {
-          console.error('Error loading temporary location:', e);
-        }
-      }
     }
   }, [userData, isLoggedIn]);
+
+  // Also check savedLocation from GeoLocationContext as a fallback
+  useEffect(() => {
+    // Only use savedLocation if we haven't loaded from userData yet
+    if (!coordinatesLoaded && savedLocation?.lat && savedLocation?.lng) {
+      console.log('[LocationPrefs] Using savedLocation from GeoLocationContext:', savedLocation);
+      setCenterLat(savedLocation.lat?.toString() || '');
+      setCenterLng(savedLocation.lng?.toString() || '');
+      setZoomRange(savedLocation.zoomRange || 50);
+      setCoordinatesLoaded(true);
+      
+      // Store as original values
+      setOriginalValues({
+        centerLat: savedLocation.lat?.toString() || '',
+        centerLng: savedLocation.lng?.toString() || '',
+        zoomRange: savedLocation.zoomRange || 50
+      });
+    }
+  }, [savedLocation, coordinatesLoaded]);
 
   const isValidLatLng = () => {
     const lat = parseFloat(centerLat);
@@ -253,8 +282,10 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
     // Cleanup function
     return () => {
-      if (mapRef.current?._resizeObserver) {
-        mapRef.current._resizeObserver.disconnect();
+      // Copy ref to local variable to avoid stale closure
+      const mapElement = mapRef.current;
+      if (mapElement?._resizeObserver) {
+        mapElement._resizeObserver.disconnect();
       }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -264,7 +295,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setMapInitialized(false);
       }
     };
-  }, []); // Only initialize once
+  }, []); // Only initialize once - intentionally not including zoomRange to avoid re-initialization
 
   // Handle loading saved coordinates after map is initialized
   useEffect(() => {
@@ -340,7 +371,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         }, 100);
       });
     }
-  }, [mapInitialized, coordinatesLoaded, centerLat, centerLng]);
+  }, [mapInitialized, coordinatesLoaded, centerLat, centerLng, zoomRange]);
 
   // Separate effect to handle radius changes
   useEffect(() => {
@@ -378,10 +409,13 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
           zoomRange: zoomRange
         };
         
-        console.log('Saving location preferences (logged in user):', locationData);
+        console.log('[LocationPrefs] handleSave - Starting save for logged in user:', locationData);
+        console.log('[LocationPrefs] handleSave - updateUserData function available:', !!updateUserData);
         
         // Save to backend and update current location
         await saveAndSetLocation(locationData, updateUserData);
+        
+        console.log('[LocationPrefs] handleSave - Save completed');
         
         // Update original values after successful save
         setOriginalValues({
@@ -404,8 +438,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setMessage({ type: 'error', text: 'Please log in to save location preferences' });
       }
     } catch (error) {
-      console.error('Error saving/setting location preferences:', error);
-      setMessage({ type: 'error', text: isLoggedIn ? 'Failed to save preferences. Please try again.' : 'Failed to set location. Please try again.' });
+      console.error('[LocationPrefs] handleSave - Error:', error);
+      console.error('[LocationPrefs] handleSave - Error details:', error.response?.data || error.message);
+      setMessage({ type: 'error', text: isLoggedIn ? `Failed to save preferences: ${error.message}` : 'Failed to set location. Please try again.' });
     } finally {
       setSaving(false);
     }

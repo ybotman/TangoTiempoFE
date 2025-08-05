@@ -36,7 +36,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   // Define role display mapping (backend role -> display name)
   const roleDisplayMap = {
     'NamedUser': 'Milonger-x',
-    'RegionalOrganizer': 'RegionalOrganizer',
+    'RegionalOrganizer': 'Organizer/Artist',
     'RegionalAdmin': 'RegionalAdmin', 
     'SystemAdmin': 'SystemAdmin',
     'SystemOwner': 'SystemOwner'
@@ -163,7 +163,10 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
 
             <Box sx={{ marginTop: 2 }}>
-              <Typography variant="subtitle1">Select Role:</Typography>
+              <Typography variant="subtitle1">Settings</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Choose your active role
+              </Typography>
               <FormControl component="fieldset">
                 <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                   {orderedUserRoles.map((role) => (

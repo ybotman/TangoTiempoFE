@@ -1,4 +1,17 @@
-// Map Center Modal - for setting location for current session
+/**
+ * MapCenterModal - For setting temporary location for current session
+ * 
+ * This modal allows users (logged-in or not) to set a temporary location
+ * for filtering events in the current session. It doesn't save to backend.
+ * 
+ * For permanent saved locations, logged-in users should use:
+ * User Settings > Location Preferences
+ * 
+ * Data flow:
+ * 1. Loads currentLocation or savedLocation as initial values
+ * 2. Saves to sessionStorage via setSessionLocation (temporary)
+ * 3. Does NOT save to backend
+ */
 'use client';
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
