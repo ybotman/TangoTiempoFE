@@ -102,7 +102,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     return allowedCityIds
       .map(cityId => {
         const city = masteredCities.find(c => c._id === cityId);
-        return city ? `${city.stateAbbr} - ${city.city}` : null;
+        return city ? `${city.stateAbbr} - ${city.cityName || city.city}` : null;
       })
       .filter(name => name !== null);
   };
@@ -176,9 +176,26 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       {/* Profile Checklist */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle1" gutterBottom>
-            Profile Requirements
-          </Typography>
+          <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Typography variant="subtitle1">
+              Profile Requirements
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch 
+                  checked={isEnabled} 
+                  onChange={(e) => setIsEnabled(e.target.checked)} 
+                  color="primary"
+                  disabled={!allChecksPassed}
+                />
+              }
+              label={
+                <Typography variant="body2">
+                  {isEnabled ? "Enabled" : "Disabled"}
+                </Typography>
+              }
+            />
+          </Box>
           <List dense>
             {profileChecks.map((check, index) => (
               <ListItem key={index}>
@@ -190,39 +207,13 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
             ))}
           </List>
           {!allChecksPassed && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              Complete all profile requirements before enabling your organizer profile.
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              All requirements must be met before you can enable your organizer profile.
             </Alert>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Selected Cities Display */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" gutterBottom>
-            Selected Cities for Venues
-          </Typography>
-          {allowedCityIds.length > 0 ? (
-            <>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                {getCityDisplayNames().map((cityName, index) => (
-                  <Chip 
-                    key={index} 
-                    label={cityName} 
-                    color="primary" 
-                    variant="outlined"
-                    size="small"
-                  />
-                ))}
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                These cities determine which venues you can select when creating events.
-              </Typography>
-            </>
-          ) : (
-            <Alert severity="warning" sx={{ mt: 1 }}>
-              No cities selected. Go to the Settings tab to select at least one city.
+          {allChecksPassed && (
+            <Alert severity="success" sx={{ mt: 2 }}>
+              All requirements met! You can now enable your organizer profile to create events.
             </Alert>
           )}
         </CardContent>
@@ -230,46 +221,8 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
 
       <Divider sx={{ my: 3 }} />
 
-      {/* Profile Enable/Disable */}
+      {/* Search Engine Visibility */}
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Card elevation={2} sx={{ p: 3, bgcolor: isEnabled ? 'success.light' : 'grey.100' }}>
-            <Typography variant="subtitle2" gutterBottom color="text.secondary">
-              Profile Activation
-            </Typography>
-            
-            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Box>
-                <FormControlLabel
-                  control={
-                    <Switch 
-                      checked={isEnabled} 
-                      onChange={(e) => setIsEnabled(e.target.checked)} 
-                      color="primary"
-                      disabled={!allChecksPassed}
-                    />
-                  }
-                  label={
-                    <Typography variant="h6">
-                      {isEnabled ? "Profile Enabled" : "Profile Disabled"}
-                    </Typography>
-                  }
-                />
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 5, mt: 1 }}>
-                  {isEnabled 
-                    ? "You can create and manage tango events"
-                    : "Enable to start creating events"
-                  }
-                </Typography>
-                {!allChecksPassed && (
-                  <Typography variant="caption" color="error" sx={{ ml: 5, mt: 0.5, display: 'block' }}>
-                    Complete all requirements above to enable profile
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-          </Card>
-        </Grid>
 
         <Grid item xs={12}>
           <Card elevation={1} sx={{ p: 3 }}>

@@ -11,15 +11,18 @@ export const useMasteredCities = () => {
       setLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/mastered-cities`, {
-        params: { appId }
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/masteredLocations/cities`, {
+        params: { appId, isActive: 'true' }
       });
 
+      // Handle different API response formats (similar to LocationAPIContext)
+      const citiesArray = Array.isArray(response.data) ? response.data : (response.data.cities || []);
+      
       // Sort cities by state and then by city name
-      const sortedCities = (response.data.masteredCities || response.data || []).sort((a, b) => {
+      const sortedCities = citiesArray.sort((a, b) => {
         const stateCompare = (a.stateAbbr || '').localeCompare(b.stateAbbr || '');
         if (stateCompare !== 0) return stateCompare;
-        return (a.city || '').localeCompare(b.city || '');
+        return (a.cityName || a.city || '').localeCompare(b.cityName || b.city || '');
       });
 
       setMasteredCities(sortedCities);

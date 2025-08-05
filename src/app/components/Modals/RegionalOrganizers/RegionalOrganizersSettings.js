@@ -35,11 +35,9 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
   const { masteredCities, loading: citiesLoading } = useMasteredCities();
   
   // State for editable fields
-  const [isEnabled, setIsEnabled] = useState(false);
   const [selectedCityIds, setSelectedCityIds] = useState([]);
   
   // Initial values for comparison
-  const [initialIsEnabled, setInitialIsEnabled] = useState(false);
   const [initialSelectedCityIds, setInitialSelectedCityIds] = useState([]);
   
   // UI state
@@ -57,16 +55,12 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
 
   useEffect(() => {
     if (userData?.regionalOrganizerInfo) {
-      setIsEnabled(roInfo.isEnabled || false);
       setSelectedCityIds(roInfo.allowedMasteredCityIds || []);
-      
-      setInitialIsEnabled(roInfo.isEnabled || false);
       setInitialSelectedCityIds(roInfo.allowedMasteredCityIds || []);
     }
-  }, [userData, roInfo.isEnabled, roInfo.allowedMasteredCityIds]);
+  }, [userData, roInfo.allowedMasteredCityIds]);
 
   const isSaveDisabled = 
-    isEnabled === initialIsEnabled && 
     JSON.stringify(selectedCityIds) === JSON.stringify(initialSelectedCityIds) ||
     saving;
 
@@ -90,7 +84,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
     try {
       const updatedRegionalInfo = {
         ...roInfo,
-        isEnabled: isEnabled,
         allowedMasteredCityIds: selectedCityIds
       };
       
@@ -112,7 +105,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
   // Format city display name
   const getCityDisplayName = (city) => {
     if (!city) return '';
-    return `${city.stateAbbr || ''} - ${city.city || ''}`.trim();
+    return `${city.stateAbbr || ''} - ${city.cityName || city.city || ''}`.trim();
   };
 
   // Get city object by ID
@@ -229,32 +222,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
         Editable Settings
       </Typography>
 
-      {/* Profile Enabled Toggle */}
-      <Card elevation={1} sx={{ p: 3, mb: 3 }}>
-        <FormControlLabel
-          control={
-            <Switch 
-              checked={isEnabled} 
-              onChange={(e) => setIsEnabled(e.target.checked)} 
-              color="primary"
-              disabled={!isApproved}
-            />
-          }
-          label={
-            <Box>
-              <Typography variant="body1">
-                {isEnabled ? "Profile Enabled" : "Profile Disabled"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {isEnabled 
-                  ? "You can create and manage events"
-                  : "Enable to start managing events"
-                }
-              </Typography>
-            </Box>
-          }
-        />
-      </Card>
 
       {/* City Selection */}
       <Card elevation={1} sx={{ p: 3 }}>
