@@ -27,6 +27,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import InfoIcon from '@mui/icons-material/Info';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import LockIcon from '@mui/icons-material/Lock';
+import RecommendIcon from '@mui/icons-material/Recommend';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useMasteredCities } from '@/hooks/useMasteredCities';
@@ -107,7 +108,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       .filter(name => name !== null);
   };
 
-  const profileChecks = [
+  const mandatoryChecks = [
     {
       label: 'Rules of Engagement Accepted',
       passed: isApprovedFromUserLogin,
@@ -131,11 +132,27 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     {
       label: 'At Least One City Selected',
       passed: allowedCityIds.length > 0,
-      icon: allowedCityIds.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+      icon: allowedCityIds.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
+      details: allowedCityIds.length > 0 ? `${allowedCityIds.length} cities selected` : null
     },
   ];
 
-  const allChecksPassed = profileChecks.every(check => check.passed);
+  const optionalItems = [
+    {
+      label: 'Delegated Organizers',
+      description: 'Allow others to manage events on your behalf',
+      hasValue: organizer?.delegatedOrganizerIds?.length > 0,
+      details: organizer?.delegatedOrganizerIds?.length > 0 ? `${organizer.delegatedOrganizerIds.length} delegates` : 'None'
+    },
+    {
+      label: 'Profile Image',
+      description: 'Logo or profile image for your organizer page',
+      hasValue: organizer?.images?.profile?.length > 0,
+      details: organizer?.images?.profile?.length > 0 ? 'Uploaded' : 'Not uploaded'
+    }
+  ];
+
+  const allMandatoryPassed = mandatoryChecks.every(check => check.passed);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -173,92 +190,142 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         </Alert>
       )}
 
-      {/* Profile Checklist */}
+      {/* Mandatory Requirements */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
-          <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Typography variant="subtitle1">
-              Profile Requirements
-            </Typography>
+          <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+            Mandatory Requirements
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            All items must be completed before enabling your profile
+          </Typography>
+          <List dense>
+            {mandatoryChecks.map((check, index) => (
+              <ListItem key={index}>
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  {check.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={check.label}
+                  secondary={check.details}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </CardContent>
+      </Card>
+
+      {/* Enable Switch */}
+      <Card 
+        elevation={2} 
+        sx={{ 
+          mb: 3, 
+          bgcolor: isEnabled ? 'success.light' : 'grey.100',
+          opacity: allMandatoryPassed ? 1 : 0.7
+        }}
+      >
+        <CardContent>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Profile Activation
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {isEnabled 
+                  ? "Your profile is active - You can create and manage tango events"
+                  : allMandatoryPassed 
+                    ? "Enable your profile to start creating events"
+                    : "Complete all mandatory requirements to enable"
+                }
+              </Typography>
+            </Box>
             <FormControlLabel
               control={
                 <Switch 
                   checked={isEnabled} 
                   onChange={(e) => setIsEnabled(e.target.checked)} 
                   color="primary"
-                  disabled={!allChecksPassed}
+                  disabled={!allMandatoryPassed}
+                  size="large"
                 />
               }
-              label={
-                <Typography variant="body2">
-                  {isEnabled ? "Enabled" : "Disabled"}
-                </Typography>
-              }
+              label={isEnabled ? "Enabled" : "Disabled"}
+              labelPlacement="bottom"
             />
           </Box>
-          <List dense>
-            {profileChecks.map((check, index) => (
-              <ListItem key={index}>
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {check.icon}
-                </ListItemIcon>
-                <ListItemText primary={check.label} />
-              </ListItem>
-            ))}
-          </List>
-          {!allChecksPassed && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              All requirements must be met before you can enable your organizer profile.
-            </Alert>
-          )}
-          {allChecksPassed && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              All requirements met! You can now enable your organizer profile to create events.
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
-      <Divider sx={{ my: 3 }} />
+      {/* Optional/Recommended Items */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+            <RecommendIcon color="primary" sx={{ mr: 1 }} />
+            <Typography variant="subtitle1" fontWeight="bold">
+              Optional & Recommended
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Enhance your profile with these additional features
+          </Typography>
+          <List dense>
+            {optionalItems.map((item, index) => (
+              <ListItem key={index}>
+                <ListItemText 
+                  primary={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      {item.label}
+                      <Chip 
+                        label={item.details} 
+                        size="small"
+                        color={item.hasValue ? "primary" : "default"}
+                        variant={item.hasValue ? "filled" : "outlined"}
+                      />
+                    </Box>
+                  }
+                  secondary={item.description}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </CardContent>
+      </Card>
 
       {/* Search Engine Visibility */}
-      <Grid container spacing={3}>
-
-        <Grid item xs={12}>
-          <Card elevation={1} sx={{ p: 3 }}>
-            <Typography variant="subtitle2" gutterBottom color="text.secondary">
-              Search Engine Visibility
+      <Card elevation={1} sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle2" gutterBottom color="text.secondary">
+            Search Engine Visibility
+          </Typography>
+          
+          <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
+            <Typography variant="body1">
+              Searchable Profile
             </Typography>
-            
-            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Typography variant="body1">
-                Searchable Profile
-              </Typography>
-              <Box display="flex" alignItems="center">
-                <Chip 
-                  label={wantRender ? "Yes" : "No"} 
-                  color={wantRender ? "primary" : "default"}
-                  size="small"
-                />
-                <Tooltip title="Manage this setting in the 'Name' tab">
-                  <IconButton size="small" sx={{ ml: 1 }}>
-                    <InfoIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+            <Box display="flex" alignItems="center">
+              <Chip 
+                label={wantRender ? "Yes" : "No"} 
+                color={wantRender ? "primary" : "default"}
+                size="small"
+              />
+              <Tooltip title="Manage this setting in the 'Name' tab">
+                <IconButton size="small" sx={{ ml: 1 }}>
+                  <InfoIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              {wantRender 
-                ? "Your organizer page appears in search results and can be found by the community"
-                : "Your profile is hidden from search engines and public listings"
-              }
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-              To change this setting, go to the "Name" tab
-            </Typography>
-          </Card>
-        </Grid>
-      </Grid>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {wantRender 
+              ? "Your organizer page appears in search results and can be found by the community"
+              : "Your profile is hidden from search engines and public listings"
+            }
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            To change this setting, go to the "Name" tab
+          </Typography>
+        </CardContent>
+      </Card>
 
       {/* Data Source Info */}
       <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
@@ -291,6 +358,10 @@ RegionalOrganizersStatus.propTypes = {
     description: PropTypes.string,
     isEnabled: PropTypes.bool,
     wantRender: PropTypes.bool,
+    delegatedOrganizerIds: PropTypes.array,
+    images: PropTypes.shape({
+      profile: PropTypes.array,
+    }),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
 };
