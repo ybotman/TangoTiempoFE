@@ -10,17 +10,47 @@ This document tracks the implementation of the automated organizer application w
 
 ### 1. Data Architecture
 - **Two Collections Strategy**: 
-  - `userLogins`: Manages account-level settings (ROE approval, enabled status, allowed cities)
-  - `organizers`: Manages public profile information (name, description, address, etc.)
+  - `userLogins.regionalOrganizerInfo`: Manages account-level settings
+    - `isApproved`: ROE acceptance status (controlled by system upon ROE acceptance)
+    - `isEnabled`: AI/Admin enable status (future feature for AI control)
+    - `isActive`: Account active status
+    - `organizerId`: Link to organizers collection
+    - `allowedMasteredCityIds`: Cities the organizer can operate in
+    - `ApprovalDate`: When ROE was accepted
+  - `organizers`: Manages public profile information
+    - `isEnabled`: Organizer's own enable/disable toggle (controlled by organizer)
+    - `fullName`, `shortName`, `description`: Public profile info
+    - `organizerTypes`: Event types (isEventOrganizer, isVenue, isTeacher, etc.)
+    - `publicContactInfo`: Address and contact details
+    - `wantRender`: Search engine visibility
+    - `isVisible`: Profile visibility to other users
   - Each tab in the Regional Organizer Settings modal is responsible for one collection only
 
-### 2. Regional Organizer Application Flow
+### 2. Understanding the Two isEnabled Attributes
+
+**IMPORTANT**: There are two different `isEnabled` attributes serving different purposes:
+
+1. **userLogins.regionalOrganizerInfo.isEnabled** (AI-Enabled)
+   - Purpose: Future AI/Admin control mechanism
+   - Controlled by: System administrators or AI automation
+   - Currently: Always set to `true` upon ROE acceptance
+   - Future use: Will allow AI or admins to disable organizers for violations
+
+2. **organizers.isEnabled** (Organizer-Enabled)  
+   - Purpose: Organizer's own on/off switch for their profile
+   - Controlled by: The organizer themselves via Status tab
+   - Current use: Must be manually enabled by organizer after profile completion
+   - Effect: Controls whether the organizer can create events
+
+Both must be `true` for an organizer to be fully functional (future state).
+
+### 3. Regional Organizer Application Flow
 1. User clicks "Apply" button in YourStatusTab
 2. ROE modal appears with Argentine Tango specific rules
 3. Upon acceptance, user is auto-approved and organizer record is created
 4. User is directed to complete their profile in Organizer Settings
 
-### 3. Tab Organization in Regional Organizer Settings
+### 4. Tab Organization in Regional Organizer Settings
 - **Status Tab** (First/Default): Profile requirements checklist and enable toggle
 - **Settings Tab**: Account settings and city selection
 - **Name Tab**: Public profile information

@@ -114,5 +114,5 @@ export const useUsers = () => {
     }
   }, [fetchUserData, user?.uid]);
 
-  return { userData, loading, updateUserData };
+  return { userData, loading, updateUserData, refreshUserData: fetchUserData };
 };

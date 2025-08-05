@@ -163,7 +163,10 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
 
             <Box sx={{ marginTop: 2 }}>
-              <Typography variant="subtitle1">Select Role:</Typography>
+              <Typography variant="subtitle1">Settings</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Choose your active role
+              </Typography>
               <FormControl component="fieldset">
                 <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                   {orderedUserRoles.map((role) => (

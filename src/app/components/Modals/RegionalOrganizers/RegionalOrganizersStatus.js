@@ -56,7 +56,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
 
   // Get values from both collections
   const roInfo = userData?.regionalOrganizerInfo || {};
-  const email = userData?.email || 'Not available';
+  const email = user?.email || 'Not available';
   const firebaseUserId = userData?.firebaseUserId || 'Not available';
   const isApprovedFromUserLogin = roInfo.isApproved || false;
   const isActiveFromUserLogin = roInfo.isActive || false;

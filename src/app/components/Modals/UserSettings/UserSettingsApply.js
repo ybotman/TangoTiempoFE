@@ -1,7 +1,10 @@
 // UserSettingsApply.js
 'use client';
-import React, { useState, useMemo } from 'react';
-import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Chip, Divider } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import InfoIcon from '@mui/icons-material/Info';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -14,7 +17,7 @@ const UserSettingsApply = () => {
 
   const { userData, updateUserData, loading: userDataLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
-  const { createOrganizer } = useOrganizers();
+  const { createOrganizer, fetchOrganizerById, organizer } = useOrganizers();
   const { logRoleChange, logActivity } = useActivityLogger();
 
   const [applicationStatus, setApplicationStatus] = useState('idle');
@@ -48,7 +51,16 @@ const UserSettingsApply = () => {
 
   // Safe access to nested properties with defaults
   const isApproved = userData?.regionalOrganizerInfo?.isApproved || false;
+  const isEnabled = userData?.regionalOrganizerInfo?.isEnabled || false;
   const hasOrganizerId = Boolean(userData?.regionalOrganizerInfo?.organizerId);
+  const organizerId = userData?.regionalOrganizerInfo?.organizerId;
+
+  // Fetch organizer data if organizerId exists
+  useEffect(() => {
+    if (organizerId) {
+      fetchOrganizerById(organizerId);
+    }
+  }, [organizerId, fetchOrganizerById]);
 
   const handleApply = async () => {
     // Don't proceed if data is loading or missing
@@ -268,6 +280,185 @@ const UserSettingsApply = () => {
         <Typography variant="body2" color="textSecondary">
           You have successfully applied as a Regional Organizer.
         </Typography>
+      )}
+
+      {/* Show organizer status and types if user has an organizer ID */}
+      {!isLoading && hasOrganizerId && (
+        <>
+          <Divider sx={{ my: 3 }} />
+          
+          {/* Organizer Status Section */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+              Organizer Status
+            </Typography>
+            
+            {/* Admin/AI Controls */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" fontWeight="medium" color="primary" sx={{ mb: 1 }}>
+                Admin/AI Controls
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', pl: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {isApproved ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                  <Typography variant="body2">
+                    <strong>Approved:</strong> {isApproved ? 'Yes' : 'No'}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {isEnabled ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                  <Typography variant="body2">
+                    <strong>AI-Enabled:</strong> {isEnabled ? 'Yes' : 'No'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+            
+            {/* Organizer Controls */}
+            <Box>
+              <Typography variant="body2" fontWeight="medium" color="secondary" sx={{ mb: 1 }}>
+                Organizer Controls
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', pl: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {organizer?.isEnabled ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                  <Typography variant="body2">
+                    <strong>Organizer-Enabled:</strong> {organizer?.isEnabled ? 'Yes' : 'No'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* Organizer Types Section */}
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+              Organizer Types
+            </Typography>
+            
+            {/* Column Headers */}
+            <Box sx={{ display: 'flex', gap: 2, mb: 2, pb: 1, borderBottom: 1, borderColor: 'divider' }}>
+              <Typography variant="body2" fontWeight="bold" sx={{ flex: 1 }}>
+                Type
+              </Typography>
+              <Typography variant="body2" fontWeight="bold" sx={{ width: 80, textAlign: 'center' }}>
+                Apply
+              </Typography>
+              <Typography variant="body2" fontWeight="bold" sx={{ width: 80, textAlign: 'center', opacity: 0.5 }} color="text.disabled">
+                Approved
+              </Typography>
+              <Typography variant="body2" fontWeight="bold" sx={{ width: 80, textAlign: 'center', opacity: 0.5 }} color="text.disabled">
+                Enabled
+              </Typography>
+            </Box>
+            
+            {/* Type Rows */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {/* Event Organizer */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  Event Organizer
+                </Typography>
+                <Box sx={{ width: 80, textAlign: 'center' }}>
+                  {organizer?.organizerTypes?.isEventOrganizer ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+              </Box>
+              
+              {/* Venue */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  Venue
+                </Typography>
+                <Box sx={{ width: 80, textAlign: 'center' }}>
+                  {organizer?.organizerTypes?.isVenue ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+              </Box>
+              
+              {/* Teacher */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  Teacher
+                </Typography>
+                <Box sx={{ width: 80, textAlign: 'center' }}>
+                  {organizer?.organizerTypes?.isTeacher ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+              </Box>
+              
+              {/* Maestro */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  Maestro
+                </Typography>
+                <Box sx={{ width: 80, textAlign: 'center' }}>
+                  {organizer?.organizerTypes?.isMaestro ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+              </Box>
+              
+              {/* DJ */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  DJ
+                </Typography>
+                <Box sx={{ width: 80, textAlign: 'center' }}>
+                  {organizer?.organizerTypes?.isDJ ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+              </Box>
+              
+              {/* Orchestra */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  Orchestra
+                </Typography>
+                <Box sx={{ width: 80, textAlign: 'center' }}>
+                  {organizer?.organizerTypes?.isOrchestra ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
+                  <CancelIcon color="disabled" fontSize="small" />
+                </Box>
+              </Box>
+            </Box>
+            
+            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                Approved and Enabled columns coming in
+              </Typography>
+              <Chip label="v2.x" size="small" sx={{ opacity: 0.7 }} />
+            </Box>
+          </Paper>
+        </>
       )}
 
       {/* Terms modal */}

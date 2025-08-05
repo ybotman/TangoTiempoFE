@@ -30,7 +30,7 @@ const modalStyle = {
 const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { userData, loading, error, updateUserData } = useUsers();
+  const { userData, loading, error, updateUserData, refreshUserData } = useUsers();
   const [currentTab, setCurrentTab] = useState('locationPrefs');
 
   // Map tab names to actual tab values
@@ -55,6 +55,14 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
       setCurrentTab(mappedTab);
     }
   }, [defaultTab, open]);
+
+  // Refresh user data when modal opens
+  useEffect(() => {
+    if (open && refreshUserData) {
+      console.log('[UserSettingsModal] Modal opened, refreshing user data');
+      refreshUserData();
+    }
+  }, [open, refreshUserData]);
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 

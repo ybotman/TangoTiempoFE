@@ -50,24 +50,35 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
   // Load user's existing preferences or temporary location
   useEffect(() => {
+    console.log('[LocationPrefs] useEffect triggered, userData:', userData);
+    console.log('[LocationPrefs] userData.localUserInfo:', userData?.localUserInfo);
+    console.log('[LocationPrefs] userData.localUserInfo.userDefaults:', userData?.localUserInfo?.userDefaults);
+    
     // First check if logged-in user has preferences
     if (userData?.localUserInfo?.userDefaults) {
       const defaults = userData.localUserInfo.userDefaults;
       
-      console.log('Loading user defaults:', defaults);
+      console.log('[LocationPrefs] Loading user defaults:', defaults);
+      console.log('[LocationPrefs] defaultCenterLocation:', defaults.defaultCenterLocation);
       
       setZoomRange(defaults.defaultZoomRange || 50);
       
       if (defaults.defaultCenterLocation) {
-        setCenterLat(defaults.defaultCenterLocation.latitude?.toString() || '');
-        setCenterLng(defaults.defaultCenterLocation.longitude?.toString() || '');
+        setCenterLat(defaults.defaultCenterLocation.lat?.toString() || '');
+        setCenterLng(defaults.defaultCenterLocation.lng?.toString() || '');
         setCoordinatesLoaded(true);
+        console.log('[LocationPrefs] Loaded coordinates:', {
+          lat: defaults.defaultCenterLocation.lat,
+          lng: defaults.defaultCenterLocation.lng
+        });
+      } else {
+        console.log('[LocationPrefs] No defaultCenterLocation found in defaults');
       }
       
       // Store original values for change detection
       setOriginalValues({
-        centerLat: defaults.defaultCenterLocation?.latitude?.toString() || '',
-        centerLng: defaults.defaultCenterLocation?.longitude?.toString() || '',
+        centerLat: defaults.defaultCenterLocation?.lat?.toString() || '',
+        centerLng: defaults.defaultCenterLocation?.lng?.toString() || '',
         zoomRange: defaults.defaultZoomRange || 50
       });
     } else if (!isLoggedIn) {
