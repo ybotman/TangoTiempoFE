@@ -120,39 +120,51 @@ This document tracks the implementation of the automated organizer application w
 3. Test complete workflow with fresh user account
 4. Verify venue selection respects selected cities
 
-### Tab Reorganization Plan (2025-01-05)
+### Tab Reorganization (Completed 2025-01-05)
 
-#### Major Changes
-1. **Status Tab** - Becomes read-only dashboard
-   - Move account settings display here from Settings
-   - Show all status indicators (mandatory and optional)
-   - Keep enable/disable toggle for organizer profile
-   - Display: delegated count, profile image, crawlable, visible, address
+#### ✅ Completed Changes
+1. **Status Tab** - Now a read-only dashboard
+   - ✅ Moved account information from Settings (email, Firebase ID, organizer ID, approval date)
+   - ✅ Shows all mandatory requirements checklist
+   - ✅ Keeps enable/disable toggle for organizer profile
+   - ✅ Added optional status indicators section showing:
+     - Delegated organizers count
+     - Profile image status
+     - Search engine visibility
+     - Profile visibility
+     - Address completeness
 
-2. **Settings Tab** - Becomes control center for all editable items
-   - Cities selection (keep existing)
-   - Visible toggle (move from elsewhere)
-   - Crawlable/searchable toggle (move from Name tab)
-   - Delegated organizers management (move from Delegated tab)
+2. **Settings Tab** - Now control center for all editable items
+   - ✅ Removed Private Information section (moved to Status)
+   - ✅ Removed System Status section (moved to Status)
+   - ✅ City selection with active/inactive toggle (existing)
+   - ✅ Profile Visible toggle (controls organizers.isVisible)
+   - ✅ Search Engine Visible toggle (controls organizers.wantRender)
+   - ✅ Delegated organizers management (moved from Delegated tab)
+     - View current delegates with remove option
+     - Add new delegates from dropdown
 
-3. **Name/Address Tab** - Merge into single tab
+3. **Apply Button Enhancement**
+   - ✅ Set `regionalOrganizerInfo.isEnabled = true` (for future AI control)
+   - ✅ Keeps existing `isApproved = true` logic
+
+#### 🚧 Pending Changes
+1. **Name/Address Tab** - Need to merge into single tab
    - Combine Name and Address tabs
-   - Remove crawlable toggle (move to Settings)
+   - Remove crawlable toggle (already moved to Settings)
    - Keep all name and address fields
 
-4. **Remove Tabs**
-   - Delegated tab (functionality moves to Settings)
+2. **Remove Tabs**
+   - Delegated tab (functionality already moved to Settings)
 
-5. **Apply Button Enhancement**
-   - Set `regionalOrganizerInfo.isEnabled = true` (for future AI control)
-   - Keep existing `isApproved = true` logic
-
-#### New Tab Order
-1. Status (read-only dashboard)
-2. Settings (all controls)
-3. Name & Address (merged)
-4. Types
-5. Profile Images
+#### Current Tab Order
+1. Status (read-only dashboard) ✅
+2. Settings (all controls) ✅
+3. Name (needs merge with Address) 🚧
+4. Address (needs merge with Name) 🚧
+5. Types
+6. Delegated (needs removal) 🚧
+7. Profile Images
 
 ### City Display Hierarchical Solution (2025-01-05)
 

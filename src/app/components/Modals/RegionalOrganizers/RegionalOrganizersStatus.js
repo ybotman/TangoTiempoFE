@@ -28,6 +28,12 @@ import InfoIcon from '@mui/icons-material/Info';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import LockIcon from '@mui/icons-material/Lock';
 import RecommendIcon from '@mui/icons-material/Recommend';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import SearchIcon from '@mui/icons-material/Search';
+import GroupIcon from '@mui/icons-material/Group';
+import ImageIcon from '@mui/icons-material/Image';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useMasteredCities } from '@/hooks/useMasteredCities';
@@ -39,11 +45,9 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
   
   // State for switchable attributes
   const [isEnabled, setIsEnabled] = useState(false);
-  const [wantRender, setWantRender] = useState(false);
   
   // Initial values for comparison
   const [initialIsEnabled, setInitialIsEnabled] = useState(false);
-  const [initialWantRender, setInitialWantRender] = useState(false);
   
   // UI state
   const [errorMessage, setErrorMessage] = useState('');
@@ -52,21 +56,36 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
 
   // Get values from both collections
   const roInfo = userData?.regionalOrganizerInfo || {};
+  const email = userData?.email || 'Not available';
+  const firebaseUserId = userData?.firebaseUserId || 'Not available';
   const isApprovedFromUserLogin = roInfo.isApproved || false;
   const isActiveFromUserLogin = roInfo.isActive || false;
   const isEnabledFromUserLogin = roInfo.isEnabled || false;
   const allowedCityIds = roInfo.allowedMasteredCityIds || [];
+  const approvalDate = roInfo.ApprovalDate ? new Date(roInfo.ApprovalDate).toLocaleDateString() : 'Not set';
+
+  // Organizer collection values
+  const wantRender = organizer?.wantRender || false;
+  const isVisible = organizer?.isVisible !== false; // Default true
+  const delegatedCount = organizer?.delegatedOrganizerIds?.length || 0;
+  const hasProfileImage = organizer?.images?.profile?.length > 0;
+  
+  // Address completeness check
+  const address = organizer?.publicContactInfo?.address || {};
+  const hasCompleteAddress = Boolean(
+    address.street1 && 
+    address.city && 
+    address.state && 
+    address.postalCode
+  );
 
   useEffect(() => {
     if (organizer && userData) {
-      // Sync from both sources - userLogin takes precedence for shared fields
-      setIsEnabled(isEnabledFromUserLogin || organizer.isEnabled || false);
-      setWantRender(organizer.wantRender || false);
-      
-      setInitialIsEnabled(isEnabledFromUserLogin || organizer.isEnabled || false);
-      setInitialWantRender(organizer.wantRender || false);
+      // Sync isEnabled from organizer collection
+      setIsEnabled(organizer.isEnabled || false);
+      setInitialIsEnabled(organizer.isEnabled || false);
     }
-  }, [organizer, userData, isEnabledFromUserLogin]);
+  }, [organizer, userData]);
 
   const isSaveDisabled = isEnabled === initialIsEnabled;
 
@@ -133,23 +152,8 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       label: 'At Least One City Selected',
       passed: allowedCityIds.length > 0,
       icon: allowedCityIds.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
-      details: allowedCityIds.length > 0 ? `${allowedCityIds.length} cities selected` : null
+      details: allowedCityIds.length > 0 ? `${allowedCityIds.length} cities: ${getCityDisplayNames().join(', ')}` : null
     },
-  ];
-
-  const optionalItems = [
-    {
-      label: 'Delegated Organizers',
-      description: 'Allow others to manage events on your behalf',
-      hasValue: organizer?.delegatedOrganizerIds?.length > 0,
-      details: organizer?.delegatedOrganizerIds?.length > 0 ? `${organizer.delegatedOrganizerIds.length} delegates` : 'None'
-    },
-    {
-      label: 'Profile Image',
-      description: 'Logo or profile image for your organizer page',
-      hasValue: organizer?.images?.profile?.length > 0,
-      details: organizer?.images?.profile?.length > 0 ? 'Uploaded' : 'Not uploaded'
-    }
   ];
 
   const allMandatoryPassed = mandatoryChecks.every(check => check.passed);
@@ -157,7 +161,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Profile Status & Visibility
+        Profile Status Dashboard
       </Typography>
 
       {errorMessage && (
@@ -189,6 +193,73 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           App restart required to activate your organizer role. Please restart the app after saving.
         </Alert>
       )}
+
+      {/* Account Information - Moved from Settings */}
+      <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+            <AccountCircleIcon sx={{ mr: 1 }} />
+            <Typography variant="subtitle1" fontWeight="bold">
+              Account Information
+            </Typography>
+          </Box>
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary">Email</Typography>
+              <Typography variant="body1">{email}</Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary">Firebase ID</Typography>
+              <Typography variant="body1" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.85rem',
+                wordBreak: 'break-all' 
+              }}>
+                {firebaseUserId}
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary">Organizer ID</Typography>
+              <Typography variant="body1" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.85rem' 
+              }}>
+                {organizerId || 'Not set'}
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary">Approval Date</Typography>
+              <Typography variant="body1">{approvalDate}</Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="body1">ROE Approved</Typography>
+                <Chip 
+                  label={isApprovedFromUserLogin ? "Yes" : "No"} 
+                  color={isApprovedFromUserLogin ? "success" : "default"}
+                  size="small"
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={6}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="body1">Account Active</Typography>
+                <Chip 
+                  label={isActiveFromUserLogin ? "Yes" : "No"} 
+                  color={isActiveFromUserLogin ? "success" : "default"}
+                  size="small"
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Mandatory Requirements */}
       <Card variant="outlined" sx={{ mb: 3 }}>
@@ -256,74 +327,113 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         </CardContent>
       </Card>
 
-      {/* Optional/Recommended Items */}
+      {/* Optional Status Indicators */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
           <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
             <RecommendIcon color="primary" sx={{ mr: 1 }} />
             <Typography variant="subtitle1" fontWeight="bold">
-              Optional & Recommended
+              Optional Status & Features
             </Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Enhance your profile with these additional features
-          </Typography>
-          <List dense>
-            {optionalItems.map((item, index) => (
-              <ListItem key={index}>
+          
+          <Grid container spacing={2}>
+            {/* Delegated Organizers */}
+            <Grid item xs={12} sm={6}>
+              <ListItem>
+                <ListItemIcon>
+                  <GroupIcon />
+                </ListItemIcon>
                 <ListItemText 
-                  primary={
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {item.label}
-                      <Chip 
-                        label={item.details} 
-                        size="small"
-                        color={item.hasValue ? "primary" : "default"}
-                        variant={item.hasValue ? "filled" : "outlined"}
-                      />
-                    </Box>
-                  }
-                  secondary={item.description}
+                  primary="Delegated Organizers"
+                  secondary={`${delegatedCount} delegate${delegatedCount !== 1 ? 's' : ''}`}
+                />
+                <Chip 
+                  label={delegatedCount > 0 ? "Active" : "None"} 
+                  size="small"
+                  color={delegatedCount > 0 ? "primary" : "default"}
+                  variant={delegatedCount > 0 ? "filled" : "outlined"}
                 />
               </ListItem>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
+            </Grid>
 
-      {/* Search Engine Visibility */}
-      <Card elevation={1} sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle2" gutterBottom color="text.secondary">
-            Search Engine Visibility
-          </Typography>
-          
-          <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
-            <Typography variant="body1">
-              Searchable Profile
-            </Typography>
-            <Box display="flex" alignItems="center">
-              <Chip 
-                label={wantRender ? "Yes" : "No"} 
-                color={wantRender ? "primary" : "default"}
-                size="small"
-              />
-              <Tooltip title="Manage this setting in the 'Name' tab">
-                <IconButton size="small" sx={{ ml: 1 }}>
-                  <InfoIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {wantRender 
-              ? "Your organizer page appears in search results and can be found by the community"
-              : "Your profile is hidden from search engines and public listings"
-            }
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-            To change this setting, go to the "Name" tab
-          </Typography>
+            {/* Profile Image */}
+            <Grid item xs={12} sm={6}>
+              <ListItem>
+                <ListItemIcon>
+                  <ImageIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Profile Image"
+                  secondary="Logo or organizer image"
+                />
+                <Chip 
+                  label={hasProfileImage ? "Uploaded" : "Not set"} 
+                  size="small"
+                  color={hasProfileImage ? "primary" : "default"}
+                  variant={hasProfileImage ? "filled" : "outlined"}
+                />
+              </ListItem>
+            </Grid>
+
+            {/* Crawlable/Searchable */}
+            <Grid item xs={12} sm={6}>
+              <ListItem>
+                <ListItemIcon>
+                  <SearchIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Search Engine Visible"
+                  secondary="Appears in search results"
+                />
+                <Chip 
+                  label={wantRender ? "Yes" : "No"} 
+                  size="small"
+                  color={wantRender ? "primary" : "default"}
+                />
+              </ListItem>
+            </Grid>
+
+            {/* Visible */}
+            <Grid item xs={12} sm={6}>
+              <ListItem>
+                <ListItemIcon>
+                  <VisibilityIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Profile Visible"
+                  secondary="Others can see and select"
+                />
+                <Chip 
+                  label={isVisible ? "Yes" : "No"} 
+                  size="small"
+                  color={isVisible ? "primary" : "default"}
+                />
+              </ListItem>
+            </Grid>
+
+            {/* Address */}
+            <Grid item xs={12}>
+              <ListItem>
+                <ListItemIcon>
+                  <LocationOnIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Address Information"
+                  secondary={hasCompleteAddress ? 
+                    `${address.street1}, ${address.city}, ${address.state} ${address.postalCode}` : 
+                    "Not complete"
+                  }
+                />
+                <Chip 
+                  label={hasCompleteAddress ? "Complete" : "Incomplete"} 
+                  size="small"
+                  color={hasCompleteAddress ? "primary" : "default"}
+                  variant={hasCompleteAddress ? "filled" : "outlined"}
+                />
+              </ListItem>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -331,8 +441,8 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
           <InfoIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-          This tab manages profile visibility settings. For account-level settings, use the Settings tab.
-          Changes may require an app restart to take full effect.
+          This dashboard shows your complete organizer status. To edit settings, use the appropriate tabs.
+          Profile activation requires an app restart to take full effect.
         </Typography>
       </Box>
 
@@ -344,7 +454,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         sx={{ mt: 3 }}
         fullWidth
       >
-        Save Settings
+        Save Profile Status
       </Button>
     </Box>
   );
@@ -358,9 +468,19 @@ RegionalOrganizersStatus.propTypes = {
     description: PropTypes.string,
     isEnabled: PropTypes.bool,
     wantRender: PropTypes.bool,
+    isVisible: PropTypes.bool,
     delegatedOrganizerIds: PropTypes.array,
     images: PropTypes.shape({
       profile: PropTypes.array,
+    }),
+    publicContactInfo: PropTypes.shape({
+      address: PropTypes.shape({
+        street1: PropTypes.string,
+        street2: PropTypes.string,
+        city: PropTypes.string,
+        state: PropTypes.string,
+        postalCode: PropTypes.string,
+      }),
     }),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,

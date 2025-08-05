@@ -22,24 +22,50 @@ import {
   InputLabel,
   OutlinedInput,
   FormHelperText,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  CircularProgress,
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import LockIcon from '@mui/icons-material/Lock';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import SearchIcon from '@mui/icons-material/Search';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
+import GroupIcon from '@mui/icons-material/Group';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useMasteredCities } from '@/hooks/useMasteredCities';
+import { useOrganizers } from '@/hooks/useOrganizers';
+import axios from 'axios';
 
-const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
+const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
   const [includeInactive, setIncludeInactive] = useState(false);
   const { masteredCities, loading: citiesLoading } = useMasteredCities(includeInactive);
+  const { organizers } = useOrganizers();
   
   // State for editable fields
   const [selectedCityIds, setSelectedCityIds] = useState([]);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isCrawlable, setIsCrawlable] = useState(false);
+  const [delegatedOrganizerIds, setDelegatedOrganizerIds] = useState([]);
+  const [selectedDelegateId, setSelectedDelegateId] = useState('');
   
   // Initial values for comparison
   const [initialSelectedCityIds, setInitialSelectedCityIds] = useState([]);
+  const [initialIsVisible, setInitialIsVisible] = useState(true);
+  const [initialIsCrawlable, setInitialIsCrawlable] = useState(false);
+  const [initialDelegatedOrganizerIds, setInitialDelegatedOrganizerIds] = useState([]);
+  
+  // UI state for delegated organizers
+  const [delegatedOrganizers, setDelegatedOrganizers] = useState([]);
+  const [loadingDelegates, setLoadingDelegates] = useState(false);
   
   // UI state
   const [errorMessage, setErrorMessage] = useState('');
@@ -59,10 +85,54 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
       setSelectedCityIds(roInfo.allowedMasteredCityIds || []);
       setInitialSelectedCityIds(roInfo.allowedMasteredCityIds || []);
     }
-  }, [userData, roInfo.allowedMasteredCityIds]);
+    if (organizer) {
+      setIsVisible(organizer.isVisible !== false); // Default true
+      setInitialIsVisible(organizer.isVisible !== false);
+      setIsCrawlable(organizer.wantRender || false);
+      setInitialIsCrawlable(organizer.wantRender || false);
+      setDelegatedOrganizerIds(organizer.delegatedOrganizerIds || []);
+      setInitialDelegatedOrganizerIds(organizer.delegatedOrganizerIds || []);
+    }
+  }, [userData, roInfo.allowedMasteredCityIds, organizer]);
+  
+  // Fetch delegated organizer details
+  useEffect(() => {
+    const fetchDelegatedOrganizers = async () => {
+      if (!delegatedOrganizerIds.length) {
+        setDelegatedOrganizers([]);
+        return;
+      }
+      
+      setLoadingDelegates(true);
+      try {
+        const fetchedOrganizers = await Promise.all(
+          delegatedOrganizerIds.map(async (id) => {
+            if (!id) return null;
+            try {
+              const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${id}`);
+              return response.data;
+            } catch (error) {
+              console.error(`Failed to fetch organizer ${id}:`, error);
+              return null;
+            }
+          })
+        );
+        setDelegatedOrganizers(fetchedOrganizers.filter(org => org !== null));
+      } catch (error) {
+        console.error('Error fetching delegated organizers:', error);
+      } finally {
+        setLoadingDelegates(false);
+      }
+    };
+    
+    fetchDelegatedOrganizers();
+  }, [delegatedOrganizerIds]);
 
   const isSaveDisabled = 
-    JSON.stringify(selectedCityIds) === JSON.stringify(initialSelectedCityIds) ||
+    (JSON.stringify(selectedCityIds) === JSON.stringify(initialSelectedCityIds) &&
+    isVisible === initialIsVisible &&
+    isCrawlable === initialIsCrawlable &&
+    JSON.stringify(delegatedOrganizerIds) === JSON.stringify(initialDelegatedOrganizerIds)) ||
     saving;
 
   const handleSnackbarClose = () => {
@@ -83,6 +153,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
     setSaving(true);
     
     try {
+      // Update userLogins collection
       const updatedRegionalInfo = {
         ...roInfo,
         allowedMasteredCityIds: selectedCityIds
@@ -92,7 +163,19 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
         regionalOrganizerInfo: updatedRegionalInfo
       });
       
+      // Update organizers collection
+      await updateOrganizer(organizerId, {
+        isVisible,
+        wantRender: isCrawlable,
+        delegatedOrganizerIds
+      });
+      
+      // Update initial values
       setInitialSelectedCityIds(selectedCityIds);
+      setInitialIsVisible(isVisible);
+      setInitialIsCrawlable(isCrawlable);
+      setInitialDelegatedOrganizerIds(delegatedOrganizerIds);
+      
       setShowSuccessMessage(true);
     } catch (error) {
       console.error('Failed to update settings:', error);
@@ -106,11 +189,28 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
   const getCityById = (cityId) => {
     return masteredCities.find(city => city._id === cityId);
   };
+  
+  // Handle delegated organizer management
+  const handleAddDelegate = () => {
+    if (selectedDelegateId && !delegatedOrganizerIds.includes(selectedDelegateId)) {
+      setDelegatedOrganizerIds([...delegatedOrganizerIds, selectedDelegateId]);
+      setSelectedDelegateId('');
+    }
+  };
+  
+  const handleRemoveDelegate = (delegateId) => {
+    setDelegatedOrganizerIds(delegatedOrganizerIds.filter(id => id !== delegateId));
+  };
+  
+  // Get available organizers for delegation
+  const availableOrganizers = organizers?.filter(
+    org => org && org._id && org._id !== organizerId && !delegatedOrganizerIds.includes(org._id)
+  ) || [];
 
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Account Settings
+        Organizer Settings & Controls
       </Typography>
 
       {errorMessage && (
@@ -131,96 +231,70 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
         </Alert>
       </Snackbar>
 
-      {/* Private Information Section */}
-      <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
-        <CardContent>
-          <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
-            <LockIcon fontSize="small" sx={{ mr: 1 }} />
-            <Typography variant="subtitle1" fontWeight="bold">
-              Private Information (Not shown to public)
-            </Typography>
-          </Box>
-          
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Email</Typography>
-              <Typography variant="body1">{email}</Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Firebase ID</Typography>
-              <Typography variant="body1" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.85rem',
-                wordBreak: 'break-all' 
-              }}>
-                {firebaseUserId}
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Organizer ID</Typography>
-              <Typography variant="body1" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.85rem' 
-              }}>
-                {organizerId || 'Not set'}
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">Approval Date</Typography>
-              <Typography variant="body1">{approvalDate}</Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* System Status Section */}
+      {/* Visibility Controls Section */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">
-            System Status
+            Visibility Controls
           </Typography>
           
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={6}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body1">ROE Approved</Typography>
-                <Chip 
-                  label={isApproved ? "Yes" : "No"} 
-                  color={isApproved ? "success" : "default"}
-                  size="small"
-                />
-              </Box>
+            <Grid item xs={12} sm={6}>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={isVisible} 
+                    onChange={(e) => setIsVisible(e.target.checked)} 
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body1">Profile Visible</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Others can see and select you as an organizer
+                    </Typography>
+                  </Box>
+                }
+                labelPlacement="end"
+              />
             </Grid>
             
-            <Grid item xs={6}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body1">Account Active</Typography>
-                <Chip 
-                  label={isActive ? "Yes" : "No"} 
-                  color={isActive ? "success" : "default"}
-                  size="small"
-                />
-              </Box>
+            <Grid item xs={12} sm={6}>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={isCrawlable} 
+                    onChange={(e) => setIsCrawlable(e.target.checked)} 
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body1">Search Engine Visible</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Profile appears in search results
+                    </Typography>
+                  </Box>
+                }
+                labelPlacement="end"
+              />
             </Grid>
           </Grid>
         </CardContent>
       </Card>
 
-      <Divider sx={{ my: 3 }} />
-
-      {/* Editable Settings Section */}
-      <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-        Editable Settings
-      </Typography>
-
 
       {/* City Selection */}
-      <Card elevation={1} sx={{ p: 3 }}>
-        {/* Active/Inactive Toggle */}
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Card elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+          <Box display="flex" alignItems="center">
+            <LocationCityIcon sx={{ mr: 1 }} />
+            <Typography variant="subtitle1" fontWeight="bold">
+              City Selection
+            </Typography>
+          </Box>
+          {/* Active/Inactive Toggle */}
           <FormControlLabel
             control={
               <Switch
@@ -230,11 +304,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
                 size="small"
               />
             }
-            label={
-              <Typography variant="body2">
-                Show inactive cities
-              </Typography>
-            }
+            label="Show inactive cities"
           />
         </Box>
         
@@ -305,6 +375,79 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
         )}
       </Card>
 
+      {/* Delegated Organizers Section */}
+      <Card elevation={1} sx={{ mt: 3, p: 3 }}>
+        <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+          <GroupIcon sx={{ mr: 1 }} />
+          <Typography variant="subtitle1" fontWeight="bold">
+            Delegated Organizers
+          </Typography>
+        </Box>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Allow other organizers to create events on your behalf
+        </Typography>
+        
+        {/* Current delegates list */}
+        {loadingDelegates ? (
+          <Box display="flex" justifyContent="center" sx={{ py: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : delegatedOrganizers.length > 0 ? (
+          <List dense sx={{ mb: 2 }}>
+            {delegatedOrganizers.map((delegate) => delegate && (
+              <ListItem key={delegate._id}>
+                <ListItemText 
+                  primary={delegate.fullName || 'Unknown'}
+                  secondary={delegate.shortName}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton 
+                    edge="end" 
+                    aria-label="delete"
+                    onClick={() => handleRemoveDelegate(delegate._id)}
+                    size="small"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            No delegated organizers assigned
+          </Typography>
+        )}
+        
+        {/* Add delegate controls */}
+        <Box display="flex" gap={2} alignItems="center">
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 200, flex: 1 }}>
+            <InputLabel id="delegate-select-label">Select Organizer</InputLabel>
+            <Select
+              labelId="delegate-select-label"
+              value={selectedDelegateId}
+              onChange={(e) => setSelectedDelegateId(e.target.value)}
+              label="Select Organizer"
+            >
+              {availableOrganizers.map((org) => (
+                <MenuItem key={org._id} value={org._id}>
+                  {org.fullName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant="outlined"
+            startIcon={<PersonAddIcon />}
+            onClick={handleAddDelegate}
+            disabled={!selectedDelegateId}
+          >
+            Add
+          </Button>
+        </Box>
+      </Card>
+
       {/* Info Box */}
       <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
@@ -332,7 +475,11 @@ RegionalOrganizersSettings.propTypes = {
   organizerId: PropTypes.string.isRequired,
   organizer: PropTypes.shape({
     _id: PropTypes.string,
+    isVisible: PropTypes.bool,
+    wantRender: PropTypes.bool,
+    delegatedOrganizerIds: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
+  updateOrganizer: PropTypes.func.isRequired,
 };
 
 export default RegionalOrganizersSettings;

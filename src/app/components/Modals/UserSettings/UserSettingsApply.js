@@ -126,8 +126,11 @@ const UserSettingsApply = () => {
         const updatedRegionalInfo = {
           organizerId: newOrganizer._id,
           isApproved: true,  // Auto-approved after ROE acceptance
-          isEnabled: false,  // Requires manual enable for safety
+          isEnabled: true,   // Set true for future AI control (can be disabled later)
           isActive: true,
+          ApprovalDate: new Date(),
+          allowedMasteredCityIds: [],
+          allowedMasteredDivisionIds: []
         };
 
         await updateUserData({
