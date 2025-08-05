@@ -92,7 +92,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
         regionalOrganizerInfo: updatedRegionalInfo
       });
       
-      setInitialIsEnabled(isEnabled);
       setInitialSelectedCityIds(selectedCityIds);
       setShowSuccessMessage(true);
     } catch (error) {
