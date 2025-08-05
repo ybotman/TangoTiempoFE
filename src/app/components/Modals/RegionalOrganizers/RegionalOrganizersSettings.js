@@ -32,7 +32,8 @@ import { useMasteredCities } from '@/hooks/useMasteredCities';
 const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
-  const { masteredCities, loading: citiesLoading } = useMasteredCities();
+  const [includeInactive, setIncludeInactive] = useState(false);
+  const { masteredCities, loading: citiesLoading } = useMasteredCities(includeInactive);
   
   // State for editable fields
   const [selectedCityIds, setSelectedCityIds] = useState([]);
@@ -100,12 +101,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
     } finally {
       setSaving(false);
     }
-  };
-
-  // Format city display name
-  const getCityDisplayName = (city) => {
-    if (!city) return '';
-    return `${city.stateAbbr || ''} - ${city.cityName || city.city || ''}`.trim();
   };
 
   // Get city object by ID
@@ -225,6 +220,25 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
 
       {/* City Selection */}
       <Card elevation={1} sx={{ p: 3 }}>
+        {/* Active/Inactive Toggle */}
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={includeInactive}
+                onChange={(e) => setIncludeInactive(e.target.checked)}
+                color="primary"
+                size="small"
+              />
+            }
+            label={
+              <Typography variant="body2">
+                Show inactive cities
+              </Typography>
+            }
+          />
+        </Box>
+        
         <FormControl fullWidth>
           <InputLabel id="city-select-label">Allowed Cities for Venues</InputLabel>
           <Select
@@ -233,27 +247,55 @@ const RegionalOrganizersSettings = ({ organizerId, organizer }) => {
             value={selectedCityIds}
             onChange={handleCityChange}
             input={<OutlinedInput label="Allowed Cities for Venues" />}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => {
-                  const city = getCityById(value);
-                  return (
-                    <Chip key={value} label={getCityDisplayName(city)} size="small" />
-                  );
-                })}
-              </Box>
-            )}
+            renderValue={(selected) => {
+              if (selected.length === 0) {
+                return <em>Select cities...</em>;
+              }
+              return (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => {
+                    const city = getCityById(value);
+                    if (!city) return null;
+                    // Show abbreviated version in the selection box
+                    const shortName = city.cityName + (city.active ? '' : ' (inactive)');
+                    return (
+                      <Chip key={value} label={shortName} size="small" />
+                    );
+                  })}
+                </Box>
+              );
+            }}
             disabled={citiesLoading}
           >
             {masteredCities.map((city) => (
-              <MenuItem key={city._id} value={city._id}>
-                {getCityDisplayName(city)}
+              <MenuItem 
+                key={city._id} 
+                value={city._id}
+                sx={{
+                  fontSize: '0.875rem',
+                  color: city.active ? 'text.primary' : 'text.disabled'
+                }}
+              >
+                {city.displayName}
+                {!city.active && (
+                  <Typography 
+                    component="span" 
+                    variant="caption" 
+                    sx={{ ml: 1, color: 'text.disabled' }}
+                  >
+                    (inactive)
+                  </Typography>
+                )}
               </MenuItem>
             ))}
           </Select>
           <FormHelperText>
             Select up to 4 cities where you can choose venues when creating events.
-            Format: State - City (e.g., "OR - Portland", "ME - Portland")
+            {masteredCities.length > 0 && (
+              <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                Format: Country - Region - Division - City
+              </Typography>
+            )}
           </FormHelperText>
         </FormControl>
         

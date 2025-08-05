@@ -34,7 +34,7 @@ import { useMasteredCities } from '@/hooks/useMasteredCities';
 const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
-  const { masteredCities } = useMasteredCities();
+  const { masteredCities } = useMasteredCities(true); // Include inactive to show selected cities
   
   // State for switchable attributes
   const [isEnabled, setIsEnabled] = useState(false);
@@ -102,7 +102,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     return allowedCityIds
       .map(cityId => {
         const city = masteredCities.find(c => c._id === cityId);
-        return city ? `${city.stateAbbr} - ${city.cityName || city.city}` : null;
+        return city ? city.cityName + (city.active ? '' : ' (inactive)') : null;
       })
       .filter(name => name !== null);
   };
