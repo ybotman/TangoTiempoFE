@@ -13,6 +13,7 @@ import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 import LocationPromptManager from '@/components/LocationPromptManager';
 import MapCenterModal from '@/components/Modals/misc/MapCenterModal';
+import UserLocationLoader from '@/components/UserLocationLoader';
 
 // Wrapper component to render MapCenterModal with context access
 const MapCenterModalWrapper = () => {
@@ -40,6 +41,7 @@ const Providers = ({ children }) => {
             <GeoLocationProvider>
               <EventDiscoveryProvider>
                 <MasteredLocationLogger />
+                <UserLocationLoader />
                 <LocationPromptManager />
                 <MapCenterModalWrapper />
                 {children}

@@ -32,7 +32,6 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
   const circleRef = useRef(null);
   
   // State for location preferences - FORCE MAP CENTER MODE
-  const useCenterLocation = true; // FORCED TO TRUE
   const [centerLat, setCenterLat] = useState('');
   const [centerLng, setCenterLng] = useState('');
   const [zoomRange, setZoomRange] = useState(50);
@@ -50,9 +49,12 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
   // Load user's existing preferences or temporary location
   useEffect(() => {
-    console.log('[LocationPrefs] useEffect triggered, userData:', userData);
-    console.log('[LocationPrefs] userData.localUserInfo:', userData?.localUserInfo);
-    console.log('[LocationPrefs] userData.localUserInfo.userDefaults:', userData?.localUserInfo?.userDefaults);
+    console.log('[LocationPrefs] useEffect triggered:', {
+      hasUserData: !!userData,
+      hasLocalUserInfo: !!userData?.localUserInfo,
+      hasUserDefaults: !!userData?.localUserInfo?.userDefaults,
+      userData: userData
+    });
     
     // First check if logged-in user has preferences
     if (userData?.localUserInfo?.userDefaults) {
@@ -60,19 +62,29 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
       
       console.log('[LocationPrefs] Loading user defaults:', defaults);
       console.log('[LocationPrefs] defaultCenterLocation:', defaults.defaultCenterLocation);
+      console.log('[LocationPrefs] useCenterLocation:', defaults.useCenterLocation);
+      console.log('[LocationPrefs] masteredCityIds:', defaults.masteredCityIds);
       
       setZoomRange(defaults.defaultZoomRange || 50);
       
+      // Always load coordinates if they exist (since we're forcing map center mode)
       if (defaults.defaultCenterLocation) {
         setCenterLat(defaults.defaultCenterLocation.lat?.toString() || '');
         setCenterLng(defaults.defaultCenterLocation.lng?.toString() || '');
         setCoordinatesLoaded(true);
-        console.log('[LocationPrefs] Loaded coordinates:', {
+        console.log('[LocationPrefs] Loaded map center coordinates:', {
           lat: defaults.defaultCenterLocation.lat,
-          lng: defaults.defaultCenterLocation.lng
+          lng: defaults.defaultCenterLocation.lng,
+          useCenterLocation: defaults.useCenterLocation
         });
+      } else if (defaults.useCenterLocation) {
+        // User has map center enabled but no coordinates saved yet
+        console.log('[LocationPrefs] Map center enabled but no coordinates saved');
       } else {
-        console.log('[LocationPrefs] No defaultCenterLocation found in defaults');
+        console.log('[LocationPrefs] No map center location found:', {
+          useCenterLocation: defaults.useCenterLocation,
+          hasDefaultCenterLocation: !!defaults.defaultCenterLocation
+        });
       }
       
       // Store original values for change detection
@@ -264,8 +276,10 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
     // Cleanup function
     return () => {
-      if (mapRef.current?._resizeObserver) {
-        mapRef.current._resizeObserver.disconnect();
+      // Copy ref to local variable to avoid stale closure
+      const mapElement = mapRef.current;
+      if (mapElement?._resizeObserver) {
+        mapElement._resizeObserver.disconnect();
       }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -275,7 +289,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setMapInitialized(false);
       }
     };
-  }, []); // Only initialize once
+  }, []); // Only initialize once - intentionally not including zoomRange to avoid re-initialization
 
   // Handle loading saved coordinates after map is initialized
   useEffect(() => {
@@ -351,7 +365,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         }, 100);
       });
     }
-  }, [mapInitialized, coordinatesLoaded, centerLat, centerLng]);
+  }, [mapInitialized, coordinatesLoaded, centerLat, centerLng, zoomRange]);
 
   // Separate effect to handle radius changes
   useEffect(() => {
