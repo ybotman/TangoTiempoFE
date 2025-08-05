@@ -29,10 +29,12 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import LockIcon from '@mui/icons-material/Lock';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
+import { useMasteredCities } from '@/hooks/useMasteredCities';
 
 const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
+  const { masteredCities } = useMasteredCities();
   
   // State for switchable attributes
   const [isEnabled, setIsEnabled] = useState(false);
@@ -52,6 +54,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
   const isApprovedFromUserLogin = roInfo.isApproved || false;
   const isActiveFromUserLogin = roInfo.isActive || false;
   const isEnabledFromUserLogin = roInfo.isEnabled || false;
+  const allowedCityIds = roInfo.allowedMasteredCityIds || [];
 
   useEffect(() => {
     if (organizer && userData) {
@@ -93,7 +96,23 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     }
   };
 
+  // Helper function to get city display names
+  const getCityDisplayNames = () => {
+    if (!allowedCityIds.length || !masteredCities.length) return [];
+    return allowedCityIds
+      .map(cityId => {
+        const city = masteredCities.find(c => c._id === cityId);
+        return city ? `${city.stateAbbr} - ${city.city}` : null;
+      })
+      .filter(name => name !== null);
+  };
+
   const profileChecks = [
+    {
+      label: 'Rules of Engagement Accepted',
+      passed: isApprovedFromUserLogin,
+      icon: isApprovedFromUserLogin ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+    },
     {
       label: 'Organizer Name',
       passed: organizer?.fullName && organizer.fullName !== 'New Organizer' && organizer.fullName.length >= 7,
@@ -108,6 +127,11 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       label: 'Description',
       passed: organizer?.description && organizer.description.length > 0,
       icon: organizer?.description && organizer.description.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+    },
+    {
+      label: 'At Least One City Selected',
+      passed: allowedCityIds.length > 0,
+      icon: allowedCityIds.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
     },
   ];
 
@@ -173,70 +197,41 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         </CardContent>
       </Card>
 
+      {/* Selected Cities Display */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" gutterBottom>
+            Selected Cities for Venues
+          </Typography>
+          {allowedCityIds.length > 0 ? (
+            <>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                {getCityDisplayNames().map((cityName, index) => (
+                  <Chip 
+                    key={index} 
+                    label={cityName} 
+                    color="primary" 
+                    variant="outlined"
+                    size="small"
+                  />
+                ))}
+              </Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                These cities determine which venues you can select when creating events.
+              </Typography>
+            </>
+          ) : (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              No cities selected. Go to the Settings tab to select at least one city.
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       <Divider sx={{ my: 3 }} />
 
-      {/* Status Controls Section */}
-      <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-        Status Controls
-      </Typography>
-
+      {/* Profile Enable/Disable */}
       <Grid container spacing={3}>
-        {/* Non-editable Status Fields */}
-        <Grid item xs={12}>
-          <Card variant="outlined" sx={{ bgcolor: 'grey.50' }}>
-            <CardContent>
-              <Typography variant="subtitle2" gutterBottom color="text.secondary">
-                System-Managed Status (Read-Only)
-              </Typography>
-              
-              <Box sx={{ mt: 2 }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                      <Typography variant="body1">
-                        ROE Approved
-                      </Typography>
-                      <Box display="flex" alignItems="center">
-                        <Chip 
-                          label={isApprovedFromUserLogin ? "Yes" : "No"} 
-                          color={isApprovedFromUserLogin ? "success" : "default"}
-                          size="small"
-                        />
-                        <Tooltip title="Set automatically when you accept the Rules of Engagement">
-                          <IconButton size="small" sx={{ ml: 1 }}>
-                            <LockIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </Box>
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                      <Typography variant="body1">
-                        Account Active
-                      </Typography>
-                      <Box display="flex" alignItems="center">
-                        <Chip 
-                          label={isActiveFromUserLogin ? "Yes" : "No"} 
-                          color={isActiveFromUserLogin ? "success" : "default"}
-                          size="small"
-                        />
-                        <Tooltip title="Managed by system administrators">
-                          <IconButton size="small" sx={{ ml: 1 }}>
-                            <LockIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Editable Status Fields */}
         <Grid item xs={12}>
           <Card elevation={2} sx={{ p: 3, bgcolor: isEnabled ? 'success.light' : 'grey.100' }}>
             <Typography variant="subtitle2" gutterBottom color="text.secondary">
@@ -251,7 +246,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
                       checked={isEnabled} 
                       onChange={(e) => setIsEnabled(e.target.checked)} 
                       color="primary"
-                      disabled={!allChecksPassed || !isApprovedFromUserLogin}
+                      disabled={!allChecksPassed}
                     />
                   }
                   label={
@@ -266,9 +261,11 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
                     : "Enable to start creating events"
                   }
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 5, mt: 0.5, display: 'block' }}>
-                  Note: To manage account-level enable setting, use the Settings tab
-                </Typography>
+                {!allChecksPassed && (
+                  <Typography variant="caption" color="error" sx={{ ml: 5, mt: 0.5, display: 'block' }}>
+                    Complete all requirements above to enable profile
+                  </Typography>
+                )}
               </Box>
             </Box>
           </Card>
