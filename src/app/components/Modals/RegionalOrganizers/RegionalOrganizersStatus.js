@@ -140,8 +140,19 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     },
     {
       label: 'Short Name',
-      passed: organizer?.shortName && organizer.shortName.length >= 3 && organizer.shortName.length <= 9,
-      icon: organizer?.shortName && organizer.shortName.length >= 3 && organizer.shortName.length <= 9 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+      passed: organizer?.shortName && 
+              organizer.shortName.length >= 3 && 
+              organizer.shortName.length <= 9 &&
+              organizer.shortName !== 'CHANGE' &&
+              !organizer.shortName.toUpperCase().includes('TANGO') &&
+              !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName),
+      icon: organizer?.shortName && 
+            organizer.shortName.length >= 3 && 
+            organizer.shortName.length <= 9 &&
+            organizer.shortName !== 'CHANGE' &&
+            !organizer.shortName.toUpperCase().includes('TANGO') &&
+            !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) 
+              ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
     },
     {
       label: 'Description',
