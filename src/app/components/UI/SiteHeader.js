@@ -89,6 +89,7 @@ const SiteHeader = () => {
         {appVersion}
       </div>
       <div
+        className="map-icon-button"
         onClick={() => openMapCenterModal()}
         title="Click to explore other locations"
         style={{

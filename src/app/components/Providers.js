@@ -12,16 +12,28 @@ import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationConte
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 import LocationPromptManager from '@/components/LocationPromptManager';
-import MapCenterModal from '@/components/Modals/misc/MapCenterModal';
+import UnifiedLocationModal from '@/components/Modals/misc/UnifiedLocationModal';
 import UserLocationLoader from '@/components/UserLocationLoader';
 
-// Wrapper component to render MapCenterModal with context access
-const MapCenterModalWrapper = () => {
-  const { mapCenterModalOpen, closeMapCenterModal } = useGeoLocation();
+// Wrapper component to render UnifiedLocationModal with context access
+const UnifiedLocationModalWrapper = () => {
+  const { 
+    mapCenterModalOpen, 
+    closeMapCenterModal,
+    setSessionLocation,
+    saveAndSetLocation,
+    currentLocation,
+    savedLocation
+  } = useGeoLocation();
+  
   return (
-    <MapCenterModal 
+    <UnifiedLocationModal 
       open={mapCenterModalOpen} 
       onClose={closeMapCenterModal}
+      onSetLocation={setSessionLocation}
+      onSaveLocation={saveAndSetLocation}
+      initialLocation={currentLocation || savedLocation}
+      savedLocation={savedLocation}
     />
   );
 };
@@ -43,7 +55,7 @@ const Providers = ({ children }) => {
                 <MasteredLocationLogger />
                 <UserLocationLoader />
                 <LocationPromptManager />
-                <MapCenterModalWrapper />
+                <UnifiedLocationModalWrapper />
                 {children}
               </EventDiscoveryProvider>
             </GeoLocationProvider>

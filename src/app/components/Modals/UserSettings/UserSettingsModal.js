@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab } from '@mui/material';
 import ModalHeader from '@/components/UI/ModalHeader';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
-import UserSettingsLocationPreferences from '@/components/Modals/UserSettings/UserSettingsLocationPreferences';
+// Removed UserSettingsLocationPreferences - using UnifiedLocationModal instead
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 import UserSettingsBookmarks from '@/components/Modals/UserSettings/UserSettingsBookmarks';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -31,12 +31,11 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
   const { userData, loading, error, updateUserData, refreshUserData } = useUsers();
-  const [currentTab, setCurrentTab] = useState('locationPrefs');
+  const [currentTab, setCurrentTab] = useState('name');
 
   // Map tab names to actual tab values
   const tabMapping = {
     'general': 'name',
-    'locationPrefs': 'locationPrefs',
     'bookmarks': 'bookmarks',
     'apply': 'apply'
   };
@@ -103,7 +102,6 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
             }}
           >
             <Tab label="Name" value="name" />
-            <Tab label="Location Prefs" value="locationPrefs" />
             <Tab label="Bookmarks" value="bookmarks" />
             <Tab label="Apply" value="apply" />
           </Tabs>
@@ -117,13 +115,6 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
             ) : (
               <>
                 {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
-                {currentTab === 'locationPrefs' && (
-                  <UserSettingsLocationPreferences 
-                    userData={userData} 
-                    updateUserData={updateUserData} 
-                    onSaveSuccess={onClose}
-                  />
-                )}
                 {currentTab === 'bookmarks' && (
                   <UserSettingsBookmarks 
                     userData={userData} 

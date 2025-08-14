@@ -33,3 +33,24 @@ body {
     /* This will crop the edges naturally due to overflow:hidden on parent */
   }
 }
+
+/* Map Icon Pulsing Animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(25, 118, 210, 0.2);
+  }
+  100% {
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 20px rgba(25, 118, 210, 0);
+  }
+}
+
+.map-icon-button {
+  animation: pulse 2s infinite;
+}
+
+.map-icon-button:hover {
+  animation: none;
+}
