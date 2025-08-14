@@ -92,9 +92,9 @@ const SiteHeader = () => {
         onClick={() => openMapCenterModal()}
         title="Click to explore other locations"
         style={{
-          position: 'absolute',
-          bottom: '10px',
-          right: '10px',
+          position: 'fixed',  // Changed from absolute to fixed
+          bottom: '20px',     // Increased spacing from edge
+          right: '20px',      // Increased spacing from edge
           backgroundColor: 'white',
           color: 'black',
           padding: '8px',
@@ -107,6 +107,7 @@ const SiteHeader = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          zIndex: 1000,       // Ensure it stays above other content
           '&:hover': {
             backgroundColor: '#f0f0f0',
             boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
