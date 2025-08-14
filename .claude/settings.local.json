@@ -57,7 +57,12 @@
       "mcp__atlassian__createJiraIssue",
       "mcp__atlassian__addCommentToJiraIssue",
       "mcp__atlassian__getJiraIssue",
-      "Bash(security find-generic-password:*)"
+      "Bash(security find-generic-password:*)",
+      "Bash(env)",
+      "WebSearch",
+      "Bash(./public/AI-Guild/Scripts/jira-tools/jira-startup-check.sh:*)",
+      "Bash(security:*)",
+      "Bash(https://hdtsllc.atlassian.net/rest/api/2/issue)"
     ],
     "deny": []
   },
