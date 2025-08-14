@@ -306,39 +306,51 @@ const UnifiedLocationModal = ({
           </Alert>
         )}
         
-        {/* Action Buttons */}
+        {/* Action Buttons - Always in one row */}
         <Box sx={{ 
           display: 'flex', 
-          gap: 2, 
+          gap: 1.5, 
           mb: 2,
-          flexDirection: isMobile ? 'column' : 'row'
+          justifyContent: 'center'
         }}>
           <Button
             variant="contained"
             onClick={handleSetTemp}
             disabled={loading || !centerLat || !centerLng}
-            startIcon={<MyLocationIcon />}
-            sx={{ flex: 1 }}
+            startIcon={<MyLocationIcon sx={{ fontSize: 18 }} />}
+            size="small"
+            sx={{ 
+              px: 2,
+              py: 0.75,
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: '110px'
+            }}
           >
-            SET (Temporary)
+            Set Temp
           </Button>
           
           <Tooltip 
             title={!user ? "Login to save permanently" : "Save as your default location"}
             arrow
           >
-            <span style={{ flex: 1 }}>
+            <span>
               <Button
                 variant={user ? "outlined" : "contained"}
                 onClick={handleSavePerm}
                 disabled={!user || loading || !centerLat || !centerLng}
-                startIcon={<LocationOnIcon />}
+                startIcon={<LocationOnIcon sx={{ fontSize: 18 }} />}
+                size="small"
                 sx={{ 
-                  width: '100%',
+                  px: 2,
+                  py: 0.75,
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  minWidth: '110px',
                   opacity: !user ? 0.5 : 1
                 }}
               >
-                SAVE (Permanent)
+                Save Default
               </Button>
             </span>
           </Tooltip>
