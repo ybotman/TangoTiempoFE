@@ -64,7 +64,8 @@
       "Bash(security:*)",
       "Bash(https://hdtsllc.atlassian.net/rest/api/2/issue)",
       "Bash(https://hdtsllc.atlassian.net/rest/api/2/issue/TIEMPO-232/transitions)",
-      "Bash(https://hdtsllc.atlassian.net/rest/api/2/issue/TIEMPO-233/transitions)"
+      "Bash(https://hdtsllc.atlassian.net/rest/api/2/issue/TIEMPO-233/transitions)",
+      "Bash(https://hdtsllc.atlassian.net/rest/api/2/issue/TIEMPO-228/transitions)"
     ],
     "deny": []
   },
