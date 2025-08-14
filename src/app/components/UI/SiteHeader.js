@@ -38,13 +38,23 @@ const SiteHeader = () => {
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      height: 'auto',
+      overflow: 'hidden' // Crop edges when zoomed
+    }}>
       <Image
         src={headerImage}
         alt="Tango Tiempo"
         width={1200}
         height={600}
-        style={{ width: '100%', height: 'auto' }}
+        style={{ 
+          width: '100%', 
+          height: 'auto',
+          // Media query effect via CSS class
+        }}
+        className="site-header-image"
         priority
       />
       <a

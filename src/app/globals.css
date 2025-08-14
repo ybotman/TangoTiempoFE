@@ -22,3 +22,14 @@ body {
   font-weight: normal !important;
   text-shadow: none !important;
 }
+
+/* Site Header Mobile Zoom Effect */
+@media (max-width: 768px) {
+  .site-header-image {
+    /* Scale the image to 130% to make it taller */
+    transform: scale(1.3);
+    /* Keep the center of the image in focus */
+    transform-origin: center center;
+    /* This will crop the edges naturally due to overflow:hidden on parent */
+  }
+}
