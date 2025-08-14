@@ -37,7 +37,7 @@ const roles = [
   },
   {
     id: 'nu',
-    title: 'NU — Named User (e.g., Milonger-x)',
+    title: 'NU — Named User (e.g., Milonger@)',
     icon: <PersonIcon />,
     color: 'info',
     permissions: [

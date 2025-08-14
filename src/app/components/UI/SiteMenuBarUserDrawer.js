@@ -35,7 +35,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
   // Define role display mapping (backend role -> display name)
   const roleDisplayMap = {
-    'NamedUser': 'Milonger-x',
+    'NamedUser': 'Milonger@',
     'RegionalOrganizer': 'Organizer/Artist',
     'RegionalAdmin': 'RegionalAdmin', 
     'SystemAdmin': 'SystemAdmin',
