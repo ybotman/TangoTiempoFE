@@ -244,7 +244,7 @@ const UserSettingsApply = () => {
       )}
 
       <Typography variant="h6" gutterBottom>
-        Apply for Regional Organizer
+        Apply for Organizer/Artist
       </Typography>
 
       <Typography variant="body1" gutterBottom>
@@ -278,7 +278,7 @@ const UserSettingsApply = () => {
       {/* Show success message if user is fully set up */}
       {!isLoading && hasOrganizerId && isApproved && (
         <Typography variant="body2" color="textSecondary">
-          You have successfully applied as a Regional Organizer.
+          You have successfully applied as an Organizer/Artist.
         </Typography>
       )}
 
