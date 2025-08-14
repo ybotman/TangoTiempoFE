@@ -298,7 +298,7 @@ const SidebarDrawer = ({ open, onClose }) => {
             // Not Logged In Menu Items
             <>
               <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
-                Why Join? It's FREE!
+                It's FREE!
               </Typography>
               <Link href="/benefits" passHref>
                 <ListItem
@@ -318,7 +318,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                   <ListItemIcon>
                     <RocketLaunchIcon sx={{ color: 'white' }} />
                   </ListItemIcon>
-                  <ListItemText primary="Milonguero-X Benefits" />
+                  <ListItemText primary="Milonguero@ Benefits" />
                 </ListItem>
               </Link>
               
@@ -511,12 +511,6 @@ const SidebarDrawer = ({ open, onClose }) => {
                     <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
                   </ListItemIcon>
                   <ListItemText primary="FAQ" />
-                </ListItem>
-                <ListItem button="true">
-                  <ListItemIcon>
-                    <HelpIcon sx={{ color: 'royalBlue' }} />
-                  </ListItemIcon>
-                  <ListItemText primary="Help" />
                 </ListItem>
                 <Link href="/about" passHref>
                   <ListItem button="true" onClick={() => onClose()}>
