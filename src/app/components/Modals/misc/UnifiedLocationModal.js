@@ -22,7 +22,6 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AuthContext } from '@/contexts/AuthContext';
 import dynamic from 'next/dynamic';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamic import for avoiding SSR issues
@@ -61,6 +60,9 @@ const UnifiedLocationModal = ({
     if (!open || mapInitialized || !mapRef.current) return;
     
     const initializeMap = async () => {
+      // Dynamic import L to avoid SSR issues
+      const L = (await import('leaflet')).default;
+      
       // Create custom icon
       const customIcon = L.divIcon({
         className: 'custom-location-marker',
@@ -150,8 +152,11 @@ const UnifiedLocationModal = ({
     };
   }, [open, isMobile]);
   
-  const updateMarker = (lat, lng) => {
+  const updateMarker = async (lat, lng) => {
     if (!mapInstanceRef.current) return;
+    
+    // Dynamic import L to avoid SSR issues
+    const L = (await import('leaflet')).default;
     
     // Remove existing marker and circle
     if (markerRef.current) {

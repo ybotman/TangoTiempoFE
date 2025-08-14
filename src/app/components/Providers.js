@@ -12,8 +12,14 @@ import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationConte
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 import LocationPromptManager from '@/components/LocationPromptManager';
-import UnifiedLocationModal from '@/components/Modals/misc/UnifiedLocationModal';
 import UserLocationLoader from '@/components/UserLocationLoader';
+import dynamic from 'next/dynamic';
+
+// Dynamic import to avoid SSR issues with Leaflet
+const UnifiedLocationModal = dynamic(
+  () => import('@/components/Modals/misc/UnifiedLocationModal'),
+  { ssr: false }
+);
 
 // Wrapper component to render UnifiedLocationModal with context access
 const UnifiedLocationModalWrapper = () => {
