@@ -103,9 +103,12 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       setInitialIsEnabled(isEnabled);
       setShowSuccessMessage(true);
       
-      // Show restart warning if enabling
+      // Auto-refresh after 2 seconds if enabling
       if (isEnabled && !initialIsEnabled) {
         setShowRestartWarning(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     } catch (error) {
       console.error('Failed to update status:', error);
@@ -171,7 +174,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           size="medium"
           sx={{ minWidth: 150 }}
         >
-          Save Profile Status
+          Save
         </Button>
       </Box>
 
@@ -201,7 +204,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           sx={{ mb: 2 }}
           onClose={() => setShowRestartWarning(false)}
         >
-          App restart required to activate your organizer role. Please restart the app after saving.
+          Activating organizer role... The app will refresh automatically in 2 seconds.
         </Alert>
       )}
 

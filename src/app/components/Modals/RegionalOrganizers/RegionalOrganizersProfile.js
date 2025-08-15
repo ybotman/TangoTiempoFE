@@ -147,9 +147,21 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Profile Information
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">
+          Profile Information
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleSave} 
+          disabled={isSaveDisabled()}
+          size="medium"
+          sx={{ minWidth: 150 }}
+        >
+          Save Profile
+        </Button>
+      </Box>
       
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -314,17 +326,6 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
           </Grid>
         </CardContent>
       </Card>
-
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handleSave} 
-        disabled={isSaveDisabled()}
-        fullWidth
-        sx={{ mt: 2 }}
-      >
-        Save Profile Information
-      </Button>
     </Box>
   );
 };
