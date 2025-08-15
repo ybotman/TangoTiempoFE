@@ -278,10 +278,12 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemText primary="User Settings" />
               </ListItem>
               
-              {/* Only show Apply as Organizer if user is not already an organizer */}
+              {/* Only show Apply as Organizer if user is not already an approved and enabled organizer */}
               {selectedRole !== listOfAllRoles.REGIONAL_ORGANIZER && 
                selectedRole !== listOfAllRoles.SYSTEM_ADMIN && 
-               selectedRole !== listOfAllRoles.SYSTEM_OWNER && (
+               selectedRole !== listOfAllRoles.SYSTEM_OWNER && 
+               !(user?.backendInfo?.regionalOrganizerInfo?.isApproved && 
+                 user?.backendInfo?.regionalOrganizerInfo?.isEnabled) && (
                 <Link href="/organizers/apply" passHref>
                   <ListItem
                     button="true"
@@ -429,6 +431,14 @@ const SidebarDrawer = ({ open, onClose }) => {
                       <SupportIcon sx={{ color: 'royalBlue' }} />
                     </ListItemIcon>
                     <ListItemText primary="About" />
+                  </ListItem>
+                </Link>
+                <Link href="/artists-plus" passHref>
+                  <ListItem button="true" onClick={() => onClose()}>
+                    <ListItemIcon>
+                      <GroupIcon sx={{ color: 'royalBlue' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Artists+" />
                   </ListItem>
                 </Link>
                 <Link href="/releases" passHref>

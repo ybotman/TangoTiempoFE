@@ -346,7 +346,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               slotProps={{ 
                 textField: { 
                   fullWidth: true,
-                  required: true
+                  required: true,
+                  error: !eventData.startDate,
+                  helperText: !eventData.startDate ? "Start date is required" : ""
                 } 
               }}
               sx={{ width: '100%' }}
@@ -365,7 +367,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               slotProps={{ 
                 textField: { 
                   fullWidth: true,
-                  required: true
+                  required: true,
+                  error: !eventData.endDate,
+                  helperText: !eventData.endDate ? "End date is required" : ""
                 } 
               }}
               sx={{ width: '100%' }}
@@ -381,6 +385,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               value={eventData.title} 
               onChange={handleTitleChange}
               required
+              error={!eventData.title}
+              helperText={!eventData.title ? "Title is required" : ""}
               fullWidth
             />
           </FormControl>
@@ -390,15 +396,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
             <TextField 
-              label="Short Title (15 chars max)" 
+              label="Short Title (21 chars max)" 
               value={eventData.shortTitle || eventData.shortName || ''} 
               onChange={(e) => {
-                const value = e.target.value.slice(0, 15); // Enforce 15 char limit
+                const value = e.target.value.slice(0, 21); // Enforce 21 char limit
                 setEventData(prevData => ({ ...prevData, shortTitle: value, shortName: value }));
               }}
               required
-              inputProps={{ maxLength: 15 }}
-              helperText={`${(eventData.shortTitle || eventData.shortName || '').length}/15 characters`}
+              error={!(eventData.shortTitle || eventData.shortName)}
+              inputProps={{ maxLength: 21 }}
+              helperText={!(eventData.shortTitle || eventData.shortName) ? "Short title is required" : `${(eventData.shortTitle || eventData.shortName || '').length}/21 characters`}
               fullWidth
             />
           </FormControl>
@@ -565,8 +572,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                   label="Venue (type to search)"
                   variant="outlined"
                   required
-                  error={Boolean(errorVenues)}
-                  helperText={errorVenues ? "Error loading venues" : ""}
+                  error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : ""}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -623,6 +630,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           value={eventData.description}
           onChange={(e) => setEventData(prevData => ({ ...prevData, description: e.target.value }))}
           required
+          error={!eventData.description}
+          helperText={!eventData.description ? "Description is required" : ""}
           fullWidth
         />
       </FormControl>
