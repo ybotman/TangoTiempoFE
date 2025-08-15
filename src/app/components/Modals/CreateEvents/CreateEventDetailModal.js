@@ -460,15 +460,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }
       }
       
-      if (!eventData.masteredRegionName) {
-        throw new Error('Region is required');
-      }
-      
       // Check if user can create events (RegionalOrganizer or RegionalAdmin)
       const selectedRole = user.backendInfo?.selectedRole || '';
       const isRegionalOrganizer = user.backendInfo?.regionalOrganizerInfo?.organizerId;
       const isRegionalAdmin = selectedRole === 'RegionalAdmin' && 
                              user.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds?.length > 0;
+      
+      // Only require region for non-RO/RA users
+      if (!eventData.masteredRegionName && !isRegionalOrganizer && !isRegionalAdmin) {
+        throw new Error('Region is required');
+      }
 
       if (!isRegionalOrganizer && !isRegionalAdmin) {
         // Determine specific error message based on user's roles
