@@ -57,24 +57,7 @@ const UnifiedLocationModal = ({
   
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
-    console.log('[UnifiedLocationModal] useEffect triggered:', {
-      open,
-      mapInitialized,
-      hasMapRef: !!mapRef.current,
-      mapRefDimensions: mapRef.current ? {
-        offsetWidth: mapRef.current.offsetWidth,
-        offsetHeight: mapRef.current.offsetHeight
-      } : null
-    });
-    
-    if (!open) {
-      console.log('[UnifiedLocationModal] Modal not open, skipping init');
-      return;
-    }
-    if (mapInitialized) {
-      console.log('[UnifiedLocationModal] Map already initialized, skipping');
-      return;
-    }
+    if (!open || mapInitialized) return;
     
     // Retry logic for waiting for ref to attach
     let retryCount = 0;
@@ -82,29 +65,20 @@ const UnifiedLocationModal = ({
     
     const checkAndInit = () => {
       retryCount++;
-      console.log(`[UnifiedLocationModal] Checking for map ref (attempt ${retryCount}/${maxRetries})`);
       
       if (mapRef.current) {
-        console.log('[UnifiedLocationModal] Map ref found, proceeding with initialization');
         initializeMap();
       } else if (retryCount < maxRetries) {
-        console.log('[UnifiedLocationModal] No map ref yet, retrying in 100ms...');
         setTimeout(checkAndInit, 100);
       } else {
-        console.error('[UnifiedLocationModal] Failed to get map ref after max retries');
         setMessage({ type: 'error', text: 'Failed to initialize map container' });
       }
     };
     
     const initializeMap = async () => {
       try {
-        console.log('[UnifiedLocationModal] Starting map initialization...');
-        console.log('[UnifiedLocationModal] Mapbox token exists:', !!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN);
-        console.log('[UnifiedLocationModal] Token preview:', process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.substring(0, 10) + '...');
-        
         // Dynamic import L to avoid SSR issues
         const L = (await import('leaflet')).default;
-        console.log('[UnifiedLocationModal] Leaflet imported successfully');
         
         // Fix Leaflet's default icon path issues
         delete L.Icon.Default.prototype._getIconUrl;
@@ -118,55 +92,31 @@ const UnifiedLocationModal = ({
         const initialLat = centerLat ? parseFloat(centerLat) : 40.7128;
         const initialLng = centerLng ? parseFloat(centerLng) : -74.0060;
         
-        console.log('[UnifiedLocationModal] Creating map with center:', initialLat, initialLng);
-        console.log('[UnifiedLocationModal] Map container dimensions:', {
-          width: mapRef.current.offsetWidth,
-          height: mapRef.current.offsetHeight
-        });
-        
         const map = L.map(mapRef.current, {
           center: [initialLat, initialLng],
           zoom: 5,
           scrollWheelZoom: true,
-          zoomControl: true // Use default position for now
+          zoomControl: true
         });
-        
-        console.log('[UnifiedLocationModal] Map instance created');
         
         // Add tile layer
-        const tileUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`;
-        console.log('[UnifiedLocationModal] Tile URL:', tileUrl.substring(0, 100) + '...');
-        
-        const tileLayer = L.tileLayer(tileUrl, {
-          maxZoom: 18,
-          tileSize: 512,
-          zoomOffset: -1,
-          attribution: '© Mapbox © OpenStreetMap'
-        });
-        
-        tileLayer.on('loading', () => {
-          console.log('[UnifiedLocationModal] Tiles loading...');
-        });
-        
-        tileLayer.on('load', () => {
-          console.log('[UnifiedLocationModal] Tiles loaded successfully');
-        });
-        
-        tileLayer.on('tileerror', (error) => {
-          console.error('[UnifiedLocationModal] Tile error:', error);
-        });
-        
-        tileLayer.addTo(map);
-        console.log('[UnifiedLocationModal] Tile layer added to map');
+        L.tileLayer(
+          `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
+          {
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1,
+            attribution: '© Mapbox © OpenStreetMap'
+          }
+        ).addTo(map);
       
-      // Handle map click
-      map.on('click', (e) => {
-        console.log('[UnifiedLocationModal] Map clicked at:', e.latlng);
-        const { lat, lng } = e.latlng;
-        updateMarker(lat, lng);
-        setCenterLat(lat.toFixed(6));
-        setCenterLng(lng.toFixed(6));
-      });
+        // Handle map click
+        map.on('click', (e) => {
+          const { lat, lng } = e.latlng;
+          updateMarker(lat, lng);
+          setCenterLat(lat.toFixed(6));
+          setCenterLng(lng.toFixed(6));
+        });
       
       // Force map to recalculate size after a delay
       setTimeout(() => {
@@ -174,38 +124,30 @@ const UnifiedLocationModal = ({
       }, 100);
       
         mapInstanceRef.current = map;
-        console.log('[UnifiedLocationModal] Setting mapInitialized to true');
         setMapInitialized(true);
         
         // Force resize after initialization
         setTimeout(() => {
           if (mapInstanceRef.current) {
-            console.log('[UnifiedLocationModal] Invalidating map size after 300ms');
             mapInstanceRef.current.invalidateSize();
           }
         }, 300);
         
-        console.log('[UnifiedLocationModal] Map initialization complete');
-        
       } catch (error) {
         console.error('[UnifiedLocationModal] Error initializing map:', error);
-        console.error('[UnifiedLocationModal] Error stack:', error.stack);
-        setMessage({ type: 'error', text: 'Failed to initialize map: ' + error.message });
+        setMessage({ type: 'error', text: 'Failed to initialize map' });
       }
     };
     
     // Start the check and init process
-    console.log('[UnifiedLocationModal] Starting ref check process...');
     checkAndInit();
     
     return () => {
-      console.log('[UnifiedLocationModal] Cleanup function called');
       if (mapInstanceRef.current) {
-        console.log('[UnifiedLocationModal] Removing map instance');
         try {
           mapInstanceRef.current.remove();
         } catch (e) {
-          console.error('[UnifiedLocationModal] Error removing map:', e);
+          // Ignore cleanup errors
         }
         mapInstanceRef.current = null;
         setMapInitialized(false);
@@ -215,11 +157,8 @@ const UnifiedLocationModal = ({
   
   // Force map resize when modal fully opens
   useEffect(() => {
-    console.log('[UnifiedLocationModal] Resize useEffect:', { open, hasMapInstance: !!mapInstanceRef.current });
     if (open && mapInstanceRef.current) {
-      // Give modal time to render
       const timer = setTimeout(() => {
-        console.log('[UnifiedLocationModal] Invalidating size from resize useEffect');
         mapInstanceRef.current.invalidateSize();
       }, 200);
       return () => clearTimeout(timer);
@@ -452,7 +391,6 @@ const UnifiedLocationModal = ({
         </Box>
         
         {/* Map Container */}
-        {console.log('[UnifiedLocationModal] Rendering map container, mapInitialized:', mapInitialized)}
         <Box
           ref={mapRef}
           sx={{
