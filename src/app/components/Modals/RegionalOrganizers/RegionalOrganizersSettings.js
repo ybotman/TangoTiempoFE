@@ -35,30 +35,24 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
 import GroupIcon from '@mui/icons-material/Group';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useMasteredCities } from '@/hooks/useMasteredCities';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import axios from 'axios';
 
 const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
-  const [includeInactive, setIncludeInactive] = useState(false);
-  const { masteredCities, loading: citiesLoading } = useMasteredCities(includeInactive);
   const { organizers } = useOrganizers();
   
   // State for editable fields
-  const [selectedCityIds, setSelectedCityIds] = useState([]);
   const [isVisible, setIsVisible] = useState(true);
   const [isCrawlable, setIsCrawlable] = useState(false);
   const [delegatedOrganizerIds, setDelegatedOrganizerIds] = useState([]);
   const [selectedDelegateId, setSelectedDelegateId] = useState('');
   
   // Initial values for comparison
-  const [initialSelectedCityIds, setInitialSelectedCityIds] = useState([]);
   const [initialIsVisible, setInitialIsVisible] = useState(true);
   const [initialIsCrawlable, setInitialIsCrawlable] = useState(false);
   const [initialDelegatedOrganizerIds, setInitialDelegatedOrganizerIds] = useState([]);
@@ -81,10 +75,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
   const approvalDate = roInfo.ApprovalDate ? new Date(roInfo.ApprovalDate).toLocaleDateString() : 'Not set';
 
   useEffect(() => {
-    if (userData?.regionalOrganizerInfo) {
-      setSelectedCityIds(roInfo.allowedMasteredCityIds || []);
-      setInitialSelectedCityIds(roInfo.allowedMasteredCityIds || []);
-    }
     if (organizer) {
       setIsVisible(organizer.isVisible !== false); // Default true
       setInitialIsVisible(organizer.isVisible !== false);
@@ -93,7 +83,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
       setDelegatedOrganizerIds(organizer.delegatedOrganizerIds || []);
       setInitialDelegatedOrganizerIds(organizer.delegatedOrganizerIds || []);
     }
-  }, [userData, roInfo.allowedMasteredCityIds, organizer]);
+  }, [organizer]);
   
   // Fetch delegated organizer details
   useEffect(() => {
@@ -129,8 +119,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
   }, [delegatedOrganizerIds]);
 
   const isSaveDisabled = 
-    (JSON.stringify(selectedCityIds) === JSON.stringify(initialSelectedCityIds) &&
-    isVisible === initialIsVisible &&
+    (isVisible === initialIsVisible &&
     isCrawlable === initialIsCrawlable &&
     JSON.stringify(delegatedOrganizerIds) === JSON.stringify(initialDelegatedOrganizerIds)) ||
     saving;
@@ -139,13 +128,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
     setShowSuccessMessage(false);
   };
 
-  const handleCityChange = (event) => {
-    const value = event.target.value;
-    // Limit to 4 cities
-    if (value.length <= 4) {
-      setSelectedCityIds(value);
-    }
-  };
 
   const handleSave = async () => {
     setErrorMessage('');
@@ -153,16 +135,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
     setSaving(true);
     
     try {
-      // Update userLogins collection
-      const updatedRegionalInfo = {
-        ...roInfo,
-        allowedMasteredCityIds: selectedCityIds
-      };
-      
-      await updateUserData({
-        regionalOrganizerInfo: updatedRegionalInfo
-      });
-      
       // Update organizers collection
       await updateOrganizer(organizerId, {
         isVisible,
@@ -171,7 +143,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
       });
       
       // Update initial values
-      setInitialSelectedCityIds(selectedCityIds);
       setInitialIsVisible(isVisible);
       setInitialIsCrawlable(isCrawlable);
       setInitialDelegatedOrganizerIds(delegatedOrganizerIds);
@@ -185,10 +156,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
     }
   };
 
-  // Get city object by ID
-  const getCityById = (cityId) => {
-    return masteredCities.find(city => city._id === cityId);
-  };
   
   // Handle delegated organizer management
   const handleAddDelegate = () => {
@@ -285,95 +252,6 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
       </Card>
 
 
-      {/* City Selection */}
-      <Card elevation={1} sx={{ p: 3, mb: 3 }}>
-        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-          <Box display="flex" alignItems="center">
-            <LocationCityIcon sx={{ mr: 1 }} />
-            <Typography variant="subtitle1" fontWeight="bold">
-              City Selection
-            </Typography>
-          </Box>
-          {/* Active/Inactive Toggle */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={includeInactive}
-                onChange={(e) => setIncludeInactive(e.target.checked)}
-                color="primary"
-                size="small"
-              />
-            }
-            label="Show inactive cities"
-          />
-        </Box>
-        
-        <FormControl fullWidth>
-          <InputLabel id="city-select-label">Allowed Cities for Venues</InputLabel>
-          <Select
-            labelId="city-select-label"
-            multiple
-            value={selectedCityIds}
-            onChange={handleCityChange}
-            input={<OutlinedInput label="Allowed Cities for Venues" />}
-            renderValue={(selected) => {
-              if (selected.length === 0) {
-                return <em>Select cities...</em>;
-              }
-              return (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => {
-                    const city = getCityById(value);
-                    if (!city) return null;
-                    // Show abbreviated version in the selection box
-                    const shortName = city.cityName + (city.active ? '' : ' (inactive)');
-                    return (
-                      <Chip key={value} label={shortName} size="small" />
-                    );
-                  })}
-                </Box>
-              );
-            }}
-            disabled={citiesLoading}
-          >
-            {masteredCities.map((city) => (
-              <MenuItem 
-                key={city._id} 
-                value={city._id}
-                sx={{
-                  fontSize: '0.875rem',
-                  color: city.active ? 'text.primary' : 'text.disabled'
-                }}
-              >
-                {city.displayName}
-                {!city.active && (
-                  <Typography 
-                    component="span" 
-                    variant="caption" 
-                    sx={{ ml: 1, color: 'text.disabled' }}
-                  >
-                    (inactive)
-                  </Typography>
-                )}
-              </MenuItem>
-            ))}
-          </Select>
-          <FormHelperText>
-            Select up to 4 cities where you can choose venues when creating events.
-            {masteredCities.length > 0 && (
-              <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                Format: Country - Region - Division - City
-              </Typography>
-            )}
-          </FormHelperText>
-        </FormControl>
-        
-        {selectedCityIds.length === 4 && (
-          <Alert severity="info" sx={{ mt: 2 }}>
-            Maximum of 4 cities reached
-          </Alert>
-        )}
-      </Card>
 
       {/* Delegated Organizers Section */}
       <Card elevation={1} sx={{ mt: 3, p: 3 }}>

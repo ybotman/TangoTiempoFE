@@ -51,7 +51,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
         <AppBar position="static" color="default">
           <Toolbar variant="dense">
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Regional Organizer Settings
+              Event Organizer Settings
             </Typography>
             <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
               <CloseIcon />

@@ -308,7 +308,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemIcon>
                   <GroupIcon sx={{ color: 'green' }} />
                 </ListItemIcon>
-                <ListItemText primary="Organizer Settings" />
+                <ListItemText primary="Event Organizer Settings" />
               </ListItem>
             </>
           )}

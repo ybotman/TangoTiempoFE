@@ -36,12 +36,10 @@ import GroupIcon from '@mui/icons-material/Group';
 import ImageIcon from '@mui/icons-material/Image';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useMasteredCities } from '@/hooks/useMasteredCities';
 
 const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
-  const { masteredCities } = useMasteredCities(true); // Include inactive to show selected cities
   
   // State for switchable attributes
   const [isEnabled, setIsEnabled] = useState(false);
@@ -61,7 +59,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
   const isApprovedFromUserLogin = roInfo.isApproved || false;
   const isActiveFromUserLogin = roInfo.isActive || false;
   const isEnabledFromUserLogin = roInfo.isEnabled || false;
-  const allowedCityIds = roInfo.allowedMasteredCityIds || [];
   const approvalDate = roInfo.ApprovalDate ? new Date(roInfo.ApprovalDate).toLocaleDateString() : 'Not set';
 
   // Organizer collection values
@@ -116,16 +113,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     }
   };
 
-  // Helper function to get city display names
-  const getCityDisplayNames = () => {
-    if (!allowedCityIds.length || !masteredCities.length) return [];
-    return allowedCityIds
-      .map(cityId => {
-        const city = masteredCities.find(c => c._id === cityId);
-        return city ? city.cityName + (city.active ? '' : ' (inactive)') : null;
-      })
-      .filter(name => name !== null);
-  };
 
   const mandatoryChecks = [
     {
@@ -158,12 +145,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       label: 'Description',
       passed: organizer?.description && organizer.description.length > 0,
       icon: organizer?.description && organizer.description.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
-    },
-    {
-      label: 'At Least One City Selected',
-      passed: allowedCityIds.length > 0,
-      icon: allowedCityIds.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
-      details: allowedCityIds.length > 0 ? `${allowedCityIds.length} cities: ${getCityDisplayNames().join(', ')}` : null
     },
   ];
 
@@ -205,77 +186,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         </Alert>
       )}
 
-      {/* User Information - Moved from Settings */}
-      <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
-        <CardContent sx={{ py: 2 }}>
-          <Box display="flex" alignItems="center" sx={{ mb: 1.5 }}>
-            <AccountCircleIcon sx={{ mr: 1 }} />
-            <Typography variant="subtitle1" fontWeight="bold">
-              User Information
-            </Typography>
-          </Box>
-          
-          <Grid container spacing={1}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Email</Typography>
-              <Typography variant="body2">{email}</Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Approval Date</Typography>
-              <Typography variant="body2">{approvalDate}</Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Organizer ID</Typography>
-              <Typography variant="body2" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.75rem' 
-              }}>
-                {organizerId || 'Not set'}
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Firebase ID</Typography>
-              <Typography variant="body2" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.75rem',
-                wordBreak: 'break-all' 
-              }}>
-                {firebaseUserId}
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Mandatory Requirements */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" gutterBottom fontWeight="bold">
-            Mandatory Requirements
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            All items must be completed before enabling your profile
-          </Typography>
-          <List dense>
-            {mandatoryChecks.map((check, index) => (
-              <ListItem key={index}>
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {check.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={check.label}
-                  secondary={check.details}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
-
-      {/* Enable Switch */}
+      {/* Profile Activation - MOVED TO TOP */}
       <Card 
         elevation={2} 
         sx={{ 
@@ -290,7 +201,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
               <Typography variant="h6" gutterBottom>
                 Profile Activation
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color={allMandatoryPassed || isEnabled ? "text.secondary" : "error"}>
                 {isEnabled 
                   ? "Your profile is active - You can create and manage tango events"
                   : allMandatoryPassed 
@@ -313,6 +224,34 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
               labelPlacement="bottom"
             />
           </Box>
+        </CardContent>
+      </Card>
+
+      {/* Mandatory Requirements - SECOND */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+            Mandatory Requirements
+          </Typography>
+          <Typography variant="body2" color="error" sx={{ mb: 2, fontWeight: 'bold' }}>
+            {mandatoryChecks.filter(c => !c.passed).length > 0 
+              ? `All ${mandatoryChecks.filter(c => !c.passed).length} items must be completed. You must activate to add events or artist types.`
+              : 'All requirements completed! You can now activate your profile.'
+            }
+          </Typography>
+          <List dense>
+            {mandatoryChecks.map((check, index) => (
+              <ListItem key={index}>
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  {check.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={check.label}
+                  secondary={check.details}
+                />
+              </ListItem>
+            ))}
+          </List>
         </CardContent>
       </Card>
 
@@ -421,6 +360,51 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
                   variant={hasCompleteAddress ? "filled" : "outlined"}
                 />
               </ListItem>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* User Information - MOVED TO BOTTOM */}
+      <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box display="flex" alignItems="center" sx={{ mb: 1.5 }}>
+            <AccountCircleIcon sx={{ mr: 1 }} />
+            <Typography variant="subtitle1" fontWeight="bold">
+              User Information
+            </Typography>
+          </Box>
+          
+          <Grid container spacing={1}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Email</Typography>
+              <Typography variant="body2">{email}</Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Approval Date</Typography>
+              <Typography variant="body2">{approvalDate}</Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Organizer ID</Typography>
+              <Typography variant="body2" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.75rem' 
+              }}>
+                {organizerId || 'Not set'}
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Firebase ID</Typography>
+              <Typography variant="body2" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.75rem',
+                wordBreak: 'break-all' 
+              }}>
+                {firebaseUserId}
+              </Typography>
             </Grid>
           </Grid>
         </CardContent>
