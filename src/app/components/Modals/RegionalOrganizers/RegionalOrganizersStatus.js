@@ -139,12 +139,19 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
             organizer.shortName !== 'CHANGE' &&
             !organizer.shortName.toUpperCase().includes('TANGO') &&
             !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) 
-              ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+              ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
+      details: !organizer?.shortName ? 'Required' : 
+               organizer.shortName === 'CHANGE' ? 'Must change from default' :
+               organizer.shortName.length < 3 ? 'Too short (min 3 chars)' :
+               organizer.shortName.length > 9 ? 'Too long (max 9 chars)' :
+               organizer.shortName.toUpperCase().includes('TANGO') ? 'Cannot contain "Tango"' :
+               /(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) ? 'Invalid format' : null
     },
     {
       label: 'Description',
-      passed: organizer?.description && organizer.description.length > 0,
-      icon: organizer?.description && organizer.description.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+      passed: organizer?.description && organizer.description.trim().length > 0,
+      icon: organizer?.description && organizer.description.trim().length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
+      details: !organizer?.description || organizer.description.trim().length === 0 ? 'Required - Add a description of your events' : null
     },
   ];
 
