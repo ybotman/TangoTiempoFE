@@ -16,6 +16,7 @@ import {
   Card,
   CardContent,
   Chip,
+  IconButton,
   useTheme,
   useMediaQuery
 } from '@mui/material';
@@ -36,13 +37,14 @@ import MessageIcon from '@mui/icons-material/Message';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default function BenefitsPage() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [expanded, setExpanded] = useState('benefits');
+  const [expanded, setExpanded] = useState(false);
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -56,15 +58,24 @@ export default function BenefitsPage() {
     }
   };
 
-  const benefits = [
+  const milonguerBenefits = [
+    { icon: <BookmarkIcon />, text: 'Save your settings and preferences' },
+    { icon: <StarIcon />, text: 'Mark favorite events and organizers' },
+    { icon: <MessageIcon />, text: 'Direct message event organizers' },
+    { icon: <LocationOnIcon />, text: 'Set your default location' },
+    { icon: <CalendarMonthIcon />, text: 'See events in your area' },
+    { icon: <VisibilityIcon />, text: 'Get discovered by event organizers' },
+  ];
+
+  const organizerBenefits = [
     { icon: <EventIcon />, text: 'Create and manage your tango events' },
-    { icon: <VisibilityIcon />, text: 'Get discovered by dancers in your area' },
-    { icon: <LocationOnIcon />, text: 'Reach dancers within your geographic range' },
-    { icon: <CalendarMonthIcon />, text: 'Automatic calendar integration' },
-    { icon: <PhotoCameraIcon />, text: 'Upload event photos and flyers' },
-    { icon: <MessageIcon />, text: 'Direct messaging with dancers' },
+    { icon: <VisibilityIcon />, text: 'Anyone and everyone can see your events' },
+    { icon: <PhotoCameraIcon />, text: 'Upload event images and flyers' },
+    { icon: <MessageIcon />, text: 'Message with Milonguero@s who favorite you' },
+    { icon: <GroupsIcon />, text: 'Dancers can contact you directly' },
+    { icon: <CheckCircleIcon />, text: 'Get notifications when dancers interact' },
     { icon: <StarIcon />, text: 'Build your reputation as an organizer' },
-    { icon: <BookmarkIcon />, text: 'Dancers can bookmark your events' },
+    { icon: <LocationOnIcon />, text: 'Reach dancers within your geographic range' },
   ];
 
   const whoItsFor = [
@@ -83,6 +94,10 @@ export default function BenefitsPage() {
     { 
       title: 'Teachers',
       items: ['Advertise classes', 'Find students', 'Share knowledge']
+    },
+    { 
+      title: 'Taxi Dancers',
+      items: ['Get hired for events', 'Connect with dancers', 'Build clientele']
     },
     { 
       title: 'Photographers',
@@ -109,7 +124,7 @@ export default function BenefitsPage() {
     },
     {
       question: 'What about dancers?',
-      answer: 'Dancers can browse events freely. Create a Milonguero@ account to bookmark events and message organizers.'
+      answer: 'Dancers can browse events freely. Create a Milonguer@ account to bookmark events and message organizers.'
     }
   ];
 
@@ -120,10 +135,32 @@ export default function BenefitsPage() {
       pb: 4
     }}>
       <Container maxWidth="md">
-        {/* Header with single JOIN button */}
+        {/* Back to Calendar Arrow */}
+        <Box sx={{ pt: 2 }}>
+          <IconButton
+            onClick={() => router.push('/calendar')}
+            sx={{ 
+              color: 'primary.main',
+              '&:hover': {
+                backgroundColor: 'primary.light'
+              }
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography 
+            component="span" 
+            variant="body2" 
+            sx={{ ml: 1, color: 'text.secondary' }}
+          >
+            Back to Calendar
+          </Typography>
+        </Box>
+
+        {/* Header with single SIGN UP button */}
         <Box sx={{ 
           textAlign: 'center', 
-          pt: { xs: 3, md: 5 },
+          pt: { xs: 2, md: 3 },
           pb: 3
         }}>
           <Typography 
@@ -150,61 +187,83 @@ export default function BenefitsPage() {
           </Typography>
 
           <Typography 
-            variant="h5" 
+            variant="body1" 
             sx={{ 
               mb: 3,
-              color: 'primary.main',
-              fontWeight: 'bold'
+              color: 'text.secondary'
             }}
           >
-            It's FREE!
+            Event entry and viewing will always be free to all Tangueros
           </Typography>
 
           <Button
             variant="contained"
-            size="large"
+            size="medium"
             onClick={handleJoinClick}
             sx={{
-              px: 6,
-              py: 2,
-              fontSize: '1.25rem',
-              fontWeight: 'bold',
-              borderRadius: 2,
+              px: 3,
+              py: 1,
+              fontSize: '1rem',
+              fontWeight: 'medium',
+              borderRadius: 1,
               textTransform: 'none',
-              boxShadow: 3,
+              boxShadow: 2,
               '&:hover': {
-                boxShadow: 5
+                boxShadow: 3
               }
             }}
           >
-            JOIN
+            SIGN UP
           </Button>
 
-          <Typography 
-            variant="body2" 
-            color="textSecondary"
-            sx={{ mt: 2 }}
-          >
-            Your first step to reaching more dancers
-          </Typography>
         </Box>
 
         {/* Accordion Tabs */}
         <Box sx={{ mt: 4 }}>
-          {/* Benefits Accordion */}
+          {/* Milonguero@ Benefits Accordion */}
           <Accordion 
-            expanded={expanded === 'benefits'} 
-            onChange={handleAccordionChange('benefits')}
+            expanded={expanded === 'milonguero'} 
+            onChange={handleAccordionChange('milonguer')}
             sx={{ mb: 2 }}
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Benefits
+                Milonguer@
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <List dense>
-                {benefits.map((benefit, index) => (
+                {milonguerBenefits.map((benefit, index) => (
+                  <ListItem key={index}>
+                    <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
+                      {benefit.icon}
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={benefit.text}
+                      primaryTypographyProps={{
+                        fontSize: { xs: '0.9rem', md: '1rem' }
+                      }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Event Organizer Benefits Accordion */}
+          <Accordion 
+            expanded={expanded === 'organizer'} 
+            onChange={handleAccordionChange('organizer')}
+            sx={{ mb: 2 }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Event Organizers
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <List dense>
+                {organizerBenefits.map((benefit, index) => (
                   <ListItem key={index}>
                     <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
                       {benefit.icon}
@@ -229,7 +288,7 @@ export default function BenefitsPage() {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Who It's For
+                Who Else It's For
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -311,32 +370,6 @@ export default function BenefitsPage() {
           </Accordion>
         </Box>
 
-        {/* Bottom CTA */}
-        <Box sx={{ 
-          textAlign: 'center', 
-          mt: 5,
-          p: 3,
-          bgcolor: 'background.paper',
-          borderRadius: 2,
-          boxShadow: 1
-        }}>
-          <Typography variant="h6" gutterBottom>
-            Ready to reach more dancers?
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleJoinClick}
-            sx={{
-              mt: 2,
-              px: 4,
-              py: 1.5,
-              textTransform: 'none'
-            }}
-          >
-            JOIN NOW - It's FREE
-          </Button>
-        </Box>
       </Container>
     </Box>
   );

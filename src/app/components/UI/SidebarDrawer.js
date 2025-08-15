@@ -186,110 +186,21 @@ const SidebarDrawer = ({ open, onClose }) => {
           */}
           {/* END OF COMMENTED REGION SECTION */}
 
-          {/* Find Events Section - Accordion */}
-          <Divider />
-          <Accordion 
-            disableGutters 
-            elevation={0}
-            sx={{
-              '&:before': { display: 'none' },
-              backgroundColor: 'transparent',
-            }}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              sx={{
-                '& .MuiAccordionSummary-content': {
-                  margin: '12px 0',
-                },
-              }}
+          {/* Event Explorer - Top Level */}
+          <Link href="/explorer" passHref>
+            <ListItem
+              button="true"
+              onClick={() => onClose()}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <LocationCityIcon />
+              <ListItemIcon>
+                <PublicIcon sx={{ color: 'primary.main' }} />
               </ListItemIcon>
-              <Typography>Find Events</Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0 }}>
-              <List disablePadding>
-                {/* Map Center - Opens temporary location modal */}
-                <ListItem
-                  button="true"
-                  onClick={() => {
-                    openMapCenterModal();
-                    onClose();
-                  }}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon>
-                    <MyLocationIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Map Center"
-                    secondary="Explore events in other areas"
-                  />
-                </ListItem>
-
-                {/* Select Venue */}
-                <ListItem
-                  button="true"
-                  onClick={() => {
-                    setVenueSelectionModalOpen(true);
-                    onClose();
-                  }}
-                  sx={{
-                    pl: 4,
-                    cursor: 'pointer',
-                    color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
-                  }}
-                >
-                  <ListItemIcon>
-                    <LocationOnIcon sx={{ color: selectedLocation?.city?.id ? 'inherit' : 'text.disabled' }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Select Venue"
-                    secondary={
-                      !selectedLocation?.city?.id 
-                        ? 'Select a city first' 
-                        : selectedVenue 
-                          ? `Current: ${selectedVenue.name || selectedVenue.shortName}` 
-                          : 'Filter by specific venue'
-                    }
-                  />
-                  {selectedVenue && (
-                    <CheckIcon fontSize="small" color="primary" />
-                  )}
-                </ListItem>
-
-                {/* Select Organizer - Coming Soon */}
-                <ListItem disabled sx={{ pl: 4 }}>
-                  <ListItemIcon>
-                    <PersonIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Select Organizer"
-                    secondary="Filter by organizer (Coming soon)"
-                  />
-                </ListItem>
-
-                {/* Event Explorer */}
-                <Link href="/explorer" passHref>
-                  <ListItem
-                    button="true"
-                    onClick={() => onClose()}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemIcon>
-                      <PublicIcon sx={{ color: 'primary.main' }} />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Event Explorer" 
-                      secondary="Discover events worldwide"
-                    />
-                  </ListItem>
-                </Link>
-              </List>
-            </AccordionDetails>
-          </Accordion>
+              <ListItemText 
+                primary="Event Explorer" 
+                secondary="Discover events worldwide"
+              />
+            </ListItem>
+          </Link>
           
           <Divider />
 

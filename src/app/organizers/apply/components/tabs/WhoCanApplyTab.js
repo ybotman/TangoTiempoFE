@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Grid,
-  Card,
-  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   List,
   ListItem,
   ListItemIcon,
@@ -21,111 +21,154 @@ import SchoolIcon from '@mui/icons-material/School';
 import StarIcon from '@mui/icons-material/Star';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PeopleIcon from '@mui/icons-material/People';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 
 const organizerTypes = [
   {
     title: 'Tango Event Hosts',
     subtitle: 'Milonga, Practica, Classes',
-    icon: <EventIcon sx={{ fontSize: 40, color: '#1976d2' }} />,
+    icon: <EventIcon sx={{ fontSize: 30, color: '#1976d2' }} />,
     requirements: [
       'Active member of the tango community',
       'Experience organizing tango events',
       'Venue access for regular events',
       'Commitment to community building'
     ],
-    color: '#e3f2fd'
+    color: '#e3f2fd',
+    comingSoon: false
   },
   {
     title: 'DJs',
     subtitle: 'Tango Music Specialists',
-    icon: <HeadphonesIcon sx={{ fontSize: 40, color: '#f57c00' }} />,
+    icon: <HeadphonesIcon sx={{ fontSize: 30, color: '#f57c00' }} />,
     requirements: [
       'Extensive tango music collection',
       'Professional audio equipment',
       'Understanding of tanda structure',
       'Experience at milongas'
     ],
-    color: '#fff3e0'
+    color: '#fff3e0',
+    comingSoon: true
   },
   {
     title: 'Teachers',
     subtitle: 'Including Traveling Teachers',
-    icon: <SchoolIcon sx={{ fontSize: 40, color: '#7b1fa2' }} />,
+    icon: <SchoolIcon sx={{ fontSize: 30, color: '#7b1fa2' }} />,
     requirements: [
       'Proven teaching experience',
       'Clear teaching methodology',
       'Student references available',
       'Flexible scheduling'
     ],
-    color: '#f3e5f5'
+    color: '#f3e5f5',
+    comingSoon: true
   },
   {
     title: 'Maestros',
     subtitle: 'Master Teachers & Couples',
-    icon: <StarIcon sx={{ fontSize: 40, color: '#c62828' }} />,
+    icon: <StarIcon sx={{ fontSize: 30, color: '#c62828' }} />,
     requirements: [
       'Professional performance history',
       'International teaching experience',
       'Specialized expertise',
       'Workshop availability'
     ],
-    color: '#ffebee'
+    color: '#ffebee',
+    comingSoon: true
   },
   {
     title: 'Orchestras',
     subtitle: 'Live Tango Music Ensembles',
-    icon: <MusicNoteIcon sx={{ fontSize: 40, color: '#00695c' }} />,
+    icon: <MusicNoteIcon sx={{ fontSize: 30, color: '#00695c' }} />,
     requirements: [
       'Complete tango ensemble',
       'Performance repertoire',
       'Professional equipment',
       'Booking availability'
     ],
-    color: '#e0f2f1'
+    color: '#e0f2f1',
+    comingSoon: true
   },
   {
     title: 'Tango Musicians',
     subtitle: 'Solo Artists & Aspiring Musicians',
-    icon: <MusicNoteIcon sx={{ fontSize: 40, color: '#4527a0' }} />,
+    icon: <MusicNoteIcon sx={{ fontSize: 30, color: '#4527a0' }} />,
     requirements: [
       'Instrument proficiency',
       'Tango repertoire knowledge',
       'Performance experience',
       'Collaboration interest'
     ],
-    color: '#ede7f6'
+    color: '#ede7f6',
+    comingSoon: true
+  },
+  {
+    title: 'Taxi Dancers',
+    subtitle: 'Professional Dance Partners',
+    icon: <PeopleIcon sx={{ fontSize: 30, color: '#e91e63' }} />,
+    requirements: [
+      'Professional dance skills',
+      'Experience with multiple dance styles',
+      'Strong leading/following abilities',
+      'Professional demeanor'
+    ],
+    color: '#fce4ec',
+    comingSoon: true
   },
   {
     title: 'Regional Admins',
     subtitle: 'Community Leaders & Coordinators',
-    icon: <AdminPanelSettingsIcon sx={{ fontSize: 40, color: '#bf360c' }} />,
+    icon: <AdminPanelSettingsIcon sx={{ fontSize: 30, color: '#bf360c' }} />,
     requirements: [
       'Strong community connections',
       'Organizational skills',
       'Time commitment available',
       'Communication abilities'
     ],
-    color: '#fbe9e7'
+    color: '#fbe9e7',
+    comingSoon: true
   },
   {
     title: 'Venues',
     subtitle: 'Dance Studios & Event Spaces',
-    icon: <BusinessIcon sx={{ fontSize: 40, color: '#388e3c' }} />,
+    icon: <BusinessIcon sx={{ fontSize: 30, color: '#388e3c' }} />,
     requirements: [
       'Physical space suitable for tango',
       'Appropriate dance flooring',
       'Capacity for social dancing',
       'Liability insurance coverage'
     ],
-    color: '#e8f5e9'
+    color: '#e8f5e9',
+    comingSoon: true
+  },
+  {
+    title: 'TangoTiempo BrainTrust',
+    subtitle: 'Strategic Advisors & Innovators',
+    icon: <PsychologyIcon sx={{ fontSize: 30, color: '#6a1b9a' }} />,
+    requirements: [
+      'Deep tango community knowledge',
+      'Strategic thinking abilities',
+      'Innovation and vision',
+      'Commitment to platform growth'
+    ],
+    color: '#f3e5f5',
+    comingSoon: true
   }
 ];
 
 const WhoCanApplyTab = () => {
+  const [expanded, setExpanded] = useState(false);
+
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-        Who Can Apply to TangoTiempo?
+        Artists + Who Can Apply to TangoTiempo
       </Typography>
       
       <Typography variant="body1" paragraph sx={{ mb: 4 }}>
@@ -134,55 +177,67 @@ const WhoCanApplyTab = () => {
         or perform, we want to help you connect with the tango community.
       </Typography>
 
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {organizerTypes.map((type, index) => (
-          <Grid item xs={12} md={6} key={index}>
-            <Card 
+          <Accordion 
+            key={index}
+            expanded={expanded === `panel${index}`}
+            onChange={handleAccordionChange(`panel${index}`)}
+            sx={{ 
+              backgroundColor: type.color,
+              '&:before': { display: 'none' }
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
               sx={{ 
-                height: '100%',
-                backgroundColor: type.color,
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 3
+                '& .MuiAccordionSummary-content': {
+                  alignItems: 'center'
                 }
               }}
             >
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  {type.icon}
-                  <Box sx={{ ml: 2 }}>
-                    <Typography variant="h6" component="h4">
-                      {type.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {type.subtitle}
-                    </Typography>
-                  </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                {type.icon}
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" component="h4">
+                    {type.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {type.subtitle}
+                  </Typography>
                 </Box>
-                
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                  Requirements:
-                </Typography>
-                
-                <List dense>
-                  {type.requirements.map((req, idx) => (
-                    <ListItem key={idx} sx={{ py: 0.5 }}>
-                      <ListItemIcon sx={{ minWidth: 32 }}>
-                        <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={req}
-                        primaryTypographyProps={{ variant: 'body2' }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
+                {type.comingSoon && (
+                  <Chip 
+                    label="Coming Soon" 
+                    size="small" 
+                    color="warning"
+                    sx={{ mr: 2 }}
+                  />
+                )}
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Requirements:
+              </Typography>
+              
+              <List dense>
+                {type.requirements.map((req, idx) => (
+                  <ListItem key={idx} sx={{ py: 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={req}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </AccordionDetails>
+          </Accordion>
         ))}
-      </Grid>
+      </Box>
 
       <Box sx={{ mt: 4, p: 3, backgroundColor: 'info.light', borderRadius: 2 }}>
         <Typography variant="h6" gutterBottom>

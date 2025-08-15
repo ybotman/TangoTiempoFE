@@ -243,14 +243,6 @@ const UserSettingsApply = () => {
         </Box>
       )}
 
-      <Typography variant="h6" gutterBottom>
-        Apply for Organizer/Artist
-      </Typography>
-
-      <Typography variant="body1" gutterBottom>
-        By applying, you can manage events in your region.
-      </Typography>
-
       {/* Only show Apply button if not loading and user doesn't have an organizer ID */}
       {!isLoading && !hasOrganizerId && (
         <Button
@@ -258,8 +250,10 @@ const UserSettingsApply = () => {
           color="primary"
           onClick={handleApply}
           disabled={isLoading || !userData || !regionalOrganizerRole}
+          size="large"
+          fullWidth
         >
-          {applicationStatus === 'loading' ? 'Applying...' : 'Apply'}
+          {applicationStatus === 'loading' ? 'Applying...' : 'Apply for Event Organizer'}
         </Button>
       )}
 
@@ -275,14 +269,40 @@ const UserSettingsApply = () => {
         </Button>
       )}
 
-      {/* Show success message if user is fully set up */}
-      {!isLoading && hasOrganizerId && isApproved && (
-        <Typography variant="body2" color="textSecondary">
-          You have successfully applied as an Organizer/Artist.
-        </Typography>
+      {/* Show setup instructions if user is approved but not enabled */}
+      {!isLoading && hasOrganizerId && isApproved && !isEnabled && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+            Complete Your Organizer Setup:
+          </Typography>
+          <Typography variant="body2" component="div">
+            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li>Click the <strong>user icon</strong> (top right)</li>
+              <li>Select <strong>"Change Role"</strong> → Choose <strong>"Organizer/Artist"</strong></li>
+              <li>Open the menu (☰) → Click <strong>"Organizer Settings"</strong></li>
+              <li>Complete ALL required fields:
+                <ul style={{ marginTop: '4px' }}>
+                  <li>Organizer Name</li>
+                  <li>Short Name</li>
+                  <li>Description</li>
+                </ul>
+              </li>
+              <li>Enable your profile once all fields are complete</li>
+            </ol>
+          </Typography>
+        </Alert>
+      )}
+      
+      {/* Show success message if user is fully enabled */}
+      {!isLoading && hasOrganizerId && isApproved && isEnabled && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          <Typography variant="body2">
+            ✓ You're all set! You can now create events as an Organizer.
+          </Typography>
+        </Alert>
       )}
 
-      {/* Show organizer status and types if user has an organizer ID */}
+      {/* Show organizer status if user has an organizer ID */}
       {!isLoading && hasOrganizerId && (
         <>
           <Divider sx={{ my: 3 }} />
@@ -327,135 +347,6 @@ const UserSettingsApply = () => {
                   </Typography>
                 </Box>
               </Box>
-            </Box>
-          </Paper>
-
-          {/* Organizer Types Section */}
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="subtitle1" gutterBottom fontWeight="bold">
-              Organizer Types
-            </Typography>
-            
-            {/* Column Headers */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 2, pb: 1, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography variant="body2" fontWeight="bold" sx={{ flex: 1 }}>
-                Type
-              </Typography>
-              <Typography variant="body2" fontWeight="bold" sx={{ width: 80, textAlign: 'center' }}>
-                Apply
-              </Typography>
-              <Typography variant="body2" fontWeight="bold" sx={{ width: 80, textAlign: 'center', opacity: 0.5 }} color="text.disabled">
-                Approved
-              </Typography>
-              <Typography variant="body2" fontWeight="bold" sx={{ width: 80, textAlign: 'center', opacity: 0.5 }} color="text.disabled">
-                Enabled
-              </Typography>
-            </Box>
-            
-            {/* Type Rows */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {/* Event Organizer */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
-                <Typography variant="body2" sx={{ flex: 1 }}>
-                  Event Organizer
-                </Typography>
-                <Box sx={{ width: 80, textAlign: 'center' }}>
-                  {organizer?.organizerTypes?.isEventOrganizer ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-              </Box>
-              
-              {/* Venue */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
-                <Typography variant="body2" sx={{ flex: 1 }}>
-                  Venue
-                </Typography>
-                <Box sx={{ width: 80, textAlign: 'center' }}>
-                  {organizer?.organizerTypes?.isVenue ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-              </Box>
-              
-              {/* Teacher */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
-                <Typography variant="body2" sx={{ flex: 1 }}>
-                  Teacher
-                </Typography>
-                <Box sx={{ width: 80, textAlign: 'center' }}>
-                  {organizer?.organizerTypes?.isTeacher ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-              </Box>
-              
-              {/* Maestro */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
-                <Typography variant="body2" sx={{ flex: 1 }}>
-                  Maestro
-                </Typography>
-                <Box sx={{ width: 80, textAlign: 'center' }}>
-                  {organizer?.organizerTypes?.isMaestro ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-              </Box>
-              
-              {/* DJ */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
-                <Typography variant="body2" sx={{ flex: 1 }}>
-                  DJ
-                </Typography>
-                <Box sx={{ width: 80, textAlign: 'center' }}>
-                  {organizer?.organizerTypes?.isDJ ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-              </Box>
-              
-              {/* Orchestra */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 0.5 }}>
-                <Typography variant="body2" sx={{ flex: 1 }}>
-                  Orchestra
-                </Typography>
-                <Box sx={{ width: 80, textAlign: 'center' }}>
-                  {organizer?.organizerTypes?.isOrchestra ? <CheckCircleIcon color="success" fontSize="small" /> : <CancelIcon color="error" fontSize="small" />}
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-                <Box sx={{ width: 80, textAlign: 'center', opacity: 0.5 }}>
-                  <CancelIcon color="disabled" fontSize="small" />
-                </Box>
-              </Box>
-            </Box>
-            
-            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="caption" color="text.secondary">
-                Approved and Enabled columns coming in
-              </Typography>
-              <Chip label="v2.x" size="small" sx={{ opacity: 0.7 }} />
             </Box>
           </Paper>
         </>
