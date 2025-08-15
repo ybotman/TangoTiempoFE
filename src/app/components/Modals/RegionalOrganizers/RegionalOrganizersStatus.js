@@ -159,9 +159,21 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Profile Status Dashboard
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">
+          Profile Status Dashboard
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleSave} 
+          disabled={isSaveDisabled}
+          size="medium"
+          sx={{ minWidth: 150 }}
+        >
+          Save Profile Status
+        </Button>
+      </Box>
 
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -425,17 +437,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           Profile activation requires an app restart to take full effect.
         </Typography>
       </Box>
-
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handleSave} 
-        disabled={isSaveDisabled}
-        sx={{ mt: 3 }}
-        fullWidth
-      >
-        Save Profile Status
-      </Button>
     </Box>
   );
 };

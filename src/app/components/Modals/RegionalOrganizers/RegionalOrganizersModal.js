@@ -96,7 +96,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               <Tab label="Status" value="status" />
               <Tab label="Settings" value="settings" />
               <Tab label="Profile" value="profile" />
-              <Tab label="Types" value="types" />
+              <Tab label="Artists+" value="types" />
               <Tab label="Profile Images" value="profileImages" />
             </Tabs>
 
