@@ -60,57 +60,45 @@ const UnifiedLocationModal = ({
     if (!open || mapInitialized || !mapRef.current) return;
     
     const initializeMap = async () => {
-      // Dynamic import L to avoid SSR issues
-      const L = (await import('leaflet')).default;
-      
-      // Create custom icon
-      const customIcon = L.divIcon({
-        className: 'custom-location-marker',
-        html: '<div style="background-color: #1976d2; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.4);"></div>',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      });
-      
-      // Initialize map
-      const map = L.map(mapRef.current, {
-        center: [centerLat || 40.7128, centerLng || -74.0060],
-        zoom: 5,
-        scrollWheelZoom: true,
-        zoomControl: false // We'll add custom position
-      });
-      
-      // Add tile layer
-      L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`, {
-        attribution: 'Map data &copy; OpenStreetMap contributors',
-        tileSize: 512,
-        zoomOffset: -1
-      }).addTo(map);
-      
-      // Add zoom control in bottom-right for mobile, top-left for desktop
-      L.control.zoom({
-        position: isMobile ? 'bottomright' : 'topleft'
-      }).addTo(map);
-      
-      // Removed scale control - not needed
-      
-      // Custom CSS for larger mobile controls
-      if (isMobile) {
-        const style = document.createElement('style');
-        style.textContent = `
-          .leaflet-control-zoom a {
-            width: 44px !important;
-            height: 44px !important;
-            line-height: 44px !important;
-            font-size: 22px !important;
+      try {
+        // Dynamic import L to avoid SSR issues
+        const L = (await import('leaflet')).default;
+        
+        // Fix Leaflet's default icon path issues
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+          iconUrl: '/leaflet/marker-icon.png',
+          shadowUrl: '/leaflet/marker-shadow.png',
+        });
+        
+        // Initialize map
+        const initialLat = centerLat ? parseFloat(centerLat) : 40.7128;
+        const initialLng = centerLng ? parseFloat(centerLng) : -74.0060;
+        
+        console.log('[UnifiedLocationModal] Creating map with center:', initialLat, initialLng);
+        
+        const map = L.map(mapRef.current, {
+          center: [initialLat, initialLng],
+          zoom: 5,
+          scrollWheelZoom: true,
+          zoomControl: true // Use default position for now
+        });
+        
+        console.log('[UnifiedLocationModal] Map created successfully');
+        
+        // Add tile layer
+        L.tileLayer(
+          `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
+          {
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1,
+            attribution: '© Mapbox © OpenStreetMap'
           }
-          .leaflet-control-scale {
-            font-size: 12px !important;
-            border: 2px solid rgba(0,0,0,0.4) !important;
-            background: rgba(255,255,255,0.9) !important;
-          }
-        `;
-        document.head.appendChild(style);
-      }
+        ).addTo(map);
+      
+        console.log('[UnifiedLocationModal] Tile layer added');
       
       // Handle map click
       map.on('click', (e) => {
@@ -125,15 +113,21 @@ const UnifiedLocationModal = ({
         map.invalidateSize();
       }, 100);
       
-      mapInstanceRef.current = map;
-      setMapInitialized(true);
-      
-      // Force another resize after initialization
-      setTimeout(() => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
-        }
-      }, 300);
+        mapInstanceRef.current = map;
+        setMapInitialized(true);
+        
+        // Force resize after initialization
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            console.log('[UnifiedLocationModal] Invalidating map size');
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 300);
+        
+      } catch (error) {
+        console.error('[UnifiedLocationModal] Error initializing map:', error);
+        setMessage({ type: 'error', text: 'Failed to initialize map' });
+      }
     };
     
     initializeMap();
