@@ -255,10 +255,12 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">
             Mandatory Requirements
           </Typography>
-          <Typography variant="body2" color="error" sx={{ mb: 2, fontWeight: 'bold' }}>
+          <Typography variant="body2" color={mandatoryChecks.filter(c => !c.passed).length > 0 ? "error" : "success.main"} sx={{ mb: 2, fontWeight: 'bold' }}>
             {mandatoryChecks.filter(c => !c.passed).length > 0 
               ? `All ${mandatoryChecks.filter(c => !c.passed).length} items must be completed. You must activate to add events or artist types.`
-              : 'All requirements completed! You can now activate your profile.'
+              : isEnabled 
+                ? 'All requirements completed! You can add events and apply for Artist+ types.'
+                : 'All requirements completed! You can now enable your profile.'
             }
           </Typography>
           <List dense>
