@@ -293,8 +293,24 @@ const UserSettingsApply = () => {
         </Alert>
       )}
       
-      {/* Show success message if user is fully enabled */}
-      {!isLoading && hasOrganizerId && isApproved && isEnabled && (
+      {/* Show instruction to change role and complete setup */}
+      {!isLoading && hasOrganizerId && isApproved && !organizer?.isEnabled && (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+            Next Steps Required:
+          </Typography>
+          <Typography variant="body2" component="div">
+            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li><strong>Change your role:</strong> Click the login button → Select "Organizer/Artist"</li>
+              <li><strong>Complete your profile:</strong> Go to Event Organizer Settings → Status tab</li>
+              <li><strong>Enable your profile:</strong> Complete all requirements and activate</li>
+            </ol>
+          </Typography>
+        </Alert>
+      )}
+      
+      {/* Show success only when organizer is actually enabled */}
+      {!isLoading && hasOrganizerId && isApproved && organizer?.isEnabled && (
         <Alert severity="success" sx={{ mt: 2 }}>
           <Typography variant="body2">
             ✓ You're all set! You can now create events as an Organizer.
@@ -313,41 +329,31 @@ const UserSettingsApply = () => {
               Organizer Status
             </Typography>
             
-            {/* Admin/AI Controls */}
+            {/* Application Status */}
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" fontWeight="medium" color="primary" sx={{ mb: 1 }}>
-                Admin/AI Controls
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', pl: 2 }}>
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {isApproved ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
                   <Typography variant="body2">
-                    <strong>Approved:</strong> {isApproved ? 'Yes' : 'No'}
+                    <strong>Application:</strong> {isApproved ? 'Approved' : 'Pending'}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {isEnabled ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                  {organizer?.isEnabled ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
                   <Typography variant="body2">
-                    <strong>AI-Enabled:</strong> {isEnabled ? 'Yes' : 'No'}
+                    <strong>Profile Status:</strong> {organizer?.isEnabled ? 'Active' : 'Not Activated'}
                   </Typography>
                 </Box>
               </Box>
             </Box>
             
-            {/* Organizer Controls */}
-            <Box>
-              <Typography variant="body2" fontWeight="medium" color="secondary" sx={{ mb: 1 }}>
-                Organizer Controls
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', pl: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {organizer?.isEnabled ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
-                  <Typography variant="body2">
-                    <strong>Organizer-Enabled:</strong> {organizer?.isEnabled ? 'Yes' : 'No'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
+            {!organizer?.isEnabled && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="caption">
+                  To activate: Change role to Organizer/Artist → Open Event Organizer Settings → Complete all requirements in Status tab
+                </Typography>
+              </Alert>
+            )}
           </Paper>
         </>
       )}
