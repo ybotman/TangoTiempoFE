@@ -11,15 +11,17 @@ const useMenuItems = () => {
 
   const getMenuItems = (context) => {
     if (context === 'dateClick') {
-      // If no region is selected, show only the "Select a region first" option
-      if (!selectedRegion) {
-        return [{ label: 'Select a region first', action: 'noAction' }];
-      }
-
+      // RO and RA users can always create events using their GeoLocation context (lat/long based)
       if (selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || selectedRole === listOfAllRoles.REGIONAL_ADMIN) {
         return [
           { label: 'Add Event', action: 'addSingleEvent' },
         ];
+      }
+      
+      // For other users, check if location is set (lat/long based system, not region based)
+      // Legacy region check removed - system now uses lat/long from GeoLocation context
+      if (!selectedLocation?.latitude || !selectedLocation?.longitude) {
+        return [{ label: 'Set your location first', action: 'noAction' }];
       }
     }
 

@@ -61,7 +61,7 @@ describe('UserSettingsApply Component', () => {
   test('renders properly with valid data', () => {
     render(<UserSettingsApply />);
     
-    expect(screen.getByText('Apply for Regional Organizer')).toBeInTheDocument();
+    expect(screen.getByText('Apply for Organizer/Artist')).toBeInTheDocument();
     expect(screen.getByText('By applying, you can manage events in your region.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
   });
@@ -204,7 +204,7 @@ describe('UserSettingsApply Component', () => {
     
     render(<UserSettingsApply />);
     
-    expect(screen.getByText('You have successfully applied as a Regional Organizer.')).toBeInTheDocument();
+    expect(screen.getByText('You have successfully applied as an Organizer/Artist.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
   });
 });

@@ -36,12 +36,10 @@ import GroupIcon from '@mui/icons-material/Group';
 import ImageIcon from '@mui/icons-material/Image';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useMasteredCities } from '@/hooks/useMasteredCities';
 
 const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
-  const { masteredCities } = useMasteredCities(true); // Include inactive to show selected cities
   
   // State for switchable attributes
   const [isEnabled, setIsEnabled] = useState(false);
@@ -61,7 +59,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
   const isApprovedFromUserLogin = roInfo.isApproved || false;
   const isActiveFromUserLogin = roInfo.isActive || false;
   const isEnabledFromUserLogin = roInfo.isEnabled || false;
-  const allowedCityIds = roInfo.allowedMasteredCityIds || [];
   const approvalDate = roInfo.ApprovalDate ? new Date(roInfo.ApprovalDate).toLocaleDateString() : 'Not set';
 
   // Organizer collection values
@@ -106,9 +103,12 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
       setInitialIsEnabled(isEnabled);
       setShowSuccessMessage(true);
       
-      // Show restart warning if enabling
+      // Auto-refresh after 2 seconds if enabling
       if (isEnabled && !initialIsEnabled) {
         setShowRestartWarning(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     } catch (error) {
       console.error('Failed to update status:', error);
@@ -116,16 +116,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
     }
   };
 
-  // Helper function to get city display names
-  const getCityDisplayNames = () => {
-    if (!allowedCityIds.length || !masteredCities.length) return [];
-    return allowedCityIds
-      .map(cityId => {
-        const city = masteredCities.find(c => c._id === cityId);
-        return city ? city.cityName + (city.active ? '' : ' (inactive)') : null;
-      })
-      .filter(name => name !== null);
-  };
 
   const mandatoryChecks = [
     {
@@ -152,18 +142,19 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
             organizer.shortName !== 'CHANGE' &&
             !organizer.shortName.toUpperCase().includes('TANGO') &&
             !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) 
-              ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
+              ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
+      details: !organizer?.shortName ? 'Required' : 
+               organizer.shortName === 'CHANGE' ? 'Must change from default' :
+               organizer.shortName.length < 3 ? 'Too short (min 3 chars)' :
+               organizer.shortName.length > 9 ? 'Too long (max 9 chars)' :
+               organizer.shortName.toUpperCase().includes('TANGO') ? 'Cannot contain "Tango"' :
+               /(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) ? 'Invalid format' : null
     },
     {
       label: 'Description',
-      passed: organizer?.description && organizer.description.length > 0,
-      icon: organizer?.description && organizer.description.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />
-    },
-    {
-      label: 'At Least One City Selected',
-      passed: allowedCityIds.length > 0,
-      icon: allowedCityIds.length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
-      details: allowedCityIds.length > 0 ? `${allowedCityIds.length} cities: ${getCityDisplayNames().join(', ')}` : null
+      passed: organizer?.description && organizer.description.trim().length > 0,
+      icon: organizer?.description && organizer.description.trim().length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
+      details: !organizer?.description || organizer.description.trim().length === 0 ? 'Required - Add a description of your events' : null
     },
   ];
 
@@ -171,9 +162,21 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Profile Status Dashboard
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">
+          Profile Status Dashboard
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleSave} 
+          disabled={isSaveDisabled}
+          size="medium"
+          sx={{ minWidth: 150 }}
+        >
+          Save
+        </Button>
+      </Box>
 
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -201,81 +204,11 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           sx={{ mb: 2 }}
           onClose={() => setShowRestartWarning(false)}
         >
-          App restart required to activate your organizer role. Please restart the app after saving.
+          Activating organizer role... The app will refresh automatically in 2 seconds.
         </Alert>
       )}
 
-      {/* User Information - Moved from Settings */}
-      <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
-        <CardContent sx={{ py: 2 }}>
-          <Box display="flex" alignItems="center" sx={{ mb: 1.5 }}>
-            <AccountCircleIcon sx={{ mr: 1 }} />
-            <Typography variant="subtitle1" fontWeight="bold">
-              User Information
-            </Typography>
-          </Box>
-          
-          <Grid container spacing={1}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Email</Typography>
-              <Typography variant="body2">{email}</Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Approval Date</Typography>
-              <Typography variant="body2">{approvalDate}</Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Organizer ID</Typography>
-              <Typography variant="body2" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.75rem' 
-              }}>
-                {organizerId || 'Not set'}
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Firebase ID</Typography>
-              <Typography variant="body2" sx={{ 
-                fontFamily: 'monospace', 
-                fontSize: '0.75rem',
-                wordBreak: 'break-all' 
-              }}>
-                {firebaseUserId}
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Mandatory Requirements */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" gutterBottom fontWeight="bold">
-            Mandatory Requirements
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            All items must be completed before enabling your profile
-          </Typography>
-          <List dense>
-            {mandatoryChecks.map((check, index) => (
-              <ListItem key={index}>
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {check.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={check.label}
-                  secondary={check.details}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
-
-      {/* Enable Switch */}
+      {/* Profile Activation - MOVED TO TOP */}
       <Card 
         elevation={2} 
         sx={{ 
@@ -290,7 +223,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
               <Typography variant="h6" gutterBottom>
                 Profile Activation
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color={allMandatoryPassed || isEnabled ? "text.secondary" : "error"}>
                 {isEnabled 
                   ? "Your profile is active - You can create and manage tango events"
                   : allMandatoryPassed 
@@ -313,6 +246,36 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
               labelPlacement="bottom"
             />
           </Box>
+        </CardContent>
+      </Card>
+
+      {/* Mandatory Requirements - SECOND */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+            Mandatory Requirements
+          </Typography>
+          <Typography variant="body2" color={mandatoryChecks.filter(c => !c.passed).length > 0 ? "error" : "success.main"} sx={{ mb: 2, fontWeight: 'bold' }}>
+            {mandatoryChecks.filter(c => !c.passed).length > 0 
+              ? `All ${mandatoryChecks.filter(c => !c.passed).length} items must be completed. You must activate to add events or artist types.`
+              : isEnabled 
+                ? 'All requirements completed! You can add events and apply for Artist+ types.'
+                : 'All requirements completed! You can now enable your profile.'
+            }
+          </Typography>
+          <List dense>
+            {mandatoryChecks.map((check, index) => (
+              <ListItem key={index}>
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  {check.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={check.label}
+                  secondary={check.details}
+                />
+              </ListItem>
+            ))}
+          </List>
         </CardContent>
       </Card>
 
@@ -426,6 +389,51 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
         </CardContent>
       </Card>
 
+      {/* User Information - MOVED TO BOTTOM */}
+      <Card variant="outlined" sx={{ mb: 3, bgcolor: 'grey.50' }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box display="flex" alignItems="center" sx={{ mb: 1.5 }}>
+            <AccountCircleIcon sx={{ mr: 1 }} />
+            <Typography variant="subtitle1" fontWeight="bold">
+              User Information
+            </Typography>
+          </Box>
+          
+          <Grid container spacing={1}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Email</Typography>
+              <Typography variant="body2">{email}</Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Approval Date</Typography>
+              <Typography variant="body2">{approvalDate}</Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Organizer ID</Typography>
+              <Typography variant="body2" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.75rem' 
+              }}>
+                {organizerId || 'Not set'}
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary">Firebase ID</Typography>
+              <Typography variant="body2" sx={{ 
+                fontFamily: 'monospace', 
+                fontSize: '0.75rem',
+                wordBreak: 'break-all' 
+              }}>
+                {firebaseUserId}
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
       {/* Data Source Info */}
       <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
@@ -434,17 +442,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
           Profile activation requires an app restart to take full effect.
         </Typography>
       </Box>
-
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handleSave} 
-        disabled={isSaveDisabled}
-        sx={{ mt: 3 }}
-        fullWidth
-      >
-        Save Profile Status
-      </Button>
     </Box>
   );
 };

@@ -465,6 +465,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         <Typography variant="h6">
           Event Location Preferences
         </Typography>
+        {/* Hide button on mobile - will show at bottom instead */}
         <Button
           variant="contained"
           startIcon={saving ? <CircularProgress size={20} /> : <SaveIcon />}
@@ -473,7 +474,8 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
           sx={{ 
             minWidth: 120,
             opacity: canSave() ? 1 : 0.5,
-            transition: 'opacity 0.3s'
+            transition: 'opacity 0.3s',
+            display: { xs: 'none', md: 'inline-flex' } // Hide on mobile
           }}
         >
           {saving ? (isLoggedIn ? 'Saving...' : 'Setting...') : 
@@ -617,6 +619,39 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
       <Typography variant="body2" color="text.secondary">
         <strong>Note:</strong> Location filtering is now set to Map Center mode only. Events will be filtered based on distance from your selected center point.
       </Typography>
+
+      {/* Mobile Save Button - Sticky at bottom */}
+      <Box 
+        sx={{ 
+          display: { xs: 'block', md: 'none' }, // Only show on mobile
+          position: 'sticky',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: 'background.paper',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          p: 2,
+          mt: 3,
+          zIndex: 10
+        }}
+      >
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={saving ? <CircularProgress size={20} /> : <SaveIcon />}
+          onClick={handleSave}
+          disabled={saving || !canSave()}
+          sx={{ 
+            opacity: canSave() ? 1 : 0.5,
+            transition: 'opacity 0.3s'
+          }}
+        >
+          {saving ? (isLoggedIn ? 'Saving...' : 'Setting...') : 
+           hasChanges() ? (isLoggedIn ? 'Save Changes' : 'Set Location') : 
+           (isLoggedIn ? 'Save' : 'Set')}
+        </Button>
+      </Box>
     </Box>
   );
 };

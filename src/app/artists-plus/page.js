@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import {
   Box,
+  Container,
   Typography,
   Accordion,
   AccordionSummary,
@@ -11,7 +12,10 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Chip
+  Chip,
+  IconButton,
+  Paper,
+  Alert
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventIcon from '@mui/icons-material/Event';
@@ -24,6 +28,10 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PeopleIcon from '@mui/icons-material/People';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
 const organizerTypes = [
   {
@@ -158,99 +166,129 @@ const organizerTypes = [
   }
 ];
 
-const WhoCanApplyTab = () => {
+const ArtistsPlusPage = () => {
   const [expanded, setExpanded] = useState(false);
+  const router = useRouter();
+  const { user } = useContext(AuthContext);
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  return (
-    <Box>
-      <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-        Artists + Who Can Apply to TangoTiempo
-      </Typography>
-      
-      <Typography variant="body1" paragraph sx={{ mb: 4 }}>
-        TangoTiempo welcomes applications from all members of the tango community who contribute to 
-        making tango events happen. Whether you organize events, provide venues, play music, teach, 
-        or perform, we want to help you connect with the tango community.
-      </Typography>
+  if (!user) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+        <Alert severity="warning">
+          Please sign in to view Artist+ information.
+        </Alert>
+      </Container>
+    );
+  }
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {organizerTypes.map((type, index) => (
-          <Accordion 
-            key={index}
-            expanded={expanded === `panel${index}`}
-            onChange={handleAccordionChange(`panel${index}`)}
-            sx={{ 
-              backgroundColor: type.color,
-              '&:before': { display: 'none' }
-            }}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Back button */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <IconButton 
+          onClick={() => router.push('/calendar')}
+          sx={{ 
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover'
+            }
+          }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
+      </Box>
+
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
+          Artists + Who Can Apply to TangoTiempo
+        </Typography>
+        
+        <Typography variant="body1" paragraph sx={{ mb: 4 }}>
+          TangoTiempo welcomes applications from all members of the tango community who contribute to 
+          making tango events happen. Whether you organize events, provide venues, play music, teach, 
+          or perform, we want to help you connect with the tango community.
+        </Typography>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {organizerTypes.map((type, index) => (
+            <Accordion 
+              key={index}
+              expanded={expanded === `panel${index}`}
+              onChange={handleAccordionChange(`panel${index}`)}
               sx={{ 
-                '& .MuiAccordionSummary-content': {
-                  alignItems: 'center'
-                }
+                backgroundColor: type.color,
+                '&:before': { display: 'none' }
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                {type.icon}
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" component="h4">
-                    {type.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {type.subtitle}
-                  </Typography>
-                </Box>
-                {type.comingSoon && (
-                  <Chip 
-                    label="Coming Soon" 
-                    size="small" 
-                    color="warning"
-                    sx={{ mr: 2 }}
-                  />
-                )}
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                Requirements:
-              </Typography>
-              
-              <List dense>
-                {type.requirements.map((req, idx) => (
-                  <ListItem key={idx} sx={{ py: 0.5 }}>
-                    <ListItemIcon sx={{ minWidth: 32 }}>
-                      <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary={req}
-                      primaryTypographyProps={{ variant: 'body2' }}
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{ 
+                  '& .MuiAccordionSummary-content': {
+                    alignItems: 'center'
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                  {type.icon}
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" component="h4">
+                      {type.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {type.subtitle}
+                    </Typography>
+                  </Box>
+                  {type.comingSoon && (
+                    <Chip 
+                      label="Coming Soon" 
+                      size="small" 
+                      color="warning"
+                      sx={{ mr: 2 }}
                     />
-                  </ListItem>
-                ))}
-              </List>
-            </AccordionDetails>
-          </Accordion>
-        ))}
-      </Box>
+                  )}
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  Requirements:
+                </Typography>
+                
+                <List dense>
+                  {type.requirements.map((req, idx) => (
+                    <ListItem key={idx} sx={{ py: 0.5 }}>
+                      <ListItemIcon sx={{ minWidth: 32 }}>
+                        <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                      </ListItemIcon>
+                      <ListItemText 
+                        primary={req}
+                        primaryTypographyProps={{ variant: 'body2' }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
 
-      <Box sx={{ mt: 4, p: 3, backgroundColor: 'info.light', borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Multiple Roles Welcome!
-        </Typography>
-        <Typography variant="body2">
-          Many community members wear multiple hats. You can apply for and maintain multiple 
-          organizer types. For example, you might be both a DJ and a Teacher, or run a Venue 
-          while also organizing Events.
-        </Typography>
-      </Box>
-    </Box>
+        <Box sx={{ mt: 4, p: 3, backgroundColor: 'info.light', borderRadius: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Multiple Roles Welcome!
+          </Typography>
+          <Typography variant="body2">
+            Many community members wear multiple hats. You can apply for and maintain multiple 
+            organizer types. For example, you might be both a DJ and a Teacher, or run a Venue 
+            while also organizing Events.
+          </Typography>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
-export default WhoCanApplyTab;
+export default ArtistsPlusPage;

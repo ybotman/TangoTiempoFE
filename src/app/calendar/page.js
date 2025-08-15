@@ -25,6 +25,8 @@ import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetail
 import CategoryCircles from '@/components/UI/CategoryCircles';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
+import { listOfAllRoles } from '@/utils/masterData';
 
 const CalendarPage = () => {
   <Head>
@@ -88,6 +90,9 @@ const CalendarPage = () => {
     noLocationSelected,
   } = useCalendarPage();
 
+  // Get selected role from context
+  const { selectedRole } = useContext(RoleContext);
+
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
@@ -99,10 +104,18 @@ const CalendarPage = () => {
     const current = new Date(startDate);
     const end = new Date(endDate);
     
+    // Determine placeholder text based on user role
+    const canAddEvents = selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || 
+                        selectedRole === listOfAllRoles.REGIONAL_ADMIN ||
+                        selectedRole === listOfAllRoles.SYSTEM_ADMIN ||
+                        selectedRole === listOfAllRoles.SUPER_ADMIN;
+    
+    const placeholderText = canAddEvents ? 'Click to add event' : 'No events';
+    
     while (current <= end) {
       placeholders.push({
         id: `placeholder-${current.toISOString()}`,
-        title: 'Click to add event', // Show instructional text
+        title: placeholderText, // Role-based text
         start: new Date(current),
         allDay: true,
         display: 'list-item', // Make it visible in list view
@@ -156,8 +169,16 @@ const CalendarPage = () => {
     
     // Handle placeholder events specially
     if (event.extendedProps?.isPlaceholder) {
-      // For list view placeholders, show clickable text
+      // For list view placeholders, show role-based text
       if (eventInfo.view.type === 'list21Days' || eventInfo.view.type === 'listMonth') {
+        // Determine text based on user role
+        const canAddEvents = selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || 
+                            selectedRole === listOfAllRoles.REGIONAL_ADMIN ||
+                            selectedRole === listOfAllRoles.SYSTEM_ADMIN ||
+                            selectedRole === listOfAllRoles.SUPER_ADMIN;
+        
+        const displayText = canAddEvents ? 'Click to add event' : 'No events';
+        
         return (
           <div style={{
             padding: '8px 16px',
@@ -165,7 +186,7 @@ const CalendarPage = () => {
             textAlign: 'center',
             fontSize: '0.9rem'
           }}>
-            <span style={{ opacity: 0.6 }}>Click to add event</span>
+            <span style={{ opacity: 0.6 }}>{displayText}</span>
           </div>
         );
       }
