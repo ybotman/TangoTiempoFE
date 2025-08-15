@@ -51,7 +51,7 @@ const UnifiedLocationModal = ({
   const [centerLat, setCenterLat] = useState(initialLocation.lat || '');
   const [centerLng, setCenterLng] = useState(initialLocation.lng || '');
   const [zoomRange, setZoomRange] = useState(initialLocation.zoomRange || 50);
-  const [scaleText, setScaleText] = useState('');
+  // Removed scale text - not needed
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   
@@ -91,12 +91,7 @@ const UnifiedLocationModal = ({
         position: isMobile ? 'bottomright' : 'topleft'
       }).addTo(map);
       
-      // Add scale control at top
-      L.control.scale({
-        position: 'topright',
-        imperial: true,
-        metric: false
-      }).addTo(map);
+      // Removed scale control - not needed
       
       // Custom CSS for larger mobile controls
       if (isMobile) {
@@ -125,20 +120,20 @@ const UnifiedLocationModal = ({
         setCenterLng(lng.toFixed(6));
       });
       
-      // Update scale on zoom
-      map.on('zoomend', () => {
-        const zoom = map.getZoom();
-        const scale = Math.round(591657550.5 / Math.pow(2, zoom));
-        setScaleText(`Scale: 1:${scale.toLocaleString()}`);
-      });
+      // Force map to recalculate size after a delay
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
       
       mapInstanceRef.current = map;
       setMapInitialized(true);
       
-      // Set initial scale
-      const zoom = map.getZoom();
-      const scale = Math.round(591657550.5 / Math.pow(2, zoom));
-      setScaleText(`Scale: 1:${scale.toLocaleString()}`);
+      // Force another resize after initialization
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 300);
     };
     
     initializeMap();
@@ -150,7 +145,18 @@ const UnifiedLocationModal = ({
         setMapInitialized(false);
       }
     };
-  }, [open, isMobile]);
+  }, [open]);
+  
+  // Force map resize when modal fully opens
+  useEffect(() => {
+    if (open && mapInstanceRef.current) {
+      // Give modal time to render
+      const timer = setTimeout(() => {
+        mapInstanceRef.current.invalidateSize();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
   
   const updateMarker = async (lat, lng) => {
     if (!mapInstanceRef.current) return;
@@ -375,20 +381,6 @@ const UnifiedLocationModal = ({
             ]}
             valueLabelDisplay="auto"
           />
-        </Box>
-        
-        {/* Scale Indicator */}
-        <Box sx={{ 
-          mb: 1,
-          p: 1,
-          bgcolor: 'grey.100',
-          borderRadius: 1,
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-            {scaleText || 'Scale: Calculating...'}
-          </Typography>
         </Box>
         
         {/* Map Container */}
