@@ -55,7 +55,7 @@ const UnifiedLocationModal = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   
-  // Initialize map
+  // Initialize map - with retry logic for ref attachment
   useEffect(() => {
     console.log('[UnifiedLocationModal] useEffect triggered:', {
       open,
@@ -75,10 +75,26 @@ const UnifiedLocationModal = ({
       console.log('[UnifiedLocationModal] Map already initialized, skipping');
       return;
     }
-    if (!mapRef.current) {
-      console.log('[UnifiedLocationModal] No map ref, skipping init');
-      return;
-    }
+    
+    // Retry logic for waiting for ref to attach
+    let retryCount = 0;
+    const maxRetries = 10;
+    
+    const checkAndInit = () => {
+      retryCount++;
+      console.log(`[UnifiedLocationModal] Checking for map ref (attempt ${retryCount}/${maxRetries})`);
+      
+      if (mapRef.current) {
+        console.log('[UnifiedLocationModal] Map ref found, proceeding with initialization');
+        initializeMap();
+      } else if (retryCount < maxRetries) {
+        console.log('[UnifiedLocationModal] No map ref yet, retrying in 100ms...');
+        setTimeout(checkAndInit, 100);
+      } else {
+        console.error('[UnifiedLocationModal] Failed to get map ref after max retries');
+        setMessage({ type: 'error', text: 'Failed to initialize map container' });
+      }
+    };
     
     const initializeMap = async () => {
       try {
@@ -178,15 +194,12 @@ const UnifiedLocationModal = ({
       }
     };
     
-    // Add delay to ensure DOM is ready
-    console.log('[UnifiedLocationModal] Waiting 100ms before initializing...');
-    const timer = setTimeout(() => {
-      initializeMap();
-    }, 100);
+    // Start the check and init process
+    console.log('[UnifiedLocationModal] Starting ref check process...');
+    checkAndInit();
     
     return () => {
       console.log('[UnifiedLocationModal] Cleanup function called');
-      clearTimeout(timer);
       if (mapInstanceRef.current) {
         console.log('[UnifiedLocationModal] Removing map instance');
         try {
