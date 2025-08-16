@@ -7,6 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
+// TIEMPO-239: Import venue timezone utilities
+import { formatVenueTime, formatVenueTimeRange, formatVenueDate } from '@/utils/venueTimezone';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizer from './ViewEventDetailsOrganizer';
@@ -111,11 +113,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const eventTitle = eventDetails?.title || 'Event Details';
   const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
   
-  // Get dates with proper timezone handling
-  // Use the direct start/end dates as they have the correct time
-  // The _instance.range dates have timezone offset issues
-  const startDate = eventDetails?.start || eventDetails?._instance?.range?.start || null;
-  const endDate = eventDetails?.end || eventDetails?._instance?.range?.end || null;
+  // TIEMPO-239: Get venue timezone display information
+  const hasVenueTimezone = eventDetails?.extendedProps?.hasVenueTimezone;
+  const displayStartTime = eventDetails?.extendedProps?.displayStartTime;
+  const displayEndTime = eventDetails?.extendedProps?.displayEndTime;
+  const timezoneAbbr = eventDetails?.extendedProps?.timezoneAbbr || '';
+  
+  // Use display times if available, otherwise fallback to event dates
+  const startDate = hasVenueTimezone && displayStartTime 
+    ? displayStartTime 
+    : (eventDetails?.start || eventDetails?._instance?.range?.start || null);
+  const endDate = hasVenueTimezone && displayEndTime
+    ? displayEndTime
+    : (eventDetails?.end || eventDetails?._instance?.range?.end || null);
   const allDay = eventDetails?.allDay || false;
 
   // Get category information for display
@@ -308,12 +318,15 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             
             {/* Date Display */}
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && startDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              {startDate && (hasVenueTimezone 
+                ? formatVenueDate(startDate)
+                : new Date(startDate).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })
+              )}
             </Typography>
 
           {/* Category Display */}
@@ -325,24 +338,23 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
               <Box display="flex" alignItems="center">
                 <Typography variant="h6" color="textSecondary">
                   <strong>
-                    {(() => {
-                      // Use the already-converted startDate
-                      const hours = startDate.getHours();
-                      const minutes = startDate.getMinutes();
-                      const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-                      const suffix = hours >= 12 ? 'p' : 'a';
-                      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
-                    })()}
+                    {hasVenueTimezone 
+                      ? formatVenueTimeRange(startDate, endDate, timezoneAbbr)
+                      : (() => {
+                          // Fallback for events without venue timezone
+                          const start = new Date(startDate);
+                          const end = new Date(endDate);
+                          const formatTime = (date) => {
+                            const hours = date.getHours();
+                            const minutes = date.getMinutes();
+                            const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                            const suffix = hours >= 12 ? 'p' : 'a';
+                            return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+                          };
+                          return `${formatTime(start)} - ${formatTime(end)}`;
+                        })()
+                    }
                   </strong>
-                  {'-'}
-                  {(() => {
-                    // Use the already-converted endDate
-                    const hours = endDate.getHours();
-                    const minutes = endDate.getMinutes();
-                    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-                    const suffix = hours >= 12 ? 'p' : 'a';
-                    return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
-                  })()}
                 </Typography>
                 <ArrowForwardIcon sx={{ color: 'red', ml: 1, fontSize: '1.2rem' }} />
               </Box>
