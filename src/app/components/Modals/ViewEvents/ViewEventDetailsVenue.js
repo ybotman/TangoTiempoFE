@@ -358,20 +358,28 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
         <Box sx={{ mb: 2 }}>
           {venue.createdAt && (
             <Typography variant="body2" color="text.secondary">
-              Created: {new Date(venue.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              Created: {(() => {
+                // TIEMPO-246: String-based date formatting
+                const [datePart] = (venue.createdAt || '').split('T');
+                if (!datePart) return '';
+                const [year, month, day] = datePart.split('-');
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+              })()}
             </Typography>
           )}
           {venue.updatedAt && (
             <Typography variant="body2" color="text.secondary">
-              Last Updated: {new Date(venue.updatedAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              Last Updated: {(() => {
+                // TIEMPO-246: String-based date formatting
+                const [datePart] = (venue.updatedAt || '').split('T');
+                if (!datePart) return '';
+                const [year, month, day] = datePart.split('-');
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+              })()}
             </Typography>
           )}
         </Box>

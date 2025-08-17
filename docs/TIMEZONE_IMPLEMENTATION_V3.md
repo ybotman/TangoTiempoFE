@@ -54,6 +54,28 @@ venueTimezone.js utilities
 
 ---
 
+## ⚠️ CRITICAL DISCOVERY (Phase 3)
+
+**Events are CREATED in browser timezone, not venue timezone!**
+
+This is the root cause that previous attempts missed. Even with perfect display fixes, events are saved with wrong times from creation.
+
+### The Problem:
+```javascript
+// CreateEventDetailModal.js - CREATES IN BROWSER TZ
+const selectedDay = dayjs(); // Browser timezone!
+const sevenPM = selectedDay.hour(19).minute(0);
+```
+
+### The Solution:
+```javascript
+// MUST CREATE IN VENUE TZ
+const venueTimezone = selectedVenue.timezone || 'America/New_York';
+const sevenPM = dayjs.tz(selectedDay, venueTimezone).hour(19).minute(0);
+```
+
+---
+
 ## Implementation Phases
 
 ### ✅ Phase 1: Foundation & Audit (COMPLETE)

@@ -232,14 +232,11 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       // Convert ISO dates back to YYYY-MM-DD format for display
       const dateStrings = eventData.excludedDates.map(isoDate => {
         // Parse as local date, not UTC
-        // If the date has 'Z' suffix, remove it to treat as local
+        // TIEMPO-246: String-based date parsing without Date() conversion
         const localIsoDate = isoDate.endsWith('Z') ? isoDate.slice(0, -1) : isoDate;
-        const date = new Date(localIsoDate);
-        const year = date.getFullYear(); // Use local methods, not UTC
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        console.log('Exclude date conversion:', { isoDate, localIsoDate, year, month, day });
-        return `${year}-${month}-${day}`;
+        const [datePart] = localIsoDate.split('T');
+        console.log('Exclude date conversion:', { isoDate, localIsoDate, datePart });
+        return datePart || '';
       });
       setExcludeDates(dateStrings.join(', '));
     }
@@ -402,17 +399,21 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         return null;
       }
       
-      // Parse YYYY-MM-DD format and keep as local time
-      const parsedDate = new Date(trimmed + 'T00:00:00');
-      
-      // Check if date is valid
-      if (isNaN(parsedDate.getTime())) {
-        // Don't log during typing, only return null
+      // TIEMPO-246: Parse YYYY-MM-DD format without Date() conversion
+      // Validate date format
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(trimmed)) {
         return null;
       }
       
-      // Return ISO string without Z suffix to maintain local time
-      return parsedDate.toISOString().slice(0, -1);
+      // Validate date components
+      const [year, month, day] = trimmed.split('-').map(num => parseInt(num, 10));
+      if (month < 1 || month > 12 || day < 1 || day > 31) {
+        return null;
+      }
+      
+      // Return as ISO string format without timezone conversion
+      return `${trimmed}T00:00:00`;
     }).filter(date => date !== null);
   };
 
