@@ -294,15 +294,29 @@ function convertRRuleDateToISO(rruleDate) {
 // This function was converting to browser timezone - the opposite of our mission.
 // Events now display in venue timezone using the display object from backend.
 
-// Helper function to calculate event duration for recurring events
+// TIEMPO-239: Calculate duration using string manipulation to avoid timezone conversion
 function calculateDuration(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const durationMs = end - start;
+  // Parse time strings without Date objects to avoid timezone issues
+  // Format: "2025-06-28T19:30:00" or "2025-06-28T19:30:00.000Z"
+  const getTimeInMinutes = (dateStr) => {
+    const timePart = dateStr.split('T')[1];
+    if (!timePart) return 0;
+    
+    const [hours, minutes] = timePart.split(':');
+    return parseInt(hours, 10) * 60 + parseInt(minutes, 10);
+  };
   
-  // Convert to hours and minutes
-  const hours = Math.floor(durationMs / (1000 * 60 * 60));
-  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+  const startMinutes = getTimeInMinutes(startDate);
+  const endMinutes = getTimeInMinutes(endDate);
+  
+  // Calculate duration (handle day boundary if end < start)
+  let durationMinutes = endMinutes - startMinutes;
+  if (durationMinutes < 0) {
+    durationMinutes += 24 * 60; // Add 24 hours if crossing midnight
+  }
+  
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
   
   // Return duration in format "HH:MM"
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;

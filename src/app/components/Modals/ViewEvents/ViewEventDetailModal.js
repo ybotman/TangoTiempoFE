@@ -320,12 +320,15 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
               {startDate && (hasVenueTimezone 
                 ? formatVenueDate(startDate)
-                : new Date(startDate).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })
+                : (() => {
+                    // TIEMPO-246: String-based fallback without Date() conversion
+                    const [datePart] = (startDate || '').split('T');
+                    if (!datePart) return '';
+                    const [year, month, day] = datePart.split('-');
+                    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                  'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                  })()
               )}
             </Typography>
 
@@ -341,17 +344,17 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                     {hasVenueTimezone 
                       ? formatVenueTimeRange(startDate, endDate, timezoneAbbr)
                       : (() => {
-                          // Fallback for events without venue timezone
-                          const start = new Date(startDate);
-                          const end = new Date(endDate);
-                          const formatTime = (date) => {
-                            const hours = date.getHours();
-                            const minutes = date.getMinutes();
-                            const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-                            const suffix = hours >= 12 ? 'p' : 'a';
-                            return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
+                          // TIEMPO-246: String-based time formatting without Date() conversion
+                          const formatTimeString = (timeStr) => {
+                            const [, timePart] = (timeStr || '').split('T');
+                            if (!timePart) return '';
+                            const [hour, minute] = timePart.split(':');
+                            const hourNum = parseInt(hour, 10);
+                            const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+                            const suffix = hourNum >= 12 ? 'p' : 'a';
+                            return `${displayHour}${parseInt(minute, 10) > 0 ? `:${minute}` : ''}${suffix}`;
                           };
-                          return `${formatTime(start)} - ${formatTime(end)}`;
+                          return `${formatTimeString(startDate)} - ${formatTimeString(endDate)}`;
                         })()
                     }
                   </strong>
@@ -434,7 +437,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             <br /><br />
             <strong>Title:</strong> {eventTitle}
             <br />
-            <strong>Date:</strong> {startDate && new Date(startDate).toLocaleDateString()}
+            <strong>Date:</strong> {startDate && (hasVenueTimezone 
+              ? formatVenueDate(startDate)
+              : startDate.split('T')[0])}
             <br />
             <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
             <br />

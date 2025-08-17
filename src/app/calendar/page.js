@@ -676,6 +676,9 @@ const CalendarPage = () => {
         >
           <FullCalendar
           plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
+          // TIEMPO-239: CRITICAL - Set timezone to UTC to prevent browser conversion
+          // This ensures events display in their venue timezone, not browser timezone
+          timeZone="UTC"
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
