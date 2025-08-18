@@ -12,6 +12,12 @@ import { useEventOperations } from '@/hooks/useEvents';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// TIEMPO-246: Configure dayjs for venue timezone support
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import axios from 'axios';
 
 const modalStyle = {
@@ -35,13 +41,17 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('basic');
   
-  // Helper function to get default start time (7pm of selected date or next day if past 7pm)
-  const getDefaultStartTime = (date) => {
-    const selectedDay = date ? dayjs(date) : dayjs();
-    const sevenPM = selectedDay.hour(19).minute(0).second(0);
-    const now = dayjs();
+  // TIEMPO-246: Helper function to get default start time in VENUE timezone
+  const getDefaultStartTime = (date, venueTimezone) => {
+    // Use venue timezone if available, fallback to NYC
+    const tz = venueTimezone || 'America/New_York';
     
-    // If current time is past 7pm today, use tomorrow at 7pm
+    // Create date in venue timezone, not browser timezone
+    const selectedDay = date ? dayjs.tz(date, tz) : dayjs.tz(undefined, tz);
+    const sevenPM = selectedDay.hour(19).minute(0).second(0);
+    const now = dayjs.tz(undefined, tz);
+    
+    // If current time is past 7pm in venue timezone, use tomorrow at 7pm
     if (now.isAfter(sevenPM)) {
       return sevenPM.add(1, 'day');
     }
@@ -49,8 +59,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   };
   
   // Helper function to get initial event data for CREATE mode
-  const getInitialEventData = (date, location, city) => {
-    const startDate = getDefaultStartTime(date);
+  const getInitialEventData = (date, location, city, venueTimezone) => {
+    const startDate = getDefaultStartTime(date, venueTimezone);
     const endDate = startDate.add(3, 'hour');
     
     return {
@@ -97,6 +107,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Legacy fields
       selectedRegion: location?.region?.name || city?.regionName || '',
       selectedRegionID: location?.region?.id || city?.regionID || '',
+      // TIEMPO-246: Venue timezone for proper event creation
+      venueTimezone: venueTimezone || null,
+      venueTimezoneAbbr: null,
       // ID field
       _id: null
     };
@@ -104,7 +117,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   
   // Initialize event data with helper function
   const [eventData, setEventData] = useState(() => 
-    getInitialEventData(selectedDate, selectedLocation, null)
+    getInitialEventData(selectedDate, selectedLocation, null, null)
   );
 
   // Refresh event data and related data when modal opens or location changes
@@ -247,13 +260,13 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
             // Prevent the modal from being usable
-            setEventData(getInitialEventData(selectedDate, selectedLocation, null));
+            setEventData(getInitialEventData(selectedDate, selectedLocation, null, null));
             return;
           }
         }
       } else {
         // Create mode - reset all fields to initial values
-        const initialData = getInitialEventData(selectedDate, selectedLocation, null);
+        const initialData = getInitialEventData(selectedDate, selectedLocation, null, null);
         setEventData(initialData);
         setHasUnsavedChanges(false); // Reset unsaved changes for create mode
       }
@@ -289,6 +302,42 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       setCurrentTab('basic');
     }
   }, [eventData.isRepeating, currentTab]);
+
+  // TIEMPO-246: Recalculate event times when venue timezone changes
+  useEffect(() => {
+    if (!editMode && eventData.venueTimezone && open) {
+      // Only recalculate if venue timezone has changed and we're in create mode
+      const currentStartDate = eventData.startDate;
+      const currentEndDate = eventData.endDate;
+      
+      // Check if times need recalculation (if they're still in default time)
+      // This prevents recalculation if user has manually changed times
+      if (currentStartDate && currentEndDate) {
+        const startHour = currentStartDate.hour ? currentStartDate.hour() : 19;
+        const isDefaultTime = startHour === 19 && currentStartDate.minute() === 0;
+        
+        if (isDefaultTime) {
+          // Recalculate times in the new venue timezone
+          const newStartDate = getDefaultStartTime(selectedDate, eventData.venueTimezone);
+          const newEndDate = newStartDate.add(3, 'hour');
+          
+          console.log('TIEMPO-246: Recalculating times for venue timezone:', {
+            venueTimezone: eventData.venueTimezone,
+            oldStart: currentStartDate.format(),
+            newStart: newStartDate.format(),
+            oldEnd: currentEndDate.format(),
+            newEnd: newEndDate.format()
+          });
+          
+          setEventData(prev => ({
+            ...prev,
+            startDate: newStartDate,
+            endDate: newEndDate
+          }));
+        }
+      }
+    }
+  }, [eventData.venueTimezone, editMode, selectedDate, open]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -651,8 +700,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       setEventData({
         title: '',
         description: '',
-        startDate: getDefaultStartTime(null),
-        endDate: getDefaultStartTime(null).add(3, 'hour'),
+        startDate: getDefaultStartTime(null, null),
+        endDate: getDefaultStartTime(null, null).add(3, 'hour'),
         cost: '',
         venueId: '',
         venueName: '',
