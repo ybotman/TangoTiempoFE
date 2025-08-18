@@ -127,10 +127,25 @@ const CalendarPage = () => {
         }
       });
       
-      // Increment date using string manipulation
+      // TIEMPO-246: Increment date using pure string manipulation
       const [year, month, day] = currentDateStr.split('-').map(Number);
-      const nextDate = new Date(Date.UTC(year, month - 1, day + 1));
-      currentDateStr = nextDate.toISOString().split('T')[0];
+      let nextDay = day + 1;
+      let nextMonth = month;
+      let nextYear = year;
+      
+      // Handle month rollover
+      const daysInMonth = [31, (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0) ? 29 : 28, 
+                          31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      if (nextDay > daysInMonth[month - 1]) {
+        nextDay = 1;
+        nextMonth++;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+      }
+      
+      currentDateStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(nextDay).padStart(2, '0')}`;
     }
     
     return placeholders;
