@@ -392,17 +392,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       const trimmed = date.trim();
       if (!trimmed) return null;
       
-      // Validate date format (YYYY-MM-DD)
+      // TIEMPO-246: Validate date format (YYYY-MM-DD)
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(trimmed)) {
         // Don't log during typing, only return null
-        return null;
-      }
-      
-      // TIEMPO-246: Parse YYYY-MM-DD format without Date() conversion
-      // Validate date format
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(trimmed)) {
         return null;
       }
       
