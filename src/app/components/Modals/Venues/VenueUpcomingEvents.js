@@ -30,13 +30,14 @@ const VenueUpcomingEvents = ({ venue }) => {
       setError(null);
       
       try {
+        // TIEMPO-246: Use ISO string without timezone conversion
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T00:00:00.000Z`;
         
         const params = {
           appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
           venueID: venue._id,
-          startDateFrom: today.toISOString(),
+          startDateFrom: todayStr,
           limit: 15,
           sort: 'startDate'
         };
@@ -110,8 +111,11 @@ const VenueUpcomingEvents = ({ venue }) => {
       ) : (
         <List dense sx={{ maxHeight: 300, overflow: 'auto' }}>
           {events.map((event) => {
-            const eventDate = new Date(event.startDate);
-            const isToday = eventDate.toDateString() === new Date().toDateString();
+            // TIEMPO-246: Compare dates without timezone conversion
+            const eventDateStr = (event.startDate || '').split('T')[0];
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const isToday = eventDateStr === todayStr;
             
             return (
               <ListItem key={event._id} divider>
