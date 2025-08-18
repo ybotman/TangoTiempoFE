@@ -479,7 +479,17 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         </TextField>
         {eventData.startDate && (
           <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
-            Starting from: {new Date(eventData.startDate).toLocaleDateString()}
+            Starting from: {(() => {
+              // TIEMPO-246: Format date without Date() conversion
+              const dateStr = typeof eventData.startDate === 'string' 
+                ? eventData.startDate 
+                : eventData.startDate?.format ? eventData.startDate.format('YYYY-MM-DD') : '';
+              const [year, month, day] = (dateStr.split('T')[0] || '').split('-');
+              if (!year) return '';
+              const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+              return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+            })()}
           </Typography>
         )}
       </Box>
