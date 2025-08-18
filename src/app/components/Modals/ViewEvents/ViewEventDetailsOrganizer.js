@@ -409,13 +409,25 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
                                 return 'Date not available';
                               }
                               
-                              const date = new Date(eventDate);
-                              if (isNaN(date.getTime())) {
+                              // TIEMPO-246: Format date and time without timezone conversion
+                              const [datePart, timePart] = (eventDate || '').split('T');
+                              if (!datePart) {
                                 console.warn('Invalid date for event:', event.title, eventDate);
                                 return 'Date not available';
                               }
                               
-                              return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                              const [year, month, day] = datePart.split('-');
+                              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                              const dateStr = `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                              
+                              if (timePart) {
+                                const [hour, minute] = timePart.split(':');
+                                const hourNum = parseInt(hour, 10);
+                                const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+                                const suffix = hourNum >= 12 ? 'PM' : 'AM';
+                                return `${dateStr} at ${displayHour}:${minute} ${suffix}`;
+                              }
+                              return dateStr;
                             })()}
                           </Typography>
                         </Box>
