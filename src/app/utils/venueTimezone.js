@@ -73,13 +73,14 @@ export function formatVenueTimeRange(startTime, endTime, timezoneAbbr = '') {
  * @returns {object} Display times and timezone info
  */
 export function getEventDisplayTimes(event) {
-  // TIEMPO-246: Check for displayStartTime directly on event (backend provides this)
-  if (event.displayStartTime) {
+  // TIEMPO-246: Check BOTH new and old field names during migration period
+  // Phase 1: Support both field naming conventions
+  if (event.venueStartDisplay || event.displayStartTime) {
     return {
-      startTime: event.displayStartTime,
-      endTime: event.displayEndTime,
-      timezone: event.venueTimezone,
-      timezoneAbbr: event.timezoneAbbr || '',
+      startTime: event.venueStartDisplay || event.displayStartTime,
+      endTime: event.venueEndDisplay || event.displayEndTime,
+      timezone: event.venueTZ || event.venueTimezone,
+      timezoneAbbr: event.venueAbbr || event.timezoneAbbr || '',
       isDST: false,
       hasVenueTimezone: true
     };
