@@ -78,7 +78,8 @@ export function transformEvents(events) {
         venueTimezone: displayTimes.timezone,
         timezoneAbbr: displayTimes.timezoneAbbr,
         isDST: displayTimes.isDST,
-        hasVenueTimezone: displayTimes.hasVenueTimezone,
+        // TIEMPO-246: Check if event has display times from backend (not calculated)
+        hasVenueTimezone: !!(event.display?.startTime || event.displayStartTime || event.venueTimezone),
       },
     };
 
