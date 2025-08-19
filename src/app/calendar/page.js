@@ -151,6 +151,25 @@ const CalendarPage = () => {
     return placeholders;
   };
 
+  // TIEMPO-252: Format venue time for calendar display
+  const formatVenueTimeForCalendar = (startStr, endStr, abbr) => {
+    // Parse venue time string (format: "2025-07-07T19:00:00")
+    const formatVenueTime = (timeStr) => {
+      if (!timeStr) return '';
+      const [, timePart] = timeStr.split('T');
+      const [hour, minute] = timePart.split(':');
+      const hourNum = parseInt(hour, 10);
+      const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+      const suffix = hourNum >= 12 ? 'p' : 'a';
+      return `${displayHour}:${minute}${suffix}`;
+    };
+    
+    return {
+      startTime: formatVenueTime(startStr),
+      endTime: formatVenueTime(endStr)
+    };
+  };
+
   // Format time display without AM/PM for monthly view
   const formatTimeForMonthly = (start, end) => {
     const formatTime = (date) => {
@@ -231,7 +250,10 @@ const CalendarPage = () => {
     
     if (isMonthlyView) {
       // Monthly view: time + categories on same line, title below
-      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      // TIEMPO-252: Use venue display times if available
+      const { startTime, endTime } = event.extendedProps?.venueStartDisplay 
+        ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
+        : formatTimeForMonthly(event.start, event.end);
       
       return (
         <div style={{ 
@@ -343,7 +365,10 @@ const CalendarPage = () => {
       );
     } else {
       // List view: time and categories on top line, title on second line
-      const { startTime, endTime } = formatTimeForListView(event.start, event.end);
+      // TIEMPO-252: Use venue display times if available
+      const { startTime, endTime } = event.extendedProps?.venueStartDisplay
+        ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
+        : formatTimeForListView(event.start, event.end);
       
       return (
         <div style={{ 

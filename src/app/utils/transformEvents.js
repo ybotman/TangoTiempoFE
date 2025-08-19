@@ -79,6 +79,11 @@ export function transformEvents(events) {
         timezoneAbbr: displayTimes.timezoneAbbr,
         isDST: displayTimes.isDST,
         hasVenueTimezone: displayTimes.hasVenueTimezone,
+        // TIEMPO-252: Pass through NEW venue timezone fields from backend
+        venueStartDisplay: event.venueStartDisplay || null,
+        venueEndDisplay: event.venueEndDisplay || null,
+        venueTZ: event.venueTZ || null,
+        venueAbbr: event.venueAbbr || null,
       },
     };
 
