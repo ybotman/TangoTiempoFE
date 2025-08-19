@@ -73,19 +73,7 @@ export function formatVenueTimeRange(startTime, endTime, timezoneAbbr = '') {
  * @returns {object} Display times and timezone info
  */
 export function getEventDisplayTimes(event) {
-  // Use display object if available
-  if (event.display && event.display.startTime) {
-    return {
-      startTime: event.display.startTime,
-      endTime: event.display.endTime,
-      timezone: event.display.timezone,
-      timezoneAbbr: event.display.timezoneAbbr || '',
-      isDST: event.display.isDST,
-      hasVenueTimezone: true
-    };
-  }
-  
-  // Fallback to event's denormalized fields if available
+  // TIEMPO-246: Check for displayStartTime directly on event (backend provides this)
   if (event.displayStartTime) {
     return {
       startTime: event.displayStartTime,
