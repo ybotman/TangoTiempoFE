@@ -16,16 +16,13 @@ const useMenuItems = () => {
     if (!user?.backendInfo?.regionalOrganizerInfo) return false;
     const orgInfo = user.backendInfo.regionalOrganizerInfo;
     
-    // Check mandatory requirements
-    const hasValidShortName = orgInfo.shortName && 
-                             orgInfo.shortName !== 'Milonga Host' && 
-                             orgInfo.shortName.trim().length > 0;
-    const hasDescription = orgInfo.description && 
-                          orgInfo.description.trim().length > 0;
+    // TIEMPO-253 FIX: The actual organizer data (shortName, description) is in the organizer collection,
+    // not in the user's regionalOrganizerInfo. When a profile is enabled, it means all mandatory
+    // requirements have been met (validated in the Event Organizer Settings Status tab).
+    // So we only need to check if the profile is enabled.
     const isEnabled = orgInfo.isEnabled === true;
     
-    // Must have all mandatory requirements AND be enabled
-    return hasValidShortName && hasDescription && isEnabled;
+    return isEnabled;
   };
 
   const getMenuItems = (context) => {

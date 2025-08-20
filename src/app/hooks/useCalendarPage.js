@@ -298,9 +298,9 @@ export const useCalendarPage = () => {
     
     // TIEMPO-253: Handle opening organizer settings for incomplete profiles
     if (action === 'openOrganizerSettings') {
-      // Open the user settings modal to the Event Organizer tab
-      // This requires accessing the global state or redirecting
-      window.location.href = '/user-settings?tab=organizer';
+      // Use the regional organizer event emitter to open the modal
+      const { regionalOrganizerEvent } = require('@/utils/RegionalOrganizerEvent');
+      regionalOrganizerEvent.openModal();
     }
   };
 
