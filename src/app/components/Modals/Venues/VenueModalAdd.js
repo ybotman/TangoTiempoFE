@@ -186,7 +186,10 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     setIsOverriding(true);
     // Add override info to comments
     if (user) {
-      const overrideMessage = `[OVERRIDE] No nearest city found. Override authorized by ${user.email} (${user.displayName || 'Unknown'}) on ${new Date().toISOString()}`;
+      // TIEMPO-246: Use ISO string without Date() for logging
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.000Z`;
+      const overrideMessage = `[OVERRIDE] No nearest city found. Override authorized by ${user.email} (${user.displayName || 'Unknown'}) on ${timestamp}`;
       setVenueData(prev => ({
         ...prev,
         comments: prev.comments ? `${prev.comments}\n${overrideMessage}` : overrideMessage

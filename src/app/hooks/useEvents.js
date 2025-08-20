@@ -206,10 +206,25 @@ export function useEvents({
   
   // Generate default date range if needed
   const getDefaultDateRange = () => {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 3, 0); // 3 months
-    return { start: startOfMonth.toISOString(), end: endOfMonth.toISOString() };
+    // TIEMPO-246: Use ISO strings without Date() for timezone independence
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    
+    // Calculate start of current month
+    const startMonth = String(month + 1).padStart(2, '0');
+    const startOfMonth = `${year}-${startMonth}-01T00:00:00.000Z`;
+    
+    // Calculate end of 3 months from now
+    const endMonth = month + 3;
+    const endYear = year + Math.floor(endMonth / 12);
+    const endMonthNormalized = endMonth % 12;
+    // Get last day of that month
+    const lastDay = new Date(endYear, endMonthNormalized + 1, 0).getDate();
+    const endMonthStr = String(endMonthNormalized + 1).padStart(2, '0');
+    const endOfMonth = `${endYear}-${endMonthStr}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
+    
+    return { start: startOfMonth, end: endOfMonth };
   };
 
   const fetchEvents = useCallback(async () => {
@@ -578,6 +593,8 @@ export function useEventOperations() {
         // RA endpoint has different requirements - prepare minimal data
         preparedData = {
           title: cleanedEventData.title,
+          // TIEMPO-245: Include shortTitle field (21 chars max)
+          shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           startDate: cleanedEventData.startDate,
           endDate: cleanedEventData.endDate,
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
@@ -606,6 +623,8 @@ export function useEventOperations() {
                            "Event Organizer",
         // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
         ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
+        // TIEMPO-245: Include shortTitle field (21 chars max)
+        shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Include admin cities for RegionalAdmin validation
@@ -803,6 +822,8 @@ export function useEventOperations() {
         // RA endpoint has different requirements - prepare minimal data
         preparedData = {
           title: cleanedEventData.title,
+          // TIEMPO-245: Include shortTitle field (21 chars max)
+          shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           startDate: cleanedEventData.startDate,
           endDate: cleanedEventData.endDate,
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
@@ -839,6 +860,8 @@ export function useEventOperations() {
                              "Event Organizer",
           // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
           ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
+          // TIEMPO-245: Include shortTitle field (21 chars max)
+          shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           // Set expiresAt to 1 year after endDate
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         };

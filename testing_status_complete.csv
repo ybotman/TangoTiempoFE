@@ -1,0 +1,17 @@
+Version,Level,Ticket,Title,Reporter,Device,State,Notes
+1.7.3,Pass,TIEMPO-165,Event Rules Validation System,Toby,All,In Progress,Implementing validation rules for event creation
+1.7.3,Failed,TIEMPO-220,Full description not displaying in event,Andi,Phone using Chrome,In Review,Fixed - Show More button detection improved
+1.7.3,Failed,TIEMPO-221,Legacy Select a region blocks Regional Organizers,Andi,All,In Review,Fixed - Removed legacy region validation for RO/RA users
+1.7.3,Pass-BUT,TIEMPO-226,List view scaling on mobile,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Added CSS for mobile list view width scaling
+1.7.3,Pass-BUT,TIEMPO-227,Menu visibility and text issues,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Updated SidebarDrawer for role-based menu display and Artists+ link
+1.7.3,Pass-BUT,TIEMPO-228,Calendar view text clarity,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Changed placeholder text to role-based (Click to add vs No events)
+1.7.3,Pass-BUT,TIEMPO-229,Map change icon visibility,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Map icon now fixed position in viewport corner
+1.7.3,Pass-BUT,TIEMPO-230,Map scale UI positioning,Andi (1.7.2 Testing),Phone using Chrome,In Review,Investigating - Map controls positioning on mobile
+1.7.3,Pass-BUT,TIEMPO-231,Settings save button position,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Save button sticky at bottom on mobile
+1.7.3,Pass-BUT,TIEMPO-232,Role terminology inconsistency,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Changed Regional Organizer to Organizer/Artist
+1.7.3,Failed,TIEMPO-233,Profile Settings missing save buttons,Andi (1.7.2 Testing),Phone using Chrome,In Review,Investigation - Profile and Images sections have save buttons present
+1.7.3,Failed,TIEMPO-234,Create Event region selection error,Andi (1.7.2 Testing),Phone using Chrome,In Review,Fixed - Removed legacy region validation for RO/RA users
+1.7.3,Pass,TIEMPO-235,Header image mobile presence,Toby,Mobile,In Review,Fixed - Added 30% zoom on mobile header
+1.7.3,Pass,TIEMPO-236,Milonger@ display name,Toby,All,In Review,Fixed - Changed Milonger-x to Milonger@ in UI
+1.7.3,Enhancement,TIEMPO-237,Redo RO Settings Modal,Toby,All,In Review,Complete - Redesigned Event Organizer Settings with Status Dashboard
+1.7.3,Enhancement,TIEMPO-238,Refine the Apply Process,Toby,All,In Review,Complete - Reorganized tabs and created Artists+ accordion page

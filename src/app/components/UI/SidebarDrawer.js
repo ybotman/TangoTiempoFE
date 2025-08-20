@@ -73,6 +73,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import { useVenueSelection } from '@/hooks/useVenueSelection';
 import { userSettingsEvent } from '@/utils/UserSettingsEvent';
+import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
 const SidebarDrawer = ({ open, onClose }) => {
   //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -123,6 +124,20 @@ const SidebarDrawer = ({ open, onClose }) => {
     };
 
     const unsubscribe = userSettingsEvent.subscribe(handleUserSettingsRequest);
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // TIEMPO-253: Subscribe to regional organizer modal event
+  useEffect(() => {
+    const handleRegionalOrganizerRequest = ({ open }) => {
+      console.log('[SidebarDrawer] Received regional organizer request:', { open });
+      setRegionalOrganizerOpen(open);
+    };
+
+    const unsubscribe = regionalOrganizerEvent.subscribe(handleRegionalOrganizerRequest);
 
     return () => {
       unsubscribe();
