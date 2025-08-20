@@ -41,15 +41,20 @@ import { useUsers } from '@/hooks/useUsers';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import axios from 'axios';
 
-const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer }) => {
+const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
   const { organizers } = useOrganizers();
   
-  // State for editable fields
-  const [isVisible, setIsVisible] = useState(true);
-  const [isCrawlable, setIsCrawlable] = useState(false);
-  const [delegatedOrganizerIds, setDelegatedOrganizerIds] = useState([]);
+  // Local state (needed for fallback when centralized state is not available)
+  const [localIsVisible, setIsVisible] = useState(true);
+  const [localIsCrawlable, setIsCrawlable] = useState(false);
+  const [localDelegatedOrganizerIds, setDelegatedOrganizerIds] = useState([]);
+  
+  // TIEMPO-254: Use unsaved changes if available, otherwise use local state
+  const isVisible = unsavedChanges?.isVisible !== undefined ? unsavedChanges.isVisible : localIsVisible;
+  const isCrawlable = unsavedChanges?.wantRender !== undefined ? unsavedChanges.wantRender : localIsCrawlable;
+  const delegatedOrganizerIds = unsavedChanges?.delegatedOrganizerIds !== undefined ? unsavedChanges.delegatedOrganizerIds : localDelegatedOrganizerIds;
   const [selectedDelegateId, setSelectedDelegateId] = useState('');
   
   // Initial values for comparison
@@ -76,11 +81,13 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
 
   useEffect(() => {
     if (organizer) {
-      setIsVisible(organizer.isVisible !== false); // Default true
-      setInitialIsVisible(organizer.isVisible !== false);
+      // Set local state for fallback
+      setIsVisible(organizer.isVisible !== false);
       setIsCrawlable(organizer.wantRender || false);
-      setInitialIsCrawlable(organizer.wantRender || false);
       setDelegatedOrganizerIds(organizer.delegatedOrganizerIds || []);
+      // Set initial values for comparison
+      setInitialIsVisible(organizer.isVisible !== false);
+      setInitialIsCrawlable(organizer.wantRender || false);
       setInitialDelegatedOrganizerIds(organizer.delegatedOrganizerIds || []);
     }
   }, [organizer]);
@@ -118,11 +125,13 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
     fetchDelegatedOrganizers();
   }, [delegatedOrganizerIds]);
 
-  const isSaveDisabled = 
+  // TIEMPO-254: Use centralized isSaving if available, otherwise check for changes
+  const isSaveDisabled = isSaving !== undefined ? isSaving : (
     (isVisible === initialIsVisible &&
     isCrawlable === initialIsCrawlable &&
     JSON.stringify(delegatedOrganizerIds) === JSON.stringify(initialDelegatedOrganizerIds)) ||
-    saving;
+    saving
+  );
 
   const handleSnackbarClose = () => {
     setShowSuccessMessage(false);
@@ -160,13 +169,25 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
   // Handle delegated organizer management
   const handleAddDelegate = () => {
     if (selectedDelegateId && !delegatedOrganizerIds.includes(selectedDelegateId)) {
-      setDelegatedOrganizerIds([...delegatedOrganizerIds, selectedDelegateId]);
+      const newDelegates = [...delegatedOrganizerIds, selectedDelegateId];
+      // TIEMPO-254: Use centralized field change handler if available
+      if (onFieldChange) {
+        onFieldChange('delegatedOrganizerIds', newDelegates);
+      } else {
+        setDelegatedOrganizerIds(newDelegates);
+      }
       setSelectedDelegateId('');
     }
   };
   
   const handleRemoveDelegate = (delegateId) => {
-    setDelegatedOrganizerIds(delegatedOrganizerIds.filter(id => id !== delegateId));
+    const newDelegates = delegatedOrganizerIds.filter(id => id !== delegateId);
+    // TIEMPO-254: Use centralized field change handler if available  
+    if (onFieldChange) {
+      onFieldChange('delegatedOrganizerIds', newDelegates);
+    } else {
+      setDelegatedOrganizerIds(newDelegates);
+    }
   };
   
   // Get available organizers for delegation
@@ -211,7 +232,14 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
                 control={
                   <Switch 
                     checked={isVisible} 
-                    onChange={(e) => setIsVisible(e.target.checked)} 
+                    onChange={(e) => {
+                      // TIEMPO-254: Use centralized field change handler if available
+                      if (onFieldChange) {
+                        onFieldChange('isVisible', e.target.checked);
+                      } else {
+                        setIsVisible(e.target.checked);
+                      }
+                    }} 
                     color="primary"
                   />
                 }
@@ -232,7 +260,14 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer })
                 control={
                   <Switch 
                     checked={isCrawlable} 
-                    onChange={(e) => setIsCrawlable(e.target.checked)} 
+                    onChange={(e) => {
+                      // TIEMPO-254: Use centralized field change handler if available
+                      if (onFieldChange) {
+                        onFieldChange('wantRender', e.target.checked);
+                      } else {
+                        setIsCrawlable(e.target.checked);
+                      }
+                    }} 
                     color="primary"
                   />
                 }
@@ -358,6 +393,11 @@ RegionalOrganizersSettings.propTypes = {
     delegatedOrganizerIds: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
+  // TIEMPO-254: Optional centralized state management props
+  onFieldChange: PropTypes.func,
+  unsavedChanges: PropTypes.object,
+  onSave: PropTypes.func,
+  isSaving: PropTypes.bool,
 };
 
 export default RegionalOrganizersSettings;

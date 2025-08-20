@@ -17,21 +17,32 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 
-const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) => {
-  // Name fields
-  const [fullName, setFullName] = useState('');
-  const [shortName, setShortName] = useState('');
-  const [description, setDescription] = useState('');
-  const [url, setUrl] = useState('');
+const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
+  // Local state (needed for fallback when centralized state is not available)
+  const [localFullName, setFullName] = useState('');
+  const [localShortName, setShortName] = useState('');
+  const [localDescription, setDescription] = useState('');
+  const [localUrl, setUrl] = useState('');
+  const [localPhone, setPhone] = useState('');
+  const [localEmail, setEmail] = useState('');
+  const [localStreet1, setStreet1] = useState('');
+  const [localStreet2, setStreet2] = useState('');
+  const [localCity, setCity] = useState('');
+  const [localState, setState] = useState('');
+  const [localZip, setZip] = useState('');
   
-  // Address fields
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [street1, setStreet1] = useState('');
-  const [street2, setStreet2] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zip, setZip] = useState('');
+  // TIEMPO-254: Use unsaved changes if available, otherwise use local state
+  const fullName = unsavedChanges?.fullName !== undefined ? unsavedChanges.fullName : localFullName;
+  const shortName = unsavedChanges?.shortName !== undefined ? unsavedChanges.shortName : localShortName;
+  const description = unsavedChanges?.description !== undefined ? unsavedChanges.description : localDescription;
+  const url = unsavedChanges?.['publicContactInfo.url'] !== undefined ? unsavedChanges['publicContactInfo.url'] : localUrl;
+  const phone = unsavedChanges?.['publicContactInfo.phone'] !== undefined ? unsavedChanges['publicContactInfo.phone'] : localPhone;
+  const email = unsavedChanges?.['publicContactInfo.Email'] !== undefined ? unsavedChanges['publicContactInfo.Email'] : localEmail;
+  const street1 = unsavedChanges?.['publicContactInfo.address.street1'] !== undefined ? unsavedChanges['publicContactInfo.address.street1'] : localStreet1;
+  const street2 = unsavedChanges?.['publicContactInfo.address.street2'] !== undefined ? unsavedChanges['publicContactInfo.address.street2'] : localStreet2;
+  const city = unsavedChanges?.['publicContactInfo.address.city'] !== undefined ? unsavedChanges['publicContactInfo.address.city'] : localCity;
+  const state = unsavedChanges?.['publicContactInfo.address.state'] !== undefined ? unsavedChanges['publicContactInfo.address.state'] : localState;
+  const zip = unsavedChanges?.['publicContactInfo.address.postalCode'] !== undefined ? unsavedChanges['publicContactInfo.address.postalCode'] : localZip;
   
   // UI state
   const [errorMessage, setErrorMessage] = useState('');
@@ -70,7 +81,10 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
     );
   };
 
+  // TIEMPO-254: Use centralized isSaving if available
   const isSaveDisabled = () => {
+    if (isSaving !== undefined) return isSaving;
+    
     // Check if name fields have changed
     const nameChanged = 
       fullName !== (organizer?.fullName || '') ||
@@ -105,6 +119,12 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
   };
 
   const handleSave = async () => {
+    // TIEMPO-254: Use centralized save handler if available
+    if (onSave) {
+      return onSave();
+    }
+    
+    // Fallback to original implementation
     if (fullName.trim().length < 7 || fullName === 'New Organizer') {
       setErrorMessage('Full Name must be at least 7 characters and cannot be "New Organizer".');
       return;
@@ -197,7 +217,14 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Full Name"
                 fullWidth
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    onFieldChange('fullName', value);
+                  } else {
+                    setFullName(value);
+                  }
+                }}
                 error={fullName === 'New Organizer' || fullName.trim().length < 7}
                 helperText={
                   fullName === 'New Organizer'
@@ -214,7 +241,14 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Short Name"
                 fullWidth
                 value={shortName}
-                onChange={(e) => setShortName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    onFieldChange('shortName', value);
+                  } else {
+                    setShortName(value);
+                  }
+                }}
                 error={isShortNameInvalid()}
                 helperText={
                   isShortNameInvalid()
@@ -229,7 +263,14 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="URL (Web or Social Media)"
                 fullWidth
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    onFieldChange('publicContactInfo', { ...organizer?.publicContactInfo, url: value });
+                  } else {
+                    setUrl(value);
+                  }
+                }}
                 helperText="Optional website or social media link"
               />
             </Grid>
@@ -241,7 +282,14 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 multiline
                 rows={3}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    onFieldChange('description', value);
+                  } else {
+                    setDescription(value);
+                  }
+                }}
                 helperText="Tell dancers about your organization"
               />
             </Grid>
@@ -265,7 +313,14 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Phone"
                 fullWidth
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    onFieldChange('publicContactInfo', { ...organizer?.publicContactInfo, phone: value });
+                  } else {
+                    setPhone(value);
+                  }
+                }}
               />
             </Grid>
             
@@ -274,7 +329,14 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Email"
                 fullWidth
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    onFieldChange('publicContactInfo', { ...organizer?.publicContactInfo, Email: value });
+                  } else {
+                    setEmail(value);
+                  }
+                }}
               />
             </Grid>
             
@@ -283,7 +345,18 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Street Address 1"
                 fullWidth
                 value={street1}
-                onChange={(e) => setStreet1(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    const currentAddress = organizer?.publicContactInfo?.address || {};
+                    onFieldChange('publicContactInfo', { 
+                      ...organizer?.publicContactInfo, 
+                      address: { ...currentAddress, street1: value }
+                    });
+                  } else {
+                    setStreet1(value);
+                  }
+                }}
               />
             </Grid>
             
@@ -292,7 +365,18 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Street Address 2"
                 fullWidth
                 value={street2}
-                onChange={(e) => setStreet2(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    const currentAddress = organizer?.publicContactInfo?.address || {};
+                    onFieldChange('publicContactInfo', { 
+                      ...organizer?.publicContactInfo, 
+                      address: { ...currentAddress, street2: value }
+                    });
+                  } else {
+                    setStreet2(value);
+                  }
+                }}
                 helperText="Apartment, suite, etc. (optional)"
               />
             </Grid>
@@ -302,7 +386,18 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="City"
                 fullWidth
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    const currentAddress = organizer?.publicContactInfo?.address || {};
+                    onFieldChange('publicContactInfo', { 
+                      ...organizer?.publicContactInfo, 
+                      address: { ...currentAddress, city: value }
+                    });
+                  } else {
+                    setCity(value);
+                  }
+                }}
               />
             </Grid>
             
@@ -311,7 +406,18 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="State"
                 fullWidth
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    const currentAddress = organizer?.publicContactInfo?.address || {};
+                    onFieldChange('publicContactInfo', { 
+                      ...organizer?.publicContactInfo, 
+                      address: { ...currentAddress, state: value }
+                    });
+                  } else {
+                    setState(value);
+                  }
+                }}
               />
             </Grid>
             
@@ -320,7 +426,18 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer }) 
                 label="Zip Code"
                 fullWidth
                 value={zip}
-                onChange={(e) => setZip(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (onFieldChange) {
+                    const currentAddress = organizer?.publicContactInfo?.address || {};
+                    onFieldChange('publicContactInfo', { 
+                      ...organizer?.publicContactInfo, 
+                      address: { ...currentAddress, postalCode: value }
+                    });
+                  } else {
+                    setZip(value);
+                  }
+                }}
               />
             </Grid>
           </Grid>
@@ -350,6 +467,11 @@ RegionalOrganizersProfile.propTypes = {
     }),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
+  // TIEMPO-254: Optional centralized state management props
+  onFieldChange: PropTypes.func,
+  unsavedChanges: PropTypes.object,
+  onSave: PropTypes.func,
+  isSaving: PropTypes.bool,
 };
 
 export default RegionalOrganizersProfile;
