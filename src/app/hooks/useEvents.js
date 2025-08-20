@@ -593,6 +593,8 @@ export function useEventOperations() {
         // RA endpoint has different requirements - prepare minimal data
         preparedData = {
           title: cleanedEventData.title,
+          // TIEMPO-245: Include shortTitle field (21 chars max)
+          shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           startDate: cleanedEventData.startDate,
           endDate: cleanedEventData.endDate,
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
@@ -621,6 +623,8 @@ export function useEventOperations() {
                            "Event Organizer",
         // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
         ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
+        // TIEMPO-245: Include shortTitle field (21 chars max)
+        shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Include admin cities for RegionalAdmin validation
@@ -818,6 +822,8 @@ export function useEventOperations() {
         // RA endpoint has different requirements - prepare minimal data
         preparedData = {
           title: cleanedEventData.title,
+          // TIEMPO-245: Include shortTitle field (21 chars max)
+          shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           startDate: cleanedEventData.startDate,
           endDate: cleanedEventData.endDate,
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
@@ -854,6 +860,8 @@ export function useEventOperations() {
                              "Event Organizer",
           // Add ownerOrganizerShortName (required by backend) - fallback to shortName field first
           ownerOrganizerShortName: cleanedEventData.ownerOrganizerShortName || cleanedEventData.shortName || cleanedEventData.ownerOrganizerName || "Event Organizer",
+          // TIEMPO-245: Include shortTitle field (21 chars max)
+          shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           // Set expiresAt to 1 year after endDate
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         };
