@@ -295,6 +295,13 @@ export const useCalendarPage = () => {
       setViewDetailModalOpen(true);
       // The delete button in the modal will handle the actual deletion
     }
+    
+    // TIEMPO-253: Handle opening organizer settings for incomplete profiles
+    if (action === 'openOrganizerSettings') {
+      // Open the user settings modal to the Event Organizer tab
+      // This requires accessing the global state or redirecting
+      window.location.href = '/user-settings?tab=organizer';
+    }
   };
 
   const handleMenuClose = () => {
