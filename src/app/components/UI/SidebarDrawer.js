@@ -286,7 +286,7 @@ const SidebarDrawer = ({ open, onClose }) => {
                 }}
               >
                 <ListItemIcon>
-                  <LocationOnIcon sx={{ color: 'primary.main' }} />
+                  <MapIcon sx={{ color: 'primary.main' }} />
                 </ListItemIcon>
                 <ListItemText 
                   primary="Set Map Center" 
