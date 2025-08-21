@@ -363,7 +363,7 @@ const UnifiedLocationModal = ({
                   opacity: !user ? 0.5 : 1
                 }}
               >
-                Save Default
+                Save Permanent
               </Button>
             </span>
           </Tooltip>

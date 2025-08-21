@@ -201,22 +201,6 @@ const SidebarDrawer = ({ open, onClose }) => {
           */}
           {/* END OF COMMENTED REGION SECTION */}
 
-          {/* Event Explorer - Top Level */}
-          <Link href="/explorer" passHref>
-            <ListItem
-              button="true"
-              onClick={() => onClose()}
-            >
-              <ListItemIcon>
-                <PublicIcon sx={{ color: 'primary.main' }} />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Event Explorer" 
-                secondary="Discover events worldwide"
-              />
-            </ListItem>
-          </Link>
-          
           <Divider />
 
           {/* Dynamic Authentication-Based Section */}
@@ -294,7 +278,6 @@ const SidebarDrawer = ({ open, onClose }) => {
               </ListItem>
 
               {/* TIEMPO-259: Map Center Menu Item */}
-              <Divider />
               <ListItem
                 button="true"
                 onClick={() => {
@@ -439,6 +422,22 @@ const SidebarDrawer = ({ open, onClose }) => {
           )}
           
           <Divider />
+
+          {/* Event Explorer - Top Level */}
+          <Link href="/explorer" passHref>
+            <ListItem
+              button="true"
+              onClick={() => onClose()}
+            >
+              <ListItemIcon>
+                <PublicIcon sx={{ color: 'primary.main' }} />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Event Explorer" 
+                secondary="Discover events worldwide"
+              />
+            </ListItem>
+          </Link>
           
           {/* Information Accordion - Collapsed by Default */}
           <Accordion defaultExpanded={false} sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}>

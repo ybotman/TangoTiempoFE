@@ -669,13 +669,13 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             fullWidth
             variant="outlined"
             startIcon={<AddLocationIcon />}
-            onClick={handleAddVenue}
+            disabled={true}
             sx={{ 
               height: '56px',
               mt: { xs: 0, md: 0 }
             }}
           >
-            Add New Venue
+            Coming Soon
           </Button>
         </Grid>
 
