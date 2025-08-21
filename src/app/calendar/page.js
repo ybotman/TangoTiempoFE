@@ -549,7 +549,10 @@ const CalendarPage = () => {
     if (currentViewType === 'list21Days' || currentViewType === 'listMonth') {
       if (viewDateRange.start && viewDateRange.end) {
         // Generate placeholders for the current view range
-        const placeholders = generatePlaceholderEvents(viewDateRange.start, viewDateRange.end);
+        // Convert Date objects to ISO strings for generatePlaceholderEvents
+        const startStr = viewDateRange.start instanceof Date ? viewDateRange.start.toISOString() : viewDateRange.start;
+        const endStr = viewDateRange.end instanceof Date ? viewDateRange.end.toISOString() : viewDateRange.end;
+        const placeholders = generatePlaceholderEvents(startStr, endStr);
         
         // TIEMPO-246: Filter dates using string comparison, not Date objects
         const eventDates = new Set(
