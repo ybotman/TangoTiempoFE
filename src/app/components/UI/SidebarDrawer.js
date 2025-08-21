@@ -292,6 +292,25 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </ListItemIcon>
                 <ListItemText primary="User Settings" />
               </ListItem>
+
+              {/* TIEMPO-259: Map Center Menu Item */}
+              <Divider />
+              <ListItem
+                button="true"
+                onClick={() => {
+                  openMapCenterModal();
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <LocationOnIcon sx={{ color: 'primary.main' }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Set Map Center" 
+                  secondary="Filter events by location"
+                />
+              </ListItem>
+              <Divider />
               
               {/* Only show Apply as Organizer if user is not already an approved and enabled organizer */}
               {selectedRole !== listOfAllRoles.REGIONAL_ORGANIZER && 
