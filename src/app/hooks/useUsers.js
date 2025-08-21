@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
+import { dedupeFetch } from '@/utils/dedupeFetch';
 
 export const useUsers = () => {
   const auth = useContext(AuthContext);
@@ -33,8 +34,8 @@ export const useUsers = () => {
         hasLoggedFetch.current = true;
       }
 
-      // Include appId as a query parameter
-      const response = await axios.get(endpoint, {
+      // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
+      const response = await dedupeFetch(endpoint, {
         params: { appId },
       });
 
