@@ -322,7 +322,11 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                 ? formatVenueDate(startDate)
                 : (() => {
                     // TIEMPO-246: String-based fallback without Date() conversion
-                    const [datePart] = (startDate || '').split('T');
+                    // TIEMPO-239: Handle both Date objects and strings
+                    const dateString = typeof startDate === 'string' 
+                      ? startDate 
+                      : startDate?.toISOString?.() || '';
+                    const [datePart] = dateString.split('T');
                     if (!datePart) return '';
                     const [year, month, day] = datePart.split('-');
                     const months = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -346,7 +350,11 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                       : (() => {
                           // TIEMPO-246: String-based time formatting without Date() conversion
                           const formatTimeString = (timeStr) => {
-                            const [, timePart] = (timeStr || '').split('T');
+                            // Handle both Date objects and strings
+                            const dateString = typeof timeStr === 'string' 
+                              ? timeStr 
+                              : timeStr?.toISOString?.() || '';
+                            const [, timePart] = dateString.split('T');
                             if (!timePart) return '';
                             const [hour, minute] = timePart.split(':');
                             const hourNum = parseInt(hour, 10);
@@ -439,7 +447,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             <br />
             <strong>Date:</strong> {startDate && (hasVenueTimezone 
               ? formatVenueDate(startDate)
-              : startDate.split('T')[0])}
+              : (typeof startDate === 'string' ? startDate : startDate?.toISOString?.() || '').split('T')[0])}
             <br />
             <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
             <br />
