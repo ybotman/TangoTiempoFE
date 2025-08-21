@@ -1,123 +1,80 @@
 # Retrospective Playbook
 
-## Session: 2025-07-23 - Location Preferences UI Implementation
+## Session: 2025-08-21 - Performance Investigation TIEMPO-257
 
-### Session Type: Feature Development
-**Duration:** Full session  
-**Outcome:** Successful implementation  
-**Version:** 1.4.6 → 1.5.0
+### Key Learnings
 
-### Categorized Findings:
-
-#### 1. Local Bash Commands
-- **All Successful** - No path or permission errors
-- Efficient file navigation and git operations
-
-#### 2. JIRA Connectivity/Params
-- **Gap Identified:** No JIRA integration attempted
-- **Lesson:** Always start with JIRA ticket search/creation
-- **Impact:** Missed documentation requirements per playbooks
-
-#### 3. GitHub Operations
-- **Success:** Clean commit with proper formatting
-- **Success:** Correct branch usage (DEVL)
-- **Improvement:** Could use more granular commits
-
-#### 4. Branching & Navigation
-- **Success:** No branch confusion or navigation errors
-- **Success:** Stayed on appropriate DEVL branch
-
-#### 5. User Guidance & Communication
-- **Success:** Clear technical explanations
-- **Success:** Good role transitions
-- **Improvement:** Should have proactively mentioned JIRA requirements
-
-### Technical Discoveries:
-
-#### API Configuration Issues:
+#### 1. JIRA API Direct Access Pattern ✅
+**CRITICAL PROCESS OVERRIDE**: When user says "use API not MPC" or "token in security":
+```bash
+curl -X POST \
+  -H "Authorization: Basic $(echo -n "${JIRA_EMAIL}:${JIRA_API_TOKEN}" | base64)" \
+  -H "Content-Type: application/json" \
+  -d '{"body": "comment text"}' \
+  "${JIRA_BASE_URL}/rest/api/2/issue/TICKET-ID/comment"
 ```
-Problem: appId=2 returned 0 cities
-Solution: appId=1 returned proper city list
-Learning: Always verify API parameters with actual calls
-```
+- Environment variables: JIRA_EMAIL, JIRA_API_TOKEN, JIRA_BASE_URL
+- More reliable than MCP for high-volume operations
+- Always use direct API when explicitly requested
 
-#### React State Management:
-```
-Problem: masteredCityIds not persisting
-Solution: Added PUT /user/location-preference endpoint call
-Learning: Always verify backend persistence, not just frontend state
-```
+#### 2. HAR File Performance Analysis Success
+- Parse HAR files with jq for performance metrics
+- Extract slowest requests: `jq '.log.entries | sort_by(.time) | reverse'`
+- Group by endpoint to find duplicates
+- Identified 80+ seconds of redundant API calls from 6.8MB HAR file
 
-#### Component Key Warnings:
-```
-Problem: Duplicate city names causing React key warnings
-Solution: Added index to key composition: `city-${city.cityId}-${index}`
-Learning: Consider data uniqueness when generating React keys
-```
+#### 3. Duplicate API Call Pattern Recognition
+**Critical Finding**: Multiple hooks fetching same data independently
+- AuthContext.js: Fetches /api/userlogins on auth state change
+- useUsers.js: DUPLICATES same /api/userlogins call
+- useEvents.js: 13-item dependency array causes constant re-fetches
+- Result: 17 userlogin calls, 6 event calls, 6 venue calls
 
-### Successful Patterns:
+#### 4. React Hook Optimization Needed
+- Massive dependency arrays cause re-render cascades
+- No request deduplication or caching
+- Components fetch data independently instead of sharing
+- Missing singleton pattern for API requests
 
-1. **API-First Development**
-   - Tested endpoints before implementation
-   - Verified data structures with actual calls
+### What Worked Well
+1. Direct JIRA API with environment variables
+2. HAR file analysis with jq
+3. Systematic Scout investigation
+4. Clear JIRA documentation with metrics
 
-2. **Incremental Implementation**
-   - Built features step-by-step
-   - Maintained working state throughout
+### What Needs Improvement
+1. Implement request deduplication singleton
+2. Add response caching with TTL
+3. Optimize React hook dependencies
+4. Create shared data context pattern
 
-3. **User Feedback Integration**
-   - Actively sought UI/UX feedback
-   - Implemented suggestions promptly
+### Metrics Target
+- API calls: 37 → 5-7 (85% reduction)
+- Data transfer: 6.8MB → <1MB
+- Page load: 7+ seconds → <2 seconds
 
-### Action Items for Future Sessions:
+### Process Improvements for Future Sessions
+1. **Always check for "API DIRECT" or "token in security" mentions** - Override MCP
+2. Create reusable JIRA API wrapper functions
+3. Use HAR file analysis for all performance investigations
+4. Document duplicate call patterns in hooks immediately
 
-1. **JIRA Integration Checklist:**
-   - [ ] Search for existing tickets at session start
-   - [ ] Create ticket if none exists
-   - [ ] Document decisions in ticket comments
-   - [ ] Update ticket status as work progresses
+## Previous Session Learnings
 
-2. **Documentation Standards:**
-   - [ ] Add API endpoint documentation to code
-   - [ ] Document component props and state
-   - [ ] Consider README updates for new features
+### Timezone Implementation (TIEMPO-246, TIEMPO-252)
+- Display all events in venue timezone, not browser timezone
+- Use string manipulation to avoid Date() conversions
+- Backend provides venueStartDisplay, venueEndDisplay fields
+- Set FullCalendar timezone="UTC" to prevent conversions
 
-3. **Testing Considerations:**
-   - [ ] Unit tests for new components
-   - [ ] Integration tests for API calls
-   - [ ] Manual test documentation
+### Profile Management (TIEMPO-253, TIEMPO-254)
+- Centralized state management across modal tabs
+- Event emitter pattern for cross-component communication
+- Proper "Next Steps" dialog flow after application
+- Check isEnabled status for profile completion
 
-### Commands for Quick Reference:
-
-```javascript
-// JIRA MCP Commands Used in Future Sessions
-mcp__atlassian__searchJiraIssuesUsingJql({
-  cloudId: "https://hdtsllc.atlassian.net",
-  jql: "project = TIEMPO AND status = 'In Progress'",
-  fields: ["summary", "status", "assignee"]
-})
-
-mcp__atlassian__createJiraIssue({
-  cloudId: "https://hdtsllc.atlassian.net",
-  projectKey: "TIEMPO",
-  issueTypeName: "Story",
-  summary: "Feature: Location Preferences UI",
-  description: "Implement user location preferences with city selection and map interface"
-})
-```
-
-### Success Metrics:
-- ✅ Feature Implementation: Complete
-- ✅ Code Quality: High
-- ✅ User Satisfaction: Achieved
-- ❌ JIRA Documentation: Missing
-- ❌ Automated Tests: Not implemented
-
-### Overall Rating: 8/10
-Excellent technical execution with room for process improvement.
-
----
-
-## Previous Retrospectives
-
-No previous retrospectives recorded.
+### Git Strategy
+- Always commit to feature branches first
+- Merge to TEST for testing
+- Never push directly to MAIN
+- Include JIRA ticket numbers in commit messages

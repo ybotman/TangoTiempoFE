@@ -25,6 +25,7 @@ import {
 } from 'firebase/auth';
 import { auth, facebookProvider, googleProvider, appleProvider } from '@/utils/firebase';
 import axios from 'axios';
+import { dedupeFetch } from '@/utils/dedupeFetch';
 
 // Create Auth Context
 export const AuthContext = createContext();
@@ -95,13 +96,14 @@ export const AuthProvider = ({ children }) => {
       console.log('Attempting to fetch user data from backend:', 
         `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`);
       
-      // Add timeout to prevent hanging requests
-      const response = await axios.get(
+      // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
+      const response = await dedupeFetch(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
         {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
+          params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID },
           timeout: 10000 // 10 second timeout
         }
       );
