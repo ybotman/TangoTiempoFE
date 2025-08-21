@@ -15,7 +15,6 @@ import {
 import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import axios from 'axios';
-import { format } from 'date-fns';
 
 const VenueUpcomingEvents = ({ venue }) => {
   const [events, setEvents] = useState([]);
@@ -30,13 +29,14 @@ const VenueUpcomingEvents = ({ venue }) => {
       setError(null);
       
       try {
+        // TIEMPO-246: Use ISO string without timezone conversion
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T00:00:00.000Z`;
         
         const params = {
           appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
           venueID: venue._id,
-          startDateFrom: today.toISOString(),
+          startDateFrom: todayStr,
           limit: 15,
           sort: 'startDate'
         };
@@ -110,8 +110,11 @@ const VenueUpcomingEvents = ({ venue }) => {
       ) : (
         <List dense sx={{ maxHeight: 300, overflow: 'auto' }}>
           {events.map((event) => {
-            const eventDate = new Date(event.startDate);
-            const isToday = eventDate.toDateString() === new Date().toDateString();
+            // TIEMPO-246: Compare dates without timezone conversion
+            const eventDateStr = (event.startDate || '').split('T')[0];
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const isToday = eventDateStr === todayStr;
             
             return (
               <ListItem key={event._id} divider>
@@ -129,7 +132,29 @@ const VenueUpcomingEvents = ({ venue }) => {
                   secondary={
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        {format(eventDate, 'EEE, MMM d, yyyy')} at {format(eventDate, 'h:mm a')}
+                        {(() => {
+                          // TIEMPO-246: Format date and time without timezone conversion
+                          const [datePart, timePart] = (event.startDate || '').split('T');
+                          if (!datePart) return 'Date not available';
+                          
+                          const [year, month, day] = datePart.split('-');
+                          const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                          
+                          // Calculate day of week
+                          const dateObj = new Date(year, month - 1, day);
+                          const weekday = weekdays[dateObj.getDay()];
+                          const dateStr = `${weekday}, ${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                          
+                          if (timePart) {
+                            const [hour, minute] = timePart.split(':');
+                            const hourNum = parseInt(hour, 10);
+                            const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+                            const suffix = hourNum >= 12 ? 'PM' : 'AM';
+                            return `${dateStr} at ${displayHour}:${minute} ${suffix}`;
+                          }
+                          return dateStr;
+                        })()}
                       </Typography>
                       {event.organizerName && (
                         <Typography variant="caption" display="block" color="text.secondary">

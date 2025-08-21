@@ -37,12 +37,12 @@ import ImageIcon from '@mui/icons-material/Image';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 
-const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) => {
+const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
   const { user } = useContext(AuthContext);
   const { userData, updateUserData } = useUsers();
   
-  // State for switchable attributes
-  const [isEnabled, setIsEnabled] = useState(false);
+  // TIEMPO-254: Use unsaved changes if available, otherwise use organizer data
+  const isEnabled = unsavedChanges?.isEnabled !== undefined ? unsavedChanges.isEnabled : (organizer?.isEnabled || false);
   
   // Initial values for comparison
   const [initialIsEnabled, setInitialIsEnabled] = useState(false);
@@ -78,19 +78,26 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
 
   useEffect(() => {
     if (organizer && userData) {
-      // Sync isEnabled from organizer collection
-      setIsEnabled(organizer.isEnabled || false);
+      // Sync initial values from organizer collection
       setInitialIsEnabled(organizer.isEnabled || false);
     }
   }, [organizer, userData]);
 
-  const isSaveDisabled = isEnabled === initialIsEnabled;
+  // TIEMPO-254: Use centralized isSaving if available, otherwise check for changes
+  const isSaveDisabled = isSaving !== undefined ? isSaving : (isEnabled === initialIsEnabled);
 
   const handleSnackbarClose = () => {
     setShowSuccessMessage(false);
   };
 
+  // TIEMPO-254: Use centralized save handler
   const handleSave = async () => {
+    // Call the centralized save handler if available
+    if (onSave) {
+      return onSave();
+    }
+    
+    // Fallback to original implementation if no centralized handler
     setErrorMessage('');
     setShowSuccessMessage(false);
     
@@ -236,7 +243,14 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer }) =
               control={
                 <Switch 
                   checked={isEnabled} 
-                  onChange={(e) => setIsEnabled(e.target.checked)} 
+                  onChange={(e) => {
+                    // TIEMPO-254: Use centralized field change handler if available
+                    if (onFieldChange) {
+                      onFieldChange('isEnabled', e.target.checked);
+                    } else {
+                      setIsEnabled(e.target.checked);
+                    }
+                  }} 
                   color="primary"
                   disabled={!allMandatoryPassed}
                   size="large"
@@ -470,6 +484,11 @@ RegionalOrganizersStatus.propTypes = {
     }),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
+  // TIEMPO-254: Optional centralized state management props
+  onFieldChange: PropTypes.func,
+  unsavedChanges: PropTypes.object,
+  onSave: PropTypes.func,
+  isSaving: PropTypes.bool,
 };
 
 export default RegionalOrganizersStatus;

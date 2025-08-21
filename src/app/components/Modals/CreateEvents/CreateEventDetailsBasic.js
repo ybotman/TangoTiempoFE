@@ -181,6 +181,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       return;
     }
     
+    // TIEMPO-246: Log venue data to check for timezone
+    console.log('TIEMPO-246: Venue selected:', {
+      id: newValue._id,
+      name: newValue.name,
+      timezone: newValue.timezone,
+      timezoneAbbr: newValue.timezoneAbbr,
+      fullVenue: newValue
+    });
+    
     // Store both the ID and the name
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
     
@@ -191,6 +200,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         // Use new standardized venue fields
         venueId: newValue._id,
         venueName: venueName,
+        // TIEMPO-246: Store venue timezone for event creation
+        venueTimezone: newValue.timezone || newValue.venueTimezone || null,
+        venueTimezoneAbbr: newValue.timezoneAbbr || null,
         // Also keep legacy fields for backward compatibility
         locationID: newValue._id,
         locationName: venueName

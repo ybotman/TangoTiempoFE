@@ -326,10 +326,14 @@ export const GeoLocationProvider = ({ children }) => {
     setSavedLocation(location);
     
     // Only update current location if it hasn't been set by user this session
-    if (!currentLocation.lat && !currentLocation.lng) {
-      setCurrentLocationState(location);
-    }
-  }, [currentLocation]);
+    // Use a ref or state setter function to avoid dependency on currentLocation
+    setCurrentLocationState(prev => {
+      if (!prev.lat && !prev.lng) {
+        return location;
+      }
+      return prev;
+    });
+  }, []);
 
   // Open location settings modal
   const openLocationSettings = useCallback((tab = 'locationPrefs') => {

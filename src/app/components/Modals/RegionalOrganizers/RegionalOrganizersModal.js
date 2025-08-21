@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Box, Typography, Tabs, Tab, useMediaQuery, useTheme, AppBar, Toolbar, IconButton } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, useMediaQuery, useTheme, AppBar, Toolbar, IconButton, Button } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersProfile from './RegionalOrganizersProfile';
 import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
@@ -20,10 +20,20 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const { user } = auth || {};
   const { organizers, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('status');
+  
+  // TIEMPO-254: Centralized state for all tabs - persists across tab changes
+  const [unsavedChanges, setUnsavedChanges] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   useEffect(() => {
     if (open) {
       setCurrentTab('status');
+      // TIEMPO-254: Reset unsaved changes when modal opens
+      setUnsavedChanges({});
+      setHasUnsavedChanges(false);
+      setSaveMessage('');
 
       const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
 
@@ -40,20 +50,104 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   }, [open, user, fetchOrganizerById]);
 
   const handleTabChange = (event, newValue) => {
-    // For now, just switch tabs. In a future update, we could add unsaved changes detection
+    // TIEMPO-254: Preserve unsaved changes when switching tabs
     setCurrentTab(newValue);
   };
 
+  // TIEMPO-254: Centralized field change handler
+  const handleFieldChange = (tabName, fieldName, value) => {
+    setUnsavedChanges(prev => ({
+      ...prev,
+      [tabName]: {
+        ...prev[tabName],
+        [fieldName]: value
+      }
+    }));
+    setHasUnsavedChanges(true);
+    setSaveMessage(''); // Clear any previous save message
+  };
+
+  // TIEMPO-254: Centralized save handler - saves all tabs at once
+  const handleSaveAll = async () => {
+    if (!hasUnsavedChanges || !organizer?._id) return;
+
+    setIsSaving(true);
+    setSaveMessage('');
+
+    try {
+      // Merge all unsaved changes into a single update object
+      const allChanges = {};
+      Object.values(unsavedChanges).forEach(tabChanges => {
+        Object.assign(allChanges, tabChanges);
+      });
+
+      // Update the organizer with all changes
+      await updateOrganizer(organizer._id, allChanges);
+
+      // Clear unsaved changes and show success
+      setUnsavedChanges({});
+      setHasUnsavedChanges(false);
+      setSaveMessage('All changes saved successfully!');
+      
+      // Refresh organizer data
+      fetchOrganizerById(organizer._id);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      setSaveMessage('Error saving changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // TIEMPO-254: Handle modal close - warn about unsaved changes
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+        setUnsavedChanges({});
+        setHasUnsavedChanges(false);
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <Box sx={modalStyle(isMobile)}>
         {/* Header with Close Button */}
         <AppBar position="static" color="default">
           <Toolbar variant="dense">
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Event Organizer Settings
+              {hasUnsavedChanges && (
+                <Typography component="span" variant="caption" sx={{ ml: 2, color: 'warning.main' }}>
+                  (Unsaved Changes)
+                </Typography>
+              )}
             </Typography>
-            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
+            {/* TIEMPO-254: Save All button in header */}
+            {hasUnsavedChanges && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={handleSaveAll}
+                disabled={isSaving}
+                sx={{ mr: 2 }}
+              >
+                {isSaving ? 'Saving...' : 'Save All'}
+              </Button>
+            )}
+            {saveMessage && (
+              <Typography variant="caption" sx={{ mr: 2, color: saveMessage.includes('Error') ? 'error.main' : 'success.main' }}>
+                {saveMessage}
+              </Typography>
+            )}
+            <IconButton edge="end" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
             </IconButton>
           </Toolbar>
@@ -117,6 +211,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
+                    onFieldChange={(field, value) => handleFieldChange('status', field, value)}
+                    unsavedChanges={unsavedChanges.status || {}}
+                    onSave={handleSaveAll}
+                    isSaving={isSaving}
                   />
                 )}
                 {currentTab === 'settings' && (
@@ -124,6 +222,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
+                    onFieldChange={(field, value) => handleFieldChange('settings', field, value)}
+                    unsavedChanges={unsavedChanges.settings || {}}
+                    onSave={handleSaveAll}
+                    isSaving={isSaving}
                   />
                 )}
                 {currentTab === 'profile' && (
@@ -131,6 +233,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
+                    onFieldChange={(field, value) => handleFieldChange('profile', field, value)}
+                    unsavedChanges={unsavedChanges.profile || {}}
+                    onSave={handleSaveAll}
+                    isSaving={isSaving}
                   />
                 )}
                 {currentTab === 'types' && (
@@ -138,6 +244,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
+                    onFieldChange={(field, value) => handleFieldChange('types', field, value)}
+                    unsavedChanges={unsavedChanges.types || {}}
+                    onSave={handleSaveAll}
+                    isSaving={isSaving}
                   />
                 )}
                 {currentTab === 'profileImages' && (
@@ -145,6 +255,10 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     organizerId={organizer?._id}
                     organizer={organizer}
                     updateOrganizer={updateOrganizer}
+                    onFieldChange={(field, value) => handleFieldChange('profileImages', field, value)}
+                    unsavedChanges={unsavedChanges.profileImages || {}}
+                    onSave={handleSaveAll}
+                    isSaving={isSaving}
                   />
                 )}
               </Box>

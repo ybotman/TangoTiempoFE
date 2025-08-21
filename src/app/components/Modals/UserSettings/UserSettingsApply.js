@@ -1,7 +1,7 @@
 // UserSettingsApply.js
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Chip, Divider } from '@mui/material';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Chip, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import InfoIcon from '@mui/icons-material/Info';
@@ -24,6 +24,9 @@ const UserSettingsApply = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showTerms, setShowTerms] = useState(false);
   const [restartMessage, setRestartMessage] = useState(false);
+  // TIEMPO-253: Add states for proper next steps flow
+  const [showNextStepsDialog, setShowNextStepsDialog] = useState(false);
+  const [hasAgreedToNextSteps, setHasAgreedToNextSteps] = useState(false);
 
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
@@ -152,6 +155,8 @@ const UserSettingsApply = () => {
 
       setApplicationStatus('success');
       setShowTerms(true);
+      // TIEMPO-253: Show next steps dialog after successful application
+      setShowNextStepsDialog(true);
     } catch (error) {
       console.error('Error during application process:', error);
       setErrorMessage(error.response?.data?.message || error.message || 'An error occurred during application.');
@@ -348,9 +353,18 @@ const UserSettingsApply = () => {
             </Box>
             
             {!organizer?.isEnabled && (
-              <Alert severity="info" sx={{ mt: 2 }}>
-                <Typography variant="caption">
-                  To activate: Change role to Organizer/Artist → Open Event Organizer Settings → Complete all requirements in Status tab
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <Typography variant="body2" fontWeight="bold" gutterBottom>
+                  ⚠️ Profile Not Yet Activated
+                </Typography>
+                <Typography variant="body2">
+                  To start creating events:
+                </Typography>
+                <Typography variant="caption" component="div" sx={{ mt: 1 }}>
+                  1. Change your role to <strong>"Organizer/Artist"</strong> in the top menu<br/>
+                  2. Open <strong>"Event Organizer Settings"</strong><br/>
+                  3. Complete all requirements in the <strong>Status tab</strong><br/>
+                  4. <strong>Enable your profile</strong> to activate event creation
                 </Typography>
               </Alert>
             )}
@@ -358,9 +372,95 @@ const UserSettingsApply = () => {
         </>
       )}
 
+      {/* TIEMPO-253: Next Steps Dialog - Shows after successful application */}
+      <Dialog
+        open={showNextStepsDialog}
+        onClose={() => {}} // Don't allow closing without agreeing
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ backgroundColor: 'primary.main', color: 'white' }}>
+          🎉 Application Submitted Successfully!
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              Important Next Steps Required:
+            </Typography>
+          </Alert>
+          
+          <Typography variant="body1" paragraph>
+            Your application to become an Event Organizer has been submitted. To start creating events, you must:
+          </Typography>
+          
+          <Box sx={{ ml: 2, mb: 2 }}>
+            <Typography variant="body2" component="div">
+              <ol style={{ margin: '8px 0' }}>
+                <li><strong>Change your role</strong> to "Organizer/Artist" in the top menu</li>
+                <li><strong>Open "Event Organizer Settings"</strong> from the menu</li>
+                <li><strong>Complete all requirements</strong> in the Status tab</li>
+                <li><strong>Enable your profile</strong> to activate event creation</li>
+              </ol>
+            </Typography>
+          </Box>
+          
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              <strong>Note:</strong> The page will refresh after you acknowledge these steps. 
+              Please remember to change your role to "Organizer/Artist" to access the Event Organizer Settings.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setHasAgreedToNextSteps(true);
+              setShowNextStepsDialog(false);
+              // Show restarting message then refresh
+              setRestartMessage(true);
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+            }}
+            fullWidth
+          >
+            I Understand - Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Restarting message */}
+      {restartMessage && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <CircularProgress size={60} sx={{ color: 'white', mb: 2 }} />
+          <Typography variant="h6" sx={{ color: 'white' }}>
+            Refreshing Application...
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'white', mt: 1 }}>
+            Please remember to change your role to Organizer/Artist
+          </Typography>
+        </Box>
+      )}
+
       {/* Terms modal */}
       <ROTermsModal
-        open={showTerms}
+        open={showTerms && !showNextStepsDialog}
         onClose={() => handleAgreeToTerms(false)}
         onAgree={() => handleAgreeToTerms(true)}
       />
