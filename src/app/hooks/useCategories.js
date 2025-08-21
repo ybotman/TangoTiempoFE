@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { dedupeFetch } from '@/utils/dedupeFetch';
 
 const useCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -10,7 +11,8 @@ const useCategories = () => {
     const fetchCategories = async () => {
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`, {
+        // TIEMPO-257: Use dedupeFetch to prevent duplicate category calls
+        const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`, {
           params: { appId },
         });
         // Handle the response data which might have a nested categories array

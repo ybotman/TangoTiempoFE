@@ -5,6 +5,7 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useEventDiscovery } from '@/contexts/EventDiscoveryContext';
+import { dedupeFetch } from '@/utils/dedupeFetch';
 
 /**
  * Helper function to resolve location parameters based on various sources
@@ -377,7 +378,8 @@ export function useEvents({
       }
 
       // Call the unified endpoint
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
+      // TIEMPO-257: Use dedupeFetch to prevent duplicate event calls
+      const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
         params,
         timeout: 15000, // 15 second timeout
       });

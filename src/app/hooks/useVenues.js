@@ -4,6 +4,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { dedupeFetch } from '@/utils/dedupeFetch';
 
 export function useVenues() {
   const [venues, setVenues] = useState([]);
@@ -39,7 +40,8 @@ export function useVenues() {
       // Add 'all=true' to get all venues without pagination
       params.all = true;
       
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
+      // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
+      const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
