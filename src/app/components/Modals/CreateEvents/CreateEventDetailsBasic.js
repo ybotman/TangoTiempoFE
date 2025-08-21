@@ -1,5 +1,6 @@
 import React, { useEffect, useContext, useState, useMemo } from 'react';
-import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete, Select, MenuItem } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete, Select, MenuItem, Button } from '@mui/material';
+import AddLocationIcon from '@mui/icons-material/AddLocation';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -9,6 +10,7 @@ import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hoo
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook for RA selection
 import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
+import VenueModalAdd from '@/components/Modals/Venues/VenueModalAdd'; // TIEMPO-258: Import venue modal
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
@@ -24,6 +26,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
+  const [showVenueModal, setShowVenueModal] = useState(false); // TIEMPO-258: Venue modal state
   
   // Force venue refresh when component mounts
   useEffect(() => {
@@ -226,6 +229,47 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const handleVenueInputChange = (event, newInputValue) => {
     setVenueInputValue(newInputValue);
   };
+
+  // TIEMPO-258: Handle Add Venue button click
+  const handleAddVenue = () => {
+    // Save current form data to sessionStorage
+    const pendingData = {
+      eventData: eventData,
+      timestamp: Date.now(),
+      returnTo: 'eventCreate'
+    };
+    sessionStorage.setItem('pendingEventData', JSON.stringify(pendingData));
+    
+    // Open venue modal
+    setShowVenueModal(true);
+  };
+
+  // TIEMPO-258: Handle venue creation callback
+  const handleVenueCreated = async (newVenue) => {
+    console.log('New venue created:', newVenue);
+    
+    // Refresh venue list
+    await fetchVenues();
+    
+    // Auto-select the new venue
+    if (newVenue && newVenue._id) {
+      setEventData(prevData => ({
+        ...prevData,
+        venueId: newVenue._id,
+        venueName: newVenue.name || newVenue.shortName,
+        locationID: newVenue._id,
+        locationName: newVenue.name || newVenue.shortName,
+        venueLatitude: newVenue.latitude || null,
+        venueLongitude: newVenue.longitude || null
+      }));
+    }
+    
+    // Clear saved data
+    sessionStorage.removeItem('pendingEventData');
+    
+    // Close modal
+    setShowVenueModal(false);
+  };
   
   // Handle start date change
   const handleStartDateChange = (newDate) => {
@@ -342,6 +386,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName]);
 
   return (
+    <>
     <Box>
       <Typography variant="h5" component="h2">
         Mandatory Event Details (Basic)
@@ -506,7 +551,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         </Grid>
 
         {/* Venue Selection - Searchable Autocomplete */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={8}>
           <FormControl fullWidth>
             {isVenueReady ? (
             <Autocomplete
@@ -618,6 +663,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           </FormControl>
         </Grid>
 
+        {/* TIEMPO-258: Add Venue Button */}
+        <Grid item xs={12} md={4}>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<AddLocationIcon />}
+            onClick={handleAddVenue}
+            sx={{ 
+              height: '56px',
+              mt: { xs: 0, md: 0 }
+            }}
+          >
+            Add New Venue
+          </Button>
+        </Grid>
+
         {/* Cost Input */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
@@ -648,6 +709,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         />
       </FormControl>
     </Box>
+
+    {/* TIEMPO-258: Venue Add Modal */}
+    {showVenueModal && (
+      <VenueModalAdd
+        onAdd={handleVenueCreated}
+        refreshList={fetchVenues}
+        onDone={() => setShowVenueModal(false)}
+      />
+    )}
+    </>
   );
 };
 
