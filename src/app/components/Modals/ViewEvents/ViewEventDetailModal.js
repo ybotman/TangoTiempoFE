@@ -63,6 +63,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   }, [open]);
 
   useEffect(() => {
+    // TIEMPO-264: Clear image state when event changes to prevent carryover
+    setImageSrc(null);
+    setShowImageTab(false);
+    
     // Try to use the event image if available
     if (eventDetails?.extendedProps?.eventImage) {
       const img = new Image();
@@ -88,21 +92,21 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           };
           
           fallbackImg.onerror = function() {
-            // If both primary and fallback fail, use the default question image
-            console.log('Fallback image also failed, using default');
-            setImageSrc('/TangoQuestion.jpg');
-            setShowImageTab(true);
+            // TIEMPO-264: If both primary and fallback fail, show no image
+            console.log('Fallback image also failed, showing no image');
+            setImageSrc(null);
+            setShowImageTab(false);
           };
         } else {
-          // No fallback provided, use default
-          setImageSrc('/TangoQuestion.jpg');
-          setShowImageTab(true);
+          // TIEMPO-264: No fallback provided, show no image
+          setImageSrc(null);
+          setShowImageTab(false);
         }
       };
     } else {
-      // No image provided at all
-      setImageSrc('/TangoQuestion.jpg');
-      setShowImageTab(true);
+      // TIEMPO-264: No image provided at all, show no image
+      setImageSrc(null);
+      setShowImageTab(false);
     }
   }, [eventDetails]);
 

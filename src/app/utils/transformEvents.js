@@ -7,6 +7,22 @@ export function transformEvents(events) {
     console.warn("No events to transform or events is not an array");
     return [];
   }
+  
+  // Debug: Check first few events for venue timezone data
+  const debugEvents = events.slice(0, 3);
+  debugEvents.forEach(event => {
+    if (event.shortTitle?.includes('VIDA') || event.title?.includes('Practica')) {
+      console.log('Backend event data:', {
+        title: event.title,
+        shortTitle: event.shortTitle,
+        venueStartDisplay: event.venueStartDisplay,
+        venueEndDisplay: event.venueEndDisplay,
+        venueAbbr: event.venueAbbr,
+        startDate: event.startDate,
+        endDate: event.endDate
+      });
+    }
+  });
 
   return events.map((event) => {
     try {
@@ -31,7 +47,8 @@ export function transformEvents(events) {
         categorySecond: event.categorySecond,
         categoryThird: event.categoryThird,
         eventImage: event.eventImage,
-        fallbackImageUrl: event.fallbackImageUrl || '/TangoQuestion.jpg',
+        // TIEMPO-264: Remove default fallback image - show empty space instead
+        fallbackImageUrl: event.fallbackImageUrl || null,
         // Include both old and new field names during transition
         locationID: venueId,  // Legacy format - keep for compatibility
         locationName: venueName,  // Legacy format - keep for compatibility

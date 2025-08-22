@@ -151,7 +151,7 @@ const CalendarPage = () => {
     return placeholders;
   };
 
-  // TIEMPO-252: Format venue time for calendar display
+  // TIEMPO-252: Format venue time for calendar display WITH timezone
   const formatVenueTimeForCalendar = (startStr, endStr, abbr) => {
     // Parse venue time string (format: "2025-07-07T19:00:00")
     const formatVenueTime = (timeStr) => {
@@ -164,9 +164,15 @@ const CalendarPage = () => {
       return `${displayHour}:${minute}${suffix}`;
     };
     
+    const startTime = formatVenueTime(startStr);
+    const endTime = formatVenueTime(endStr);
+    
+    // Add timezone abbreviation if provided
+    const endTimeWithTz = endTime && abbr ? `${endTime} ${abbr}` : endTime;
+    
     return {
-      startTime: formatVenueTime(startStr),
-      endTime: formatVenueTime(endStr)
+      startTime: startTime,
+      endTime: endTimeWithTz
     };
   };
 
@@ -251,6 +257,19 @@ const CalendarPage = () => {
     if (isMonthlyView) {
       // Monthly view: time + categories on same line, title below
       // TIEMPO-252: Use venue display times if available
+      
+      // Debug: Check what venue data we have
+      if (event.title?.includes('Practica') || event.extendedProps?.shortTitle?.includes('VIDA')) {
+        console.log('Event venue data:', {
+          title: event.title,
+          shortTitle: event.extendedProps?.shortTitle,
+          venueStartDisplay: event.extendedProps?.venueStartDisplay,
+          venueEndDisplay: event.extendedProps?.venueEndDisplay,
+          venueAbbr: event.extendedProps?.venueAbbr,
+          hasVenueData: !!event.extendedProps?.venueStartDisplay
+        });
+      }
+      
       const { startTime, endTime } = event.extendedProps?.venueStartDisplay 
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForMonthly(event.start, event.end);
