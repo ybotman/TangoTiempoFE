@@ -545,25 +545,29 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Check if the user's organizerInfo flags are all enabled (only for RegionalOrganizer)
       if (isRegionalOrganizer) {
         const orgInfo = user.backendInfo.regionalOrganizerInfo;
-        const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
+        // TIEMPO-271: Only check isActive and isApproved, NOT isEnabled
+        // isEnabled should only be true when RO completes profile requirements
+        const requiredFlagsEnabled = orgInfo.isActive && orgInfo.isApproved;
         
-        if (!allFlagsEnabled) {
-        console.warn('Attempting to fix regionalOrganizerInfo flags...');
+        if (!requiredFlagsEnabled) {
+        console.warn('Checking regionalOrganizerInfo flags...');
         
-        // Try to automatically fix the flags first
-        try {
-          // Get fresh token for authorization
-          const token = await getIdToken(true);
-          
-          // Call API to activate the organizer flags
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
-            { firebaseUserId: user.uid },
-            { 
-              headers: { Authorization: `Bearer ${token}` },
-              params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID }
-            }
-          );
+        // TIEMPO-271: Only auto-enable isActive if needed
+        // Do NOT auto-enable isEnabled - that requires profile completion
+        if (!orgInfo.isActive) {
+          try {
+            // Get fresh token for authorization
+            const token = await getIdToken(true);
+            
+            // Call API to activate only isActive flag
+            const response = await axios.post(
+              `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
+              { firebaseUserId: user.uid },
+              { 
+                headers: { Authorization: `Bearer ${token}` },
+                params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID }
+              }
+            );
           
           
           // Update the user's info with the updated flags
@@ -602,8 +606,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             }
           }
         } catch (flagsError) {
-          console.error('Failed to update organizer flags:', flagsError);
-          throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
+            console.error('Failed to update organizer flags:', flagsError);
+            throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
+          }
+        }
+        
+        // TIEMPO-271: Check if isEnabled is false - means profile incomplete
+        if (!orgInfo.isEnabled) {
+          throw new Error('Please complete your Regional Organizer profile before creating events. You must accept the Rules of Engagement, provide an organizer short name, and add a description.');
         }
       }
       }

@@ -6,13 +6,11 @@ import {
   Box, 
   Typography, 
   TextField, 
-  Button, 
   Alert, 
   Snackbar, 
   Card,
   CardContent,
   Grid,
-  Divider,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
@@ -171,16 +169,7 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
         <Typography variant="h6">
           Profile Information
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={handleSave} 
-          disabled={isSaveDisabled()}
-          size="medium"
-          sx={{ minWidth: 150 }}
-        >
-          Save Profile
-        </Button>
+        {/* TIEMPO-272: Save button removed - use modal header Save All button */}
       </Box>
       
       {errorMessage && (

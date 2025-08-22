@@ -7,7 +7,6 @@ import {
   Typography,
   FormControlLabel,
   Switch,
-  Button,
   Alert,
   Snackbar,
   Card,
@@ -16,17 +15,13 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
   Chip,
   Grid,
-  Tooltip,
-  IconButton,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import InfoIcon from '@mui/icons-material/Info';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import LockIcon from '@mui/icons-material/Lock';
 import RecommendIcon from '@mui/icons-material/Recommend';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -173,16 +168,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
         <Typography variant="h6">
           Profile Status Dashboard
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={handleSave} 
-          disabled={isSaveDisabled}
-          size="medium"
-          sx={{ minWidth: 150 }}
-        >
-          Save
-        </Button>
+        {/* TIEMPO-272: Save button removed - use modal header Save All button */}
       </Box>
 
       {errorMessage && (
@@ -244,12 +230,11 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
                 <Switch 
                   checked={isEnabled} 
                   onChange={(e) => {
-                    // TIEMPO-254: Use centralized field change handler if available
+                    // TIEMPO-272: Always use centralized field change handler
                     if (onFieldChange) {
                       onFieldChange('isEnabled', e.target.checked);
-                    } else {
-                      setIsEnabled(e.target.checked);
                     }
+                    // Removed fallback setIsEnabled - no local state exists
                   }} 
                   color="primary"
                   disabled={!allMandatoryPassed}

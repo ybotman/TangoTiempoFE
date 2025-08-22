@@ -1,9 +1,10 @@
 // src/hooks/useMenuItems.js
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { listOfAllRoles } from '@/utils/masterData';
+import { useOrganizers } from '@/hooks/useOrganizers';
 
 const useMenuItems = () => {
   const { selectedRole } = useContext(RoleContext);
@@ -11,16 +12,24 @@ const useMenuItems = () => {
   const { selectedLocation } = useGeoLocation();
   const selectedRegion = selectedLocation?.region?.name;
   
-  // TIEMPO-253: Check if organizer profile is complete and enabled
+  // TIEMPO-272: Get organizer data from the organizer collection
+  const { organizer, fetchOrganizerById } = useOrganizers();
+  
+  // Fetch organizer when we have the ID
+  useEffect(() => {
+    const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
+    if (organizerId && selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
+      fetchOrganizerById(organizerId);
+    }
+  }, [user, selectedRole, fetchOrganizerById]);
+  
+  // TIEMPO-272: Check organizer.isEnabled from organizer collection, not user collection
   const isOrganizerProfileComplete = () => {
     if (!user?.backendInfo?.regionalOrganizerInfo) return false;
-    const orgInfo = user.backendInfo.regionalOrganizerInfo;
     
-    // TIEMPO-253 FIX: The actual organizer data (shortName, description) is in the organizer collection,
-    // not in the user's regionalOrganizerInfo. When a profile is enabled, it means all mandatory
-    // requirements have been met (validated in the Event Organizer Settings Status tab).
-    // So we only need to check if the profile is enabled.
-    const isEnabled = orgInfo.isEnabled === true;
+    // TIEMPO-272 FIX: Check isEnabled from the organizer collection for accurate status
+    // The organizer collection has the current state, user collection may be stale
+    const isEnabled = organizer?.isEnabled === true;
     
     return isEnabled;
   };
