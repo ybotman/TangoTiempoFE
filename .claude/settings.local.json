@@ -51,7 +51,8 @@
       "Bash(./public/AI-Guild/Scripts/jira-tools/jira-create-classified.sh:*)",
       "Bash(jira --config ./.jira.d/config.yml list --query=\"assignee = currentUser() AND status != Done\" --columns=key,type,status,summary)",
       "Bash(jira:*)",
-      "WebFetch(domain:calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net)"
+      "WebFetch(domain:calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net)",
+      "mcp__atlassian__getTransitionsForJiraIssue"
     ],
     "deny": []
   },
