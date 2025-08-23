@@ -269,7 +269,7 @@ const UnifiedLocationModal = ({
       setTimeout(() => {
         onClose();
       }, 500);
-    } catch (error) {
+    } catch (_) {
       setMessage({ type: 'error', text: 'Failed to save location' });
     }
     setLoading(false);

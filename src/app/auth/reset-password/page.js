@@ -13,14 +13,12 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/contexts/AuthContext';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Link from 'next/link';
 
 const ResetPasswordPage = () => {
-  const router = useRouter();
   const { resetPassword, loading: authLoading } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

@@ -24,7 +24,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // For tracking initialization state
   const [isInitialized, setIsInitialized] = useState(false);
-  const initializationAttempted = useRef(false);
+  useRef(false);
 
   // State for user's physical location (from browser or IP)
   const [userLocation, setUserLocation] = useState({

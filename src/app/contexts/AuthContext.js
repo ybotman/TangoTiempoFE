@@ -19,9 +19,6 @@ import {
   updateProfile,
   sendPasswordResetEmail,
   sendEmailVerification,
-  updateEmail,
-  updatePassword,
-  reauthenticateWithCredential,
 } from 'firebase/auth';
 import { auth, facebookProvider, googleProvider, appleProvider } from '@/utils/firebase';
 import axios from 'axios';

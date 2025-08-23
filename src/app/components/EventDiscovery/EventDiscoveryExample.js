@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useContext } from 'react';
-import PropTypes from 'prop-types';
 import {
   useEventDiscovery,
   useEventFilters,
@@ -20,7 +19,7 @@ export default function EventDiscoveryExample() {
   const isAuthenticated = !!user;
   const { state, actions } = useEventDiscovery();
   const { filters, setFilters, resetFilters } = useEventFilters();
-  const { locationMode, setLocationMode, selectedCityIds } = useLocationMode();
+  const { locationMode, setLocationMode } = useLocationMode();
   const hasUnsavedChanges = useHasUnsavedChanges();
   const { isLoading, isSaving, error } = usePreferencesState();
 

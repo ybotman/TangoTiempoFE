@@ -77,12 +77,12 @@ const LocationSelector = ({ open, onClose }) => {
               } else {
                 setError('Could not find a nearby city. Please select manually.');
               }
-            } catch (err) {
+            } catch (_) {
               setError('Failed to find nearest city. Please select manually.');
             }
             setIsDetecting(false);
           },
-          (err) => {
+          (_) => {
             setError('Location access denied. Please select manually.');
             setIsDetecting(false);
           }
@@ -91,7 +91,7 @@ const LocationSelector = ({ open, onClose }) => {
         setError('Geolocation is not supported by your browser.');
         setIsDetecting(false);
       }
-    } catch (err) {
+    } catch (_) {
       setError('Failed to detect location. Please select manually.');
       setIsDetecting(false);
     }

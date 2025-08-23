@@ -55,7 +55,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
   const [proximityWarning, setProximityWarning] = useState(false);
   const [stage, setStage] = useState(1); // 1 = address, 2 = details
   const [isOverriding, setIsOverriding] = useState(false);
-  const [overrideType, setOverrideType] = useState(null); // 'no-city' or 'proximity'
+  const [, setOverrideType] = useState(null); // 'no-city' or 'proximity'
 
   const handleAddressChange = (field) => (event) => {
     setAddressData({

@@ -19,19 +19,16 @@ import {
   //  Avatar,
   Typography,
   //  Collapse,
-  CircularProgress,
   Box,
   Accordion,
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
-import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
 // import ErrorIcon from '@mui/icons-material/Error';
 import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
@@ -45,11 +42,6 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import InfoIcon from '@mui/icons-material/Info';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
-import CheckIcon from '@mui/icons-material/Check';
-import PersonIcon from '@mui/icons-material/Person';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -95,13 +87,13 @@ const SidebarDrawer = ({ open, onClose }) => {
   const { user } = useContext(AuthContext) || {};
 
   // Get selected location and initialization state from GeoLocationContext
-  const { selectedLocation, isInitialized, openLocationSettings, openMapCenterModal, userMapPreferences } = useGeoLocation();
+  const { selectedLocation, isInitialized, openMapCenterModal } = useGeoLocation();
 
   // Get the organizer selection state from useCalendarPage
   const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
   
   // Get venue selection state
-  const { selectedVenue } = useVenueSelection();
+  useVenueSelection();
   
   // Debug menu is only available for Regional Admin, System Admin, and System Owner
   const showDebugMenu = [
@@ -111,7 +103,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   ].includes(selectedRole);
   
   // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
-  const [venueSelectionReady, setVenueSelectionReady] = useState(false);
+  const [, setVenueSelectionReady] = useState(false);
   
   // Subscribe to user settings event
   useEffect(() => {

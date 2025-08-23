@@ -1,7 +1,6 @@
 //app/hooks/useCategories.js
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { dedupeFetch } from '@/utils/dedupeFetch';
 
 const useCategories = () => {

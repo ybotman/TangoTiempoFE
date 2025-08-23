@@ -77,7 +77,7 @@ export const useImages = (organizerId) => {
       });
 
       // Get the URL of the uploaded blob
-      const imageUrl = blockBlobClient.url; // Since blobs are public, we can use this URL
+      // const imageUrl = blockBlobClient.url; // Since blobs are public, we can use this URL
 // TIEMPO-276: Security cleanup - removed logging
       await fetchImages();
     } catch (error) {

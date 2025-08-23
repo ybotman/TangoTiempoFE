@@ -16,8 +16,6 @@ function resolveLocationParameters(options) {
   const {
     explicitParams = {},
     currentLocation = null,
-    useLocationPreferences = false,
-    useGeoLocationContext = false
   } = options;
 
   // Priority 1: Explicit parameters always win

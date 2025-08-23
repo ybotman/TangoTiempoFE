@@ -32,9 +32,9 @@ class SimpleJira {
       // First, let's try a simple serverInfo endpoint that doesn't require auth
       // TIEMPO-276: Security cleanup - removed debug logging
       try {
-        const serverInfo = await axios.get(`${JIRA_URL}/rest/api/3/serverInfo`);
+        await axios.get(`${JIRA_URL}/rest/api/3/serverInfo`);
         // TIEMPO-276: Security cleanup - removed debug logging
-      } catch (err) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed debug logging
       }
       
@@ -46,24 +46,24 @@ class SimpleJira {
         if (projects.data.length > 0) {
           // TIEMPO-276: Security cleanup - removed project details logging
         }
-      } catch (err) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed error details logging
       }
       
       // Try different project endpoints
       // TIEMPO-276: Security cleanup - removed debug logging
       try {
-        const projectSearch = await this.api.get('/project/search');
+        await this.api.get('/project/search');
         // TIEMPO-276: Security cleanup - removed debug logging
-      } catch (err) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed error logging
       }
       
       // Check user info
       try {
-        const userInfo = await this.api.get('/myself');
+        await this.api.get('/myself');
         // TIEMPO-276: Security cleanup - removed user info logging
-      } catch (err) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed auth header and error details logging
       }
 
@@ -72,11 +72,11 @@ class SimpleJira {
       // Try to get your user permissions
       // TIEMPO-276: Security cleanup - removed debug logging
       try {
-        const perms = await this.api.get('/mypermissions', {
+        await this.api.get('/mypermissions', {
           params: { permissions: 'BROWSE_PROJECTS,CREATE_ISSUES,ADMINISTER_PROJECTS' }
         });
         // TIEMPO-276: Security cleanup - removed permissions logging
-      } catch (err) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed error logging
       }
       
@@ -85,9 +85,9 @@ class SimpleJira {
       // Try to search for all issues first
       // TIEMPO-276: Security cleanup - removed debug logging
       try {
-        const allIssues = await this.api.get('/search?maxResults=10');
+        await this.api.get('/search?maxResults=10');
         // TIEMPO-276: Security cleanup - removed issue details logging
-      } catch (searchError) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed error logging
       }
 
@@ -102,7 +102,7 @@ class SimpleJira {
         if (testIssue) {
           // TIEMPO-276: Security cleanup - removed issue creation logging
         }
-      } catch (createError) {
+      } catch (_) {
         // TIEMPO-276: Security cleanup - removed error logging
       }
       
@@ -138,7 +138,7 @@ class SimpleJira {
 
   async listIssues() {
     try {
-      const response = await this.api.get(`/search?jql=project=${PROJECT_KEY}&maxResults=20`);
+      await this.api.get(`/search?jql=project=${PROJECT_KEY}&maxResults=20`);
       // TIEMPO-276: Security cleanup - removed issue listing
     } catch (error) {
       console.error('❌ Failed to list issues:', error.response?.data || error.message);

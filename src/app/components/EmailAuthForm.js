@@ -80,7 +80,7 @@ const EmailAuthForm = ({ mode, onSubmit, error }) => {
     setLoading(true);
     try {
 // TIEMPO-276: Security cleanup - removed logging
-      const result = await onSubmit({
+      await onSubmit({
         email,
         password,
         firstName,

@@ -1,10 +1,9 @@
 // UserSettingsApply.js
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Chip, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import InfoIcon from '@mui/icons-material/Info';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -26,7 +25,6 @@ const UserSettingsApply = () => {
   const [restartMessage, setRestartMessage] = useState(false);
   // TIEMPO-253: Add states for proper next steps flow
   const [showNextStepsDialog, setShowNextStepsDialog] = useState(false);
-  const [hasAgreedToNextSteps, setHasAgreedToNextSteps] = useState(false);
 
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
