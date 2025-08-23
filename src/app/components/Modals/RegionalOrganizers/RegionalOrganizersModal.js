@@ -94,20 +94,12 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
       // Clear unsaved changes and show success
       setUnsavedChanges({});
       setHasUnsavedChanges(false);
-      setSaveMessage('All changes saved successfully!');
+      setSaveMessage('All changes saved! Restarting to apply changes...');
       
-      // TIEMPO-272: Delay refresh to avoid race condition with backend
-      // Only refresh if the response doesn't have the expected data
-      if (updatedOrganizer && updatedOrganizer.isEnabled !== allChanges.isEnabled) {
-        console.warn('TIEMPO-272: Backend returned different isEnabled value, refreshing...');
-        setTimeout(() => fetchOrganizerById(organizer._id), 1000);
-      } else {
-        // Trust the response data without additional fetch
-        console.log('TIEMPO-272: Using response data, skipping refresh');
-      }
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSaveMessage(''), 3000);
+      // TIEMPO-272: Auto-restart after all saves to ensure system is fully updated
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error saving changes:', error);
       setSaveMessage('Error saving changes. Please try again.');
