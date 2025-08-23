@@ -18,7 +18,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { organizers, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
+  const { organizers: _, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('status');
   
   // TIEMPO-254: Centralized state for all tabs - persists across tab changes
@@ -56,16 +56,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
 
   // TIEMPO-254: Centralized field change handler
   const handleFieldChange = (tabName, fieldName, value) => {
-    // TIEMPO-272: Debug logging for isEnabled changes
-    if (fieldName === 'isEnabled') {
-      console.log('TIEMPO-272 isEnabled Change:', {
-        tabName,
-        fieldName,
-        value,
-        currentUnsaved: unsavedChanges
-      });
-    }
-    
     setUnsavedChanges(prev => ({
       ...prev,
       [tabName]: {
@@ -91,26 +81,25 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
         Object.assign(allChanges, tabChanges);
       });
 
-      // TIEMPO-272: Debug logging to verify isEnabled is in payload
-      console.log('TIEMPO-272 Save Debug:', {
-        unsavedChanges,
-        allChanges,
-        hasIsEnabled: 'isEnabled' in allChanges
-      });
-
       // Update the organizer with all changes
-      await updateOrganizer(organizer._id, allChanges);
+      const updatedOrganizer = await updateOrganizer(organizer._id, allChanges);
+      
+      // TIEMPO-272: Log the response to debug isEnabled persistence
+      console.log('TIEMPO-272: Updated organizer response:', {
+        isEnabled: updatedOrganizer?.isEnabled,
+        allChanges,
+        fullResponse: updatedOrganizer
+      });
 
       // Clear unsaved changes and show success
       setUnsavedChanges({});
       setHasUnsavedChanges(false);
-      setSaveMessage('All changes saved successfully!');
+      setSaveMessage('All changes saved! Restarting to apply changes...');
       
-      // Refresh organizer data
-      fetchOrganizerById(organizer._id);
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSaveMessage(''), 3000);
+      // TIEMPO-272: Auto-restart after all saves to ensure system is fully updated
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error saving changes:', error);
       setSaveMessage('Error saving changes. Please try again.');

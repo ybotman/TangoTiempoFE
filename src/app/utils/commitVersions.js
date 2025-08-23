@@ -35,7 +35,7 @@ try {
   // Write the updated data back to versions.json
   fs.writeFileSync(versionsPath, JSON.stringify(filteredVersions, null, 2));
 
-  console.log(`Updated ${versionsPath} with local commits for branch ${currentBranch}, version ${lastVersion}`);
+  // TIEMPO-276: Security cleanup - removed version logging
 } catch (error) {
   console.error('Error updating versions.json:', error.message);
 }

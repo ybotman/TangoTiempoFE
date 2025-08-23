@@ -60,7 +60,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
 
   // Load user's existing preferences or temporary location
   useEffect(() => {
-    console.log('[LocationPrefs] useEffect triggered:', {
+// TIEMPO-276: Security cleanup - removed logging
       hasUserData: !!userData,
       hasLocalUserInfo: !!userData?.localUserInfo,
       hasUserDefaults: !!userData?.localUserInfo?.userDefaults,
@@ -71,10 +71,10 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
     if (userData?.localUserInfo?.userDefaults) {
       const defaults = userData.localUserInfo.userDefaults;
       
-      console.log('[LocationPrefs] Loading user defaults:', defaults);
-      console.log('[LocationPrefs] defaultCenterLocation:', defaults.defaultCenterLocation);
-      console.log('[LocationPrefs] useCenterLocation:', defaults.useCenterLocation);
-      console.log('[LocationPrefs] masteredCityIds:', defaults.masteredCityIds);
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
       
       setZoomRange(defaults.defaultZoomRange || 50);
       
@@ -84,16 +84,16 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setCenterLat(defaults.defaultCenterLocation.latitude?.toString() || '');
         setCenterLng(defaults.defaultCenterLocation.longitude?.toString() || '');
         setCoordinatesLoaded(true);
-        console.log('[LocationPrefs] Loaded map center coordinates:', {
+// TIEMPO-276: Security cleanup - removed logging
           lat: defaults.defaultCenterLocation.latitude,
           lng: defaults.defaultCenterLocation.longitude,
           useCenterLocation: defaults.useCenterLocation
         });
       } else if (defaults.useCenterLocation) {
         // User has map center enabled but no coordinates saved yet
-        console.log('[LocationPrefs] Map center enabled but no coordinates saved');
+// TIEMPO-276: Security cleanup - removed logging
       } else {
-        console.log('[LocationPrefs] No map center location found:', {
+// TIEMPO-276: Security cleanup - removed logging
           useCenterLocation: defaults.useCenterLocation,
           hasDefaultCenterLocation: !!defaults.defaultCenterLocation
         });
@@ -112,7 +112,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
   useEffect(() => {
     // Only use savedLocation if we haven't loaded from userData yet
     if (!coordinatesLoaded && savedLocation?.lat && savedLocation?.lng) {
-      console.log('[LocationPrefs] Using savedLocation from GeoLocationContext:', savedLocation);
+// TIEMPO-276: Security cleanup - removed logging
       setCenterLat(savedLocation.lat?.toString() || '');
       setCenterLng(savedLocation.lng?.toString() || '');
       setZoomRange(savedLocation.zoomRange || 50);
@@ -409,13 +409,13 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
           zoomRange: zoomRange
         };
         
-        console.log('[LocationPrefs] handleSave - Starting save for logged in user:', locationData);
-        console.log('[LocationPrefs] handleSave - updateUserData function available:', !!updateUserData);
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
         
         // Save to backend and update current location
         await saveAndSetLocation(locationData, updateUserData);
         
-        console.log('[LocationPrefs] handleSave - Save completed');
+// TIEMPO-276: Security cleanup - removed logging
         
         // Update original values after successful save
         setOriginalValues({

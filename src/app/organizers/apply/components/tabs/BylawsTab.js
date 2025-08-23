@@ -129,7 +129,7 @@ const BylawsTab = () => {
         <Divider sx={{ mb: 2 }} />
       </Paper>
 
-      {roles.map((role, index) => (
+      {roles.map((role) => (
         <Accordion
           key={role.id}
           expanded={expanded === role.id}

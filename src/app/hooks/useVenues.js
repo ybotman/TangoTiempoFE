@@ -20,24 +20,26 @@ export function useVenues() {
   const masteredCityId = selectedLocation?.city?.id || null;
 
   // Fetch venues based on selected location
-  const fetchVenues = useCallback(async (isActive = null) => {
+  const fetchVenues = useCallback(async (isActive = null, location = null) => {
     setLoading(true);
     setError(null);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const params = { appId };
+      
+      // Add distance-based parameters if location provided
+      if (location && location.lat && location.lng) {
+        params.lat = location.lat;
+        params.lng = location.lng;
+        params.radius = location.radius || 20; // Default 20 miles
+      }
+      
       // Only add isActive parameter if explicitly set
       if (isActive !== null) {
         params.isActive = isActive;
       }
       
-      // Add location filters from GeoLocationContext
-      // Filter by masteredDivisionId if available to get venues for the selected location
-      if (masteredDivisionId) {
-        params.masteredDivisionId = masteredDivisionId;
-      }
-      
-      // Add 'all=true' to get all venues without pagination
+      // Add 'all=true' to get all venues without pagination (once distance API is ready)
       params.all = true;
       
       // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
@@ -46,7 +48,7 @@ export function useVenues() {
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-        //console.log(`Received ${response.data.venues.length} venues from API with pagination:`, response.data.pagination);
+// TIEMPO-276: Security cleanup - removed logging
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
@@ -55,10 +57,12 @@ export function useVenues() {
         // Format: {data: Array, pagination: Object}
         setVenues(response.data.data);
       } else {
+        // TIEMPO-275: Keep console.error for important errors
         console.error('API returned unknown venues data format:', response.data);
         setVenues([]);
       }
     } catch (err) {
+      // TIEMPO-275: Keep console.error for important errors
       console.error('Error fetching venues:', err);
       setError(err.message);
     } finally {
@@ -136,13 +140,12 @@ export function useVenues() {
       if (!populate) {
         const existingVenue = venues.find(venue => venue._id === venueId);
         if (existingVenue) {
-          console.log('Found venue in local cache:', existingVenue.name || existingVenue.shortName);
+// TIEMPO-276: Security cleanup - removed logging
           return existingVenue;
         }
       }
       
-      // Otherwise fetch from the API
-      console.log(`Fetching venue with ID: ${venueId}${populate ? ' (with populated references)' : ''}`);
+// TIEMPO-276: Security cleanup - removed logging
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${venueId}`, {
         params: { appId, populate: populate.toString() },
       });
@@ -150,17 +153,19 @@ export function useVenues() {
       // Handle various response formats
       if (response.data && response.data.venue) {
         // Handle {venue: Object} format
-        console.log(`Venue fetched with ID ${venueId}:`, response.data.venue.name || 'Unknown name');
+// TIEMPO-276: Security cleanup - removed logging
         return response.data.venue;
       } else if (response.data && typeof response.data === 'object' && response.data._id) {
         // Handle direct venue object format
-        console.log(`Venue fetched with ID ${venueId}:`, response.data.name || 'Unknown name');
+// TIEMPO-276: Security cleanup - removed logging
         return response.data;
       } else {
+        // TIEMPO-275: Keep console.error for important errors
         console.error(`Unexpected venue data format for ID ${venueId}:`, response.data);
         return null;
       }
     } catch (err) {
+      // TIEMPO-275: Keep console.error for important errors
       console.error('Error fetching venue by ID:', err);
       setError(err.message);
       return null;

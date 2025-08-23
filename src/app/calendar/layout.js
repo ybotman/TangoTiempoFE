@@ -16,12 +16,12 @@ const RootLayout = ({ children }) => {
 
   useEffect(() => {
     if (userDisplayName) {
-      console.log('Layout:uE User Name:', userDisplayName);
+      // TIEMPO-276: Security cleanup - removed user logging
     }
 
     // Use GeoLocationContext instead of RegionsContext for logging
     if (selectedRegionName) {
-      console.log('Layout:uE Selected Region:', selectedRegionName);
+      // TIEMPO-276: Security cleanup - removed region logging
     }
   }, [userDisplayName, selectedRegionName]);
 

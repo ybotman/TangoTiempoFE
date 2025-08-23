@@ -37,7 +37,7 @@ const LocationContextModal = ({ open, onClose }) => {
   // Fetch cities when modal opens
   useEffect(() => {
     const loadCities = async () => {
-      console.log('LCM uE: loadCities Start');
+// TIEMPO-276: Security cleanup - removed logging
       if (open) {
         setLoading(true);
 
@@ -49,7 +49,7 @@ const LocationContextModal = ({ open, onClose }) => {
               try {
                 // We will fetch ALL cities with no divisionId filter
                 await fetchCities(undefined, true); // no divisionId => fetch all active cities
-                console.log('Cities fetched successfully');
+// TIEMPO-276: Security cleanup - removed logging
                 // Force map container to re-render with new key
                 setMapContainerKey(Date.now());
                 resolve();
@@ -72,7 +72,7 @@ const LocationContextModal = ({ open, onClose }) => {
     // Add a safeguard timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       if (loading) {
-        console.log('Loading timeout triggered - forcing loading to false');
+// TIEMPO-276: Security cleanup - removed logging
         setLoading(false);
         setMapReady(true);
         // Force map container to re-render with new key when timeout occurs
@@ -86,7 +86,7 @@ const LocationContextModal = ({ open, onClose }) => {
   // Process cities to ensure they have coordinates and log the results
   useEffect(() => {
     if (cities && Array.isArray(cities)) {
-      console.log(`Processing cities array with ${cities.length} items`);
+// TIEMPO-276: Security cleanup - removed logging
       
       // Check for both direct latitude/longitude AND location.coordinates
       // This handles multiple possible API response formats
@@ -135,16 +135,16 @@ const LocationContextModal = ({ open, onClose }) => {
         return city;
       });
       
-      console.log(`Cities with valid coordinates: ${processedCities.length} out of ${cities.length}`);
+// TIEMPO-276: Security cleanup - removed logging
       
       // Log the first few cities for debugging
       if (processedCities.length > 0) {
-        console.log('Sample city data:', processedCities[0]);
-        console.log('First 3 city coordinates:', processedCities.slice(0, 3).map(c =>
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
           `${c.cityName}: [${c.latitude}, ${c.longitude}]`).join(', '));
       } else {
         // Log more details about the cities array to diagnose the problem
-        console.log('Processing city data - using fallbacks if needed:', {
+// TIEMPO-276: Security cleanup - removed logging
           citiesArrayIsArray: Array.isArray(cities),
           citiesLength: cities?.length,
           firstRawCity: cities && cities.length > 0 ? cities[0] : null,
@@ -200,7 +200,7 @@ const LocationContextModal = ({ open, onClose }) => {
           }
         ];
 
-        console.log('Using fallback cities for map display');
+// TIEMPO-276: Security cleanup - removed logging
         setCitiesWithCoords(fallbackCities);
         setMapContainerKey(Date.now());
         setMapReady(true);
@@ -214,7 +214,7 @@ const LocationContextModal = ({ open, onClose }) => {
         setMapContainerKey(Date.now());
       }
     } else {
-      console.log('Cities array is null, undefined, or not an array');
+// TIEMPO-276: Security cleanup - removed logging
       setCitiesWithCoords([]);
     }
     
@@ -248,7 +248,7 @@ const LocationContextModal = ({ open, onClose }) => {
       return;
     }
 
-    console.log(`Clicking city: ${city.cityName} (${city._id}) at ${city.latitude}, ${city.longitude}`);
+// TIEMPO-276: Security cleanup - removed logging
 
     // Set the clicked city ID so we can identify when nearestCity updates
     setClickedCityId(city._id);
@@ -373,11 +373,11 @@ const LocationContextModal = ({ open, onClose }) => {
               key={`map-${mapContainerKey}-${nearestCity?.city?.id || 'default'}`}
               // Add whenCreated callback to debug map initialization
               whenCreated={(map) => {
-                console.log('Map created successfully', map);
+// TIEMPO-276: Security cleanup - removed logging
                 // Invalidate map size to ensure correct rendering
                 setTimeout(() => {
                   map.invalidateSize();
-                  console.log('Map size invalidated');
+// TIEMPO-276: Security cleanup - removed logging
                 }, 100);
               }}
             >
@@ -392,7 +392,7 @@ const LocationContextModal = ({ open, onClose }) => {
                 const isCurrent = city._id === nearestCity?.city?.id;
                 const color = isCurrent ? 'green' : 'blue';
                 
-                //console.log(`Rendering city marker: ${city.cityName}, current: ${isCurrent}, coords: ${city.latitude},${city.longitude}`);
+// TIEMPO-276: Security cleanup - removed logging
                 
                 // Return both a Marker and CircleMarker for each city
                 return (
@@ -410,7 +410,7 @@ const LocationContextModal = ({ open, onClose }) => {
                       radius={isCurrent ? 12 : 8}
                       eventHandlers={{
                         click: () => {
-                          console.log('City clicked:', city.cityName);
+// TIEMPO-276: Security cleanup - removed logging
                           if (!isCurrent) handleCityClick(city);
                         },
                       }}

@@ -1,9 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
-import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { AuthContext } from '@/contexts/AuthContext';
-import { useUsers } from '@/hooks/useUsers';
+import { useState, useEffect } from 'react';
 
 /**
  * Hook to manage location selection prompting
@@ -15,9 +12,7 @@ import { useUsers } from '@/hooks/useUsers';
  */
 export const useLocationPrompt = () => {
   const [showLocationSelector, setShowLocationSelector] = useState(false);
-  const { selectedLocation, isInitialized } = useGeoLocation();
-  const { user } = useContext(AuthContext);
-  const { userData } = useUsers();
+  // Dependencies removed; selector currently managed via defaults
   
   useEffect(() => {
     // Never show the location selector - use defaults

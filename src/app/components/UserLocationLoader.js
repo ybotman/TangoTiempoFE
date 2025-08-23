@@ -15,7 +15,7 @@ const UserLocationLoader = () => {
 
   useEffect(() => {
     if (userData && loadUserMapPreferences) {
-      console.log('[UserLocationLoader] Loading user map preferences');
+      // TIEMPO-276: Security cleanup - removed preferences logging
       loadUserMapPreferences(userData);
     }
   }, [userData, loadUserMapPreferences]);

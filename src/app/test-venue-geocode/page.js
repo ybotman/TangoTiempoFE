@@ -40,8 +40,8 @@ export default function TestVenueGeocode() {
         </Typography>
         <Typography variant="body2" component="ul">
           <li>Enter venue name and address details</li>
-          <li>Click "Geocode" to get coordinates and see map</li>
-          <li>Shows nearest mastered city (e.g., "Boston" for Quincy addresses)</li>
+          <li>Click &quot;Geocode&quot; to get coordinates and see map</li>
+          <li>Shows nearest mastered city (e.g., &quot;Boston&quot; for Quincy addresses)</li>
           <li>Low confidence addresses show warning to verify map location</li>
           <li>Nearby venues within 100 yards are displayed as warnings</li>
           <li>Save button creates the venue after validation</li>
@@ -58,7 +58,7 @@ export default function TestVenueGeocode() {
         </Typography>
         
         <Typography variant="body2" color="warning.main" sx={{ mt: 2 }}>
-          Note: Generic addresses like "123 Main St" may fail geocoding. Use real, well-known addresses for testing.
+          Note: Generic addresses like &quot;123 Main St&quot; may fail geocoding. Use real, well-known addresses for testing.
         </Typography>
       </Box>
     </Container>

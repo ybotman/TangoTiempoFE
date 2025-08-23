@@ -235,7 +235,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         // TIEMPO-246: String-based date parsing without Date() conversion
         const localIsoDate = isoDate.endsWith('Z') ? isoDate.slice(0, -1) : isoDate;
         const [datePart] = localIsoDate.split('T');
-        console.log('Exclude date conversion:', { isoDate, localIsoDate, datePart });
+// TIEMPO-276: Security cleanup - removed logging
         return datePart || '';
       });
       setExcludeDates(dateStrings.join(', '));
@@ -400,7 +400,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       }
       
       // Validate date components
-      const [year, month, day] = trimmed.split('-').map(num => parseInt(num, 10));
+      const [, month, day] = trimmed.split('-').map(num => parseInt(num, 10));
       if (month < 1 || month > 12 || day < 1 || day > 31) {
         return null;
       }
@@ -449,7 +449,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       <Typography variant="h6">Repeating Rules</Typography>
       
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
-        Configure how often this event repeats. The event's duration (from Basic tab) stays the same for each occurrence.
+        Configure how often this event repeats. The event&apos;s duration (from Basic tab) stays the same for each occurrence.
       </Typography>
 
       {/* Recurrence Type */}

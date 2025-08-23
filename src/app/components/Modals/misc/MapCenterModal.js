@@ -87,13 +87,13 @@ const MapCenterModal = ({ open, onClose }) => {
     const initTimer = setTimeout(() => {
       if (!mapRef.current || mapInstanceRef.current) return;
 
-      console.log('Initializing temporary map modal...');
+// TIEMPO-276: Security cleanup - removed logging
       setMapLoading(true);
       
       import('leaflet').then((L) => {
         // Double-check refs
         if (!mapRef.current || mapInstanceRef.current) {
-          console.log('Map ref not ready or already initialized');
+// TIEMPO-276: Security cleanup - removed logging
           return;
         }
         
@@ -110,7 +110,7 @@ const MapCenterModal = ({ open, onClose }) => {
         const initialLng = centerLng ? parseFloat(centerLng) : -98.5795;
         const initialZoom = 4;
         
-        console.log('Creating map with center:', initialLat, initialLng);
+// TIEMPO-276: Security cleanup - removed logging
         
         try {
           mapInstanceRef.current = L.map(mapRef.current, {
@@ -120,7 +120,7 @@ const MapCenterModal = ({ open, onClose }) => {
             zoomControl: true,
           });
           
-          console.log('Map created successfully');
+// TIEMPO-276: Security cleanup - removed logging
           
           // Add tile layer
           L.tileLayer(
@@ -136,7 +136,7 @@ const MapCenterModal = ({ open, onClose }) => {
           // Force invalidate size after a moment
           setTimeout(() => {
             if (mapInstanceRef.current) {
-              console.log('Invalidating map size');
+// TIEMPO-276: Security cleanup - removed logging
               mapInstanceRef.current.invalidateSize();
             }
           }, 300);

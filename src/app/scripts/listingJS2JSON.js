@@ -36,4 +36,4 @@ const entries = lines.map(p => {
 // 3. Write out JSON
 const outPath = path.join(__dirname, 'listing.json');
 fs.writeFileSync(outPath, JSON.stringify(entries, null, 2), 'utf-8');
-console.log(`✅ Wrote ${entries.length} entries to ${outPath}`);
+// TIEMPO-276: Security cleanup - removed logging

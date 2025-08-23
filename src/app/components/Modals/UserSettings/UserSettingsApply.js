@@ -1,10 +1,9 @@
 // UserSettingsApply.js
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Chip, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import InfoIcon from '@mui/icons-material/Info';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -26,15 +25,14 @@ const UserSettingsApply = () => {
   const [restartMessage, setRestartMessage] = useState(false);
   // TIEMPO-253: Add states for proper next steps flow
   const [showNextStepsDialog, setShowNextStepsDialog] = useState(false);
-  const [hasAgreedToNextSteps, setHasAgreedToNextSteps] = useState(false);
 
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
     if (!Array.isArray(roles)) {
-      console.log('Roles not loaded or not an array:', roles);
+// TIEMPO-276: Security cleanup - removed logging
       return null;
     }
-    console.log('Available roles:', roles.map(r => r?.roleName));
+// TIEMPO-276: Security cleanup - removed logging
     return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
@@ -206,19 +204,7 @@ const UserSettingsApply = () => {
   const isLoading = userDataLoading || rolesLoading || applicationStatus === 'loading';
   
   // Debug logging
-  console.log('UserSettingsApply Debug:', {
-    hasOrganizerId,
-    isApproved,
-    isLoading,
-    userData: !!userData,
-    userDataDetails: userData,
-    regionalOrganizerRole: !!regionalOrganizerRole,
-    regionalOrganizerRoleDetails: regionalOrganizerRole,
-    rolesArray: roles,
-    rolesLoading,
-    userDataLoading,
-    buttonDisabled: isLoading || !userData || !regionalOrganizerRole
-  });
+  // TIEMPO-276: Security cleanup - removed logging
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
@@ -283,8 +269,8 @@ const UserSettingsApply = () => {
           <Typography variant="body2" component="div">
             <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
               <li>Click the <strong>user icon</strong> (top right)</li>
-              <li>Select <strong>"Change Role"</strong> → Choose <strong>"Organizer/Artist"</strong></li>
-              <li>Open the menu (☰) → Click <strong>"Organizer Settings"</strong></li>
+              <li>Select <strong>&quot;Change Role&quot;</strong> → Choose <strong>&quot;Organizer/Artist&quot;</strong></li>
+              <li>Open the menu (☰) → Click <strong>&quot;Organizer Settings&quot;</strong></li>
               <li>Complete ALL required fields:
                 <ul style={{ marginTop: '4px' }}>
                   <li>Organizer Name</li>
@@ -306,7 +292,7 @@ const UserSettingsApply = () => {
           </Typography>
           <Typography variant="body2" component="div">
             <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
-              <li><strong>Change your role:</strong> Click the login button → Select "Organizer/Artist"</li>
+              <li><strong>Change your role:</strong> Click the login button → Select &quot;Organizer/Artist&quot;</li>
               <li><strong>Complete your profile:</strong> Go to Event Organizer Settings → Status tab</li>
               <li><strong>Enable your profile:</strong> Complete all requirements and activate</li>
             </ol>
@@ -318,7 +304,7 @@ const UserSettingsApply = () => {
       {!isLoading && hasOrganizerId && isApproved && organizer?.isEnabled && (
         <Alert severity="success" sx={{ mt: 2 }}>
           <Typography variant="body2">
-            ✓ You're all set! You can now create events as an Organizer.
+            ✓ You&apos;re all set! You can now create events as an Organizer.
           </Typography>
         </Alert>
       )}
@@ -361,8 +347,8 @@ const UserSettingsApply = () => {
                   To start creating events:
                 </Typography>
                 <Typography variant="caption" component="div" sx={{ mt: 1 }}>
-                  1. Change your role to <strong>"Organizer/Artist"</strong> in the top menu<br/>
-                  2. Open <strong>"Event Organizer Settings"</strong><br/>
+                  1. Change your role to <strong>&quot;Organizer/Artist&quot;</strong> in the top menu<br/>
+                  2. Open <strong>&quot;Event Organizer Settings&quot;</strong><br/>
                   3. Complete all requirements in the <strong>Status tab</strong><br/>
                   4. <strong>Enable your profile</strong> to activate event creation
                 </Typography>
@@ -396,8 +382,8 @@ const UserSettingsApply = () => {
           <Box sx={{ ml: 2, mb: 2 }}>
             <Typography variant="body2" component="div">
               <ol style={{ margin: '8px 0' }}>
-                <li><strong>Change your role</strong> to "Organizer/Artist" in the top menu</li>
-                <li><strong>Open "Event Organizer Settings"</strong> from the menu</li>
+                <li><strong>Change your role</strong> to &quot;Organizer/Artist&quot; in the top menu</li>
+                <li><strong>Open &quot;Event Organizer Settings&quot;</strong> from the menu</li>
                 <li><strong>Complete all requirements</strong> in the Status tab</li>
                 <li><strong>Enable your profile</strong> to activate event creation</li>
               </ol>
@@ -407,7 +393,7 @@ const UserSettingsApply = () => {
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>Note:</strong> The page will refresh after you acknowledge these steps. 
-              Please remember to change your role to "Organizer/Artist" to access the Event Organizer Settings.
+              Please remember to change your role to &quot;Organizer/Artist&quot; to access the Event Organizer Settings.
             </Typography>
           </Alert>
         </DialogContent>
@@ -416,7 +402,6 @@ const UserSettingsApply = () => {
             variant="contained"
             color="primary"
             onClick={() => {
-              setHasAgreedToNextSteps(true);
               setShowNextStepsDialog(false);
               // Show restarting message then refresh
               setRestartMessage(true);

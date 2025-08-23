@@ -17,9 +17,16 @@ export const useUsers = () => {
     if (!user?.uid) {
       // Only log this once
       if (!hasLoggedFetch.current) {
-        console.log('useUsers: Waiting for user authentication');
+// TIEMPO-276: Security cleanup - removed logging
       }
       setLoading(false); // Ensure loading is set to false
+      return;
+    }
+
+    // TIEMPO-272: Check if we've already tried and got 404 for this user
+    if (sessionStorage.getItem(`user_404_${user.uid}`)) {
+      console.log('Skipping fetch - user previously returned 404');
+      setLoading(false);
       return;
     }
 
@@ -30,7 +37,7 @@ export const useUsers = () => {
       setLoading(true);
       // Only log initial fetch
       if (!hasLoggedFetch.current) {
-        console.log('useUsers: Fetching user data for:', user.uid);
+// TIEMPO-276: Security cleanup - removed logging
         hasLoggedFetch.current = true;
       }
 
@@ -42,15 +49,20 @@ export const useUsers = () => {
       // Only log if defaults changed
       const currentDefaults = JSON.stringify(response.data?.localUserInfo?.userDefaults);
       if (lastLoggedDefaults.current !== currentDefaults) {
-        console.log('useUsers: User preferences loaded:', {
-          hasCityPreferences: !!(response.data?.localUserInfo?.userDefaults?.masteredCityIds?.length),
-          hasMapPreferences: !!response.data?.localUserInfo?.userDefaults?.useCenterLocation
-        });
+        // TIEMPO-276: Security cleanup - removed logging
         lastLoggedDefaults.current = currentDefaults;
       }
       setUserData(response.data);
     } catch (error) {
       console.error('UU: Error fetching user data:', error);
+      // TIEMPO-272: If user doesn't exist (404), mark to prevent retry loops
+      if (error.response?.status === 404) {
+        sessionStorage.setItem(`user_404_${user.uid}`, 'true');
+        // Clear this flag after 5 minutes to allow retry later
+        setTimeout(() => {
+          sessionStorage.removeItem(`user_404_${user.uid}`);
+        }, 5 * 60 * 1000);
+      }
     } finally {
       setLoading(false);
       // Remove verbose logging
@@ -75,7 +87,7 @@ export const useUsers = () => {
         };
 
         // Log updates with payload details
-        console.log('useUsers: Updating user preferences with data:', JSON.stringify(dataToUpdate, null, 2));
+// TIEMPO-276: Security cleanup - removed logging
 
         // Use the optimized endpoint PUT /api/userlogins/updateUserInfo
         // This endpoint expects firebaseUserId and appId in the request body
@@ -91,12 +103,7 @@ export const useUsers = () => {
         // Log update success with key info only
         const prefs = updatedUserData?.localUserInfo?.userDefaults;
         if (prefs) {
-          console.log('useUsers: Preferences updated:', {
-            mode: prefs.useCenterLocation ? 'map' : 'cities',
-            cityCount: prefs.masteredCityIds?.length || 0,
-            hasDefaultCenterLocation: !!prefs.defaultCenterLocation,
-            defaultCenterLocation: prefs.defaultCenterLocation
-          });
+          // TIEMPO-276: Security cleanup - removed logging
         }
       } catch (error) {
         console.error('UU:Updt Error updating user data:', error);

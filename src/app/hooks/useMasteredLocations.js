@@ -94,12 +94,12 @@ export function useMasteredLocations() {
 
   const fetchCities = useCallback(
     async (divisionId, isActive = true, requireCoordinates = true) => {
-      console.log('FE: uML fetchCities');
+// TIEMPO-276: Security cleanup - removed logging
       setLoading(true);
       setError(null);
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-        console.log('Fetching cities for appId:', appId, 'isActive:', isActive);
+// TIEMPO-276: Security cleanup - removed logging
 
         const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
           params: {
@@ -109,16 +109,16 @@ export function useMasteredLocations() {
           },
         });
 
-        console.log('Raw API response:', response.data);
-        console.log('Response data type:', typeof response.data);
-        console.log('Is array?', Array.isArray(response.data));
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
         
         // Check the response structure - it might be {cities: [...]} format
         let citiesArray = response.data;
         
         // Handle response.data.cities structure (API returns an object with cities array)
         if (!Array.isArray(response.data) && response.data.cities && Array.isArray(response.data.cities)) {
-          console.log('API returned cities in response.data.cities structure');
+// TIEMPO-276: Security cleanup - removed logging
           citiesArray = response.data.cities;
         } else if (!Array.isArray(response.data)) {
           console.error('Error: API response data is not an array and has no cities property:', response.data);
@@ -143,11 +143,11 @@ export function useMasteredLocations() {
           citiesWithCoordinates = citiesArray;
         }
 
-        console.log(`Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
+// TIEMPO-276: Security cleanup - removed logging
 
         // If we have cities with coordinates, log a sample
         if (citiesWithCoordinates.length > 0) {
-          console.log('Sample city data:', citiesWithCoordinates[0]);
+// TIEMPO-276: Security cleanup - removed logging
         }
         // If we have cities but none with coordinates, check if this is a real problem
         else if (citiesArray.length > 0 && requireCoordinates) {
@@ -157,7 +157,7 @@ export function useMasteredLocations() {
           );
 
           if (citiesWithAnyCoords.length > 0) {
-            console.log('Found cities with coordinates in unexpected format - will attempt to normalize');
+// TIEMPO-276: Security cleanup - removed logging
 
             // Try to recover these coordinates by normalizing them
             const recoveredCities = citiesArray.map(city => {
@@ -182,7 +182,7 @@ export function useMasteredLocations() {
             );
 
             if (recoveredCities.length > 0) {
-              console.log(`Recovered ${recoveredCities.length} cities with coordinates`);
+// TIEMPO-276: Security cleanup - removed logging
               // Use the recovered cities
               citiesWithCoordinates = recoveredCities;
             }
@@ -190,12 +190,12 @@ export function useMasteredLocations() {
 
           // Only log this as info if we still have no valid cities and coordinates are required
           if (citiesWithCoordinates.length === 0 && requireCoordinates) {
-            console.log('Cities found but none have valid coordinates - this may need investigation');
+// TIEMPO-276: Security cleanup - removed logging
           }
         }
         // No cities at all - this is probably during initialization
         else {
-          console.log('No cities found in API response - this might be expected during initialization');
+// TIEMPO-276: Security cleanup - removed logging
         }
         setCities(citiesWithCoordinates);
       } catch (err) {
@@ -229,7 +229,7 @@ export function useMasteredLocations() {
             appId,
           },
         });
-        console.log('Nearest Mastered Location Response:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
         setNearestCity(response.data);
       } catch (err) {
         console.error('Error fetching nearest mastered location:', err.message);

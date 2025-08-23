@@ -65,14 +65,14 @@ export const LocationAPIProvider = ({ children }) => {
       const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
       const url = `${baseURL}/api/masteredLocations/nearestMastered?latitude=${parsedLatitude}&longitude=${parsedLongitude}&maxDistance=${maxDistance}&isActive=true&appId=${appId}`;
 
-      console.log('[LocationAPIContext] Fetching nearest city:', { latitude: parsedLatitude, longitude: parsedLongitude });
+      // TIEMPO-276: Security cleanup - removed API logging
 
       const response = await fetch(url);
       
       if (!response.ok) {
         if (response.status === 404) {
           const errorMessage = 'No nearby city found within search radius';
-          console.log('[LocationAPIContext] No nearby city found');
+          // TIEMPO-276: Security cleanup - removed API logging
           
           // Emit specific error for no city found
           locationEventBus.emit(LOCATION_EVENTS.LOCATION_ERROR, {
@@ -129,7 +129,7 @@ export const LocationAPIProvider = ({ children }) => {
         isFallback: !cityLatitude || !cityLongitude || !data.cityID || !data.regionID || !data.divisionID || !data.countryID
       };
 
-      console.log('[LocationAPIContext] Nearest city fetched:', cityData.cityName);
+      // TIEMPO-276: Security cleanup - removed API logging
 
       // Emit success event with city data
       locationEventBus.emit(LOCATION_EVENTS.NEAREST_CITY_FETCHED, {
@@ -175,7 +175,7 @@ export const LocationAPIProvider = ({ children }) => {
         url += `&divisionId=${divisionId}`;
       }
 
-      console.log('[LocationAPIContext] Fetching cities:', { divisionId, isActive });
+      // TIEMPO-276: Security cleanup - removed API logging
 
       const response = await fetch(url);
 
@@ -230,7 +230,7 @@ export const LocationAPIProvider = ({ children }) => {
           )
         : processedCities;
 
-      console.log(`[LocationAPIContext] Fetched ${finalCities.length} cities`);
+      // TIEMPO-276: Security cleanup - removed API logging
 
       // Emit success event with cities data
       locationEventBus.emit(LOCATION_EVENTS.CITIES_FETCHED, {
@@ -276,7 +276,7 @@ export const LocationAPIProvider = ({ children }) => {
         url += `&countryId=${countryId}`;
       }
 
-      console.log('[LocationAPIContext] Fetching regions:', { countryId, isActive });
+      // TIEMPO-276: Security cleanup - removed API logging
 
       const response = await fetch(url);
 
@@ -305,7 +305,7 @@ export const LocationAPIProvider = ({ children }) => {
         regionName: region.regionName || region.name || 'Unknown Region'
       }));
 
-      console.log(`[LocationAPIContext] Fetched ${processedRegions.length} regions`);
+      // TIEMPO-276: Security cleanup - removed API logging
 
       // Emit success event with regions data
       locationEventBus.emit(LOCATION_EVENTS.REGIONS_FETCHED, {
@@ -350,7 +350,7 @@ export const LocationAPIProvider = ({ children }) => {
         url += `&regionId=${regionId}`;
       }
 
-      console.log('[LocationAPIContext] Fetching divisions:', { regionId, isActive });
+      // TIEMPO-276: Security cleanup - removed API logging
 
       const response = await fetch(url);
 
@@ -379,7 +379,7 @@ export const LocationAPIProvider = ({ children }) => {
         divisionName: division.divisionName || division.name || 'Unknown Division'
       }));
 
-      console.log(`[LocationAPIContext] Fetched ${processedDivisions.length} divisions`);
+      // TIEMPO-276: Security cleanup - removed API logging
 
       // Emit success event with divisions data
       locationEventBus.emit(LOCATION_EVENTS.DIVISIONS_FETCHED, {

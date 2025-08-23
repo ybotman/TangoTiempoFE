@@ -17,12 +17,12 @@ class RegionalOrganizerEventEmitter {
   }
 
   openModal() {
-    console.log('[RegionalOrganizerEvent] Opening regional organizer modal');
+    // TIEMPO-276: Security cleanup - removed modal logging
     this.emit({ open: true });
   }
 
   closeModal() {
-    console.log('[RegionalOrganizerEvent] Closing regional organizer modal');
+    // TIEMPO-276: Security cleanup - removed modal logging
     this.emit({ open: false });
   }
 }

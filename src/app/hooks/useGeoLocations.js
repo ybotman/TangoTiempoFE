@@ -57,7 +57,7 @@ export function useGeoLocations() {
           // Use fallback coordinates if provided
           setLatitude(data.fallback.latitude);
           setLongitude(data.fallback.longitude);
-          console.log('Using fallback coordinates from proxy');
+// TIEMPO-276: Security cleanup - removed logging
         } else {
           throw new Error('Unable to retrieve geolocation data.');
         }
@@ -68,7 +68,7 @@ export function useGeoLocations() {
     } catch (err) {
       // Don't log canceled/aborted requests as errors
       if (err.name === 'AbortError' || err.message === 'canceled') {
-        console.log('useGeoLocations: Request timeout, using fallback coordinates');
+// TIEMPO-276: Security cleanup - removed logging
       } else {
         console.error('useGeoLocations-> Error:', err.message);
         setError(err.message);
@@ -92,7 +92,7 @@ export function useGeoLocations() {
     
     if (isBostonCalendar) {
       // For Boston Tango Calendar, we should trigger Boston city selection
-      console.log('useGeoLocations: Detected Boston Tango Calendar iframe - will trigger Boston city selection');
+// TIEMPO-276: Security cleanup - removed logging
       // Note: The actual city selection will be handled by the calendar page
       setLatitude(42.3601);
       setLongitude(-71.0589);
@@ -103,7 +103,7 @@ export function useGeoLocations() {
     }
     
     setLoading(false);
-    console.log('useGeoLocations: Using default coordinates', { isBostonCalendar });
+// TIEMPO-276: Security cleanup - removed logging
   }, [fetchIPLocation]);
 
   const refetch = async () => {
@@ -114,7 +114,7 @@ export function useGeoLocations() {
     setLatitude(39.8283);
     setLongitude(-98.5795);
     setLoading(false);
-    console.log('useGeoLocations refetch: Using default US center coordinates (automatic detection disabled)');
+// TIEMPO-276: Security cleanup - removed logging
   };
 
   return {

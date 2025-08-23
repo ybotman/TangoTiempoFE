@@ -124,7 +124,7 @@ export default function MessageAdminPage() {
             Two-way messaging coming soon!
           </Typography>
           <Typography variant="body2">
-            We're working on a new feature that will allow you to send messages directly through TangoTiempo. 
+            We&apos;re working on a new feature that will allow you to send messages directly through TangoTiempo. 
             For now, please use the contact options above.
           </Typography>
         </Alert>

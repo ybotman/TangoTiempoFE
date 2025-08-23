@@ -1,7 +1,6 @@
 //app/hooks/useCategories.js
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { dedupeFetch } from '@/utils/dedupeFetch';
 
 const useCategories = () => {
@@ -23,11 +22,13 @@ const useCategories = () => {
           // Object with categories array inside (the actual format)
           setCategories(response.data.categories);
         } else {
+          // TIEMPO-275: Keep console.error for important errors
           console.error('Invalid categories data format:', response.data);
           // Just set empty array if data format is invalid
           setCategories([]);
         }
       } catch (error) {
+        // TIEMPO-275: Keep console.error for important errors
         console.error('Error fetching categories:', error);
         // Just use an empty array on error
         setCategories([]);

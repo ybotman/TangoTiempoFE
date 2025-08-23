@@ -43,7 +43,7 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
   // Fetch venue details using venueId (or legacy locationID as fallback)
   useEffect(() => {
     if (currentVenueId) {
-      console.log(`ViewEventDetailsMore: Attempting to fetch venue with ID: ${currentVenueId}`);
+// TIEMPO-276: Security cleanup - removed logging
       // Skip the API call if the ID is not valid for the API (e.g., if it's an object that got stringified)
       if (currentVenueId.includes('[object Object]')) {
         console.warn('ViewEventDetailsMore: Invalid venue ID format detected, skipping API call');
@@ -54,7 +54,7 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
       getVenueById(currentVenueId)
         .then((response) => {
           if (response) {
-            console.log(`ViewEventDetailsMore: Successfully retrieved venue: ${response.name || 'Unknown name'}`);
+// TIEMPO-276: Security cleanup - removed logging
             setVenueDetails(response);
           } else {
             console.warn(`ViewEventDetailsMore: Venue with ID ${currentVenueId} not found or returned null`);
@@ -66,7 +66,7 @@ const ViewEventDetailsMore = ({ eventDetails }) => {
           setVenueDetails(null);
         });
     } else {
-      console.log('ViewEventDetailsMore: No venue ID provided');
+// TIEMPO-276: Security cleanup - removed logging
     }
   }, [currentVenueId, getVenueById]);
 

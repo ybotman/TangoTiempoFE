@@ -144,14 +144,14 @@ const VenueModalEdit = ({ venue, onUpdate, refreshList, onDone }) => {
       const addressString = buildAddressString();
       
       // Step 1: Geocode the address
-      console.log('Geocoding address:', addressString);
+// TIEMPO-276: Security cleanup - removed logging
       const geocodeResponse = await axios.get(`${baseURL}/api/venues/geocode`, {
         params: { address: addressString }
       });
 
       if (geocodeResponse.data) {
         const geocodeData = geocodeResponse.data;
-        console.log('Geocode result:', geocodeData);
+// TIEMPO-276: Security cleanup - removed logging
         
         setGeocodeResult({
           latitude: geocodeData.latitude,
@@ -236,7 +236,7 @@ const VenueModalEdit = ({ venue, onUpdate, refreshList, onDone }) => {
         masteredCountryId: geocodeResult.masteredCountryId
       };
       
-      console.log('Updating venue:', updateData);
+// TIEMPO-276: Security cleanup - removed logging
       await onUpdate(venue._id, updateData);
       
       refreshList();

@@ -185,13 +185,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
     
     // TIEMPO-246: Log venue data to check for timezone
-    console.log('TIEMPO-246: Venue selected:', {
-      id: newValue._id,
-      name: newValue.name,
-      timezone: newValue.timezone,
-      timezoneAbbr: newValue.timezoneAbbr,
-      fullVenue: newValue
-    });
+    // TIEMPO-276: Security cleanup - removed logging
     
     // Store both the ID and the name
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
@@ -230,23 +224,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setVenueInputValue(newInputValue);
   };
 
-  // TIEMPO-258: Handle Add Venue button click
-  const handleAddVenue = () => {
-    // Save current form data to sessionStorage
-    const pendingData = {
-      eventData: eventData,
-      timestamp: Date.now(),
-      returnTo: 'eventCreate'
-    };
-    sessionStorage.setItem('pendingEventData', JSON.stringify(pendingData));
-    
-    // Open venue modal
-    setShowVenueModal(true);
-  };
 
   // TIEMPO-258: Handle venue creation callback
   const handleVenueCreated = async (newVenue) => {
-    console.log('New venue created:', newVenue);
+// TIEMPO-276: Security cleanup - removed logging
     
     // Refresh venue list
     await fetchVenues();
@@ -737,7 +718,9 @@ CreateEventDetailsBasic.propTypes = {
     locationID: PropTypes.string,
     locationName: PropTypes.string,
     description: PropTypes.string,
+    ownerOrganizerID: PropTypes.string,
     ownerOrganizerName: PropTypes.string,
+    ownerOrganizerShortName: PropTypes.string,
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 const fs = require('fs');
 const path = require('path');
@@ -35,10 +36,10 @@ const VENUE_ATTRIBUTES = [
 // Patterns to identify usage types
 const USAGE_PATTERNS = {
   display: [
-    /\.name[\s\)}]/,
-    /\.shortName[\s\)}]/,
-    /\.city[\s\)}]/,
-    /\.state[\s\)}]/,
+    /\.name[\s)}]/,
+    /\.shortName[\s)}]/,
+    /\.city[\s)}]/,
+    /\.state[\s)}]/,
     /\.address/,
     /<.*>\s*{\s*venue\./,
     /tooltip.*venue\./,
@@ -93,12 +94,12 @@ function searchInFile(filePath, attribute) {
     });
     
     return results;
-  } catch (error) {
+  } catch {
     return [];
   }
 }
 
-function categorizeUsage(line, attribute) {
+function categorizeUsage(line) {
   const types = [];
   
   for (const [type, patterns] of Object.entries(USAGE_PATTERNS)) {

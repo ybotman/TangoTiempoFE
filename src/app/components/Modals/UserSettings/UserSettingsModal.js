@@ -42,7 +42,7 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
 
   useEffect(() => {
     if (!user) {
-      console.log('User is not authenticated or AuthContext is not initialized yet.');
+// TIEMPO-276: Security cleanup - removed logging
     }
   }, [user]);
 
@@ -50,7 +50,7 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   useEffect(() => {
     if (defaultTab && open) {
       const mappedTab = tabMapping[defaultTab] || defaultTab;
-      console.log('[UserSettingsModal] Setting tab to:', mappedTab);
+// TIEMPO-276: Security cleanup - removed logging
       setCurrentTab(mappedTab);
     }
   }, [defaultTab, open]);
@@ -58,7 +58,7 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   // Refresh user data when modal opens
   useEffect(() => {
     if (open && refreshUserData) {
-      console.log('[UserSettingsModal] Modal opened, refreshing user data');
+// TIEMPO-276: Security cleanup - removed logging
       refreshUserData();
     }
   }, [open, refreshUserData]);

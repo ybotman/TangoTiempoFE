@@ -1,0 +1,281 @@
+
+> tangotiempo@1.8.2 eslint
+> clear && npx eslint  . --fix
+
+[3J[H[2J
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/scripts/analyze-venue-lineage.js
+    3:12  error  'require' is not defined               no-undef
+    4:14  error  'require' is not defined               no-undef
+   38:15  error  Unnecessary escape character: \)       no-useless-escape
+   39:20  error  Unnecessary escape character: \)       no-useless-escape
+   40:15  error  Unnecessary escape character: \)       no-useless-escape
+   41:16  error  Unnecessary escape character: \)       no-useless-escape
+   96:12  error  'error' is defined but never used      no-unused-vars
+  101:32  error  'attribute' is defined but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/auth/reset-password/page.js
+  88:44  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  98:21  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/benefits/page.js
+   21:3   error  'useMediaQuery' is defined but never used                        no-unused-vars
+   44:9   error  'theme' is assigned a value but never used                       no-unused-vars
+  289:28  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/EmailVerificationBanner.js
+  148:16  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  153:17  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/LocationSelector.js
+  80:22  error  '_' is defined but never used  no-unused-vars
+  85:12  error  '_' is defined but never used  no-unused-vars
+  94:14  error  '_' is defined but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/CreateEvents/CreateEventDetailModal.js
+   38:20  error    'apiLoading' is assigned a value but never used                                                                                                   no-unused-vars
+  258:6   warning  React Hook useEffect has a missing dependency: 'getInitialEventData'. Either include it or remove the dependency array                            react-hooks/exhaustive-deps
+  305:6   warning  React Hook useEffect has missing dependencies: 'eventData.endDate' and 'eventData.startDate'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  311:10  error    'hasUnsavedChanges' is assigned a value but never used                                                                                            no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/CreateEvents/CreateEventDetailsBasic.js
+   60:6   warning  React Hook useEffect has a missing dependency: 'venues'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  228:9   error    'handleAddVenue' is assigned a value but never used                                                        no-unused-vars
+  303:20  error    'eventData.ownerOrganizerID' is missing in props validation                                                react/prop-types
+  304:57  error    'eventData.ownerOrganizerID' is missing in props validation                                                react/prop-types
+  305:19  error    'eventData.ownerOrganizerID' is missing in props validation                                                react/prop-types
+  307:17  error    'eventData.ownerOrganizerID' is missing in props validation                                                react/prop-types
+  539:43  error    'eventData.ownerOrganizerShortName' is missing in props validation                                         react/prop-types
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/CreateEvents/CreateEventDetailsRepeating.js
+  264:6   warning  React Hook useEffect has missing dependencies: 'eventData.excludeDatesString', 'eventData.excludedDates', 'eventData.monthlyDays', 'eventData.monthlyWeeks', 'eventData.recurrenceCount', 'eventData.recurrenceDays', 'eventData.recurrenceEndDate', 'eventData.recurrenceType', 'eventData.useEndDate', and 'excludeDates'. Either include them or remove the dependency array. If 'setExcludeDates' needs the current value of 'eventData.excludeDatesString', you can also switch to useReducer instead of useState and read 'eventData.excludeDatesString' in the reducer  react-hooks/exhaustive-deps
+  403:14  error    'year' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+  445:6   warning  React Hook useEffect has missing dependencies: 'generateRRule', 'setEventData', and 'validateRRule'. Either include them or remove the dependency array. If 'setEventData' changes too often, find the parent component that defines it and wrap that definition in useCallback                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+  452:58  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
+  17:26  error  Parsing error: Unexpected token :
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/RegionalOrganizers/RegionalOrganizersModal.js
+  21:11  error  'organizers' is assigned a value but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/RegionalOrganizers/RegionalOrganizersProfile.js
+   83:9  error  'isSaveDisabled' is assigned a value but never used  no-unused-vars
+  119:9  error  'handleSave' is assigned a value but never used      no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/RegionalOrganizers/RegionalOrganizersSettings.js
+   3:38  error  'useContext' is defined but never used       no-unused-vars
+  31:10  error  'AuthContext' is defined but never used      no-unused-vars
+  66:9   error  'roInfo' is assigned a value but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/RegionalOrganizers/RegionalOrganizersStatus.js
+  37:21  error  'updateUserData' is assigned a value but never used          no-unused-vars
+  55:9   error  'isActiveFromUserLogin' is assigned a value but never used   no-unused-vars
+  56:9   error  'isEnabledFromUserLogin' is assigned a value but never used  no-unused-vars
+  82:9   error  'isSaveDisabled' is assigned a value but never used          no-unused-vars
+  89:9   error  'handleSave' is assigned a value but never used              no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/UserSettings/UserSettingsApply.js
+  272:34   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  272:46   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  272:74   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  272:91   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  273:53   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  273:72   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  295:86   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  295:103  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  307:18   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  350:50   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  350:67   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  351:35   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  351:60   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  385:58   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  385:75   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  386:34   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  386:59   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  396:54   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  396:71   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  405:15   error  'setHasAgreedToNextSteps' is not defined                         no-undef
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/UserSettings/UserSettingsBookmarks.js
+   23:21  error  'BookmarkBorderIcon' is defined but never used  no-unused-vars
+   31:44  error  'updateUserData' is defined but never used      no-unused-vars
+   31:60  error  'onSaveSuccess' is defined but never used       no-unused-vars
+  102:9   error  'getIcon' is assigned a value but never used    no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/UserSettings/UserSettingsLocationPreferences.js
+  65:23  error  Parsing error: Unexpected token :
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/UserSettings/UserSettingsModal.js
+  56:6  warning  React Hook useEffect has a missing dependency: 'tabMapping'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/UserSettings/UserSettingsNotifications.js
+  40:6  warning  React Hook useEffect has a missing dependency: 'getCurrentNotificationPreference'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  46:6  warning  React Hook useEffect has a missing dependency: 'getCurrentNotificationPreference'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/Venues/VenueModalList.js
+  101:9  error  'handleDeleteVenue' is assigned a value but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/ViewEvents/ViewEventDetailModal.js
+   11:10  error  'formatVenueTime' is defined but never used                                      no-unused-vars
+  118:56  error  'eventDetails.extendedProps.shortTitle' is missing in props validation           react/prop-types
+  121:57  error  'eventDetails.extendedProps.hasVenueTimezone' is missing in props validation     react/prop-types
+  122:57  error  'eventDetails.extendedProps.displayStartTime' is missing in props validation     react/prop-types
+  123:55  error  'eventDetails.extendedProps.displayEndTime' is missing in props validation       react/prop-types
+  124:53  error  'eventDetails.extendedProps.timezoneAbbr' is missing in props validation         react/prop-types
+  129:22  error  'eventDetails.start' is missing in props validation                              react/prop-types
+  132:22  error  'eventDetails.end' is missing in props validation                                react/prop-types
+  180:52  error  'eventDetails.extendedProps.masteredCityId' is missing in props validation       react/prop-types
+  180:68  error  'eventDetails.extendedProps.masteredCityId._id' is missing in props validation   react/prop-types
+  181:51  error  'eventDetails.extendedProps.masteredCityId' is missing in props validation       react/prop-types
+  182:51  error  'eventDetails.extendedProps.venueMasteredCityID' is missing in props validation  react/prop-types
+  183:51  error  'eventDetails.extendedProps.venueMasteredCityId' is missing in props validation  react/prop-types
+  286:37  error  'eventDetails.extendedProps.masteredCityName' is missing in props validation     react/prop-types
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/ViewEvents/ViewEventDetailsBasic.js
+  14:36  error  'eventDetails.title' is missing in props validation  react/prop-types
+  37:15  error  'maxHeight' is assigned a value but never used       no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/ViewEvents/ViewEventDetailsOrganizer.js
+  39:59   error  'eventDetails.extendedProps.ownerOrganizer' is missing in props validation  react/prop-types
+  39:106  error  'eventDetails.extendedProps.organizer' is missing in props validation       react/prop-types
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/misc/LocationContextModal.js
+  144:59  error  Parsing error: Unexpected token )
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/misc/MapCenterModal.js
+  170:6  warning  React Hook useEffect has missing dependencies: 'centerLat', 'centerLng', 'isValidLatLng', and 'updateMarker'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  232:6  warning  React Hook useEffect has missing dependencies: 'centerLat' and 'centerLng'. Either include them or remove the dependency array                                    react-hooks/exhaustive-deps
+  239:6  warning  React Hook useEffect has missing dependencies: 'isValidLatLng' and 'updateMarker'. Either include them or remove the dependency array                             react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/Modals/misc/UnifiedLocationModal.js
+    8:3   error    'DialogActions' is defined but never used                                                                                                                          no-unused-vars
+   28:7   error    'MapContainer' is assigned a value but never used                                                                                                                  no-unused-vars
+   34:3   error    'open' is missing in props validation                                                                                                                              react/prop-types
+   35:3   error    'onClose' is missing in props validation                                                                                                                           react/prop-types
+   36:3   error    'onSetLocation' is missing in props validation                                                                                                                     react/prop-types
+   37:3   error    'onSaveLocation' is missing in props validation                                                                                                                    react/prop-types
+   38:3   error    'initialLocation' is missing in props validation                                                                                                                   react/prop-types
+   39:3   error    'savedLocation' is missing in props validation                                                                                                                     react/prop-types
+   39:3   error    'savedLocation' is assigned a value but never used                                                                                                                 no-unused-vars
+  149:18  error    'e' is defined but never used                                                                                                                                      no-unused-vars
+  156:6   warning  React Hook useEffect has missing dependencies: 'centerLat', 'centerLng', 'mapInitialized', and 'updateMarker'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  221:6   warning  React Hook useEffect has missing dependencies: 'centerLat' and 'centerLng'. Either include them or remove the dependency array                                     react-hooks/exhaustive-deps
+  228:6   warning  React Hook useEffect has a missing dependency: 'updateMarker'. Either include it or remove the dependency array                                                    react-hooks/exhaustive-deps
+  272:14  error    '_' is defined but never used                                                                                                                                      no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/UI/SidebarDrawer.js
+  203:19  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/UI/SiteHeader.js
+  15:11  error  'selectedLocation' is assigned a value but never used  no-unused-vars
+  18:11  error  'userData' is assigned a value but never used          no-unused-vars
+  19:11  error  'organizer' is assigned a value but never used         no-unused-vars
+  23:9   error  'isMapMode' is assigned a value but never used         no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/UI/SiteMenuBar.js
+  13:104  error  'showDiscovered' is defined but never used      no-unused-vars
+  13:120  error  'onDiscoveredToggle' is defined but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/components/UI/SiteMenuBarUserDrawer.js
+  94:6  warning  React Hook useEffect has a missing dependency: 'roleDisplayOrder'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/contexts/GeoLocationContext.js
+   79:18  error    'e' is defined but never used                                                                                               no-unused-vars
+   98:20  error    'coordinates' is defined but never used                                                                                     no-unused-vars
+  158:28  error    'details' is defined but never used                                                                                         no-unused-vars
+  310:6   warning  React Hook useCallback has an unnecessary dependency: 'fetchNearestCity'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useCalendarPage.js
+  302:42  error  'require' is not defined  no-undef
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useEvents.js
+  357:6  warning  React Hook useCallback has unnecessary dependencies: 'city', 'division', 'isInitialized', 'lat', 'lng', 'region', 'useGeoLocationContext', 'useLocationPreferences', and 'userDefaults'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useImages.js
+  53:6  warning  React Hook useEffect has a missing dependency: 'fetchImages'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useLocationPrompt.js
+  18:11  error  'selectedLocation' is assigned a value but never used  no-unused-vars
+  18:29  error  'isInitialized' is assigned a value but never used     no-unused-vars
+  19:11  error  'user' is assigned a value but never used              no-unused-vars
+  20:11  error  'userData' is assigned a value but never used          no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useMenuItems.js
+  13:9  error  'selectedRegion' is assigned a value but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useRAOrganizers.js
+  28:5  warning  React Hook useMemo has a missing dependency: 'cityIdsArray'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useUserLogins.js
+   53:5  warning  React Hook useCallback has an unnecessary dependency: 'userLogins'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+   64:5  warning  React Hook useCallback has an unnecessary dependency: 'userLogins'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+   83:5  warning  React Hook useCallback has an unnecessary dependency: 'userLogins'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  102:5  warning  React Hook useCallback has an unnecessary dependency: 'userLogins'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/hooks/useVenues.js
+  69:6  warning  React Hook useCallback has unnecessary dependencies: 'masteredCityId' and 'masteredRegionId'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/message-admin/page.js
+  127:15  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/organizers/apply/components/tabs/ApplicationFormTab.js
+    7:3   error  'Button' is defined but never used                               no-unused-vars
+   23:8   error  'SettingsIcon' is defined but never used                         no-unused-vars
+   25:8   error  'ArrowForwardIcon' is defined but never used                     no-unused-vars
+   31:9   error  'router' is assigned a value but never used                      no-unused-vars
+   76:49  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+   85:64  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+   85:72  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  101:14  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/organizers/apply/components/tabs/BylawsTab.js
+  132:25  error  'index' is defined but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/organizers/apply/components/tabs/HowToApplyTab.js
+  36:8  error  'RestartAltIcon' is defined but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/organizers/apply/components/tabs/RestartRequiredModal.js
+  30:6  warning  React Hook useEffect has a missing dependency: 'handleRestart'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/organizers/apply/components/tabs/WhatAndWhyTab.js
+  10:3  error  'List' is defined but never used          no-unused-vars
+  11:3  error  'ListItem' is defined but never used      no-unused-vars
+  12:3  error  'ListItemIcon' is defined but never used  no-unused-vars
+  13:3  error  'ListItemText' is defined but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/organizers/apply/components/tabs/YourStatusTab.js
+    3:39  error  'useEffect' is defined but never used                            no-unused-vars
+   10:3   error  'Chip' is defined but never used                                 no-unused-vars
+   72:9   error  'handleStartApplication' is assigned a value but never used      no-unused-vars
+  207:33  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  288:16  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  357:40  error  'index' is defined but never used                                no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/scripts/jira-simple.js
+   37:16  error  '_' is defined but never used  no-unused-vars
+   49:16  error  '_' is defined but never used  no-unused-vars
+   58:16  error  '_' is defined but never used  no-unused-vars
+   66:16  error  '_' is defined but never used  no-unused-vars
+   79:16  error  '_' is defined but never used  no-unused-vars
+   90:16  error  '_' is defined but never used  no-unused-vars
+  105:16  error  '_' is defined but never used  no-unused-vars
+  110:21  error  Unreachable code               no-unreachable
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/test-venue-geocode/page.js
+  43:21  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  43:29  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  44:50  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  44:57  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  61:40  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  61:52  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/utils/LocationLogger.js
+  55:15  error  'abstractData' is assigned a value but never used  no-unused-vars
+
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/src/app/utils/transformEvents.js
+  211:53  error  'endDate' is defined but never used           no-unused-vars
+  265:9   error  Unexpected lexical declaration in case block  no-case-declarations
+  283:9   error  'frequency' is not defined                    no-undef
+
+✖ 176 problems (151 errors, 25 warnings)
+
