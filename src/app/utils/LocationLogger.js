@@ -52,7 +52,7 @@ const LocationLogger = () => {
           console.error(`LL:uE-> AbstractAPI failed with status: ${abstractResponse.status}`);
           throw new Error(`AbstractAPI error: ${abstractResponse.statusText}`);
         }
-        const abstractData = await safeParseJSON(abstractResponse);
+        await safeParseJSON(abstractResponse);
 
         // Log AbstractAPI results
         // TIEMPO-276: Security cleanup - removed Abstract API logging

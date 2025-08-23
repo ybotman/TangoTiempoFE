@@ -35,7 +35,7 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
-  const { loading: apiLoading } = useLocationAPI();
+  const { loading: _ } = useLocationAPI();
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
@@ -308,7 +308,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [saving, setSaving] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Import event operations hook

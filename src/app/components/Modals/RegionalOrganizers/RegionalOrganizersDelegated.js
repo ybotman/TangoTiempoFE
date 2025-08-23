@@ -12,11 +12,7 @@ const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds =
   const safeOrganizerIds = Array.isArray(delegatedOrganizerIds) ? delegatedOrganizerIds : [];
 
   // Log for debugging
-// TIEMPO-276: Security cleanup - removed logging
-    organizerId,
-    delegatedOrganizerIds: safeOrganizerIds,
-    organizersCount: organizers.length
-  });
+  // TIEMPO-276: Security cleanup - removed logging
   const [delegatedOrganizers, setDelegatedOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

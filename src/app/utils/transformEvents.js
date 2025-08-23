@@ -208,7 +208,10 @@ export function transformEvents(events) {
 }
 
 // Parse RRULE string to FullCalendar v6 object format
-function parseRRuleToObject(rruleString, startDate, endDate) {
+function parseRRuleToObject(rruleString, startDate, _) {
+  // First pass: get frequency
+  let frequency = null;
+  
   try {
     const parts = rruleString.split(';');
     
@@ -217,9 +220,6 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
       // Otherwise keep as UTC for backward compatibility
       dtstart: startDate
     };
-  
-  // First pass: get frequency
-  let frequency = null;
   parts.forEach(part => {
     const [key, value] = part.split('=');
     if (key === 'FREQ') {
@@ -260,12 +260,13 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
           // Converting to lowercase for FullCalendar compatibility
         }
         break;
-      case 'UNTIL':
+      case 'UNTIL': {
         // Convert RRULE date format to ISO format
         const isoDate = convertRRuleDateToISO(value);
         // TIEMPO-239: Use date as-is for venue times
         rruleObj.until = isoDate;
         break;
+      }
       case 'COUNT':
         rruleObj.count = parseInt(value);
         break;

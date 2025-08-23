@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -28,7 +28,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupIcon from '@mui/icons-material/Group';
-import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import axios from 'axios';
@@ -63,7 +62,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, o
   const [saving, setSaving] = useState(false);
 
   // Get values from userLogins
-  const roInfo = userData?.regionalOrganizerInfo || {};
+  const _ = userData?.regionalOrganizerInfo || {};
 
   useEffect(() => {
     if (organizer) {

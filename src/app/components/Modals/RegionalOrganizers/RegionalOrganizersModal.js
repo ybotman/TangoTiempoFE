@@ -18,7 +18,7 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const { organizers, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
+  const { organizers: _, organizer, loading, error, fetchOrganizerById, updateOrganizer } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('status');
   
   // TIEMPO-254: Centralized state for all tabs - persists across tab changes

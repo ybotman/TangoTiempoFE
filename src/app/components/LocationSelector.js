@@ -77,7 +77,7 @@ const LocationSelector = ({ open, onClose }) => {
               } else {
                 setError('Could not find a nearby city. Please select manually.');
               }
-            } catch (_) {
+            } catch {
               setError('Failed to find nearest city. Please select manually.');
             }
             setIsDetecting(false);

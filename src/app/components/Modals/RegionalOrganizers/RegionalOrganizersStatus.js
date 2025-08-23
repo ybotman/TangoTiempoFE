@@ -34,7 +34,7 @@ import { useUsers } from '@/hooks/useUsers';
 
 const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
   const { user } = useContext(AuthContext);
-  const { userData, updateUserData } = useUsers();
+  const { userData } = useUsers();
   
   // TIEMPO-254: Use unsaved changes if available, otherwise use organizer data
   const isEnabled = unsavedChanges?.isEnabled !== undefined ? unsavedChanges.isEnabled : (organizer?.isEnabled || false);
@@ -52,8 +52,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
   const email = user?.email || 'Not available';
   const firebaseUserId = userData?.firebaseUserId || 'Not available';
   const isApprovedFromUserLogin = roInfo.isApproved || false;
-  const isActiveFromUserLogin = roInfo.isActive || false;
-  const isEnabledFromUserLogin = roInfo.isEnabled || false;
   const approvalDate = roInfo.ApprovalDate ? new Date(roInfo.ApprovalDate).toLocaleDateString() : 'Not set';
 
   // Organizer collection values
@@ -78,45 +76,11 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
     }
   }, [organizer, userData]);
 
-  // TIEMPO-254: Use centralized isSaving if available, otherwise check for changes
-  const isSaveDisabled = isSaving !== undefined ? isSaving : (isEnabled === initialIsEnabled);
 
   const handleSnackbarClose = () => {
     setShowSuccessMessage(false);
   };
 
-  // TIEMPO-254: Use centralized save handler
-  const handleSave = async () => {
-    // Call the centralized save handler if available
-    if (onSave) {
-      return onSave();
-    }
-    
-    // Fallback to original implementation if no centralized handler
-    setErrorMessage('');
-    setShowSuccessMessage(false);
-    
-    try {
-      // Update organizer collection only
-      await updateOrganizer(organizerId, { 
-        isEnabled
-      });
-      
-      setInitialIsEnabled(isEnabled);
-      setShowSuccessMessage(true);
-      
-      // Auto-refresh after 2 seconds if enabling
-      if (isEnabled && !initialIsEnabled) {
-        setShowRestartWarning(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Failed to update status:', error);
-      setErrorMessage('An error occurred while updating organizer status.');
-    }
-  };
 
 
   const mandatoryChecks = [

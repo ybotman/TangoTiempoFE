@@ -269,8 +269,8 @@ const UserSettingsApply = () => {
           <Typography variant="body2" component="div">
             <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
               <li>Click the <strong>user icon</strong> (top right)</li>
-              <li>Select <strong>"Change Role"</strong> → Choose <strong>"Organizer/Artist"</strong></li>
-              <li>Open the menu (☰) → Click <strong>"Organizer Settings"</strong></li>
+              <li>Select <strong>&quot;Change Role&quot;</strong> → Choose <strong>&quot;Organizer/Artist&quot;</strong></li>
+              <li>Open the menu (☰) → Click <strong>&quot;Organizer Settings&quot;</strong></li>
               <li>Complete ALL required fields:
                 <ul style={{ marginTop: '4px' }}>
                   <li>Organizer Name</li>

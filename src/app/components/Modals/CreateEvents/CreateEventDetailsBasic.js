@@ -224,19 +224,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setVenueInputValue(newInputValue);
   };
 
-  // TIEMPO-258: Handle Add Venue button click
-  const handleAddVenue = () => {
-    // Save current form data to sessionStorage
-    const pendingData = {
-      eventData: eventData,
-      timestamp: Date.now(),
-      returnTo: 'eventCreate'
-    };
-    sessionStorage.setItem('pendingEventData', JSON.stringify(pendingData));
-    
-    // Open venue modal
-    setShowVenueModal(true);
-  };
 
   // TIEMPO-258: Handle venue creation callback
   const handleVenueCreated = async (newVenue) => {
