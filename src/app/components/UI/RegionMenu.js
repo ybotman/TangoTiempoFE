@@ -47,19 +47,19 @@ const RegionMenu = ({ onClose }) => {
   };
 
   const handleRegionClick = (region) => {
-    console.log('Region Selected:', region);
+    // TIEMPO-276: Security cleanup - removed region logging
     setLocalSelectedRegion(region);
     setSelectionLevel(2);
   };
 
   const handleDivisionClick = (division) => {
-    console.log('Division Selected:', division);
+    // TIEMPO-276: Security cleanup - removed division logging
     setLocalSelectedDivision(division);
     setSelectionLevel(3);
   };
 
   const handleCityClick = (city) => {
-    console.log('City Selected:', city);
+    // TIEMPO-276: Security cleanup - removed city logging
     
     // Update GeoLocationContext with the selected location
     selectLocation({

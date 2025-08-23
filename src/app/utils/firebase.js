@@ -8,11 +8,7 @@ const decodedFirebaseConfig = JSON.parse(
   Buffer.from(process.env.NEXT_PUBLIC_FIREBASE_JSON, 'base64').toString('utf-8')
 );
 
-console.log('=== Firebase Configuration ===');
-console.log('Project ID:', decodedFirebaseConfig.projectId);
-console.log('Auth Domain:', decodedFirebaseConfig.authDomain);
-console.log('Current Domain:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
-console.log('Full Firebase Config:', decodedFirebaseConfig);
+// TIEMPO-276: Security cleanup - removed Firebase config logging
 
 // Initialize Firebase app
 const app = initializeApp(decodedFirebaseConfig);
@@ -35,10 +31,7 @@ const appleProvider = new OAuthProvider('apple.com');
 appleProvider.addScope('email');
 appleProvider.addScope('name');
 
-// Log Apple provider setup
-console.log('=== Apple Provider Setup ===');
-console.log('Provider ID:', appleProvider.providerId);
-console.log('Scopes:', appleProvider.scopes);
+// TIEMPO-276: Security cleanup - removed Apple provider logging
 
 // Set custom parameters if needed (optional)
 // appleProvider.setCustomParameters({

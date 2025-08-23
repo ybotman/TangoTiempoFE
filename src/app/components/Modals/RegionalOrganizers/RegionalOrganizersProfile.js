@@ -79,89 +79,11 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
     );
   };
 
-  // TIEMPO-254: Use centralized isSaving if available
-  const isSaveDisabled = () => {
-    if (isSaving !== undefined) return isSaving;
-    
-    // Check if name fields have changed
-    const nameChanged = 
-      fullName !== (organizer?.fullName || '') ||
-      shortName !== (organizer?.shortName || '') ||
-      description !== (organizer?.description || '') ||
-      url !== (organizer?.publicContactInfo?.url || '');
-    
-    // Check if address fields have changed
-    const publicContactInfo = organizer?.publicContactInfo || {};
-    const address = publicContactInfo.address || {};
-    
-    const addressChanged = 
-      phone !== (publicContactInfo.phone || '') ||
-      email !== (publicContactInfo.Email || '') ||
-      street1 !== (address.street1 || '') ||
-      street2 !== (address.street2 || '') ||
-      city !== (address.city || '') ||
-      state !== (address.state || '') ||
-      zip !== (address.postalCode || '');
-    
-    // Check if data is valid
-    const dataInvalid = 
-      fullName === 'New Organizer' ||
-      fullName.trim().length < 7 ||
-      isShortNameInvalid();
-    
-    return (!nameChanged && !addressChanged) || dataInvalid;
-  };
 
   const handleSnackbarClose = () => {
     setShowSuccessMessage(false);
   };
 
-  const handleSave = async () => {
-    // TIEMPO-254: Use centralized save handler if available
-    if (onSave) {
-      return onSave();
-    }
-    
-    // Fallback to original implementation
-    if (fullName.trim().length < 7 || fullName === 'New Organizer') {
-      setErrorMessage('Full Name must be at least 7 characters and cannot be "New Organizer".');
-      return;
-    }
-    if (isShortNameInvalid()) {
-      setErrorMessage(
-        'Short Name must be between 3 and 9 characters, cannot be "CHANGE" or contain "TANGO", and must not contain invalid patterns like double spaces or hyphens.'
-      );
-      return;
-    }
-
-    const updateData = {
-      fullName,
-      shortName,
-      description,
-      publicContactInfo: {
-        ...organizer?.publicContactInfo,
-        url,
-        phone,
-        Email: email,
-        address: {
-          street1,
-          street2,
-          city,
-          state,
-          postalCode: zip,
-        },
-      },
-    };
-
-    try {
-      await updateOrganizer(organizerId, updateData);
-      setErrorMessage('');
-      setShowSuccessMessage(true);
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      setErrorMessage('An error occurred while updating the profile information.');
-    }
-  };
 
   return (
     <Box sx={{ mt: 2 }}>

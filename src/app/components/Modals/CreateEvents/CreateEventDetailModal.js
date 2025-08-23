@@ -5,7 +5,7 @@ import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
 import ValidationDialog from './ValidationDialog';
-import { useLocationAPI } from '@/contexts/LocationAPIContext';
+// import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
@@ -35,7 +35,7 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
-  const { loading: apiLoading } = useLocationAPI();
+  // Removed unused loading from LocationAPI
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
@@ -236,26 +236,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           });
           
           // Enhanced debug logging to diagnose field issues
-          console.log('RA Edit Validation - Enhanced Debug:', {
-            selectedRole,
-            raAllowedCities,
-            'raAllowedCities type': Array.isArray(raAllowedCities) ? 'array' : typeof raAllowedCities,
-            'raAllowedCities sample': raAllowedCities.length > 0 ? raAllowedCities[0] : 'empty',
-            eventCityId,
-            'eventCityId type': typeof eventCityId,
-            'eventToEdit._id': eventToEdit._id,
-            'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
-            'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
-            'eventToEdit.venueMasteredCityID': eventToEdit.venueMasteredCityID,  // TIEMPO-195
-            'eventToEdit.venueMasteredCityId': eventToEdit.venueMasteredCityId,
-            'eventToEdit.masteredCityName': eventToEdit.masteredCityName,
-            'eventToEdit.locationID': eventToEdit.locationID,
-            'eventToEdit.venueId': eventToEdit.venueId,
-            'eventToEdit.venue': eventToEdit.venue,
-            'eventToEdit.venueInfo': eventToEdit.venueInfo,
-            'All eventToEdit fields': Object.keys(eventToEdit),
-            hasAccess: hasAccess
-          });
+          // TIEMPO-276: Security cleanup - removed console.log for RA Edit Validation
           
           if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
@@ -272,14 +253,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
 
       // Log current location for debugging
-      console.log(`Modal opened in ${editMode ? 'EDIT' : 'CREATE'} mode`, {
-        mode: editMode ? 'EDIT' : 'CREATE',
-        eventId: eventToEdit?._id || null,
-        selectedRole: user?.backendInfo?.selectedRole,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
-        organizerInfo: user?.backendInfo?.regionalOrganizerInfo,
-        organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
-      });
+      // TIEMPO-276: Security cleanup - removed logging
     }
   }, [open, selectedLocation, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
@@ -287,10 +261,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   useEffect(() => {
     // Check if user has regionalOrganizerInfo with an organizerId (indicates they are an RO)
     if (!editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
-      console.log('Fetching organizer for CREATE mode:', {
-        organizerId: user.backendInfo.regionalOrganizerInfo.organizerId,
-        hasOrganizerInfo: !!user.backendInfo.regionalOrganizerInfo
-      });
+      // TIEMPO-276: Security cleanup - removed logging
       fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
     }
   }, [editMode, user, fetchOrganizerById]);
@@ -321,13 +292,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           const newStartDate = getDefaultStartTime(selectedDate, eventData.venueTimezone);
           const newEndDate = newStartDate.add(3, 'hour');
           
-          console.log('TIEMPO-246: Recalculating times for venue timezone:', {
-            venueTimezone: eventData.venueTimezone,
-            oldStart: currentStartDate.format(),
-            newStart: newStartDate.format(),
-            oldEnd: currentEndDate.format(),
-            newEnd: newEndDate.format()
-          });
+          // TIEMPO-276: Security cleanup - removed logging
           
           setEventData(prev => ({
             ...prev,
@@ -343,7 +308,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [saving, setSaving] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Import event operations hook
@@ -656,9 +621,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }, 2000);
       } else {
         // Create new event
-        console.log('Creating new event');
+// TIEMPO-276: Security cleanup - removed logging
         await createEvent(eventDataWithDefaults);
-        console.log('Event created successfully');
+// TIEMPO-276: Security cleanup - removed logging
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
         

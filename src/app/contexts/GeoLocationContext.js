@@ -24,7 +24,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // For tracking initialization state
   const [isInitialized, setIsInitialized] = useState(false);
-  const initializationAttempted = useRef(false);
+  useRef(false);
 
   // State for user's physical location (from browser or IP)
   const [userLocation, setUserLocation] = useState({
@@ -76,8 +76,8 @@ export const GeoLocationProvider = ({ children }) => {
       if (saved) {
         try {
           return JSON.parse(saved);
-        } catch (e) {
-          console.error('[GeoLocationContext] Error parsing saved location:', e);
+        } catch {
+          // TIEMPO-276: Security cleanup - removed error logging
           return { lat: null, lng: null, zoomRange: 50 };
         }
       }
@@ -90,13 +90,13 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Subscribe to location events on mount
   useEffect(() => {
-    console.log('[GeoLocationContext] Setting up event subscriptions');
+    // TIEMPO-276: Security cleanup - removed setup logging
 
     // Subscribe to nearest city fetched event
     const unsubscribeNearestCity = locationEventBus.on(
       LOCATION_EVENTS.NEAREST_CITY_FETCHED,
-      ({ cityData, coordinates }) => {
-        console.log('[GeoLocationContext] Received NEAREST_CITY_FETCHED event:', cityData.cityName);
+      ({ cityData }) => {
+        // TIEMPO-276: Security cleanup - removed event logging
         
         // Update selected location with the fetched city
         setSelectedLocation({
@@ -129,7 +129,7 @@ export const GeoLocationProvider = ({ children }) => {
     const unsubscribeCities = locationEventBus.on(
       LOCATION_EVENTS.CITIES_FETCHED,
       ({ cities }) => {
-        console.log(`[GeoLocationContext] Received CITIES_FETCHED event: ${cities.length} cities`);
+        // TIEMPO-276: Security cleanup - removed event logging
         setLocationData(prev => ({ ...prev, cities }));
       }
     );
@@ -138,7 +138,7 @@ export const GeoLocationProvider = ({ children }) => {
     const unsubscribeRegions = locationEventBus.on(
       LOCATION_EVENTS.REGIONS_FETCHED,
       ({ regions }) => {
-        console.log(`[GeoLocationContext] Received REGIONS_FETCHED event: ${regions.length} regions`);
+        // TIEMPO-276: Security cleanup - removed event logging
         setLocationData(prev => ({ ...prev, regions }));
       }
     );
@@ -147,7 +147,7 @@ export const GeoLocationProvider = ({ children }) => {
     const unsubscribeDivisions = locationEventBus.on(
       LOCATION_EVENTS.DIVISIONS_FETCHED,
       ({ divisions }) => {
-        console.log(`[GeoLocationContext] Received DIVISIONS_FETCHED event: ${divisions.length} divisions`);
+        // TIEMPO-276: Security cleanup - removed event logging
         setLocationData(prev => ({ ...prev, divisions }));
       }
     );
@@ -155,7 +155,7 @@ export const GeoLocationProvider = ({ children }) => {
     // Subscribe to location error events
     const unsubscribeLocationError = locationEventBus.on(
       LOCATION_EVENTS.LOCATION_ERROR,
-      ({ error, operation, details }) => {
+      ({ error, operation }) => {
         console.error(`[GeoLocationContext] Location error in ${operation}:`, error);
         
         // Update appropriate error state based on operation
@@ -171,7 +171,7 @@ export const GeoLocationProvider = ({ children }) => {
     const unsubscribeLoadingStarted = locationEventBus.on(
       LOCATION_EVENTS.LOADING_STARTED,
       ({ operation }) => {
-        console.log(`[GeoLocationContext] Loading started: ${operation}`);
+        // TIEMPO-276: Security cleanup - removed loading logging
         
         if (operation === 'fetchNearestCity') {
           setLoadingState(prev => ({ ...prev, nearestCity: true }));
@@ -184,7 +184,7 @@ export const GeoLocationProvider = ({ children }) => {
     const unsubscribeLoadingCompleted = locationEventBus.on(
       LOCATION_EVENTS.LOADING_COMPLETED,
       ({ operation }) => {
-        console.log(`[GeoLocationContext] Loading completed: ${operation}`);
+        // TIEMPO-276: Security cleanup - removed loading logging
         
         if (operation === 'fetchNearestCity') {
           setLoadingState(prev => ({ ...prev, nearestCity: false }));
@@ -199,7 +199,7 @@ export const GeoLocationProvider = ({ children }) => {
 
     // Cleanup subscriptions on unmount
     return () => {
-      console.log('[GeoLocationContext] Cleaning up event subscriptions');
+      // TIEMPO-276: Security cleanup - removed cleanup logging
       unsubscribeNearestCity();
       unsubscribeCities();
       unsubscribeRegions();
@@ -212,7 +212,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {
-    console.log('[GeoLocationContext] Manual location selection:', location);
+    // TIEMPO-276: Security cleanup - removed selection logging
     
     setSelectedLocation(prev => ({
       ...prev,
@@ -225,7 +225,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Function to clear selected location
   const clearLocation = useCallback(() => {
-    console.log('[GeoLocationContext] Clearing selected location');
+    // TIEMPO-276: Security cleanup - removed clearing logging
     
     setSelectedLocation({
       country: { id: null, name: null },
@@ -257,7 +257,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Function to refresh user's browser location
   const refreshUserLocation = useCallback(async () => {
-    console.log('[GeoLocationContext] Refreshing user location');
+    // TIEMPO-276: Security cleanup - removed refresh logging
     setLoadingState(prev => ({ ...prev, userLocation: true }));
     setErrorState(prev => ({ ...prev, userLocation: null }));
 
@@ -284,7 +284,7 @@ export const GeoLocationProvider = ({ children }) => {
 
             // In map mode, we don't need to automatically fetch nearest city
             // Only fetch if explicitly requested from hamburger menu
-            console.log('[GeoLocationContext] Skipping automatic nearest city fetch in map mode');
+            // TIEMPO-276: Security cleanup - removed skip logging
 
             setLoadingState(prev => ({ ...prev, userLocation: false }));
           },
@@ -314,7 +314,7 @@ export const GeoLocationProvider = ({ children }) => {
     if (!userData?.localUserInfo?.userDefaults) return;
     
     const defaults = userData.localUserInfo.userDefaults;
-    console.log('[GeoLocationContext] Loading user map preferences:', defaults);
+    // TIEMPO-276: Security cleanup - removed preferences logging
     
     const location = {
       lat: defaults.defaultCenterLocation?.latitude || null,   // Backend stores as 'latitude'
@@ -337,32 +337,32 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Open location settings modal
   const openLocationSettings = useCallback((tab = 'locationPrefs') => {
-    console.log('[GeoLocationContext] Opening location settings, tab:', tab);
+    // TIEMPO-276: Security cleanup - removed modal logging
     // Use userSettingsEvent to trigger the modal in SidebarDrawer
     userSettingsEvent.openModal(tab);
   }, []);
 
   // Close location settings modal
   const closeLocationSettings = useCallback(() => {
-    console.log('[GeoLocationContext] Closing location settings');
+    // TIEMPO-276: Security cleanup - removed modal logging
     // Note: Modal closing is handled by SidebarDrawer directly
   }, []);
 
   // Open MapCenterModal
   const openMapCenterModal = useCallback(() => {
-    console.log('[GeoLocationContext] Opening MapCenterModal');
+    // TIEMPO-276: Security cleanup - removed modal logging
     setMapCenterModalOpen(true);
   }, []);
 
   // Close MapCenterModal
   const closeMapCenterModal = useCallback(() => {
-    console.log('[GeoLocationContext] Closing MapCenterModal');
+    // TIEMPO-276: Security cleanup - removed modal logging
     setMapCenterModalOpen(false);
   }, []);
 
   // Set location for current session (used by MapCenterModal)
   const setSessionLocation = useCallback((locationData) => {
-    console.log('[GeoLocationContext] Setting session location:', locationData);
+    // TIEMPO-276: Security cleanup - removed session logging
     
     const location = {
       lat: locationData.centerLocation?.lat || locationData.lat,
@@ -381,7 +381,7 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Save location to backend and set as current (used by UserSettings)
   const saveAndSetLocation = useCallback(async (locationData, updateUserData) => {
-    console.log('[GeoLocationContext] Saving and setting location:', locationData);
+    // TIEMPO-276: Security cleanup - removed save logging
     
     const location = {
       lat: locationData.centerLocation?.lat || locationData.lat,
@@ -435,7 +435,7 @@ export const GeoLocationProvider = ({ children }) => {
        window.parent !== window && document.referrer.toLowerCase().includes('bostontangocalendar'));
     
     if (isBostonCalendar && locationAPI?.fetchCities) {
-      console.log('[GeoLocationContext] Detected Boston Tango Calendar iframe - selecting Boston city');
+      // TIEMPO-276: Security cleanup - removed iframe logging
       
       // Fetch cities and find Boston
       locationAPI.fetchCities().then(cities => {
@@ -445,7 +445,7 @@ export const GeoLocationProvider = ({ children }) => {
         );
         
         if (bostonCity) {
-          console.log('[GeoLocationContext] Found Boston city:', bostonCity);
+          // TIEMPO-276: Security cleanup - removed city logging
           selectLocation({
             country: {
               id: bostonCity.countryID,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -13,15 +13,10 @@ import {
   Card,
   CardContent,
   Grid,
-  Divider,
-  TextField,
-  Chip,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
-  OutlinedInput,
-  FormHelperText,
   List,
   ListItem,
   ListItemText,
@@ -30,20 +25,15 @@ import {
   CircularProgress,
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import LockIcon from '@mui/icons-material/Lock';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import SearchIcon from '@mui/icons-material/Search';
 import GroupIcon from '@mui/icons-material/Group';
-import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import axios from 'axios';
 
-const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
-  const { user } = useContext(AuthContext);
-  const { userData, updateUserData } = useUsers();
+const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, isSaving }) => {
+  const { userData } = useUsers();
   const { organizers } = useOrganizers();
   
   // Local state (needed for fallback when centralized state is not available)
@@ -72,12 +62,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, o
   const [saving, setSaving] = useState(false);
 
   // Get values from userLogins
-  const roInfo = userData?.regionalOrganizerInfo || {};
-  const email = userData?.email || 'Not available';
-  const firebaseUserId = userData?.firebaseUserId || 'Not available';
-  const isApproved = roInfo.isApproved || false;
-  const isActive = roInfo.isActive || false;
-  const approvalDate = roInfo.ApprovalDate ? new Date(roInfo.ApprovalDate).toLocaleDateString() : 'Not set';
+  const _ = userData?.regionalOrganizerInfo || {};
 
   useEffect(() => {
     if (organizer) {

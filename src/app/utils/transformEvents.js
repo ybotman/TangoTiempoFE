@@ -12,7 +12,8 @@ export function transformEvents(events) {
   const debugEvents = events.slice(0, 3);
   debugEvents.forEach(event => {
     if (event.shortTitle?.includes('VIDA') || event.title?.includes('Practica')) {
-      console.log('Backend event data:', {
+      // TIEMPO-276: Security cleanup - removed backend event logging
+      /*
         title: event.title,
         shortTitle: event.shortTitle,
         venueStartDisplay: event.venueStartDisplay,
@@ -20,7 +21,7 @@ export function transformEvents(events) {
         venueAbbr: event.venueAbbr,
         startDate: event.startDate,
         endDate: event.endDate
-      });
+      */
     }
   });
 
@@ -134,7 +135,7 @@ export function transformEvents(events) {
         // TIEMPO-239: Pass venue times if available for RRULE parsing
         const startForRRule = useVenueTime ? displayTimes.startTime : event.startDate;
         const endForRRule = useVenueTime ? displayTimes.endTime : event.endDate;
-        const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule, endForRRule);
+        const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule);
         
         
         // Create the event object
@@ -207,7 +208,10 @@ export function transformEvents(events) {
 }
 
 // Parse RRULE string to FullCalendar v6 object format
-function parseRRuleToObject(rruleString, startDate, endDate) {
+function parseRRuleToObject(rruleString, startDate) {
+  // First pass: get frequency
+  let frequency = null;
+  
   try {
     const parts = rruleString.split(';');
     
@@ -216,9 +220,6 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
       // Otherwise keep as UTC for backward compatibility
       dtstart: startDate
     };
-  
-  // First pass: get frequency
-  let frequency = null;
   parts.forEach(part => {
     const [key, value] = part.split('=');
     if (key === 'FREQ') {
@@ -259,12 +260,13 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
           // Converting to lowercase for FullCalendar compatibility
         }
         break;
-      case 'UNTIL':
+      case 'UNTIL': {
         // Convert RRULE date format to ISO format
         const isoDate = convertRRuleDateToISO(value);
         // TIEMPO-239: Use date as-is for venue times
         rruleObj.until = isoDate;
         break;
+      }
       case 'COUNT':
         rruleObj.count = parseInt(value);
         break;

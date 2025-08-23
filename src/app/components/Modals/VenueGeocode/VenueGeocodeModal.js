@@ -91,14 +91,14 @@ const VenueGeocodeModal = ({ open, onClose }) => {
       const addressString = buildAddressString();
       
       // Step 1: Geocode the address
-      console.log('Geocoding address:', addressString);
+// TIEMPO-276: Security cleanup - removed logging
       const geocodeResponse = await axios.get(`${baseURL}/api/venues/geocode`, {
         params: { address: addressString }
       });
 
       if (geocodeResponse.data) {
         const geocodeData = geocodeResponse.data;
-        console.log('Geocode result:', geocodeData);
+// TIEMPO-276: Security cleanup - removed logging
         
         setGeocodeResult({
           latitude: geocodeData.latitude,
@@ -169,11 +169,11 @@ const VenueGeocodeModal = ({ open, onClose }) => {
         appId
       };
       
-      console.log('Creating venue:', payload);
+// TIEMPO-276: Security cleanup - removed logging
       const response = await axios.post(`${baseURL}/api/venues`, payload);
       
       if (response.data) {
-        console.log('Venue created successfully:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
         // TODO: Show success message and close modal
         handleClose();
       }

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
+import PropTypes from 'prop-types';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Box,
   Button,
   Typography,
@@ -21,14 +21,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AuthContext } from '@/contexts/AuthContext';
-import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamic import for avoiding SSR issues
-const MapContainer = dynamic(
-  () => import('react-leaflet').then(mod => mod.MapContainer),
-  { ssr: false }
-);
+// Note: Using Leaflet directly; no MapContainer used in this implementation
 
 const UnifiedLocationModal = ({ 
   open, 
@@ -36,7 +32,7 @@ const UnifiedLocationModal = ({
   onSetLocation,
   onSaveLocation,
   initialLocation = { lat: 40.7128, lng: -74.0060, zoomRange: 50 },
-  savedLocation = null
+  
 }) => {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -146,7 +142,7 @@ const UnifiedLocationModal = ({
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
         mapInstanceRef.current = null;
@@ -269,7 +265,7 @@ const UnifiedLocationModal = ({
       setTimeout(() => {
         onClose();
       }, 500);
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to save location' });
     }
     setLoading(false);
@@ -440,3 +436,23 @@ const UnifiedLocationModal = ({
 };
 
 export default UnifiedLocationModal;
+
+UnifiedLocationModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSetLocation: PropTypes.func.isRequired,
+  onSaveLocation: PropTypes.func.isRequired,
+  initialLocation: PropTypes.shape({
+    lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    zoomRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }),
+  savedLocation: PropTypes.oneOfType([
+    PropTypes.shape({
+      lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      zoomRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    }),
+    PropTypes.oneOf([null])
+  ]),
+};

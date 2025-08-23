@@ -260,14 +260,7 @@ const CalendarPage = () => {
       
       // Debug: Check what venue data we have
       if (event.title?.includes('Practica') || event.extendedProps?.shortTitle?.includes('VIDA')) {
-        console.log('Event venue data:', {
-          title: event.title,
-          shortTitle: event.extendedProps?.shortTitle,
-          venueStartDisplay: event.extendedProps?.venueStartDisplay,
-          venueEndDisplay: event.extendedProps?.venueEndDisplay,
-          venueAbbr: event.extendedProps?.venueAbbr,
-          hasVenueData: !!event.extendedProps?.venueStartDisplay
-        });
+        // TIEMPO-276: Security cleanup - removed venue data logging
       }
       
       const { startTime, endTime } = event.extendedProps?.venueStartDisplay 
@@ -595,7 +588,7 @@ const CalendarPage = () => {
     return coloredFilteredEvents;
   })();
 
-  //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
+// TIEMPO-276: Security cleanup - removed logging
   useEffect(() => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();

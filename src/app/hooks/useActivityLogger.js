@@ -31,11 +31,7 @@ export const useActivityLogger = () => {
       };
 
       // Log to console for debugging
-      console.log('Frontend Activity Log:', {
-        action: logData.action,
-        resource: logData.resource,
-        details: logData.details
-      });
+      // TIEMPO-276: Security cleanup - removed logging
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/frontend-logs`, {
         method: 'POST',

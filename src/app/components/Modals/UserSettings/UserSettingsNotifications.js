@@ -98,7 +98,7 @@ const UserSettingsNotifications = ({ userData, updateUserData }) => {
         }
       });
       
-      console.log('Notification preference updated successfully to:', preferenceValue);
+// TIEMPO-276: Security cleanup - removed logging
       setShowSuccessMessage(true);
       setIsModified(false);
     } catch (err) {

@@ -55,7 +55,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
   const [proximityWarning, setProximityWarning] = useState(false);
   const [stage, setStage] = useState(1); // 1 = address, 2 = details
   const [isOverriding, setIsOverriding] = useState(false);
-  const [overrideType, setOverrideType] = useState(null); // 'no-city' or 'proximity'
+  const [, setOverrideType] = useState(null); // 'no-city' or 'proximity'
 
   const handleAddressChange = (field) => (event) => {
     setAddressData({
@@ -123,14 +123,14 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
       const addressString = buildAddressString();
       
       // Step 1: Geocode the address
-      console.log('Geocoding address:', addressString);
+// TIEMPO-276: Security cleanup - removed logging
       const geocodeResponse = await axios.get(`${baseURL}/api/venues/geocode`, {
         params: { address: addressString }
       });
 
       if (geocodeResponse.data) {
         const geocodeData = geocodeResponse.data;
-        console.log('Geocode result:', geocodeData);
+// TIEMPO-276: Security cleanup - removed logging
         
         setGeocodeResult({
           latitude: geocodeData.latitude,
@@ -228,7 +228,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
         masteredCountryId: geocodeResult.masteredCountryId
       };
       
-      console.log('Creating venue:', data);
+// TIEMPO-276: Security cleanup - removed logging
       await onAdd(data);
       
       refreshList();

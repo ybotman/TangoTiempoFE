@@ -4,7 +4,6 @@ import React, { useContext } from 'react';
 import {
   Box,
   Typography,
-  Button,
   Paper,
   Alert,
   List,
@@ -20,9 +19,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 
 const ApplicationFormTab = () => {
@@ -73,7 +70,7 @@ const ApplicationFormTab = () => {
         </Typography>
         
         <Alert severity="info" sx={{ mb: 3 }}>
-          To become a TangoTiempo organizer, you'll need to create an account first.
+          To become a TangoTiempo organizer, you&apos;ll need to create an account first.
         </Alert>
 
         <Paper elevation={1} sx={{ p: 4, textAlign: 'center' }}>
@@ -82,7 +79,7 @@ const ApplicationFormTab = () => {
             Step 1: Create Your Account
           </Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
-            Click the user icon in the top menu bar and select "Sign Up" to create your 
+            Click the user icon in the top menu bar and select &quot;Sign Up&quot; to create your 
             free TangoTiempo account.
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -98,7 +95,7 @@ const ApplicationFormTab = () => {
     return (
       <Box>
         <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-          You're Already an Organizer!
+          You&apos;re Already an Organizer!
         </Typography>
         
         <Alert severity="success" sx={{ mb: 3 }}>

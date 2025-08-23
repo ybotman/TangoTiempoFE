@@ -7,10 +7,6 @@ import {
   Grid,
   Card,
   CardContent,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Paper
 } from '@mui/material';
 import PublicIcon from '@mui/icons-material/Public';

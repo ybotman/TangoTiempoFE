@@ -1,11 +1,13 @@
 // @/components/Modals/Venues/VenueModal.js
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Tabs, Tab, useMediaQuery, useTheme } from '@mui/material';
 import ModalHeader from '@/components/UI/ModalHeader';
 import { useVenues } from '@/hooks/useVenues';
+import { useUsers } from '@/hooks/useUsers';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import VenueModalList from './VenueModalList';
 import VenueModalAdd from './VenueModalAdd';
 import VenueModalEdit from './VenueModalEdit';
@@ -16,18 +18,34 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { venues, fetchVenues, addVenue, updateVenue, deactivateVenue } = useVenues();
-  const [currentTab, setCurrentTab] = useState('list');
+  const { userData } = useUsers();
+  const { currentLocation } = useGeoLocation();
+  const [currentTab, setCurrentTab] = useState('map');
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(defaultCityId || '');
-  const [activeFilter, setActiveFilter] = useState(true);
+  const [mapCenter, setMapCenter] = useState(null);
 
   useEffect(() => {
     if (open) {
-      setCurrentTab('list');
+      setCurrentTab('map');
       setSelectedVenue(null);
-      fetchVenues(selectedCityId, activeFilter);
+      
+      // Get user's saved location or current location
+      const userLat = userData?.localUserInfo?.userDefaults?.latitude || currentLocation?.lat;
+      const userLng = userData?.localUserInfo?.userDefaults?.longitude || currentLocation?.lng;
+      
+      if (userLat && userLng) {
+        const location = { lat: userLat, lng: userLng, radius: 20 };
+        setMapCenter(location);
+        fetchVenues(null, location); // Fetch venues within 20 miles
+      } else {
+        // Default to Boston if no location
+        const defaultLocation = { lat: 42.3601, lng: -71.0589, radius: 20 };
+        setMapCenter(defaultLocation);
+        fetchVenues(null, defaultLocation);
+      }
     }
-  }, [open, selectedCityId, activeFilter, fetchVenues]);
+  }, [open, fetchVenues, userData, currentLocation]);
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
@@ -36,8 +54,24 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
     setCurrentTab('edit');
   };
 
+  const handleMapEditClick = (venue) => {
+    setSelectedVenue(venue);
+    setCurrentTab('edit');
+  };
+
   const handleListRefresh = () => {
-    fetchVenues(selectedCityId, activeFilter);
+    fetchVenues(null, mapCenter); // Fetch venues for current map center
+  };
+
+  const handleMapMove = (newCenter, bounds) => {
+    // When map moves, fetch venues for the new area
+    const location = { 
+      lat: newCenter.lat, 
+      lng: newCenter.lng, 
+      radius: 20 // Or calculate from bounds
+    };
+    setMapCenter(location);
+    fetchVenues(null, location);
   };
 
   return (
@@ -75,10 +109,9 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
               }
             }}
           >
-            <Tab label="List" value="list" />
+            <Tab label="Map" value="map" />
             <Tab label="Add" value="add" />
             <Tab label="Edit" value="edit" disabled={!selectedVenue} />
-            <Tab label="Map" value="map" />
           </Tabs>
 
           <Box
@@ -88,20 +121,8 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
               p: 2,
             }}
           >
-            {currentTab === 'list' && (
-              <VenueModalList
-                venues={venues}
-                onEdit={handleEditVenue}
-                onDelete={deactivateVenue}
-                selectedCityId={selectedCityId}
-                onCityChange={(cid) => setSelectedCityId(cid)}
-                activeFilter={activeFilter}
-                onActiveFilterChange={(val) => setActiveFilter(val)}
-                refreshList={handleListRefresh}
-              />
-            )}
             {currentTab === 'add' && (
-              <VenueModalAdd onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('list')} />
+              <VenueModalAdd onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('map')} />
             )}
             {currentTab === 'edit' && selectedVenue && (
               <VenueModalEdit
@@ -110,11 +131,19 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
                 refreshList={handleListRefresh}
                 onDone={() => {
                   setSelectedVenue(null);
-                  setCurrentTab('list');
+                  setCurrentTab('map');
                 }}
               />
             )}
-            {currentTab === 'map' && <VenueModalMap venues={venues} selectedVenueId={selectedVenue?._id} />}
+            {currentTab === 'map' && (
+              <VenueModalMap 
+                venues={venues} 
+                selectedVenueId={selectedVenue?._id}
+                onEditVenue={handleMapEditClick}
+                initialCenter={mapCenter}
+                onMapMove={handleMapMove}
+              />
+            )}
           </Box>
         </Box>
       </Box>

@@ -21,7 +21,6 @@ import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 const VenueModalList = ({
   venues,
   onEdit,
-  onDelete,
   selectedCityId,
   onCityChange,
   activeFilter,
@@ -35,7 +34,7 @@ const VenueModalList = ({
   const [regionId, setRegionId] = useState('');
   const [divisionId, setDivisionId] = useState('');
   const [cityId, setCityId] = useState(selectedCityId || '');
-  const [deleteError, setDeleteError] = useState(null);
+  // Removed unused deleteError state
 
   useEffect(() => {
     // Assume single country scenario. If multiple, we can prompt user.
@@ -98,26 +97,13 @@ const VenueModalList = ({
     onActiveFilterChange(e.target.checked);
   };
 
-  const handleDeleteVenue = async (venueId) => {
-    setDeleteError(null);
-    try {
-      await onDelete(venueId);
-      refreshList();
-    } catch (err) {
-      setDeleteError(err.message);
-    }
-  };
+  // Removed unused handleDeleteVenue helper
 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
         Venue List
       </Typography>
-      {deleteError && (
-        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
-          {deleteError}
-        </Typography>
-      )}
 
       <Box display="flex" flexDirection="row" gap={2} alignItems="center" sx={{ mb: 2, flexWrap: 'wrap' }}>
         {/* Country Dropdown */}

@@ -53,12 +53,12 @@ const UserSettingsName = ({ userData, updateUserData }) => {
       };
       
       // Log what we're saving
-      console.log('Saving user data:', updatedUserData);
+// TIEMPO-276: Security cleanup - removed logging
 
       // Call the update method
       await updateUserData(updatedUserData);
       
-      console.log('User data updated successfully');
+// TIEMPO-276: Security cleanup - removed logging
       // Show success message
       setShowSuccessMessage(true);
     } catch (err) {

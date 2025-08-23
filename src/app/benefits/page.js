@@ -17,8 +17,6 @@ import {
   CardContent,
   Chip,
   IconButton,
-  useTheme,
-  useMediaQuery
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -36,14 +34,11 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import MessageIcon from '@mui/icons-material/Message';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default function BenefitsPage() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [expanded, setExpanded] = useState(false);
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -288,7 +283,7 @@ export default function BenefitsPage() {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Who Else It's For
+                Who Else It&apos;s For
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
