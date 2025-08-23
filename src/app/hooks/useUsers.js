@@ -23,6 +23,13 @@ export const useUsers = () => {
       return;
     }
 
+    // TIEMPO-272: Check if we've already tried and got 404 for this user
+    if (sessionStorage.getItem(`user_404_${user.uid}`)) {
+      console.log('Skipping fetch - user previously returned 404');
+      setLoading(false);
+      return;
+    }
+
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
     const endpoint = `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`;
 
@@ -48,6 +55,14 @@ export const useUsers = () => {
       setUserData(response.data);
     } catch (error) {
       console.error('UU: Error fetching user data:', error);
+      // TIEMPO-272: If user doesn't exist (404), mark to prevent retry loops
+      if (error.response?.status === 404) {
+        sessionStorage.setItem(`user_404_${user.uid}`, 'true');
+        // Clear this flag after 5 minutes to allow retry later
+        setTimeout(() => {
+          sessionStorage.removeItem(`user_404_${user.uid}`);
+        }, 5 * 60 * 1000);
+      }
     } finally {
       setLoading(false);
       // Remove verbose logging
