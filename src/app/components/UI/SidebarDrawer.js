@@ -116,7 +116,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   // Subscribe to user settings event
   useEffect(() => {
     const handleUserSettingsRequest = ({ open, tab }) => {
-      console.log('[SidebarDrawer] Received user settings request:', { open, tab });
+      // TIEMPO-276: Security cleanup - removed settings logging
       if (open) {
         setRequestedTab(tab);
         setUserSettingsOpen(true);
@@ -133,7 +133,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   // TIEMPO-253: Subscribe to regional organizer modal event
   useEffect(() => {
     const handleRegionalOrganizerRequest = ({ open }) => {
-      console.log('[SidebarDrawer] Received regional organizer request:', { open });
+      // TIEMPO-276: Security cleanup - removed organizer logging
       setRegionalOrganizerOpen(open);
     };
 
@@ -160,7 +160,7 @@ const SidebarDrawer = ({ open, onClose }) => {
 
     // Otherwise, give GeoLocationContext a moment to initialize
     const timer = setTimeout(() => {
-      console.log('SidebarDrawer: Setting venue selection ready after timeout');
+      // TIEMPO-276: Security cleanup - removed venue logging
       setVenueSelectionReady(true);
     }, 2000); // 2 second delay, increased from original
 
@@ -555,7 +555,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         onClose={() => setOrganizerSelectionModalOpen(false)}
         selectedOrganizers={selectedOrganizers}
         onSelectOrganizers={(selected) => {
-          console.log('Selected organizers:', selected);
+          // TIEMPO-276: Security cleanup - removed organizer logging
           setSelectedOrganizers(selected);
         }}
       />

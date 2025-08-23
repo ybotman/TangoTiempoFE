@@ -41,7 +41,7 @@ const VenueUpcomingEvents = ({ venue }) => {
           sort: 'startDate'
         };
 
-        console.log('Fetching events for venue:', venue.name, 'with params:', params);
+// TIEMPO-276: Security cleanup - removed logging
         
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BE_URL}/api/events/`,
@@ -50,7 +50,7 @@ const VenueUpcomingEvents = ({ venue }) => {
 
         if (response.data && response.data.events) {
           setEvents(response.data.events.slice(0, 15)); // Ensure max 15 events
-          console.log(`Found ${response.data.events.length} upcoming events for venue`);
+// TIEMPO-276: Security cleanup - removed logging
         } else {
           setEvents([]);
         }

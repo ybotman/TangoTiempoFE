@@ -46,7 +46,7 @@ export function useVenues() {
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-        // TIEMPO-275: Removed console.log - Received venues from API with pagination
+// TIEMPO-276: Security cleanup - removed logging
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
@@ -138,12 +138,12 @@ export function useVenues() {
       if (!populate) {
         const existingVenue = venues.find(venue => venue._id === venueId);
         if (existingVenue) {
-          // TIEMPO-275: Removed console.log - Found venue in local cache
+// TIEMPO-276: Security cleanup - removed logging
           return existingVenue;
         }
       }
       
-      // TIEMPO-275: Removed console.log - Fetching venue with ID
+// TIEMPO-276: Security cleanup - removed logging
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${venueId}`, {
         params: { appId, populate: populate.toString() },
       });
@@ -151,11 +151,11 @@ export function useVenues() {
       // Handle various response formats
       if (response.data && response.data.venue) {
         // Handle {venue: Object} format
-        // TIEMPO-275: Removed console.log - Venue fetched with ID
+// TIEMPO-276: Security cleanup - removed logging
         return response.data.venue;
       } else if (response.data && typeof response.data === 'object' && response.data._id) {
         // Handle direct venue object format
-        // TIEMPO-275: Removed console.log - Venue fetched with ID
+// TIEMPO-276: Security cleanup - removed logging
         return response.data;
       } else {
         // TIEMPO-275: Keep console.error for important errors

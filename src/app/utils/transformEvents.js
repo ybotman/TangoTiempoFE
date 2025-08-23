@@ -12,7 +12,8 @@ export function transformEvents(events) {
   const debugEvents = events.slice(0, 3);
   debugEvents.forEach(event => {
     if (event.shortTitle?.includes('VIDA') || event.title?.includes('Practica')) {
-      console.log('Backend event data:', {
+      // TIEMPO-276: Security cleanup - removed backend event logging
+      /*
         title: event.title,
         shortTitle: event.shortTitle,
         venueStartDisplay: event.venueStartDisplay,
@@ -20,7 +21,7 @@ export function transformEvents(events) {
         venueAbbr: event.venueAbbr,
         startDate: event.startDate,
         endDate: event.endDate
-      });
+      */
     }
   });
 

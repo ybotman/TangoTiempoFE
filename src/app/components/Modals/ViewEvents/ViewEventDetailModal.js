@@ -79,7 +79,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
       // Handle image load error - try fallback image if available
       img.onerror = function() {
-        console.log('Primary image failed to load, trying fallback');
+// TIEMPO-276: Security cleanup - removed logging
         
         // Try event-specific fallback if available
         if (eventDetails?.extendedProps?.fallbackImageUrl) {
@@ -93,7 +93,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           
           fallbackImg.onerror = function() {
             // TIEMPO-264: If both primary and fallback fail, show no image
-            console.log('Fallback image also failed, showing no image');
+// TIEMPO-276: Security cleanup - removed logging
             setImageSrc(null);
             setShowImageTab(false);
           };
@@ -197,16 +197,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Debug logging for RA permissions
   if (selectedRole === 'RegionalAdmin') {
-    console.log('RA Permission Debug:', {
-      selectedRole,
-      hasUser: !!user,
-      raAllowedCities,
-      raAllowedCitiesType: Array.isArray(raAllowedCities) ? (raAllowedCities.length > 0 ? typeof raAllowedCities[0] : 'empty') : 'not-array',
-      eventCityId,
-      eventCityIdType: typeof eventCityId,
-      masteredCityIdRaw: eventDetails?.extendedProps?.masteredCityId,
-      isRegionalAdmin
-    });
+    // TIEMPO-276: Security cleanup - removed logging
   }
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;

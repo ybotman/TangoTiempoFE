@@ -27,15 +27,7 @@ export const uploadEventImage = async (file, authToken = null) => {
     }
     
     // Log upload attempt details
-    console.log('Attempting image upload:', {
-      url: `${process.env.NEXT_PUBLIC_BE_URL}/api/events/upload-image`,
-      hasAuthToken: !!authToken,
-      authTokenPreview: authToken ? `${authToken.substring(0, 20)}...` : 'none',
-      appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
-      fileName: uniqueFilename,
-      fileSize: file.size,
-      fileType: file.type
-    });
+    // TIEMPO-276: Security cleanup - removed logging
     
     // Upload to our backend API, which will handle Azure storage
     const response = await axios.post(

@@ -80,7 +80,7 @@ const UserSettingsBookmarks = ({ userData, updateUserData, onSaveSuccess }) => {
       // Exiting edit mode - save changes if any items were removed
       if (removedItems.events.length > 0 || removedItems.organizers.length > 0 || removedItems.cities.length > 0) {
         // Save logic would go here
-        console.log('Items removed:', removedItems);
+// TIEMPO-276: Security cleanup - removed logging
       }
       setRemovedItems({ events: [], organizers: [], cities: [] });
     }

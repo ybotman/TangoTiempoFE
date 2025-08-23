@@ -17,7 +17,7 @@ class UserSettingsEventEmitter {
   }
 
   openModal(tab = 'locationPrefs') {
-    console.log('[UserSettingsEvent] Opening modal with tab:', tab);
+    // TIEMPO-276: Security cleanup - removed modal logging
     this.emit({ open: true, tab });
   }
 }

@@ -31,7 +31,7 @@ class LocationEventBus {
     this.events[event].push(callback);
     
     if (this.debug) {
-      console.log(`[LocationEventBus] Subscribed to ${event}, total listeners: ${this.events[event].length}`);
+      // TIEMPO-276: Security cleanup - removed subscription logging
     }
     
     // Return unsubscribe function
@@ -48,13 +48,13 @@ class LocationEventBus {
   emit(event, data) {
     if (!this.events[event]) {
       if (this.debug) {
-        console.log(`[LocationEventBus] No listeners for event: ${event}`);
+        // TIEMPO-276: Security cleanup - removed event logging
       }
       return;
     }
     
     if (this.debug) {
-      console.log(`[LocationEventBus] Emitting ${event} to ${this.events[event].length} listeners`, data);
+      // TIEMPO-276: Security cleanup - removed emission logging
     }
     
     // Call each listener with the data
@@ -78,7 +78,7 @@ class LocationEventBus {
     this.events[event] = this.events[event].filter(cb => cb !== callback);
     
     if (this.debug) {
-      console.log(`[LocationEventBus] Unsubscribed from ${event}, remaining listeners: ${this.events[event].length}`);
+      // TIEMPO-276: Security cleanup - removed unsubscribe logging
     }
     
     // Clean up empty event arrays
@@ -95,12 +95,12 @@ class LocationEventBus {
     if (event) {
       delete this.events[event];
       if (this.debug) {
-        console.log(`[LocationEventBus] Cleared all listeners for ${event}`);
+        // TIEMPO-276: Security cleanup - removed clear logging
       }
     } else {
       this.events = {};
       if (this.debug) {
-        console.log('[LocationEventBus] Cleared all event listeners');
+        // TIEMPO-276: Security cleanup - removed clear logging
       }
     }
   }

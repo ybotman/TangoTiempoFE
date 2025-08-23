@@ -74,7 +74,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
       });
       
       if (response.data && response.data.events) {
-        console.log('Upcoming events data:', response.data.events);
+// TIEMPO-276: Security cleanup - removed logging
         setUpcomingEvents(response.data.events);
       }
     } catch (err) {
@@ -88,16 +88,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
   useEffect(() => {
     const fetchOrganizerDetails = async () => {
       // Debug logging
-      console.log('Organizer data debug:', {
-        populatedOrganizer,
-        organizerIdRaw: eventDetails?.extendedProps?.ownerOrganizerID,
-        ownerOrganizer: eventDetails?.extendedProps?.ownerOrganizer,
-        organizer: eventDetails?.extendedProps?.organizer,
-        organizerId,
-        organizerName,
-        organizerObject,
-        extendedProps: eventDetails?.extendedProps
-      });
+      // TIEMPO-276: Security cleanup - removed logging
 
       // If organizer is already populated as an object, use it directly
       if (organizerObject && organizerObject._id) {
@@ -378,7 +369,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
             {upcomingEvents.map((event, index) => {
               // Debug first event to see structure
               if (index === 0) {
-                console.log('Event structure:', event);
+// TIEMPO-276: Security cleanup - removed logging
               }
               return (
               <React.Fragment key={event._id || index}>

@@ -34,7 +34,7 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted with email:', email);
+    // TIEMPO-276: Security cleanup - removed email logging
     setError('');
     setSuccess(false);
 
@@ -50,11 +50,11 @@ const ResetPasswordPage = () => {
     }
 
     setLoading(true);
-    console.log('Calling resetPassword function...');
+    // TIEMPO-276: Security cleanup - removed function call logging
     
     try {
       const result = await resetPassword(email);
-      console.log('resetPassword result:', result);
+      // TIEMPO-276: Security cleanup - removed result logging
       
       if (result.success) {
         setSuccess(true);

@@ -235,7 +235,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         // TIEMPO-246: String-based date parsing without Date() conversion
         const localIsoDate = isoDate.endsWith('Z') ? isoDate.slice(0, -1) : isoDate;
         const [datePart] = localIsoDate.split('T');
-        console.log('Exclude date conversion:', { isoDate, localIsoDate, datePart });
+// TIEMPO-276: Security cleanup - removed logging
         return datePart || '';
       });
       setExcludeDates(dateStrings.join(', '));

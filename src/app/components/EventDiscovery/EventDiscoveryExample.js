@@ -48,7 +48,7 @@ export default function EventDiscoveryExample() {
   const handleManualSave = async () => {
     try {
       await actions.savePreferences();
-      console.log('Preferences saved successfully');
+// TIEMPO-276: Security cleanup - removed logging
     } catch (error) {
       console.error('Failed to save preferences:', error);
     }

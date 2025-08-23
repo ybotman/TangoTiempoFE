@@ -12,7 +12,7 @@ const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds =
   const safeOrganizerIds = Array.isArray(delegatedOrganizerIds) ? delegatedOrganizerIds : [];
 
   // Log for debugging
-  console.log('RegionalOrganizersDelegated received:', {
+// TIEMPO-276: Security cleanup - removed logging
     organizerId,
     delegatedOrganizerIds: safeOrganizerIds,
     organizersCount: organizers.length

@@ -229,7 +229,7 @@ export function EventDiscoveryProvider({ children }) {
       // Call the updateUserData function from useUsers hook
       await updateUserData(updateData);
       
-      console.log('EventDiscoveryContext: Preferences saved successfully');
+      // TIEMPO-276: Security cleanup - removed preferences logging
       dispatch({ type: 'SAVE_PREFERENCES_SUCCESS' });
     } catch (error) {
       console.error('Failed to save event discovery preferences:', error);

@@ -236,26 +236,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           });
           
           // Enhanced debug logging to diagnose field issues
-          console.log('RA Edit Validation - Enhanced Debug:', {
-            selectedRole,
-            raAllowedCities,
-            'raAllowedCities type': Array.isArray(raAllowedCities) ? 'array' : typeof raAllowedCities,
-            'raAllowedCities sample': raAllowedCities.length > 0 ? raAllowedCities[0] : 'empty',
-            eventCityId,
-            'eventCityId type': typeof eventCityId,
-            'eventToEdit._id': eventToEdit._id,
-            'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
-            'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
-            'eventToEdit.venueMasteredCityID': eventToEdit.venueMasteredCityID,  // TIEMPO-195
-            'eventToEdit.venueMasteredCityId': eventToEdit.venueMasteredCityId,
-            'eventToEdit.masteredCityName': eventToEdit.masteredCityName,
-            'eventToEdit.locationID': eventToEdit.locationID,
-            'eventToEdit.venueId': eventToEdit.venueId,
-            'eventToEdit.venue': eventToEdit.venue,
-            'eventToEdit.venueInfo': eventToEdit.venueInfo,
-            'All eventToEdit fields': Object.keys(eventToEdit),
-            hasAccess: hasAccess
-          });
+          // TIEMPO-276: Security cleanup - removed console.log for RA Edit Validation
           
           if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
@@ -272,14 +253,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
 
       // Log current location for debugging
-      console.log(`Modal opened in ${editMode ? 'EDIT' : 'CREATE'} mode`, {
-        mode: editMode ? 'EDIT' : 'CREATE',
-        eventId: eventToEdit?._id || null,
-        selectedRole: user?.backendInfo?.selectedRole,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
-        organizerInfo: user?.backendInfo?.regionalOrganizerInfo,
-        organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
-      });
+      // TIEMPO-276: Security cleanup - removed logging
     }
   }, [open, selectedLocation, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
@@ -287,10 +261,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   useEffect(() => {
     // Check if user has regionalOrganizerInfo with an organizerId (indicates they are an RO)
     if (!editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
-      console.log('Fetching organizer for CREATE mode:', {
-        organizerId: user.backendInfo.regionalOrganizerInfo.organizerId,
-        hasOrganizerInfo: !!user.backendInfo.regionalOrganizerInfo
-      });
+      // TIEMPO-276: Security cleanup - removed logging
       fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
     }
   }, [editMode, user, fetchOrganizerById]);
@@ -321,13 +292,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           const newStartDate = getDefaultStartTime(selectedDate, eventData.venueTimezone);
           const newEndDate = newStartDate.add(3, 'hour');
           
-          console.log('TIEMPO-246: Recalculating times for venue timezone:', {
-            venueTimezone: eventData.venueTimezone,
-            oldStart: currentStartDate.format(),
-            newStart: newStartDate.format(),
-            oldEnd: currentEndDate.format(),
-            newEnd: newEndDate.format()
-          });
+          // TIEMPO-276: Security cleanup - removed logging
           
           setEventData(prev => ({
             ...prev,
@@ -656,9 +621,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }, 2000);
       } else {
         // Create new event
-        console.log('Creating new event');
+// TIEMPO-276: Security cleanup - removed logging
         await createEvent(eventDataWithDefaults);
-        console.log('Event created successfully');
+// TIEMPO-276: Security cleanup - removed logging
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
         

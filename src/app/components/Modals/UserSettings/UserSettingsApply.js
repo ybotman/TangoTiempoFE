@@ -31,10 +31,10 @@ const UserSettingsApply = () => {
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
     if (!Array.isArray(roles)) {
-      console.log('Roles not loaded or not an array:', roles);
+// TIEMPO-276: Security cleanup - removed logging
       return null;
     }
-    console.log('Available roles:', roles.map(r => r?.roleName));
+// TIEMPO-276: Security cleanup - removed logging
     return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
@@ -206,19 +206,7 @@ const UserSettingsApply = () => {
   const isLoading = userDataLoading || rolesLoading || applicationStatus === 'loading';
   
   // Debug logging
-  console.log('UserSettingsApply Debug:', {
-    hasOrganizerId,
-    isApproved,
-    isLoading,
-    userData: !!userData,
-    userDataDetails: userData,
-    regionalOrganizerRole: !!regionalOrganizerRole,
-    regionalOrganizerRoleDetails: regionalOrganizerRole,
-    rolesArray: roles,
-    rolesLoading,
-    userDataLoading,
-    buttonDisabled: isLoading || !userData || !regionalOrganizerRole
-  });
+  // TIEMPO-276: Security cleanup - removed logging
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>

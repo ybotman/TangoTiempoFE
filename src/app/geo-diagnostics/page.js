@@ -44,25 +44,25 @@ export default function GeoDiagnosticsPage() {
   useEffect(() => {
     const getCfData = () => {
       // Debug: log all cookies
-      console.log('All cookies:', document.cookie);
+// TIEMPO-276: Security cleanup - removed logging
       
       const cookieValue = document.cookie
         .split('; ')
         .find(row => row.startsWith('cf-geo-data='))
         ?.split('=')[1];
       
-      console.log('CF cookie value:', cookieValue);
+// TIEMPO-276: Security cleanup - removed logging
       
       if (cookieValue) {
         try {
           const data = JSON.parse(decodeURIComponent(cookieValue));
-          console.log('Parsed CF data:', data);
+// TIEMPO-276: Security cleanup - removed logging
           setCfGeoData(data);
         } catch (e) {
           console.error('Error parsing CF geo data:', e);
         }
       } else {
-        console.log('No CF cookie found');
+// TIEMPO-276: Security cleanup - removed logging
       }
     };
 
@@ -96,7 +96,7 @@ export default function GeoDiagnosticsPage() {
     localStorage.setItem('edge-geolocation-enabled', enabled.toString());
     
     // In real implementation, this would switch the location provider
-    console.log('Edge geolocation:', enabled ? 'ENABLED' : 'DISABLED');
+// TIEMPO-276: Security cleanup - removed logging
   };
 
   // Load edge enabled state from localStorage on mount

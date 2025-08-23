@@ -5,7 +5,7 @@ const MasteredLocationLogger = () => {
   const { selectedLocation } = useGeoLocation();
 
   useEffect(() => {
-    console.log('Current GeoLocationContext City:', selectedLocation?.city?.name || 'Unknown');
+    // TIEMPO-276: Security cleanup - removed location logging
   }, [selectedLocation]);
 
   return null;

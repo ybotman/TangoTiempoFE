@@ -30,9 +30,7 @@ const LocationLogger = () => {
         const ipapiData = await safeParseJSON(ipapiResponse);
 
         // Log ipapi results
-        console.log('LL:uE-> ipapi full:', ipapiData);
-        console.log(`LL:uE-> ipapi IP: ${ipapiData.ip}, Lat: ${ipapiData.latitude}, Long: ${ipapiData.longitude}`);
-        console.log(`LL:uE-> ipapi Location: ${ipapiData.country_name}, ${ipapiData.region}, ${ipapiData.city}`);
+        // TIEMPO-276: Security cleanup - removed IP geolocation logging
 
         // Use hook to fetch nearest mastered location from ipapi location
         await fetchNearestMastered({
@@ -57,13 +55,7 @@ const LocationLogger = () => {
         const abstractData = await safeParseJSON(abstractResponse);
 
         // Log AbstractAPI results
-        console.log('LL:uE-> AbstractAPI full:', abstractData);
-        console.log(
-          `LL:uE-> AbstractAPI IP: ${abstractData.ip_address}, Lat: ${abstractData.latitude}, Long: ${abstractData.longitude}`
-        );
-        console.log(
-          `LL:uE-> AbstractAPI Location: ${abstractData.country}, ${abstractData.region}, ${abstractData.city}`
-        );
+        // TIEMPO-276: Security cleanup - removed Abstract API logging
       } catch (err) {
         console.error('LL:uE-> Failed to fetch location:', err.message);
       }
@@ -74,10 +66,7 @@ const LocationLogger = () => {
 
   useEffect(() => {
     if (nearestCity) {
-      console.log(
-        'LL:uE-> Nearest Mastered Location:',
-        [nearestCity.countryName, nearestCity.regionName, nearestCity.divisionName, nearestCity.cityName].join(', ')
-      );
+      // TIEMPO-276: Security cleanup - removed nearest city logging
     }
     if (error) {
       console.error('LL:uE-> Error fetching nearest mastered location:', error);

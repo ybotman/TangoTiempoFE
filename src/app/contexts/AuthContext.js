@@ -39,23 +39,23 @@ export const AuthProvider = ({ children }) => {
   const signUpOngoing = useRef(false);
 
   useEffect(() => {
-    // TIEMPO-275: Removed console.log - AuthProvider useEffect called
+// TIEMPO-276: Security cleanup - removed logging
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      //  console.log('onAuthStateChanged triggered');
+// TIEMPO-276: Security cleanup - removed logging
       // const startTime = Date.now();
 
       if (currentUser) {
-        // TIEMPO-275: Removed console.log - User is logged in
+// TIEMPO-276: Security cleanup - removed logging
         await setUserData(currentUser);
       } else {
-        // TIEMPO-275: Removed console.log - No user is logged in
+// TIEMPO-276: Security cleanup - removed logging
         setUser(null);
         setSelectedRole(''); // Reset selectedRole on logout
       }
 
       setLoading(false);
       //  const endTime = Date.now();
-      //  console.log(`Auth state change handling took ${endTime - startTime} ms`);
+// TIEMPO-276: Security cleanup - removed logging
     });
     
     // Set up token refresh interval if a user exists
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
               ...prevUser,
               token: newToken
             }));
-            // TIEMPO-275: Removed console.log - Auth token refreshed
+// TIEMPO-276: Security cleanup - removed logging
           }
         } catch (error) {
           console.error('Error refreshing token:', error);
@@ -86,14 +86,14 @@ export const AuthProvider = ({ children }) => {
 
   // Function to fetch and set combined user data
   const setUserData = async (firebaseUser) => {
-    // console.log('setUserData called');
+// TIEMPO-276: Security cleanup - removed logging
     // const startTime = Date.now();
 
     try {
       const idToken = await firebaseUser.getIdToken();
-      // TIEMPO-275: Removed console.log - Fetched ID token
+// TIEMPO-276: Security cleanup - removed logging
 
-      // TIEMPO-275: Removed console.log - Attempting to fetch user data from backend
+// TIEMPO-276: Security cleanup - removed logging
       
       // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
       const response = await dedupeFetch(
@@ -106,15 +106,15 @@ export const AuthProvider = ({ children }) => {
           timeout: 10000 // 10 second timeout
         }
       );
-      // TIEMPO-275: Removed console.log - Successfully fetched user data from backend
+// TIEMPO-276: Security cleanup - removed logging
 
       const backendInfo = response.data;
       
-      // TIEMPO-275: Removed debugging console.logs for auth provider, roleIds, and regionalOrganizerInfo
+// TIEMPO-276: Security cleanup - removed logging
       
       // Check if regionalOrganizerInfo is properly populated
       if (backendInfo.regionalOrganizerInfo && backendInfo.regionalOrganizerInfo.organizerId) {
-        // TIEMPO-275: Removed console.log - User has organizerId
+// TIEMPO-276: Security cleanup - removed logging
         
         // Ensure the flags are set properly
         if (!backendInfo.regionalOrganizerInfo.isActive ||
@@ -141,20 +141,20 @@ export const AuthProvider = ({ children }) => {
         roles: backendInfo.roleIds.map((role) => role.roleName) || [],
         token: idToken, // Store the token for API calls
       };
-      // TIEMPO-275: Removed console.log - Merged user
+// TIEMPO-276: Security cleanup - removed logging
       setUser(mergedUser);
 
       // Always default to NamedUser role if available
       if (mergedUser.roles.includes('NamedUser')) {
-        // TIEMPO-275: Removed console.log - Setting selectedRole to NamedUser by default
+// TIEMPO-276: Security cleanup - removed logging
         setSelectedRole('NamedUser');
       } else {
         // Fall back to first available role if NamedUser not available
-        // TIEMPO-275: Removed console.log - NamedUser role not found, using first available role
+// TIEMPO-276: Security cleanup - removed logging
         setSelectedRole(mergedUser.roles[0] || '');
       }
       
-      // TIEMPO-275: Removed debugging console.logs for available roles
+// TIEMPO-276: Security cleanup - removed logging
     } catch (err) {
       console.error('Error fetching combined user data:', err);
       
@@ -185,7 +185,7 @@ export const AuthProvider = ({ children }) => {
         }
       };
       
-      // TIEMPO-275: Removed console.log - Using minimal user object due to backend error
+// TIEMPO-276: Security cleanup - removed logging
       
       // Set a minimal user object instead of null to prevent complete login failure
       setUser(minimalUser);
@@ -194,7 +194,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     // const endTime = Date.now();
-    // console.log(`setUserData execution time: ${endTime - startTime} ms`);
+// TIEMPO-276: Security cleanup - removed logging
   };
 
   // Authenticate with Google
@@ -209,7 +209,7 @@ export const AuthProvider = ({ children }) => {
     try {
       signUpOngoing.current = true;
       const result = await signInWithPopup(auth, googleProvider);
-      // TIEMPO-275: Removed console.log - Google sign-in successful
+// TIEMPO-276: Security cleanup - removed logging
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
@@ -246,7 +246,7 @@ export const AuthProvider = ({ children }) => {
     try {
       signUpOngoing.current = true;
       const result = await signInWithPopup(auth, facebookProvider);
-      // TIEMPO-275: Removed console.log - Facebook sign-in successful
+// TIEMPO-276: Security cleanup - removed logging
       const firebaseUser = result.user;
 
       // Fetch or create user in backend
@@ -273,10 +273,10 @@ export const AuthProvider = ({ children }) => {
 
   // Authenticate with Apple
   const authenticateWithApple = async () => {
-    // TIEMPO-275: Removed console.log - Starting Apple Sign-In
+// TIEMPO-276: Security cleanup - removed logging
     
     if (user) {
-      // TIEMPO-275: Removed console.log - User already signed in
+// TIEMPO-276: Security cleanup - removed logging
       setError('You are already signed in.');
       return null;
     }
@@ -286,17 +286,17 @@ export const AuthProvider = ({ children }) => {
     try {
       signUpOngoing.current = true;
       
-      // TIEMPO-275: Removed console.logs for provider config, auth domain, and signInWithPopup attempt
+// TIEMPO-276: Security cleanup - removed logging
       const result = await signInWithPopup(auth, appleProvider);
       
-      // TIEMPO-275: Removed console.log - Apple sign-in successful with details
+// TIEMPO-276: Security cleanup - removed logging
       
       const firebaseUser = result.user;
 
       // Extract name from Apple profile on first login
       if (result.additionalUserInfo?.isNewUser && result.additionalUserInfo?.profile) {
         const profile = result.additionalUserInfo.profile;
-        // TIEMPO-275: Removed console.log - Apple profile data
+// TIEMPO-276: Security cleanup - removed logging
         
         // Apple provides name data differently - could be in various formats
         let fullName = '';
@@ -317,7 +317,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         if (fullName) {
-          // TIEMPO-275: Removed console.log - Updating Firebase profile with Apple name
+// TIEMPO-276: Security cleanup - removed logging
           await updateProfile(firebaseUser, { displayName: fullName });
           // Update the local user object to reflect the change
           firebaseUser.displayName = fullName;
@@ -327,13 +327,13 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // TIEMPO-275: Removed console.log - Creating/updating user in backend
+// TIEMPO-276: Security cleanup - removed logging
       await handleBackendUser(firebaseUser);
 
       signUpOngoing.current = false;
       await setUserData(firebaseUser); // Set merged user data
       setLoading(false);
-      // TIEMPO-275: Removed console.log - Apple Sign-In Complete
+// TIEMPO-276: Security cleanup - removed logging
       return firebaseUser;
     } catch (err) {
       console.error('=== Apple Sign-In Error ===');
@@ -346,7 +346,7 @@ export const AuthProvider = ({ children }) => {
       });
       
       if (err.code === 'auth/account-exists-with-different-credential') {
-        // TIEMPO-275: Removed console.log - Account exists with different credential, attempting to link
+// TIEMPO-276: Security cleanup - removed logging
         const user = await handleAccountExistsWithDifferentCredential(err);
         return user;
       } else if (err.code === 'auth/operation-not-allowed') {
@@ -429,7 +429,7 @@ export const AuthProvider = ({ children }) => {
   const handleBackendUser = async (firebaseUser) => {
     const idToken = await firebaseUser.getIdToken();
     try {
-      // TIEMPO-275: Removed console.log - Fetching user from backend
+// TIEMPO-276: Security cleanup - removed logging
       await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
@@ -438,7 +438,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching user from backend:', error);
       if (error.response && error.response.status === 404) {
-        // TIEMPO-275: Removed console.log - User not found in backend. Creating new user
+// TIEMPO-276: Security cleanup - removed logging
         const displayName = firebaseUser.displayName || '';
         const [firstName, lastName] = displayName.split(' ');
         const userData = {
@@ -482,41 +482,41 @@ export const AuthProvider = ({ children }) => {
 
   // Sign up with Email and Password
   const signUp = async ({ email, password, firstName, lastName }) => {
-    // TIEMPO-275: Removed console.log - Starting signup process with details
+// TIEMPO-276: Security cleanup - removed logging
     
     try {
       setLoading(true);
       
-      // TIEMPO-275: Removed console.log - Attempting to create user with Firebase
+// TIEMPO-276: Security cleanup - removed logging
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
-      // TIEMPO-275: Removed console.log - Firebase user created successfully
+// TIEMPO-276: Security cleanup - removed logging
       
       // Update profile with display name
       const displayName = `${firstName} ${lastName}`.trim();
-      // TIEMPO-275: Removed console.log - Updating user profile with display name
+// TIEMPO-276: Security cleanup - removed logging
       await updateProfile(firebaseUser, { displayName });
-      // TIEMPO-275: Removed console.log - Profile updated successfully
+// TIEMPO-276: Security cleanup - removed logging
       
       // Send email verification
-      // TIEMPO-275: Removed console.log - Sending email verification
+// TIEMPO-276: Security cleanup - removed logging
       try {
         await sendEmailVerification(firebaseUser);
-        // TIEMPO-275: Removed console.log - Email verification sent successfully
+// TIEMPO-276: Security cleanup - removed logging
       } catch (verifyErr) {
         console.error('Error sending verification email:', verifyErr);
         // Don't fail signup if verification email fails
       }
       
       // Create user in backend
-      // TIEMPO-275: Removed console.log - Creating user in backend
+// TIEMPO-276: Security cleanup - removed logging
       await handleBackendUser(firebaseUser);
-      // TIEMPO-275: Removed console.log - Backend user created/updated successfully
+// TIEMPO-276: Security cleanup - removed logging
       
       // Set user data in context
-      // TIEMPO-275: Removed console.log - Setting user data in context
+// TIEMPO-276: Security cleanup - removed logging
       await setUserData(firebaseUser);
-      // TIEMPO-275: Removed console.log - User data set in context successfully
+// TIEMPO-276: Security cleanup - removed logging
       
       setLoading(false);
       return firebaseUser;
@@ -555,7 +555,7 @@ export const AuthProvider = ({ children }) => {
   const logOut = async () => {
     try {
       await signOut(auth);
-      // TIEMPO-275: Removed console.log - User signed out successfully
+// TIEMPO-276: Security cleanup - removed logging
       setUser(null);
       setSelectedRole(''); // Reset selectedRole on logout
     } catch (error) {
@@ -588,14 +588,14 @@ export const AuthProvider = ({ children }) => {
 
   // Password Reset
   const resetPassword = async (email) => {
-    // TIEMPO-275: Removed console.log - resetPassword called with email
+// TIEMPO-276: Security cleanup - removed logging
     try {
       setLoading(true);
       setError('');
       
-      // TIEMPO-275: Removed console.log - Calling sendPasswordResetEmail
+// TIEMPO-276: Security cleanup - removed logging
       await sendPasswordResetEmail(auth, email);
-      // TIEMPO-275: Removed console.log - Password reset email sent successfully
+// TIEMPO-276: Security cleanup - removed logging
       
       setLoading(false);
       return { success: true };

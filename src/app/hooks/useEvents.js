@@ -187,7 +187,7 @@ export function useEvents({
   const effectiveCityIds = locationParams.cityIds;
   const effectiveZoomRange = locationParams.zoomRange;
 
-  // TIEMPO-275: Removed console.log - Using location from source
+// TIEMPO-276: Security cleanup - removed logging
   // Track location changes silently
   lastLoggedLocation.current = locationParams.source;
   
@@ -220,7 +220,7 @@ export function useEvents({
   };
 
   const fetchEvents = useCallback(async () => {
-    // TIEMPO-275: Removed console.log - fetchEvents triggered with details
+// TIEMPO-276: Security cleanup - removed logging
     // Track fetch timing silently
     const now = Date.now();
     lastFetchTimestamp.current = now;
@@ -228,7 +228,7 @@ export function useEvents({
     // Check if we have any location parameters at all
     if (!effectiveRegion && !effectiveDivision && !effectiveCity && 
         !effectiveLat && !effectiveLng && (!effectiveCityIds || effectiveCityIds.length === 0)) {
-      // TIEMPO-275: Removed console.log - No location selected, skipping event fetch
+// TIEMPO-276: Security cleanup - removed logging
       setEventsData({
         events: [],
         pagination: {
@@ -276,7 +276,7 @@ export function useEvents({
       if (effectiveCityIds && effectiveCityIds.length > 0) {
         // Use the new cityIds parameter that Tom implemented
         params.cityIds = effectiveCityIds;
-        // TIEMPO-275: Removed console.log - Using multi-city filtering with cityIds
+// TIEMPO-276: Security cleanup - removed logging
       } else {
         // Location-based filtering parameters - using effective values that may come from GeoLocationContext
         if (effectiveRegion) params.masteredRegionName = effectiveRegion;
@@ -305,14 +305,14 @@ export function useEvents({
         params.includeAiGenerated = true;
       }
 
-      // TIEMPO-275: Removed console.log - Using location filters with details
+// TIEMPO-276: Security cleanup - removed logging
 
 
       // Add user role and organizerId if user is a RegionalOrganizer
       if (userId && selectedRole === 'RegionalOrganizer' && userOrganizerId) {
         params.organizerId = userOrganizerId;
         params.userRole = 'RegionalOrganizer'; // Make sure we're passing the role to the backend
-        // TIEMPO-275: Removed console.log - Adding RegionalOrganizer filtering with organizerId
+// TIEMPO-276: Security cleanup - removed logging
       } else if (userId && userRoles?.includes('RegionalOrganizer')) {
         // If user has RO role but we're not using it, explain why
         /* Commented out to reduce console noise
@@ -326,7 +326,7 @@ export function useEvents({
       }
 
 
-      // TIEMPO-275: Removed console.log - API Request details
+// TIEMPO-276: Security cleanup - removed logging
 
       // Call the unified endpoint
       // TIEMPO-257: Use dedupeFetch to prevent duplicate event calls
@@ -393,7 +393,7 @@ export function useEvents({
     // Skip if using location preferences but user data not loaded yet
     if (useLocationPreferences && !userDefaults && user) {
       if (!hasLoggedWaiting.current.userPrefs) {
-        // TIEMPO-275: Removed console.log - Waiting for user preferences to load
+// TIEMPO-276: Security cleanup - removed logging
         hasLoggedWaiting.current.userPrefs = true;
       }
       return;
@@ -403,7 +403,7 @@ export function useEvents({
     // This should only apply when we're actually using the context as our location source
     if (useGeoLocationContext && !useLocationPreferences && !isInitialized) {
       if (!hasLoggedWaiting.current.geoInit) {
-        // TIEMPO-275: Removed console.log - Waiting for GeoLocationContext initialization
+// TIEMPO-276: Security cleanup - removed logging
         hasLoggedWaiting.current.geoInit = true;
       }
       return;
@@ -419,7 +419,7 @@ export function useEvents({
       
       if (!hasValidCity && !hasValidRegion && !hasValidCoords) {
         if (!hasLoggedWaiting.current.noLocationData) {
-          // TIEMPO-275: Removed console.log - No valid location data available from GeoLocationContext
+// TIEMPO-276: Security cleanup - removed logging
           hasLoggedWaiting.current.noLocationData = true;
         }
         return;
@@ -434,7 +434,7 @@ export function useEvents({
       
       if (!hasValidCities && !hasValidMapCenter) {
         if (!hasLoggedWaiting.current.noPreferences) {
-          // TIEMPO-275: Removed console.log - No valid location preferences set
+// TIEMPO-276: Security cleanup - removed logging
           hasLoggedWaiting.current.noPreferences = true;
         }
         return;
@@ -506,12 +506,12 @@ export function useEventOperations() {
       let token;
       try {
         token = await getIdToken(true); // Force refresh
-        // TIEMPO-275: Removed console.log - Got fresh token for event creation
+// TIEMPO-276: Security cleanup - removed logging
       } catch (tokenError) {
         console.error('Failed to get fresh token:', tokenError);
         if (user.token) {
           token = user.token; // Fall back to existing token if available
-          // TIEMPO-275: Removed console.log - Using existing token for event creation
+// TIEMPO-276: Security cleanup - removed logging
         } else {
           throw new Error('Authentication token unavailable');
         }
@@ -520,7 +520,7 @@ export function useEventOperations() {
       // Clean up the event data by converting empty strings for ObjectId fields to null
       const cleanedEventData = sanitizeObjectIdFields(eventData);
       
-      // TIEMPO-275: Removed console.log - Event creation debug info
+// TIEMPO-276: Security cleanup - removed logging
       
       // Prepare the event data for submission based on role
       let preparedData;
@@ -583,10 +583,10 @@ export function useEventOperations() {
           type: "Point",
           coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
         };
-        // TIEMPO-275: Removed console.log - Added venue coordinates to venueGeolocation
+// TIEMPO-276: Security cleanup - removed logging
       } else if (eventData.venueId || eventData.locationID) {
         // We have a venue but no coordinates - need to fetch them
-        // TIEMPO-275: Removed console.log - Venue selected but coordinates not provided. Attempting to fetch venue data
+// TIEMPO-276: Security cleanup - removed logging
         try {
           // Import the venue service function directly
           const { getVenueById } = await import('@/services/venueService');
@@ -600,7 +600,7 @@ export function useEventOperations() {
               type: "Point",
               coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
             };
-            // TIEMPO-275: Removed console.log - Retrieved and added venue coordinates
+// TIEMPO-276: Security cleanup - removed logging
           } else {
             // TIEMPO-275: Keep console.warn for important warnings
             console.warn('Could not retrieve venue coordinates for venue ID:', venueId);
@@ -633,7 +633,7 @@ export function useEventOperations() {
       // Handle image upload if an image file is present
       if (preparedData.imageFile) {
         try {
-          // TIEMPO-275: Removed console.log - Image upload requested with token status
+// TIEMPO-276: Security cleanup - removed logging
           
           // Import the upload function dynamically to avoid issues with SSR
           const { uploadEventImage } = await import('@/utils/uploadEventImages');
@@ -684,7 +684,7 @@ export function useEventOperations() {
         }
       }
 
-      // TIEMPO-275: Removed console.log - Submitting event data to API
+// TIEMPO-276: Security cleanup - removed logging
 
       // Set authorization header with the fresh token
       const config = {
@@ -693,15 +693,15 @@ export function useEventOperations() {
         }
       };
       
-      // TIEMPO-275: Removed console.log - Sending event creation request with auth token
+// TIEMPO-276: Security cleanup - removed logging
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
         ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/create`
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
       
-      // TIEMPO-275: Removed console.logs - Creating event via endpoint and prepared data
+// TIEMPO-276: Security cleanup - removed logging
       const response = await axios.post(endpoint, preparedData, config);
-      // TIEMPO-275: Removed console.log - Event created successfully
+// TIEMPO-276: Security cleanup - removed logging
       return response.data;
     } catch (error) {
       console.error('Error creating event:', error);
@@ -730,12 +730,12 @@ export function useEventOperations() {
       let token;
       try {
         token = await getIdToken(true); // Force refresh
-        // TIEMPO-275: Removed console.log - Got fresh token for event update
+// TIEMPO-276: Security cleanup - removed logging
       } catch (tokenError) {
         console.error('Failed to get fresh token:', tokenError);
         if (user.token) {
           token = user.token; // Fall back to existing token if available
-          // TIEMPO-275: Removed console.log - Using existing token for event update
+// TIEMPO-276: Security cleanup - removed logging
         } else {
           throw new Error('Authentication token unavailable');
         }
@@ -809,10 +809,10 @@ export function useEventOperations() {
             type: "Point",
             coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
           };
-          // TIEMPO-275: Removed console.log - Added venue coordinates to venueGeolocation for update
+// TIEMPO-276: Security cleanup - removed logging
         } else if (eventData.venueId || eventData.locationID) {
           // We have a venue but no coordinates - need to fetch them
-          // TIEMPO-275: Removed console.log - Venue selected but coordinates not provided for update. Attempting to fetch venue data
+// TIEMPO-276: Security cleanup - removed logging
           try {
             // Import the venue service function directly
             const { getVenueById } = await import('@/services/venueService');
@@ -826,7 +826,7 @@ export function useEventOperations() {
                 type: "Point",
                 coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
               };
-              // TIEMPO-275: Removed console.log - Retrieved and added venue coordinates for update
+// TIEMPO-276: Security cleanup - removed logging
             } else {
               // TIEMPO-275: Keep console.warn for important warnings
               console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
@@ -855,7 +855,7 @@ export function useEventOperations() {
       // Handle image upload if an image file is present
       if (preparedData.imageFile) {
         try {
-          // TIEMPO-275: Removed console.log - Image upload requested for update with token status
+// TIEMPO-276: Security cleanup - removed logging
           
           // Import the upload function dynamically to avoid issues with SSR
           const { uploadEventImage } = await import('@/utils/uploadEventImages');
@@ -901,17 +901,17 @@ export function useEventOperations() {
         }
       };
       
-      // TIEMPO-275: Removed console.logs - Updating event and prepared data for update
+// TIEMPO-276: Security cleanup - removed logging
       
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
         ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`;
       
-      // TIEMPO-275: Removed console.log - Updating event via endpoint
+// TIEMPO-276: Security cleanup - removed logging
       const response = await axios.put(endpoint, preparedData, config);
       
-      // TIEMPO-275: Removed console.log - Event updated successfully
+// TIEMPO-276: Security cleanup - removed logging
       return response.data;
     } catch (error) {
       console.error('Error updating event:', error);
@@ -938,12 +938,12 @@ export function useEventOperations() {
       let token;
       try {
         token = await getIdToken(true); // Force refresh
-        // TIEMPO-275: Removed console.log - Got fresh token for event deletion
+// TIEMPO-276: Security cleanup - removed logging
       } catch (tokenError) {
         console.error('Failed to get fresh token:', tokenError);
         if (user.token) {
           token = user.token; // Fall back to existing token if available
-          // TIEMPO-275: Removed console.log - Using existing token for event deletion
+// TIEMPO-276: Security cleanup - removed logging
         } else {
           throw new Error('Authentication token unavailable');
         }
@@ -956,7 +956,7 @@ export function useEventOperations() {
         }
       };
       
-      // TIEMPO-275: Removed console.log - Deleting event
+// TIEMPO-276: Security cleanup - removed logging
       
       // Build query parameters including role information
       const queryParams = new URLSearchParams({
@@ -976,10 +976,10 @@ export function useEventOperations() {
         ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?${queryParams.toString()}`;
       
-      // TIEMPO-275: Removed console.log - Deleting event via endpoint
+// TIEMPO-276: Security cleanup - removed logging
       const response = await axios.delete(endpoint, config);
       
-      // TIEMPO-275: Removed console.log - Event deleted successfully
+// TIEMPO-276: Security cleanup - removed logging
       return response.data;
     } catch (error) {
       console.error('Error deleting event:', error);

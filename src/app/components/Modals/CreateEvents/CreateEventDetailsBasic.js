@@ -185,13 +185,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
     
     // TIEMPO-246: Log venue data to check for timezone
-    console.log('TIEMPO-246: Venue selected:', {
-      id: newValue._id,
-      name: newValue.name,
-      timezone: newValue.timezone,
-      timezoneAbbr: newValue.timezoneAbbr,
-      fullVenue: newValue
-    });
+    // TIEMPO-276: Security cleanup - removed logging
     
     // Store both the ID and the name
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
@@ -246,7 +240,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
 
   // TIEMPO-258: Handle venue creation callback
   const handleVenueCreated = async (newVenue) => {
-    console.log('New venue created:', newVenue);
+// TIEMPO-276: Security cleanup - removed logging
     
     // Refresh venue list
     await fetchVenues();

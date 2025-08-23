@@ -66,9 +66,9 @@ const VenueSelectionModal = ({ open, onClose }) => {
       if (open && hasLocationToUse && isInitialized) {
         setLoading(true);
         try {
-          console.log('VenueSelectionModal: Loading venues for city', selectedLocation?.city?.name);
+// TIEMPO-276: Security cleanup - removed logging
           refreshVenues();
-          console.log('Venues fetched successfully');
+// TIEMPO-276: Security cleanup - removed logging
           // Force map container to re-render with new key
           setMapContainerKey(Date.now());
         } catch (error) {
@@ -77,12 +77,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
           setLoading(false);
         }
       } else if (open) {
-        console.log('VenueSelectionModal: Not ready to load venues yet', {
-          hasSelectedCity,
-          hasMapCenter,
-          isInitialized,
-          cityName: selectedLocation?.city?.name
-        });
+        // TIEMPO-276: Security cleanup - removed logging
       }
     };
     loadVenues();
@@ -90,7 +85,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
     // Add a safeguard timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       if (loading) {
-        console.log('Loading timeout triggered - forcing loading to false');
+// TIEMPO-276: Security cleanup - removed logging
         setLoading(false);
         setMapReady(true);
         // Force map container to re-render with new key when timeout occurs
@@ -117,7 +112,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
   // Handle venue selection
   const handleVenueClick = (venue) => {
     selectVenue(venue);
-    console.log(`Selected venue: ${venue.name || venue.shortName}`);
+// TIEMPO-276: Security cleanup - removed logging
   };
 
   let center;
@@ -226,14 +221,14 @@ const VenueSelectionModal = ({ open, onClose }) => {
                 zoomControl={false}
                 key={`map-${mapContainerKey}`}
                 whenCreated={(map) => {
-                  console.log('Map created successfully', map);
+// TIEMPO-276: Security cleanup - removed logging
                   // Store the map instance in the ref
                   mapRef.current = map;
 
                   // Invalidate map size to ensure correct rendering
                   setTimeout(() => {
                     map.invalidateSize();
-                    console.log('Map size invalidated');
+// TIEMPO-276: Security cleanup - removed logging
 
                     // Use a fixed zoom level
                     const zoomLevel = 10;
@@ -245,7 +240,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
                     try {
                       // Set the initial view directly - this is a core method available in all Leaflet maps
                       map.setView([centerLat, centerLng], zoomLevel);
-                      console.log(`Initial map view set to zoom level ${zoomLevel}`);
+// TIEMPO-276: Security cleanup - removed logging
                     } catch (error) {
                       console.error('Error setting initial map view:', error);
                     }
@@ -291,7 +286,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
                       radius={isSelected ? 12 : 8}
                       eventHandlers={{
                         click: () => {
-                          console.log('Venue clicked:', venue.name || venue.shortName);
+// TIEMPO-276: Security cleanup - removed logging
                           handleVenueClick(venue);
                         },
                       }}

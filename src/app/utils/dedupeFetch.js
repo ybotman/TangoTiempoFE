@@ -21,20 +21,20 @@ export const dedupeFetch = async (url, options = {}, retries = 3) => {
   
   // If request is already in flight, return the existing promise
   if (pendingRequests.has(cacheKey)) {
-    console.log(`[DedupeFetch] Returning in-flight request for: ${url}`);
+    // TIEMPO-276: Security cleanup - removed request logging
     return pendingRequests.get(cacheKey);
   }
   
   // Create new request with exponential backoff for failures
   const promise = axios.get(url, options)
     .then(response => {
-      console.log(`[DedupeFetch] Request completed for: ${url}`);
+      // TIEMPO-276: Security cleanup - removed request logging
       return response;
     })
     .catch(err => {
       // Retry on server errors with exponential backoff
       if (retries > 0 && err.response?.status >= 500) {
-        console.log(`[DedupeFetch] Retrying failed request (${retries} left): ${url}`);
+        // TIEMPO-276: Security cleanup - removed retry logging
         const delay = 1000 * (4 - retries); // 1s, 2s, 3s
         return new Promise(resolve =>
           setTimeout(() => {
@@ -64,18 +64,18 @@ export const dedupPost = async (url, data = {}, options = {}, retries = 3) => {
   const cacheKey = `POST_${url}_${JSON.stringify(data)}`;
   
   if (pendingRequests.has(cacheKey)) {
-    console.log(`[DedupPost] Returning in-flight POST for: ${url}`);
+    // TIEMPO-276: Security cleanup - removed POST logging
     return pendingRequests.get(cacheKey);
   }
   
   const promise = axios.post(url, data, options)
     .then(response => {
-      console.log(`[DedupPost] POST completed for: ${url}`);
+      // TIEMPO-276: Security cleanup - removed POST logging
       return response;
     })
     .catch(err => {
       if (retries > 0 && err.response?.status >= 500) {
-        console.log(`[DedupPost] Retrying failed POST (${retries} left): ${url}`);
+        // TIEMPO-276: Security cleanup - removed retry logging
         const delay = 1000 * (4 - retries);
         return new Promise(resolve =>
           setTimeout(() => {
@@ -100,7 +100,7 @@ export const dedupPost = async (url, data = {}, options = {}, retries = 3) => {
  */
 export const clearPendingRequests = () => {
   pendingRequests.clear();
-  console.log('[DedupeFetch] All pending requests cleared');
+  // TIEMPO-276: Security cleanup - removed clear logging
 };
 
 /**
