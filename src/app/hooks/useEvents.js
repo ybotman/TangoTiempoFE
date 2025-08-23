@@ -187,18 +187,9 @@ export function useEvents({
   const effectiveCityIds = locationParams.cityIds;
   const effectiveZoomRange = locationParams.zoomRange;
 
-  // Log location source if it changed
-  if (lastLoggedLocation.current !== locationParams.source) {
-    console.log(`useEvents: Using location from ${locationParams.source}`, {
-      region: effectiveRegion,
-      division: effectiveDivision,
-      city: effectiveCity,
-      lat: effectiveLat,
-      lng: effectiveLng,
-      cityIds: effectiveCityIds
-    });
-    lastLoggedLocation.current = locationParams.source;
-  }
+  // TIEMPO-275: Removed console.log - Using location from source
+  // Track location changes silently
+  lastLoggedLocation.current = locationParams.source;
   
   // Cache key generation commented out to fix ESLint warnings
   // This was previously used for memoizing/deduplicating requests
@@ -229,27 +220,15 @@ export function useEvents({
   };
 
   const fetchEvents = useCallback(async () => {
-    // Rate limit logging to once every 5 seconds
+    // TIEMPO-275: Removed console.log - fetchEvents triggered with details
+    // Track fetch timing silently
     const now = Date.now();
-    if (!lastFetchTimestamp.current || now - lastFetchTimestamp.current > 5000) {
-      console.log('useEvents: fetchEvents triggered', {
-        trigger: 'dependency change',
-        role: selectedRole,
-        location: {
-          region: effectiveRegion,
-          division: effectiveDivision,
-          city: effectiveCity
-        },
-        hasUser: !!user,
-        timestamp: new Date().toISOString()
-      });
-      lastFetchTimestamp.current = now;
-    }
+    lastFetchTimestamp.current = now;
     
     // Check if we have any location parameters at all
     if (!effectiveRegion && !effectiveDivision && !effectiveCity && 
         !effectiveLat && !effectiveLng && (!effectiveCityIds || effectiveCityIds.length === 0)) {
-      console.log('useEvents: No location selected, skipping event fetch');
+      // TIEMPO-275: Removed console.log - No location selected, skipping event fetch
       setEventsData({
         events: [],
         pagination: {
@@ -297,7 +276,7 @@ export function useEvents({
       if (effectiveCityIds && effectiveCityIds.length > 0) {
         // Use the new cityIds parameter that Tom implemented
         params.cityIds = effectiveCityIds;
-        console.log('Using multi-city filtering with cityIds:', effectiveCityIds);
+        // TIEMPO-275: Removed console.log - Using multi-city filtering with cityIds
       } else {
         // Location-based filtering parameters - using effective values that may come from GeoLocationContext
         if (effectiveRegion) params.masteredRegionName = effectiveRegion;
@@ -326,32 +305,14 @@ export function useEvents({
         params.includeAiGenerated = true;
       }
 
-      // Log the actual values used for filtering (from direct input or GeoLocationContext)
-      console.log('Using location filters:', {
-        cityIds: effectiveCityIds,
-        region: effectiveRegion,
-        division: effectiveDivision,
-        city: effectiveCity,
-        lat: effectiveLat,
-        lng: effectiveLng,
-        useGeoSearch: params.useGeoSearch,
-        radius: params.radius,
-        source: useLocationPreferences ? 'User Preferences' :
-                useGeoLocationContext && (
-                  effectiveRegion !== region ||
-                  effectiveDivision !== division ||
-                  effectiveCity !== city ||
-                  effectiveLat !== lat ||
-                  effectiveLng !== lng
-                ) ? 'GeoLocationContext' : 'Direct input'
-      });
+      // TIEMPO-275: Removed console.log - Using location filters with details
 
 
       // Add user role and organizerId if user is a RegionalOrganizer
       if (userId && selectedRole === 'RegionalOrganizer' && userOrganizerId) {
         params.organizerId = userOrganizerId;
         params.userRole = 'RegionalOrganizer'; // Make sure we're passing the role to the backend
-        console.log('Adding RegionalOrganizer filtering with organizerId:', params.organizerId);
+        // TIEMPO-275: Removed console.log - Adding RegionalOrganizer filtering with organizerId
       } else if (userId && userRoles?.includes('RegionalOrganizer')) {
         // If user has RO role but we're not using it, explain why
         /* Commented out to reduce console noise
@@ -365,17 +326,7 @@ export function useEvents({
       }
 
 
-      // Log API call details only in development and only for unique requests
-      if (process.env.NODE_ENV === 'development') {
-        const requestKey = JSON.stringify({ cityIds: params.cityIds, start: params.start, end: params.end });
-        if (lastLoggedLocation.current !== `api:${requestKey}`) {
-          console.log('useEvents: API Request:', {
-            url: `${process.env.NEXT_PUBLIC_BE_URL}/api/events`,
-            params
-          });
-          lastLoggedLocation.current = `api:${requestKey}`;
-        }
-      }
+      // TIEMPO-275: Removed console.log - API Request details
 
       // Call the unified endpoint
       // TIEMPO-257: Use dedupeFetch to prevent duplicate event calls
@@ -442,7 +393,7 @@ export function useEvents({
     // Skip if using location preferences but user data not loaded yet
     if (useLocationPreferences && !userDefaults && user) {
       if (!hasLoggedWaiting.current.userPrefs) {
-        console.log('useEvents: Waiting for user preferences to load');
+        // TIEMPO-275: Removed console.log - Waiting for user preferences to load
         hasLoggedWaiting.current.userPrefs = true;
       }
       return;
@@ -452,7 +403,7 @@ export function useEvents({
     // This should only apply when we're actually using the context as our location source
     if (useGeoLocationContext && !useLocationPreferences && !isInitialized) {
       if (!hasLoggedWaiting.current.geoInit) {
-        console.log('useEvents: Waiting for GeoLocationContext initialization');
+        // TIEMPO-275: Removed console.log - Waiting for GeoLocationContext initialization
         hasLoggedWaiting.current.geoInit = true;
       }
       return;
@@ -468,11 +419,7 @@ export function useEvents({
       
       if (!hasValidCity && !hasValidRegion && !hasValidCoords) {
         if (!hasLoggedWaiting.current.noLocationData) {
-          console.log('useEvents: No valid location data available from GeoLocationContext', {
-            city: effectiveCity,
-            region: effectiveRegion,
-            coords: [effectiveLat, effectiveLng]
-          });
+          // TIEMPO-275: Removed console.log - No valid location data available from GeoLocationContext
           hasLoggedWaiting.current.noLocationData = true;
         }
         return;
@@ -487,11 +434,7 @@ export function useEvents({
       
       if (!hasValidCities && !hasValidMapCenter) {
         if (!hasLoggedWaiting.current.noPreferences) {
-          console.log('useEvents: No valid location preferences set', {
-            cityIds: effectiveCityIds,
-            mapCenter: [effectiveLat, effectiveLng],
-            useCenterLocation: true // FORCED TO TRUE
-          });
+          // TIEMPO-275: Removed console.log - No valid location preferences set
           hasLoggedWaiting.current.noPreferences = true;
         }
         return;
@@ -563,12 +506,12 @@ export function useEventOperations() {
       let token;
       try {
         token = await getIdToken(true); // Force refresh
-        console.log('Got fresh token for event creation');
+        // TIEMPO-275: Removed console.log - Got fresh token for event creation
       } catch (tokenError) {
         console.error('Failed to get fresh token:', tokenError);
         if (user.token) {
           token = user.token; // Fall back to existing token if available
-          console.log('Using existing token for event creation');
+          // TIEMPO-275: Removed console.log - Using existing token for event creation
         } else {
           throw new Error('Authentication token unavailable');
         }
@@ -577,16 +520,7 @@ export function useEventOperations() {
       // Clean up the event data by converting empty strings for ObjectId fields to null
       const cleanedEventData = sanitizeObjectIdFields(eventData);
       
-      // Log debugging information
-      console.log('Event creation debug info:', {
-        selectedRole: selectedRole,
-        userId: user?.uid,
-        userRoles: user?.roles,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
-        organizerName: user?.backendInfo?.regionalOrganizerInfo?.organizerName,
-        hasRORole: user?.roles?.includes('RegionalOrganizer'),
-        eventOwnerOrganizerID: cleanedEventData.ownerOrganizerID
-      });
+      // TIEMPO-275: Removed console.log - Event creation debug info
       
       // Prepare the event data for submission based on role
       let preparedData;
@@ -649,10 +583,10 @@ export function useEventOperations() {
           type: "Point",
           coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
         };
-        console.log('Added venue coordinates to venueGeolocation:', preparedData.venueGeolocation);
+        // TIEMPO-275: Removed console.log - Added venue coordinates to venueGeolocation
       } else if (eventData.venueId || eventData.locationID) {
         // We have a venue but no coordinates - need to fetch them
-        console.log('Venue selected but coordinates not provided. Attempting to fetch venue data.');
+        // TIEMPO-275: Removed console.log - Venue selected but coordinates not provided. Attempting to fetch venue data
         try {
           // Import the venue service function directly
           const { getVenueById } = await import('@/services/venueService');
@@ -666,8 +600,9 @@ export function useEventOperations() {
               type: "Point",
               coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
             };
-            console.log('Retrieved and added venue coordinates:', preparedData.venueGeolocation);
+            // TIEMPO-275: Removed console.log - Retrieved and added venue coordinates
           } else {
+            // TIEMPO-275: Keep console.warn for important warnings
             console.warn('Could not retrieve venue coordinates for venue ID:', venueId);
             // Fallback to empty coordinates array to prevent schema validation error
             preparedData.venueGeolocation = {
@@ -698,13 +633,7 @@ export function useEventOperations() {
       // Handle image upload if an image file is present
       if (preparedData.imageFile) {
         try {
-          console.log('Image upload requested, token status:', {
-            hasToken: !!token,
-            tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
-            tokenLength: token?.length,
-            fileSize: preparedData.imageFile.size,
-            fileName: preparedData.imageFile.name
-          });
+          // TIEMPO-275: Removed console.log - Image upload requested with token status
           
           // Import the upload function dynamically to avoid issues with SSR
           const { uploadEventImage } = await import('@/utils/uploadEventImages');
@@ -755,8 +684,7 @@ export function useEventOperations() {
         }
       }
 
-      // Log the data being sent
-      console.log('Submitting event data to API:', preparedData);
+      // TIEMPO-275: Removed console.log - Submitting event data to API
 
       // Set authorization header with the fresh token
       const config = {
@@ -765,16 +693,15 @@ export function useEventOperations() {
         }
       };
       
-      console.log('Sending event creation request with auth token');
+      // TIEMPO-275: Removed console.log - Sending event creation request with auth token
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
         ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/create`
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
       
-      console.log(`Creating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
-      console.log('PreparedData being sent:', JSON.stringify(preparedData, null, 2));
+      // TIEMPO-275: Removed console.logs - Creating event via endpoint and prepared data
       const response = await axios.post(endpoint, preparedData, config);
-      console.log('Event created successfully:', response.data);
+      // TIEMPO-275: Removed console.log - Event created successfully
       return response.data;
     } catch (error) {
       console.error('Error creating event:', error);
@@ -803,12 +730,12 @@ export function useEventOperations() {
       let token;
       try {
         token = await getIdToken(true); // Force refresh
-        console.log('Got fresh token for event update');
+        // TIEMPO-275: Removed console.log - Got fresh token for event update
       } catch (tokenError) {
         console.error('Failed to get fresh token:', tokenError);
         if (user.token) {
           token = user.token; // Fall back to existing token if available
-          console.log('Using existing token for event update');
+          // TIEMPO-275: Removed console.log - Using existing token for event update
         } else {
           throw new Error('Authentication token unavailable');
         }
@@ -882,10 +809,10 @@ export function useEventOperations() {
             type: "Point",
             coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
           };
-          console.log('Added venue coordinates to venueGeolocation for update:', preparedData.venueGeolocation);
+          // TIEMPO-275: Removed console.log - Added venue coordinates to venueGeolocation for update
         } else if (eventData.venueId || eventData.locationID) {
           // We have a venue but no coordinates - need to fetch them
-          console.log('Venue selected but coordinates not provided for update. Attempting to fetch venue data.');
+          // TIEMPO-275: Removed console.log - Venue selected but coordinates not provided for update. Attempting to fetch venue data
           try {
             // Import the venue service function directly
             const { getVenueById } = await import('@/services/venueService');
@@ -899,8 +826,9 @@ export function useEventOperations() {
                 type: "Point",
                 coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
               };
-              console.log('Retrieved and added venue coordinates for update:', preparedData.venueGeolocation);
+              // TIEMPO-275: Removed console.log - Retrieved and added venue coordinates for update
             } else {
+              // TIEMPO-275: Keep console.warn for important warnings
               console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
               // Fallback to empty coordinates array to prevent schema validation error
               preparedData.venueGeolocation = {
@@ -927,13 +855,7 @@ export function useEventOperations() {
       // Handle image upload if an image file is present
       if (preparedData.imageFile) {
         try {
-          console.log('Image upload requested for update, token status:', {
-            hasToken: !!token,
-            tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
-            tokenLength: token?.length,
-            fileSize: preparedData.imageFile.size,
-            fileName: preparedData.imageFile.name
-          });
+          // TIEMPO-275: Removed console.log - Image upload requested for update with token status
           
           // Import the upload function dynamically to avoid issues with SSR
           const { uploadEventImage } = await import('@/utils/uploadEventImages');
@@ -979,18 +901,17 @@ export function useEventOperations() {
         }
       };
       
-      console.log('Updating event:', eventId, 'as role:', selectedRole);
-      console.log('Prepared data for update:', JSON.stringify(preparedData, null, 2));
+      // TIEMPO-275: Removed console.logs - Updating event and prepared data for update
       
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
         ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`;
       
-      console.log(`Updating event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      // TIEMPO-275: Removed console.log - Updating event via endpoint
       const response = await axios.put(endpoint, preparedData, config);
       
-      console.log('Event updated successfully:', response.data);
+      // TIEMPO-275: Removed console.log - Event updated successfully
       return response.data;
     } catch (error) {
       console.error('Error updating event:', error);
@@ -1017,12 +938,12 @@ export function useEventOperations() {
       let token;
       try {
         token = await getIdToken(true); // Force refresh
-        console.log('Got fresh token for event deletion');
+        // TIEMPO-275: Removed console.log - Got fresh token for event deletion
       } catch (tokenError) {
         console.error('Failed to get fresh token:', tokenError);
         if (user.token) {
           token = user.token; // Fall back to existing token if available
-          console.log('Using existing token for event deletion');
+          // TIEMPO-275: Removed console.log - Using existing token for event deletion
         } else {
           throw new Error('Authentication token unavailable');
         }
@@ -1035,7 +956,7 @@ export function useEventOperations() {
         }
       };
       
-      console.log('Deleting event:', eventId);
+      // TIEMPO-275: Removed console.log - Deleting event
       
       // Build query parameters including role information
       const queryParams = new URLSearchParams({
@@ -1055,10 +976,10 @@ export function useEventOperations() {
         ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
         : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?${queryParams.toString()}`;
       
-      console.log(`Deleting event via ${selectedRole === 'RegionalAdmin' ? 'RA' : 'RO'} endpoint: ${endpoint}`);
+      // TIEMPO-275: Removed console.log - Deleting event via endpoint
       const response = await axios.delete(endpoint, config);
       
-      console.log('Event deleted successfully:', response.data);
+      // TIEMPO-275: Removed console.log - Event deleted successfully
       return response.data;
     } catch (error) {
       console.error('Error deleting event:', error);

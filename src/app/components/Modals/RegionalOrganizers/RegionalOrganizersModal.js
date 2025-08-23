@@ -56,16 +56,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
 
   // TIEMPO-254: Centralized field change handler
   const handleFieldChange = (tabName, fieldName, value) => {
-    // TIEMPO-272: Debug logging for isEnabled changes
-    if (fieldName === 'isEnabled') {
-      console.log('TIEMPO-272 isEnabled Change:', {
-        tabName,
-        fieldName,
-        value,
-        currentUnsaved: unsavedChanges
-      });
-    }
-    
     setUnsavedChanges(prev => ({
       ...prev,
       [tabName]: {
@@ -89,13 +79,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
       const allChanges = {};
       Object.values(unsavedChanges).forEach(tabChanges => {
         Object.assign(allChanges, tabChanges);
-      });
-
-      // TIEMPO-272: Debug logging to verify isEnabled is in payload
-      console.log('TIEMPO-272 Save Debug:', {
-        unsavedChanges,
-        allChanges,
-        hasIsEnabled: 'isEnabled' in allChanges
       });
 
       // Update the organizer with all changes

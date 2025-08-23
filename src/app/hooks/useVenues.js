@@ -46,7 +46,7 @@ export function useVenues() {
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-        //console.log(`Received ${response.data.venues.length} venues from API with pagination:`, response.data.pagination);
+        // TIEMPO-275: Removed console.log - Received venues from API with pagination
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
@@ -55,10 +55,12 @@ export function useVenues() {
         // Format: {data: Array, pagination: Object}
         setVenues(response.data.data);
       } else {
+        // TIEMPO-275: Keep console.error for important errors
         console.error('API returned unknown venues data format:', response.data);
         setVenues([]);
       }
     } catch (err) {
+      // TIEMPO-275: Keep console.error for important errors
       console.error('Error fetching venues:', err);
       setError(err.message);
     } finally {
@@ -136,13 +138,12 @@ export function useVenues() {
       if (!populate) {
         const existingVenue = venues.find(venue => venue._id === venueId);
         if (existingVenue) {
-          console.log('Found venue in local cache:', existingVenue.name || existingVenue.shortName);
+          // TIEMPO-275: Removed console.log - Found venue in local cache
           return existingVenue;
         }
       }
       
-      // Otherwise fetch from the API
-      console.log(`Fetching venue with ID: ${venueId}${populate ? ' (with populated references)' : ''}`);
+      // TIEMPO-275: Removed console.log - Fetching venue with ID
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${venueId}`, {
         params: { appId, populate: populate.toString() },
       });
@@ -150,17 +151,19 @@ export function useVenues() {
       // Handle various response formats
       if (response.data && response.data.venue) {
         // Handle {venue: Object} format
-        console.log(`Venue fetched with ID ${venueId}:`, response.data.venue.name || 'Unknown name');
+        // TIEMPO-275: Removed console.log - Venue fetched with ID
         return response.data.venue;
       } else if (response.data && typeof response.data === 'object' && response.data._id) {
         // Handle direct venue object format
-        console.log(`Venue fetched with ID ${venueId}:`, response.data.name || 'Unknown name');
+        // TIEMPO-275: Removed console.log - Venue fetched with ID
         return response.data;
       } else {
+        // TIEMPO-275: Keep console.error for important errors
         console.error(`Unexpected venue data format for ID ${venueId}:`, response.data);
         return null;
       }
     } catch (err) {
+      // TIEMPO-275: Keep console.error for important errors
       console.error('Error fetching venue by ID:', err);
       setError(err.message);
       return null;
