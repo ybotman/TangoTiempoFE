@@ -125,20 +125,38 @@ const ExplorerPage = () => {
         }
       }
       
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/summary`, { 
-        params,
-        headers 
-      });
+      // Try /api/events/summary first, fallback to /api/events if it doesn't exist
+      let response;
+      try {
+        response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/summary`, { 
+          params,
+          headers 
+        });
+      } catch (summaryError) {
+        // If summary endpoint doesn't exist, try regular events endpoint
+        if (summaryError.response?.status === 404) {
+          console.log('Summary endpoint not found, trying /api/events');
+          response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, { 
+            params,
+            headers 
+          });
+        } else {
+          throw summaryError;
+        }
+      }
       
       if (params.format === 'clusters') {
         setClusters(response.data.clusters || []);
         setEvents([]);
       } else {
-        setEvents(response.data.events || []);
+        setEvents(response.data.events || response.data || []);
         setClusters([]);
       }
     } catch (error) {
       console.error('Error fetching events:', error);
+      // Add user-friendly error handling
+      setEvents([]);
+      setClusters([]);
     } finally {
       setLoading(false);
     }

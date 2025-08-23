@@ -1,0 +1,1914 @@
+[
+  {
+    "_id": "680c5113ef6308b31e5b5686",
+    "appId": "1",
+    "name": "(Maine) Maine Ballroom Dance",
+    "shortName": "",
+    "address1": "614 Congress St.",
+    "address2": "",
+    "address3": "",
+    "city": "Portland,",
+    "state": "ME",
+    "zip": "",
+    "phone": "",
+    "comments": "",
+    "latitude": 43.6534848,
+    "longitude": -70.2638653,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -70.2638653,
+        43.6534848
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46d",
+      "cityName": "Portland"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:51.402Z",
+    "updatedAt": "2025-04-27T03:11:24.168Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5112ef6308b31e5b5670",
+    "appId": "1",
+    "name": "(Maine) Metta Studio 40",
+    "shortName": "",
+    "address1": " Main St Bldg 13, Suite 136,",
+    "address2": "",
+    "address3": "",
+    "city": "Biddeford",
+    "state": "ME",
+    "zip": "",
+    "phone": "",
+    "comments": "",
+    "latitude": 43.4969645,
+    "longitude": -70.4664723,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -70.4664723,
+        43.4969645
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46d",
+      "cityName": "Portland"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:50.344Z",
+    "updatedAt": "2025-04-27T03:11:42.932Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5112ef6308b31e5b567b",
+    "appId": "1",
+    "name": "(Maine) Portland New Church",
+    "shortName": "",
+    "address1": "302 Stevens Ave",
+    "address2": "",
+    "address3": "",
+    "city": "portland",
+    "state": "ME",
+    "zip": "04103",
+    "phone": "",
+    "comments": "",
+    "latitude": 43.6688357,
+    "longitude": -70.2953501,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -70.2953501,
+        43.6688357
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46d",
+      "cityName": "Portland"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:50.874Z",
+    "updatedAt": "2025-04-26T03:20:50.875Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c510fef6308b31e5b562f",
+    "appId": "1",
+    "name": "251 West Central St, Natick, MA 01760",
+    "shortName": "251W-CNTR",
+    "address1": "251 West Central St",
+    "address2": "",
+    "address3": "",
+    "city": "Natick",
+    "state": "MA",
+    "zip": "01760",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.2825098,
+    "longitude": -71.3929639,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.3929639,
+        42.2825098
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:47.004Z",
+    "updatedAt": "2025-07-14T17:06:01.813Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5114ef6308b31e5b569c",
+    "appId": "1",
+    "name": "52 Roberts Road",
+    "shortName": "52-RBRTS",
+    "address1": "52 Roberts Road",
+    "address2": "",
+    "address3": "",
+    "city": "cambridge",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.3776592,
+    "longitude": -71.1079406,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1079406,
+        42.3776592
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:52.509Z",
+    "updatedAt": "2025-07-14T17:06:18.291Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "6875386056b4e944a75da569",
+    "appId": "1",
+    "name": "Allston Abbey",
+    "shortName": "ALLSTN-ABBY",
+    "address1": "5 St Lukes Rd, Allston, MA",
+    "address2": "",
+    "address3": "",
+    "city": " Allston",
+    "state": "ma",
+    "zip": "02134",
+    "phone": "",
+    "comments": "+02134/@42.3521462,-71.1296649,",
+    "latitude": 42.352146,
+    "longitude": -71.1296649,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1296649,
+        42.352146
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "isApproved": false,
+    "createdAt": "2025-07-14T17:03:28.919Z",
+    "updatedAt": "2025-07-14T17:30:46.632Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5111ef6308b31e5b5659",
+    "appId": "1",
+    "name": "Andrew Middle School",
+    "shortName": "Andrew",
+    "address1": "3000 Mistic Valley Pkwy",
+    "address2": "",
+    "address3": "",
+    "city": "Medford",
+    "state": "MA",
+    "zip": "01801",
+    "phone": "",
+    "comments": "<p>Andrew Middle School</p>\n<p>&nbsp;</p>",
+    "latitude": 42.4118968,
+    "longitude": -71.0983847,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0983847,
+        42.4118968
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:49.072Z",
+    "updatedAt": "2025-06-30T20:33:29.826Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5122ef6308b31e5b57b6",
+    "appId": "1",
+    "name": "Avalon Dance Fitness",
+    "shortName": "Avalon",
+    "address1": "345 Trapelo Road",
+    "address2": "",
+    "address3": "",
+    "city": "Belmont",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<p>Easy public transit  (#73 bus 10-15 min from Harvard Sq. stops directly in front)</p>\n<p>Plenty of street parking</p>\n<p>185 Green ST, Cambridge (Central Square)</p>\n<p>Park at Green ST Garage, 260 Green ST ($2/h), limited meter street parking<br />\nPublic Transit: Red Line &#8211; Central Square stop, numerous buses</p>",
+    "latitude": 42.3853386,
+    "longitude": -71.1829355,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1829355,
+        42.3853386
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:06.375Z",
+    "updatedAt": "2025-06-30T20:33:36.103Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511aef6308b31e5b5719",
+    "appId": "1",
+    "name": "Balera School of Ballroom",
+    "shortName": "Balera",
+    "address1": "105 Rumford Ave",
+    "address2": "",
+    "address3": "",
+    "city": "Newton, Ma",
+    "state": "MA",
+    "zip": "02466",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.358273,
+    "longitude": -71.242456,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.242456,
+        42.358273
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:58.541Z",
+    "updatedAt": "2025-06-30T20:33:42.539Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5116ef6308b31e5b56c8",
+    "appId": "1",
+    "name": "Barker Center Cafe",
+    "shortName": "Barker",
+    "address1": "12 quincy street",
+    "address2": "",
+    "address3": "",
+    "city": "cambridge",
+    "state": "MA",
+    "zip": "02138",
+    "phone": "",
+    "comments": "<p>t 12 Quincy Street. A rotunda with high windows on all sides, pristine hardwood floor, tables, and a true circle for a perfect ronda right at the heart campus.<br />\nNearby metered parking on Mass Ave., Harvard St., and Quincy St. Garage at Broadway. Directions: walk inside the Barker Center, past the security desk, through the double doors, and straight to the end of the hall.</p>",
+    "latitude": 42.3725819,
+    "longitude": -71.1145547,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1145547,
+        42.3725819
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:54.599Z",
+    "updatedAt": "2025-06-30T20:07:30.160Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5119ef6308b31e5b5703",
+    "appId": "1",
+    "name": "Blue Back Square",
+    "shortName": "",
+    "address1": "65 Memorial Rd,",
+    "address2": "",
+    "address3": "",
+    "city": "West Hartford",
+    "state": "CT",
+    "zip": "06107",
+    "phone": "",
+    "comments": "",
+    "latitude": 41.759633,
+    "longitude": -72.7400297,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -72.7400297,
+        41.759633
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46c",
+      "cityName": "Hartford"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:57.510Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511fef6308b31e5b5779",
+    "appId": "1",
+    "name": "Boston Sterling Park",
+    "shortName": "",
+    "address1": "Boston Sterling Park",
+    "address2": "",
+    "address3": "",
+    "city": "boston",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<p>During summer months of July and August, there is outside Tango dancing in the summer.</p>\n<p>The location is on the large sidewalk of sterling park, across from Boston Harbor Hotel.  The map shows the exact location of the dance venue.</p>",
+    "latitude": 42.356763,
+    "longitude": -71.051141,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.051141,
+        42.356763
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:03.322Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5110ef6308b31e5b5645",
+    "appId": "1",
+    "name": "Cambridge Community Center for Arts",
+    "shortName": "CCCA",
+    "address1": "41 2nd St.",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "",
+    "zip": "02141",
+    "phone": "6176151550",
+    "comments": "",
+    "latitude": 42.3698204,
+    "longitude": -71.0792473,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0792473,
+        42.3698204
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:48.073Z",
+    "updatedAt": "2025-06-30T20:33:55.524Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "6855cb96fc52778b324c9978",
+    "appId": "1",
+    "name": "Cambridge Foundry",
+    "shortName": "FOUNDRY",
+    "address1": "101 Rogers St",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02142",
+    "phone": "(857) 998-2063",
+    "comments": "",
+    "latitude": 42.36681,
+    "longitude": -71.08267,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.08267,
+        42.36681
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-06-20T20:50:00.000Z",
+    "updatedAt": "2025-06-30T20:07:37.242Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5116ef6308b31e5b56bd",
+    "appId": "1",
+    "name": "Cape Anne Center",
+    "shortName": "CapeAnne",
+    "address1": "6 Enon St",
+    "address2": "",
+    "address3": "",
+    "city": "Beverly",
+    "state": "MA",
+    "zip": "01915",
+    "phone": "",
+    "comments": "<p>Cape Anne Center for Dance, 6 Enon St., Beverly, Ma 01915. </p>",
+    "latitude": 42.5832055,
+    "longitude": -70.8848164,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -70.8848164,
+        42.5832055
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:54.081Z",
+    "updatedAt": "2025-06-30T20:34:15.309Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5121ef6308b31e5b57a7",
+    "appId": "1",
+    "name": "Center for Arts at the Armory",
+    "shortName": "ARMORY",
+    "address1": "191 Highland Ave",
+    "address2": "",
+    "address3": "",
+    "city": "somerville",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<p>The <strong>Center for Arts at the Armory</strong> is conveniently located at 191 Highland Avenue between Davis and Union Squares in Somerville, Massachusetts. The award-winning <strong>Arts at the Armory Café </strong>can be found on the left-hand side as you enter the first floor.  A <strong>free </strong><strong>44-space parking lot</strong> is located behind the Armory.  Additional overflow parking lots are available.  Please see below for their locations.</p>\n<p>Because the Armory is located in a busy residential neighborhood, parking can be limited, and we strongly encourage you to car pool, take public transportation, ride your bicycle or walk. There are bicycle racks behind and in front of the building. Please do not lock your bike on the Armory railing.</p>\n<p>Arts at the Armory is approximately a 15 minute walk from Davis Square which is on the MBTA Red Line. You can also find us by using either the MBTA RT 88 and RT 90 bus that can be caught either at Lechmere (Green Line) or Davis Square (Red Line). Get off at the Highland Avenue and Lowell Street stop. You can also get to us from Sullivan Square (Orange Line) by using the MBTA RT 90 bus. Get off at the Highland Avenue and Benton Road stop.</p>",
+    "latitude": 42.3897362,
+    "longitude": -71.1059052,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1059052,
+        42.3897362
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:05.603Z",
+    "updatedAt": "2025-06-30T20:33:11.097Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5117ef6308b31e5b56de",
+    "appId": "1",
+    "name": "DANCE FEVER STUDIO *Newton",
+    "shortName": "",
+    "address1": "200 Wells Avenue",
+    "address2": "",
+    "address3": "",
+    "city": "Newton",
+    "state": "MA",
+    "zip": "021459",
+    "phone": "",
+    "comments": "<p>DANCE FEVER STUDIO</p>\n<p>200 Wells Avenue Newton, MA, 02459</p>",
+    "latitude": 42.2948585,
+    "longitude": -71.19976,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.19976,
+        42.2948585
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:55.680Z",
+    "updatedAt": "2025-04-26T03:20:55.680Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c4ebaef6308b31e5b5555",
+    "appId": "1",
+    "name": "Dance Studio A",
+    "shortName": "",
+    "address1": "123 Main St",
+    "address2": "",
+    "address3": "",
+    "city": "Boston",
+    "state": "MA",
+    "zip": "02110",
+    "phone": "555-1234",
+    "comments": "A nice dance studio",
+    "latitude": 42.3601,
+    "longitude": -71.0589,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0589,
+        42.3601
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:10:50.318Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5122ef6308b31e5b57c1",
+    "appId": "1",
+    "name": "Dance Union",
+    "shortName": "",
+    "address1": "16 bow street",
+    "address2": "",
+    "address3": "",
+    "city": "Somerville",
+    "state": "MA",
+    "zip": "02143",
+    "phone": "(617) 721-4872",
+    "comments": "<p>Home of The Tango Society of Boston Events.</p>",
+    "latitude": 42.3807113,
+    "longitude": -71.0972088,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0972088,
+        42.3807113
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:21:06.890Z",
+    "updatedAt": "2025-06-30T20:08:18.034Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5117ef6308b31e5b56d3",
+    "appId": "1",
+    "name": "Dante Alighieri Society",
+    "shortName": "",
+    "address1": "41 Hampshire St",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02139",
+    "phone": "",
+    "comments": "<p>41 Hampshire St, Cambridge, MA 02139</p>",
+    "latitude": 42.3668445,
+    "longitude": -71.0919603,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0919603,
+        42.3668445
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:55.147Z",
+    "updatedAt": "2025-06-30T20:31:55.203Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5123ef6308b31e5b57cc",
+    "appId": "1",
+    "name": "EPIC. Q-BALLROOM",
+    "shortName": "EPIC",
+    "address1": "26 New Street, Suite 3",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02138",
+    "phone": "",
+    "comments": "<p>Formally Extreme Dancesport, we&#8217;re a dance studio, a practice space, a social meeting place. Come take a class, take a private lesson, or just chill with us.</p>",
+    "latitude": 42.3878553,
+    "longitude": -71.1404605,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1404605,
+        42.3878553
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:21:07.418Z",
+    "updatedAt": "2025-06-30T20:34:37.909Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "6871bb4c47913efb2936e13d",
+    "appId": "1",
+    "name": "East Street Dance Center",
+    "shortName": "East D-Center",
+    "address1": "47 East St",
+    "address2": "",
+    "address3": "",
+    "city": "Hadley",
+    "state": "MA",
+    "zip": "01035",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.34416246148,
+    "longitude": -72.582662521262,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -72.582662521,
+        42.3441624614
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "isApproved": true,
+    "createdAt": "2025-06-30T20:30:51.045Z",
+    "updatedAt": "2025-06-30T20:31:03.818Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5115ef6308b31e5b56b2",
+    "appId": "1",
+    "name": "FG Dance Academy",
+    "shortName": "FGDA",
+    "address1": "​380 Washington St Level 2,",
+    "address2": "",
+    "address3": "",
+    "city": "Brighton",
+    "state": "MA",
+    "zip": "02135",
+    "phone": "812.345.1077",
+    "comments": "<p>The Fernanda Ghi Dance Company (FGDC) is dedicated to creating a fusion between Argentine Tango and other forms of art, such as music, theater, other styles of dance, and the visual arts. The company embraces Argentine Tango as an ever-evolving language, one with the ability to meld different mediums in dynamic and unexpected ways. At it’s core, tango is a form of communication &#8211; through the embrace of two people, opposing energies can be harnessed to move as one. While, FGDC is not limited to Tango alone, we use it as our language of connection and gateway to exploration.</p>",
+    "latitude": 42.3489552,
+    "longitude": -71.1541815,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1541815,
+        42.3489552
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:20:53.559Z",
+    "updatedAt": "2025-06-30T20:35:46.800Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "68530038bb55072806428501",
+    "appId": "1",
+    "name": "Follen Church",
+    "shortName": "",
+    "address1": "755 Massachusetts Ave",
+    "address2": "",
+    "address3": "",
+    "city": "Lexington",
+    "state": "MA",
+    "zip": "02420",
+    "phone": "",
+    "comments": "<h2>FOLLEN CHURCH</h2><p>A historic Unitarian Universalist church and community space in Lexington.</p>",
+    "latitude": 42.4463131,
+    "longitude": -71.2130077,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.2130077,
+        42.4463131
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-06-18T14:00:00.000Z",
+    "updatedAt": "2025-06-30T20:32:04.029Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511bef6308b31e5b572f",
+    "appId": "1",
+    "name": "Fort Getty Pavilion in Jamestown, RI.",
+    "shortName": "",
+    "address1": "913 Fort Getty Rd",
+    "address2": "",
+    "address3": "",
+    "city": "Jamestown",
+    "state": "RI",
+    "zip": "",
+    "phone": "(401) 423-7211",
+    "comments": "<p>913 Fort Getty Rd, Jamestown, RI(401) 423-7211</p>",
+    "latitude": 41.4868351,
+    "longitude": -71.3907336,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.3907336,
+        41.4868351
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46b",
+      "cityName": "Providence"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:59.622Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5120ef6308b31e5b578d",
+    "appId": "1",
+    "name": "Garage Dance Studio",
+    "shortName": "Garage",
+    "address1": "1385 East Street 06053",
+    "address2": "",
+    "address3": "",
+    "city": "New Britain",
+    "state": "CT",
+    "zip": "06053",
+    "phone": "",
+    "comments": "<p>Welcome to the Garage Dance Studio – a new, unique and well appointed dance studio catering to adults 19-90. The Garage mission is to support the creative journey of each student in a fun, affordable and caring environment that allows for individual style and growth. We offer quality dance instruction focusing on technique, rhythm and musicality. Whether you are trying dance for the first time or choosing dance as your career, the Garage door is open for exploration, discovery and fun. We will make your experience rewarding and extraordinary one step at a time.</p>\n<p>Join us at The Garage! We look forward to your visit.</p>",
+    "latitude": 41.690411,
+    "longitude": -72.7590571,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -72.7590571,
+        41.690411
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46c",
+      "cityName": "Hartford"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:21:04.320Z",
+    "updatedAt": "2025-07-14T01:35:21.701Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5113ef6308b31e5b5691",
+    "appId": "1",
+    "name": "Harvard Dance Center",
+    "shortName": "",
+    "address1": "66 Garden St",
+    "address2": "",
+    "address3": "",
+    "city": "cambridge",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<h2>HARVARD DANCE CENTER</h2>\n<p>The Harvard Dance Center’s mission is artistic, academic, and civic leadership. It is a site that leads through equality and dignity for all, aims to foster agency through dance for students, and promotes the arts as agents of social change in the world.</p>\n<p>The Dance Center is the primary venue for dance on campus. Dance offerings include curricular courses led by Dance faculty in Theater, Dance &amp; Media, as well as non-credit Harvard community dance classes which span a wide range of genres for all levels of experience, and which are made accessible to all through a robust tuition assistance program. The Dance Center regularly hosts guest artists and choreographers who teach master classes and hold residencies throughout the academic year, fostering exceptional opportunities for students to work with luminaries and innovators in the field and in disciplines linked to dance.</p>\n<p>The Dance Center partners with departments and organizations across campus to provide workshops and dialogues that address important campus and cultural issues. It provides mentorship, support, and residency opportunities for student emerging choreographers, as well as for student-led dance groups which represent over 20 traditions from across the globe.</p>\n<h2>ALL ARE WELCOME</h2>\n<p>The Harvard Dance Center is a place where any student can be fully self-expressed, without fear of being made to feel uncomfortable, unwelcome, or unsafe on account of biological sex, race/ethnicity, sexual orientation, gender identity or expression, cultural background, age, or physical or mental ability; a place where the rules guard each person&#8217;s self-respect and dignity and strongly encourage everyone to respect others.</p>",
+    "latitude": 42.3817853,
+    "longitude": -71.1269587,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1269587,
+        42.3817853
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:51.947Z",
+    "updatedAt": "2025-06-30T20:32:14.686Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c510eef6308b31e5b5624",
+    "appId": "1",
+    "name": "Immersive Arts Boston",
+    "shortName": "",
+    "address1": "130 Columbus Ave",
+    "address2": "",
+    "address3": "",
+    "city": "Boston",
+    "state": "MA",
+    "zip": "02116",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.349585,
+    "longitude": -71.0702513,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0702513,
+        42.349585
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:46.474Z",
+    "updatedAt": "2025-06-30T20:32:28.419Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c510def6308b31e5b560a",
+    "appId": "1",
+    "name": "Jose Mateo Theatre",
+    "shortName": "Mateo",
+    "address1": "400 Harvard Street",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge, MA",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.3716538,
+    "longitude": -71.1142745,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1142745,
+        42.3716538
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:45.137Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c510def6308b31e5b5615",
+    "appId": "1",
+    "name": "Lehman Hall, Harvard Yard",
+    "shortName": "",
+    "address1": "Lehman Hall, Harvard Yard",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02138",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.3735909,
+    "longitude": -71.11849,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.11849,
+        42.3735909
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:45.699Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "6852ffeabb550728064284fd",
+    "appId": "1",
+    "name": "Lexington Community Center",
+    "shortName": "LEX-COMM",
+    "address1": "39 Marrett Road",
+    "address2": "",
+    "address3": "",
+    "city": "Lexington",
+    "state": "MA",
+    "zip": "02421",
+    "phone": "",
+    "comments": "<h2>LEXINGTON COMMUNITY CENTER</h2><p>Located in Lexington, MA, this center provides event space and community programs.</p>",
+    "latitude": 42.4365674,
+    "longitude": -71.2190456,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.2190456,
+        42.4365674
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-06-18T14:00:00.000Z",
+    "updatedAt": "2025-07-22T22:01:31.984Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5120ef6308b31e5b5798",
+    "appId": "1",
+    "name": "MIT Building 36 (50 vassar)",
+    "shortName": "MIT36",
+    "address1": "50 Vassar St",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<div>\n<p><span style=\"font-size: medium;\"><b><span style=\"color: #000000;\">Building 36</span></b><span style=\"color: #000000;\"> (50 Vassar Street)</span></span></p>\n</div>\n<div><span style=\"font-size: medium;\"><b><span style=\"color: #666666;\">  </span><span style=\"color: #000000;\">  -36-112</span></b><span style=\"color: #000000;\"> is on the first floor </span></span></div>\n<p>&nbsp;</p>",
+    "latitude": 42.3614118,
+    "longitude": -71.0916997,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0916997,
+        42.3614118
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:21:04.834Z",
+    "updatedAt": "2025-06-30T20:35:27.156Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5118ef6308b31e5b56f4",
+    "appId": "1",
+    "name": "MIT Building 66 (25 Ames)",
+    "shortName": "",
+    "address1": "25 ames St",
+    "address2": "",
+    "address3": "",
+    "city": "cambrige",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<div>\n<div><b><span style=\"color: #000000;\">Building 66</span></b><span style=\"color: #000000;\"> (25 Ames Street)</span></div>\n</div>\n<div>\n<div><span style=\"font-size: medium;\"><b><span style=\"color: #000000;\">  -66-168</span></b><span style=\"color: #000000;\"> is on the first floor </span></span></div>\n</div>\n<div></div>",
+    "latitude": 42.360955,
+    "longitude": -71.0892393,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0892393,
+        42.360955
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:56.762Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5118ef6308b31e5b56e9",
+    "appId": "1",
+    "name": "MIT Student Center",
+    "shortName": "",
+    "address1": "84 Massachusetts Avenue",
+    "address2": "",
+    "address3": "",
+    "city": "cambridge",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "<div>\n<div><b><span style=\"color: #000000;\">Student center, building W20</span></b></div>\n<div>    &#8211;<b>W20-201 </b>(West Lounge)is on the second fl<span style=\"color: #000000;\"><b>oor </b></span></div>\n<div><span style=\"color: #000000;\"><b>    &#8211;</b><b>W20-208</b><b> (Lobdell)</b> is on the second floor<br />\n<b>    &#8211;</b><b>W20-491</b>and<b>W20-407</b> are on the 4th floor</span></div>\n</div>\n<div></div>\n<div></div>\n<div><a href=\"https://whereis.mit.edu/?go=W20\">MIT &#8211; w20 MAP </a></div>\n<div></div>",
+    "latitude": 42.359014,
+    "longitude": -71.0947224,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0947224,
+        42.359014
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:56.221Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "68618ed70b3c39839acf1d08",
+    "appId": "1",
+    "name": "Mango Studio Rental",
+    "shortName": "Mango",
+    "address1": "112 Bishop Allen Dr",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02139",
+    "phone": "(617) 539-6744",
+    "comments": "<p>Open until 2AM. Rehearsal studio.</p>",
+    "latitude": 42.364926,
+    "longitude": -71.104785,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.104785,
+        42.364926
+      ]
+    },
+    "isActive": true,
+    "createdAt": "2025-06-28T00:00:00.000Z",
+    "updatedAt": "2025-06-30T20:36:23.864Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c4ebbef6308b31e5b556b",
+    "appId": "1",
+    "name": "Millennium Ballroom",
+    "shortName": "",
+    "address1": "789 Ballroom Blvd",
+    "address2": "",
+    "address3": "",
+    "city": "Somerville",
+    "state": "MA",
+    "zip": "02143",
+    "phone": "555-9012",
+    "comments": "Large ballroom venue",
+    "latitude": 42.3876,
+    "longitude": -71.0995,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0995,
+        42.3876
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:10:51.433Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511def6308b31e5b575b",
+    "appId": "1",
+    "name": "Narragansett Towers",
+    "shortName": "Towers",
+    "address1": "35 Ocean Road",
+    "address2": "",
+    "address3": "",
+    "city": "Narragansett",
+    "state": "RI",
+    "zip": "",
+    "phone": "",
+    "comments": "<p><span class=\"js-about-item-abstr\">The Towers, also known as the Twin Towers is a historic structure located at 35 Ocean Road in Narragansett, Rhode Island. It is the only remnant of the Narragansett Pier Casino built in the 1880s. On November 25, 1969, it was added to the National Register of Historic Places.</span></p>\n<p>The seaside venue is conveniently located close to ground, rail and air transportation. The Towers is served by the <a href=\"http://www.ripta.com/\" target=\"_blank\" rel=\"noopener noreferrer\">RIPTA</a> <strong>bus route 14</strong> with the closest stop across from the Narragansett library, just two blocks away. <a href=\"http://www.amtrak.com/servlet/ContentServer?pagename=am%2Fam2Station%2FStation_Page&amp;code=KIN\" target=\"_blank\" rel=\"noopener noreferrer\">Amtrak</a> serves the <strong>West Kingston train station</strong> just eight miles to the northwest. <a href=\"http://www.pvdairport.com/\" target=\"_blank\" rel=\"noopener noreferrer\">T.F. Green Airport</a> is located 25 miles to the north.</p>\n<p>Free public parking is available along Ocean Road and surrounding streets. The Towers does not have its own parking lot.</p>",
+    "latitude": 41.4304522,
+    "longitude": -71.4559793,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.4559793,
+        41.4304522
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46b",
+      "cityName": "Providence"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:01.738Z",
+    "updatedAt": "2025-06-30T20:34:46.232Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "68745e2456b4e944a75d89d0",
+    "appId": "1",
+    "name": "Parkway Place",
+    "shortName": "ParkWayPl",
+    "address1": "1548 Dorchester Ave",
+    "address2": "",
+    "address3": "",
+    "city": "Dorchester",
+    "state": "Ma",
+    "zip": "02124",
+    "phone": "",
+    "comments": "02124/@42.297698,-71.0633857,17",
+    "latitude": 42.297698,
+    "longitude": -71.063385717,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.063385717,
+        42.297698
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "isApproved": true,
+    "createdAt": "2025-07-14T01:32:20.338Z",
+    "updatedAt": "2025-07-14T01:33:20.620Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511cef6308b31e5b5745",
+    "appId": "1",
+    "name": "Rise UP Center",
+    "shortName": "",
+    "address1": "30 Howard St.",
+    "address2": "",
+    "address3": "",
+    "city": "Wilton",
+    "state": "NH",
+    "zip": "",
+    "phone": "",
+    "comments": "<p><a href=\"http://riseupcenter.org/index.php/location/\">The Rise Up! Center</a> has Tango! The Rise Up! Center is located at 30 Howard St, in Wilton, NH.</p>\n<p>(down by the big, white <em>Riverview Artist&#8217;s Mill</em>).</p>\n<p>Howard St is directly off Main St by the Wilton Post Office.   Follow the parking lot back, and please park in the large lot next to the river.</p>\n<p>All tango Events for this location: <a href=\"https://bostontangocalendar.com/venue/rise-up-center/\">https://bostontangocalendar.com/venue/rise-up-center/</a></p>",
+    "latitude": 42.8411131,
+    "longitude": -71.7360647,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.7360647,
+        42.8411131
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46e",
+      "cityName": "Manchester"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:00.685Z",
+    "updatedAt": "2025-04-26T03:21:00.686Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c5115ef6308b31e5b56a7",
+    "appId": "1",
+    "name": "SOCH Penthouse",
+    "shortName": "",
+    "address1": "59 shepard street",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02138",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.3810119,
+    "longitude": -71.1252329,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1252329,
+        42.3810119
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:53.045Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511cef6308b31e5b573a",
+    "appId": "1",
+    "name": "Scottish Rite Museum Auditorium",
+    "shortName": "",
+    "address1": "33 Marrett Road",
+    "address2": "",
+    "address3": "",
+    "city": "Lexington",
+    "state": "MA",
+    "zip": "02421",
+    "phone": "",
+    "comments": "<p>Scottish Rite Museum Auditorium</p>\n<p>33 Marrett Road<br />\nLexington, MA 02421<br />\n<a href=\"tel:(781) 861-6559\">(781) 861-6559</a></p>\n<p><strong>Free Museum Admission &amp; Free Parking</strong></p>",
+    "latitude": 42.4367819,
+    "longitude": -71.2142447,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.2142447,
+        42.4367819
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:00.158Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "687538ce56b4e944a75da57c",
+    "appId": "1",
+    "name": "St. James Episcopal Church",
+    "shortName": "ST-JAMES",
+    "address1": " b",
+    "address2": "1991 Massachusetts Ave,",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02140",
+    "phone": "",
+    "comments": "St. James Episcopal Church\n1991 Massachusetts Ave, Cambridge, MA 02140 42.390651,-71.1235169",
+    "latitude": 42.390651,
+    "longitude": -71.1235169,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1235169,
+        42.390651
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "isApproved": false,
+    "createdAt": "2025-07-14T17:05:18.634Z",
+    "updatedAt": "2025-07-14T17:05:18.635Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c4ebaef6308b31e5b5560",
+    "appId": "1",
+    "name": "Tango Center",
+    "shortName": "",
+    "address1": "456 Dance Ave",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02139",
+    "phone": "555-5678",
+    "comments": "Beautiful tango center",
+    "latitude": 42.3736,
+    "longitude": -71.1097,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.1097,
+        42.3736
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:10:50.893Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c510fef6308b31e5b563a",
+    "appId": "1",
+    "name": "TangoAffair Studio",
+    "shortName": "TangoAffair ",
+    "address1": "9 Union Street",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "",
+    "zip": "02139",
+    "phone": "617-615-1550",
+    "comments": "",
+    "latitude": 42.3689986,
+    "longitude": -71.0959511,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0959511,
+        42.3689986
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:20:47.530Z",
+    "updatedAt": "2025-06-30T20:34:56.210Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "6862f3fb0ac53b960834ed90",
+    "appId": "1",
+    "name": "The Dance Complex Cambridge",
+    "shortName": "Cmbg Complex",
+    "address1": "536 Mass Ave",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.3641,
+    "longitude": -71.102317,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.102317,
+        42.3641
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "isApproved": true,
+    "createdAt": "2025-06-30T20:30:51.045Z",
+    "updatedAt": "2025-06-30T20:31:03.818Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511def6308b31e5b5750",
+    "appId": "1",
+    "name": "The Mediator (Fellowship)",
+    "shortName": "",
+    "address1": " 50 Rounds Avenue",
+    "address2": "",
+    "address3": "",
+    "city": "providence",
+    "state": "RI",
+    "zip": "02907",
+    "phone": "",
+    "comments": "",
+    "latitude": 41.7875812,
+    "longitude": -71.4251357,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.4251357,
+        41.7875812
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46b",
+      "cityName": "Providence"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:21:01.207Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c4f5eef6308b31e5b5583",
+    "appId": "1",
+    "name": "UNKNOWN",
+    "shortName": "UNKNOWN",
+    "address1": "UNKNOWN",
+    "address2": "",
+    "address3": "",
+    "city": "nowhere",
+    "state": "ma",
+    "zip": "02111",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.355083,
+    "longitude": -71.06588,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.06588,
+        42.355083
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:13:34.043Z",
+    "updatedAt": "2025-06-30T20:09:05.563Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "68190f7b05c983fb8798381b",
+    "appId": "1",
+    "name": "Ultimate Tango Studio",
+    "shortName": "ULTIMATE",
+    "address1": "349 Washington St",
+    "address2": "",
+    "address3": "",
+    "city": "Malden",
+    "state": "MA",
+    "zip": "02148",
+    "phone": "",
+    "comments": "/@42.4387386,-71.0714035",
+    "latitude": 42.4387386,
+    "longitude": -71.0714035,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.0714035,
+        42.4387386
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-04-26T03:10:50.318Z",
+    "updatedAt": "2025-07-14T06:07:47.796Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511bef6308b31e5b5724",
+    "appId": "1",
+    "name": "Weeks Bridge",
+    "shortName": "WKS-BRDG",
+    "address1": "953 Memorial Dr",
+    "address2": "",
+    "address3": "",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02138",
+    "phone": "",
+    "comments": "<p>The Weeks Footbridge (or simply Weeks Bridge), is a pedestrian bridge over the Charles River, connecting Cambridge, Massachusetts with the Allston neighborhood of Boston. John W. Weeks was a longtime U.S. Representative, and later Senator, from Massachusetts, as well as Secretary of War in the Harding and Coolidge administrations. The Weeks Bridge opened in 1927 to carry pedestrian traffic between the Harvard Business School&#8217;s newly built Allston campus and the Business School&#8217;s former home, Harvard&#8217;s traditional campus in Cambridge. Its concrete underbelly conceals tentacles of the University&#8217;s steam, electrical, and communications networks.[3]</p>\n<p>The bridge is a popular vantage point from which to enjoy the Head of the Charles Regatta. An abrupt bend in the river prompts most boats to crowd through the bridge&#8217;s center span, and collisions have occurred when coxswains could not make themselves heard above the cheering of the crowd.[4]</p>",
+    "latitude": 42.369024,
+    "longitude": -71.117442,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.117442,
+        42.369024
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:59.076Z",
+    "updatedAt": "2025-07-14T17:08:21.142Z",
+    "__v": 0,
+    "isApproved": false,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "6853000abb550728064284ff",
+    "appId": "1",
+    "name": "Wellfleet Preservation Hall",
+    "shortName": "",
+    "address1": "335 Main St",
+    "address2": "",
+    "address3": "",
+    "city": "Wellfleet",
+    "state": "MA",
+    "zip": "02667",
+    "phone": "",
+    "comments": "<h2>WELLFLEET PRESERVATION HALL</h2><p>A vibrant arts and community center located on Cape Cod.</p>",
+    "latitude": 41.9380966,
+    "longitude": -70.0311441,
+    "isValidVenueGeolocation": true,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -70.0311441,
+        41.9380966
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": true,
+    "createdAt": "2025-06-18T14:00:00.000Z",
+    "updatedAt": "2025-06-30T20:08:57.946Z",
+    "__v": 0,
+    "isApproved": true,
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  {
+    "_id": "680c511aef6308b31e5b570e",
+    "appId": "1",
+    "name": "Whitney Building",
+    "shortName": "",
+    "address1": "50 Kearney road",
+    "address2": "",
+    "address3": "",
+    "city": "Needham",
+    "state": "MA",
+    "zip": "02494",
+    "phone": "",
+    "comments": "",
+    "latitude": 42.3056518,
+    "longitude": -71.2288124,
+    "isValidVenueGeolocation": false,
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -71.2288124,
+        42.3056518
+      ]
+    },
+    "masteredCityId": {
+      "_id": "6751f58a5db435dd8005e46a",
+      "cityName": "Boston"
+    },
+    "masteredDivisionId": "6751f58a5db435dd8005e460",
+    "masteredRegionId": "6751f58a5db435dd8005e45b",
+    "masteredCountryId": "6751f57e2e74d97609e7dca0",
+    "isActive": false,
+    "createdAt": "2025-04-26T03:20:58.026Z",
+    "updatedAt": "2025-06-20T21:34:46.003Z",
+    "__v": 0,
+    "country": "US",
+    "timezone": "America/New_York"
+  }
+]

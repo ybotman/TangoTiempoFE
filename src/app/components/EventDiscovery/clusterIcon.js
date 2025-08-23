@@ -1,12 +1,11 @@
 'use client';
 
+import L from 'leaflet';
+
 export const createClusterIcon = (count) => {
   if (typeof window === 'undefined') {
     return null;
   }
-  
-  // eslint-disable-next-line no-undef
-  const L = require('leaflet');
   
   return L.divIcon({
     className: 'custom-cluster-icon',
