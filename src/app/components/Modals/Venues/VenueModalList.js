@@ -104,11 +104,6 @@ const VenueModalList = ({
       <Typography variant="h6" gutterBottom>
         Venue List
       </Typography>
-      {deleteError && (
-        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
-          {deleteError}
-        </Typography>
-      )}
 
       <Box display="flex" flexDirection="row" gap={2} alignItems="center" sx={{ mb: 2, flexWrap: 'wrap' }}>
         {/* Country Dropdown */}

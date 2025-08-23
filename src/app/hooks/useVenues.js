@@ -20,24 +20,26 @@ export function useVenues() {
   const masteredCityId = selectedLocation?.city?.id || null;
 
   // Fetch venues based on selected location
-  const fetchVenues = useCallback(async (isActive = null) => {
+  const fetchVenues = useCallback(async (isActive = null, location = null) => {
     setLoading(true);
     setError(null);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const params = { appId };
+      
+      // Add distance-based parameters if location provided
+      if (location && location.lat && location.lng) {
+        params.lat = location.lat;
+        params.lng = location.lng;
+        params.radius = location.radius || 20; // Default 20 miles
+      }
+      
       // Only add isActive parameter if explicitly set
       if (isActive !== null) {
         params.isActive = isActive;
       }
       
-      // Add location filters from GeoLocationContext
-      // Filter by masteredDivisionId if available to get venues for the selected location
-      if (masteredDivisionId) {
-        params.masteredDivisionId = masteredDivisionId;
-      }
-      
-      // Add 'all=true' to get all venues without pagination
+      // Add 'all=true' to get all venues without pagination (once distance API is ready)
       params.all = true;
       
       // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
