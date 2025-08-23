@@ -4,7 +4,6 @@ import React, { useContext } from 'react';
 import {
   Box,
   Typography,
-  Button,
   Paper,
   Alert,
   List,
@@ -20,9 +19,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 
 const ApplicationFormTab = () => {

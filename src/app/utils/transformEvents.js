@@ -135,7 +135,7 @@ export function transformEvents(events) {
         // TIEMPO-239: Pass venue times if available for RRULE parsing
         const startForRRule = useVenueTime ? displayTimes.startTime : event.startDate;
         const endForRRule = useVenueTime ? displayTimes.endTime : event.endDate;
-        const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule, endForRRule);
+        const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule);
         
         
         // Create the event object
@@ -208,7 +208,7 @@ export function transformEvents(events) {
 }
 
 // Parse RRULE string to FullCalendar v6 object format
-function parseRRuleToObject(rruleString, startDate, _) {
+function parseRRuleToObject(rruleString, startDate) {
   // First pass: get frequency
   let frequency = null;
   

@@ -44,6 +44,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
   
   // UI state
   const [errorMessage, setErrorMessage] = useState('');
+  const [showRestartMessage, setShowRestartMessage] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showRestartWarning, setShowRestartWarning] = useState(false);
 
@@ -128,6 +129,15 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
 
   return (
     <Box sx={{ mt: 2 }}>
+      {/* Restart message when isEnabled is toggled */}
+      {showRestartMessage && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            Saving changes and restarting... Please wait.
+          </Typography>
+        </Alert>
+      )}
+      
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">
           Profile Status Dashboard
@@ -197,8 +207,18 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
                     // TIEMPO-272: Always use centralized field change handler
                     if (onFieldChange) {
                       onFieldChange('isEnabled', e.target.checked);
+                      
+                      // TIEMPO-272: Show restart message and reload after save
+                      // Save the change first, then reload
+                      if (onSave) {
+                        onSave().then(() => {
+                          setShowRestartMessage(true);
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 3000);
+                        });
+                      }
                     }
-                    // Removed fallback setIsEnabled - no local state exists
                   }} 
                   color="primary"
                   disabled={!allMandatoryPassed}

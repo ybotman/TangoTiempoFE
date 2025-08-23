@@ -10,7 +10,6 @@ const useMenuItems = () => {
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const { selectedLocation } = useGeoLocation();
-  const selectedRegion = selectedLocation?.region?.name;
   
   // TIEMPO-272: Get organizer data from the organizer collection
   const { organizer, fetchOrganizerById } = useOrganizers();

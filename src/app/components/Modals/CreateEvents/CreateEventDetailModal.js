@@ -5,7 +5,7 @@ import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
 import ValidationDialog from './ValidationDialog';
-import { useLocationAPI } from '@/contexts/LocationAPIContext';
+// import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
@@ -35,7 +35,7 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
-  const { loading: _ } = useLocationAPI();
+  // Removed unused loading from LocationAPI
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();

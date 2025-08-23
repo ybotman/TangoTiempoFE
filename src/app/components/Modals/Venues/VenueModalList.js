@@ -21,7 +21,6 @@ import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 const VenueModalList = ({
   venues,
   onEdit,
-  onDelete,
   selectedCityId,
   onCityChange,
   activeFilter,
@@ -35,7 +34,7 @@ const VenueModalList = ({
   const [regionId, setRegionId] = useState('');
   const [divisionId, setDivisionId] = useState('');
   const [cityId, setCityId] = useState(selectedCityId || '');
-  const [deleteError, setDeleteError] = useState(null);
+  // Removed unused deleteError state
 
   useEffect(() => {
     // Assume single country scenario. If multiple, we can prompt user.

@@ -82,7 +82,7 @@ const LocationSelector = ({ open, onClose }) => {
             }
             setIsDetecting(false);
           },
-          (_) => {
+          () => {
             setError('Location access denied. Please select manually.');
             setIsDetecting(false);
           }
@@ -91,7 +91,7 @@ const LocationSelector = ({ open, onClose }) => {
         setError('Geolocation is not supported by your browser.');
         setIsDetecting(false);
       }
-    } catch (_) {
+    } catch {
       setError('Failed to detect location. Please select manually.');
       setIsDetecting(false);
     }

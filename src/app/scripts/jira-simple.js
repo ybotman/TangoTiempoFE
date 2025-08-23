@@ -34,7 +34,7 @@ class SimpleJira {
       try {
         await axios.get(`${JIRA_URL}/rest/api/3/serverInfo`);
         // TIEMPO-276: Security cleanup - removed debug logging
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed debug logging
       }
       
@@ -46,7 +46,7 @@ class SimpleJira {
         if (projects.data.length > 0) {
           // TIEMPO-276: Security cleanup - removed project details logging
         }
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed error details logging
       }
       
@@ -55,7 +55,7 @@ class SimpleJira {
       try {
         await this.api.get('/project/search');
         // TIEMPO-276: Security cleanup - removed debug logging
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed error logging
       }
       
@@ -63,7 +63,7 @@ class SimpleJira {
       try {
         await this.api.get('/myself');
         // TIEMPO-276: Security cleanup - removed user info logging
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed auth header and error details logging
       }
 
@@ -76,7 +76,7 @@ class SimpleJira {
           params: { permissions: 'BROWSE_PROJECTS,CREATE_ISSUES,ADMINISTER_PROJECTS' }
         });
         // TIEMPO-276: Security cleanup - removed permissions logging
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed error logging
       }
       
@@ -87,7 +87,7 @@ class SimpleJira {
       try {
         await this.api.get('/search?maxResults=10');
         // TIEMPO-276: Security cleanup - removed issue details logging
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed error logging
       }
 
@@ -102,7 +102,7 @@ class SimpleJira {
         if (testIssue) {
           // TIEMPO-276: Security cleanup - removed issue creation logging
         }
-      } catch (_) {
+      } catch {
         // TIEMPO-276: Security cleanup - removed error logging
       }
       

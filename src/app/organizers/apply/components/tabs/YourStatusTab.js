@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Box,
   Typography,
   Paper,
   Button,
   Alert,
-  Chip,
+  // Chip,
   Grid,
   Card,
   CardContent,
@@ -69,11 +69,11 @@ const YourStatusTab = () => {
   const currentPhase = getApplicationPhase();
 
   // Phase-specific action handlers
-  const handleStartApplication = () => {
+  // const handleStartApplication = () => {
     // Check if we're in the organizer application page context
     // If not, we might need to open User Settings modal instead
     setShowROEModal(true);
-  };
+  // };
 
   const handleROEAccept = (accepted) => {
     setShowROEModal(false);
@@ -354,7 +354,7 @@ const YourStatusTab = () => {
           Application Progress
         </Typography>
         <Stepper orientation="vertical">
-          {applicationSteps.map((step, index) => (
+          {applicationSteps.map((step) => (
             <Step key={step.label} active={!step.completed} completed={step.completed}>
               <StepLabel>{step.label}</StepLabel>
               <StepContent>

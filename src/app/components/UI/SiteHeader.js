@@ -6,21 +6,18 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
-import { useUsers } from '@/hooks/useUsers';
 import MapIcon from '@mui/icons-material/Map';
 import packageJson from '../../../../package.json';
 // Removed userSettingsEvent - using GeoLocationContext instead
 
 const SiteHeader = () => {
-  const { selectedLocation, openMapCenterModal } = useGeoLocation();
+  const { openMapCenterModal } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
-  const { userData } = useUsers();
-  const { organizer, fetchOrganizerById } = useOrganizers();
+  const { fetchOrganizerById } = useOrganizers();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
   
-  // Determine if user is in map mode or city mode
-  const isMapMode = true; // FORCED TO TRUE - Always use map mode
+  // Map mode forced true by product decision
   
   // Fetch organizer data when user is a RegionalOrganizer
   useEffect(() => {

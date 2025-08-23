@@ -11,3 +11,6 @@
 [FRED] src/app/components/Modals/RegionalOrganizers/*.js - VERIFIED (no PropTypes errors)
 [FRED] src/app/components/Modals/CreateEvents/*.js - COMPLETED (fixed CreateEventDetailsBasic.js)
 [FRED] src/app/components/Modals/UserSettings/*.js - VERIFIED (no PropTypes errors)
+[DINO] Sat Aug 23 16:22:27 EDT 2025 - Fixed react/no-unescaped-entities - 21 errors cleared (excluding Fred's files)
+[DINO] Sat Aug 23 16:22:27 EDT 2025 - Fixed no-useless-escape - 4 errors cleared
+[DINO] Sat Aug 23 16:22:27 EDT 2025 - Fixed no-unused-vars in UI/contexts/hooks/scripts - 33 errors cleared
