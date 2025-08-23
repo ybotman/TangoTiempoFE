@@ -461,6 +461,8 @@ ViewEventDetailsOrganizer.propTypes = {
     extendedProps: PropTypes.shape({
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
+      ownerOrganizer: PropTypes.object,
+      organizer: PropTypes.object,
     }),
   }),
 };

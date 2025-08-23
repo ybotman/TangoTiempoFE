@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
+import PropTypes from 'prop-types';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Box,
   Button,
   Typography,
@@ -25,10 +25,7 @@ import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamic import for avoiding SSR issues
-const MapContainer = dynamic(
-  () => import('react-leaflet').then(mod => mod.MapContainer),
-  { ssr: false }
-);
+// Note: Using Leaflet directly; no MapContainer used in this implementation
 
 const UnifiedLocationModal = ({ 
   open, 
@@ -440,3 +437,23 @@ const UnifiedLocationModal = ({
 };
 
 export default UnifiedLocationModal;
+
+UnifiedLocationModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSetLocation: PropTypes.func.isRequired,
+  onSaveLocation: PropTypes.func.isRequired,
+  initialLocation: PropTypes.shape({
+    lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    zoomRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }),
+  savedLocation: PropTypes.oneOfType([
+    PropTypes.shape({
+      lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      zoomRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    }),
+    PropTypes.oneOf([null])
+  ]),
+};

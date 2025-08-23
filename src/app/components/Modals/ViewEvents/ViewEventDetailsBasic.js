@@ -128,6 +128,7 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
 };
 ViewEventDetailsBasic.propTypes = {
   eventDetails: PropTypes.shape({
+    title: PropTypes.string,
     extendedProps: PropTypes.shape({
       description: PropTypes.string,
       cost: PropTypes.string,

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 const fs = require('fs');
 const path = require('path');
@@ -93,12 +94,12 @@ function searchInFile(filePath, attribute) {
     });
     
     return results;
-  } catch (error) {
+  } catch (_) {
     return [];
   }
 }
 
-function categorizeUsage(line, attribute) {
+function categorizeUsage(line, _) {
   const types = [];
   
   for (const [type, patterns] of Object.entries(USAGE_PATTERNS)) {

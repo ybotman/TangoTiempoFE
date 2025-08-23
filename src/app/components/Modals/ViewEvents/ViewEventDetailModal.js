@@ -8,7 +8,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
 // TIEMPO-239: Import venue timezone utilities
-import { formatVenueTime, formatVenueTimeRange, formatVenueDate } from '@/utils/venueTimezone';
+import { formatVenueTimeRange, formatVenueDate } from '@/utils/venueTimezone';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizer from './ViewEventDetailsOrganizer';
@@ -471,16 +471,30 @@ ViewEventDetailModal.propTypes = {
   eventDetails: PropTypes.shape({
     title: PropTypes.string,
     allDay: PropTypes.bool,
+    start: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    end: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
     extendedProps: PropTypes.shape({
       _id: PropTypes.string,
       eventImage: PropTypes.string,
       fallbackImageUrl: PropTypes.string,
       description: PropTypes.string,
+      shortTitle: PropTypes.string,
       categoryFirst: PropTypes.string,
       categorySecond: PropTypes.string,
       categoryThird: PropTypes.string,
+      hasVenueTimezone: PropTypes.bool,
+      displayStartTime: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      displayEndTime: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      timezoneAbbr: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
+      masteredCityId: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({ _id: PropTypes.string, id: PropTypes.string })
+      ]),
+      venueMasteredCityID: PropTypes.string,
+      venueMasteredCityId: PropTypes.string,
+      masteredCityName: PropTypes.string,
     }),
     _instance: PropTypes.shape({
       range: PropTypes.shape({

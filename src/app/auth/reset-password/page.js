@@ -85,7 +85,7 @@ const ResetPasswordPage = () => {
 
           {/* Description */}
           <Typography variant="body2" sx={{ mb: 3, textAlign: 'center', color: 'text.secondary' }}>
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </Typography>
 
           {/* Success Message */}
@@ -95,7 +95,7 @@ const ResetPasswordPage = () => {
                 Password reset email sent! Check your inbox for instructions.
               </Typography>
               <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                Didn't receive it? Check your spam folder or try again.
+                Didn&apos;t receive it? Check your spam folder or try again.
               </Typography>
             </Alert>
           )}
