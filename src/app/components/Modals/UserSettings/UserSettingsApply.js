@@ -304,7 +304,7 @@ const UserSettingsApply = () => {
       {!isLoading && hasOrganizerId && isApproved && organizer?.isEnabled && (
         <Alert severity="success" sx={{ mt: 2 }}>
           <Typography variant="body2">
-            ✓ You're all set! You can now create events as an Organizer.
+            ✓ You&apos;re all set! You can now create events as an Organizer.
           </Typography>
         </Alert>
       )}
@@ -402,7 +402,6 @@ const UserSettingsApply = () => {
             variant="contained"
             color="primary"
             onClick={() => {
-              setHasAgreedToNextSteps(true);
               setShowNextStepsDialog(false);
               // Show restarting message then refresh
               setRestartMessage(true);
