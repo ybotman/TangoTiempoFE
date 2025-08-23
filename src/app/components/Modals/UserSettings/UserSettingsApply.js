@@ -292,7 +292,7 @@ const UserSettingsApply = () => {
           </Typography>
           <Typography variant="body2" component="div">
             <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
-              <li><strong>Change your role:</strong> Click the login button → Select "Organizer/Artist"</li>
+              <li><strong>Change your role:</strong> Click the login button → Select &quot;Organizer/Artist&quot;</li>
               <li><strong>Complete your profile:</strong> Go to Event Organizer Settings → Status tab</li>
               <li><strong>Enable your profile:</strong> Complete all requirements and activate</li>
             </ol>
@@ -347,8 +347,8 @@ const UserSettingsApply = () => {
                   To start creating events:
                 </Typography>
                 <Typography variant="caption" component="div" sx={{ mt: 1 }}>
-                  1. Change your role to <strong>"Organizer/Artist"</strong> in the top menu<br/>
-                  2. Open <strong>"Event Organizer Settings"</strong><br/>
+                  1. Change your role to <strong>&quot;Organizer/Artist&quot;</strong> in the top menu<br/>
+                  2. Open <strong>&quot;Event Organizer Settings&quot;</strong><br/>
                   3. Complete all requirements in the <strong>Status tab</strong><br/>
                   4. <strong>Enable your profile</strong> to activate event creation
                 </Typography>
@@ -382,8 +382,8 @@ const UserSettingsApply = () => {
           <Box sx={{ ml: 2, mb: 2 }}>
             <Typography variant="body2" component="div">
               <ol style={{ margin: '8px 0' }}>
-                <li><strong>Change your role</strong> to "Organizer/Artist" in the top menu</li>
-                <li><strong>Open "Event Organizer Settings"</strong> from the menu</li>
+                <li><strong>Change your role</strong> to &quot;Organizer/Artist&quot; in the top menu</li>
+                <li><strong>Open &quot;Event Organizer Settings&quot;</strong> from the menu</li>
                 <li><strong>Complete all requirements</strong> in the Status tab</li>
                 <li><strong>Enable your profile</strong> to activate event creation</li>
               </ol>
@@ -393,7 +393,7 @@ const UserSettingsApply = () => {
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>Note:</strong> The page will refresh after you acknowledge these steps. 
-              Please remember to change your role to "Organizer/Artist" to access the Event Organizer Settings.
+              Please remember to change your role to &quot;Organizer/Artist&quot; to access the Event Organizer Settings.
             </Typography>
           </Alert>
         </DialogContent>

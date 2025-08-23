@@ -200,7 +200,7 @@ const SidebarDrawer = ({ open, onClose }) => {
             // Not Logged In Menu Items
             <>
               <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
-                It's FREE!
+                It&apos;s FREE!
               </Typography>
               <Link href="/benefits" passHref>
                 <ListItem

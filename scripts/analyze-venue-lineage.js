@@ -36,10 +36,10 @@ const VENUE_ATTRIBUTES = [
 // Patterns to identify usage types
 const USAGE_PATTERNS = {
   display: [
-    /\.name[\s\)}]/,
-    /\.shortName[\s\)}]/,
-    /\.city[\s\)}]/,
-    /\.state[\s\)}]/,
+    /\.name[\s)}]/,
+    /\.shortName[\s)}]/,
+    /\.city[\s)}]/,
+    /\.state[\s)}]/,
     /\.address/,
     /<.*>\s*{\s*venue\./,
     /tooltip.*venue\./,
@@ -94,12 +94,12 @@ function searchInFile(filePath, attribute) {
     });
     
     return results;
-  } catch (_) {
+  } catch {
     return [];
   }
 }
 
-function categorizeUsage(line, _) {
+function categorizeUsage(line) {
   const types = [];
   
   for (const [type, patterns] of Object.entries(USAGE_PATTERNS)) {

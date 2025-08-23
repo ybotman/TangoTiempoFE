@@ -34,7 +34,7 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
       if (descriptionRef.current) {
         const element = descriptionRef.current;
         // Compare scrollHeight with the actual rendered height
-        const maxHeight = parseFloat(window.getComputedStyle(element).maxHeight);
+        // Read computed maxHeight if needed for future logic
         
         // If showMore is false and content is clipped
         if (!showMore && element.scrollHeight > element.clientHeight) {

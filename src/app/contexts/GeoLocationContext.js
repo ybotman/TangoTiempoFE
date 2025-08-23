@@ -76,7 +76,7 @@ export const GeoLocationProvider = ({ children }) => {
       if (saved) {
         try {
           return JSON.parse(saved);
-        } catch (e) {
+        } catch {
           // TIEMPO-276: Security cleanup - removed error logging
           return { lat: null, lng: null, zoomRange: 50 };
         }
@@ -95,7 +95,7 @@ export const GeoLocationProvider = ({ children }) => {
     // Subscribe to nearest city fetched event
     const unsubscribeNearestCity = locationEventBus.on(
       LOCATION_EVENTS.NEAREST_CITY_FETCHED,
-      ({ cityData, coordinates }) => {
+      ({ cityData }) => {
         // TIEMPO-276: Security cleanup - removed event logging
         
         // Update selected location with the fetched city
@@ -155,7 +155,7 @@ export const GeoLocationProvider = ({ children }) => {
     // Subscribe to location error events
     const unsubscribeLocationError = locationEventBus.on(
       LOCATION_EVENTS.LOCATION_ERROR,
-      ({ error, operation, details }) => {
+      ({ error, operation }) => {
         console.error(`[GeoLocationContext] Location error in ${operation}:`, error);
         
         // Update appropriate error state based on operation

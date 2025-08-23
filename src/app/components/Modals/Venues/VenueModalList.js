@@ -98,15 +98,7 @@ const VenueModalList = ({
     onActiveFilterChange(e.target.checked);
   };
 
-  const handleDeleteVenue = async (venueId) => {
-    setDeleteError(null);
-    try {
-      await onDelete(venueId);
-      refreshList();
-    } catch (err) {
-      setDeleteError(err.message);
-    }
-  };
+  // Removed unused handleDeleteVenue helper
 
   return (
     <Box>

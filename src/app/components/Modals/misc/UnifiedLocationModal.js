@@ -21,7 +21,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AuthContext } from '@/contexts/AuthContext';
-import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamic import for avoiding SSR issues
@@ -33,7 +32,7 @@ const UnifiedLocationModal = ({
   onSetLocation,
   onSaveLocation,
   initialLocation = { lat: 40.7128, lng: -74.0060, zoomRange: 50 },
-  savedLocation = null
+  
 }) => {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -143,7 +142,7 @@ const UnifiedLocationModal = ({
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
         mapInstanceRef.current = null;
@@ -266,7 +265,7 @@ const UnifiedLocationModal = ({
       setTimeout(() => {
         onClose();
       }, 500);
-    } catch (_) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to save location' });
     }
     setLoading(false);

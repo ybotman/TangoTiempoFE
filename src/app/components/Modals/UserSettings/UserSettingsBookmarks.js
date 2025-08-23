@@ -20,7 +20,6 @@ import {
 } from '@mui/material';
 import {
   Bookmark as BookmarkIcon,
-  BookmarkBorder as BookmarkBorderIcon,
   Edit as EditIcon,
   LocationCity as CityIcon,
   Event as EventIcon,
@@ -28,7 +27,7 @@ import {
   Done as DoneIcon
 } from '@mui/icons-material';
 
-const UserSettingsBookmarks = ({ userData, updateUserData, onSaveSuccess }) => {
+const UserSettingsBookmarks = ({ userData }) => {
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState('events');
   
@@ -99,18 +98,7 @@ const UserSettingsBookmarks = ({ userData, updateUserData, onSaveSuccess }) => {
     }));
   };
 
-  const getIcon = (type) => {
-    switch (type) {
-      case 'events':
-        return <EventIcon />;
-      case 'organizers':
-        return <OrganizerIcon />;
-      case 'cities':
-        return <CityIcon />;
-      default:
-        return <BookmarkIcon />;
-    }
-  };
+  // Removed unused getIcon helper
 
   const getItemCount = (type) => {
     return bookmarkedItems[type]?.length || 0;
@@ -290,8 +278,6 @@ const UserSettingsBookmarks = ({ userData, updateUserData, onSaveSuccess }) => {
 
 UserSettingsBookmarks.propTypes = {
   userData: PropTypes.object,
-  updateUserData: PropTypes.func,
-  onSaveSuccess: PropTypes.func,
 };
 
 export default UserSettingsBookmarks;

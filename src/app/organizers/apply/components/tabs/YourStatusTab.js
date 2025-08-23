@@ -204,7 +204,7 @@ const YourStatusTab = () => {
       <Card elevation={2}>
         <CardContent sx={{ p: 4 }}>
           <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 3 }}>
-            Congratulations! You've been approved as a Regional Organizer.
+            Congratulations! You&apos;ve been approved as a Regional Organizer.
           </Alert>
           
           <Typography variant="h6" gutterBottom>
@@ -285,7 +285,7 @@ const YourStatusTab = () => {
             Welcome, Regional Organizer!
           </Typography>
           <Typography variant="h6" paragraph>
-            You're all set to create Argentine Tango events.
+            You&apos;re all set to create Argentine Tango events.
           </Typography>
           <Button 
             variant="contained" 
