@@ -61,13 +61,9 @@ export const useUsers = () => {
       setUserData(response.data);
     } catch (error) {
       console.error('UU: Error fetching user data:', error);
-      // TIEMPO-272: If user doesn't exist (404), mark to prevent retry loops
+      // TIEMPO-272: If user doesn't exist (404), store timestamp for retry logic
       if (error.response?.status === 404) {
-        sessionStorage.setItem(`user_404_${user.uid}`, 'true');
-        // Clear this flag after 5 minutes to allow retry later
-        setTimeout(() => {
-          sessionStorage.removeItem(`user_404_${user.uid}`);
-        }, 5 * 60 * 1000);
+        sessionStorage.setItem(`user_404_${user.uid}`, Date.now().toString());
       }
     } finally {
       setLoading(false);
