@@ -23,11 +23,28 @@ export const useUsers = () => {
       return;
     }
 
-    // TIEMPO-272: Check if we've already tried and got 404 for this user
-    if (sessionStorage.getItem(`user_404_${user.uid}`)) {
-      console.log('Skipping fetch - user previously returned 404');
-      setLoading(false);
-      return;
+    // TIEMPO-272: Check timestamp instead of boolean for retry logic
+    try {
+      const lastAttempt = sessionStorage.getItem(`user_404_${user.uid}`);
+      if (lastAttempt) {
+        const timestamp = parseInt(lastAttempt, 10);
+        // Defensive: If parse fails or invalid timestamp, clear and retry
+        if (isNaN(timestamp) || timestamp > Date.now()) {
+          sessionStorage.removeItem(`user_404_${user.uid}`);
+        } else {
+          const timeSinceAttempt = Date.now() - timestamp;
+          if (timeSinceAttempt < 30000) { // Only skip for 30 seconds
+            console.log('Skipping fetch - waiting before retry');
+            setLoading(false);
+            return;
+          }
+          // Clear the flag after cooldown period
+          sessionStorage.removeItem(`user_404_${user.uid}`);
+        }
+      }
+    } catch (error) {
+      // If sessionStorage fails, continue with fetch
+      console.warn('SessionStorage error, continuing with fetch:', error);
     }
 
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
@@ -55,13 +72,13 @@ export const useUsers = () => {
       setUserData(response.data);
     } catch (error) {
       console.error('UU: Error fetching user data:', error);
-      // TIEMPO-272: If user doesn't exist (404), mark to prevent retry loops
+      // TIEMPO-272: If user doesn't exist (404), store timestamp for retry logic
       if (error.response?.status === 404) {
-        sessionStorage.setItem(`user_404_${user.uid}`, 'true');
-        // Clear this flag after 5 minutes to allow retry later
-        setTimeout(() => {
-          sessionStorage.removeItem(`user_404_${user.uid}`);
-        }, 5 * 60 * 1000);
+        try {
+          sessionStorage.setItem(`user_404_${user.uid}`, Date.now().toString());
+        } catch (storageError) {
+          console.warn('Unable to cache 404 timestamp:', storageError);
+        }
       }
     } finally {
       setLoading(false);
