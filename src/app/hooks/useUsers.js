@@ -24,16 +24,27 @@ export const useUsers = () => {
     }
 
     // TIEMPO-272: Check timestamp instead of boolean for retry logic
-    const lastAttempt = sessionStorage.getItem(`user_404_${user.uid}`);
-    if (lastAttempt) {
-      const timeSinceAttempt = Date.now() - parseInt(lastAttempt);
-      if (timeSinceAttempt < 30000) { // Only skip for 30 seconds
-        console.log('Skipping fetch - waiting before retry');
-        setLoading(false);
-        return;
+    try {
+      const lastAttempt = sessionStorage.getItem(`user_404_${user.uid}`);
+      if (lastAttempt) {
+        const timestamp = parseInt(lastAttempt, 10);
+        // Defensive: If parse fails or invalid timestamp, clear and retry
+        if (isNaN(timestamp) || timestamp > Date.now()) {
+          sessionStorage.removeItem(`user_404_${user.uid}`);
+        } else {
+          const timeSinceAttempt = Date.now() - timestamp;
+          if (timeSinceAttempt < 30000) { // Only skip for 30 seconds
+            console.log('Skipping fetch - waiting before retry');
+            setLoading(false);
+            return;
+          }
+          // Clear the flag after cooldown period
+          sessionStorage.removeItem(`user_404_${user.uid}`);
+        }
       }
-      // Clear the flag after cooldown period
-      sessionStorage.removeItem(`user_404_${user.uid}`);
+    } catch (error) {
+      // If sessionStorage fails, continue with fetch
+      console.warn('SessionStorage error, continuing with fetch:', error);
     }
 
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
@@ -63,7 +74,11 @@ export const useUsers = () => {
       console.error('UU: Error fetching user data:', error);
       // TIEMPO-272: If user doesn't exist (404), store timestamp for retry logic
       if (error.response?.status === 404) {
-        sessionStorage.setItem(`user_404_${user.uid}`, Date.now().toString());
+        try {
+          sessionStorage.setItem(`user_404_${user.uid}`, Date.now().toString());
+        } catch (storageError) {
+          console.warn('Unable to cache 404 timestamp:', storageError);
+        }
       }
     } finally {
       setLoading(false);
