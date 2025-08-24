@@ -23,11 +23,17 @@ export const useUsers = () => {
       return;
     }
 
-    // TIEMPO-272: Check if we've already tried and got 404 for this user
-    if (sessionStorage.getItem(`user_404_${user.uid}`)) {
-      console.log('Skipping fetch - user previously returned 404');
-      setLoading(false);
-      return;
+    // TIEMPO-272: Check timestamp instead of boolean for retry logic
+    const lastAttempt = sessionStorage.getItem(`user_404_${user.uid}`);
+    if (lastAttempt) {
+      const timeSinceAttempt = Date.now() - parseInt(lastAttempt);
+      if (timeSinceAttempt < 30000) { // Only skip for 30 seconds
+        console.log('Skipping fetch - waiting before retry');
+        setLoading(false);
+        return;
+      }
+      // Clear the flag after cooldown period
+      sessionStorage.removeItem(`user_404_${user.uid}`);
     }
 
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
