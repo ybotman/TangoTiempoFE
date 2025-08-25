@@ -42,6 +42,7 @@ export function useVenues() {
           // Use zoomRange from context (user's saved preference) or radius from location or default
           params.radius = effectiveLocation.radius || effectiveLocation.zoomRange || 50; // Default 50 miles
           params.sortByDistance = true; // Sort by closest first
+          console.log('🎯 TIEMPO-276: Fetching venues with params:', params);
         }
       }
       
@@ -83,8 +84,17 @@ export function useVenues() {
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {
-    fetchVenues();
-  }, [fetchVenues]);
+    // TIEMPO-276: Only fetch when we have location data
+    // Wait for selectedLocation to be populated before fetching
+    if (selectedLocation?.latitude && selectedLocation?.longitude) {
+      console.log('useVenues: Fetching with location:', selectedLocation.latitude, selectedLocation.longitude, 'radius:', selectedLocation.zoomRange);
+      fetchVenues();
+    } else if (selectedLocation === null) {
+      // If explicitly null (not just undefined), fetch without location
+      console.log('useVenues: Fetching without location (selectedLocation is null)');
+      fetchVenues();
+    }
+  }, [fetchVenues, selectedLocation]);
 
   const addVenue = useCallback(async (data) => {
     setLoading(true);

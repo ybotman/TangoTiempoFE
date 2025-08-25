@@ -10,12 +10,14 @@ import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hoo
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook for RA selection
 import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
+import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
 import VenueModalAdd from '@/components/Modals/Venues/VenueModalAdd'; // TIEMPO-258: Import venue modal
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
   const categories = useCategories(); // Fetch categories
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  const { selectedLocation } = useGeoLocation(); // TIEMPO-276: Get location for debugging
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers(); // Fetch organizers for regular use
   const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
@@ -27,6 +29,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
   const [showVenueModal, setShowVenueModal] = useState(false); // TIEMPO-258: Venue modal state
+  
+  // TIEMPO-276: DEBUG - Remove after testing
+  useEffect(() => {
+    console.log('🔍 VENUE DEBUG:');
+    console.log('- Selected Location:', selectedLocation);
+    console.log('- Lat/Lng:', selectedLocation?.latitude, selectedLocation?.longitude);
+    console.log('- ZoomRange:', selectedLocation?.zoomRange);
+    console.log('- Venues loaded:', venues.length);
+    console.log('- First venue:', venues[0]?.venueName, venues[0]?.distance);
+  }, [selectedLocation, venues]);
   
   // Force venue refresh when component mounts
   useEffect(() => {
