@@ -27,11 +27,22 @@ export function useVenues() {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const params = { appId };
       
-      // Add distance-based parameters if location provided
-      if (location && location.lat && location.lng) {
-        params.lat = location.lat;
-        params.lng = location.lng;
-        params.radius = location.radius || 20; // Default 20 miles
+      // TIEMPO-276: Always use user's location and range from context
+      const effectiveLocation = location || selectedLocation;
+      
+      // Add distance-based parameters if location available
+      if (effectiveLocation) {
+        // Handle both coordinate formats (lat/lng and latitude/longitude)
+        const lat = effectiveLocation.lat || effectiveLocation.latitude;
+        const lng = effectiveLocation.lng || effectiveLocation.longitude;
+        
+        if (lat && lng) {
+          params.lat = lat;
+          params.lng = lng;
+          // Use zoomRange from context (user's saved preference) or radius from location or default
+          params.radius = effectiveLocation.radius || effectiveLocation.zoomRange || 50; // Default 50 miles
+          params.sortByDistance = true; // Sort by closest first
+        }
       }
       
       // Only add isActive parameter if explicitly set
@@ -68,7 +79,7 @@ export function useVenues() {
     } finally {
       setLoading(false);
     }
-  }, [masteredCityId, masteredDivisionId, masteredRegionId]);
+  }, [masteredCityId, masteredDivisionId, masteredRegionId, selectedLocation]);
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {
