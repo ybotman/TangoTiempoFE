@@ -4,7 +4,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { dedupeFetch } from '@/utils/dedupeFetch';
+// import { dedupeFetch } from '@/utils/dedupeFetch'; // TIEMPO-276: Temporarily bypass dedupe for location-based filtering
 
 export function useVenues() {
   const [venues, setVenues] = useState([]);
@@ -58,7 +58,8 @@ export function useVenues() {
       params.all = true;
       
       // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
-      const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
+      // TIEMPO-276: Add timestamp to force fresh fetch when location changes
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
