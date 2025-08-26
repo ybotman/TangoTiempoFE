@@ -45,7 +45,6 @@ export function useVenues() {
           const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
           params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
           params.sortByDistance = true; // Sort by closest first
-          console.log('🎯 TIEMPO-276: Fetching venues with params:', params);
         }
       }
       
@@ -64,18 +63,12 @@ export function useVenues() {
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-        console.log('🔍 TIEMPO-276: Backend returned', response.data.venues.length, 'venues');
-        if (response.data.venues.length > 0) {
-          console.log('First venue:', response.data.venues[0].venueName, 'Distance:', response.data.venues[0].distance);
-        }
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
-        console.log('🔍 TIEMPO-276: Backend returned', response.data.length, 'venues (legacy format)');
         setVenues(response.data);
       } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
         // Format: {data: Array, pagination: Object}
-        console.log('🔍 TIEMPO-276: Backend returned', response.data.data.length, 'venues (data format)');
         setVenues(response.data.data);
       } else {
         // TIEMPO-275: Keep console.error for important errors
@@ -98,13 +91,7 @@ export function useVenues() {
     const coordLocation = currentLocation || savedLocation;
     
     if (coordLocation?.lat || coordLocation?.latitude) {
-      const lat = coordLocation.lat || coordLocation.latitude;
-      const lng = coordLocation.lng || coordLocation.longitude;
-      console.log('useVenues: Fetching with location:', lat, lng, 'radius:', coordLocation.zoomRange);
       fetchVenues();
-    } else {
-      // No location available yet
-      console.log('useVenues: Waiting for location data...');
     }
   }, [fetchVenues, currentLocation, savedLocation]);
 

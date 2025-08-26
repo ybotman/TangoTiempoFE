@@ -30,18 +30,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
   const [showVenueModal, setShowVenueModal] = useState(false); // TIEMPO-258: Venue modal state
   
-  // TIEMPO-276: DEBUG - Remove after testing
-  useEffect(() => {
-    const coordLocation = currentLocation || savedLocation;
-    console.log('🔍 VENUE DEBUG:');
-    console.log('- SelectedLocation (IDs):', selectedLocation);
-    console.log('- CurrentLocation:', currentLocation);
-    console.log('- SavedLocation:', savedLocation);
-    console.log('- Using Lat/Lng:', coordLocation?.lat || coordLocation?.latitude, coordLocation?.lng || coordLocation?.longitude);
-    console.log('- ZoomRange:', coordLocation?.zoomRange);
-    console.log('- Venues loaded:', venues.length);
-    console.log('- First venue:', venues[0]?.venueName, venues[0]?.distance);
-  }, [selectedLocation, currentLocation, savedLocation, venues]);
   
   // TIEMPO-276: Removed manual fetchVenues - let useVenues handle it with location context
   // Set venue ready when venues are loaded
@@ -346,6 +334,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     
     // Always add a header for active venues if there are any venues at all
     if (venueOptionsArray.length > 0) {
+      // TIEMPO-276: Add location context header
+      const nearestCity = activeVenues[0]?.city || activeVenues[0]?.address?.city || 'your area';
+      const radius = currentLocation?.zoomRange || savedLocation?.zoomRange || 50;
+      groupedOptions.push({ 
+        _id: 'location-header', 
+        isDivider: true, 
+        isHeader: true, 
+        text: `📍 Near ${nearestCity} (within ${radius} miles)` 
+      });
       groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
       
       // Add active venues
@@ -378,7 +375,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
     
     return groupedOptions;
-  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName]);
+  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, currentLocation, savedLocation]);
 
   return (
     <>
@@ -621,11 +618,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Venue (type to search)"
+                  label={`Venues within ${currentLocation?.zoomRange || savedLocation?.zoomRange || 50} miles (type to search)`}
                   variant="outlined"
                   required
                   error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
-                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : ""}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `Showing ${venues.length} venues from your map center`}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
