@@ -54,8 +54,8 @@ export function useVenues() {
         params.isActive = isActive;
       }
       
-      // Add 'all=true' to get all venues without pagination (once distance API is ready)
-      params.all = true;
+      // TIEMPO-276: Remove 'all=true' as it bypasses distance filtering in backend
+      // params.all = true;
       
       // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
       // TIEMPO-276: Add timestamp to force fresh fetch when location changes
