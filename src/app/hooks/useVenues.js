@@ -56,9 +56,9 @@ export function useVenues() {
       // TIEMPO-276: Remove 'all=true' as it bypasses distance filtering in backend
       // params.all = true;
       
-      // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
-      // TIEMPO-276: Add timestamp to force fresh fetch when location changes
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
+      // TIEMPO-276: Use dedupeFetch with location-aware params for proper caching
+      // The cache key includes lat/lng/radius, so location changes will fetch fresh data
+      const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
@@ -91,6 +91,10 @@ export function useVenues() {
     const coordLocation = currentLocation || savedLocation;
     
     if (coordLocation?.lat || coordLocation?.latitude) {
+      fetchVenues();
+    } else {
+      // TIEMPO-276: Fallback - fetch all venues if no location available
+      // This ensures venues are always available even without location
       fetchVenues();
     }
   }, [fetchVenues, currentLocation, savedLocation]);
