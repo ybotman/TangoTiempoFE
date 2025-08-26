@@ -4,7 +4,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-// import { dedupeFetch } from '@/utils/dedupeFetch'; // TIEMPO-276: Temporarily bypass dedupe for location-based filtering
+import { dedupeFetch } from '@/utils/dedupeFetch';
 
 export function useVenues() {
   const [venues, setVenues] = useState([]);
