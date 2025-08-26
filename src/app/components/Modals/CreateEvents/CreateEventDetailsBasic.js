@@ -17,7 +17,7 @@ import PropTypes from 'prop-types';
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
   const categories = useCategories(); // Fetch categories
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
-  const { selectedLocation } = useGeoLocation(); // TIEMPO-276: Get location for debugging
+  const { selectedLocation, savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get all location sources for debugging
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers(); // Fetch organizers for regular use
   const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
@@ -32,13 +32,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   
   // TIEMPO-276: DEBUG - Remove after testing
   useEffect(() => {
+    const coordLocation = currentLocation || savedLocation;
     console.log('🔍 VENUE DEBUG:');
-    console.log('- Selected Location:', selectedLocation);
-    console.log('- Lat/Lng:', selectedLocation?.latitude, selectedLocation?.longitude);
-    console.log('- ZoomRange:', selectedLocation?.zoomRange);
+    console.log('- SelectedLocation (IDs):', selectedLocation);
+    console.log('- CurrentLocation:', currentLocation);
+    console.log('- SavedLocation:', savedLocation);
+    console.log('- Using Lat/Lng:', coordLocation?.lat || coordLocation?.latitude, coordLocation?.lng || coordLocation?.longitude);
+    console.log('- ZoomRange:', coordLocation?.zoomRange);
     console.log('- Venues loaded:', venues.length);
     console.log('- First venue:', venues[0]?.venueName, venues[0]?.distance);
-  }, [selectedLocation, venues]);
+  }, [selectedLocation, currentLocation, savedLocation, venues]);
   
   // Force venue refresh when component mounts
   useEffect(() => {

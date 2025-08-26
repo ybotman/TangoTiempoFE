@@ -12,7 +12,8 @@ export function useVenues() {
   const [loading, setLoading] = useState(false);
   
   // Use GeoLocationContext for location-based filtering
-  const { selectedLocation } = useGeoLocation();
+  // TIEMPO-276: Get both selectedLocation (for IDs) and savedLocation/currentLocation (for coordinates)
+  const { selectedLocation, savedLocation, currentLocation } = useGeoLocation();
   
   // Get location IDs for filtering
   const masteredRegionId = selectedLocation?.region?.id || null;
@@ -28,19 +29,20 @@ export function useVenues() {
       const params = { appId };
       
       // TIEMPO-276: Always use user's location and range from context
-      const effectiveLocation = location || selectedLocation;
+      // Use passed location first, then currentLocation or savedLocation for coordinates
+      const coordLocation = location || currentLocation || savedLocation;
       
       // Add distance-based parameters if location available
-      if (effectiveLocation) {
+      if (coordLocation) {
         // Handle both coordinate formats (lat/lng and latitude/longitude)
-        const lat = effectiveLocation.lat || effectiveLocation.latitude;
-        const lng = effectiveLocation.lng || effectiveLocation.longitude;
+        const lat = coordLocation.lat || coordLocation.latitude;
+        const lng = coordLocation.lng || coordLocation.longitude;
         
         if (lat && lng) {
           params.lat = lat;
           params.lng = lng;
           // Use zoomRange from context (user's saved preference) or radius from location or default
-          params.radius = effectiveLocation.radius || effectiveLocation.zoomRange || 50; // Default 50 miles
+          params.radius = coordLocation.radius || coordLocation.zoomRange || 50; // Default 50 miles
           params.sortByDistance = true; // Sort by closest first
           console.log('🎯 TIEMPO-276: Fetching venues with params:', params);
         }
@@ -80,21 +82,24 @@ export function useVenues() {
     } finally {
       setLoading(false);
     }
-  }, [masteredCityId, masteredDivisionId, masteredRegionId, selectedLocation]);
+  }, [masteredCityId, masteredDivisionId, masteredRegionId, currentLocation, savedLocation]);
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {
     // TIEMPO-276: Only fetch when we have location data
-    // Wait for selectedLocation to be populated before fetching
-    if (selectedLocation?.latitude && selectedLocation?.longitude) {
-      console.log('useVenues: Fetching with location:', selectedLocation.latitude, selectedLocation.longitude, 'radius:', selectedLocation.zoomRange);
+    // Use currentLocation or savedLocation for actual coordinates
+    const coordLocation = currentLocation || savedLocation;
+    
+    if (coordLocation?.lat || coordLocation?.latitude) {
+      const lat = coordLocation.lat || coordLocation.latitude;
+      const lng = coordLocation.lng || coordLocation.longitude;
+      console.log('useVenues: Fetching with location:', lat, lng, 'radius:', coordLocation.zoomRange);
       fetchVenues();
-    } else if (selectedLocation === null) {
-      // If explicitly null (not just undefined), fetch without location
-      console.log('useVenues: Fetching without location (selectedLocation is null)');
-      fetchVenues();
+    } else {
+      // No location available yet
+      console.log('useVenues: Waiting for location data...');
     }
-  }, [fetchVenues, selectedLocation]);
+  }, [fetchVenues, currentLocation, savedLocation]);
 
   const addVenue = useCallback(async (data) => {
     setLoading(true);
