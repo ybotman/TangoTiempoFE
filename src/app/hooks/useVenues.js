@@ -42,7 +42,8 @@ export function useVenues() {
           params.lat = lat;
           params.lng = lng;
           // Use zoomRange from context (user's saved preference) or radius from location or default
-          params.radius = coordLocation.radius || coordLocation.zoomRange || 50; // Default 50 miles
+          const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
+          params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
           params.sortByDistance = true; // Sort by closest first
           console.log('🎯 TIEMPO-276: Fetching venues with params:', params);
         }
