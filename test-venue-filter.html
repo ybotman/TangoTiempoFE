@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Venue Filter</title></head>
+<body>
+<h2>Test Venue Distance Filter</h2>
+<button onclick="testNearby()">Test 5km Range</button>
+<button onclick="testFar()">Test 100km Range</button>
+<pre id="result"></pre>
+
+<script>
+const BE_URL = 'http://localhost:3010';
+
+async function testNearby() {
+  const response = await fetch(`${BE_URL}/api/venues?lat=42.3601&lng=-71.0589&radius=5km&appId=1`);
+  const data = await response.json();
+  document.getElementById('result').innerText = `5km range: ${data.data.length} venues found\n` + 
+    data.data.slice(0,3).map(v => `- ${v.venueName}: ${v.distance}km`).join('\n');
+}
+
+async function testFar() {
+  const response = await fetch(`${BE_URL}/api/venues?lat=42.3601&lng=-71.0589&radius=100km&appId=1`);
+  const data = await response.json();
+  document.getElementById('result').innerText = `100km range: ${data.data.length} venues found`;
+}
+</script>
+</body>
+</html>
