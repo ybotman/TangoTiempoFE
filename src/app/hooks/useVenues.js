@@ -12,7 +12,8 @@ export function useVenues() {
   const [loading, setLoading] = useState(false);
   
   // Use GeoLocationContext for location-based filtering
-  const { selectedLocation } = useGeoLocation();
+  // TIEMPO-276: Get both selectedLocation (for IDs) and savedLocation/currentLocation (for coordinates)
+  const { selectedLocation, savedLocation, currentLocation } = useGeoLocation();
   
   // Get location IDs for filtering
   const masteredRegionId = selectedLocation?.region?.id || null;
@@ -27,11 +28,24 @@ export function useVenues() {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const params = { appId };
       
-      // Add distance-based parameters if location provided
-      if (location && location.lat && location.lng) {
-        params.lat = location.lat;
-        params.lng = location.lng;
-        params.radius = location.radius || 20; // Default 20 miles
+      // TIEMPO-276: Always use user's location and range from context
+      // Use passed location first, then currentLocation or savedLocation for coordinates
+      const coordLocation = location || currentLocation || savedLocation;
+      
+      // Add distance-based parameters if location available
+      if (coordLocation) {
+        // Handle both coordinate formats (lat/lng and latitude/longitude)
+        const lat = coordLocation.lat || coordLocation.latitude;
+        const lng = coordLocation.lng || coordLocation.longitude;
+        
+        if (lat && lng) {
+          params.lat = lat;
+          params.lng = lng;
+          // Use zoomRange from context (user's saved preference) or radius from location or default
+          const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
+          params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
+          params.sortByDistance = true; // Sort by closest first
+        }
       }
       
       // Only add isActive parameter if explicitly set
@@ -39,16 +53,16 @@ export function useVenues() {
         params.isActive = isActive;
       }
       
-      // Add 'all=true' to get all venues without pagination (once distance API is ready)
-      params.all = true;
+      // TIEMPO-276: Remove 'all=true' as it bypasses distance filtering in backend
+      // params.all = true;
       
-      // TIEMPO-257: Use dedupeFetch to prevent duplicate venue calls
+      // TIEMPO-276: Use dedupeFetch with location-aware params for proper caching
+      // The cache key includes lat/lng/radius, so location changes will fetch fresh data
       const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
       
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-// TIEMPO-276: Security cleanup - removed logging
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
@@ -72,8 +86,18 @@ export function useVenues() {
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {
-    fetchVenues();
-  }, [fetchVenues]);
+    // TIEMPO-276: Only fetch when we have location data
+    // Use currentLocation or savedLocation for actual coordinates
+    const coordLocation = currentLocation || savedLocation;
+    
+    if (coordLocation?.lat || coordLocation?.latitude) {
+      fetchVenues();
+    } else {
+      // TIEMPO-276: Fallback - fetch all venues if no location available
+      // This ensures venues are always available even without location
+      fetchVenues();
+    }
+  }, [fetchVenues, currentLocation, savedLocation]);
 
   const addVenue = useCallback(async (data) => {
     setLoading(true);

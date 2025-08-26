@@ -10,12 +10,14 @@ import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hoo
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook for RA selection
 import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
+import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
 import VenueModalAdd from '@/components/Modals/Venues/VenueModalAdd'; // TIEMPO-258: Import venue modal
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
   const categories = useCategories(); // Fetch categories
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers(); // Fetch organizers for regular use
   const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
@@ -28,14 +30,14 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
   const [showVenueModal, setShowVenueModal] = useState(false); // TIEMPO-258: Venue modal state
   
-  // Force venue refresh when component mounts
+  
+  // TIEMPO-276: Removed manual fetchVenues - let useVenues handle it with location context
+  // Set venue ready when venues are loaded
   useEffect(() => {
-    setIsVenueReady(false);
-    fetchVenues().then(() => {
-      // Delay setting venue ready to prevent MUI warnings during initial render
+    if (venues.length > 0 || !loadingVenues) {
       setTimeout(() => setIsVenueReady(true), 100);
-    });
-  }, [fetchVenues]);
+    }
+  }, [venues, loadingVenues]);
   
   // Set initial venue input value when venues are loaded or eventData changes
   useEffect(() => {
@@ -332,6 +334,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     
     // Always add a header for active venues if there are any venues at all
     if (venueOptionsArray.length > 0) {
+      // TIEMPO-276: Add location context header
+      const nearestCity = activeVenues[0]?.city || activeVenues[0]?.address?.city || 'your area';
+      const radius = currentLocation?.zoomRange || savedLocation?.zoomRange || 50;
+      groupedOptions.push({ 
+        _id: 'location-header', 
+        isDivider: true, 
+        isHeader: true, 
+        text: `📍 Near ${nearestCity} (within ${radius} miles)` 
+      });
       groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
       
       // Add active venues
@@ -364,7 +375,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
     
     return groupedOptions;
-  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName]);
+  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, currentLocation, savedLocation]);
 
   return (
     <>
@@ -607,11 +618,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Venue (type to search)"
+                  label={`Venues within ${currentLocation?.zoomRange || savedLocation?.zoomRange || 50} miles (type to search)`}
                   variant="outlined"
                   required
                   error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
-                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : ""}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `Showing ${venues.length} venues from your map center`}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
