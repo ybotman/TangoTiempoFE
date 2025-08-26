@@ -43,14 +43,13 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     console.log('- First venue:', venues[0]?.venueName, venues[0]?.distance);
   }, [selectedLocation, currentLocation, savedLocation, venues]);
   
-  // Force venue refresh when component mounts
+  // TIEMPO-276: Removed manual fetchVenues - let useVenues handle it with location context
+  // Set venue ready when venues are loaded
   useEffect(() => {
-    setIsVenueReady(false);
-    fetchVenues().then(() => {
-      // Delay setting venue ready to prevent MUI warnings during initial render
+    if (venues.length > 0 || !loadingVenues) {
       setTimeout(() => setIsVenueReady(true), 100);
-    });
-  }, [fetchVenues]);
+    }
+  }, [venues, loadingVenues]);
   
   // Set initial venue input value when venues are loaded or eventData changes
   useEffect(() => {

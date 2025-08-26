@@ -62,13 +62,18 @@ export function useVenues() {
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
         // Format: {venues: Array, pagination: Object}
-// TIEMPO-276: Security cleanup - removed logging
+        console.log('🔍 TIEMPO-276: Backend returned', response.data.venues.length, 'venues');
+        if (response.data.venues.length > 0) {
+          console.log('First venue:', response.data.venues[0].venueName, 'Distance:', response.data.venues[0].distance);
+        }
         setVenues(response.data.venues);
       } else if (Array.isArray(response.data)) {
         // Handle direct array response (legacy format)
+        console.log('🔍 TIEMPO-276: Backend returned', response.data.length, 'venues (legacy format)');
         setVenues(response.data);
       } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
         // Format: {data: Array, pagination: Object}
+        console.log('🔍 TIEMPO-276: Backend returned', response.data.data.length, 'venues (data format)');
         setVenues(response.data.data);
       } else {
         // TIEMPO-275: Keep console.error for important errors
@@ -82,7 +87,7 @@ export function useVenues() {
     } finally {
       setLoading(false);
     }
-  }, [masteredCityId, masteredDivisionId, masteredRegionId, currentLocation, savedLocation]);
+  }, [masteredCityId, masteredDivisionId, masteredRegionId]);
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {
