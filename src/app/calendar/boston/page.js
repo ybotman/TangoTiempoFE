@@ -68,16 +68,9 @@ const BostonCalendarPage = () => {
 
   // Force Boston location on mount
   useEffect(() => {
-    console.log('[Boston Route] Current location:', currentLocation);
     // Always set Boston location to ensure it has the source field
-    console.log('[Boston Route] Setting Boston location:', BOSTON_CONFIG);
     setSessionLocation(BOSTON_CONFIG);
   }, []); // Run once on mount
-  
-  // Debug: Log location changes
-  useEffect(() => {
-    console.log('[Boston Route] Location updated:', currentLocation);
-  }, [currentLocation]);
 
   // Get all the calendar functionality from the hook
   const {
@@ -108,19 +101,6 @@ const BostonCalendarPage = () => {
     handleDateClick,
     setCreateModalOpen: handleCreateEventModalClose,
   } = useCalendarPage();
-  
-  // Debug: Log events data
-  useEffect(() => {
-    console.log('[Boston Route] Transformed events:', coloredFilteredEvents?.length || 0, 'events');
-    if (coloredFilteredEvents?.length > 0) {
-      console.log('[Boston Route] First event structure:', coloredFilteredEvents[0]);
-      // Check if events have the required FullCalendar fields
-      const hasStart = coloredFilteredEvents[0].hasOwnProperty('start');
-      const hasEnd = coloredFilteredEvents[0].hasOwnProperty('end');
-      const hasTitle = coloredFilteredEvents[0].hasOwnProperty('title');
-      console.log('[Boston Route] Event has start?', hasStart, 'end?', hasEnd, 'title?', hasTitle);
-    }
-  }, [coloredFilteredEvents]);
 
   // Handle month view rendering
   const handleDayCellDidMount = (info) => {
@@ -336,7 +316,7 @@ const BostonCalendarPage = () => {
             }}
             eventClassNames={(arg) => {
               const category = categories.find((cat) => cat.id === arg.event.extendedProps.category);
-              return category ? [`category-${category.name.toLowerCase().replace(/\s+/g, '-')}`] : [];
+              return category && category.name ? [`category-${category.name.toLowerCase().replace(/\s+/g, '-')}`] : [];
             }}
             eventDidMount={(info) => {
               const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
