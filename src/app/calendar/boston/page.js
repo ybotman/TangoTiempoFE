@@ -55,9 +55,8 @@ const BostonCalendarPage = () => {
 
   // Get GeoLocation context but we'll override it
   const { 
-    setCurrentLocation, 
-    setSavedLocation,
-    currentLocation 
+    currentLocation,
+    setSessionLocation
   } = useGeoLocation();
 
   // Auth and Role contexts
@@ -68,8 +67,7 @@ const BostonCalendarPage = () => {
   useEffect(() => {
     // Only set if not already set to Boston
     if (currentLocation?.source !== 'legacy-boston') {
-      setCurrentLocation(BOSTON_CONFIG);
-      setSavedLocation(BOSTON_CONFIG);
+      setSessionLocation(BOSTON_CONFIG);
     }
   }, []); // Run once on mount
 
