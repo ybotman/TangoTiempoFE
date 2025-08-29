@@ -33,7 +33,7 @@ import { listOfAllRoles } from '@/utils/masterData';
 const BOSTON_CONFIG = {
   lat: 42.3601,
   lng: -71.0589,
-  zoomRange: 30, // 30 mile radius around Boston
+  zoomRange: 200, // 200 mile radius - covers all New England
   source: 'legacy-boston',
   locked: true
 };
