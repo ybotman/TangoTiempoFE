@@ -19,7 +19,7 @@ import Image from 'next/image';
 
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
-import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
+// CalendarSubMenu removed for simplified Boston view
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
@@ -281,8 +281,7 @@ const BostonCalendarPage = () => {
           </ButtonGroup>
         </div>
 
-        {/* Calendar Sub Menu - but hide location-specific items */}
-        <CalendarSubMenu />
+        {/* Calendar Sub Menu removed for simplified Boston view */}
 
         {/* Category Circles Legend */}
         {categories && categories.length > 0 && (
