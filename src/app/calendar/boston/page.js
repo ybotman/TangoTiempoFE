@@ -63,13 +63,23 @@ const BostonCalendarPage = () => {
   const { user } = useContext(AuthContext);
   const { selectedRole } = useContext(RoleContext);
 
+  // Local state for view type (not provided by hook)
+  const [currentViewType, setCurrentViewType] = useState('dayGridMonth');
+
   // Force Boston location on mount
   useEffect(() => {
+    console.log('[Boston Route] Current location:', currentLocation);
     // Only set if not already set to Boston
     if (currentLocation?.source !== 'legacy-boston') {
+      console.log('[Boston Route] Setting Boston location:', BOSTON_CONFIG);
       setSessionLocation(BOSTON_CONFIG);
     }
   }, []); // Run once on mount
+  
+  // Debug: Log location changes
+  useEffect(() => {
+    console.log('[Boston Route] Location updated:', currentLocation);
+  }, [currentLocation]);
 
   // Get all the calendar functionality from the hook
   const {
@@ -80,30 +90,35 @@ const BostonCalendarPage = () => {
     searchTerm,
     setSearchTerm,
     calendarRef,
-    currentViewType,
-    setCurrentViewType,
-    today,
     handlePrev,
     handleNext,
-    handleTodayClick,
+    handleToday: handleTodayClick,
     selectedEvent,
     handleEventClick,
-    isViewEventModalOpen,
-    handleModalClose,
-    loading,
-    error,
-    calendarApi,
+    isViewDetailModalOpen: isViewEventModalOpen,
+    setViewDetailModalOpen: handleModalClose,
+    eventsLoading: loading,
+    eventsError: error,
     noLocationSelected,
     includeAIEvents,
     setIncludeAIEvents,
     selectedAIEvent,
     isViewAIEventModalOpen,
     handleAIModalClose,
-    isCreateEventModalOpen,
-    selectedDateInfo,
+    isCreateModalOpen: isCreateEventModalOpen,
+    clickedDate: selectedDateInfo,
     handleDateClick,
-    handleCreateEventModalClose,
+    setCreateModalOpen: handleCreateEventModalClose,
   } = useCalendarPage();
+  
+  // Debug: Log events data
+  useEffect(() => {
+    console.log('[Boston Route] Events loaded:', events?.length || 0, 'events');
+    console.log('[Boston Route] No location selected?', noLocationSelected);
+    if (events?.length > 0) {
+      console.log('[Boston Route] Sample event:', events[0]);
+    }
+  }, [events, noLocationSelected]);
 
   // Handle month view rendering
   const handleDayCellDidMount = (info) => {
@@ -168,7 +183,7 @@ const BostonCalendarPage = () => {
     return () => {
       window.removeEventListener('resize', handleWindowResize);
     };
-  }, [calendarRef]);
+  }, [calendarRef, currentViewType]);
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
@@ -181,7 +196,7 @@ const BostonCalendarPage = () => {
         overflow: 'hidden'
       }}>
         <img 
-          src="/defaults/BTCHeader.jpg" 
+          src="/defaults/BTCHeader2.jpeg" 
           alt="Boston Tango Calendar"
           style={{ 
             width: '100%', 
@@ -258,7 +273,7 @@ const BostonCalendarPage = () => {
           <ButtonGroup variant="outlined" size="small">
             <IconButton
               onClick={() => {
-                calendarApi?.changeView('dayGridMonth');
+                calendarRef.current?.getApi()?.changeView('dayGridMonth');
                 setCurrentViewType('dayGridMonth');
               }}
               color={currentViewType === 'dayGridMonth' ? 'primary' : 'default'}
@@ -268,7 +283,7 @@ const BostonCalendarPage = () => {
             </IconButton>
             <IconButton
               onClick={() => {
-                calendarApi?.changeView('list21Days');
+                calendarRef.current?.getApi()?.changeView('list21Days');
                 setCurrentViewType('list21Days');
               }}
               color={currentViewType === 'list21Days' ? 'primary' : 'default'}
@@ -341,7 +356,7 @@ const BostonCalendarPage = () => {
       {isViewEventModalOpen && selectedEvent && (
         <ViewEventDetailModal
           open={isViewEventModalOpen}
-          onClose={handleModalClose}
+          onClose={() => handleModalClose(false)}
           eventDetails={selectedEvent}
         />
       )}
@@ -357,8 +372,8 @@ const BostonCalendarPage = () => {
       {isCreateEventModalOpen && (
         <CreateEventDetailModal
           open={isCreateEventModalOpen}
-          onClose={handleCreateEventModalClose}
-          selectedDate={selectedDateInfo?.dateStr}
+          onClose={() => handleCreateEventModalClose(false)}
+          selectedDate={selectedDateInfo}
         />
       )}
     </div>
