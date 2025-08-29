@@ -81,7 +81,7 @@ const BostonCalendarPage = () => {
 
   // Get all the calendar functionality from the hook
   const {
-    events = [],
+    coloredFilteredEvents = [],  // Use the transformed events ready for FullCalendar
     categories = [],
     activeCategories = [],
     handleCategoryChange,
@@ -111,18 +111,20 @@ const BostonCalendarPage = () => {
   
   // Debug: Log events data
   useEffect(() => {
-    console.log('[Boston Route] Events loaded:', events?.length || 0, 'events');
-    console.log('[Boston Route] No location selected?', noLocationSelected);
-    console.log('[Boston Route] Loading?', loading);
-    console.log('[Boston Route] Error?', error);
-    if (events?.length > 0) {
-      console.log('[Boston Route] Sample event:', events[0]);
+    console.log('[Boston Route] Transformed events:', coloredFilteredEvents?.length || 0, 'events');
+    if (coloredFilteredEvents?.length > 0) {
+      console.log('[Boston Route] First event structure:', coloredFilteredEvents[0]);
+      // Check if events have the required FullCalendar fields
+      const hasStart = coloredFilteredEvents[0].hasOwnProperty('start');
+      const hasEnd = coloredFilteredEvents[0].hasOwnProperty('end');
+      const hasTitle = coloredFilteredEvents[0].hasOwnProperty('title');
+      console.log('[Boston Route] Event has start?', hasStart, 'end?', hasEnd, 'title?', hasTitle);
     }
-  }, [events, noLocationSelected, loading, error]);
+  }, [coloredFilteredEvents]);
 
   // Handle month view rendering
   const handleDayCellDidMount = (info) => {
-    const dayEvents = events.filter((event) => {
+    const dayEvents = coloredFilteredEvents.filter((event) => {
       const eventDate = new Date(event.start).toDateString();
       const cellDate = new Date(info.date).toDateString();
       return eventDate === cellDate;
@@ -311,7 +313,7 @@ const BostonCalendarPage = () => {
             ref={calendarRef}
             plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
             initialView={currentViewType}
-            events={events}
+            events={coloredFilteredEvents}
             eventClick={handleEventClick}
             dateClick={handleDateClick}
             headerToolbar={false}
