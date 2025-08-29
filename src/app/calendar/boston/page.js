@@ -69,11 +69,9 @@ const BostonCalendarPage = () => {
   // Force Boston location on mount
   useEffect(() => {
     console.log('[Boston Route] Current location:', currentLocation);
-    // Only set if not already set to Boston
-    if (currentLocation?.source !== 'legacy-boston') {
-      console.log('[Boston Route] Setting Boston location:', BOSTON_CONFIG);
-      setSessionLocation(BOSTON_CONFIG);
-    }
+    // Always set Boston location to ensure it has the source field
+    console.log('[Boston Route] Setting Boston location:', BOSTON_CONFIG);
+    setSessionLocation(BOSTON_CONFIG);
   }, []); // Run once on mount
   
   // Debug: Log location changes
@@ -115,10 +113,12 @@ const BostonCalendarPage = () => {
   useEffect(() => {
     console.log('[Boston Route] Events loaded:', events?.length || 0, 'events');
     console.log('[Boston Route] No location selected?', noLocationSelected);
+    console.log('[Boston Route] Loading?', loading);
+    console.log('[Boston Route] Error?', error);
     if (events?.length > 0) {
       console.log('[Boston Route] Sample event:', events[0]);
     }
-  }, [events, noLocationSelected]);
+  }, [events, noLocationSelected, loading, error]);
 
   // Handle month view rendering
   const handleDayCellDidMount = (info) => {

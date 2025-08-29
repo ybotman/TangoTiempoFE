@@ -370,6 +370,10 @@ export const GeoLocationProvider = ({ children }) => {
       zoomRange: locationData.zoomRange || 50
     };
     
+    // Only add source and locked if they exist (for Boston route)
+    if (locationData.source) location.source = locationData.source;
+    if (locationData.locked !== undefined) location.locked = locationData.locked;
+    
     setCurrentLocationState(location);
     
     // Save to sessionStorage
