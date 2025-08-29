@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(request) {
+  // Check for Boston Tango Calendar iframe
+  const referer = request.headers.get('referer');
+  const isFromBoston = referer && referer.includes('bostontangocalendar.com');
+  
+  // Redirect Boston iframe traffic to dedicated route
+  if (isFromBoston && request.nextUrl.pathname === '/calendar') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/calendar/boston';
+    return NextResponse.redirect(url);
+  }
+  
   // Only process geo-diagnostics routes
   if (request.nextUrl.pathname === '/geo-diagnostics') {
     const response = NextResponse.next();
