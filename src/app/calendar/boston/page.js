@@ -75,9 +75,9 @@ const BostonCalendarPage = () => {
 
   // Get all the calendar functionality from the hook
   const {
-    events,
-    categories,
-    activeCategories,
+    events = [],
+    categories = [],
+    activeCategories = [],
     handleCategoryChange,
     searchTerm,
     setSearchTerm,
@@ -285,11 +285,13 @@ const BostonCalendarPage = () => {
         <CalendarSubMenu />
 
         {/* Category Circles Legend */}
-        <CategoryCircles
-          categories={categories}
-          activeCategories={activeCategories}
-          handleCategoryChange={handleCategoryChange}
-        />
+        {categories && categories.length > 0 && (
+          <CategoryCircles
+            categories={categories}
+            activeCategories={activeCategories}
+            handleCategoryChange={handleCategoryChange}
+          />
+        )}
 
         {/* Main Calendar */}
         <div style={{ width: '100%', overflowX: 'auto' }}>
