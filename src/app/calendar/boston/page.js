@@ -38,6 +38,50 @@ const BOSTON_CONFIG = {
   locked: true
 };
 
+// Helper functions for event rendering
+const formatTime = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  let hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+  return hours + (minutes !== 0 ? ':' + minutesStr : '') + ampm;
+};
+
+const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay, venueAbbr) => {
+  if (!venueStartDisplay) return { startTime: '', endTime: '' };
+  
+  const parseVenueTime = (displayStr) => {
+    if (!displayStr) return '';
+    const match = displayStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!match) return '';
+    
+    let hours = parseInt(match[1]);
+    const minutes = match[2];
+    const period = match[3].toLowerCase();
+    
+    if (hours === 12 && period === 'am') {
+      return '12:00am';
+    }
+    
+    return hours + (minutes !== '00' ? ':' + minutes : '') + period;
+  };
+  
+  return {
+    startTime: parseVenueTime(venueStartDisplay),
+    endTime: parseVenueTime(venueEndDisplay)
+  };
+};
+
+const formatTimeForListView = (start, end) => {
+  const startTime = start ? formatTime(start) : '';
+  const endTime = end ? formatTime(end) : '';
+  return { startTime, endTime };
+};
+
 const BostonCalendarPage = () => {
   <Head>
     <title>Boston Tango Calendar - Tango Events in Boston Area</title>
@@ -101,6 +145,133 @@ const BostonCalendarPage = () => {
     handleDateClick,
     setCreateModalOpen: handleCreateEventModalClose,
   } = useCalendarPage();
+
+  // Custom event content renderer (simplified for Boston read-only view)
+  const renderEventContent = (eventInfo) => {
+    const { event } = eventInfo;
+    const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
+    
+    // Check for AI discovered events (not needed for Boston but keeping structure)
+    const isAIDiscovered = event.extendedProps?.isAIDiscovered || false;
+    const isCanceled = event.extendedProps?.eventStatus === 'canceled';
+    
+    // Get organizer short name
+    const organizerShort = event.extendedProps?.organizerShort || 
+                          event.extendedProps?.ownerOrganizer?.organizerShort || '';
+    
+    // Get venue/location short title
+    const eventShortTitle = event.extendedProps?.venueName || 
+                           event.extendedProps?.eventLocationTitle || '';
+
+    if (isMonthlyView) {
+      // Month view: compact display
+      const { startTime, endTime } = event.extendedProps?.venueStartDisplay
+        ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
+        : formatTimeForListView(event.start, event.end);
+      
+      return (
+        <div style={{ 
+          padding: '2px', 
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1px'
+        }}>
+          {/* Time, categories, organizer on one line */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '0.75rem'
+          }}>
+            {startTime && (
+              <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+            )}
+            <CategoryCircles eventProps={event.extendedProps} />
+            {organizerShort && (
+              <span style={{ color: '#666' }}>{organizerShort}</span>
+            )}
+          </div>
+          
+          {/* Event title */}
+          <div style={{ 
+            fontSize: '0.65rem', 
+            fontWeight: 'normal',
+            lineHeight: '1.1',
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
+          }}>
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+          </div>
+        </div>
+      );
+    } else {
+      // List view: more detailed display
+      const { startTime, endTime } = event.extendedProps?.venueStartDisplay
+        ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
+        : formatTimeForListView(event.start, event.end);
+      
+      return (
+        <div style={{ 
+          padding: '4px 2px', 
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px'
+        }}>
+          {/* Time range, categories, organizer, venue */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            {startTime && (
+              <div style={{ fontSize: '0.9rem', flexShrink: 0 }}>
+                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                {endTime && (
+                  <>
+                    <span> - </span>
+                    <span style={{ fontWeight: 'normal' }}>{endTime}</span>
+                  </>
+                )}
+              </div>
+            )}
+            <CategoryCircles eventProps={event.extendedProps} />
+            {organizerShort && (
+              <div style={{
+                fontSize: '0.85rem',
+                color: '#666',
+                textDecoration: isCanceled ? 'line-through' : 'none'
+              }}>
+                {organizerShort}
+                {eventShortTitle && (
+                  <>
+                    <span> | </span>
+                    <span style={{ fontWeight: 'bold', color: '#333' }}>
+                      {eventShortTitle}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Event title */}
+          <div style={{ 
+            fontSize: '0.7rem', 
+            fontWeight: 'normal',
+            lineHeight: '1.2',
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
+          }}>
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+          </div>
+        </div>
+      );
+    }
+  };
 
   // Handle month view rendering
   const handleDayCellDidMount = (info) => {
@@ -295,11 +466,16 @@ const BostonCalendarPage = () => {
             initialView={currentViewType}
             events={coloredFilteredEvents}
             eventClick={handleEventClick}
-            dateClick={handleDateClick}
+            // Remove dateClick for read-only view
             headerToolbar={false}
             height="auto"
-            dayMaxEvents={3}
+            dayMaxEvents={false}  // Show all events, not just 3
             eventDisplay="block"
+            // Add missing configurations from main calendar
+            nextDayThreshold="06:00:00"  // Events until 6am count as previous day
+            timeZone="UTC"  // Use UTC to prevent timezone conversions
+            nowIndicator={true}  // Show current time indicator
+            eventContent={renderEventContent}  // Use custom renderer
             eventTimeFormat={{
               hour: 'numeric',
               minute: '2-digit',
