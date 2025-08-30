@@ -15,19 +15,19 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
-import Image from 'next/image';
+// Image import removed - not used
 
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 // CalendarSubMenu removed for simplified Boston view
-import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
+// CreateEventDetailModal removed - Boston is read-only
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
-import { RoleContext } from '@/contexts/RoleContext';
-import { listOfAllRoles } from '@/utils/masterData';
+// RoleContext not needed for Boston calendar
+// listOfAllRoles removed - not used
 
 // Boston configuration - locked coordinates
 const BOSTON_CONFIG = {
@@ -51,7 +51,7 @@ const formatTime = (dateStr) => {
   return hours + (minutes !== 0 ? ':' + minutesStr : '') + ampm;
 };
 
-const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay, venueAbbr) => {
+const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay) => {
   if (!venueStartDisplay) return { startTime: '', endTime: '' };
   
   const parseVenueTime = (displayStr) => {
@@ -99,13 +99,12 @@ const BostonCalendarPage = () => {
 
   // Get GeoLocation context but we'll override it
   const { 
-    currentLocation,
     setSessionLocation
   } = useGeoLocation();
 
   // Auth and Role contexts
   const { user } = useContext(AuthContext);
-  const { selectedRole } = useContext(RoleContext);
+  // Role context not used in Boston calendar
 
   // Local state for view type (not provided by hook)
   const [currentViewType, setCurrentViewType] = useState('dayGridMonth');
@@ -114,7 +113,7 @@ const BostonCalendarPage = () => {
   useEffect(() => {
     // Always set Boston location to ensure it has the source field
     setSessionLocation(BOSTON_CONFIG);
-  }, []); // Run once on mount
+  }, [setSessionLocation]); // Include dependency
 
   // Get all the calendar functionality from the hook
   const {
@@ -132,18 +131,13 @@ const BostonCalendarPage = () => {
     handleEventClick,
     isViewDetailModalOpen: isViewEventModalOpen,
     setViewDetailModalOpen: handleModalClose,
-    eventsLoading: loading,
-    eventsError: error,
-    noLocationSelected,
+    // Loading and error states not used in Boston view
     includeAIEvents,
     setIncludeAIEvents,
     selectedAIEventDetails: selectedAIEvent,  // AI event details
     isAIDetailModalOpen: isViewAIEventModalOpen,  // AI modal state
     setAIDetailModalOpen: handleAIModalClose,  // AI modal close
-    isCreateModalOpen: isCreateEventModalOpen,
-    clickedDate: selectedDateInfo,
-    handleDateClick,
-    setCreateModalOpen: handleCreateEventModalClose,
+    // Create event modal not used - Boston is read-only
   } = useCalendarPage();
 
   // Custom event content renderer (match main calendar exactly)
