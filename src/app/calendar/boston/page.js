@@ -146,37 +146,6 @@ const BostonCalendarPage = () => {
     setCreateModalOpen: handleCreateEventModalClose,
   } = useCalendarPage();
 
-  // Helper to render category circles inline
-  const renderCategoryCircles = (extendedProps) => {
-    if (!extendedProps) return null;
-    
-    const { categoryFirst, categorySecond, categoryThird } = extendedProps;
-    const categoryIds = [categoryFirst, categorySecond, categoryThird];
-    
-    return (
-      <div style={{ display: 'inline-flex', gap: '2px', flexShrink: 0 }}>
-        {categoryIds.map((catId, index) => {
-          if (!catId) return null;
-          const category = categories.find(c => c.id === catId);
-          if (!category) return null;
-          
-          return (
-            <div
-              key={index}
-              style={{
-                width: index === 0 ? '8px' : '6px',
-                height: index === 0 ? '8px' : '6px',
-                borderRadius: '50%',
-                backgroundColor: category.color || '#ccc',
-                border: '1px solid rgba(0,0,0,0.1)'
-              }}
-            />
-          );
-        }).filter(Boolean)}
-      </div>
-    );
-  };
-
   // Custom event content renderer (simplified for Boston read-only view)
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
@@ -196,7 +165,7 @@ const BostonCalendarPage = () => {
                            event.extendedProps?.venueShort || '';
 
     if (isMonthlyView) {
-      // Month view: compact display
+      // Month view: match main calendar exactly
       const { startTime, endTime } = event.extendedProps?.venueStartDisplay
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForListView(event.start, event.end);
@@ -208,36 +177,73 @@ const BostonCalendarPage = () => {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1px'
+          justifyContent: 'flex-start'
         }}>
-          {/* Time, categories, organizer on one line */}
+          {/* Row 1: Time, categories, organizer, shortTitle */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '4px',
-            fontSize: '0.75rem'
+            gap: '3px',
+            marginBottom: '1px'
           }}>
+            {/* Always show time if available */}
             {startTime && (
-              <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+              <div style={{ 
+                fontSize: '0.8rem', 
+                lineHeight: '1.0',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
+              }}>
+                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
+              </div>
             )}
-            {renderCategoryCircles(event.extendedProps)}
+            {/* Category bubbles using component */}
+            <CategoryCircles eventProps={event.extendedProps} />
+            {/* Organizer */}
             {organizerShort && (
-              <span style={{ color: '#666', fontSize: '0.7rem' }}>{organizerShort}</span>
+              <div style={{
+                fontSize: '0.75rem',
+                fontWeight: 'normal',
+                color: '#666',
+                overflow: 'visible',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                lineHeight: '1.0',
+                textDecoration: isCanceled ? 'line-through' : 'none'
+              }}>
+                {organizerShort}
+              </div>
             )}
+            {/* Venue short title */}
             {eventShortTitle && (
               <>
-                <span style={{ fontSize: '0.7rem', color: '#666' }}> | </span>
-                <span style={{ fontWeight: 'bold', fontSize: '0.7rem' }}>{eventShortTitle}</span>
+                <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  color: '#333',
+                  overflow: 'visible',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 1,
+                  lineHeight: '1.0',
+                  textDecoration: isCanceled ? 'line-through' : 'none'
+                }}>
+                  {eventShortTitle}
+                </div>
               </>
             )}
           </div>
           
-          {/* Event title */}
+          {/* Row 2: Event title - no wrapping */}
           <div style={{ 
             fontSize: '0.65rem', 
             fontWeight: 'normal',
             lineHeight: '1.1',
-            color: '#000000',  // Black text
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            flex: 1,
+            color: '#555',
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
@@ -276,7 +282,7 @@ const BostonCalendarPage = () => {
                 )}
               </div>
             )}
-            {renderCategoryCircles(event.extendedProps)}
+            <CategoryCircles eventProps={event.extendedProps} />
             {organizerShort && (
               <span style={{
                 fontSize: '0.85rem',
