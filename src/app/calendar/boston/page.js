@@ -466,6 +466,28 @@ const BostonCalendarPage = () => {
             </IconButton>
           </ButtonGroup>
 
+          {/* Date Range Display - Month Year Label */}
+          <div
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+              {calendarRef.current
+                ? (() => {
+                    const calDate = calendarRef.current.getApi().getDate();
+                    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+                    return `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
+                  })()
+                : 'LOADING CALENDAR...'}
+            </div>
+          </div>
+
           <ButtonGroup variant="outlined" size="small">
             <IconButton
               onClick={() => {
@@ -539,21 +561,12 @@ const BostonCalendarPage = () => {
             eventDidMount={(info) => {
               const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
               
-              // For month view - white/light background with subtle border
+              // For month view - transparent background, let renderEventContent handle styling
               if (info.view.type === 'dayGridMonth') {
-                info.el.style.backgroundColor = '#ffffff';
-                info.el.style.borderColor = '#e0e0e0';
-                info.el.style.color = '#000000';  // Black text
-                
-                // Ensure text inside is black
-                const eventTitle = info.el.querySelector('.fc-event-title');
-                if (eventTitle) {
-                  eventTitle.style.color = '#000000';
-                }
-                const eventTime = info.el.querySelector('.fc-event-time');
-                if (eventTime) {
-                  eventTime.style.color = '#000000';
-                }
+                info.el.style.backgroundColor = 'transparent';
+                info.el.style.borderColor = 'transparent';
+                info.el.style.border = 'none';
+                info.el.style.boxShadow = 'none';
               }
               
               // For list view - transparent background to avoid double colors
@@ -570,15 +583,14 @@ const BostonCalendarPage = () => {
             }}
             // Gray out past days in month view
             dayCellDidMount={(arg) => {
+              const { date, el } = arg;
               const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const cellDate = new Date(arg.date);
-              cellDate.setHours(0, 0, 0, 0);
+              const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+              const cellDateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
               
-              // Apply gray background to past days
-              if (cellDate < today) {
-                arg.el.style.backgroundColor = '#f5f5f5';
-                arg.el.style.opacity = '0.7';
+              // Apply gray background to past days (match main calendar #c0c0c0)
+              if (cellDateStr < todayStr) {
+                el.style.backgroundColor = '#c0c0c0';
               }
               
               // Also handle the category circles we add
