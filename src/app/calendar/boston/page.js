@@ -146,7 +146,7 @@ const BostonCalendarPage = () => {
     setCreateModalOpen: handleCreateEventModalClose,
   } = useCalendarPage();
 
-  // Custom event content renderer (simplified for Boston read-only view)
+  // Custom event content renderer (match main calendar exactly)
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
@@ -154,15 +154,15 @@ const BostonCalendarPage = () => {
     // Check for canceled events
     const isCanceled = event.extendedProps?.eventStatus === 'canceled';
     
-    // Get organizer short name - check multiple possible fields
+    // Get organizer short name (normal text)
     const organizerShort = event.extendedProps?.organizerShort || 
                           event.extendedProps?.ownerOrganizer?.organizerShort ||
                           event.extendedProps?.ownerOrganizerShort || '';
     
-    // Get venue/location short title - prioritize venueName
-    const eventShortTitle = event.extendedProps?.venueName || 
-                           event.extendedProps?.eventLocationTitle ||
-                           event.extendedProps?.venueShort || '';
+    // Get venue short title (BOLD text) - uses shortTitle field like main calendar
+    const eventShortTitle = event.extendedProps?.shortTitle || 
+                           event.title?.substring(0, 15) || 
+                           '';
 
     if (isMonthlyView) {
       // Month view: match main calendar exactly
@@ -179,14 +179,14 @@ const BostonCalendarPage = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start'
         }}>
-          {/* Row 1: Time, categories, organizer, shortTitle */}
+          {/* Row 1: Time | Categories | Organizer (normal) | Venue (bold) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '3px',
             marginBottom: '1px'
           }}>
-            {/* Always show time if available */}
+            {/* Time display */}
             {startTime && (
               <div style={{ 
                 fontSize: '0.8rem', 
@@ -198,39 +198,40 @@ const BostonCalendarPage = () => {
                 {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
               </div>
             )}
-            {/* Category bubbles using component */}
+            {/* Category bubbles */}
             <CategoryCircles eventProps={event.extendedProps} />
-            {/* Organizer */}
+            {/* Organizer and Venue - matching main calendar exactly */}
             {organizerShort && (
-              <div style={{
-                fontSize: '0.75rem',
-                fontWeight: 'normal',
-                color: '#666',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                lineHeight: '1.0',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {organizerShort}
-              </div>
-            )}
-            {/* Venue short title */}
-            {eventShortTitle && (
               <>
-                <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
                 <div style={{
                   fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'visible',
                   whiteSpace: 'nowrap',
                   flexShrink: 1,
                   lineHeight: '1.0',
                   textDecoration: isCanceled ? 'line-through' : 'none'
                 }}>
-                  {eventShortTitle}
+                  {organizerShort}
                 </div>
+                {eventShortTitle && (
+                  <>
+                    <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      color: '#333',
+                      overflow: 'visible',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 1,
+                      lineHeight: '1.0',
+                      textDecoration: isCanceled ? 'line-through' : 'none'
+                    }}>
+                      {eventShortTitle}
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
