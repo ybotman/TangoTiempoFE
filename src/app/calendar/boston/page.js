@@ -146,22 +146,54 @@ const BostonCalendarPage = () => {
     setCreateModalOpen: handleCreateEventModalClose,
   } = useCalendarPage();
 
+  // Helper to render category circles inline
+  const renderCategoryCircles = (extendedProps) => {
+    if (!extendedProps) return null;
+    
+    const { categoryFirst, categorySecond, categoryThird } = extendedProps;
+    const categoryIds = [categoryFirst, categorySecond, categoryThird];
+    
+    return (
+      <div style={{ display: 'inline-flex', gap: '2px', flexShrink: 0 }}>
+        {categoryIds.map((catId, index) => {
+          if (!catId) return null;
+          const category = categories.find(c => c.id === catId);
+          if (!category) return null;
+          
+          return (
+            <div
+              key={index}
+              style={{
+                width: index === 0 ? '8px' : '6px',
+                height: index === 0 ? '8px' : '6px',
+                borderRadius: '50%',
+                backgroundColor: category.color || '#ccc',
+                border: '1px solid rgba(0,0,0,0.1)'
+              }}
+            />
+          );
+        }).filter(Boolean)}
+      </div>
+    );
+  };
+
   // Custom event content renderer (simplified for Boston read-only view)
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
     
-    // Check for AI discovered events (not needed for Boston but keeping structure)
-    const isAIDiscovered = event.extendedProps?.isAIDiscovered || false;
+    // Check for canceled events
     const isCanceled = event.extendedProps?.eventStatus === 'canceled';
     
-    // Get organizer short name
+    // Get organizer short name - check multiple possible fields
     const organizerShort = event.extendedProps?.organizerShort || 
-                          event.extendedProps?.ownerOrganizer?.organizerShort || '';
+                          event.extendedProps?.ownerOrganizer?.organizerShort ||
+                          event.extendedProps?.ownerOrganizerShort || '';
     
-    // Get venue/location short title
+    // Get venue/location short title - prioritize venueName
     const eventShortTitle = event.extendedProps?.venueName || 
-                           event.extendedProps?.eventLocationTitle || '';
+                           event.extendedProps?.eventLocationTitle ||
+                           event.extendedProps?.venueShort || '';
 
     if (isMonthlyView) {
       // Month view: compact display
@@ -188,9 +220,15 @@ const BostonCalendarPage = () => {
             {startTime && (
               <span style={{ fontWeight: 'bold' }}>{startTime}</span>
             )}
-            <CategoryCircles eventProps={event.extendedProps} />
+            {renderCategoryCircles(event.extendedProps)}
             {organizerShort && (
-              <span style={{ color: '#666' }}>{organizerShort}</span>
+              <span style={{ color: '#666', fontSize: '0.7rem' }}>{organizerShort}</span>
+            )}
+            {eventShortTitle && (
+              <>
+                <span style={{ fontSize: '0.7rem', color: '#666' }}> | </span>
+                <span style={{ fontWeight: 'bold', fontSize: '0.7rem' }}>{eventShortTitle}</span>
+              </>
             )}
           </div>
           
@@ -238,23 +276,28 @@ const BostonCalendarPage = () => {
                 )}
               </div>
             )}
-            <CategoryCircles eventProps={event.extendedProps} />
+            {renderCategoryCircles(event.extendedProps)}
             {organizerShort && (
-              <div style={{
+              <span style={{
                 fontSize: '0.85rem',
                 color: '#666',
                 textDecoration: isCanceled ? 'line-through' : 'none'
               }}>
                 {organizerShort}
-                {eventShortTitle && (
-                  <>
-                    <span> | </span>
-                    <span style={{ fontWeight: 'bold', color: '#333' }}>
-                      {eventShortTitle}
-                    </span>
-                  </>
-                )}
-              </div>
+              </span>
+            )}
+            {eventShortTitle && (
+              <>
+                <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
+                <span style={{ 
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold', 
+                  color: '#333',
+                  textDecoration: isCanceled ? 'line-through' : 'none'
+                }}>
+                  {eventShortTitle}
+                </span>
+              </>
             )}
           </div>
           
