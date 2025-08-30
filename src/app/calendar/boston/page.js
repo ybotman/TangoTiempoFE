@@ -237,7 +237,7 @@ const BostonCalendarPage = () => {
             fontSize: '0.65rem', 
             fontWeight: 'normal',
             lineHeight: '1.1',
-            color: '#555',
+            color: '#000000',  // Black text
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
@@ -306,7 +306,7 @@ const BostonCalendarPage = () => {
             fontSize: '0.7rem', 
             fontWeight: 'normal',
             lineHeight: '1.2',
-            color: '#555',
+            color: '#000000',  // Black text
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
@@ -539,10 +539,21 @@ const BostonCalendarPage = () => {
             eventDidMount={(info) => {
               const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
               
-              // For month view - keep event backgrounds with category colors
-              if (info.view.type === 'dayGridMonth' && category) {
-                info.el.style.backgroundColor = category.color;
-                info.el.style.borderColor = category.color;
+              // For month view - white/light background with subtle border
+              if (info.view.type === 'dayGridMonth') {
+                info.el.style.backgroundColor = '#ffffff';
+                info.el.style.borderColor = '#e0e0e0';
+                info.el.style.color = '#000000';  // Black text
+                
+                // Ensure text inside is black
+                const eventTitle = info.el.querySelector('.fc-event-title');
+                if (eventTitle) {
+                  eventTitle.style.color = '#000000';
+                }
+                const eventTime = info.el.querySelector('.fc-event-time');
+                if (eventTime) {
+                  eventTime.style.color = '#000000';
+                }
               }
               
               // For list view - transparent background to avoid double colors
