@@ -481,7 +481,6 @@ const BostonCalendarPage = () => {
               minute: '2-digit',
               meridiem: 'short',
             }}
-            dayCellDidMount={handleDayCellDidMount}
             views={{
               list21Days: {
                 type: 'list',
@@ -496,15 +495,40 @@ const BostonCalendarPage = () => {
             }}
             eventDidMount={(info) => {
               const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
-              if (category) {
+              
+              // For month view - keep event backgrounds with category colors
+              if (info.view.type === 'dayGridMonth' && category) {
                 info.el.style.backgroundColor = category.color;
                 info.el.style.borderColor = category.color;
+              }
+              
+              // For list view - transparent background to avoid double colors
+              if (info.view.type === 'list21Days' || info.view.type === 'listMonth') {
+                info.el.style.backgroundColor = 'transparent';
+                info.el.style.borderColor = '#ddd';
                 
+                // Style the dot with category color
                 const dotEl = info.el.querySelector('.fc-list-event-dot');
-                if (dotEl) {
+                if (dotEl && category) {
                   dotEl.style.borderColor = category.color;
                 }
               }
+            }}
+            // Gray out past days in month view
+            dayCellDidMount={(arg) => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const cellDate = new Date(arg.date);
+              cellDate.setHours(0, 0, 0, 0);
+              
+              // Apply gray background to past days
+              if (cellDate < today) {
+                arg.el.style.backgroundColor = '#f5f5f5';
+                arg.el.style.opacity = '0.7';
+              }
+              
+              // Also handle the category circles we add
+              handleDayCellDidMount(arg);
             }}
           />
         </div>
