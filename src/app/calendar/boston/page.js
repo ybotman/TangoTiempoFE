@@ -128,7 +128,7 @@ const BostonCalendarPage = () => {
     handlePrev,
     handleNext,
     handleToday: handleTodayClick,
-    selectedEvent,
+    selectedEventDetails,  // This is the actual selected event data
     handleEventClick,
     isViewDetailModalOpen: isViewEventModalOpen,
     setViewDetailModalOpen: handleModalClose,
@@ -137,9 +137,9 @@ const BostonCalendarPage = () => {
     noLocationSelected,
     includeAIEvents,
     setIncludeAIEvents,
-    selectedAIEvent,
-    isViewAIEventModalOpen,
-    handleAIModalClose,
+    selectedAIEventDetails: selectedAIEvent,  // AI event details
+    isAIDetailModalOpen: isViewAIEventModalOpen,  // AI modal state
+    setAIDetailModalOpen: handleAIModalClose,  // AI modal close
     isCreateModalOpen: isCreateEventModalOpen,
     clickedDate: selectedDateInfo,
     handleDateClick,
@@ -511,29 +511,23 @@ const BostonCalendarPage = () => {
       </div>
 
       {/* Modals */}
-      {isViewEventModalOpen && selectedEvent && (
+      {isViewEventModalOpen && selectedEventDetails && (
         <ViewEventDetailModal
           open={isViewEventModalOpen}
           onClose={() => handleModalClose(false)}
-          eventDetails={selectedEvent}
+          eventDetails={selectedEventDetails}
         />
       )}
 
       {isViewAIEventModalOpen && selectedAIEvent && (
         <ViewAIEventDetails
           open={isViewAIEventModalOpen}
-          onClose={handleAIModalClose}
+          onClose={() => handleAIModalClose(false)}
           aiEventDetails={selectedAIEvent}
         />
       )}
 
-      {isCreateEventModalOpen && (
-        <CreateEventDetailModal
-          open={isCreateEventModalOpen}
-          onClose={() => handleCreateEventModalClose(false)}
-          selectedDate={selectedDateInfo}
-        />
-      )}
+      {/* Create modal removed - read-only view */}
     </div>
   );
 };
