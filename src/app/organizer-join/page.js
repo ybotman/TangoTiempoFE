@@ -2,20 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import styles from './organizer-join.module.css'
 
 export default function OrganizerJoinPage() {
-  const [formData, setFormData] = useState({
-    role: 'organizer',
-    name: '',
-    email: '',
-    cityRegion: '',
-    website: '',
-    message: ''
-  })
-  const [submitStatus, setSubmitStatus] = useState(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [expandedProcess, setExpandedProcess] = useState({})
 
   const toggleProcess = (id) => {
@@ -25,49 +14,10 @@ export default function OrganizerJoinPage() {
     }))
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitStatus(null)
-
-    try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch('/api/partner/interest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        setSubmitStatus('success')
-        setFormData({
-          role: 'organizer',
-          name: '',
-          email: '',
-          cityRegion: '',
-          website: '',
-          message: ''
-        })
-      } else {
-        setSubmitStatus('error')
-      }
-    } catch (error) {
-      console.error('Form submission error:', error)
-      setSubmitStatus('error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   const processSteps = [
     {
       id: 'account',
-      title: '1. Create Your Organizer Account',
+      title: '1. Create Account',
       summary: 'Quick 2-minute signup with email verification',
       details: [
         'Sign up with your email and password',
@@ -79,7 +29,7 @@ export default function OrganizerJoinPage() {
     },
     {
       id: 'venue',
-      title: '2. Set Up Your Venues',
+      title: '2. Setup Your Venues (if needed)',
       summary: 'Add the locations where you host events',
       details: [
         'Search our database for existing venues or add new ones',
@@ -92,7 +42,7 @@ export default function OrganizerJoinPage() {
     },
     {
       id: 'events',
-      title: '3. List Your Events',
+      title: '3. Add Events',
       summary: 'Fast event creation with recurring support',
       details: [
         'Choose event type: Milonga, Practica, Class, Festival, Workshop',
@@ -146,15 +96,12 @@ export default function OrganizerJoinPage() {
             Help dancers find your milongas, practicas, and classes.
           </p>
           <div className={styles.heroCtas}>
-            <Link href="/auth" className={styles.ctaPrimary}>
+            <Link href="/auth/login" className={styles.ctaPrimary}>
               Start Listing Events Now
             </Link>
-            <a href="#process" className={styles.ctaSecondary}>
-              See How It Works
-            </a>
           </div>
           <p className={styles.launchNote}>
-            Already trusted by 50+ organizers in the Northeast
+            Already the Northeast's primary tango calendar
           </p>
         </div>
       </section>
@@ -164,15 +111,13 @@ export default function OrganizerJoinPage() {
         <div className={styles.missionContent}>
           <h2>Why TangoTiempo?</h2>
           <p>
-            We're building the <strong>only comprehensive, FREE</strong> tango calendar
+            We're building <strong>a comprehensive, FREE</strong> tango calendar
             for the United States. No fees, no gatekeeping, no favoritism - just a
             shared resource for the entire tango community. The Northeast region
             (especially Boston) is nearly complete, and we're expanding nationwide.
           </p>
           <div className={styles.statusBadge}>
             <span className={styles.badge}>100% Free Forever</span>
-            <span className={styles.badge}>Northeast: 85% Complete</span>
-            <span className={styles.badge}>National Expansion: Active</span>
           </div>
         </div>
       </section>
@@ -281,7 +226,7 @@ export default function OrganizerJoinPage() {
 
       {/* Current Coverage */}
       <section className={styles.coverage}>
-        <h2>Current Coverage</h2>
+        <h2>Our Expansion Plan</h2>
         <div className={styles.coverageGrid}>
           <div className={styles.coverageRegion}>
             <h3>✅ Active Regions</h3>
@@ -293,22 +238,12 @@ export default function OrganizerJoinPage() {
             </ul>
           </div>
           <div className={styles.coverageRegion}>
-            <h3>🚀 Launching Soon</h3>
-            <ul>
-              <li>San Francisco Bay Area</li>
-              <li>Los Angeles</li>
-              <li>Chicago</li>
-              <li>Seattle</li>
-            </ul>
-          </div>
-          <div className={styles.coverageRegion}>
-            <h3>📅 2025 Expansion</h3>
-            <ul>
-              <li>Denver</li>
-              <li>Austin</li>
-              <li>Portland</li>
-              <li>All major US cities</li>
-            </ul>
+            <h3>🚀 2025-2026 Expansion</h3>
+            <p style={{color: '#c0c0c0', lineHeight: '1.6'}}>
+              We're just starting our active rollout.
+              Major cities across the United States
+              will be added throughout 2025-2026.
+            </p>
           </div>
         </div>
       </section>
@@ -381,115 +316,6 @@ export default function OrganizerJoinPage() {
         </div>
       </section>
 
-      {/* Interest Form for Non-Organizers */}
-      <section className={styles.interestForm} id="interest-form">
-        <h2>Not an Organizer? Join the Waitlist</h2>
-        <p>DJs, Teachers, and Taxi Dancers - be first to know when your features launch.</p>
-
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="role">I am a:</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="organizer">Event Organizer</option>
-              <option value="dj">DJ</option>
-              <option value="teacher">Teacher / Maestro</option>
-              <option value="taxi">Taxi Dancer</option>
-              <option value="both">Multiple Roles</option>
-            </select>
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="name">Name *</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="email">Email *</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="cityRegion">City/Region *</label>
-              <input
-                type="text"
-                id="cityRegion"
-                name="cityRegion"
-                value={formData.cityRegion}
-                onChange={handleInputChange}
-                placeholder="e.g., Boston, MA"
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="website">Website/Social</label>
-              <input
-                type="text"
-                id="website"
-                name="website"
-                value={formData.website}
-                onChange={handleInputChange}
-                placeholder="Optional"
-              />
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="message">Message (Optional)</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              rows="4"
-              placeholder="Tell us about your tango involvement..."
-            />
-          </div>
-
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Sending...' : 'Join Waitlist'}
-          </button>
-
-          {submitStatus === 'success' && (
-            <div className={styles.successMessage}>
-              Thank you! We'll notify you when your features are ready.
-            </div>
-          )}
-
-          {submitStatus === 'error' && (
-            <div className={styles.errorMessage}>
-              Something went wrong. Please try again or email us directly.
-            </div>
-          )}
-        </form>
-      </section>
 
       {/* Final CTA */}
       <section className={styles.finalCta}>
@@ -500,11 +326,11 @@ export default function OrganizerJoinPage() {
             Start listing your events today - it takes less than 10 minutes!
           </p>
           <div className={styles.finalButtons}>
-            <Link href="/auth" className={styles.ctaPrimary}>
+            <Link href="/auth/login" className={styles.ctaPrimary}>
               Create Organizer Account
             </Link>
             <Link href="/calendar" className={styles.ctaSecondary}>
-              Browse Current Events
+              See the Calendar
             </Link>
           </div>
         </div>
