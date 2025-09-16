@@ -166,11 +166,6 @@ export default function OrganizerJoinPage() {
           Click each step to see detailed information
         </p>
 
-        {/* Image placeholder */}
-        <div className={styles.processImage}>
-          <p>[ Process flow diagram will go here ]</p>
-        </div>
-
         <div className={styles.processSteps}>
           {processSteps.map((step) => (
             <div key={step.id} className={styles.processStep}>
@@ -220,30 +215,6 @@ export default function OrganizerJoinPage() {
             <span className={styles.quickTime}>5 min</span>
             <h3>List Event</h3>
             <p>Create your first listing</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Current Coverage */}
-      <section className={styles.coverage}>
-        <h2>Our Expansion Plan</h2>
-        <div className={styles.coverageGrid}>
-          <div className={styles.coverageRegion}>
-            <h3>✅ Active Regions</h3>
-            <ul>
-              <li>Boston & Greater Boston</li>
-              <li>New York City Metro</li>
-              <li>Philadelphia Area</li>
-              <li>Washington DC Region</li>
-            </ul>
-          </div>
-          <div className={styles.coverageRegion}>
-            <h3>🚀 2025-2026 Expansion</h3>
-            <p style={{color: '#c0c0c0', lineHeight: '1.6'}}>
-              We're just starting our active rollout.
-              Major cities across the United States
-              will be added throughout 2025-2026.
-            </p>
           </div>
         </div>
       </section>
