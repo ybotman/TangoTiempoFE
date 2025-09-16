@@ -25,6 +25,16 @@ export default function OrganizerJoinPage() {
         </div>
       </section>
 
+      {/* Trust & Privacy Section */}
+      <section className={styles.trustSection}>
+        <div className={styles.trustContent}>
+          <h2 className={styles.trustHeading}>🔒 We Never Sell or Share Your Data</h2>
+          <p className={styles.trustSubheading}>
+            Run BY Tango Event Organizers FOR the Tango Community
+          </p>
+        </div>
+      </section>
+
       {/* Mission Statement */}
       <section className={styles.mission}>
         <div className={styles.missionContent}>
