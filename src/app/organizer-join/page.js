@@ -20,7 +20,7 @@ export default function OrganizerJoinPage() {
             </Link>
           </div>
           <p className={styles.launchNote}>
-            Already the Northeast's primary tango calendar
+            Already the Northeast&apos;s primary tango calendar
           </p>
         </div>
       </section>
@@ -30,10 +30,10 @@ export default function OrganizerJoinPage() {
         <div className={styles.missionContent}>
           <h2>Why TangoTiempo?</h2>
           <p>
-            We're building <strong>a comprehensive, FREE</strong> tango calendar
+            We&apos;re building <strong>a comprehensive, FREE</strong> tango calendar
             for the United States. No fees, no gatekeeping, no favoritism - just a
             shared resource for the entire tango community. The Northeast region
-            (especially Boston) is nearly complete, and we're expanding nationwide.
+            (especially Boston) is nearly complete, and we&apos;re expanding nationwide.
           </p>
           <div className={styles.statusBadge}>
             <span className={styles.badge}>100% Free Forever</span>
@@ -122,7 +122,7 @@ export default function OrganizerJoinPage() {
           </div>
           <div className={styles.faqItem}>
             <h3>Do you share my data?</h3>
-            <p>Never. Your data belongs to you. We don't sell or share organizer information.</p>
+            <p>Never. Your data belongs to you. We don&apos;t sell or share organizer information.</p>
           </div>
           <div className={styles.faqItem}>
             <h3>What if I need help?</h3>

@@ -894,12 +894,29 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Reduce padding on all sections for mobile */
+  .hero,
+  .mission,
+  .benefits,
+  .valueProps,
+  .process,
+  .quickStart,
+  .coverage,
+  .faqs,
+  .comingSoon,
+  .interestForm,
+  .finalCta {
+    padding: 40px 15px;
+  }
+
   .heroContent h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    margin-bottom: 16px;
   }
 
   .subhead {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin-bottom: 30px;
   }
 
   .heroCtas {
@@ -912,22 +929,171 @@
     width: 100%;
     max-width: 280px;
     text-align: center;
+    padding: 14px 24px;
+    font-size: 1rem;
   }
 
-  .valueGrid,
+  /* Mission section */
+  .missionContent h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .missionContent p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  /* Benefits grid */
+  .benefitGrid,
+  .valueGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .benefitCard,
+  .valueCard {
+    padding: 20px;
+  }
+
+  .benefitCard h3,
+  .valueCard h3 {
+    font-size: 1.2rem;
+  }
+
+  .benefitIcon {
+    font-size: 2rem;
+  }
+
+  /* Quick Start */
+  .quickStart h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .quickSteps {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .quickStep {
+    padding: 20px;
+    min-width: auto;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .quickTime {
+    position: static;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  .quickStep h3 {
+    font-size: 1.2rem;
+    margin-top: 0;
+  }
+
+  /* FAQs */
+  .faqs h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
   .faqGrid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .steps {
+  .faqItem {
+    padding: 20px;
+  }
+
+  .faqItem h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Coming Soon */
+  .comingSoon h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .comingSoonGrid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .comingSoonCard {
+    padding: 20px;
+    padding-top: 50px;
+  }
+
+  .eta {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  /* Final CTA */
+  .finalCtaContent h2 {
+    font-size: 2rem;
+  }
+
+  .finalCtaContent p {
+    font-size: 1rem;
+  }
+
+  .finalButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Trust section */
+  .trustSection {
+    padding: 30px 15px;
+  }
+
+  .trustHeading {
+    font-size: 1rem;
+  }
+
+  .trustSubheading {
+    font-size: 0.85rem;
   }
 
   .form {
     padding: 25px;
   }
+}
 
-  .finalCta {
-    grid-template-columns: 1fr;
+/* Extra small devices */
+@media (max-width: 480px) {
+  .heroContent h1 {
+    font-size: 1.5rem;
+  }
+
+  .missionContent h2,
+  .benefits h2,
+  .quickStart h2,
+  .faqs h2,
+  .comingSoon h2 {
+    font-size: 1.5rem;
+  }
+
+  .badge {
+    font-size: 0.85rem;
+    padding: 6px 15px;
+  }
+
+  .benefitCard,
+  .valueCard,
+  .faqItem,
+  .comingSoonCard {
+    padding: 15px;
+  }
+
+  .finalCtaContent h2 {
+    font-size: 1.6rem;
   }
 }
