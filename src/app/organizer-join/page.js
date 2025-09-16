@@ -133,7 +133,7 @@ export default function OrganizerJoinPage() {
 
       {/* Coming Soon for Others */}
       <section className={styles.comingSoon}>
-        <h2>Coming Soon: DJ & Teacher Features</h2>
+        <h2>Coming Soon: More Features</h2>
         <div className={styles.comingSoonGrid}>
           <div className={styles.comingSoonCard}>
             <h3>For DJs</h3>
@@ -164,6 +164,16 @@ export default function OrganizerJoinPage() {
               <li>Reviews & ratings</li>
             </ul>
             <span className={styles.eta}>Q2 2025</span>
+          </div>
+          <div className={styles.comingSoonCard}>
+            <h3>Social Integrations</h3>
+            <ul>
+              <li>Facebook event sync</li>
+              <li>Google Calendar export</li>
+              <li>Instagram event sharing</li>
+              <li>Auto-post to social media</li>
+            </ul>
+            <span className={styles.eta}>Coming Soon</span>
           </div>
         </div>
       </section>
