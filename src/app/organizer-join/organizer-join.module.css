@@ -695,138 +695,6 @@
   line-height: 1.6;
 }
 
-/* Interest Form */
-.interestForm {
-  padding: 80px 20px;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.interestForm h2 {
-  font-size: 2.5rem;
-  color: #ffd700;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.interestForm > p {
-  text-align: center;
-  color: #c0c0c0;
-  margin-bottom: 50px;
-  font-size: 1.1rem;
-}
-
-.form {
-  max-width: 600px;
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 40px;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 215, 0, 0.2);
-}
-
-.formGroup {
-  margin-bottom: 25px;
-  flex: 1;
-}
-
-.formGroup label {
-  display: block;
-  color: #ffd700;
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.formGroup input,
-.formGroup select,
-.formGroup textarea {
-  width: 100%;
-  padding: 12px 15px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  color: #ffffff;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.formGroup input:focus,
-.formGroup select:focus,
-.formGroup textarea:focus {
-  outline: none;
-  border-color: #ffd700;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
-}
-
-.formGroup select option {
-  background: #1a1a2e;
-  color: #ffffff;
-}
-
-.formGroup textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.formRow {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 0;
-}
-
-@media (max-width: 600px) {
-  .formRow {
-    flex-direction: column;
-  }
-}
-
-.submitButton {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, #ff8c00, #ffa500);
-  color: #000000;
-  border: none;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 10px;
-}
-
-.submitButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(255, 140, 0, 0.5);
-}
-
-.submitButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.successMessage {
-  margin-top: 20px;
-  padding: 15px;
-  background: rgba(76, 175, 80, 0.1);
-  border: 1px solid #4caf50;
-  border-radius: 8px;
-  color: #4caf50;
-  text-align: center;
-  font-weight: 600;
-}
-
-.errorMessage {
-  margin-top: 20px;
-  padding: 15px;
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid #f44336;
-  border-radius: 8px;
-  color: #f44336;
-  text-align: center;
-  font-weight: 600;
-}
-
 /* Final CTA Section */
 .finalCta {
   padding: 100px 20px;
@@ -904,7 +772,6 @@
   .coverage,
   .faqs,
   .comingSoon,
-  .interestForm,
   .finalCta {
     padding: 40px 15px;
   }
@@ -1060,10 +927,6 @@
 
   .trustSubheading {
     font-size: 0.85rem;
-  }
-
-  .form {
-    padding: 25px;
   }
 }
 
