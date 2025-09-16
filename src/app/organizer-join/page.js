@@ -1,90 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import styles from './organizer-join.module.css'
 
 export default function OrganizerJoinPage() {
-  const [expandedProcess, setExpandedProcess] = useState({})
-
-  const toggleProcess = (id) => {
-    setExpandedProcess(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }))
-  }
-
-  const processSteps = [
-    {
-      id: 'account',
-      title: '1. Create Account',
-      summary: 'Quick 2-minute signup with email verification',
-      details: [
-        'Sign up with your email and password',
-        'Verify your email address',
-        'Complete your organizer profile with contact info',
-        'Add your organization name and website (optional)',
-        'Set your primary city/region for event listings'
-      ]
-    },
-    {
-      id: 'venue',
-      title: '2. Setup Your Venues (if needed)',
-      summary: 'Add the locations where you host events',
-      details: [
-        'Search our database for existing venues or add new ones',
-        'Provide venue name and full address',
-        'Our system automatically geocodes for map display',
-        'Add venue details: capacity, floor type, parking info',
-        'Upload venue photos (coming soon)',
-        'Save multiple venues for quick event creation'
-      ]
-    },
-    {
-      id: 'events',
-      title: '3. Add Events',
-      summary: 'Fast event creation with recurring support',
-      details: [
-        'Choose event type: Milonga, Practica, Class, Festival, Workshop',
-        'Select from your saved venues or add new',
-        'Set date, time, and recurrence pattern',
-        'Add event description and special notes',
-        'Include pricing information (free, fixed, or sliding scale)',
-        'Add links to registration or tickets',
-        'Preview how your event appears to dancers',
-        'Publish immediately or schedule for later'
-      ]
-    },
-    {
-      id: 'manage',
-      title: '4. Manage & Update',
-      summary: 'Keep your listings current with easy tools',
-      details: [
-        'Dashboard view of all your events',
-        'Quick edit for last-minute changes',
-        'Cancel or postpone with automatic notifications',
-        'Duplicate events for similar future listings',
-        'Track views and interest (analytics coming soon)',
-        'Export your event data anytime',
-        'Bulk update tools for multiple events'
-      ]
-    },
-    {
-      id: 'promote',
-      title: '5. Promotion & Growth (Coming Soon)',
-      summary: 'Optional tools to reach more dancers',
-      details: [
-        'Featured event placement in search results',
-        'Email notifications to dancers in your area',
-        'Social media integration and sharing tools',
-        'Event reminder notifications',
-        'Dancer RSVP and interest tracking',
-        'Direct messaging with interested dancers',
-        'Co-promotion with other organizers'
-      ]
-    }
-  ]
-
   return (
     <div className={styles.container}>
       {/* Hero Section */}
@@ -156,44 +75,6 @@ export default function OrganizerJoinPage() {
             <h3>Always Free</h3>
             <p>No listing fees, no commissions, no hidden costs</p>
           </div>
-        </div>
-      </section>
-
-      {/* The Process - Expandable */}
-      <section className={styles.process} id="process">
-        <h2>The Complete Process</h2>
-        <p className={styles.processSubhead}>
-          Click each step to see detailed information
-        </p>
-
-        <div className={styles.processSteps}>
-          {processSteps.map((step) => (
-            <div key={step.id} className={styles.processStep}>
-              <button
-                className={styles.processHeader}
-                onClick={() => toggleProcess(step.id)}
-                aria-expanded={expandedProcess[step.id]}
-              >
-                <div className={styles.processTitle}>
-                  <h3>{step.title}</h3>
-                  <p>{step.summary}</p>
-                </div>
-                <span className={styles.processToggle}>
-                  {expandedProcess[step.id] ? '−' : '+'}
-                </span>
-              </button>
-
-              {expandedProcess[step.id] && (
-                <div className={styles.processDetails}>
-                  <ul>
-                    {step.details.map((detail, idx) => (
-                      <li key={idx}>{detail}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
         </div>
       </section>
 
