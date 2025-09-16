@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:localhost)",
-      "Bash(./.ybotbot/jira-tools/jira-create.sh:*)"
+      "Bash(./.ybotbot/jira-tools/jira-create.sh:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
