@@ -119,16 +119,30 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // TIEMPO-239: Get venue timezone display information
   const hasVenueTimezone = eventDetails?.extendedProps?.hasVenueTimezone;
-  const displayStartTime = eventDetails?.extendedProps?.displayStartTime;
-  const displayEndTime = eventDetails?.extendedProps?.displayEndTime;
+  const venueStartDisplay = eventDetails?.extendedProps?.venueStartDisplay;
+  const venueEndDisplay = eventDetails?.extendedProps?.venueEndDisplay;
+  const displayStartTime = venueStartDisplay || eventDetails?.extendedProps?.displayStartTime;
+  const displayEndTime = venueEndDisplay || eventDetails?.extendedProps?.displayEndTime;
   const timezoneAbbr = eventDetails?.extendedProps?.timezoneAbbr || '';
-  
+
+  // Debug timezone fields
+  console.log('Modal timezone debug:', {
+    hasVenueTimezone,
+    venueStartDisplay,
+    venueEndDisplay,
+    displayStartTime,
+    displayEndTime,
+    eventStart: eventDetails?.start,
+    eventEnd: eventDetails?.end
+  });
+
   // Use display times if available, otherwise fallback to event dates
-  const startDate = hasVenueTimezone && displayStartTime 
-    ? displayStartTime 
+  // For now, use venueStartDisplay directly if available, regardless of hasVenueTimezone flag
+  const startDate = venueStartDisplay
+    ? venueStartDisplay
     : (eventDetails?.start || eventDetails?._instance?.range?.start || null);
-  const endDate = hasVenueTimezone && displayEndTime
-    ? displayEndTime
+  const endDate = venueEndDisplay
+    ? venueEndDisplay
     : (eventDetails?.end || eventDetails?._instance?.range?.end || null);
   const allDay = eventDetails?.allDay || false;
 
@@ -340,7 +354,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
               <Box display="flex" alignItems="center">
                 <Typography variant="h6" color="textSecondary">
                   <strong>
-                    {hasVenueTimezone 
+                    {venueStartDisplay
                       ? formatVenueTimeRange(startDate, endDate, timezoneAbbr)
                       : (() => {
                           // TIEMPO-246: String-based time formatting without Date() conversion
