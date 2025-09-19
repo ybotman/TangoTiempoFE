@@ -149,7 +149,8 @@ const BostonCalendarPage = () => {
     handleEventClick,
     isViewDetailModalOpen: isViewEventModalOpen,
     setViewDetailModalOpen: handleModalClose,
-    // Loading and error states not used in Boston view
+    // Loading states
+    eventsLoading,
     includeAIEvents,
     setIncludeAIEvents,
     selectedAIEventDetails: selectedAIEvent,  // AI event details
@@ -547,7 +548,46 @@ const BostonCalendarPage = () => {
         )}
 
         {/* Main Calendar */}
-        <div style={{ width: '100%', overflowX: 'auto' }}>
+        <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
+          {eventsLoading && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: '20px 40px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: '3px solid #f3f3f3',
+                borderTop: '3px solid #1976d2',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <div style={{ 
+                fontSize: '16px', 
+                fontWeight: '500',
+                color: '#333' 
+              }}>
+                Loading events...
+              </div>
+              <style jsx>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
+            </div>
+          )}
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
