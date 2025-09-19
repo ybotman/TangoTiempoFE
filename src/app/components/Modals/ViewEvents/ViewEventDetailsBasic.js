@@ -64,13 +64,9 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
         </Typography>
       )}
 
-      {/* Event Description */}
-      <Typography variant="h6" component="h3" gutterBottom>
-        Description
-      </Typography>
-
+      {/* Event Description - no header, just the content */}
       {/* Render sanitized description as HTML with line limitation */}
-      <Box sx={{ position: 'relative' }}>
+      <Box sx={{ position: 'relative', mt: 2 }}>
         <div
           ref={descriptionRef}
           style={{

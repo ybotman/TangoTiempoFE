@@ -15,10 +15,10 @@ Coordinate backend and frontend deployment of venue filtering feature (TIEMPO-27
 - **TEST Branch**: Merged and deployed to Vercel
 - **TEST Deployment**: Not working - backend missing distance filtering
 
-### Backend (CALBE-53) ⚠️
+### Backend (CALBE-53) ✅
 - **Local**: Working with distance-based venue filtering
-- **TEST**: Not deployed - missing venue distance filtering
-- **PROD**: Not deployed
+- **TEST**: DEPLOYED ✅
+- **PROD**: DEPLOYED ✅ - Live since September 18th, 3:17 PM
 
 ## Required Actions
 
