@@ -756,7 +756,7 @@ const CalendarPage = () => {
             setViewDateRange({ start: view.currentStart, end: view.currentEnd });
           }
         }}
-        nextDayThreshold="04:00:00"
+        nextDayThreshold="06:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
         eventContent={renderEventContent}

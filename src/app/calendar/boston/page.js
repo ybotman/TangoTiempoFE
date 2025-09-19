@@ -51,28 +51,46 @@ const formatTime = (dateStr) => {
   return hours + (minutes !== 0 ? ':' + minutesStr : '') + ampm;
 };
 
-const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay) => {
+const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay, venueAbbr) => {
   if (!venueStartDisplay) return { startTime: '', endTime: '' };
-  
+
   const parseVenueTime = (displayStr) => {
     if (!displayStr) return '';
+
+    // Check if it's ISO format (from main calendar data)
+    if (displayStr.includes('T')) {
+      const [, timePart] = displayStr.split('T');
+      const [hour, minute] = timePart.split(':');
+      const hourNum = parseInt(hour, 10);
+      const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+      const suffix = hourNum >= 12 ? 'p' : 'a';
+      return `${displayHour}:${minute}${suffix}`;
+    }
+
+    // Otherwise it's display format (AM/PM)
     const match = displayStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
     if (!match) return '';
-    
+
     let hours = parseInt(match[1]);
     const minutes = match[2];
     const period = match[3].toLowerCase();
-    
+
     if (hours === 12 && period === 'am') {
       return '12:00am';
     }
-    
+
     return hours + (minutes !== '00' ? ':' + minutes : '') + period;
   };
-  
+
+  const startTime = parseVenueTime(venueStartDisplay);
+  const endTime = parseVenueTime(venueEndDisplay);
+
+  // Add timezone abbreviation if provided (matching main calendar)
+  const endTimeWithTz = endTime && venueAbbr ? `${endTime} ${venueAbbr}` : endTime;
+
   return {
-    startTime: parseVenueTime(venueStartDisplay),
-    endTime: parseVenueTime(venueEndDisplay)
+    startTime: startTime,
+    endTime: endTimeWithTz
   };
 };
 
@@ -148,10 +166,13 @@ const BostonCalendarPage = () => {
     // Check for canceled events
     const isCanceled = event.extendedProps?.eventStatus === 'canceled';
     
-    // Get organizer short name (normal text)
-    const organizerShort = event.extendedProps?.organizerShort || 
+    // Get organizer short name (normal text) - check both Boston and Main calendar fields
+    const organizerShort = event.extendedProps?.organizerShort ||
                           event.extendedProps?.ownerOrganizer?.organizerShort ||
-                          event.extendedProps?.ownerOrganizerShort || '';
+                          event.extendedProps?.ownerOrganizerShort ||
+                          event.extendedProps?.ownerOrganizerShortName ||  // Main calendar field
+                          event.extendedProps?.ownerOrganizerName?.substring(0, 8) || // Main calendar fallback
+                          '';
     
     // Get venue short title (BOLD text) - uses shortTitle field like main calendar
     const eventShortTitle = event.extendedProps?.shortTitle || 
@@ -182,11 +203,12 @@ const BostonCalendarPage = () => {
           }}>
             {/* Time display */}
             {startTime && (
-              <div style={{ 
-                fontSize: '0.8rem', 
+              <div style={{
+                fontSize: '0.8rem',
                 lineHeight: '1.0',
                 flexShrink: 0,
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                color: '#000'  // Explicitly set black color for time text
               }}>
                 <span style={{ fontWeight: 'bold' }}>{startTime}</span>
                 {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
@@ -267,7 +289,7 @@ const BostonCalendarPage = () => {
             gap: '8px'
           }}>
             {startTime && (
-              <div style={{ fontSize: '0.9rem', flexShrink: 0 }}>
+              <div style={{ fontSize: '0.9rem', flexShrink: 0, color: '#000' }}>
                 <span style={{ fontWeight: 'bold' }}>{startTime}</span>
                 {endTime && (
                   <>
@@ -303,11 +325,11 @@ const BostonCalendarPage = () => {
           </div>
           
           {/* Event title */}
-          <div style={{ 
-            fontSize: '0.7rem', 
+          <div style={{
+            fontSize: '0.7rem',
             fontWeight: 'normal',
             lineHeight: '1.2',
-            color: '#000000',  // Black text
+            color: '#555',  // Gray text to match main calendar
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
