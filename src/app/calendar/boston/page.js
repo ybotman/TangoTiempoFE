@@ -600,7 +600,7 @@ const BostonCalendarPage = () => {
             dayMaxEvents={false}  // Show all events, not just 3
             eventDisplay="block"
             // Add missing configurations from main calendar
-            nextDayThreshold="06:00:00"  // Events until 6am count as previous day
+            nextDayThreshold="04:00:00"  // Events until 4am count as previous day (matching main calendar)
             timeZone="UTC"  // Use UTC to prevent timezone conversions
             nowIndicator={true}  // Show current time indicator
             eventContent={renderEventContent}  // Use custom renderer
