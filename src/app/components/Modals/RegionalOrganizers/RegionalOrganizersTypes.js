@@ -28,6 +28,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
     isMaestro: false,
     isDJ: false,
     isOrchestra: false,
+    isTaxiDancer: false,
   });
 
   const [initialTypes, setInitialTypes] = useState({});
@@ -45,6 +46,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         isMaestro: organizerTypes.isMaestro ?? false,
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
+        isTaxiDancer: organizerTypes.isTaxiDancer ?? false,
       });
 
       setInitialTypes({
@@ -54,6 +56,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         isMaestro: organizerTypes.isMaestro ?? false,
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
+        isTaxiDancer: organizerTypes.isTaxiDancer ?? false,
       });
       
       // Reset venue request when organizer data changes
@@ -176,8 +179,20 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Organizer Types
+        Artists+ Types
       </Typography>
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+          Event Organizer Feature Available Now!
+        </Typography>
+        <Typography variant="body2">
+          Currently, only the Event Organizer feature is fully functional for managing milongas, festivals, classes, and other tango events.
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Coming Next Quarter:</strong> When you select your Artists+ types below, you'll receive notifications upon login about new features available for your profile type!
+        </Typography>
+      </Alert>
 
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -193,7 +208,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert severity="success" onClose={handleSnackbarClose}>
-          Organizer types have been updated successfully!
+          Artists+ types have been updated successfully!
         </Alert>
       </Snackbar>
 
@@ -219,6 +234,11 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
           'isOrchestra',
           'Performs live Argentine tango music. Will be listed in the Orchestras directory.'
         )}
+        {renderTypeCheckbox(
+          'Taxi Dancer',
+          'isTaxiDancer',
+          'Available for hire as a dance partner at events.'
+        )}
         {/* Venue is handled specially and placed last */}
         {renderTypeCheckbox(
           'Venue',
@@ -230,6 +250,10 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
       <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled}>
         Save
       </Button>
+
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+        Note: Features for each Artists+ type will be rolled out progressively. Start tagging your profile now!
+      </Typography>
     </Box>
   );
 };
@@ -245,6 +269,7 @@ RegionalOrganizerTypes.propTypes = {
       isMaestro: PropTypes.bool,
       isDJ: PropTypes.bool,
       isOrchestra: PropTypes.bool,
+      isTaxiDancer: PropTypes.bool,
     }),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,
