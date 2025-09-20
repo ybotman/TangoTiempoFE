@@ -53,12 +53,12 @@ const UserSettingsName = ({ userData, updateUserData }) => {
       };
       
       // Log what we're saving
-      console.log('Saving user data:', updatedUserData);
+// TIEMPO-276: Security cleanup - removed logging
 
       // Call the update method
       await updateUserData(updatedUserData);
       
-      console.log('User data updated successfully');
+// TIEMPO-276: Security cleanup - removed logging
       // Show success message
       setShowSuccessMessage(true);
     } catch (err) {
@@ -71,7 +71,10 @@ const UserSettingsName = ({ userData, updateUserData }) => {
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h6">Update Your Name</Typography>
+      <Typography variant="h6">Update Your Public Facing Name</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        This name will be displayed publicly when you create events or interact with other users on the platform.
+      </Typography>
       
       {/* Error message for API errors */}
       {error && (

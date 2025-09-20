@@ -7,6 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
+// TIEMPO-239: Import venue timezone utilities
+import { formatVenueTimeRange, formatVenueDate } from '@/utils/venueTimezone';
 import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizer from './ViewEventDetailsOrganizer';
@@ -61,6 +63,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   }, [open]);
 
   useEffect(() => {
+    // TIEMPO-264: Clear image state when event changes to prevent carryover
+    setImageSrc(null);
+    setShowImageTab(false);
+    
     // Try to use the event image if available
     if (eventDetails?.extendedProps?.eventImage) {
       const img = new Image();
@@ -73,7 +79,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
       // Handle image load error - try fallback image if available
       img.onerror = function() {
-        console.log('Primary image failed to load, trying fallback');
+// TIEMPO-276: Security cleanup - removed logging
         
         // Try event-specific fallback if available
         if (eventDetails?.extendedProps?.fallbackImageUrl) {
@@ -86,21 +92,21 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           };
           
           fallbackImg.onerror = function() {
-            // If both primary and fallback fail, use the default question image
-            console.log('Fallback image also failed, using default');
-            setImageSrc('/TangoQuestion.jpg');
-            setShowImageTab(true);
+            // TIEMPO-264: If both primary and fallback fail, show no image
+// TIEMPO-276: Security cleanup - removed logging
+            setImageSrc(null);
+            setShowImageTab(false);
           };
         } else {
-          // No fallback provided, use default
-          setImageSrc('/TangoQuestion.jpg');
-          setShowImageTab(true);
+          // TIEMPO-264: No fallback provided, show no image
+          setImageSrc(null);
+          setShowImageTab(false);
         }
       };
     } else {
-      // No image provided at all
-      setImageSrc('/TangoQuestion.jpg');
-      setShowImageTab(true);
+      // TIEMPO-264: No image provided at all, show no image
+      setImageSrc(null);
+      setShowImageTab(false);
     }
   }, [eventDetails]);
 
@@ -111,11 +117,33 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const eventTitle = eventDetails?.title || 'Event Details';
   const eventShortTitle = eventDetails?.extendedProps?.shortTitle || eventTitle;
   
-  // Get dates with proper timezone handling
-  // Use the direct start/end dates as they have the correct time
-  // The _instance.range dates have timezone offset issues
-  const startDate = eventDetails?.start || eventDetails?._instance?.range?.start || null;
-  const endDate = eventDetails?.end || eventDetails?._instance?.range?.end || null;
+  // TIEMPO-239: Get venue timezone display information
+  const hasVenueTimezone = eventDetails?.extendedProps?.hasVenueTimezone;
+  const venueStartDisplay = eventDetails?.extendedProps?.venueStartDisplay;
+  const venueEndDisplay = eventDetails?.extendedProps?.venueEndDisplay;
+  const displayStartTime = venueStartDisplay || eventDetails?.extendedProps?.displayStartTime;
+  const displayEndTime = venueEndDisplay || eventDetails?.extendedProps?.displayEndTime;
+  const timezoneAbbr = eventDetails?.extendedProps?.timezoneAbbr || '';
+
+  // Debug timezone fields
+  console.log('Modal timezone debug:', {
+    hasVenueTimezone,
+    venueStartDisplay,
+    venueEndDisplay,
+    displayStartTime,
+    displayEndTime,
+    eventStart: eventDetails?.start,
+    eventEnd: eventDetails?.end
+  });
+
+  // Use display times if available, otherwise fallback to event dates
+  // For now, use venueStartDisplay directly if available, regardless of hasVenueTimezone flag
+  const startDate = venueStartDisplay
+    ? venueStartDisplay
+    : (eventDetails?.start || eventDetails?._instance?.range?.start || null);
+  const endDate = venueEndDisplay
+    ? venueEndDisplay
+    : (eventDetails?.end || eventDetails?._instance?.range?.end || null);
   const allDay = eventDetails?.allDay || false;
 
   // Get category information for display
@@ -164,7 +192,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Extract city ID from event - handle both object and string formats
   const eventCityId = eventDetails?.extendedProps?.masteredCityId?._id || 
-                     eventDetails?.extendedProps?.masteredCityId;
+                     eventDetails?.extendedProps?.masteredCityId ||
+                     eventDetails?.extendedProps?.venueMasteredCityID ||  // TIEMPO-195: Add missing field
+                     eventDetails?.extendedProps?.venueMasteredCityId;
   
   const isRegionalAdmin = user &&
                           selectedRole === 'RegionalAdmin' &&
@@ -181,16 +211,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Debug logging for RA permissions
   if (selectedRole === 'RegionalAdmin') {
-    console.log('RA Permission Debug:', {
-      selectedRole,
-      hasUser: !!user,
-      raAllowedCities,
-      raAllowedCitiesType: Array.isArray(raAllowedCities) ? (raAllowedCities.length > 0 ? typeof raAllowedCities[0] : 'empty') : 'not-array',
-      eventCityId,
-      eventCityIdType: typeof eventCityId,
-      masteredCityIdRaw: eventDetails?.extendedProps?.masteredCityId,
-      isRegionalAdmin
-    });
+    // TIEMPO-276: Security cleanup - removed logging
   }
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
@@ -306,12 +327,22 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             
             {/* Date Display */}
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && startDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              {startDate && (hasVenueTimezone 
+                ? formatVenueDate(startDate)
+                : (() => {
+                    // TIEMPO-246: String-based fallback without Date() conversion
+                    // TIEMPO-239: Handle both Date objects and strings
+                    const dateString = typeof startDate === 'string' 
+                      ? startDate 
+                      : startDate?.toISOString?.() || '';
+                    const [datePart] = dateString.split('T');
+                    if (!datePart) return '';
+                    const [year, month, day] = datePart.split('-');
+                    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                  'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                  })()
+              )}
             </Typography>
 
           {/* Category Display */}
@@ -323,24 +354,27 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
               <Box display="flex" alignItems="center">
                 <Typography variant="h6" color="textSecondary">
                   <strong>
-                    {(() => {
-                      // Use the already-converted startDate
-                      const hours = startDate.getHours();
-                      const minutes = startDate.getMinutes();
-                      const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-                      const suffix = hours >= 12 ? 'p' : 'a';
-                      return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
-                    })()}
+                    {venueStartDisplay
+                      ? formatVenueTimeRange(startDate, endDate, timezoneAbbr)
+                      : (() => {
+                          // TIEMPO-246: String-based time formatting without Date() conversion
+                          const formatTimeString = (timeStr) => {
+                            // Handle both Date objects and strings
+                            const dateString = typeof timeStr === 'string' 
+                              ? timeStr 
+                              : timeStr?.toISOString?.() || '';
+                            const [, timePart] = dateString.split('T');
+                            if (!timePart) return '';
+                            const [hour, minute] = timePart.split(':');
+                            const hourNum = parseInt(hour, 10);
+                            const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+                            const suffix = hourNum >= 12 ? 'p' : 'a';
+                            return `${displayHour}${parseInt(minute, 10) > 0 ? `:${minute}` : ''}${suffix}`;
+                          };
+                          return `${formatTimeString(startDate)} - ${formatTimeString(endDate)}`;
+                        })()
+                    }
                   </strong>
-                  {'-'}
-                  {(() => {
-                    // Use the already-converted endDate
-                    const hours = endDate.getHours();
-                    const minutes = endDate.getMinutes();
-                    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-                    const suffix = hours >= 12 ? 'p' : 'a';
-                    return `${displayHours}${minutes > 0 ? `:${minutes.toString().padStart(2, '0')}` : ''}${suffix}`;
-                  })()}
                 </Typography>
                 <ArrowForwardIcon sx={{ color: 'red', ml: 1, fontSize: '1.2rem' }} />
               </Box>
@@ -420,7 +454,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             <br /><br />
             <strong>Title:</strong> {eventTitle}
             <br />
-            <strong>Date:</strong> {startDate && new Date(startDate).toLocaleDateString()}
+            <strong>Date:</strong> {startDate && (hasVenueTimezone 
+              ? formatVenueDate(startDate)
+              : (typeof startDate === 'string' ? startDate : startDate?.toISOString?.() || '').split('T')[0])}
             <br />
             <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
             <br />
@@ -449,16 +485,30 @@ ViewEventDetailModal.propTypes = {
   eventDetails: PropTypes.shape({
     title: PropTypes.string,
     allDay: PropTypes.bool,
+    start: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    end: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
     extendedProps: PropTypes.shape({
       _id: PropTypes.string,
       eventImage: PropTypes.string,
       fallbackImageUrl: PropTypes.string,
       description: PropTypes.string,
+      shortTitle: PropTypes.string,
       categoryFirst: PropTypes.string,
       categorySecond: PropTypes.string,
       categoryThird: PropTypes.string,
+      hasVenueTimezone: PropTypes.bool,
+      displayStartTime: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      displayEndTime: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      timezoneAbbr: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
+      masteredCityId: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({ _id: PropTypes.string, id: PropTypes.string })
+      ]),
+      venueMasteredCityID: PropTypes.string,
+      venueMasteredCityId: PropTypes.string,
+      masteredCityName: PropTypes.string,
     }),
     _instance: PropTypes.shape({
       range: PropTypes.shape({

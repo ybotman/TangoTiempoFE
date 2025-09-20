@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const MasteredLocationLogger = () => {
-  const { nearestCity } = useMasteredLocation();
+  const { selectedLocation } = useGeoLocation();
 
   useEffect(() => {
-    console.log('Current MasteredLocationContext City:', nearestCity?.cityName || 'Unknown');
-  }, [nearestCity]);
+    // TIEMPO-276: Security cleanup - removed location logging
+  }, [selectedLocation]);
 
   return null;
 };

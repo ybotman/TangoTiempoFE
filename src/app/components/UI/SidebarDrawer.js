@@ -19,16 +19,16 @@ import {
   //  Avatar,
   Typography,
   //  Collapse,
-  CircularProgress,
   Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
-import HelpIcon from '@mui/icons-material/Help';
 import LockIcon from '@mui/icons-material/Lock';
-import ErrorIcon from '@mui/icons-material/Error';
+// import ErrorIcon from '@mui/icons-material/Error';
 import SupportIcon from '@mui/icons-material/Support';
 import GroupIcon from '@mui/icons-material/Group';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatIndentIncreaseIcon from '@mui/icons-material/FormatIndentIncrease';
 import MessageIcon from '@mui/icons-material/Message';
@@ -37,6 +37,11 @@ import BusinessIcon from '@mui/icons-material/Business';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import UpdateIcon from '@mui/icons-material/Update';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import InfoIcon from '@mui/icons-material/Info';
 //import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Link from 'next/link';
 //import RegionMenu from './RegionMenu';
@@ -46,15 +51,21 @@ import PrivacyPolicyModal from '@/components/Modals/misc/PrivacyPolicyModal';
 import FAQModal from '@/components/Modals/misc/FAQModal';
 import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import { RoleContext } from '@/contexts/RoleContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
-import LocationContextModal from '@/components/Modals/misc/LocationContextModal'; // NEW IMPORT
+import PublicIcon from '@mui/icons-material/Public';
+// Removed LocationContextModal import - using map center mode only
+// MapCenterModal moved to Providers for centralized rendering
 import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
 import RegionalOrganizerSelection from '@/components/Modals/RegionalOrganizers/RegionalOrganizerSelection'; // ORGANIZER SELECTION
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
+import { useVenueSelection } from '@/hooks/useVenueSelection';
+import { userSettingsEvent } from '@/utils/UserSettingsEvent';
+import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
 const SidebarDrawer = ({ open, onClose }) => {
   //  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
@@ -64,26 +75,25 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
-
-  // NEW STATE FOR LOCATION MODAL
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
-
-  // NEW STATE FOR VENUE SELECTION MODAL
+  // const [locationModalOpen, setLocationModalOpen] = useState(false); // Removed - using map center mode only
   const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
-
-  // NEW STATE FOR ORGANIZER SELECTION MODAL
   const [organizerSelectionModalOpen, setOrganizerSelectionModalOpen] = useState(false);
+  const [requestedTab, setRequestedTab] = useState(null);
 
   // NEW STATE FOR DEBUG MENU
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
+  const { user } = useContext(AuthContext) || {};
 
   // Get selected location and initialization state from GeoLocationContext
-  const { selectedLocation, isInitialized } = useGeoLocation();
+  const { selectedLocation, isInitialized, openMapCenterModal } = useGeoLocation();
 
   // Get the organizer selection state from useCalendarPage
   const { selectedOrganizers, setSelectedOrganizers } = useCalendarPage();
+  
+  // Get venue selection state
+  useVenueSelection();
   
   // Debug menu is only available for Regional Admin, System Admin, and System Owner
   const showDebugMenu = [
@@ -93,7 +103,38 @@ const SidebarDrawer = ({ open, onClose }) => {
   ].includes(selectedRole);
   
   // Add delay to venue selection rendering to ensure GeoLocationContext has time to initialize
-  const [venueSelectionReady, setVenueSelectionReady] = useState(false);
+  const [, setVenueSelectionReady] = useState(false);
+  
+  // Subscribe to user settings event
+  useEffect(() => {
+    const handleUserSettingsRequest = ({ open, tab }) => {
+      // TIEMPO-276: Security cleanup - removed settings logging
+      if (open) {
+        setRequestedTab(tab);
+        setUserSettingsOpen(true);
+      }
+    };
+
+    const unsubscribe = userSettingsEvent.subscribe(handleUserSettingsRequest);
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // TIEMPO-253: Subscribe to regional organizer modal event
+  useEffect(() => {
+    const handleRegionalOrganizerRequest = ({ open }) => {
+      // TIEMPO-276: Security cleanup - removed organizer logging
+      setRegionalOrganizerOpen(open);
+    };
+
+    const unsubscribe = regionalOrganizerEvent.subscribe(handleRegionalOrganizerRequest);
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
   
   // Effect to handle venue selection readiness
   useEffect(() => {
@@ -111,7 +152,7 @@ const SidebarDrawer = ({ open, onClose }) => {
 
     // Otherwise, give GeoLocationContext a moment to initialize
     const timer = setTimeout(() => {
-      console.log('SidebarDrawer: Setting venue selection ready after timeout');
+      // TIEMPO-276: Security cleanup - removed venue logging
       setVenueSelectionReady(true);
     }, 2000); // 2 second delay, increased from original
 
@@ -152,178 +193,121 @@ const SidebarDrawer = ({ open, onClose }) => {
           */}
           {/* END OF COMMENTED REGION SECTION */}
 
-          {/* NEW MAP ICON SECTION */}
           <Divider />
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Calendar Location
-          </Typography>
-          <ListItem
-            button="true"
-            onClick={() => {
-              setLocationModalOpen(true);
-              onClose();
-            }}
-          >
-            <ListItemIcon>
-              <MapIcon sx={{ color: 'blue' }} />
-            </ListItemIcon>
-            <ListItemText primary="Select Nearest City" />
-          </ListItem>
-          {/* Select Organizer Menu Item */}
-          <ListItem
-            button="true"
-            onClick={() => {
-              setOrganizerSelectionModalOpen(true);
-              onClose();
-            }}
-            sx={{
-              cursor: 'pointer',
-              color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
-              bgcolor: selectedOrganizers?.length > 0 ? 'rgba(63, 81, 181, 0.08)' : 'transparent',
-              '&:hover': {
-                bgcolor: selectedOrganizers?.length > 0 ? 'rgba(63, 81, 181, 0.12)' : 'rgba(0, 0, 0, 0.04)'
-              },
-              borderLeft: selectedOrganizers?.length > 0 ? '4px solid #3f51b5' : 'none',
-              pl: selectedOrganizers?.length > 0 ? 1 : 2 // Compensate for the border
-            }}
-          >
-            <ListItemIcon>
-              <GroupIcon sx={{
-                color: !selectedLocation?.city?.id
-                  ? 'gray'
-                  : selectedOrganizers?.length > 0
-                    ? '#3f51b5'
-                    : 'indigo'
-              }} />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography>Select Organizer</Typography>
-                  {selectedOrganizers?.length > 0 && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        bgcolor: '#3f51b5',
-                        color: 'white',
-                        borderRadius: '10px',
-                        px: 1,
-                        py: 0.2,
-                        ml: 1
-                      }}
-                    >
-                      {selectedOrganizers.length}
-                    </Typography>
-                  )}
-                </Box>
-              }
-              secondary={
-                !selectedLocation?.city?.id
-                  ? "Select a city first"
-                  : selectedOrganizers?.length > 0
-                    ? `${selectedOrganizers.length} organizer${selectedOrganizers.length !== 1 ? 's' : ''} selected`
-                    : null
-              }
-            />
-          </ListItem>
 
-          {/* Venue Selection Menu Item with improved loading state handling */}
-          {!venueSelectionReady ? (
-            // Show loading state while contexts initialize
-            <ListItem>
-              <ListItemIcon>
-                <CircularProgress size={20} color="primary" />
-              </ListItemIcon>
-              <ListItemText primary="Loading Venues..." />
-            </ListItem>
-          ) : !isInitialized ? (
-            // System is still initializing but we want to show something
-            <ListItem
-              button="true"
-              onClick={() => {
-                setVenueSelectionModalOpen(true);
-                onClose();
-              }}
-              sx={{
-                cursor: 'pointer',
-                color: 'text.secondary',
-              }}
-            >
-              <ListItemIcon>
-                <BusinessIcon sx={{ color: 'gray' }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Select Venue"
-                secondary="Location system initializing..."
-              />
-            </ListItem>
+          {/* Dynamic Authentication-Based Section */}
+          {!user ? (
+            // Not Logged In Menu Items
+            <>
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
+                It&apos;s FREE!
+              </Typography>
+              <Link href="/benefits" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                  sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    },
+                    mx: 1,
+                    borderRadius: 1,
+                    mt: 1
+                  }}
+                >
+                  <ListItemIcon>
+                    <RocketLaunchIcon sx={{ color: 'white' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Milonguero@ Benefits" />
+                </ListItem>
+              </Link>
+              
+              <Divider sx={{ my: 1 }} />
+              
+              <Link href="/auth/login" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <LoginIcon sx={{ color: 'green' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Sign In" />
+                </ListItem>
+              </Link>
+              
+              <Link href="/auth/signup" passHref>
+                <ListItem
+                  button="true"
+                  onClick={() => onClose()}
+                >
+                  <ListItemIcon>
+                    <PersonAddIcon sx={{ color: 'blue' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Create Account" />
+                </ListItem>
+              </Link>
+            </>
           ) : (
-            // Interactive menu item that's always clickable and shows proper state
-            <ListItem
-              button="true"
-              onClick={() => {
-                setVenueSelectionModalOpen(true);
-                onClose();
-              }}
-              sx={{
-                cursor: 'pointer',
-                color: selectedLocation?.city?.id ? 'text.primary' : 'text.secondary',
-              }}
-            >
-              <ListItemIcon>
-                <BusinessIcon sx={{ color: selectedLocation?.city?.id ? 'teal' : 'gray' }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Select Venue"
-                secondary={!selectedLocation?.city?.id ? "Select a city first" : null}
-              />
-            </ListItem>
-          )}
-          
-          {/* Apply as Organizer Menu Item */}
-          <Link href="/organizers/apply" passHref>
-            <ListItem
-              button="true"
-              onClick={() => onClose()}
-            >
-              <ListItemIcon>
-                <GroupIcon sx={{ color: 'indigo' }} />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Apply as Organizer" 
-                secondary="Become a TangoTiempo organizer"
-              />
-            </ListItem>
-          </Link>
-          
-          <Divider />
+            // Logged In Menu Items
+            <>
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
+                User Settings
+              </Typography>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setUserSettingsOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <AccountCircleIcon sx={{ color: 'blue' }} />
+                </ListItemIcon>
+                <ListItemText primary="User Settings" />
+              </ListItem>
 
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Role Settings
-          </Typography>
-          {selectedRole === '' && (
-            <ListItem>
-              <ListItemIcon>
-                <ErrorIcon sx={{ color: 'coral' }} />
-              </ListItemIcon>
-              <ListItemText primary="Sign In to Save Settings" />
-            </ListItem>
-          )}
-          {selectedRole !== '' && (
-            <ListItem
-              button="true"
-              onClick={() => {
-                setUserSettingsOpen(true);
-                onClose();
-              }}
-            >
-              <ListItemIcon>
-                <AccountCircleIcon sx={{ color: 'blue' }} />
-              </ListItemIcon>
-              <ListItemText primary="User Settings" />
-            </ListItem>
-          )}
-          {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+              {/* TIEMPO-259: Map Center Menu Item */}
+              <ListItem
+                button="true"
+                onClick={() => {
+                  openMapCenterModal();
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <MapIcon sx={{ color: 'primary.main' }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Set Map Center" 
+                  secondary="Filter events by location"
+                />
+              </ListItem>
+              <Divider />
+              
+              {/* Only show Apply as Organizer if user is not already an approved and enabled organizer */}
+              {selectedRole !== listOfAllRoles.REGIONAL_ORGANIZER && 
+               selectedRole !== listOfAllRoles.SYSTEM_ADMIN && 
+               selectedRole !== listOfAllRoles.SYSTEM_OWNER && 
+               !(user?.backendInfo?.regionalOrganizerInfo?.isApproved && 
+                 user?.backendInfo?.regionalOrganizerInfo?.isEnabled) && (
+                <Link href="/organizers/apply" passHref>
+                  <ListItem
+                    button="true"
+                    onClick={() => onClose()}
+                  >
+                    <ListItemIcon>
+                      <GroupIcon sx={{ color: 'indigo' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Apply as Organizer" />
+                  </ListItem>
+                </Link>
+              )}
+              
+              {/* Role-specific menu items */}
+              {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
             <>
               <ListItem
                 button="true"
@@ -333,22 +317,9 @@ const SidebarDrawer = ({ open, onClose }) => {
                 }}
               >
                 <ListItemIcon>
-                  <EventAvailableIcon sx={{ color: 'green' }} />
+                  <GroupIcon sx={{ color: 'green' }} />
                 </ListItemIcon>
-                <ListItemText primary="Regional Organizer" />
-              </ListItem>
-
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setVenueModalOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <EventAvailableIcon sx={{ color: 'teal' }} />
-                </ListItemIcon>
-                <ListItemText primary="Venues" />
+                <ListItemText primary="Event Organizer Settings" />
               </ListItem>
             </>
           )}
@@ -415,42 +386,113 @@ const SidebarDrawer = ({ open, onClose }) => {
               </Link>
             </>
           )}
+              
+              {/* Close authentication section */}
+            </>
+          )}
+          
+          {/* Venues - Top level for Regional Organizers */}
+          {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+            <>
+              <Divider />
+              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
+                Event Management
+              </Typography>
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setVenueModalOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <BusinessIcon sx={{ color: 'teal' }} />
+                </ListItemIcon>
+                <ListItemText primary="Venues" />
+              </ListItem>
+            </>
+          )}
+          
           <Divider />
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Information
-          </Typography>
-          <ListItem button="true" onClick={() => setFaqOpen(true)}>
-            <ListItemIcon>
-              <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
-            </ListItemIcon>
-            <ListItemText primary="FAQ" />
-          </ListItem>
-          <ListItem button="true">
-            <ListItemIcon>
-              <HelpIcon sx={{ color: 'royalBlue' }} />
-            </ListItemIcon>
-            <ListItemText primary="Help" />
-          </ListItem>
-          <Link href="/about" passHref>
-            <ListItem button="true">
+
+          {/* Event Explorer - Top Level */}
+          <Link href="/explorer" passHref>
+            <ListItem
+              button="true"
+              onClick={() => onClose()}
+            >
               <ListItemIcon>
-                <SupportIcon sx={{ color: 'royalBlue' }} />
+                <PublicIcon sx={{ color: 'primary.main' }} />
               </ListItemIcon>
-              <ListItemText primary="About" />
+              <ListItemText 
+                primary="Event Explorer" 
+                secondary="Discover events worldwide"
+              />
             </ListItem>
           </Link>
-          <Link href="/releases" passHref>
-            <ListItem button="true" onClick={() => onClose()}>
-              <ListItemIcon>
-                <UpdateIcon sx={{ color: 'royalBlue' }} />
-              </ListItemIcon>
-              <ListItemText primary="Release Notes" />
-            </ListItem>
-          </Link>
+          
+          {/* Information Accordion - Collapsed by Default */}
+          <Accordion defaultExpanded={false} sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{ px: 2, minHeight: 48 }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <InfoIcon sx={{ color: 'royalBlue', mr: 1 }} />
+                <Typography>Information</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <List dense>
+                <ListItem button="true" onClick={() => { setFaqOpen(true); onClose(); }}>
+                  <ListItemIcon>
+                    <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="FAQ" />
+                </ListItem>
+                <Link href="/about" passHref>
+                  <ListItem button="true" onClick={() => onClose()}>
+                    <ListItemIcon>
+                      <SupportIcon sx={{ color: 'royalBlue' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="About" />
+                  </ListItem>
+                </Link>
+                <Link href="/artists-plus" passHref>
+                  <ListItem button="true" onClick={() => onClose()}>
+                    <ListItemIcon>
+                      <GroupIcon sx={{ color: 'royalBlue' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Artists+" />
+                  </ListItem>
+                </Link>
+                <Link href="/releases" passHref>
+                  <ListItem button="true" onClick={() => onClose()}>
+                    <ListItemIcon>
+                      <UpdateIcon sx={{ color: 'royalBlue' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Release Notes" />
+                  </ListItem>
+                </Link>
+                <ListItem
+                  button="true"
+                  onClick={() => {
+                    setPrivacyPolicyOpen(true);
+                    onClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <LockIcon sx={{ color: 'green' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Privacy Policy" />
+                </ListItem>
+              </List>
+            </AccordionDetails>
+          </Accordion>
+          
           <Divider />
-          <Typography variant="caption" color="textSecondary" sx={{ pl: 2 }}>
-            Other
-          </Typography>
+          
+          {/* Message Admin - Always Available */}
           <Link href="/message-admin" passHref>
             <ListItem button="true" onClick={() => onClose()}>
               <ListItemIcon>
@@ -459,18 +501,6 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemText primary="Message Admin" />
             </ListItem>
           </Link>
-          <ListItem
-            button="true"
-            onClick={() => {
-              setPrivacyPolicyOpen(true);
-              onClose();
-            }}
-          >
-            <ListItemIcon>
-              <LockIcon sx={{ color: 'green' }} />
-            </ListItemIcon>
-            <ListItemText primary="Privacy Policy" />
-          </ListItem>
           
           {/* Debug Menu - visible in all environments */}
           {showDebugMenu && (
@@ -496,20 +526,28 @@ const SidebarDrawer = ({ open, onClose }) => {
         </List>
       </Drawer>
       {/* Modals */}
-      <UserSettingsModal open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} />
+      <UserSettingsModal 
+        open={userSettingsOpen} 
+        onClose={() => {
+          setUserSettingsOpen(false);
+          setRequestedTab(null);
+        }}
+        defaultTab={requestedTab}
+      />
       <RegionalOrganizersModal open={regionalOrganizerOpen} onClose={() => setRegionalOrganizerOpen(false)} />
       <SystemAdminModal open={systemAdminOpen} onClose={() => setSystemAdminOpen(false)} />
       <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
-      <LocationContextModal open={locationModalOpen} onClose={() => setLocationModalOpen(false)} /> {/* NEW MODAL */}
+      {/* LocationContextModal removed - using map center mode only */}
+      {/* MapCenterModal moved to Providers for centralized rendering */}
       <VenueSelectionModal open={venueSelectionModalOpen} onClose={() => setVenueSelectionModalOpen(false)} />
       <RegionalOrganizerSelection
         open={organizerSelectionModalOpen}
         onClose={() => setOrganizerSelectionModalOpen(false)}
         selectedOrganizers={selectedOrganizers}
         onSelectOrganizers={(selected) => {
-          console.log('Selected organizers:', selected);
+          // TIEMPO-276: Security cleanup - removed organizer logging
           setSelectedOrganizers(selected);
         }}
       />

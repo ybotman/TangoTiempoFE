@@ -19,55 +19,21 @@ const LocationInfo = () => {
     locationDisplayText
   } = useGeoLocation();
   
-  // Get event counts for different location levels
-  // First, get events for the region level only
+  // Get event count for current location level only
+  // Use a single API call with proper filters based on selected location
   const { 
-    events: regionEvents, 
-    loading: regionLoading
-    // error: regionError
-  } = useEvents(
-    selectedLocation.region.name || '',
-    '', // No division filter
-    '', // No city filter
-    null, // No date filters for counts
-    null
-  );
+    events,
+    loading: eventsLoading
+  } = useEvents({
+    region: selectedLocation.region?.name || '',
+    division: selectedLocation.division?.name || '',
+    city: selectedLocation.city?.name || '',
+    // Don't fetch if we don't have at least a region
+    skip: !selectedLocation.region?.name
+  });
   
-  // Get events for the division level (region + division)
-  const divisionFilterActive = !!selectedLocation.division.name;
-  const { 
-    events: divisionEvents,
-    loading: divisionLoading
-    // error: divisionError
-  } = useEvents(
-    selectedLocation.region.name || '',
-    divisionFilterActive ? (selectedLocation.division.name || '') : '',
-    '', // No city filter
-    null,
-    null
-  );
-  
-  // Get events for the city level (region + division + city)
-  const cityFilterActive = !!selectedLocation.city.name;
-  const { 
-    events: cityEvents,
-    loading: cityLoading
-    // error: cityError
-  } = useEvents(
-    selectedLocation.region.name || '',
-    selectedLocation.division.name || '',
-    cityFilterActive ? (selectedLocation.city.name || '') : '',
-    null,
-    null
-  );
-  
-  // Aggregated loading state for the event counts
-  // const aggregatedLoading = regionLoading || divisionLoading || cityLoading;
-  
-  // Use fallback values for event counts if there are errors
-  const regionCount = regionEvents?.length || 0;
-  const divisionCount = divisionEvents?.length || 0;
-  const cityCount = cityEvents?.length || 0;
+  // Calculate event count based on current location filter level
+  const eventCount = events?.length || 0;
 
   // Extract location components
   const { region, division, city } = selectedLocation;
@@ -100,7 +66,7 @@ const LocationInfo = () => {
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
               {region.name && (
                 <Badge 
-                  badgeContent={regionLoading ? '...' : regionCount} 
+                  badgeContent={eventsLoading ? '...' : eventCount} 
                   color="secondary"
                   overlap="circular"
                   anchorOrigin={{
@@ -121,7 +87,7 @@ const LocationInfo = () => {
               
               {division.name && (
                 <Badge 
-                  badgeContent={divisionLoading ? '...' : divisionCount} 
+                  badgeContent={eventsLoading ? '...' : eventCount} 
                   color="secondary"
                   overlap="circular"
                   anchorOrigin={{
@@ -142,7 +108,7 @@ const LocationInfo = () => {
               
               {city.name && (
                 <Badge 
-                  badgeContent={cityLoading ? '...' : cityCount} 
+                  badgeContent={eventsLoading ? '...' : eventCount} 
                   color="secondary"
                   overlap="circular"
                   anchorOrigin={{

@@ -57,7 +57,7 @@ export function useGeoLocations() {
           // Use fallback coordinates if provided
           setLatitude(data.fallback.latitude);
           setLongitude(data.fallback.longitude);
-          console.log('Using fallback coordinates from proxy');
+// TIEMPO-276: Security cleanup - removed logging
         } else {
           throw new Error('Unable to retrieve geolocation data.');
         }
@@ -68,14 +68,14 @@ export function useGeoLocations() {
     } catch (err) {
       // Don't log canceled/aborted requests as errors
       if (err.name === 'AbortError' || err.message === 'canceled') {
-        console.log('useGeoLocations: Request timeout, using fallback coordinates');
+// TIEMPO-276: Security cleanup - removed logging
       } else {
         console.error('useGeoLocations-> Error:', err.message);
         setError(err.message);
       }
-      // Set fallback US center coordinates - Boston area
-      setLatitude(42.3601);
-      setLongitude(-71.0589);
+      // Set fallback to center of continental US instead of Boston
+      setLatitude(39.8283);
+      setLongitude(-98.5795);
     } finally {
       setLoading(false);
     }
@@ -85,22 +85,36 @@ export function useGeoLocations() {
     // TIEMPO-135: Disable automatic IP geolocation - always use Boston
     // fetchIPLocation();  // Disabled per requirements
     
-    // Set Boston coordinates immediately
-    setLatitude(42.3601);
-    setLongitude(-71.0589);
+    // Check if we're embedded in Boston Tango Calendar iframe
+    const isBostonCalendar = typeof window !== 'undefined' && 
+      (window.location.hostname.toLowerCase().includes('bostontangocalendar') ||
+       window.parent !== window && document.referrer.toLowerCase().includes('bostontangocalendar'));
+    
+    if (isBostonCalendar) {
+      // For Boston Tango Calendar, we should trigger Boston city selection
+// TIEMPO-276: Security cleanup - removed logging
+      // Note: The actual city selection will be handled by the calendar page
+      setLatitude(42.3601);
+      setLongitude(-71.0589);
+    } else {
+      // Set center of continental US coordinates for all other cases
+      setLatitude(39.8283);
+      setLongitude(-98.5795);
+    }
+    
     setLoading(false);
-    console.log('useGeoLocations: Using default Boston coordinates (automatic detection disabled)');
+// TIEMPO-276: Security cleanup - removed logging
   }, [fetchIPLocation]);
 
   const refetch = async () => {
     // TIEMPO-135: Refetch also disabled - always return Boston
     // await fetchIPLocation();  // Disabled per requirements
     
-    // Just set Boston coordinates again
-    setLatitude(42.3601);
-    setLongitude(-71.0589);
+    // Just set US center coordinates again
+    setLatitude(39.8283);
+    setLongitude(-98.5795);
     setLoading(false);
-    console.log('useGeoLocations refetch: Using default Boston coordinates (automatic detection disabled)');
+// TIEMPO-276: Security cleanup - removed logging
   };
 
   return {

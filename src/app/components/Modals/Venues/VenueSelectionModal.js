@@ -12,34 +12,38 @@ import {
   CircularProgress,
   Typography,
   Box,
-  Slider
+  Paper
 } from '@mui/material';
 // Removed unused import: categoryColors
 import { useVenueSelection } from '@/hooks/useVenueSelection';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useUsers } from '@/hooks/useUsers';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
 // Dynamic imports for react-leaflet (no SSR)
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
 const CircleMarker = dynamic(() => import('react-leaflet').then((mod) => mod.CircleMarker), { ssr: false });
+const Circle = dynamic(() => import('react-leaflet').then((mod) => mod.Circle), { ssr: false });
 const ZoomControl = dynamic(() => import('react-leaflet').then((mod) => mod.ZoomControl), { ssr: false });
 const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip), { ssr: false });
-const Circle = dynamic(() => import('react-leaflet').then((mod) => mod.Circle), { ssr: false });
 // const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
+
+// Import the upcoming events component
+import VenueUpcomingEvents from './VenueUpcomingEvents';
 
 const VenueSelectionModal = ({ open, onClose }) => {
   const { selectedLocation, isInitialized } = useGeoLocation();
+  const { userData } = useUsers();
   const {
     filteredVenues,
     selectedVenue,
-    radiusMiles,
     loading: venuesLoading,
     error: venuesError,
     selectVenue,
     refreshVenues,
-    handleRadiusChange: setRadiusMiles,
-    hasSelectedCity
+    hasSelectedCity,
+    radiusMiles
   } = useVenueSelection();
 
   const [loading, setLoading] = useState(false);
@@ -47,17 +51,24 @@ const VenueSelectionModal = ({ open, onClose }) => {
   const [mapContainerKey, setMapContainerKey] = useState(Date.now()); // Force re-render key
   const mapRef = useRef(null); // Direct map instance reference
   
+  // Use user's saved map center location preferences if available
+  const userDefaults = userData?.localUserInfo?.userDefaults;
+  const defaultCenter = userDefaults?.defaultCenterLocation;
+  
   // Fetch venues when modal opens
   useEffect(() => {
     const loadVenues = async () => {
       // Only attempt to load venues if GeoLocation context is initialized
-      // and we have a selected city
-      if (open && hasSelectedCity && isInitialized) {
+      // and we have either a map center location or selected city
+      const hasMapCenter = defaultCenter?.latitude && defaultCenter?.longitude;
+      const hasLocationToUse = hasMapCenter || hasSelectedCity;
+      
+      if (open && hasLocationToUse && isInitialized) {
         setLoading(true);
         try {
-          console.log('VenueSelectionModal: Loading venues for city', selectedLocation?.city?.name);
+// TIEMPO-276: Security cleanup - removed logging
           refreshVenues();
-          console.log('Venues fetched successfully');
+// TIEMPO-276: Security cleanup - removed logging
           // Force map container to re-render with new key
           setMapContainerKey(Date.now());
         } catch (error) {
@@ -66,11 +77,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
           setLoading(false);
         }
       } else if (open) {
-        console.log('VenueSelectionModal: Not ready to load venues yet', {
-          hasSelectedCity,
-          isInitialized,
-          cityName: selectedLocation?.city?.name
-        });
+        // TIEMPO-276: Security cleanup - removed logging
       }
     };
     loadVenues();
@@ -78,7 +85,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
     // Add a safeguard timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       if (loading) {
-        console.log('Loading timeout triggered - forcing loading to false');
+// TIEMPO-276: Security cleanup - removed logging
         setLoading(false);
         setMapReady(true);
         // Force map container to re-render with new key when timeout occurs
@@ -87,7 +94,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
     }, 5000); // 5 second timeout
     
     return () => clearTimeout(timeoutId);
-  }, [open, refreshVenues, hasSelectedCity, loading, isInitialized, selectedLocation?.city?.name]);
+  }, [open, refreshVenues, hasSelectedCity, loading, isInitialized, selectedLocation?.city?.name, defaultCenter]);
 
   // Set map ready when filtered venues change
   useEffect(() => {
@@ -101,84 +108,32 @@ const VenueSelectionModal = ({ open, onClose }) => {
     setMapReady(true);
   }, [filteredVenues]);
 
-  // Add a useEffect for radius changes that will adjust the map zoom
-  useEffect(() => {
-    // Only attempt to adjust the map when everything is ready
-    if (mapReady && mapRef.current) {
-      // Use a timeout to ensure the map is fully initialized
-      const timeoutId = setTimeout(() => {
-        try {
-          const map = mapRef.current;
-          console.log('Attempting to adjust map zoom for radius change');
-
-          // Check if the map instance has the methods we need
-          if (typeof map.flyToBounds === 'function') {
-            console.log('Using flyToBounds method');
-
-            // Set initial zoom level based on radius
-            const zoomLevel = Math.max(6, Math.min(13, 14 - Math.log2(radiusMiles / 10)));
-            map.setZoom(zoomLevel);
-
-            console.log(`Set map zoom to ${zoomLevel} for radius of ${radiusMiles} miles`);
-          } else {
-            console.log('Map does not have flyToBounds method');
-          }
-        } catch (error) {
-          console.error('Error in radius change effect:', error);
-        }
-      }, 500);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [radiusMiles, mapReady]);
 
   // Handle venue selection
   const handleVenueClick = (venue) => {
     selectVenue(venue);
-    console.log(`Selected venue: ${venue.name || venue.shortName}`);
+// TIEMPO-276: Security cleanup - removed logging
   };
 
-  // Ensure we have a valid center based on the selected city
-  const center =
-    selectedLocation?.city?.latitude && selectedLocation?.city?.longitude
-      ? [selectedLocation.city.latitude, selectedLocation.city.longitude]
-      : [39.8283, -98.5795]; // Default fallback center (USA approx)
+  let center;
+  if (defaultCenter?.latitude && defaultCenter?.longitude) {
+    // Use saved map center location
+    center = [defaultCenter.latitude, defaultCenter.longitude];
+  } else if (selectedLocation?.city?.latitude && selectedLocation?.city?.longitude) {
+    // Fallback to selected city if no saved preferences
+    center = [selectedLocation.city.latitude, selectedLocation.city.longitude];
+  } else {
+    // Default fallback center (USA approx)
+    center = [39.8283, -98.5795];
+  }
 
   const isLoading = loading || venuesLoading || !mapReady;
   const hasError = venuesError;
   const hasVenues = filteredVenues && filteredVenues.length > 0;
 
-  // Handle radius slider change
-  const handleRadiusChange = (event, newValue) => {
-    setRadiusMiles(newValue);
-    // We'll let the useEffect handle map updates instead of calling adjustMapToRadius directly
-  };
-
-  // Add effect to handle map zoom changes when radius changes
-  useEffect(() => {
-    // Since we can't reliably access Leaflet map methods directly through refs in this component,
-    // we'll use a simpler approach - just update the key to force a full re-render of the MapContainer
-    // when the radius changes or selected location changes
-    if (selectedLocation?.city?.latitude && selectedLocation?.city?.longitude) {
-      // Force re-render on radius changes by updating the map key
-      // This is more reliable than trying to call methods on the map instance directly
-      setMapContainerKey(Date.now());
-      console.log(`Set new map container key for radius ${radiusMiles} miles`);
-    }
-  }, [radiusMiles, selectedLocation?.city?.latitude, selectedLocation?.city?.longitude]);
-  
-  // Function to select a venue and close the modal
-  const handleSelectVenue = () => {
-    if (selectedVenue) {
-      // Using the selectVenue from our hook already handles the context update
-      console.log(`Selecting venue: ${selectedVenue.name || selectedVenue.shortName}`);
-      // Close the modal
-      onClose();
-    }
-  };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>Select Venue</DialogTitle>
       <DialogContent style={{ height: '550px', position: 'relative' }}>
         {!isInitialized ? (
@@ -191,16 +146,14 @@ const VenueSelectionModal = ({ open, onClose }) => {
               Please wait while we set up the venue selection system.
             </Typography>
           </Box>
-        ) : !hasSelectedCity ? (
+        ) : !hasSelectedCity && !(defaultCenter?.latitude && defaultCenter?.longitude) ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%" flexDirection="column">
-            <Typography color="primary" variant="h6" gutterBottom>Please select a city first</Typography>
+            <Typography color="primary" variant="h6" gutterBottom>Please set your location preferences</Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', maxWidth: '80%' }}>
-              You need to select a city before you can choose a venue.
-              Use the &quot;Select Nearest City&quot; option in the main menu.
+              You need to set your map center location in User Settings before you can choose a venue.
             </Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
-              This is needed even if location detection is enabled,
-              as we need to know which city&apos;s venues to display.
+              Go to User Settings → Location Prefs and click on the map to set your center location.
             </Typography>
             <Button onClick={onClose} color="primary" variant="contained">
               Go Back to Menu
@@ -231,58 +184,22 @@ const VenueSelectionModal = ({ open, onClose }) => {
               If you still don&apos;t see any venues, your administrator may need to add venues in this region.
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button onClick={() => setRadiusMiles(300)} color="primary" variant="contained">
-                Increase Search Radius
-              </Button>
               <Button onClick={onClose} color="primary" variant="outlined">
                 Close
               </Button>
             </Box>
           </Box>
         ) : (
-          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            {/* Filter controls */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2, gap: 2 }}>
-              {/* Enhanced Radius Filter */}
-              <Box sx={{ px: 2 }}>
-                <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-                  Search Radius: {radiusMiles} miles
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Shows venues within {radiusMiles} miles of {selectedLocation?.city?.name || 'selected city'}
-                </Typography>
-                <Slider
-                  value={radiusMiles}
-                  onChange={handleRadiusChange}
-                  min={5}
-                  max={300}
-                  step={5}
-                  marks={[
-                    { value: 10, label: '10mi' },
-                    { value: 25, label: '25mi' },
-                    { value: 50, label: '50mi' },
-                    { value: 100, label: '100mi' },
-                    { value: 200, label: '200mi' }
-                  ]}
-                  valueLabelDisplay="auto"
-                  aria-labelledby="radius-slider"
-                  sx={{
-                    "&amp; .MuiSlider-markLabel": {
-                      fontSize: "0.75rem"
-                    }
-                  }}
-                />
-              </Box>
-            </Box>
-            
+          <Box sx={{ height: '100%', display: 'flex', gap: 2 }}>
             {/* Map container */}
             <Box 
               sx={{
-                flexGrow: 1,
+                flex: selectedVenue ? '0 0 60%' : '1',
                 position: "relative",
                 overflow: "hidden",
                 border: "1px solid #ccc",
                 borderRadius: "4px",
+                transition: 'flex 0.3s ease',
                 "&amp; .leaflet-container": {
                   height: "100%",
                   width: "100%",
@@ -299,23 +216,22 @@ const VenueSelectionModal = ({ open, onClose }) => {
             >
               <MapContainer
                 center={center}
-                zoom={Math.max(5, Math.min(12, 13 - Math.log2(radiusMiles / 20)))}
+                zoom={10} // Fixed zoom level
                 style={{ height: '100%', width: '100%' }}
                 zoomControl={false}
                 key={`map-${mapContainerKey}`}
                 whenCreated={(map) => {
-                  console.log('Map created successfully', map);
+// TIEMPO-276: Security cleanup - removed logging
                   // Store the map instance in the ref
                   mapRef.current = map;
 
                   // Invalidate map size to ensure correct rendering
                   setTimeout(() => {
                     map.invalidateSize();
-                    console.log('Map size invalidated');
+// TIEMPO-276: Security cleanup - removed logging
 
-                    // Calculate an appropriate initial zoom level based on radius using logarithmic scale
-                    // This is a simpler approach that doesn't rely on Leaflet's bounds methods
-                    const zoomLevel = Math.max(5, Math.min(12, 13 - Math.log2(radiusMiles / 20)));
+                    // Use a fixed zoom level
+                    const zoomLevel = 10;
 
                     // Get center point from selected location or default center
                     const centerLat = parseFloat(selectedLocation?.city?.latitude || center[0]);
@@ -324,7 +240,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
                     try {
                       // Set the initial view directly - this is a core method available in all Leaflet maps
                       map.setView([centerLat, centerLng], zoomLevel);
-                      console.log(`Initial map view set to zoom level ${zoomLevel}`);
+// TIEMPO-276: Security cleanup - removed logging
                     } catch (error) {
                       console.error('Error setting initial map view:', error);
                     }
@@ -337,23 +253,18 @@ const VenueSelectionModal = ({ open, onClose }) => {
                 />
                 <ZoomControl position="bottomright" />
 
-                {/* Visual radius indicator */}
-                {selectedLocation?.city?.latitude && selectedLocation?.city?.longitude && (
+                {/* Radius circle showing the search area - read only */}
+                {selectedLocation?.city?.latitude && selectedLocation?.city?.longitude && radiusMiles && (
                   <Circle
-                    center={[
-                      parseFloat(selectedLocation.city.latitude),
-                      parseFloat(selectedLocation.city.longitude)
-                    ]}
+                    center={[selectedLocation.city.latitude, selectedLocation.city.longitude]}
+                    radius={radiusMiles * 1609.34} // Convert miles to meters
                     pathOptions={{
-                      color: '#3f51b5',
-                      fillColor: '#3f51b5',
-                      fillOpacity: 0.05,
-                      weight: 1,
-                      dashArray: '5, 5',
-                      opacity: 0.6
+                      color: 'blue',
+                      fillColor: 'lightblue',
+                      fillOpacity: 0.1,
+                      weight: 2,
+                      dashArray: '5, 10'
                     }}
-                    // Convert miles to meters for the circle radius (1 mile = 1609.34 meters)
-                    radius={radiusMiles * 1609.34}
                   />
                 )}
 
@@ -375,7 +286,7 @@ const VenueSelectionModal = ({ open, onClose }) => {
                       radius={isSelected ? 12 : 8}
                       eventHandlers={{
                         click: () => {
-                          console.log('Venue clicked:', venue.name || venue.shortName);
+// TIEMPO-276: Security cleanup - removed logging
                           handleVenueClick(venue);
                         },
                       }}
@@ -388,6 +299,22 @@ const VenueSelectionModal = ({ open, onClose }) => {
                 })}
               </MapContainer>
             </Box>
+            
+            {/* Events panel */}
+            {selectedVenue && (
+              <Paper 
+                sx={{ 
+                  flex: '0 0 40%',
+                  overflow: 'auto',
+                  p: 2,
+                  bgcolor: 'background.paper',
+                  borderRadius: 1
+                }}
+                elevation={2}
+              >
+                <VenueUpcomingEvents venue={selectedVenue} />
+              </Paper>
+            )}
           </Box>
         )}
       </DialogContent>
@@ -395,22 +322,11 @@ const VenueSelectionModal = ({ open, onClose }) => {
         <Typography variant="body2">
           {selectedVenue 
             ? `Selected: ${selectedVenue.name || selectedVenue.shortName}` 
-            : 'Click a venue to select it'}
+            : hasVenues ? 'Click a venue to see its upcoming events' : ''}
         </Typography>
-        <Box>
-          <Button onClick={onClose} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSelectVenue} 
-            color="primary" 
-            variant="contained" 
-            disabled={!selectedVenue}
-            sx={{ ml: 1 }}
-          >
-            Select Venue
-          </Button>
-        </Box>
+        <Button onClick={onClose} color="primary" variant="contained">
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   );

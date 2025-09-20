@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(request) {
+  // Check for Boston Tango Calendar iframe
+  const referer = request.headers.get('referer');
+  const isFromBoston = referer && referer.includes('bostontangocalendar.com');
+  
+  // Redirect Boston iframe traffic to dedicated route
+  if (isFromBoston && request.nextUrl.pathname === '/calendar') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/calendar/boston';
+    return NextResponse.redirect(url);
+  }
+  
   const response = NextResponse.next();
   
   // Extract Cloudflare headers - try both CF-* and X-Geo-* prefixes
@@ -21,6 +32,16 @@ export function middleware(request) {
     workerActive: request.headers.get('x-geo-worker') || null,
     timestamp: Date.now()
   };
+  
+  // Only process geo-diagnostics routes with additional logging
+  if (request.nextUrl.pathname === '/geo-diagnostics') {
+    // Log ALL headers to see what's coming through
+    const allHeaders = {};
+    request.headers.forEach((value, key) => {
+      allHeaders[key] = value;
+    });
+    console.log('ALL Headers received:', allHeaders);
+  }
 
   // Only log in development or for geo-diagnostics route
   if (process.env.NODE_ENV === 'development' || request.nextUrl.pathname === '/geo-diagnostics') {

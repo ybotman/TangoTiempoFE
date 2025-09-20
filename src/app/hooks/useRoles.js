@@ -16,7 +16,7 @@ export const useRoles = () => {
         params: { appId }, // Add appId as a query parameter
       });
 
-      setRoles(response.data);
+      setRoles(response.data.roles || response.data || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
       setError(error);

@@ -83,8 +83,9 @@ const ViewEventDetailsRepeating = ({ eventDetails }) => {
     
     // End condition
     if (rules.UNTIL) {
-      const untilDate = parseRRuleDate(rules.UNTIL);
-      description += ` until ${untilDate.toLocaleDateString()}`;
+      // TIEMPO-246: Format date without timezone conversion
+      const untilDateStr = parseRRuleDateString(rules.UNTIL);
+      description += ` until ${untilDateStr}`;
     } else if (rules.COUNT) {
       description += ` for ${rules.COUNT} occurrence${rules.COUNT === '1' ? '' : 's'}`;
     } else {
@@ -101,16 +102,26 @@ const ViewEventDetailsRepeating = ({ eventDetails }) => {
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
   
-  // Parse RRULE date format
-  const parseRRuleDate = (dateStr) => {
+  // TIEMPO-246: Parse RRULE date format without timezone conversion
+  const parseRRuleDateString = (dateStr) => {
     // Handle YYYYMMDDTHHMMSSZ format
-    if (dateStr.length >= 15) {
+    if (dateStr.length >= 8) {
       const year = dateStr.substring(0, 4);
       const month = dateStr.substring(4, 6);
       const day = dateStr.substring(6, 8);
-      return new Date(`${year}-${month}-${day}`);
+      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
     }
-    return new Date(dateStr);
+    // Handle ISO format if already formatted
+    if (dateStr.includes('-')) {
+      const [datePart] = dateStr.split('T');
+      const [year, month, day] = datePart.split('-');
+      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+    }
+    return dateStr;
   };
   
   return (
@@ -152,7 +163,15 @@ const ViewEventDetailsRepeating = ({ eventDetails }) => {
           {eventDetails?.extendedProps?.startDate && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="caption" color="text.secondary">
-                First occurrence: {new Date(eventDetails.extendedProps.startDate).toLocaleDateString()}
+                First occurrence: {(() => {
+                  // TIEMPO-246: Format date without timezone conversion
+                  const [datePart] = (eventDetails.extendedProps.startDate || '').split('T');
+                  if (!datePart) return '';
+                  const [year, month, day] = datePart.split('-');
+                  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+                  return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                })()}
               </Typography>
             </Box>
           )}

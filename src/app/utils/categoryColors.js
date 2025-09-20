@@ -41,6 +41,6 @@ export const coloredFilteredEvents = (events, activeCategories) => {
     };
   });
 
-  //  console.log('Colored events:', coloredEvents); // Debugging log to check colored events
+// TIEMPO-276: Security cleanup - removed logging
   return coloredEvents;
 };

@@ -2,7 +2,7 @@
 
 'use client'; 
 import Head from 'next/head';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
@@ -23,6 +23,10 @@ import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEvent
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { AuthContext } from '@/contexts/AuthContext';
+import { RoleContext } from '@/contexts/RoleContext';
+import { listOfAllRoles } from '@/utils/masterData';
 
 const CalendarPage = () => {
   <Head>
@@ -38,6 +42,15 @@ const CalendarPage = () => {
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.tangotiempo.com" />
   </Head>;
+
+  // State to track if we've auto-opened the map
+  const [hasAutoOpenedMap, setHasAutoOpenedMap] = useState(false);
+  
+  // Get GeoLocation context for auto-opening map
+  const { openLocationSettings, openMapCenterModal } = useGeoLocation();
+  
+  // Get auth context to check if user is logged in
+  const { user } = useContext(AuthContext);
 
   // Regions data is now handled by useCalendarPage
   const {
@@ -74,24 +87,39 @@ const CalendarPage = () => {
     isAIDetailModalOpen,
     setAIDetailModalOpen,
     selectedAIEventDetails,
+    noLocationSelected,
+    eventsLoading,
   } = useCalendarPage();
+
+  // Get selected role from context
+  const { selectedRole } = useContext(RoleContext);
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
     return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
   };
 
-  // Generate placeholder events for list view to show all dates
+  // TIEMPO-246: Generate placeholder events without Date() conversions
   const generatePlaceholderEvents = (startDate, endDate) => {
     const placeholders = [];
-    const current = new Date(startDate);
-    const end = new Date(endDate);
     
-    while (current <= end) {
+    // Determine placeholder text based on user role
+    const canAddEvents = selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || 
+                        selectedRole === listOfAllRoles.REGIONAL_ADMIN ||
+                        selectedRole === listOfAllRoles.SYSTEM_ADMIN ||
+                        selectedRole === listOfAllRoles.SUPER_ADMIN;
+    
+    const placeholderText = canAddEvents ? 'Click to add event' : 'No events';
+    
+    // String-based date manipulation to avoid timezone conversions
+    let currentDateStr = startDate.split('T')[0]; // Get YYYY-MM-DD part
+    const endDateStr = endDate.split('T')[0];
+    
+    while (currentDateStr <= endDateStr) {
       placeholders.push({
-        id: `placeholder-${current.toISOString()}`,
-        title: 'Click to add event', // Show instructional text
-        start: new Date(current),
+        id: `placeholder-${currentDateStr}`,
+        title: placeholderText, // Role-based text
+        start: `${currentDateStr}T00:00:00`, // ISO string without timezone
         allDay: true,
         display: 'list-item', // Make it visible in list view
         classNames: ['fc-placeholder-event'],
@@ -99,10 +127,54 @@ const CalendarPage = () => {
           isPlaceholder: true
         }
       });
-      current.setDate(current.getDate() + 1);
+      
+      // TIEMPO-246: Increment date using pure string manipulation
+      const [year, month, day] = currentDateStr.split('-').map(Number);
+      let nextDay = day + 1;
+      let nextMonth = month;
+      let nextYear = year;
+      
+      // Handle month rollover
+      const daysInMonth = [31, (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0) ? 29 : 28, 
+                          31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      if (nextDay > daysInMonth[month - 1]) {
+        nextDay = 1;
+        nextMonth++;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+      }
+      
+      currentDateStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(nextDay).padStart(2, '0')}`;
     }
     
     return placeholders;
+  };
+
+  // TIEMPO-252: Format venue time for calendar display WITH timezone
+  const formatVenueTimeForCalendar = (startStr, endStr, abbr) => {
+    // Parse venue time string (format: "2025-07-07T19:00:00")
+    const formatVenueTime = (timeStr) => {
+      if (!timeStr) return '';
+      const [, timePart] = timeStr.split('T');
+      const [hour, minute] = timePart.split(':');
+      const hourNum = parseInt(hour, 10);
+      const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+      const suffix = hourNum >= 12 ? 'p' : 'a';
+      return `${displayHour}:${minute}${suffix}`;
+    };
+    
+    const startTime = formatVenueTime(startStr);
+    const endTime = formatVenueTime(endStr);
+    
+    // Add timezone abbreviation if provided
+    const endTimeWithTz = endTime && abbr ? `${endTime} ${abbr}` : endTime;
+    
+    return {
+      startTime: startTime,
+      endTime: endTimeWithTz
+    };
   };
 
   // Format time display without AM/PM for monthly view
@@ -144,8 +216,16 @@ const CalendarPage = () => {
     
     // Handle placeholder events specially
     if (event.extendedProps?.isPlaceholder) {
-      // For list view placeholders, show clickable text
+      // For list view placeholders, show role-based text
       if (eventInfo.view.type === 'list21Days' || eventInfo.view.type === 'listMonth') {
+        // Determine text based on user role
+        const canAddEvents = selectedRole === listOfAllRoles.REGIONAL_ORGANIZER || 
+                            selectedRole === listOfAllRoles.REGIONAL_ADMIN ||
+                            selectedRole === listOfAllRoles.SYSTEM_ADMIN ||
+                            selectedRole === listOfAllRoles.SUPER_ADMIN;
+        
+        const displayText = canAddEvents ? 'Click to add event' : 'No events';
+        
         return (
           <div style={{
             padding: '8px 16px',
@@ -153,7 +233,7 @@ const CalendarPage = () => {
             textAlign: 'center',
             fontSize: '0.9rem'
           }}>
-            <span style={{ opacity: 0.6 }}>Click to add event</span>
+            <span style={{ opacity: 0.6 }}>{displayText}</span>
           </div>
         );
       }
@@ -177,7 +257,16 @@ const CalendarPage = () => {
     
     if (isMonthlyView) {
       // Monthly view: time + categories on same line, title below
-      const { startTime, endTime } = formatTimeForMonthly(event.start, event.end);
+      // TIEMPO-252: Use venue display times if available
+      
+      // Debug: Check what venue data we have
+      if (event.title?.includes('Practica') || event.extendedProps?.shortTitle?.includes('VIDA')) {
+        // TIEMPO-276: Security cleanup - removed venue data logging
+      }
+      
+      const { startTime, endTime } = event.extendedProps?.venueStartDisplay 
+        ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
+        : formatTimeForMonthly(event.start, event.end);
       
       return (
         <div style={{ 
@@ -278,6 +367,9 @@ const CalendarPage = () => {
             fontWeight: 'normal',
             lineHeight: '1.1',
             wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
             hyphens: 'auto',
             flex: 1,
             color: '#555',
@@ -289,7 +381,10 @@ const CalendarPage = () => {
       );
     } else {
       // List view: time and categories on top line, title on second line
-      const { startTime, endTime } = formatTimeForListView(event.start, event.end);
+      // TIEMPO-252: Use venue display times if available
+      const { startTime, endTime } = event.extendedProps?.venueStartDisplay
+        ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
+        : formatTimeForListView(event.start, event.end);
       
       return (
         <div style={{ 
@@ -396,6 +491,9 @@ const CalendarPage = () => {
             fontWeight: 'normal',
             lineHeight: '1.2',
             wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
             hyphens: 'auto',
             color: '#555',
             textDecoration: isCanceled ? 'line-through' : 'none'
@@ -470,19 +568,23 @@ const CalendarPage = () => {
     if (currentViewType === 'list21Days' || currentViewType === 'listMonth') {
       if (viewDateRange.start && viewDateRange.end) {
         // Generate placeholders for the current view range
-        const placeholders = generatePlaceholderEvents(viewDateRange.start, viewDateRange.end);
+        // Convert Date objects to ISO strings for generatePlaceholderEvents
+        const startStr = viewDateRange.start instanceof Date ? viewDateRange.start.toISOString() : viewDateRange.start;
+        const endStr = viewDateRange.end instanceof Date ? viewDateRange.end.toISOString() : viewDateRange.end;
+        const placeholders = generatePlaceholderEvents(startStr, endStr);
         
-        // Filter out dates that already have real events
+        // TIEMPO-246: Filter dates using string comparison, not Date objects
         const eventDates = new Set(
           coloredFilteredEvents.map(event => {
-            const eventDate = new Date(event.start);
-            return eventDate.toDateString();
+            // Extract date part from ISO string (YYYY-MM-DD)
+            return (event.start || '').split('T')[0];
           })
         );
         
         const neededPlaceholders = placeholders.filter(placeholder => {
-          const placeholderDate = new Date(placeholder.start);
-          return !eventDates.has(placeholderDate.toDateString());
+          // Extract date part from placeholder start
+          const placeholderDateStr = (placeholder.start || '').split('T')[0];
+          return !eventDates.has(placeholderDateStr);
         });
         
         // Combine with real events
@@ -493,7 +595,7 @@ const CalendarPage = () => {
     return coloredFilteredEvents;
   })();
 
-  //console.log('Modal isCreateModalOpen open state:', isCreateModalOpen);
+// TIEMPO-276: Security cleanup - removed logging
   useEffect(() => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();
@@ -513,6 +615,25 @@ const CalendarPage = () => {
       window.removeEventListener('resize', handleWindowResize);
     };
   }, [calendarRef]); // Add calendarRef to the dependency array
+
+  // Auto-open map if no location is selected
+  useEffect(() => {
+    if (noLocationSelected && !hasAutoOpenedMap) {
+      // Small delay to ensure page is loaded
+      const timer = setTimeout(() => {
+        if (!user) {
+          // Non-logged user: Open MapCenterModal
+          openMapCenterModal();
+        } else {
+          // Logged-in user: Open UserSettings to location preferences
+          openLocationSettings('locationPrefs');
+        }
+        setHasAutoOpenedMap(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [noLocationSelected, hasAutoOpenedMap, openLocationSettings, openMapCenterModal, user]);
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
@@ -566,10 +687,13 @@ const CalendarPage = () => {
           >
             <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
               {calendarRef.current
-                ? calendarRef.current.getApi().getDate().toLocaleDateString(undefined, {
-                    month: 'long',
-                    year: 'numeric',
-                  }).toUpperCase()
+                ? (() => {
+                    // TIEMPO-246: Format calendar date without timezone conversion
+                    const calDate = calendarRef.current.getApi().getDate();
+                    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+                    return `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
+                  })()
                 : 'LOADING CALENDAR...'}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#888' }}>
@@ -593,21 +717,79 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      <div
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        style={{
-          width: '100%',
-          maxWidth: '100%',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          position: 'relative',
-        }}
-      >
-        <FullCalendar
+      {noLocationSelected ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '60px 20px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '8px',
+          margin: '20px',
+        }}>
+          <h2 style={{ marginBottom: '20px', color: '#666' }}>
+            Loading Map Settings...
+          </h2>
+          <p style={{ fontSize: '16px', color: '#777' }}>
+            Opening location selector
+          </p>
+        </div>
+      ) : (
+        <div
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          style={{
+            width: '100%',
+            maxWidth: '100%',
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            position: 'relative',
+          }}
+        >
+          {eventsLoading && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: '20px 40px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: '3px solid #f3f3f3',
+                borderTop: '3px solid #1976d2',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <div style={{ 
+                fontSize: '16px', 
+                fontWeight: '500',
+                color: '#333' 
+              }}>
+                Loading events...
+              </div>
+              <style jsx>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
+            </div>
+          )}
+          <FullCalendar
           plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
+          // TIEMPO-239: CRITICAL - Set timezone to UTC to prevent browser conversion
+          // This ensures events display in their venue timezone, not browser timezone
+          timeZone="UTC"
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
@@ -620,7 +802,7 @@ const CalendarPage = () => {
             setViewDateRange({ start: view.currentStart, end: view.currentEnd });
           }
         }}
-        nextDayThreshold="04:00:00"
+        nextDayThreshold="06:00:00"
         eventClick={handleEventClick}
         dateClick={handleDateClick}
         eventContent={renderEventContent}
@@ -708,18 +890,18 @@ const CalendarPage = () => {
           },
         }}
         dayCellDidMount={({ date, el }) => {
+          // TIEMPO-246: Compare dates without timezone conversion
           const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const cellDate = new Date(date);
-          cellDate.setHours(0, 0, 0, 0);
+          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+          const cellDateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-          if (cellDate < today) {
+          if (cellDateStr < todayStr) {
             el.style.backgroundColor = '#c0c0c0';
           }
         }}
       />
-      </div>
-      
+        </div>
+      )}
       
       {/* SubMenu */}
       <CalendarSubMenu

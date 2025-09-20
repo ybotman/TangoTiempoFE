@@ -50,7 +50,7 @@ export const useRAOrganizers = () => {
     
     // Skip fetch if we already fetched with the same configuration
     if (lastFetchKey === fetchKey && organizers.length > 0) {
-      console.log('Skipping RA organizers fetch - data already loaded for same configuration');
+// TIEMPO-276: Security cleanup - removed logging
       return;
     }
 
@@ -63,7 +63,7 @@ export const useRAOrganizers = () => {
 
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       
-      console.log('Fetching RA organizers for allowed cities:', allowedCityIds);
+// TIEMPO-276: Security cleanup - removed logging
 
       // Since backend doesn't support multiple city filtering yet,
       // fetch organizers from all cities the RA manages by making separate requests
@@ -95,14 +95,14 @@ export const useRAOrganizers = () => {
             }
           }
           
-          console.log(`Found ${cityOrganizers.length} organizers in city ${cityId}`);
+// TIEMPO-276: Security cleanup - removed logging
         } catch (cityError) {
           console.warn(`Failed to fetch organizers for city ${cityId}:`, cityError.message);
           // Continue with other cities
         }
       }
 
-      console.log(`Total RA organizers found: ${allOrganizers.length}`);
+// TIEMPO-276: Security cleanup - removed logging
 
       // Ensure we're setting an array
       const organizersData = allOrganizers;

@@ -9,18 +9,21 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
   if (!eventDetails) return null;
 
   const formatDateRange = (start, end) => {
-    const startDate = new Date(start);
-    const endDate = end ? new Date(end) : startDate;
-    
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    // TIEMPO-246: Format dates without timezone conversion
+    const formatFullDate = (dateStr) => {
+      const [datePart] = (dateStr || '').split('T');
+      if (!datePart) return '';
+      const [year, month, day] = datePart.split('-');
+      const date = new Date(year, month - 1, day);
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      const weekday = weekdays[date.getDay()];
+      return `${weekday}, ${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
     };
     
-    const startStr = startDate.toLocaleDateString('en-US', options);
-    const endStr = endDate.toLocaleDateString('en-US', options);
+    const startStr = formatFullDate(start);
+    const endStr = end ? formatFullDate(end) : startStr;
     
     // Same day event
     if (startStr === endStr) {
@@ -34,14 +37,25 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
   const formatDiscoveryDate = (discoveryDate) => {
     if (!discoveryDate) return 'Unknown';
     
-    const date = new Date(discoveryDate);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    // TIEMPO-246: Format discovery date without timezone conversion
+    const [datePart, timePart] = (discoveryDate || '').split('T');
+    if (!datePart) return 'Unknown';
+    
+    const [year, month, day] = datePart.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let result = `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+    
+    if (timePart) {
+      const [hour, minute] = timePart.split(':');
+      const hourNum = parseInt(hour, 10);
+      const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+      const suffix = hourNum >= 12 ? 'PM' : 'AM';
+      result += ` ${displayHour}:${minute} ${suffix}`;
+    }
+    
+    return result;
   };
 
   return (

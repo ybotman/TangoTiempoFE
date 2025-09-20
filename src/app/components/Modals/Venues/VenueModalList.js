@@ -21,7 +21,6 @@ import { useMasteredLocations } from '@/hooks/useMasteredLocations';
 const VenueModalList = ({
   venues,
   onEdit,
-  onDelete,
   selectedCityId,
   onCityChange,
   activeFilter,
@@ -35,7 +34,7 @@ const VenueModalList = ({
   const [regionId, setRegionId] = useState('');
   const [divisionId, setDivisionId] = useState('');
   const [cityId, setCityId] = useState(selectedCityId || '');
-  const [deleteError, setDeleteError] = useState(null);
+  // Removed unused deleteError state
 
   useEffect(() => {
     // Assume single country scenario. If multiple, we can prompt user.
@@ -98,32 +97,19 @@ const VenueModalList = ({
     onActiveFilterChange(e.target.checked);
   };
 
-  const handleDeleteVenue = async (venueId) => {
-    setDeleteError(null);
-    try {
-      await onDelete(venueId);
-      refreshList();
-    } catch (err) {
-      setDeleteError(err.message);
-    }
-  };
+  // Removed unused handleDeleteVenue helper
 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
         Venue List
       </Typography>
-      {deleteError && (
-        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
-          {deleteError}
-        </Typography>
-      )}
 
       <Box display="flex" flexDirection="row" gap={2} alignItems="center" sx={{ mb: 2, flexWrap: 'wrap' }}>
         {/* Country Dropdown */}
         <TextField select label="Country" value={countryId} onChange={handleCountryChange} sx={{ minWidth: 200 }}>
           <MenuItem value="">Select Country</MenuItem>
-          {countries.map((co) => (
+          {Array.isArray(countries) && countries.map((co) => (
             <MenuItem key={co._id} value={co._id}>
               {co.countryName}
             </MenuItem>
@@ -140,7 +126,7 @@ const VenueModalList = ({
           disabled={!countryId}
         >
           <MenuItem value="">Select Region</MenuItem>
-          {regions.map((r) => (
+          {Array.isArray(regions) && regions.map((r) => (
             <MenuItem key={r._id} value={r._id}>
               {r.regionName}
             </MenuItem>
@@ -157,7 +143,7 @@ const VenueModalList = ({
           disabled={!regionId}
         >
           <MenuItem value="">Select Division</MenuItem>
-          {divisions.map((d) => (
+          {Array.isArray(divisions) && divisions.map((d) => (
             <MenuItem key={d._id} value={d._id}>
               {d.divisionName}
             </MenuItem>
@@ -174,7 +160,7 @@ const VenueModalList = ({
           disabled={!divisionId}
         >
           <MenuItem value="">All Cities</MenuItem>
-          {cities.map((c) => (
+          {Array.isArray(cities) && cities.map((c) => (
             <MenuItem key={c._id} value={c._id}>
               {c.cityName}
             </MenuItem>
@@ -204,13 +190,6 @@ const VenueModalList = ({
                 <ListItem
                   button="true"
                   onDoubleClick={() => onEdit(v)}
-                  secondaryAction={
-                    v.isActive && (
-                      <Button variant="outlined" color="error" onClick={() => handleDeleteVenue(v._id)}>
-                        Deactivate
-                      </Button>
-                    )
-                  }
                 >
                   <ListItemText
                     primary={`${v.name} (${v.shortName})`}
