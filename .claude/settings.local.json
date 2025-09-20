@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:localhost)",
-      "Bash(./.ybotbot/jira-tools/jira-create.sh:*)"
+      "Bash(./.ybotbot/jira-tools/jira-create.sh:*)",
+      "WebFetch(domain:hdtsllc.atlassian.net)",
+      "Bash(curl:*)",
+      "WebSearch",
+      "Read(//tmp/**)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [],
     "ask": []
