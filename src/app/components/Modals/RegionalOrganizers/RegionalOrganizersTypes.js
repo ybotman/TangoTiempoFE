@@ -23,15 +23,15 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
 
   const [types, setTypes] = useState({
     isEventOrganizer: true,
-    isVenue: false,
     isTeacher: false,
     isMaestro: false,
     isDJ: false,
     isOrchestra: false,
+    isTaxiDancer: false,
+    isVendor: false,
   });
 
   const [initialTypes, setInitialTypes] = useState({});
-  const [pendingVenueRequest, setPendingVenueRequest] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -40,24 +40,23 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
       const organizerTypes = organizer.organizerTypes || {};
       setTypes({
         isEventOrganizer: organizerTypes.isEventOrganizer ?? true,
-        isVenue: organizerTypes.isVenue ?? false,
         isTeacher: organizerTypes.isTeacher ?? false,
         isMaestro: organizerTypes.isMaestro ?? false,
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
+        isTaxiDancer: organizerTypes.isTaxiDancer ?? false,
+        isVendor: organizerTypes.isVendor ?? false,
       });
 
       setInitialTypes({
         isEventOrganizer: organizerTypes.isEventOrganizer ?? true,
-        isVenue: organizerTypes.isVenue ?? false,
         isTeacher: organizerTypes.isTeacher ?? false,
         isMaestro: organizerTypes.isMaestro ?? false,
         isDJ: organizerTypes.isDJ ?? false,
         isOrchestra: organizerTypes.isOrchestra ?? false,
+        isTaxiDancer: organizerTypes.isTaxiDancer ?? false,
+        isVendor: organizerTypes.isVendor ?? false,
       });
-      
-      // Reset venue request when organizer data changes
-      setPendingVenueRequest(false);
     }
   }, [organizer]);
 
@@ -66,18 +65,6 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
 
     if (name === 'isEventOrganizer' && !checked) {
       alert('You cannot uncheck Event Organizer.');
-      return;
-    }
-
-    // Special handling for venue checkbox
-    if (name === 'isVenue') {
-      if (checked) {
-        // When checked, set to pending request
-        setPendingVenueRequest(true);
-      } else {
-        // When unchecked, cancel the request
-        setPendingVenueRequest(false);
-      }
       return;
     }
 
@@ -111,53 +98,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
     }
   };
 
-  // For handling venue registration request
-  const handleVenueRequest = () => {
-    // In the future, this would submit the request to create a venue
-    // For now, it's just a placeholder that will reset the UI
-    setShowSuccessMessage(true);
-    setPendingVenueRequest(false);
-  };
-
   const renderTypeCheckbox = (label, name, infoText) => {
-    // Special case for venue checkbox
-    if (name === 'isVenue') {
-      return (
-        <Box key={name} sx={{ mb: 2, mt: 3, pb: 2, borderBottom: '1px solid #e0e0e0' }}>
-          <Box display="flex" alignItems="center" justifyContent="space-between">
-            <FormControlLabel
-              control={<Checkbox checked={initialTypes.isVenue || pendingVenueRequest} onChange={handleTypeChange} name={name} color="primary" />}
-              label={initialTypes.isVenue ? "Venue (Approved)" : "Venue"}
-            />
-            <Tooltip title="Request to be listed as a venue in the system. Admin approval required. Your address will be used to create the venue.">
-              <IconButton size="small" aria-label="Venue info">
-                <InfoIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          
-          {/* Show submit button when venue is checked but not yet approved */}
-          {pendingVenueRequest && !initialTypes.isVenue && (
-            <Box mt={1} ml={4}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Submit a request to create a venue at your address. System will check for duplicates.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="inherit"
-                size="small"
-                onClick={handleVenueRequest}
-                sx={{ bgcolor: '#e0e0e0' }}
-              >
-                Submit Venue Request
-              </Button>
-            </Box>
-          )}
-        </Box>
-      );
-    }
-    
-    // Regular checkboxes for other types
     return (
       <Box key={name} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
         <FormControlLabel
@@ -176,8 +117,23 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Organizer Types
+        Artists+ Types
       </Typography>
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+          Event Organizer Feature Available Now!
+        </Typography>
+        <Typography variant="body2">
+          Currently, only the Event Organizer feature is fully functional for managing milongas, festivals, classes, and other tango events.
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Coming Soon:</strong> Each Artists+ type you select will become searchable both within TangoTiempo and on Google. You'll have dedicated profile pages where you can configure your activities and showcase your work in each role.
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Select your Artists+ types now to be notified when your searchable profiles become available!
+        </Typography>
+      </Alert>
 
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -193,7 +149,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert severity="success" onClose={handleSnackbarClose}>
-          Organizer types have been updated successfully!
+          Artists+ types have been updated successfully!
         </Alert>
       </Snackbar>
 
@@ -219,17 +175,25 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
           'isOrchestra',
           'Performs live Argentine tango music. Will be listed in the Orchestras directory.'
         )}
-        {/* Venue is handled specially and placed last */}
         {renderTypeCheckbox(
-          'Venue',
-          'isVenue',
-          'The address provided will be listed for OTHER Organizers to select for their calendar events.'
+          'Taxi Dancer',
+          'isTaxiDancer',
+          'Available for hire as a dance partner at events.'
+        )}
+        {renderTypeCheckbox(
+          'Vendor',
+          'isVendor',
+          'Sells tango-related products or services (shoes, clothing, music, etc.).'
         )}
       </Box>
 
       <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled}>
         Save
       </Button>
+
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+        Note: Your Artists+ selections will create searchable profile pages. Start building your presence now!
+      </Typography>
     </Box>
   );
 };
@@ -240,11 +204,12 @@ RegionalOrganizerTypes.propTypes = {
     _id: PropTypes.string,
     organizerTypes: PropTypes.shape({
       isEventOrganizer: PropTypes.bool,
-      isVenue: PropTypes.bool,
       isTeacher: PropTypes.bool,
       isMaestro: PropTypes.bool,
       isDJ: PropTypes.bool,
       isOrchestra: PropTypes.bool,
+      isTaxiDancer: PropTypes.bool,
+      isVendor: PropTypes.bool,
     }),
   }).isRequired,
   updateOrganizer: PropTypes.func.isRequired,

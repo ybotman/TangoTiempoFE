@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab, useMediaQuery, useTheme, AppBar, Toolbar, IconButton, Button } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import RegionalOrganizersProfile from './RegionalOrganizersProfile';
-import RegionalOrganizersProfileImages from './RegionalOrganizersProfileImages';
 import RegionalOrganizerTypes from './RegionalOrganizersTypes';
 import RegionalOrganizersStatus from './RegionalOrganizersStatus';
 import RegionalOrganizersSettings from './RegionalOrganizersSettings';
@@ -197,7 +196,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
               <Tab label="Settings" value="settings" />
               <Tab label="Profile" value="profile" />
               <Tab label="Artists+" value="types" />
-              <Tab label="Profile Images" value="profileImages" />
             </Tabs>
 
             {loading ? (
@@ -252,17 +250,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
                     updateOrganizer={updateOrganizer}
                     onFieldChange={(field, value) => handleFieldChange('types', field, value)}
                     unsavedChanges={unsavedChanges.types || {}}
-                    onSave={handleSaveAll}
-                    isSaving={isSaving}
-                  />
-                )}
-                {currentTab === 'profileImages' && (
-                  <RegionalOrganizersProfileImages
-                    organizerId={organizer?._id}
-                    organizer={organizer}
-                    updateOrganizer={updateOrganizer}
-                    onFieldChange={(field, value) => handleFieldChange('profileImages', field, value)}
-                    unsavedChanges={unsavedChanges.profileImages || {}}
                     onSave={handleSaveAll}
                     isSaving={isSaving}
                   />

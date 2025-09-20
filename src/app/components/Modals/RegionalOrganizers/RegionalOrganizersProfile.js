@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
+import ImageIcon from '@mui/icons-material/Image';
 
 const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
   // Local state (needed for fallback when centralized state is not available)
@@ -201,7 +202,7 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
                     setDescription(value);
                   }
                 }}
-                helperText="Tell dancers about your organization"
+                helperText="Describe your EVENT ORGANIZER - This will appear in search results"
               />
             </Grid>
           </Grid>
@@ -352,6 +353,33 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
               />
             </Grid>
           </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Profile Images Coming Soon Section */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+            <ImageIcon sx={{ mr: 1 }} />
+            <Typography variant="subtitle1" fontWeight="bold">
+              Profile Images
+            </Typography>
+          </Box>
+          
+          <Alert severity="info">
+            <Typography variant="body2">
+              <strong>Feature Coming Soon!</strong>
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              You'll soon be able to upload profile images including:
+            </Typography>
+            <Typography variant="caption" component="div" sx={{ mt: 1, pl: 2 }}>
+              • Banner Image - Display at the top of your profile<br />
+              • Profile Image - Your organization's main photo<br />
+              • Landscape Image - Wide format image for event displays<br />
+              • Logo Image - Your organization's official logo
+            </Typography>
+          </Alert>
         </CardContent>
       </Card>
     </Box>

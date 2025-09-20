@@ -20,6 +20,7 @@ import useMenuItems from '@/hooks/useMenuItems';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
+import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -299,7 +300,6 @@ export const useCalendarPage = () => {
     // TIEMPO-253: Handle opening organizer settings for incomplete profiles
     if (action === 'openOrganizerSettings') {
       // Use the regional organizer event emitter to open the modal
-      const { regionalOrganizerEvent } = require('@/utils/RegionalOrganizerEvent');
       regionalOrganizerEvent.openModal();
     }
   };

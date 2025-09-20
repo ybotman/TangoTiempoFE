@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/navigation';
 import {
   Drawer,
   Box,
@@ -25,6 +26,7 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
+  const router = useRouter();
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const { logAuthEvent, logRoleChange, logActivity } = useActivityLogger();
@@ -124,6 +126,14 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
     });
     
     selectRole(newRole);
+    
+    // TIEMPO-282: Redirect from Boston calendar to main calendar when switching to Regional Organizer
+    if (typeof window !== 'undefined' && 
+        window.location.pathname === '/calendar/boston' && 
+        newRole === 'RegionalOrganizer') {
+      router.push('/calendar');
+    }
+    
     handleUserDrawerClose(); // Close drawer after selection
     showRoleMessage(newRole); // Trigger message independently
   };
