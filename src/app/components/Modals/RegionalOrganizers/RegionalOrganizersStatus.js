@@ -17,6 +17,7 @@ import {
   ListItemText,
   Chip,
   Grid,
+  TextField,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -38,6 +39,8 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
   
   // TIEMPO-254: Use unsaved changes if available, otherwise use organizer data
   const isEnabled = unsavedChanges?.isEnabled !== undefined ? unsavedChanges.isEnabled : (organizer?.isEnabled || false);
+  const shortName = unsavedChanges?.shortName !== undefined ? unsavedChanges.shortName : (organizer?.shortName || '');
+  const description = unsavedChanges?.description !== undefined ? unsavedChanges.description : (organizer?.description || '');
   
   // Initial values for comparison
   const [initialIsEnabled, setInitialIsEnabled] = useState(false);
@@ -96,31 +99,31 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
     },
     {
       label: 'Short Name',
-      passed: organizer?.shortName && 
-              organizer.shortName.length >= 3 && 
-              organizer.shortName.length <= 9 &&
-              organizer.shortName !== 'CHANGE' &&
-              !organizer.shortName.toUpperCase().includes('TANGO') &&
-              !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName),
-      icon: organizer?.shortName && 
-            organizer.shortName.length >= 3 && 
-            organizer.shortName.length <= 9 &&
-            organizer.shortName !== 'CHANGE' &&
-            !organizer.shortName.toUpperCase().includes('TANGO') &&
-            !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) 
+      passed: shortName && 
+              shortName.length >= 3 && 
+              shortName.length <= 12 &&
+              shortName !== 'CHANGE' &&
+              !shortName.toUpperCase().includes('TANGO') &&
+              !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(shortName),
+      icon: shortName && 
+            shortName.length >= 3 && 
+            shortName.length <= 12 &&
+            shortName !== 'CHANGE' &&
+            !shortName.toUpperCase().includes('TANGO') &&
+            !/(^[\s-]|[\s-]$|[-\s]{2,})/.test(shortName) 
               ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
-      details: !organizer?.shortName ? 'Required' : 
-               organizer.shortName === 'CHANGE' ? 'Must change from default' :
-               organizer.shortName.length < 3 ? 'Too short (min 3 chars)' :
-               organizer.shortName.length > 9 ? 'Too long (max 9 chars)' :
-               organizer.shortName.toUpperCase().includes('TANGO') ? 'Cannot contain "Tango"' :
-               /(^[\s-]|[\s-]$|[-\s]{2,})/.test(organizer.shortName) ? 'Invalid format' : null
+      details: !shortName ? 'Required' : 
+               shortName === 'CHANGE' ? 'Must change from default' :
+               shortName.length < 3 ? 'Too short (min 3 chars)' :
+               shortName.length > 12 ? 'Too long (max 12 chars)' :
+               shortName.toUpperCase().includes('TANGO') ? 'Cannot contain "Tango"' :
+               /(^[\s-]|[\s-]$|[-\s]{2,})/.test(shortName) ? 'Invalid format' : null
     },
     {
       label: 'Description',
-      passed: organizer?.description && organizer.description.trim().length > 0,
-      icon: organizer?.description && organizer.description.trim().length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
-      details: !organizer?.description || organizer.description.trim().length === 0 ? 'Required - Add a description of your events' : null
+      passed: description && description.trim().length > 0,
+      icon: description && description.trim().length > 0 ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />,
+      details: !description || description.trim().length === 0 ? 'Required - Add a description of your events' : null
     },
   ];
 
@@ -209,6 +212,71 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
               labelPlacement="bottom"
             />
           </Box>
+        </CardContent>
+      </Card>
+
+      {/* Quick Edit Section for Required Fields */}
+      <Card variant="outlined" sx={{ mb: 3, bgcolor: '#f5f5f5' }}>
+        <CardContent>
+          <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+            Quick Edit - Complete These for Approval
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Fast track your approval by filling in these required fields:
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="caption">
+              <strong>Note:</strong> Short names must be unique. If your chosen name is already taken, you'll be notified when saving.
+            </Typography>
+          </Alert>
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Short Name"
+                value={shortName}
+                onChange={(e) => {
+                  if (onFieldChange) {
+                    onFieldChange('shortName', e.target.value);
+                  }
+                }}
+                error={!shortName || shortName === 'CHANGE' || shortName.length < 3 || shortName.length > 12 || shortName.toUpperCase().includes('TANGO')}
+                helperText={
+                  !shortName ? 'Required - 3-12 characters, must be unique' :
+                  shortName === 'CHANGE' ? 'Must change from default' :
+                  shortName.length < 3 ? 'Too short (min 3 chars)' :
+                  shortName.length > 12 ? 'Too long (max 12 chars)' :
+                  shortName.toUpperCase().includes('TANGO') ? 'Cannot contain "Tango"' :
+                  'Used in event listings - must be unique across all organizers'
+                }
+                size="small"
+                inputProps={{ maxLength: 12 }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Description"
+                value={description}
+                onChange={(e) => {
+                  if (onFieldChange) {
+                    onFieldChange('description', e.target.value);
+                  }
+                }}
+                error={!description || description.trim().length === 0}
+                helperText={
+                  !description || description.trim().length === 0 
+                    ? 'Required - Tell dancers about your organization' 
+                    : 'Describe your events and what makes them special'
+                }
+                size="small"
+              />
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
