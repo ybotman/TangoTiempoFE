@@ -18,10 +18,12 @@ import {
   Chip,
   Grid,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import InfoIcon from '@mui/icons-material/Info';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import RecommendIcon from '@mui/icons-material/Recommend';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -173,16 +175,45 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
         elevation={2} 
         sx={{ 
           mb: 3, 
-          bgcolor: isEnabled ? 'success.light' : 'grey.100',
-          opacity: allMandatoryPassed ? 1 : 0.7
+          bgcolor: isEnabled ? 'success.light' : 'error.light',
+          opacity: allMandatoryPassed ? 1 : 0.7,
+          border: isEnabled ? '1px solid' : '2px solid',
+          borderColor: isEnabled ? 'success.main' : 'error.main'
         }}
       >
         <CardContent>
           <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Profile Activation
-              </Typography>
+            <Box sx={{ flex: 1 }}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="h6" gutterBottom>
+                  Profile Activation
+                </Typography>
+                <Tooltip 
+                  title={
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>When Disabled:</strong>
+                      </Typography>
+                      <Typography variant="body2" component="ul" sx={{ pl: 2, m: 0 }}>
+                        <li>You cannot create or manage events</li>
+                        <li>People cannot find you in searches</li>
+                        <li>Your profile is not visible to the public</li>
+                        <li>Artists+ features are unavailable</li>
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        <strong>Enable your profile to unlock all features!</strong>
+                      </Typography>
+                    </Box>
+                  }
+                  arrow
+                  placement="top"
+                >
+                  <InfoOutlinedIcon 
+                    color={isEnabled ? "action" : "error"} 
+                    sx={{ fontSize: 20, cursor: 'help' }} 
+                  />
+                </Tooltip>
+              </Box>
               <Typography variant="body2" color={allMandatoryPassed || isEnabled ? "text.secondary" : "error"}>
                 {isEnabled 
                   ? "Your profile is active - You can create and manage tango events"
