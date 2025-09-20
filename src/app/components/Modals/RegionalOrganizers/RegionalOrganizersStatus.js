@@ -301,8 +301,8 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
                 error={!description || description.trim().length === 0}
                 helperText={
                   !description || description.trim().length === 0 
-                    ? 'Required - Tell dancers about your organization' 
-                    : 'Describe your events and what makes them special'
+                    ? 'Required - Describe your EVENT ORGANIZER' 
+                    : 'Describe your EVENT ORGANIZER - This will show up in search results'
                 }
                 size="small"
               />

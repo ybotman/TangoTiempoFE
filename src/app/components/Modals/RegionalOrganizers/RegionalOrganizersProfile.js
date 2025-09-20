@@ -202,7 +202,7 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
                     setDescription(value);
                   }
                 }}
-                helperText="Tell dancers about your organization"
+                helperText="Describe your EVENT ORGANIZER - This will appear in search results"
               />
             </Grid>
           </Grid>
