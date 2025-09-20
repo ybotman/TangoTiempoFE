@@ -34,7 +34,7 @@ export const useOrganizers = () => {
 
         // Check if the cache is valid and not expired
         if (Array.isArray(parsedData) && now - timestamp < cacheExpiry) {
-          console.log('Using cached organizers data');
+// TIEMPO-276: Security cleanup - removed logging
           setOrganizers(parsedData);
           setFetchLoading(false);
           return true;
@@ -52,7 +52,7 @@ export const useOrganizers = () => {
     try {
       localStorage.setItem('organizers_data', JSON.stringify(data));
       localStorage.setItem('organizers_timestamp', Date.now().toString());
-      console.log('Organizers data cached successfully');
+// TIEMPO-276: Security cleanup - removed logging
     } catch (cacheError) {
       console.warn('Error caching organizers data:', cacheError);
     }
@@ -86,14 +86,14 @@ export const useOrganizers = () => {
 
     try {
       setFetchLoading(true);
-      console.log('Fetching organizers with params:', params);
+// TIEMPO-276: Security cleanup - removed logging
 
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, {
         params,
         timeout: 10000 // 10 second timeout to prevent hanging requests
       });
 
-      console.log('Organizers fetched successfully:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
 
       // Ensure we're setting an array
       const organizersData = Array.isArray(response.data) ? response.data : [];
@@ -124,12 +124,12 @@ export const useOrganizers = () => {
     const maxRetries = 3;
 
     if (retryCount >= maxRetries) {
-      console.log(`Max retries (${maxRetries}) reached for organizers fetch`);
+// TIEMPO-276: Security cleanup - removed logging
       return;
     }
 
     const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
-    console.log(`Retrying organizers fetch in ${delay}ms (attempt ${retryCount + 1})`);
+// TIEMPO-276: Security cleanup - removed logging
 
     setTimeout(() => {
       setRetryCount(prevCount => prevCount + 1);
@@ -146,12 +146,12 @@ export const useOrganizers = () => {
 
     // Check cache first
     if (organizerCache[organizerId]) {
-      console.log('Using cached organizer data for:', organizerId);
+// TIEMPO-276: Security cleanup - removed logging
       setOrganizer(organizerCache[organizerId]);
       return;
     }
 
-    console.log('fetchOrganizerById called with organizerId:', organizerId);
+// TIEMPO-276: Security cleanup - removed logging
 
     try {
       setFetchLoading(true);
@@ -161,7 +161,7 @@ export const useOrganizers = () => {
         timeout: 10000 // 10 second timeout
       });
 
-      console.log('Organizer fetched successfully:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
       setOrganizer(response.data);
       setError(null);
       
@@ -194,7 +194,7 @@ export const useOrganizers = () => {
         timeout: 10000 // 10 second timeout
       });
 
-      console.log('Organizer by Firebase ID fetched:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
       return response.data;
 
     } catch (error) {
@@ -223,7 +223,7 @@ export const useOrganizers = () => {
     }
 
     try {
-      console.log('updateOrganizer:', organizerId, updateData);
+// TIEMPO-276: Security cleanup - removed logging
       setUpdateLoading(true);
 
       // Add appId to the update data
@@ -238,7 +238,7 @@ export const useOrganizers = () => {
         { timeout: 10000 } // 10 second timeout
       );
 
-      console.log('Organizer updated successfully:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
       setOrganizer(response.data); // Update organizer state with response data
       setError(null);
 
@@ -274,7 +274,7 @@ export const useOrganizers = () => {
         { timeout: 10000 } // 10 second timeout
       );
 
-      console.log('Organizer created successfully:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
       setError(null);
 
       return response.data;

@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/navigation';
 import {
   Drawer,
   Box,
@@ -25,6 +26,7 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
+  const router = useRouter();
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const { logAuthEvent, logRoleChange, logActivity } = useActivityLogger();
@@ -35,8 +37,8 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
   // Define role display mapping (backend role -> display name)
   const roleDisplayMap = {
-    'NamedUser': 'Milonger-x',
-    'RegionalOrganizer': 'RegionalOrganizer',
+    'NamedUser': 'Milonger@',
+    'RegionalOrganizer': 'Organizer/Artist',
     'RegionalAdmin': 'RegionalAdmin', 
     'SystemAdmin': 'SystemAdmin',
     'SystemOwner': 'SystemOwner'
@@ -124,6 +126,14 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
     });
     
     selectRole(newRole);
+    
+    // TIEMPO-282: Redirect from Boston calendar to main calendar when switching to Regional Organizer
+    if (typeof window !== 'undefined' && 
+        window.location.pathname === '/calendar/boston' && 
+        newRole === 'RegionalOrganizer') {
+      router.push('/calendar');
+    }
+    
     handleUserDrawerClose(); // Close drawer after selection
     showRoleMessage(newRole); // Trigger message independently
   };
@@ -163,7 +173,10 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
 
             <Box sx={{ marginTop: 2 }}>
-              <Typography variant="subtitle1">Select Role:</Typography>
+              <Typography variant="subtitle1">Settings</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Choose your active role
+              </Typography>
               <FormControl component="fieldset">
                 <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                   {orderedUserRoles.map((role) => (

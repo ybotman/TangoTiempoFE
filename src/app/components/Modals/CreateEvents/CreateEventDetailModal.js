@@ -5,13 +5,19 @@ import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
 import ValidationDialog from './ValidationDialog';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+// import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useEventOperations } from '@/hooks/useEvents';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// TIEMPO-246: Configure dayjs for venue timezone support
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import axios from 'axios';
 
 const modalStyle = {
@@ -29,19 +35,23 @@ const modalStyle = {
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
-  const { nearestCity } = useMasteredLocation();
+  // Removed unused loading from LocationAPI
   const { selectedLocation } = useGeoLocation();
   const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('basic');
   
-  // Helper function to get default start time (7pm of selected date or next day if past 7pm)
-  const getDefaultStartTime = (date) => {
-    const selectedDay = date ? dayjs(date) : dayjs();
-    const sevenPM = selectedDay.hour(19).minute(0).second(0);
-    const now = dayjs();
+  // TIEMPO-246: Helper function to get default start time in VENUE timezone
+  const getDefaultStartTime = (date, venueTimezone) => {
+    // Use venue timezone if available, fallback to NYC
+    const tz = venueTimezone || 'America/New_York';
     
-    // If current time is past 7pm today, use tomorrow at 7pm
+    // Create date in venue timezone, not browser timezone
+    const selectedDay = date ? dayjs.tz(date, tz) : dayjs.tz(undefined, tz);
+    const sevenPM = selectedDay.hour(19).minute(0).second(0);
+    const now = dayjs.tz(undefined, tz);
+    
+    // If current time is past 7pm in venue timezone, use tomorrow at 7pm
     if (now.isAfter(sevenPM)) {
       return sevenPM.add(1, 'day');
     }
@@ -49,8 +59,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   };
   
   // Helper function to get initial event data for CREATE mode
-  const getInitialEventData = (date, location, city) => {
-    const startDate = getDefaultStartTime(date);
+  const getInitialEventData = (date, location, city, venueTimezone) => {
+    const startDate = getDefaultStartTime(date, venueTimezone);
     const endDate = startDate.add(3, 'hour');
     
     return {
@@ -97,6 +107,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Legacy fields
       selectedRegion: location?.region?.name || city?.regionName || '',
       selectedRegionID: location?.region?.id || city?.regionID || '',
+      // TIEMPO-246: Venue timezone for proper event creation
+      venueTimezone: venueTimezone || null,
+      venueTimezoneAbbr: null,
       // ID field
       _id: null
     };
@@ -104,7 +117,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   
   // Initialize event data with helper function
   const [eventData, setEventData] = useState(() => 
-    getInitialEventData(selectedDate, selectedLocation, nearestCity)
+    getInitialEventData(selectedDate, selectedLocation, null, null)
   );
 
   // Refresh event data and related data when modal opens or location changes
@@ -166,13 +179,13 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           fallbackImageUrl: eventToEdit.fallbackImageUrl || null,
           
           // Location hierarchy
-          masteredRegionName: eventToEdit.masteredRegionName || selectedLocation.region.name || (nearestCity?.regionName || ''),
-          masteredDivisionName: eventToEdit.masteredDivisionName || selectedLocation.division.name || (nearestCity?.divisionName || ''),
-          masteredCityName: eventToEdit.masteredCityName || selectedLocation.city.name || (nearestCity?.cityName || ''),
+          masteredRegionName: eventToEdit.masteredRegionName || selectedLocation.region.name || '',
+          masteredDivisionName: eventToEdit.masteredDivisionName || selectedLocation.division.name || '',
+          masteredCityName: eventToEdit.masteredCityName || selectedLocation.city.name || '',
           
           // Legacy fields for backward compatibility
-          selectedRegion: eventToEdit.selectedRegion || selectedLocation.region.name || (nearestCity?.regionName || ''),
-          selectedRegionID: eventToEdit.selectedRegionID || selectedLocation.region.id || (nearestCity?.regionID || ''),
+          selectedRegion: eventToEdit.selectedRegion || selectedLocation.region.name || '',
+          selectedRegionID: eventToEdit.selectedRegionID || selectedLocation.region.id || '',
           
           // Repeating event settings
           isRepeating: eventToEdit.isRepeating || false,
@@ -204,6 +217,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           // Extract city ID - handle both object and string formats from backend
           const eventCityId = eventToEdit.masteredCityId?._id || 
                              eventToEdit.masteredCityId || 
+                             eventToEdit.venueMasteredCityID ||  // Add missing field from TIEMPO-195
+                             eventToEdit.venueMasteredCityId ||  // Add lowercase variant
                              eventToEdit.venue?.masteredCityId?._id ||
                              eventToEdit.venue?.masteredCityId ||
                              eventToEdit.venueInfo?.masteredCityId?._id ||
@@ -221,59 +236,32 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           });
           
           // Enhanced debug logging to diagnose field issues
-          console.log('RA Edit Validation - Enhanced Debug:', {
-            selectedRole,
-            raAllowedCities,
-            'raAllowedCities type': Array.isArray(raAllowedCities) ? 'array' : typeof raAllowedCities,
-            'raAllowedCities sample': raAllowedCities.length > 0 ? raAllowedCities[0] : 'empty',
-            eventCityId,
-            'eventCityId type': typeof eventCityId,
-            'eventToEdit._id': eventToEdit._id,
-            'eventToEdit.masteredCityId': eventToEdit.masteredCityId,
-            'eventToEdit.masteredCityId?._id': eventToEdit.masteredCityId?._id,
-            'eventToEdit.masteredCityName': eventToEdit.masteredCityName,
-            'eventToEdit.locationID': eventToEdit.locationID,
-            'eventToEdit.venueId': eventToEdit.venueId,
-            'eventToEdit.venue': eventToEdit.venue,
-            'eventToEdit.venueInfo': eventToEdit.venueInfo,
-            'All eventToEdit fields': Object.keys(eventToEdit),
-            hasAccess: hasAccess
-          });
+          // TIEMPO-276: Security cleanup - removed console.log for RA Edit Validation
           
           if (!hasAccess) {
             setSaveError('You do not have permission to edit events in this city. This event is outside your assigned regions.');
             // Prevent the modal from being usable
-            setEventData(getInitialEventData(selectedDate, selectedLocation, nearestCity));
+            setEventData(getInitialEventData(selectedDate, selectedLocation, null, null));
             return;
           }
         }
       } else {
         // Create mode - reset all fields to initial values
-        const initialData = getInitialEventData(selectedDate, selectedLocation, nearestCity);
+        const initialData = getInitialEventData(selectedDate, selectedLocation, null, null);
         setEventData(initialData);
         setHasUnsavedChanges(false); // Reset unsaved changes for create mode
       }
 
       // Log current location for debugging
-      console.log(`Modal opened in ${editMode ? 'EDIT' : 'CREATE'} mode`, {
-        mode: editMode ? 'EDIT' : 'CREATE',
-        eventId: eventToEdit?._id || null,
-        selectedRole: user?.backendInfo?.selectedRole,
-        organizerId: user?.backendInfo?.regionalOrganizerInfo?.organizerId,
-        organizerInfo: user?.backendInfo?.regionalOrganizerInfo,
-        organizerShortName: user?.backendInfo?.regionalOrganizerInfo?.organizerShortName
-      });
+      // TIEMPO-276: Security cleanup - removed logging
     }
-  }, [open, selectedLocation, nearestCity, selectedDate, editMode, eventToEdit, selectedRole, user]);
+  }, [open, selectedLocation, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
   // Fetch organizer data when in create mode and user is RO
   useEffect(() => {
     // Check if user has regionalOrganizerInfo with an organizerId (indicates they are an RO)
     if (!editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
-      console.log('Fetching organizer for CREATE mode:', {
-        organizerId: user.backendInfo.regionalOrganizerInfo.organizerId,
-        hasOrganizerInfo: !!user.backendInfo.regionalOrganizerInfo
-      });
+      // TIEMPO-276: Security cleanup - removed logging
       fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
     }
   }, [editMode, user, fetchOrganizerById]);
@@ -286,11 +274,41 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     }
   }, [eventData.isRepeating, currentTab]);
 
+  // TIEMPO-246: Recalculate event times when venue timezone changes
+  useEffect(() => {
+    if (!editMode && eventData.venueTimezone && open) {
+      // Only recalculate if venue timezone has changed and we're in create mode
+      const currentStartDate = eventData.startDate;
+      const currentEndDate = eventData.endDate;
+      
+      // Check if times need recalculation (if they're still in default time)
+      // This prevents recalculation if user has manually changed times
+      if (currentStartDate && currentEndDate) {
+        const startHour = currentStartDate.hour ? currentStartDate.hour() : 19;
+        const isDefaultTime = startHour === 19 && currentStartDate.minute() === 0;
+        
+        if (isDefaultTime) {
+          // Recalculate times in the new venue timezone
+          const newStartDate = getDefaultStartTime(selectedDate, eventData.venueTimezone);
+          const newEndDate = newStartDate.add(3, 'hour');
+          
+          // TIEMPO-276: Security cleanup - removed logging
+          
+          setEventData(prev => ({
+            ...prev,
+            startDate: newStartDate,
+            endDate: newEndDate
+          }));
+        }
+      }
+    }
+  }, [eventData.venueTimezone, editMode, selectedDate, open]);
+
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Import event operations hook
@@ -456,15 +474,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }
       }
       
-      if (!eventData.masteredRegionName) {
-        throw new Error('Region is required');
-      }
-      
       // Check if user can create events (RegionalOrganizer or RegionalAdmin)
       const selectedRole = user.backendInfo?.selectedRole || '';
       const isRegionalOrganizer = user.backendInfo?.regionalOrganizerInfo?.organizerId;
       const isRegionalAdmin = selectedRole === 'RegionalAdmin' && 
                              user.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds?.length > 0;
+      
+      // Only require region for non-RO/RA users
+      if (!eventData.masteredRegionName && !isRegionalOrganizer && !isRegionalAdmin) {
+        throw new Error('Region is required');
+      }
 
       if (!isRegionalOrganizer && !isRegionalAdmin) {
         // Determine specific error message based on user's roles
@@ -491,25 +510,53 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Check if the user's organizerInfo flags are all enabled (only for RegionalOrganizer)
       if (isRegionalOrganizer) {
         const orgInfo = user.backendInfo.regionalOrganizerInfo;
-        const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
         
-        if (!allFlagsEnabled) {
-        console.warn('Attempting to fix regionalOrganizerInfo flags...');
+        // TIEMPO-253: Check if organizer profile is complete
+        const hasCompletedProfile = orgInfo.shortName && 
+                                   orgInfo.shortName.trim() !== '' && 
+                                   orgInfo.description && 
+                                   orgInfo.description.trim() !== '' &&
+                                   orgInfo.isEnabled === true;
         
-        // Try to automatically fix the flags first
-        try {
-          // Get fresh token for authorization
-          const token = await getIdToken(true);
+        if (!hasCompletedProfile) {
+          // Profile is incomplete - show specific error message
+          const missingFields = [];
+          if (!orgInfo.shortName || orgInfo.shortName.trim() === '') {
+            missingFields.push('Short Name');
+          }
+          if (!orgInfo.description || orgInfo.description.trim() === '') {
+            missingFields.push('Description');
+          }
+          if (!orgInfo.isEnabled) {
+            missingFields.push('Profile not enabled');
+          }
           
-          // Call API to activate the organizer flags
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
-            { firebaseUserId: user.uid },
-            { 
-              headers: { Authorization: `Bearer ${token}` },
-              params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID }
-            }
-          );
+          throw new Error(`Your organizer profile is incomplete. Please complete the following in Event Organizer Settings: ${missingFields.join(', ')}`);
+        }
+        
+        // TIEMPO-271: Only check isActive and isApproved after profile is complete
+        // isEnabled should only be true when RO completes profile requirements
+        const requiredFlagsEnabled = orgInfo.isActive && orgInfo.isApproved;
+        
+        if (!requiredFlagsEnabled) {
+        console.warn('Checking regionalOrganizerInfo flags...');
+        
+        // TIEMPO-271: Only auto-enable isActive if needed
+        // Do NOT auto-enable isEnabled - that requires profile completion
+        if (!orgInfo.isActive) {
+          try {
+            // Get fresh token for authorization
+            const token = await getIdToken(true);
+            
+            // Call API to activate only isActive flag
+            const response = await axios.post(
+              `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
+              { firebaseUserId: user.uid },
+              { 
+                headers: { Authorization: `Bearer ${token}` },
+                params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID }
+              }
+            );
           
           
           // Update the user's info with the updated flags
@@ -548,8 +595,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             }
           }
         } catch (flagsError) {
-          console.error('Failed to update organizer flags:', flagsError);
-          throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
+            console.error('Failed to update organizer flags:', flagsError);
+            throw new Error('Your organizer profile is not fully activated. Please contact an administrator.');
+          }
+        }
+        
+        // TIEMPO-271: Check if isEnabled is false - means profile incomplete
+        if (!orgInfo.isEnabled) {
+          throw new Error('Please complete your Regional Organizer profile before creating events. You must accept the Rules of Engagement, provide an organizer short name, and add a description.');
         }
       }
       }
@@ -592,9 +645,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }, 2000);
       } else {
         // Create new event
-        console.log('Creating new event');
+// TIEMPO-276: Security cleanup - removed logging
         await createEvent(eventDataWithDefaults);
-        console.log('Event created successfully');
+// TIEMPO-276: Security cleanup - removed logging
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
         
@@ -646,8 +699,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       setEventData({
         title: '',
         description: '',
-        startDate: getDefaultStartTime(null),
-        endDate: getDefaultStartTime(null).add(3, 'hour'),
+        startDate: getDefaultStartTime(null, null),
+        endDate: getDefaultStartTime(null, null).add(3, 'hour'),
         cost: '',
         venueId: '',
         venueName: '',
@@ -669,11 +722,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         imagePreviewUrl: null,
         shortTitle: '',
         shortName: '',
-        masteredRegionName: selectedLocation.region.name || (nearestCity?.regionName || ''),
-        masteredDivisionName: selectedLocation.division.name || (nearestCity?.divisionName || ''),
-        masteredCityName: selectedLocation.city.name || (nearestCity?.cityName || ''),
-        selectedRegion: selectedLocation.region.name || (nearestCity?.regionName || ''),
-        selectedRegionID: selectedLocation.region.id || (nearestCity?.regionID || ''),
+        masteredRegionName: selectedLocation.region.name || '',
+        masteredDivisionName: selectedLocation.division.name || '',
+        masteredCityName: selectedLocation.city.name || '',
+        selectedRegion: selectedLocation.region.name || '',
+        selectedRegionID: selectedLocation.region.id || '',
       });
       setCurrentTab('basic');
     }

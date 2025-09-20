@@ -1,181 +1,324 @@
 'use client';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   Box,
   Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   Paper,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+  Alert,
+  Chip,
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Card,
+  CardContent,
+  Grid
 } from '@mui/material';
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineOppositeContent,
+  timelineOppositeContentClasses
+} from '@mui/lab';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RateReviewIcon from '@mui/icons-material/RateReview';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import TimerIcon from '@mui/icons-material/Timer';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { AuthContext } from '@/contexts/AuthContext';
+import { useUsers } from '@/hooks/useUsers';
 
-const steps = [
+const applicationSteps = [
   {
-    label: 'Create Your Account',
+    title: 'Create Account',
+    time: '2 min',
     icon: <PersonAddIcon />,
-    description: 'Sign up for a free TangoTiempo account if you don\'t already have one.',
-    details: [
-      'Click the user icon in the top menu',
-      'Choose "Sign Up" option',
-      'Verify your email address',
-      'Complete basic profile information'
-    ]
+    description: 'Sign up with email or Google',
+    details: 'You\'ll automatically receive Named User (NU) role upon account creation.'
   },
   {
-    label: 'Choose Your Organizer Type(s)',
-    icon: <AssignmentIcon />,
-    description: 'Select one or more organizer types that match your role in the tango community.',
-    details: [
-      'Review all available organizer types',
-      'Select all that apply to you',
-      'Each type has specific requirements',
-      'You can add more types later'
-    ]
+    title: 'Start Application',
+    time: '1 min',
+    icon: <AssignmentTurnedInIcon />,
+    description: 'Click "Start Application" in Your Status tab',
+    details: 'The application button appears once you\'re logged in.'
   },
   {
-    label: 'Complete Your Profile',
-    icon: <AssignmentIcon />,
-    description: 'Fill out the application form with your information and qualifications.',
-    details: [
-      'Provide contact information',
-      'Describe your experience',
-      'Upload relevant photos or documents',
-      'Add links to your website or social media'
-    ]
-  },
-  {
-    label: 'Accept Terms & Submit',
+    title: 'Accept ROE',
+    time: '5 min',
     icon: <CheckCircleIcon />,
-    description: 'Review and accept the TangoTiempo organizer terms and bylaws.',
-    details: [
-      'Read the organizer bylaws carefully',
-      'Understand your responsibilities',
-      'Accept the terms of service',
-      'Submit your application'
-    ]
+    description: 'Read and accept Rules of Engagement',
+    details: 'You must read all 5 sections and check the acceptance box. Only Argentine Tango events are permitted!'
   },
   {
-    label: 'Application Review',
-    icon: <RateReviewIcon />,
-    description: 'Your application will be reviewed by regional administrators.',
-    details: [
-      'Review typically takes 2-3 business days',
-      'You may be contacted for additional information',
-      'Check your application status anytime',
-      'Email notification upon decision'
-    ]
+    title: 'Auto-Approval',
+    time: 'Instant',
+    icon: <CheckCircleIcon sx={{ color: 'success.main' }} />,
+    description: 'Automatically approved upon ROE acceptance',
+    details: 'Your organizer profile is created with isApproved=true, isEnabled=false for safety.'
   },
   {
-    label: 'Start Managing Events',
-    icon: <NotificationsActiveIcon />,
-    description: 'Once approved, you can start creating and managing your tango events.',
-    details: [
-      'Access organizer dashboard',
-      'Create event listings',
-      'Manage your organizer profile',
-      'Connect with the community'
-    ]
+    title: 'Complete Setup',
+    time: '10 min',
+    icon: <SettingsIcon />,
+    description: 'Configure your organizer profile',
+    details: 'Change your organizer name, add description, and enable your profile when ready.'
+  },
+  {
+    title: 'Final Activation',
+    time: '2 min',
+    icon: <CelebrationIcon />,
+    description: 'Enable profile and restart',
+    details: 'Toggle "Enable Profile" in settings, restart app, and you\'re ready to create events!'
+  }
+];
+
+const faqs = [
+  {
+    question: 'Why is automatic approval offered?',
+    answer: 'We trust our community members who accept the strict Argentine Tango-only policy. The ROE acceptance serves as your commitment to maintaining event quality.'
+  },
+  {
+    question: 'Why are two restarts required?',
+    answer: 'First restart activates your organizer role after ROE acceptance. Second restart applies your enabled status after profile setup. This ensures proper permissions loading.'
+  },
+  {
+    question: 'What\'s the difference between Approved and Enabled?',
+    answer: 'Approved means you\'ve accepted the ROE and can access organizer features. Enabled means your profile is active and searchable by the community.'
+  },
+  {
+    question: 'Can I have multiple organizer types?',
+    answer: 'Yes! You can be an Event Organizer, Teacher, DJ, or any combination. Select your types in the organizer settings.'
+  },
+  {
+    question: 'What happens if I post non-tango events?',
+    answer: 'AI monitoring will flag non-tango events. Repeated violations may result in suspension of organizer privileges. Only Argentine Tango events are allowed!'
   }
 ];
 
 const HowToApplyTab = () => {
+  const { user } = useContext(AuthContext);
+  const { userData } = useUsers();
+
+  // Determine user's current state
+  const getUserState = () => {
+    if (!user) return 'not-signed-in';
+    if (!userData?.regionalOrganizerInfo?.organizerId) return 'ready-to-apply';
+    if (!userData?.regionalOrganizerInfo?.isEnabled) return 'in-progress';
+    return 'active';
+  };
+
+  const userState = getUserState();
+
+  // Dynamic button based on state
+  const getActionButton = () => {
+    switch (userState) {
+      case 'not-signed-in':
+        return (
+          <Button variant="contained" color="primary" size="large">
+            Sign Up Now
+          </Button>
+        );
+      case 'ready-to-apply':
+        return (
+          <Button 
+            variant="contained" 
+            color="primary" 
+            size="large"
+            onClick={() => window.location.href = '/organizers/apply#your-status'}
+          >
+            Go to Your Status
+          </Button>
+        );
+      case 'in-progress':
+        return (
+          <Button 
+            variant="contained" 
+            color="secondary" 
+            size="large"
+            onClick={() => window.location.href = '/organizers/apply#your-status'}
+          >
+            Continue Application
+          </Button>
+        );
+      case 'active':
+        return (
+          <Chip 
+            label="You're an Active Organizer!" 
+            color="success" 
+            icon={<CheckCircleIcon />}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-        How to Apply
+        How to Become an Organizer
+      </Typography>
+
+      {/* Quick Action Panel */}
+      <Card elevation={2} sx={{ mb: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <CardContent sx={{ textAlign: 'center', color: 'white' }}>
+          <Typography variant="h5" gutterBottom>
+            Ready to Join?
+          </Typography>
+          <Typography variant="body1" paragraph>
+            The entire process takes about 20 minutes from sign-up to active organizer.
+          </Typography>
+          {getActionButton()}
+        </CardContent>
+      </Card>
+
+      {/* Timeline */}
+      <Paper elevation={1} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+          <TimerIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+          Application Timeline
+        </Typography>
+        
+        <Timeline
+          sx={{
+            [`& .${timelineOppositeContentClasses.root}`]: {
+              flex: 0.2,
+            },
+          }}
+        >
+          {applicationSteps.map((step, index) => (
+            <TimelineItem key={index}>
+              <TimelineOppositeContent color="textSecondary">
+                <Chip label={step.time} size="small" />
+              </TimelineOppositeContent>
+              <TimelineSeparator>
+                <TimelineDot color={index === 3 ? 'success' : 'primary'}>
+                  {step.icon}
+                </TimelineDot>
+                {index < applicationSteps.length - 1 && <TimelineConnector />}
+              </TimelineSeparator>
+              <TimelineContent>
+                <Typography variant="h6" component="h4">
+                  {step.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {step.description}
+                </Typography>
+                <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
+                  {step.details}
+                </Alert>
+              </TimelineContent>
+            </TimelineItem>
+          ))}
+        </Timeline>
+      </Paper>
+
+      {/* Important Notice */}
+      <Alert severity="warning" sx={{ mb: 4 }}>
+        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+          Important: Only Argentine Tango Events Allowed
+        </Typography>
+        <Typography variant="body2">
+          As a Regional Organizer, you may ONLY create events that are strictly Argentine Tango 
+          (milongas, practicas, classes, workshops). No fusion events or other dance styles are 
+          permitted. AI monitoring ensures compliance with this policy.
+        </Typography>
+      </Alert>
+
+      {/* FAQs */}
+      <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+        <HelpOutlineIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+        Frequently Asked Questions
       </Typography>
       
-      <Typography variant="body1" paragraph sx={{ mb: 4 }}>
-        Becoming a TangoTiempo organizer is a straightforward process. Follow these steps to 
-        join our community of tango event organizers and contributors.
-      </Typography>
+      {faqs.map((faq, index) => (
+        <Accordion key={index} sx={{ mb: 1 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle1">{faq.question}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography variant="body2" color="text.secondary">
+              {faq.answer}
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
+      ))}
 
-      <Stepper orientation="vertical">
-        {steps.map((step, index) => (
-          <Step key={step.label} active={true}>
-            <StepLabel
-              StepIconComponent={() => (
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {index + 1}
-                </Box>
-              )}
-            >
-              <Typography variant="h6">{step.label}</Typography>
-            </StepLabel>
-            <StepContent>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                {step.description}
+      {/* Support Section */}
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Need Help?
               </Typography>
-              <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.50' }}>
-                <List dense>
-                  {step.details.map((detail, idx) => (
-                    <ListItem key={idx}>
-                      <ListItemIcon sx={{ minWidth: 32 }}>
-                        <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
-                      </ListItemIcon>
-                      <ListItemText primary={detail} />
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-
-      <Box sx={{ mt: 4, p: 3, backgroundColor: 'warning.light', borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Processing Time
-        </Typography>
-        <Typography variant="body2">
-          Most applications are reviewed within 2-3 business days. During busy periods, 
-          it may take up to a week. You'll receive email updates about your application status, 
-          and you can check your status anytime in the "Your Status" tab.
-        </Typography>
-      </Box>
-
-      <Box sx={{ mt: 3, p: 3, backgroundColor: 'success.light', borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Need Help?
-        </Typography>
-        <Typography variant="body2">
-          If you have questions about the application process or need assistance, you can:
-        </Typography>
-        <List dense sx={{ mt: 1 }}>
-          <ListItem>
-            <ListItemText primary="• Contact your regional administrator" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Check the FAQ section" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Send a message through the Message Admin feature" />
-          </ListItem>
-        </List>
-      </Box>
+              <List dense>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText primary="Contact your Regional Admin" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText primary="Join the community forum" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText primary="Watch video tutorials (coming soon)" />
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Your Benefits
+              </Typography>
+              <List dense>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon color="success" />
+                  </ListItemIcon>
+                  <ListItemText primary="Create unlimited tango events" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon color="success" />
+                  </ListItemIcon>
+                  <ListItemText primary="Manage your organizer profile" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon color="success" />
+                  </ListItemIcon>
+                  <ListItemText primary="Connect with the tango community" />
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

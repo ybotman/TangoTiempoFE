@@ -1,21 +1,23 @@
 // app/components/UI/SiteHeader.js
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Image from 'next/image';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
-import LocationContextModal from '@/components/Modals/misc/LocationContextModal';
+import MapIcon from '@mui/icons-material/Map';
 import packageJson from '../../../../package.json';
+// Removed userSettingsEvent - using GeoLocationContext instead
 
 const SiteHeader = () => {
-  const { selectedLocation } = useGeoLocation();
+  const { openMapCenterModal } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
-  const { organizer, fetchOrganizerById } = useOrganizers();
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const { fetchOrganizerById } = useOrganizers();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
+  
+  // Map mode forced true by product decision
   
   // Fetch organizer data when user is a RegionalOrganizer
   useEffect(() => {
@@ -33,13 +35,23 @@ const SiteHeader = () => {
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      height: 'auto',
+      overflow: 'hidden' // Crop edges when zoomed
+    }}>
       <Image
         src={headerImage}
         alt="Tango Tiempo"
         width={1200}
         height={600}
-        style={{ width: '100%', height: 'auto' }}
+        style={{ 
+          width: '100%', 
+          height: 'auto',
+          // Media query effect via CSS class
+        }}
+        className="site-header-image"
         priority
       />
       <a
@@ -74,23 +86,26 @@ const SiteHeader = () => {
         {appVersion}
       </div>
       <div
-        onClick={() => setLocationModalOpen(true)}
-        title="Click to select a different city"
+        className="map-icon-button"
+        onClick={() => openMapCenterModal()}
+        title="Click to explore other locations"
         style={{
-          position: 'absolute',
-          bottom: '10px',
-          right: '10px',
+          position: 'fixed',  // Changed from absolute to fixed
+          bottom: '20px',     // Increased spacing from edge
+          right: '20px',      // Increased spacing from edge
           backgroundColor: 'white',
           color: 'black',
-          padding: '5px 10px',
-          borderRadius: '3px',
-          fontSize: '12px',
+          padding: '8px',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
           boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,       // Ensure it stays above other content
           '&:hover': {
             backgroundColor: '#f0f0f0',
             boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
@@ -105,31 +120,9 @@ const SiteHeader = () => {
           e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
         }}
       >
-        {/* User name */}
-        {user && (
-          <div style={{ fontSize: '10px', marginBottom: '2px', opacity: 0.8 }}>
-            {user.displayName || user.email?.split('@')[0] || 'User'}
-          </div>
-        )}
-        
-        {/* Organizer shortName if RO role */}
-        {selectedRole === 'RegionalOrganizer' && organizer && (
-          <div style={{ fontSize: '10px', marginBottom: '2px', opacity: 0.8 }}>
-            Organizer: {organizer.shortName || 'N/A'}
-          </div>
-        )}
-        
-        {/* City label */}
-        <div>
-          {`City: ${selectedLocation.city?.name || 'Unknown'}`}
-        </div>
+        {/* Just the icon */}
+        <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
       </div>
-      
-      {/* Location Context Modal */}
-      <LocationContextModal
-        open={locationModalOpen}
-        onClose={() => setLocationModalOpen(false)}
-      />
     </div>
   );
 };

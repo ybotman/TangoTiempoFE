@@ -4,7 +4,6 @@ import React, { useContext } from 'react';
 import {
   Box,
   Typography,
-  Button,
   Paper,
   Alert,
   List,
@@ -18,37 +17,44 @@ import {
 } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useRouter } from 'next/navigation';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SettingsIcon from '@mui/icons-material/Settings';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 
 const ApplicationFormTab = () => {
   const { user } = useContext(AuthContext);
   const { userData } = useUsers();
-  const router = useRouter();
 
   const steps = [
     {
-      label: 'Sign Up for TangoTiempo',
-      description: 'Create your free account to get started',
+      label: 'Create Account',
+      description: 'Sign up with email or Google',
       completed: !!user
     },
     {
-      label: 'Go to User Settings',
-      description: 'Access your settings from the user menu',
-      completed: !!userData
-    },
-    {
-      label: 'Navigate to Apply Tab',
-      description: 'Find the "Apply" section in your user settings',
+      label: 'Apply',
+      description: 'Apply to become an Event Organizer',
       completed: userData?.regionalOrganizerInfo?.organizerId
     },
     {
-      label: 'Submit Application',
-      description: 'Complete the application process',
+      label: 'Accept Guidelines',
+      description: 'Read and accept the community guidelines',
       completed: userData?.regionalOrganizerInfo?.isApproved
+    },
+    {
+      label: 'Auto-Approval',
+      description: 'Automatically approved after guidelines acceptance',
+      completed: userData?.regionalOrganizerInfo?.isApproved
+    },
+    {
+      label: 'Profile Setup',
+      description: 'Add name, contact info, then activate your role',
+      completed: userData?.regionalOrganizerInfo?.isEnabled
+    },
+    {
+      label: 'Fully Active',
+      description: 'Ready to add events! Then add artist types',
+      completed: userData?.regionalOrganizerInfo?.isEnabled && userData?.regionalOrganizerInfo?.isApproved
     }
   ];
 
@@ -62,7 +68,7 @@ const ApplicationFormTab = () => {
         </Typography>
         
         <Alert severity="info" sx={{ mb: 3 }}>
-          To become a TangoTiempo organizer, you'll need to create an account first.
+          To become a TangoTiempo organizer, you&apos;ll need to create an account first.
         </Alert>
 
         <Paper elevation={1} sx={{ p: 4, textAlign: 'center' }}>
@@ -71,7 +77,7 @@ const ApplicationFormTab = () => {
             Step 1: Create Your Account
           </Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
-            Click the user icon in the top menu bar and select "Sign Up" to create your 
+            Click the user icon in the top menu bar and select &quot;Sign Up&quot; to create your 
             free TangoTiempo account.
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -87,7 +93,7 @@ const ApplicationFormTab = () => {
     return (
       <Box>
         <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-          You're Already an Organizer!
+          You&apos;re Already an Organizer!
         </Typography>
         
         <Alert severity="success" sx={{ mb: 3 }}>
@@ -131,13 +137,15 @@ const ApplicationFormTab = () => {
         Complete Your Application
       </Typography>
 
-      <Alert severity="success" sx={{ mb: 3 }}>
-        Great! You're signed in. Now follow these steps to complete your organizer application.
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body1">
+          Event Organizer status is <strong>mandatory</strong> to create events. Artist types (DJ, Orchestra, etc.) are optional add-ons.
+        </Typography>
       </Alert>
 
       <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Application Process
+          Application Progress
         </Typography>
         
         <Stepper activeStep={activeStep} orientation="vertical">
@@ -146,69 +154,17 @@ const ApplicationFormTab = () => {
               <StepLabel>{step.label}</StepLabel>
               <StepContent>
                 <Typography>{step.description}</Typography>
+                {/* Show Apply button at step 2 (Accept Terms) */}
+                {index === 1 && !step.completed && (
+                  <Box sx={{ mt: 2 }}>
+                    <UserSettingsApply />
+                  </Box>
+                )}
               </StepContent>
             </Step>
           ))}
         </Stepper>
       </Paper>
-
-      <Paper elevation={2} sx={{ p: 4, backgroundColor: 'primary.light', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="h5" sx={{ color: 'primary.contrastText', mb: 1 }}>
-              Ready to Apply?
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'primary.contrastText' }}>
-              Click below to go to User Settings and find the Apply tab
-            </Typography>
-          </Box>
-          <SettingsIcon sx={{ fontSize: 60, color: 'primary.contrastText', opacity: 0.7 }} />
-        </Box>
-        
-        <Button
-          variant="contained"
-          size="large"
-          endIcon={<ArrowForwardIcon />}
-          sx={{ 
-            mt: 3,
-            backgroundColor: 'white',
-            color: 'primary.main',
-            '&:hover': {
-              backgroundColor: 'grey.100'
-            }
-          }}
-          onClick={() => {
-            // This would open the user settings modal
-            // For now, we'll just show instructions
-            alert('Click the user icon in the top menu, then select "User Settings" and navigate to the "Apply" tab.');
-          }}
-        >
-          Go to User Settings → Apply Tab
-        </Button>
-      </Paper>
-
-      <Box sx={{ mt: 3, p: 3, backgroundColor: 'info.light', borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          What Happens in User Settings?
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="1. Open User Settings from the user menu" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="2. Navigate to the 'Apply' tab" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="3. Click 'Apply' to submit your application" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="4. Accept the Terms of Use when prompted" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="5. Your application will be reviewed by administrators" />
-          </ListItem>
-        </List>
-      </Box>
     </Box>
   );
 };

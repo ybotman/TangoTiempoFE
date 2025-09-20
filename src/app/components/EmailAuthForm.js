@@ -38,14 +38,7 @@ const EmailAuthForm = ({ mode, onSubmit, error }) => {
     const isValid = re.test(password);
     
     // Debug logging
-    console.log('Password validation:', {
-      password: password ? '******' : 'empty', // Don't log actual password
-      length: password ? password.length : 0,
-      hasLetter: /[A-Za-z]/.test(password),
-      hasNumber: /\d/.test(password),
-      isValidLength: password.length >= 8,
-      overallValid: isValid
-    });
+    // TIEMPO-276: Security cleanup - removed logging
     
     return isValid;
   };
@@ -83,17 +76,17 @@ const EmailAuthForm = ({ mode, onSubmit, error }) => {
     }
 
     // All validations passed
-    console.log('All form validations passed, submitting form...');
+// TIEMPO-276: Security cleanup - removed logging
     setLoading(true);
     try {
-      console.log('Calling onSubmit function...');
-      const result = await onSubmit({
+// TIEMPO-276: Security cleanup - removed logging
+      await onSubmit({
         email,
         password,
         firstName,
         lastName
       });
-      console.log('Form submission result:', result ? 'Success' : 'Failed');
+// TIEMPO-276: Security cleanup - removed logging
     } catch (error) {
       console.error('Form submission error:', error);
       console.error('Error details:', {

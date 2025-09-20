@@ -93,19 +93,7 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
   useEffect(() => {
     const fetchVenueDetails = async () => {
       // Debug logging
-      console.log('Venue data debug:', {
-        populatedVenue,
-        venueIdRaw,
-        locationIdRaw: eventDetails?.extendedProps?.locationID,
-        venue: eventDetails?.extendedProps?.venue,
-        location: eventDetails?.extendedProps?.location,
-        venueId,
-        venueName,
-        venueObject,
-        typeOfVenueIdRaw: typeof venueIdRaw,
-        venueIdRawKeys: venueIdRaw && typeof venueIdRaw === 'object' ? Object.keys(venueIdRaw) : null,
-        extendedProps: eventDetails?.extendedProps
-      });
+      // TIEMPO-276: Security cleanup - removed logging
 
       // If venue is already populated as an object, use it directly
       if (venueObject && venueObject._id) {
@@ -124,18 +112,7 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
       try {
         const venueData = await getVenueById(venueId, true); // Add true to populate references
         if (venueData) {
-          console.log('Fetched venue data:', {
-            name: venueData.name,
-            address: venueData.address,
-            address1: venueData.address1,
-            address2: venueData.address2,
-            city: venueData.city,
-            state: venueData.state,
-            zip: venueData.zip,
-            phone: venueData.phone,
-            phoneNumber: venueData.phoneNumber,
-            website: venueData.website
-          });
+          // TIEMPO-276: Security cleanup - removed logging
           setVenue(venueData);
         } else {
           setError('Venue details not found');
@@ -358,20 +335,28 @@ const ViewEventDetailsVenue = ({ eventDetails }) => {
         <Box sx={{ mb: 2 }}>
           {venue.createdAt && (
             <Typography variant="body2" color="text.secondary">
-              Created: {new Date(venue.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              Created: {(() => {
+                // TIEMPO-246: String-based date formatting
+                const [datePart] = (venue.createdAt || '').split('T');
+                if (!datePart) return '';
+                const [year, month, day] = datePart.split('-');
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+              })()}
             </Typography>
           )}
           {venue.updatedAt && (
             <Typography variant="body2" color="text.secondary">
-              Last Updated: {new Date(venue.updatedAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              Last Updated: {(() => {
+                // TIEMPO-246: String-based date formatting
+                const [datePart] = (venue.updatedAt || '').split('T');
+                if (!datePart) return '';
+                const [year, month, day] = datePart.split('-');
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+              })()}
             </Typography>
           )}
         </Box>

@@ -10,8 +10,7 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
-  IconButton,
-  Chip
+  IconButton
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';
@@ -19,10 +18,6 @@ import PropTypes from 'prop-types';
 
 // Import tab components
 import WhoCanApplyTab from './tabs/WhoCanApplyTab';
-import HowToApplyTab from './tabs/HowToApplyTab';
-import WhatAndWhyTab from './tabs/WhatAndWhyTab';
-import BylawsTab from './tabs/BylawsTab';
-import YourStatusTab from './tabs/YourStatusTab';
 import ApplicationFormTab from './tabs/ApplicationFormTab';
 
 function TabPanel({ children, value, index, ...other }) {
@@ -67,18 +62,14 @@ const OrganizerApplicationPortal = () => {
   };
 
   const tabLabels = [
-    'Who Can Apply',
-    'How to Apply',
-    'What & Why',
-    'Bylaws',
-    'Your Status',
-    'Apply Now'
+    'Apply Now',
+    'Artists +'
   ];
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Back button and Work in Progress */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+      {/* Back button */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <IconButton 
           onClick={() => router.push('/calendar')}
           sx={{ 
@@ -91,11 +82,6 @@ const OrganizerApplicationPortal = () => {
         >
           <ArrowBackIcon />
         </IconButton>
-        <Chip 
-          label="WORK IN PROGRESS" 
-          color="warning" 
-          variant="outlined"
-        />
       </Box>
 
       {/* SEO-friendly header */}
@@ -143,22 +129,10 @@ const OrganizerApplicationPortal = () => {
         </Box>
 
         <TabPanel value={activeTab} index={0}>
-          <WhoCanApplyTab />
+          <ApplicationFormTab />
         </TabPanel>
         <TabPanel value={activeTab} index={1}>
-          <HowToApplyTab />
-        </TabPanel>
-        <TabPanel value={activeTab} index={2}>
-          <WhatAndWhyTab />
-        </TabPanel>
-        <TabPanel value={activeTab} index={3}>
-          <BylawsTab />
-        </TabPanel>
-        <TabPanel value={activeTab} index={4}>
-          <YourStatusTab />
-        </TabPanel>
-        <TabPanel value={activeTab} index={5}>
-          <ApplicationFormTab />
+          <WhoCanApplyTab />
         </TabPanel>
       </Paper>
     </Container>

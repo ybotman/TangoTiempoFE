@@ -37,7 +37,7 @@ const roles = [
   },
   {
     id: 'nu',
-    title: 'NU — Named User (e.g., Milonger-x)',
+    title: 'NU — Named User (e.g., Milonger@)',
     icon: <PersonIcon />,
     color: 'info',
     permissions: [
@@ -129,7 +129,7 @@ const BylawsTab = () => {
         <Divider sx={{ mb: 2 }} />
       </Paper>
 
-      {roles.map((role, index) => (
+      {roles.map((role) => (
         <Accordion
           key={role.id}
           expanded={expanded === role.id}

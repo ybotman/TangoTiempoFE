@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVenues } from './useVenues';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useUsers } from './useUsers';
 
 /**
  * Calculate distance between two coordinates using the Haversine formula
@@ -48,13 +49,17 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 export function useVenueSelection() {
   const { venues, loading: venuesLoading, error: venuesError, fetchVenues } = useVenues();
   const { selectedLocation } = useGeoLocation();
+  const { userData } = useUsers();
   
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [filteredVenues, setFilteredVenues] = useState([]);
   const [venueCategory, setVenueCategory] = useState('all');
   // Always use city view with radius filtering (keep for API compatibility)
   const [useDivisionScope, setUseDivisionScope] = useState(false);
-  const [radiusMiles, setRadiusMiles] = useState(50); // Default radius of 50 miles - more reasonable starting point
+  
+  // Get radius from user preferences or default to 50
+  const userDefaults = userData?.localUserInfo?.userDefaults;
+  const [radiusMiles, setRadiusMiles] = useState(userDefaults?.defaultZoomRange || 50);
   
   // Filter venues based on location, category, scope, and radius
   useEffect(() => {
@@ -78,21 +83,30 @@ export function useVenueSelection() {
       validVenues = validVenues.filter(venue =>
         venue.masteredDivisionId === selectedLocation.division.id
       );
-    } else if (selectedLocation?.city?.latitude &&
-               selectedLocation?.city?.longitude &&
-               radiusMiles > 0) {
-      // In city view mode, filter only by radius from the city's coordinates
-      // This shows all venues within the specified radius, regardless of their masteredCityId
-      const cityLat = parseFloat(selectedLocation.city.latitude);
-      const cityLng = parseFloat(selectedLocation.city.longitude);
+    } else if (radiusMiles > 0) {
+      // Use user's map center location preferences if available
+      const defaultCenter = userDefaults?.defaultCenterLocation;
+      let centerLat, centerLng;
+      
+      if (defaultCenter?.latitude && defaultCenter?.longitude) {
+        // Use saved map center location
+        centerLat = parseFloat(defaultCenter.latitude);
+        centerLng = parseFloat(defaultCenter.longitude);
+      } else if (selectedLocation?.city?.latitude && selectedLocation?.city?.longitude) {
+        // Fallback to selected city if no saved preferences
+        centerLat = parseFloat(selectedLocation.city.latitude);
+        centerLng = parseFloat(selectedLocation.city.longitude);
+      }
+      
+      if (centerLat && centerLng) {
+        validVenues = validVenues.filter(venue => {
+          const venueLat = parseFloat(venue.latitude);
+          const venueLng = parseFloat(venue.longitude);
 
-      validVenues = validVenues.filter(venue => {
-        const venueLat = parseFloat(venue.latitude);
-        const venueLng = parseFloat(venue.longitude);
-
-        const distance = calculateDistance(cityLat, cityLng, venueLat, venueLng);
-        return distance <= radiusMiles;
-      });
+          const distance = calculateDistance(centerLat, centerLng, venueLat, venueLng);
+          return distance <= radiusMiles;
+        });
+      }
     }
     
     // Apply venue category filter if not "all"
@@ -105,7 +119,7 @@ export function useVenueSelection() {
     }
     
     setFilteredVenues(validVenues);
-  }, [venues, selectedLocation, venueCategory, useDivisionScope, radiusMiles]);
+  }, [venues, selectedLocation, venueCategory, useDivisionScope, radiusMiles, userDefaults]);
   
   // Function to select a venue
   const selectVenue = useCallback((venue) => {

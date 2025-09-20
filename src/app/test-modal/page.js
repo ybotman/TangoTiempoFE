@@ -50,7 +50,7 @@ export default function TestModalPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         eventDetails={mockEventDetails}
-        onEventUpdated={() => console.log('Event updated')}
+// TIEMPO-276: Security cleanup - removed logging
       />
     </Container>
   );

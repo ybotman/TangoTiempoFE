@@ -1,9 +1,29 @@
+// TIEMPO-239: Import venue timezone utilities for proper display
+import { getEventDisplayTimes } from './venueTimezone';
+
 export function transformEvents(events) {
   // Only log if no events received (potential error condition)
   if (!events || !Array.isArray(events) || events.length === 0) {
     console.warn("No events to transform or events is not an array");
     return [];
   }
+  
+  // Debug: Check first few events for venue timezone data
+  const debugEvents = events.slice(0, 3);
+  debugEvents.forEach(event => {
+    if (event.shortTitle?.includes('VIDA') || event.title?.includes('Practica')) {
+      // TIEMPO-276: Security cleanup - removed backend event logging
+      /*
+        title: event.title,
+        shortTitle: event.shortTitle,
+        venueStartDisplay: event.venueStartDisplay,
+        venueEndDisplay: event.venueEndDisplay,
+        venueAbbr: event.venueAbbr,
+        startDate: event.startDate,
+        endDate: event.endDate
+      */
+    }
+  });
 
   return events.map((event) => {
     try {
@@ -11,29 +31,10 @@ export function transformEvents(events) {
       // Handle both old locationID/locationName and new venueID/venueId/venueName formats
       const venueId = event.venueID || event.venueId || event.locationID || null;
       const venueName = event.venueName || event.locationName || null;
-    
-    // Debug logging for RA city mapping
-    if (events.indexOf(event) < 3) {
-      console.log(`Event Transform Debug - ${event.title}:`, {
-        masteredCityId: event.masteredCityId,
-        masteredCityIdType: typeof event.masteredCityId,
-        masteredCityId_id: event.masteredCityId?._id,
-        masteredCityName: event.masteredCityName,
-        willMapTo: event.masteredCityId?._id || event.masteredCityId || null
-      });
-    }
-    /*
-    if (events.indexOf(event) < 3) {
-      console.log(`Event ${event.title}:`, {
-        id: event._id,
-        venueID: event.venueID,
-        venueId: event.venueId,
-        locationID: event.locationID,
-        resolvedVenueId: venueId,
-        isActive: event.isActive
-      });
-    }
-    */
+      
+      // TIEMPO-239: Get proper display times from event
+      const displayTimes = getEventDisplayTimes(event);
+      const useVenueTime = displayTimes.hasVenueTimezone;
     
     // For FullCalendar RRULE plugin, we need to handle recurring events differently
     const baseEvent = {
@@ -47,7 +48,8 @@ export function transformEvents(events) {
         categorySecond: event.categorySecond,
         categoryThird: event.categoryThird,
         eventImage: event.eventImage,
-        fallbackImageUrl: event.fallbackImageUrl || '/TangoQuestion.jpg',
+        // TIEMPO-264: Remove default fallback image - show empty space instead
+        fallbackImageUrl: event.fallbackImageUrl || null,
         // Include both old and new field names during transition
         locationID: venueId,  // Legacy format - keep for compatibility
         locationName: venueName,  // Legacy format - keep for compatibility
@@ -60,6 +62,8 @@ export function transformEvents(events) {
         masteredCityName: event.masteredCityName,
         // Store the backend's masteredCityId directly - can be either object or string
         masteredCityId: event.masteredCityId, // For RA permission checks
+        venueMasteredCityID: event.venueMasteredCityID, // TIEMPO-195: Add missing field for single-city RAs
+        venueMasteredCityId: event.venueMasteredCityId, // Lowercase variant
         active: event.active || event.isActive, // Legacy field
         isActive: event.isActive || event.active, // Current field
         canceled: event.canceled || event.isCanceled,
@@ -85,6 +89,19 @@ export function transformEvents(events) {
         isRepeating: event.isRepeating || false,
         // Add excludedDates for edit mode
         excludedDates: event.excludedDates || [],
+        // TIEMPO-239: Add venue timezone display information
+        display: event.display || null,
+        displayStartTime: displayTimes.startTime,
+        displayEndTime: displayTimes.endTime,
+        venueTimezone: displayTimes.timezone,
+        timezoneAbbr: displayTimes.timezoneAbbr,
+        isDST: displayTimes.isDST,
+        hasVenueTimezone: displayTimes.hasVenueTimezone,
+        // TIEMPO-252: Pass through NEW venue timezone fields from backend
+        venueStartDisplay: event.venueStartDisplay || null,
+        venueEndDisplay: event.venueEndDisplay || null,
+        venueTZ: event.venueTZ || null,
+        venueAbbr: event.venueAbbr || null,
       },
     };
 
@@ -107,14 +124,17 @@ export function transformEvents(events) {
         // Return as a regular event instead
         return {
           ...baseEvent,
-          start: stripTimezoneIndicator(event.startDate),
-          end: stripTimezoneIndicator(event.endDate),
+          // TIEMPO-239: Use venue display times if available
+          start: useVenueTime ? displayTimes.startTime : event.startDate,
+          end: useVenueTime ? displayTimes.endTime : event.endDate,
         };
       }
       
       try {
         // Parse RRULE string to FullCalendar v6 object format
-        const rruleObj = parseRRuleToObject(cleanedRRule, event.startDate, event.endDate);
+        // TIEMPO-239: Pass venue times if available for RRULE parsing
+        const startForRRule = useVenueTime ? displayTimes.startTime : event.startDate;
+        const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule);
         
         
         // Create the event object
@@ -143,7 +163,8 @@ export function transformEvents(events) {
             const excludedDateOnly = excludedDate.split('T')[0]; // Gets "2025-10-10"
             // Combine excluded date with event's start time
             const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
-            return stripTimezoneIndicator(exdateWithTime);
+            // TIEMPO-239: Return as-is for venue times
+            return exdateWithTime;
           });
           
           // Excluded dates processed and added to event
@@ -156,8 +177,9 @@ export function transformEvents(events) {
         // Fallback to single event with indicator
         return {
           ...baseEvent,
-          start: stripTimezoneIndicator(event.startDate),
-          end: stripTimezoneIndicator(event.endDate),
+          // TIEMPO-239: Use venue display times if available
+          start: useVenueTime ? displayTimes.startTime : event.startDate,
+          end: useVenueTime ? displayTimes.endTime : event.endDate,
           title: event.title + ' (⚠️ Recurring)',
           extendedProps: {
             ...baseEvent.extendedProps,
@@ -171,8 +193,9 @@ export function transformEvents(events) {
       // For non-recurring events, use standard format
       return {
         ...baseEvent,
-        start: stripTimezoneIndicator(event.startDate), // Map 'startDate' to 'start'
-        end: stripTimezoneIndicator(event.endDate), // Map 'endDate' to 'end'
+        // TIEMPO-239: Use venue display times if available, fallback to UTC
+        start: useVenueTime ? displayTimes.startTime : event.startDate,
+        end: useVenueTime ? displayTimes.endTime : event.endDate
       };
     }
     } catch (error) {
@@ -184,18 +207,18 @@ export function transformEvents(events) {
 }
 
 // Parse RRULE string to FullCalendar v6 object format
-function parseRRuleToObject(rruleString, startDate, endDate) {
+function parseRRuleToObject(rruleString, startDate) {
+  // First pass: get frequency
+  let frequency = null;
+  
   try {
     const parts = rruleString.split(';');
     
     const rruleObj = {
-      // Strip Z suffix to treat as local time instead of UTC
-      // This prevents recurring events from shifting to previous day in local timezones
-      dtstart: stripTimezoneIndicator(startDate) // Use event's startDate as dtstart without UTC indicator
+      // TIEMPO-239: Use venue time directly if available (no Z suffix)
+      // Otherwise keep as UTC for backward compatibility
+      dtstart: startDate
     };
-  
-  // First pass: get frequency
-  let frequency = null;
   parts.forEach(part => {
     const [key, value] = part.split('=');
     if (key === 'FREQ') {
@@ -236,11 +259,13 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
           // Converting to lowercase for FullCalendar compatibility
         }
         break;
-      case 'UNTIL':
-        // Convert RRULE date format to ISO format and strip timezone
+      case 'UNTIL': {
+        // Convert RRULE date format to ISO format
         const isoDate = convertRRuleDateToISO(value);
-        rruleObj.until = stripTimezoneIndicator(isoDate);
+        // TIEMPO-239: Use date as-is for venue times
+        rruleObj.until = isoDate;
         break;
+      }
       case 'COUNT':
         rruleObj.count = parseInt(value);
         break;
@@ -260,12 +285,13 @@ function parseRRuleToObject(rruleString, startDate, endDate) {
       return {
         freq: 'daily',
         count: 1,
-        dtstart: stripTimezoneIndicator(startDate)
+        // TIEMPO-239: Use date as-is\n        dtstart: startDate
       };
     }
     return {
       freq: 'weekly',
-      dtstart: stripTimezoneIndicator(startDate)
+      // TIEMPO-239: Use date as-is
+      dtstart: startDate
     };
   }
 }
@@ -287,40 +313,33 @@ function convertRRuleDateToISO(rruleDate) {
   return rruleDate; // Return as-is if format doesn't match
 }
 
-// Strip timezone indicator (Z suffix) from date strings
-// Convert UTC date to local time and format as ISO string without timezone indicator
-// This makes FullCalendar treat the time as the actual local time equivalent
-function stripTimezoneIndicator(dateString) {
-  if (!dateString) return dateString;
-  
-  // Handle ISO string format with Z suffix (UTC)
-  if (typeof dateString === 'string' && dateString.endsWith('Z')) {
-    const utcDate = new Date(dateString);
-    // Get the local time equivalent by using the local timezone offset
-    const localISOString = new Date(utcDate.getTime() - (utcDate.getTimezoneOffset() * 60000)).toISOString();
-    // Remove the Z suffix to get local time format
-    return localISOString.slice(0, -1);
-  }
-  
-  // Handle other timezone indicators like +00:00
-  if (typeof dateString === 'string' && /[+-]\d{2}:\d{2}$/.test(dateString)) {
-    const utcDate = new Date(dateString);
-    const localISOString = new Date(utcDate.getTime() - (utcDate.getTimezoneOffset() * 60000)).toISOString();
-    return localISOString.slice(0, -1);
-  }
-  
-  return dateString;
-}
+// TIEMPO-239: stripTimezoneIndicator function REMOVED
+// This function was converting to browser timezone - the opposite of our mission.
+// Events now display in venue timezone using the display object from backend.
 
-// Helper function to calculate event duration for recurring events
+// TIEMPO-239: Calculate duration using string manipulation to avoid timezone conversion
 function calculateDuration(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const durationMs = end - start;
+  // Parse time strings without Date objects to avoid timezone issues
+  // Format: "2025-06-28T19:30:00" or "2025-06-28T19:30:00.000Z"
+  const getTimeInMinutes = (dateStr) => {
+    const timePart = dateStr.split('T')[1];
+    if (!timePart) return 0;
+    
+    const [hours, minutes] = timePart.split(':');
+    return parseInt(hours, 10) * 60 + parseInt(minutes, 10);
+  };
   
-  // Convert to hours and minutes
-  const hours = Math.floor(durationMs / (1000 * 60 * 60));
-  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+  const startMinutes = getTimeInMinutes(startDate);
+  const endMinutes = getTimeInMinutes(endDate);
+  
+  // Calculate duration (handle day boundary if end < start)
+  let durationMinutes = endMinutes - startMinutes;
+  if (durationMinutes < 0) {
+    durationMinutes += 24 * 60; // Add 24 hours if crossing midnight
+  }
+  
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
   
   // Return duration in format "HH:MM"
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;

@@ -12,13 +12,15 @@ import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
-import { useGeoLocation } from '@/contexts/GeoLocationContext';
+// No longer needed - using saved user preferences instead
+// import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+// import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
+import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
 export const useCalendarPage = () => {
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -31,8 +33,9 @@ export const useCalendarPage = () => {
   const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
-  const { nearestCity } = useMasteredLocation();
-  const { selectedLocation } = useGeoLocation();
+  // No longer needed - using saved user preferences instead
+  // const { nearestCity } = useMasteredLocation();
+  // const { selectedLocation } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const [datesSet, setDatesSet] = useState(null);
@@ -60,20 +63,20 @@ export const useCalendarPage = () => {
     }
   }, [selectedOrganizers]);
 
-  // Use GeoLocationContext as primary source, with fallback to MasteredLocationContext
-  // Ensure we have valid string values to avoid API errors
-  const regionName = (selectedLocation.region.name || nearestCity?.regionName || 'Northeast').trim();
-  const divisionName = (selectedLocation.division.name || nearestCity?.divisionName || '').trim();
-  const cityName = (selectedLocation.city.name || nearestCity?.cityName || '').trim();
+  // No longer using GeoLocationContext - using saved user preferences instead
+  // These are kept for backward compatibility but will be empty
+  const regionName = '';
+  const divisionName = '';
+  const cityName = '';
 
-  // Use the updated useEvents hook implementation that accepts an options object
-  const { events, loading: eventsLoading, error: eventsError, refreshEvents } = useEvents({
-    region: regionName, 
-    division: divisionName, 
-    city: cityName, 
+  // Use the updated useEvents hook with location preferences
+  // Enable GeoLocationContext to get temporaryLocation for SET operations
+  const { events, loading: eventsLoading, error: eventsError, noLocationSelected, refreshEvents } = useEvents({
     startDate: datesSet?.start, 
     endDate: datesSet?.end,
-    limit: 200 // Increase the limit to ensure we get all events
+    limit: 200, // Increase the limit to ensure we get all events
+    useGeoLocationContext: true, // Enable GeoLocationContext to get temporaryLocation
+    useLocationPreferences: true // Enable saved user preferences
   });
   
   // Initialize event operations
@@ -293,6 +296,12 @@ export const useCalendarPage = () => {
       setViewDetailModalOpen(true);
       // The delete button in the modal will handle the actual deletion
     }
+    
+    // TIEMPO-253: Handle opening organizer settings for incomplete profiles
+    if (action === 'openOrganizerSettings') {
+      // Use the regional organizer event emitter to open the modal
+      regionalOrganizerEvent.openModal();
+    }
   };
 
   const handleMenuClose = () => {
@@ -339,6 +348,7 @@ export const useCalendarPage = () => {
     // Add loading and error states
     eventsLoading,
     eventsError,
+    noLocationSelected,
     // Location info
     regionName,
     divisionName,

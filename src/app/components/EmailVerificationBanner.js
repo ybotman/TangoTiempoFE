@@ -145,12 +145,12 @@ const EmailVerificationBanner = () => {
                 },
               }}
             >
-              I've Verified
+              I&apos;ve Verified
             </Button>
           </Box>
 
           <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'text.secondary' }}>
-            Didn't receive the email? Check your spam folder or click resend.
+            Didn&apos;t receive the email? Check your spam folder or click resend.
           </Typography>
         </Box>
       </Alert>

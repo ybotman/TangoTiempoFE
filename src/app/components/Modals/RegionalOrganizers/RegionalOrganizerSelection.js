@@ -163,7 +163,7 @@ const RegionalOrganizerSelection = ({ open, onClose, selectedOrganizers = [], on
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent checkbox toggle
                     // Navigation to organizer details would go here
-                    console.log(`Navigate to organizer details for: ${organizer.name}`);
+// TIEMPO-276: Security cleanup - removed logging
                     // This would typically open RegionalOrganizersModal for this organizer
                   }}
                 >

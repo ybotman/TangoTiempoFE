@@ -1,7 +1,9 @@
 // UserSettingsApply.js
 'use client';
-import React, { useState, useMemo } from 'react';
-import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -14,17 +16,23 @@ const UserSettingsApply = () => {
 
   const { userData, updateUserData, loading: userDataLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
-  const { createOrganizer } = useOrganizers();
+  const { createOrganizer, fetchOrganizerById, organizer } = useOrganizers();
   const { logRoleChange, logActivity } = useActivityLogger();
 
   const [applicationStatus, setApplicationStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [showTerms, setShowTerms] = useState(false);
   const [restartMessage, setRestartMessage] = useState(false);
+  // TIEMPO-253: Add states for proper next steps flow
+  const [showNextStepsDialog, setShowNextStepsDialog] = useState(false);
 
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
-    if (!Array.isArray(roles)) return null;
+    if (!Array.isArray(roles)) {
+// TIEMPO-276: Security cleanup - removed logging
+      return null;
+    }
+// TIEMPO-276: Security cleanup - removed logging
     return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
@@ -44,7 +52,16 @@ const UserSettingsApply = () => {
 
   // Safe access to nested properties with defaults
   const isApproved = userData?.regionalOrganizerInfo?.isApproved || false;
+  const isEnabled = userData?.regionalOrganizerInfo?.isEnabled || false;
   const hasOrganizerId = Boolean(userData?.regionalOrganizerInfo?.organizerId);
+  const organizerId = userData?.regionalOrganizerInfo?.organizerId;
+
+  // Fetch organizer data if organizerId exists
+  useEffect(() => {
+    if (organizerId) {
+      fetchOrganizerById(organizerId);
+    }
+  }, [organizerId, fetchOrganizerById]);
 
   const handleApply = async () => {
     // Don't proceed if data is loading or missing
@@ -101,8 +118,8 @@ const UserSettingsApply = () => {
           fullName: `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`,
           organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
           isActive: true,
-          isEnabled: true,
-          wantRender: true,
+          isEnabled: false,  // Requires manual enable for safety
+          wantRender: false, // Not searchable until enabled
           organizerTypes: {
             isEventOrganizer: true,
             isVenue: false,
@@ -121,9 +138,12 @@ const UserSettingsApply = () => {
 
         const updatedRegionalInfo = {
           organizerId: newOrganizer._id,
-          isApproved: false,
-          isEnabled: true,
+          isApproved: true,  // Auto-approved after ROE acceptance
+          isEnabled: true,   // Set true for future AI control (can be disabled later)
           isActive: true,
+          ApprovalDate: new Date(),
+          allowedMasteredCityIds: [],
+          allowedMasteredDivisionIds: []
         };
 
         await updateUserData({
@@ -133,6 +153,8 @@ const UserSettingsApply = () => {
 
       setApplicationStatus('success');
       setShowTerms(true);
+      // TIEMPO-253: Show next steps dialog after successful application
+      setShowNextStepsDialog(true);
     } catch (error) {
       console.error('Error during application process:', error);
       setErrorMessage(error.response?.data?.message || error.message || 'An error occurred during application.');
@@ -180,6 +202,9 @@ const UserSettingsApply = () => {
 
   // Determine the overall loading state
   const isLoading = userDataLoading || rolesLoading || applicationStatus === 'loading';
+  
+  // Debug logging
+  // TIEMPO-276: Security cleanup - removed logging
 
   return (
     <Box sx={{ mt: 2, p: isMobile ? 1 : 3 }}>
@@ -209,14 +234,6 @@ const UserSettingsApply = () => {
         </Box>
       )}
 
-      <Typography variant="h6" gutterBottom>
-        Apply for Regional Organizer
-      </Typography>
-
-      <Typography variant="body1" gutterBottom>
-        By applying, you can manage events in your region.
-      </Typography>
-
       {/* Only show Apply button if not loading and user doesn't have an organizer ID */}
       {!isLoading && !hasOrganizerId && (
         <Button
@@ -224,8 +241,10 @@ const UserSettingsApply = () => {
           color="primary"
           onClick={handleApply}
           disabled={isLoading || !userData || !regionalOrganizerRole}
+          size="large"
+          fullWidth
         >
-          {applicationStatus === 'loading' ? 'Applying...' : 'Apply'}
+          {applicationStatus === 'loading' ? 'Applying...' : 'Apply for Event Organizer'}
         </Button>
       )}
 
@@ -241,16 +260,192 @@ const UserSettingsApply = () => {
         </Button>
       )}
 
-      {/* Show success message if user is fully set up */}
-      {!isLoading && hasOrganizerId && isApproved && (
-        <Typography variant="body2" color="textSecondary">
-          You have successfully applied as a Regional Organizer.
-        </Typography>
+      {/* Show setup instructions if user is approved but not enabled */}
+      {!isLoading && hasOrganizerId && isApproved && !isEnabled && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+            Complete Your Organizer Setup:
+          </Typography>
+          <Typography variant="body2" component="div">
+            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li>Click the <strong>user icon</strong> (top right)</li>
+              <li>Select <strong>&quot;Change Role&quot;</strong> → Choose <strong>&quot;Organizer/Artist&quot;</strong></li>
+              <li>Open the menu (☰) → Click <strong>&quot;Organizer Settings&quot;</strong></li>
+              <li>Complete ALL required fields:
+                <ul style={{ marginTop: '4px' }}>
+                  <li>Organizer Name</li>
+                  <li>Short Name</li>
+                  <li>Description</li>
+                </ul>
+              </li>
+              <li>Enable your profile once all fields are complete</li>
+            </ol>
+          </Typography>
+        </Alert>
+      )}
+      
+      {/* Show instruction to change role and complete setup */}
+      {!isLoading && hasOrganizerId && isApproved && !organizer?.isEnabled && (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+            Next Steps Required:
+          </Typography>
+          <Typography variant="body2" component="div">
+            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li><strong>Change your role:</strong> Click the login button → Select &quot;Organizer/Artist&quot;</li>
+              <li><strong>Complete your profile:</strong> Go to Event Organizer Settings → Status tab</li>
+              <li><strong>Enable your profile:</strong> Complete all requirements and activate</li>
+            </ol>
+          </Typography>
+        </Alert>
+      )}
+      
+      {/* Show success only when organizer is actually enabled */}
+      {!isLoading && hasOrganizerId && isApproved && organizer?.isEnabled && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          <Typography variant="body2">
+            ✓ You&apos;re all set! You can now create events as an Organizer.
+          </Typography>
+        </Alert>
+      )}
+
+      {/* Show organizer status if user has an organizer ID */}
+      {!isLoading && hasOrganizerId && (
+        <>
+          <Divider sx={{ my: 3 }} />
+          
+          {/* Organizer Status Section */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+              Organizer Status
+            </Typography>
+            
+            {/* Application Status */}
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {isApproved ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                  <Typography variant="body2">
+                    <strong>Application:</strong> {isApproved ? 'Approved' : 'Pending'}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {organizer?.isEnabled ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                  <Typography variant="body2">
+                    <strong>Profile Status:</strong> {organizer?.isEnabled ? 'Active' : 'Not Activated'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+            
+            {!organizer?.isEnabled && (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <Typography variant="body2" fontWeight="bold" gutterBottom>
+                  ⚠️ Profile Not Yet Activated
+                </Typography>
+                <Typography variant="body2">
+                  To start creating events:
+                </Typography>
+                <Typography variant="caption" component="div" sx={{ mt: 1 }}>
+                  1. Change your role to <strong>&quot;Organizer/Artist&quot;</strong> in the top menu<br/>
+                  2. Open <strong>&quot;Event Organizer Settings&quot;</strong><br/>
+                  3. Complete all requirements in the <strong>Status tab</strong><br/>
+                  4. <strong>Enable your profile</strong> to activate event creation
+                </Typography>
+              </Alert>
+            )}
+          </Paper>
+        </>
+      )}
+
+      {/* TIEMPO-253: Next Steps Dialog - Shows after successful application */}
+      <Dialog
+        open={showNextStepsDialog}
+        onClose={() => {}} // Don't allow closing without agreeing
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ backgroundColor: 'primary.main', color: 'white' }}>
+          🎉 Application Submitted Successfully!
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              Important Next Steps Required:
+            </Typography>
+          </Alert>
+          
+          <Typography variant="body1" paragraph>
+            Your application to become an Event Organizer has been submitted. To start creating events, you must:
+          </Typography>
+          
+          <Box sx={{ ml: 2, mb: 2 }}>
+            <Typography variant="body2" component="div">
+              <ol style={{ margin: '8px 0' }}>
+                <li><strong>Change your role</strong> to &quot;Organizer/Artist&quot; in the top menu</li>
+                <li><strong>Open &quot;Event Organizer Settings&quot;</strong> from the menu</li>
+                <li><strong>Complete all requirements</strong> in the Status tab</li>
+                <li><strong>Enable your profile</strong> to activate event creation</li>
+              </ol>
+            </Typography>
+          </Box>
+          
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              <strong>Note:</strong> The page will refresh after you acknowledge these steps. 
+              Please remember to change your role to &quot;Organizer/Artist&quot; to access the Event Organizer Settings.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setShowNextStepsDialog(false);
+              // Show restarting message then refresh
+              setRestartMessage(true);
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+            }}
+            fullWidth
+          >
+            I Understand - Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Restarting message */}
+      {restartMessage && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <CircularProgress size={60} sx={{ color: 'white', mb: 2 }} />
+          <Typography variant="h6" sx={{ color: 'white' }}>
+            Refreshing Application...
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'white', mt: 1 }}>
+            Please remember to change your role to Organizer/Artist
+          </Typography>
+        </Box>
       )}
 
       {/* Terms modal */}
       <ROTermsModal
-        open={showTerms}
+        open={showTerms && !showNextStepsDialog}
         onClose={() => handleAgreeToTerms(false)}
         onAgree={() => handleAgreeToTerms(true)}
       />

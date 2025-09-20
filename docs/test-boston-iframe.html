@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boston Tango Calendar - Iframe Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .iframe-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+        .test-links {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .test-links button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-links button:hover {
+            background: #0056b3;
+        }
+        .info {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Boston Tango Calendar - Iframe Test Page</h1>
+    
+    <div class="test-links">
+        <button onclick="loadUrl('http://localhost:3000/calendar/boston')">Load Boston Route (Direct)</button>
+        <button onclick="loadUrl('http://localhost:3000/calendar')">Load Regular Calendar</button>
+        <button onclick="loadUrl('https://test.tangotiempo.com/calendar/boston')">Load TEST Boston</button>
+        <button onclick="loadUrl('https://tangotiempo.com/calendar/boston')">Load PROD Boston</button>
+    </div>
+    
+    <div class="info" id="current-url">Currently showing: http://localhost:3000/calendar/boston</div>
+    
+    <div class="iframe-container">
+        <iframe id="calendar-frame" src="http://localhost:3000/calendar/boston"></iframe>
+    </div>
+    
+    <script>
+        function loadUrl(url) {
+            document.getElementById('calendar-frame').src = url;
+            document.getElementById('current-url').textContent = 'Currently showing: ' + url;
+        }
+    </script>
+</body>
+</html>

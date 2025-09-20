@@ -6,13 +6,11 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Tabs, Tab } from '@mui/material';
 import ModalHeader from '@/components/UI/ModalHeader';
 import UserSettingsName from '@/components/Modals/UserSettings/UserSettingsName';
-import UserSettingsFavorites from '@/components/Modals/UserSettings/UserSettingsFavorites';
-import UserSettingsNotifications from '@/components/Modals/UserSettings/UserSettingsNotifications';
+// Removed UserSettingsLocationPreferences - using UnifiedLocationModal instead
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
-import UserSettingsGeoLocation from '@/components/Modals/UserSettings/UserSettingsGeoLocation';
+import UserSettingsBookmarks from '@/components/Modals/UserSettings/UserSettingsBookmarks';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 const modalStyle = {
   position: 'absolute',
@@ -29,18 +27,41 @@ const modalStyle = {
   flexDirection: 'column',
 };
 
-const UserSettingsModal = ({ open, onClose }) => {
+const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   const auth = useContext(AuthContext);
   const { user } = auth || {};
-  const geoLocation = useGeoLocation();
-  const { userData, loading, error, updateUserData } = useUsers();
+  const { userData, loading, error, updateUserData, refreshUserData } = useUsers();
   const [currentTab, setCurrentTab] = useState('name');
+
+  // Map tab names to actual tab values
+  const tabMapping = {
+    'general': 'name',
+    'bookmarks': 'bookmarks',
+    'apply': 'apply'
+  };
 
   useEffect(() => {
     if (!user) {
-      console.log('User is not authenticated or AuthContext is not initialized yet.');
+// TIEMPO-276: Security cleanup - removed logging
     }
   }, [user]);
+
+  // Update current tab when defaultTab changes
+  useEffect(() => {
+    if (defaultTab && open) {
+      const mappedTab = tabMapping[defaultTab] || defaultTab;
+// TIEMPO-276: Security cleanup - removed logging
+      setCurrentTab(mappedTab);
+    }
+  }, [defaultTab, open]);
+
+  // Refresh user data when modal opens
+  useEffect(() => {
+    if (open && refreshUserData) {
+// TIEMPO-276: Security cleanup - removed logging
+      refreshUserData();
+    }
+  }, [open, refreshUserData]);
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
@@ -81,9 +102,7 @@ const UserSettingsModal = ({ open, onClose }) => {
             }}
           >
             <Tab label="Name" value="name" />
-            <Tab label="Favs" value="favorites" />
-            <Tab label="Notifications" value="notifications" />
-            <Tab label="Location" value="geolocation" />
+            <Tab label="Bookmarks" value="bookmarks" />
             <Tab label="Apply" value="apply" />
           </Tabs>
 
@@ -96,14 +115,12 @@ const UserSettingsModal = ({ open, onClose }) => {
             ) : (
               <>
                 {currentTab === 'name' && <UserSettingsName userData={userData} updateUserData={updateUserData} />}
-                {currentTab === 'favorites' && (
-                  <UserSettingsFavorites userData={userData} updateUserData={updateUserData} />
-                )}
-                {currentTab === 'notifications' && (
-                  <UserSettingsNotifications userData={userData} updateUserData={updateUserData} />
-                )}
-                {currentTab === 'geolocation' && (
-                  <UserSettingsGeoLocation userData={userData} geoLocation={geoLocation} />
+                {currentTab === 'bookmarks' && (
+                  <UserSettingsBookmarks 
+                    userData={userData} 
+                    updateUserData={updateUserData} 
+                    onSaveSuccess={onClose}
+                  />
                 )}
                 {currentTab === 'apply' && <UserSettingsApply userData={userData} />}
               </>
@@ -119,6 +136,7 @@ const UserSettingsModal = ({ open, onClose }) => {
 UserSettingsModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  defaultTab: PropTypes.string,
 };
 
 export default UserSettingsModal;

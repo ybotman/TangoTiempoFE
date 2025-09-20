@@ -33,7 +33,9 @@ export function useMasteredLocations() {
         const response = await axios.get(`${baseURL}/api/masteredLocations/countries`, {
           params: { isActive, appId },
         });
-        setCountries(response.data);
+        // Handle both array and object with countries property
+        const countriesData = Array.isArray(response.data) ? response.data : (response.data.countries || []);
+        setCountries(countriesData);
       } catch (err) {
         console.error('Error fetching countries:', err.message);
         setError(err.message);
@@ -54,7 +56,9 @@ export function useMasteredLocations() {
         const response = await axios.get(`${baseURL}/api/masteredLocations/regions`, {
           params: { countryId, isActive, appId },
         });
-        setRegions(response.data);
+        // Handle both array and object with regions property
+        const regionsData = Array.isArray(response.data) ? response.data : (response.data.regions || []);
+        setRegions(regionsData);
       } catch (err) {
         console.error('Error fetching regions:', err.message);
         setError(err.message);
@@ -75,7 +79,9 @@ export function useMasteredLocations() {
         const response = await axios.get(`${baseURL}/api/masteredLocations/divisions`, {
           params: { regionId, isActive, appId },
         });
-        setDivisions(response.data);
+        // Handle both array and object with divisions property
+        const divisionsData = Array.isArray(response.data) ? response.data : (response.data.divisions || []);
+        setDivisions(divisionsData);
       } catch (err) {
         console.error('Error fetching divisions:', err.message);
         setError(err.message);
@@ -87,13 +93,13 @@ export function useMasteredLocations() {
   );
 
   const fetchCities = useCallback(
-    async (divisionId, isActive = true) => {
-      console.log('FE: uML fetchCities');
+    async (divisionId, isActive = true, requireCoordinates = true) => {
+// TIEMPO-276: Security cleanup - removed logging
       setLoading(true);
       setError(null);
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-        console.log('Fetching cities for appId:', appId, 'isActive:', isActive);
+// TIEMPO-276: Security cleanup - removed logging
 
         const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
           params: {
@@ -103,12 +109,16 @@ export function useMasteredLocations() {
           },
         });
 
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
+// TIEMPO-276: Security cleanup - removed logging
+        
         // Check the response structure - it might be {cities: [...]} format
         let citiesArray = response.data;
         
         // Handle response.data.cities structure (API returns an object with cities array)
         if (!Array.isArray(response.data) && response.data.cities && Array.isArray(response.data.cities)) {
-          console.log('API returned cities in response.data.cities structure');
+// TIEMPO-276: Security cleanup - removed logging
           citiesArray = response.data.cities;
         } else if (!Array.isArray(response.data)) {
           console.error('Error: API response data is not an array and has no cities property:', response.data);
@@ -117,31 +127,37 @@ export function useMasteredLocations() {
           return;
         }
 
-        // Ensure each city has latitude/longitude for the map
-        let citiesWithCoordinates = citiesArray.filter(
-          (city) => city.latitude !== undefined &&
-                   city.longitude !== undefined &&
-                   city.latitude !== null &&
-                   city.longitude !== null &&
-                   !isNaN(parseFloat(city.latitude)) &&
-                   !isNaN(parseFloat(city.longitude))
-        );
+        // If coordinates are required, filter cities with valid coordinates
+        let citiesWithCoordinates;
+        if (requireCoordinates) {
+          citiesWithCoordinates = citiesArray.filter(
+            (city) => city.latitude !== undefined &&
+                     city.longitude !== undefined &&
+                     city.latitude !== null &&
+                     city.longitude !== null &&
+                     !isNaN(parseFloat(city.latitude)) &&
+                     !isNaN(parseFloat(city.longitude))
+          );
+        } else {
+          // For user settings, return all cities regardless of coordinates
+          citiesWithCoordinates = citiesArray;
+        }
 
-        console.log(`Cities fetched: ${citiesArray.length}, With coordinates: ${citiesWithCoordinates.length}`);
+// TIEMPO-276: Security cleanup - removed logging
 
         // If we have cities with coordinates, log a sample
         if (citiesWithCoordinates.length > 0) {
-          console.log('Sample city data:', citiesWithCoordinates[0]);
+// TIEMPO-276: Security cleanup - removed logging
         }
         // If we have cities but none with coordinates, check if this is a real problem
-        else if (citiesArray.length > 0) {
+        else if (citiesArray.length > 0 && requireCoordinates) {
           // Check if any cities have location.coordinates even if not in the expected format
           const citiesWithAnyCoords = citiesArray.filter(
             city => city.location && city.location.coordinates
           );
 
           if (citiesWithAnyCoords.length > 0) {
-            console.log('Found cities with coordinates in unexpected format - will attempt to normalize');
+// TIEMPO-276: Security cleanup - removed logging
 
             // Try to recover these coordinates by normalizing them
             const recoveredCities = citiesArray.map(city => {
@@ -166,20 +182,20 @@ export function useMasteredLocations() {
             );
 
             if (recoveredCities.length > 0) {
-              console.log(`Recovered ${recoveredCities.length} cities with coordinates`);
+// TIEMPO-276: Security cleanup - removed logging
               // Use the recovered cities
               citiesWithCoordinates = recoveredCities;
             }
           }
 
-          // Only log this as info if we still have no valid cities
-          if (citiesWithCoordinates.length === 0) {
-            console.log('Cities found but none have valid coordinates - this may need investigation');
+          // Only log this as info if we still have no valid cities and coordinates are required
+          if (citiesWithCoordinates.length === 0 && requireCoordinates) {
+// TIEMPO-276: Security cleanup - removed logging
           }
         }
         // No cities at all - this is probably during initialization
         else {
-          console.log('No cities found in API response - this might be expected during initialization');
+// TIEMPO-276: Security cleanup - removed logging
         }
         setCities(citiesWithCoordinates);
       } catch (err) {
@@ -213,7 +229,7 @@ export function useMasteredLocations() {
             appId,
           },
         });
-        console.log('Nearest Mastered Location Response:', response.data);
+// TIEMPO-276: Security cleanup - removed logging
         setNearestCity(response.data);
       } catch (err) {
         console.error('Error fetching nearest mastered location:', err.message);

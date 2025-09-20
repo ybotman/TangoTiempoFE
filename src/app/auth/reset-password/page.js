@@ -13,14 +13,12 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/contexts/AuthContext';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Link from 'next/link';
 
 const ResetPasswordPage = () => {
-  const router = useRouter();
   const { resetPassword, loading: authLoading } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +32,7 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted with email:', email);
+    // TIEMPO-276: Security cleanup - removed email logging
     setError('');
     setSuccess(false);
 
@@ -50,11 +48,11 @@ const ResetPasswordPage = () => {
     }
 
     setLoading(true);
-    console.log('Calling resetPassword function...');
+    // TIEMPO-276: Security cleanup - removed function call logging
     
     try {
       const result = await resetPassword(email);
-      console.log('resetPassword result:', result);
+      // TIEMPO-276: Security cleanup - removed result logging
       
       if (result.success) {
         setSuccess(true);
@@ -87,7 +85,7 @@ const ResetPasswordPage = () => {
 
           {/* Description */}
           <Typography variant="body2" sx={{ mb: 3, textAlign: 'center', color: 'text.secondary' }}>
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </Typography>
 
           {/* Success Message */}
@@ -97,7 +95,7 @@ const ResetPasswordPage = () => {
                 Password reset email sent! Check your inbox for instructions.
               </Typography>
               <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                Didn't receive it? Check your spam folder or try again.
+                Didn&apos;t receive it? Check your spam folder or try again.
               </Typography>
             </Alert>
           )}

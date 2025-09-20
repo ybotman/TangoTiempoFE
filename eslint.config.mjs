@@ -69,6 +69,21 @@ export default [
     },
   },
   
+  // Configuration for Node.js files (scripts and server-side code)
+  {
+    files: ['scripts/**/*.js', 'src/app/scripts/**/*.js', '**/analyze-*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+      },
+    },
+  },
+  
   // Include recommended JS configurations
   pluginJs.configs.recommended,
   

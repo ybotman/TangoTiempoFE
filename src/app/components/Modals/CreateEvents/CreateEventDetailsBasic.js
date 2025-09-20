@@ -1,5 +1,6 @@
 import React, { useEffect, useContext, useState, useMemo } from 'react';
-import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete, Select, MenuItem } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete, Select, MenuItem, Button } from '@mui/material';
+import AddLocationIcon from '@mui/icons-material/AddLocation';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -9,11 +10,14 @@ import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hoo
 import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook for RA selection
 import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
+import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
+import VenueModalAdd from '@/components/Modals/Venues/VenueModalAdd'; // TIEMPO-258: Import venue modal
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
   const categories = useCategories(); // Fetch categories
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers(); // Fetch organizers for regular use
   const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
@@ -24,15 +28,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
+  const [showVenueModal, setShowVenueModal] = useState(false); // TIEMPO-258: Venue modal state
   
-  // Force venue refresh when component mounts
+  
+  // TIEMPO-276: Removed manual fetchVenues - let useVenues handle it with location context
+  // Set venue ready when venues are loaded
   useEffect(() => {
-    setIsVenueReady(false);
-    fetchVenues().then(() => {
-      // Delay setting venue ready to prevent MUI warnings during initial render
+    if (venues.length > 0 || !loadingVenues) {
       setTimeout(() => setIsVenueReady(true), 100);
-    });
-  }, [fetchVenues]);
+    }
+  }, [venues, loadingVenues]);
   
   // Set initial venue input value when venues are loaded or eventData changes
   useEffect(() => {
@@ -181,6 +186,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       return;
     }
     
+    // TIEMPO-246: Log venue data to check for timezone
+    // TIEMPO-276: Security cleanup - removed logging
+    
     // Store both the ID and the name
     const venueName = newValue.name || newValue.shortName || `Venue ${newValue._id}`;
     
@@ -191,6 +199,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         // Use new standardized venue fields
         venueId: newValue._id,
         venueName: venueName,
+        // TIEMPO-246: Store venue timezone for event creation
+        venueTimezone: newValue.timezone || newValue.venueTimezone || null,
+        venueTimezoneAbbr: newValue.timezoneAbbr || null,
         // Also keep legacy fields for backward compatibility
         locationID: newValue._id,
         locationName: venueName
@@ -213,6 +224,34 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   // Handle venue input change for filtering
   const handleVenueInputChange = (event, newInputValue) => {
     setVenueInputValue(newInputValue);
+  };
+
+
+  // TIEMPO-258: Handle venue creation callback
+  const handleVenueCreated = async (newVenue) => {
+// TIEMPO-276: Security cleanup - removed logging
+    
+    // Refresh venue list
+    await fetchVenues();
+    
+    // Auto-select the new venue
+    if (newVenue && newVenue._id) {
+      setEventData(prevData => ({
+        ...prevData,
+        venueId: newVenue._id,
+        venueName: newVenue.name || newVenue.shortName,
+        locationID: newVenue._id,
+        locationName: newVenue.name || newVenue.shortName,
+        venueLatitude: newVenue.latitude || null,
+        venueLongitude: newVenue.longitude || null
+      }));
+    }
+    
+    // Clear saved data
+    sessionStorage.removeItem('pendingEventData');
+    
+    // Close modal
+    setShowVenueModal(false);
   };
   
   // Handle start date change
@@ -295,6 +334,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     
     // Always add a header for active venues if there are any venues at all
     if (venueOptionsArray.length > 0) {
+      // TIEMPO-276: Add location context header
+      const nearestCity = activeVenues[0]?.city || activeVenues[0]?.address?.city || 'your area';
+      const radius = currentLocation?.zoomRange || savedLocation?.zoomRange || 50;
+      groupedOptions.push({ 
+        _id: 'location-header', 
+        isDivider: true, 
+        isHeader: true, 
+        text: `📍 Near ${nearestCity} (within ${radius} miles)` 
+      });
       groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
       
       // Add active venues
@@ -327,9 +375,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
     
     return groupedOptions;
-  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName]);
+  }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, currentLocation, savedLocation]);
 
   return (
+    <>
     <Box>
       <Typography variant="h5" component="h2">
         Mandatory Event Details (Basic)
@@ -346,7 +395,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               slotProps={{ 
                 textField: { 
                   fullWidth: true,
-                  required: true
+                  required: true,
+                  error: !eventData.startDate,
+                  helperText: !eventData.startDate ? "Start date is required" : ""
                 } 
               }}
               sx={{ width: '100%' }}
@@ -365,7 +416,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               slotProps={{ 
                 textField: { 
                   fullWidth: true,
-                  required: true
+                  required: true,
+                  error: !eventData.endDate,
+                  helperText: !eventData.endDate ? "End date is required" : ""
                 } 
               }}
               sx={{ width: '100%' }}
@@ -381,6 +434,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               value={eventData.title} 
               onChange={handleTitleChange}
               required
+              error={!eventData.title}
+              helperText={!eventData.title ? "Title is required" : ""}
               fullWidth
             />
           </FormControl>
@@ -390,15 +445,16 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
             <TextField 
-              label="Short Title (15 chars max)" 
+              label="Short Title (21 chars max)" 
               value={eventData.shortTitle || eventData.shortName || ''} 
               onChange={(e) => {
-                const value = e.target.value.slice(0, 15); // Enforce 15 char limit
+                const value = e.target.value.slice(0, 21); // Enforce 21 char limit
                 setEventData(prevData => ({ ...prevData, shortTitle: value, shortName: value }));
               }}
               required
-              inputProps={{ maxLength: 15 }}
-              helperText={`${(eventData.shortTitle || eventData.shortName || '').length}/15 characters`}
+              error={!(eventData.shortTitle || eventData.shortName)}
+              inputProps={{ maxLength: 21 }}
+              helperText={!(eventData.shortTitle || eventData.shortName) ? "Short title is required" : `${(eventData.shortTitle || eventData.shortName || '').length}/21 characters`}
               fullWidth
             />
           </FormControl>
@@ -487,7 +543,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         </Grid>
 
         {/* Venue Selection - Searchable Autocomplete */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={8}>
           <FormControl fullWidth>
             {isVenueReady ? (
             <Autocomplete
@@ -562,11 +618,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Venue (type to search)"
+                  label={`Venues within ${currentLocation?.zoomRange || savedLocation?.zoomRange || 50} miles (type to search)`}
                   variant="outlined"
                   required
-                  error={Boolean(errorVenues)}
-                  helperText={errorVenues ? "Error loading venues" : ""}
+                  error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `Showing ${venues.length} venues from your map center`}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -599,6 +655,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           </FormControl>
         </Grid>
 
+        {/* TIEMPO-258: Add Venue Button */}
+        <Grid item xs={12} md={4}>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<AddLocationIcon />}
+            disabled={true}
+            sx={{ 
+              height: '56px',
+              mt: { xs: 0, md: 0 }
+            }}
+          >
+            Coming Soon
+          </Button>
+        </Grid>
+
         {/* Cost Input */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
@@ -623,10 +695,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           value={eventData.description}
           onChange={(e) => setEventData(prevData => ({ ...prevData, description: e.target.value }))}
           required
+          error={!eventData.description}
+          helperText={!eventData.description ? "Description is required" : ""}
           fullWidth
         />
       </FormControl>
     </Box>
+
+    {/* TIEMPO-258: Venue Add Modal */}
+    {showVenueModal && (
+      <VenueModalAdd
+        onAdd={handleVenueCreated}
+        refreshList={fetchVenues}
+        onDone={() => setShowVenueModal(false)}
+      />
+    )}
+    </>
   );
 };
 
@@ -645,7 +729,9 @@ CreateEventDetailsBasic.propTypes = {
     locationID: PropTypes.string,
     locationName: PropTypes.string,
     description: PropTypes.string,
+    ownerOrganizerID: PropTypes.string,
     ownerOrganizerName: PropTypes.string,
+    ownerOrganizerShortName: PropTypes.string,
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,

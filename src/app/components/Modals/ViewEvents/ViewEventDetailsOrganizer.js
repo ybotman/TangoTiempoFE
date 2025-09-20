@@ -74,7 +74,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
       });
       
       if (response.data && response.data.events) {
-        console.log('Upcoming events data:', response.data.events);
+// TIEMPO-276: Security cleanup - removed logging
         setUpcomingEvents(response.data.events);
       }
     } catch (err) {
@@ -88,16 +88,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
   useEffect(() => {
     const fetchOrganizerDetails = async () => {
       // Debug logging
-      console.log('Organizer data debug:', {
-        populatedOrganizer,
-        organizerIdRaw: eventDetails?.extendedProps?.ownerOrganizerID,
-        ownerOrganizer: eventDetails?.extendedProps?.ownerOrganizer,
-        organizer: eventDetails?.extendedProps?.organizer,
-        organizerId,
-        organizerName,
-        organizerObject,
-        extendedProps: eventDetails?.extendedProps
-      });
+      // TIEMPO-276: Security cleanup - removed logging
 
       // If organizer is already populated as an object, use it directly
       if (organizerObject && organizerObject._id) {
@@ -378,7 +369,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
             {upcomingEvents.map((event, index) => {
               // Debug first event to see structure
               if (index === 0) {
-                console.log('Event structure:', event);
+// TIEMPO-276: Security cleanup - removed logging
               }
               return (
               <React.Fragment key={event._id || index}>
@@ -409,13 +400,25 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
                                 return 'Date not available';
                               }
                               
-                              const date = new Date(eventDate);
-                              if (isNaN(date.getTime())) {
+                              // TIEMPO-246: Format date and time without timezone conversion
+                              const [datePart, timePart] = (eventDate || '').split('T');
+                              if (!datePart) {
                                 console.warn('Invalid date for event:', event.title, eventDate);
                                 return 'Date not available';
                               }
                               
-                              return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                              const [year, month, day] = datePart.split('-');
+                              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                              const dateStr = `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                              
+                              if (timePart) {
+                                const [hour, minute] = timePart.split(':');
+                                const hourNum = parseInt(hour, 10);
+                                const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+                                const suffix = hourNum >= 12 ? 'PM' : 'AM';
+                                return `${dateStr} at ${displayHour}:${minute} ${suffix}`;
+                              }
+                              return dateStr;
                             })()}
                           </Typography>
                         </Box>
@@ -458,6 +461,8 @@ ViewEventDetailsOrganizer.propTypes = {
     extendedProps: PropTypes.shape({
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
+      ownerOrganizer: PropTypes.object,
+      organizer: PropTypes.object,
     }),
   }),
 };

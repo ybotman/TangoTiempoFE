@@ -25,18 +25,19 @@ export async function geocodeAddress(address1, address2, address3, city, state, 
 
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(parts)}.json?access_token=${accessToken}&limit=1`;
 
-  console.log('Geocoding Request URL:', url);
+  // TIEMPO-276: Security cleanup - removed geocoding URL logging
 
   try {
     const response = await axios.get(url);
-    console.log('Geocoding Response:', response.data);
+    // TIEMPO-276: Security cleanup - removed geocoding response logging
 
     if (response.data.features?.length > 0) {
       const [lng, lat] = response.data.features[0].center;
-      console.log('Extracted Geo Coordinates:', {
+      // TIEMPO-276: Security cleanup - removed coordinate logging
+      /*
         latitude: lat,
         longitude: lng,
-      });
+      */
       return { latitude: lat, longitude: lng };
     } else {
       console.warn('Geocoding returned no features.');

@@ -5,13 +5,13 @@ import { Box, Typography, Alert, Button } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DebugJsonView from './DebugJsonView';
-import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
+import { useLocationAPI } from '@/contexts/LocationAPIContext';
 
 /**
- * Debug component for MasteredLocationContext
+ * Debug component for LocationAPIContext (formerly MasteredLocationContext)
  */
 const MasteredLocationContextDebug = () => {
-  const { nearestCity, loading, error, fetchNearestCity } = useMasteredLocation() || {};
+  const { loading, error, fetchNearestCity } = useLocationAPI() || {};
   
   const handleRefresh = () => {
     if (fetchNearestCity && window && window.navigator && window.navigator.geolocation) {
@@ -37,12 +37,12 @@ const MasteredLocationContextDebug = () => {
       <Box display="flex" alignItems="center" mb={2}>
         <LocationOnIcon fontSize="large" sx={{ mr: 1, color: 'primary.main' }} />
         <Typography variant="h5" component="h2">
-          Mastered Location Context Debug
+          Location API Context Debug
         </Typography>
       </Box>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        This view shows the current state of the MasteredLocationContext, which manages the standardized location hierarchy.
+        This view shows the current state of the LocationAPIContext, which provides location API services.
       </Alert>
 
       <Box mb={3}>
@@ -58,8 +58,12 @@ const MasteredLocationContextDebug = () => {
       </Box>
 
       <DebugJsonView 
-        title="Current Nearest City" 
-        data={nearestCity || {}} 
+        title="API Context State" 
+        data={{ 
+          loading,
+          error,
+          hasAPIFunctions: !!fetchNearestCity 
+        }} 
         expandByDefault 
       />
       
