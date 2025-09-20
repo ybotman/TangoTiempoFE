@@ -134,7 +134,6 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         // TIEMPO-239: Pass venue times if available for RRULE parsing
         const startForRRule = useVenueTime ? displayTimes.startTime : event.startDate;
-        const endForRRule = useVenueTime ? displayTimes.endTime : event.endDate;
         const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule);
         
         

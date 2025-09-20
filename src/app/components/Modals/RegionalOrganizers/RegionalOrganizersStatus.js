@@ -35,7 +35,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 
-const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
+const RegionalOrganizersStatus = ({ organizerId, organizer, onFieldChange, unsavedChanges }) => {
   const { user } = useContext(AuthContext);
   const { userData } = useUsers();
   
@@ -44,11 +44,8 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
   const shortName = unsavedChanges?.shortName !== undefined ? unsavedChanges.shortName : (organizer?.shortName || '');
   const description = unsavedChanges?.description !== undefined ? unsavedChanges.description : (organizer?.description || '');
   
-  // Initial values for comparison
-  const [initialIsEnabled, setInitialIsEnabled] = useState(false);
-  
   // UI state
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage] = useState(''); // setErrorMessage not currently used
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showRestartWarning, setShowRestartWarning] = useState(false);
 
@@ -77,7 +74,6 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
   useEffect(() => {
     if (organizer && userData) {
       // Sync initial values from organizer collection
-      setInitialIsEnabled(organizer.isEnabled || false);
     }
   }, [organizer, userData]);
 
@@ -257,7 +253,7 @@ const RegionalOrganizersStatus = ({ organizerId, organizer, updateOrganizer, onF
           </Typography>
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="caption">
-              <strong>Note:</strong> Short names must be unique. If your chosen name is already taken, you'll be notified when saving.
+              <strong>Note:</strong> Short names must be unique. If your chosen name is already taken, you&apos;ll be notified when saving.
             </Typography>
           </Alert>
           

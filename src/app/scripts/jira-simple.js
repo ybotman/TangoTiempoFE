@@ -107,9 +107,9 @@ class SimpleJira {
       }
       
       return true;
+    // eslint-disable-next-line no-unreachable
     } catch (error) {
-      console.error('❌ Connection failed:', error.response?.status, error.response?.statusText);
-      console.error('Error details:', error.response?.data || error.message);
+      console.error('❌ Test failed:', error.message);
       return false;
     }
   }

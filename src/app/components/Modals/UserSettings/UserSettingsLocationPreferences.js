@@ -61,11 +61,6 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
   // Load user's existing preferences or temporary location
   useEffect(() => {
 // TIEMPO-276: Security cleanup - removed logging
-      hasUserData: !!userData,
-      hasLocalUserInfo: !!userData?.localUserInfo,
-      hasUserDefaults: !!userData?.localUserInfo?.userDefaults,
-      userData: userData
-    });
     
     // First check if logged-in user has preferences
     if (userData?.localUserInfo?.userDefaults) {
@@ -85,18 +80,11 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setCenterLng(defaults.defaultCenterLocation.longitude?.toString() || '');
         setCoordinatesLoaded(true);
 // TIEMPO-276: Security cleanup - removed logging
-          lat: defaults.defaultCenterLocation.latitude,
-          lng: defaults.defaultCenterLocation.longitude,
-          useCenterLocation: defaults.useCenterLocation
-        });
       } else if (defaults.useCenterLocation) {
         // User has map center enabled but no coordinates saved yet
 // TIEMPO-276: Security cleanup - removed logging
       } else {
 // TIEMPO-276: Security cleanup - removed logging
-          useCenterLocation: defaults.useCenterLocation,
-          hasDefaultCenterLocation: !!defaults.defaultCenterLocation
-        });
       }
       
       // Store original values for change detection

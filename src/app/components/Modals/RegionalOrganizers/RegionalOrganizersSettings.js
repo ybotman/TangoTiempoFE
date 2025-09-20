@@ -28,12 +28,10 @@ import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupIcon from '@mui/icons-material/Group';
-import { useUsers } from '@/hooks/useUsers';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import axios from 'axios';
 
 const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, isSaving }) => {
-  const { userData } = useUsers();
   const { organizers } = useOrganizers();
   
   // Local state (needed for fallback when centralized state is not available)
@@ -62,7 +60,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, o
   const [saving, setSaving] = useState(false);
 
   // Get values from userLogins
-  const _ = userData?.regionalOrganizerInfo || {};
+  // const regionalOrganizerInfo = userData?.regionalOrganizerInfo || {};
 
   useEffect(() => {
     if (organizer) {

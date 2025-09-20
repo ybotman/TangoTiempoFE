@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
-import { useRouter } from 'next/navigation';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
@@ -25,7 +24,6 @@ import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsAppl
 const ApplicationFormTab = () => {
   const { user } = useContext(AuthContext);
   const { userData } = useUsers();
-  const router = useRouter();
 
   const steps = [
     {
