@@ -253,12 +253,15 @@ const BostonCalendarPage = () => {
             )}
           </div>
           
-          {/* Row 2: Event title - no wrapping */}
+          {/* Row 2: Event title - with wrapping */}
           <div style={{ 
             fontSize: '0.65rem', 
             fontWeight: 'normal',
             lineHeight: '1.1',
             wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
             hyphens: 'auto',
             flex: 1,
             color: '#555',
@@ -330,6 +333,11 @@ const BostonCalendarPage = () => {
             fontSize: '0.7rem',
             fontWeight: 'normal',
             lineHeight: '1.2',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
             color: '#555',  // Gray text to match main calendar
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
