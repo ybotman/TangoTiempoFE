@@ -128,7 +128,7 @@ const RegionalOrganizerTypes = ({ organizerId, organizer, updateOrganizer }) => 
           Currently, only the Event Organizer feature is fully functional for managing milongas, festivals, classes, and other tango events.
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          <strong>Coming Soon:</strong> Each Artists+ type you select will become searchable both within TangoTiempo and on Google. You'll have dedicated profile pages where you can configure your activities and showcase your work in each role.
+          <strong>Coming Soon:</strong> Each Artists+ type you select will become searchable both within TangoTiempo and on Google. You&apos;ll have dedicated profile pages where you can configure your activities and showcase your work in each role.
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
           Select your Artists+ types now to be notified when your searchable profiles become available!

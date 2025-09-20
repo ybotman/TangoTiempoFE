@@ -1,28 +1,26 @@
 // @/components/Modals/Venues/VenueModal.js
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Tabs, Tab, useMediaQuery, useTheme } from '@mui/material';
 import ModalHeader from '@/components/UI/ModalHeader';
 import { useVenues } from '@/hooks/useVenues';
 import { useUsers } from '@/hooks/useUsers';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import VenueModalList from './VenueModalList';
 import VenueModalAdd from './VenueModalAdd';
 import VenueModalEdit from './VenueModalEdit';
 import VenueModalMap from './VenueModalMap';
 import modalStyle from '@/components/Styles/modalStyles';
 
-const VenueModal = ({ open, onClose, defaultCityId }) => {
+const VenueModal = ({ open, onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { venues, fetchVenues, addVenue, updateVenue, deactivateVenue } = useVenues();
+  const { venues, fetchVenues, addVenue, updateVenue } = useVenues();
   const { userData } = useUsers();
   const { currentLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('map');
   const [selectedVenue, setSelectedVenue] = useState(null);
-  const [selectedCityId, setSelectedCityId] = useState(defaultCityId || '');
   const [mapCenter, setMapCenter] = useState(null);
 
   useEffect(() => {
@@ -49,10 +47,6 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
-  const handleEditVenue = (venue) => {
-    setSelectedVenue(venue);
-    setCurrentTab('edit');
-  };
 
   const handleMapEditClick = (venue) => {
     setSelectedVenue(venue);
@@ -63,7 +57,7 @@ const VenueModal = ({ open, onClose, defaultCityId }) => {
     fetchVenues(null, mapCenter); // Fetch venues for current map center
   };
 
-  const handleMapMove = (newCenter, bounds) => {
+  const handleMapMove = (newCenter) => {
     // When map moves, fetch venues for the new area
     const location = { 
       lat: newCenter.lat, 

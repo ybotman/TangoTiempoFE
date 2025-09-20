@@ -16,7 +16,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import ImageIcon from '@mui/icons-material/Image';
 
-const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, onFieldChange, unsavedChanges, onSave, isSaving }) => {
+const RegionalOrganizersProfile = ({ organizer, onFieldChange, unsavedChanges }) => {
   // Local state (needed for fallback when centralized state is not available)
   const [localFullName, setFullName] = useState('');
   const [localShortName, setShortName] = useState('');
@@ -44,7 +44,7 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
   const zip = unsavedChanges?.['publicContactInfo.address.postalCode'] !== undefined ? unsavedChanges['publicContactInfo.address.postalCode'] : localZip;
   
   // UI state
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage] = useState(''); // setErrorMessage not currently used
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
@@ -371,13 +371,13 @@ const RegionalOrganizersProfile = ({ organizerId, organizer, updateOrganizer, on
               <strong>Feature Coming Soon!</strong>
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              You'll soon be able to upload profile images including:
+              You&apos;ll soon be able to upload profile images including:
             </Typography>
             <Typography variant="caption" component="div" sx={{ mt: 1, pl: 2 }}>
               • Banner Image - Display at the top of your profile<br />
-              • Profile Image - Your organization's main photo<br />
+              • Profile Image - Your organization&apos;s main photo<br />
               • Landscape Image - Wide format image for event displays<br />
-              • Logo Image - Your organization's official logo
+              • Logo Image - Your organization&apos;s official logo
             </Typography>
           </Alert>
         </CardContent>

@@ -499,6 +499,8 @@ ViewEventDetailModal.propTypes = {
       hasVenueTimezone: PropTypes.bool,
       displayStartTime: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
       displayEndTime: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      venueStartDisplay: PropTypes.string,
+      venueEndDisplay: PropTypes.string,
       timezoneAbbr: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
       ownerOrganizerName: PropTypes.string,
