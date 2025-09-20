@@ -510,7 +510,31 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Check if the user's organizerInfo flags are all enabled (only for RegionalOrganizer)
       if (isRegionalOrganizer) {
         const orgInfo = user.backendInfo.regionalOrganizerInfo;
-        // TIEMPO-271: Only check isActive and isApproved, NOT isEnabled
+        
+        // TIEMPO-253: Check if organizer profile is complete
+        const hasCompletedProfile = orgInfo.shortName && 
+                                   orgInfo.shortName.trim() !== '' && 
+                                   orgInfo.description && 
+                                   orgInfo.description.trim() !== '' &&
+                                   orgInfo.isEnabled === true;
+        
+        if (!hasCompletedProfile) {
+          // Profile is incomplete - show specific error message
+          const missingFields = [];
+          if (!orgInfo.shortName || orgInfo.shortName.trim() === '') {
+            missingFields.push('Short Name');
+          }
+          if (!orgInfo.description || orgInfo.description.trim() === '') {
+            missingFields.push('Description');
+          }
+          if (!orgInfo.isEnabled) {
+            missingFields.push('Profile not enabled');
+          }
+          
+          throw new Error(`Your organizer profile is incomplete. Please complete the following in Event Organizer Settings: ${missingFields.join(', ')}`);
+        }
+        
+        // TIEMPO-271: Only check isActive and isApproved after profile is complete
         // isEnabled should only be true when RO completes profile requirements
         const requiredFlagsEnabled = orgInfo.isActive && orgInfo.isApproved;
         
