@@ -101,7 +101,17 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
       }, 2000);
     } catch (error) {
       console.error('Error saving changes:', error);
-      setSaveMessage('Error saving changes. Please try again.');
+
+      // TIEMPO-284: Handle 409 Conflict for duplicate shortName
+      if (error.response?.status === 409) {
+        const shortName = allChanges.shortName || organizer?.shortName;
+        setSaveMessage(
+          `The Short Name "${shortName}" is already taken by another organizer. ` +
+          `Please choose a unique name.`
+        );
+      } else {
+        setSaveMessage('Error saving changes. Please try again.');
+      }
     } finally {
       setIsSaving(false);
     }
