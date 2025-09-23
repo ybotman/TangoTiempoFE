@@ -272,28 +272,33 @@ const BostonCalendarPage = () => {
         </div>
       );
     } else {
-      // List view: more detailed display
+      // List view: more detailed display - matching main calendar exactly
       const { startTime, endTime } = event.extendedProps?.venueStartDisplay
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForListView(event.start, event.end);
-      
+
       return (
-        <div style={{ 
-          padding: '4px 2px', 
+        <div style={{
+          padding: '4px 2px',
           overflow: 'hidden',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           gap: '2px'
         }}>
-          {/* Time range, categories, organizer, venue */}
+          {/* Row 1: Time range, category circles, organizer, shortTitle - LARGER */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           }}>
+            {/* Time range - matching main calendar */}
             {startTime && (
-              <div style={{ fontSize: '0.9rem', flexShrink: 0, color: '#000' }}>
+              <div style={{
+                fontSize: '0.9rem',
+                lineHeight: '1.2',
+                flexShrink: 0
+              }}>
                 <span style={{ fontWeight: 'bold' }}>{startTime}</span>
                 {endTime && (
                   <>
@@ -303,32 +308,44 @@ const BostonCalendarPage = () => {
                 )}
               </div>
             )}
+            {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
             {organizerShort && (
-              <span style={{
-                fontSize: '0.85rem',
-                color: '#666',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {organizerShort}
-              </span>
-            )}
-            {eventShortTitle && (
               <>
-                <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
-                <span style={{ 
+                <div style={{
                   fontSize: '0.85rem',
-                  fontWeight: 'bold', 
-                  color: '#333',
+                  fontWeight: 'normal',
+                  color: '#666',
+                  overflow: 'visible',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 1,
+                  lineHeight: '1.2',
                   textDecoration: isCanceled ? 'line-through' : 'none'
                 }}>
-                  {eventShortTitle}
-                </span>
+                  {organizerShort}
+                </div>
+                {eventShortTitle && (
+                  <>
+                    <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
+                    <div style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      color: '#333',
+                      overflow: 'visible',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 1,
+                      lineHeight: '1.2',
+                      textDecoration: isCanceled ? 'line-through' : 'none'
+                    }}>
+                      {eventShortTitle}
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
-          
-          {/* Event title */}
+
+          {/* Row 2: Event title with recurring indicator - SMALLER */}
           <div style={{
             fontSize: '0.7rem',
             fontWeight: 'normal',
@@ -338,7 +355,7 @@ const BostonCalendarPage = () => {
             whiteSpace: 'normal',
             overflowWrap: 'break-word',
             hyphens: 'auto',
-            color: '#555',  // Gray text to match main calendar
+            color: '#555',
             textDecoration: isCanceled ? 'line-through' : 'none'
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
@@ -433,30 +450,6 @@ const BostonCalendarPage = () => {
           }}
         />
       </div>
-
-      {/* Optional: Soft auth encouragement banner for non-logged users */}
-      {!user && (
-        <div style={{
-          background: 'linear-gradient(to right, #f0f0f0, #e0e0e0)',
-          padding: '10px 20px',
-          textAlign: 'center',
-          borderBottom: '1px solid #ccc'
-        }}>
-          <span style={{ marginRight: '10px' }}>
-            Sign in to save your favorite events and get personalized recommendations!
-          </span>
-          <a 
-            href="/login" 
-            style={{
-              color: '#007bff',
-              textDecoration: 'none',
-              fontWeight: 'bold'
-            }}
-          >
-            Sign In
-          </a>
-        </div>
-      )}
 
       <SiteMenuBar
         activeCategories={activeCategories}
