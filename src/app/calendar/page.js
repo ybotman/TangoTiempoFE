@@ -813,13 +813,16 @@ const CalendarPage = () => {
               );
             }
 
-            // Regular days show abbreviated month
+            // Regular days show abbreviated month with smaller font for month
             return (
               <div style={{
-                fontSize: '0.85rem',
-                padding: '2px'
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '1px'
               }}>
-                {monthAbbr}-{day}
+                <span style={{ fontSize: '0.7rem', color: '#666' }}>{monthAbbr}-</span>
+                <span style={{ fontSize: '0.85rem' }}>{day}</span>
               </div>
             );
           }}
