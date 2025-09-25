@@ -158,7 +158,12 @@ export const useCalendarPage = () => {
   };
 
   const handlePrev = () => {
-    calendarRef.current.getApi().prev();
+    const api = calendarRef.current.getApi();
+    const currentDate = api.getDate();
+
+    // Move to first day of previous month
+    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    api.gotoDate(prevMonth);
 
     // Track previous navigation
     trackEvent({
@@ -170,7 +175,12 @@ export const useCalendarPage = () => {
   };
 
   const handleNext = () => {
-    calendarRef.current.getApi().next();
+    const api = calendarRef.current.getApi();
+    const currentDate = api.getDate();
+
+    // Move to first day of next month
+    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    api.gotoDate(nextMonth);
 
     // Track next navigation
     trackEvent({

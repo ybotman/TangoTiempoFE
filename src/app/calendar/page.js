@@ -96,7 +96,7 @@ const CalendarPage = () => {
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
-    return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
+    return window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
   };
 
   // TIEMPO-246: Generate placeholder events without Date() conversions
@@ -600,8 +600,8 @@ const CalendarPage = () => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();
       if (window.innerWidth >= 768) {
-        calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
-        setCurrentViewType('dayGridMonth');
+        calendarApi.changeView('dayGrid8Week'); // Switch to 8-week view for large screens
+        setCurrentViewType('dayGrid8Week');
       } else {
         calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
         setCurrentViewType('list21Days');
@@ -692,8 +692,8 @@ const CalendarPage = () => {
 
           <ButtonGroup variant="outlined" aria-label="outlined button group">
             <IconButton onClick={() => {
-              calendarRef.current.getApi().changeView('dayGridMonth');
-              setCurrentViewType('dayGridMonth');
+              calendarRef.current.getApi().changeView('dayGrid8Week');
+              setCurrentViewType('dayGrid8Week');
             }}>
               <CalendarMonthIcon />
             </IconButton>
@@ -785,8 +785,8 @@ const CalendarPage = () => {
           events={eventsWithPlaceholders}
           // TIEMPO-288: Custom date cell content with month abbreviations
           dayCellContent={(arg) => {
-            // Only apply to month view
-            if (arg.view.type !== 'dayGridMonth') {
+            // Apply to both month view and 8-week view
+            if (arg.view.type !== 'dayGridMonth' && arg.view.type !== 'dayGrid8Week' && arg.view.type !== 'dayGrid') {
               return arg.dayNumberText;
             }
 
@@ -924,6 +924,17 @@ const CalendarPage = () => {
           dayGridMonth: {
             titleFormat: { year: 'numeric', month: 'long' }, // Ensures title says "May 2025"
             eventMinHeight: 25, // Ensure enough height for title + category circles
+            fixedWeekCount: false, // Allow variable number of weeks
+            dayHeaderFormat: { weekday: 'short' }, // Keep day headers short
+          },
+          // Custom 8-week view
+          dayGrid8Week: {
+            type: 'dayGrid',
+            duration: { weeks: 8 },
+            buttonText: '8 Weeks',
+            fixedWeekCount: false,
+            eventMinHeight: 25,
+            dayHeaderFormat: { weekday: 'short' },
           },
         }}
         dayCellDidMount={({ date, el }) => {
