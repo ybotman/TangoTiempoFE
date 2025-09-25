@@ -2,6 +2,98 @@
 
 import axios from 'axios';
 
+export async function searchVenues(query, options = {}) {
+  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+  if (!accessToken) {
+    console.error('Mapbox access token is missing or not provided.');
+    throw new Error('Mapbox access token is missing or not provided.');
+  }
+
+  const {
+    proximity = null, // [lng, lat] for biasing results
+    limit = 5,
+    types = 'poi,address', // Can include: poi, address, postcode, place, neighborhood
+    country = 'us' // ISO 3166 country code
+  } = options;
+
+  let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json`;
+  url += `?access_token=${accessToken}`;
+  url += `&limit=${limit}`;
+  url += `&types=${types}`;
+  url += `&country=${country}`;
+
+  if (proximity) {
+    url += `&proximity=${proximity[0]},${proximity[1]}`;
+  }
+
+  try {
+    const response = await axios.get(url);
+
+    if (response.data.features) {
+      return response.data.features.map(feature => {
+        // Parse the place components
+        const context = feature.context || [];
+        const addressComponents = {
+          address: feature.properties?.address || '',
+          name: feature.text || '',
+          fullAddress: feature.place_name || '',
+          city: '',
+          state: '',
+          zip: '',
+          country: ''
+        };
+
+        // Extract components from context
+        context.forEach(component => {
+          if (component.id.startsWith('postcode')) {
+            addressComponents.zip = component.text;
+          } else if (component.id.startsWith('place')) {
+            addressComponents.city = component.text;
+          } else if (component.id.startsWith('region')) {
+            addressComponents.state = component.short_code ?
+              component.short_code.replace('US-', '') : component.text;
+          } else if (component.id.startsWith('country')) {
+            addressComponents.country = component.text;
+          }
+        });
+
+        // Handle POI results that have address in properties
+        if (feature.properties?.address) {
+          addressComponents.address1 = feature.properties.address;
+        } else if (feature.address) {
+          addressComponents.address1 = `${feature.address} ${feature.text}`;
+        } else {
+          addressComponents.address1 = feature.text;
+        }
+
+        return {
+          id: feature.id,
+          name: addressComponents.name,
+          fullAddress: addressComponents.fullAddress,
+          address1: addressComponents.address1,
+          address2: '',
+          address3: '',
+          city: addressComponents.city,
+          state: addressComponents.state,
+          zip: addressComponents.zip,
+          country: addressComponents.country,
+          center: feature.center, // [lng, lat]
+          latitude: feature.center[1],
+          longitude: feature.center[0],
+          placeType: feature.place_type[0],
+          relevance: feature.relevance
+        };
+      });
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Venue Search Error:', error.message, error.response?.data);
+    throw error;
+  }
+}
+
 export async function geocodeAddress(address1, address2, address3, city, state, zip) {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 

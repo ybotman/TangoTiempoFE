@@ -11,7 +11,7 @@ import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook
 import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
-import VenueModalAdd from '@/components/Modals/Venues/VenueModalAdd'; // TIEMPO-258: Import venue modal
+import VenueModalAddWithSearch from '@/components/Modals/Venues/VenueModalAddWithSearch'; // TIEMPO-258: Import venue modal with search
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
@@ -704,7 +704,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
 
     {/* TIEMPO-258: Venue Add Modal */}
     {showVenueModal && (
-      <VenueModalAdd
+      <VenueModalAddWithSearch
         onAdd={handleVenueCreated}
         refreshList={fetchVenues}
         onDone={() => setShowVenueModal(false)}

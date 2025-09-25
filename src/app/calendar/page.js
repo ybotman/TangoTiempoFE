@@ -675,7 +675,7 @@ const CalendarPage = () => {
             </IconButton>
           </ButtonGroup>
 
-          {/* Date Range Display */}
+          {/* Date Range Display - Month title removed for TIEMPO-288 */}
           <div
             style={{
               flex: 1,
@@ -685,17 +685,7 @@ const CalendarPage = () => {
               alignItems: 'center',
             }}
           >
-            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-              {calendarRef.current
-                ? (() => {
-                    // TIEMPO-246: Format calendar date without timezone conversion
-                    const calDate = calendarRef.current.getApi().getDate();
-                    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-                                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-                    return `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
-                  })()
-                : 'LOADING CALENDAR...'}
-            </div>
+            {/* Month display removed - dates now show month abbreviations in cells */}
             <div style={{ fontSize: '0.75rem', color: '#888' }}>
             </div>
           </div>
@@ -793,6 +783,46 @@ const CalendarPage = () => {
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
+          // TIEMPO-288: Custom date cell content with month abbreviations
+          dayCellContent={(arg) => {
+            // Only apply to month view
+            if (arg.view.type !== 'dayGridMonth') {
+              return arg.dayNumberText;
+            }
+
+            const date = arg.date;
+            const day = date.getDate();
+            const month = date.getMonth();
+            const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                              'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][month];
+            const fullMonth = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                              'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'][month];
+
+            // First day of month shows full month name in bold
+            if (day === 1) {
+              return (
+                <div style={{
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  padding: '2px',
+                  borderTop: '2px solid #1976d2',
+                  marginTop: '-2px'
+                }}>
+                  {fullMonth}-{day}
+                </div>
+              );
+            }
+
+            // Regular days show abbreviated month
+            return (
+              <div style={{
+                fontSize: '0.85rem',
+                padding: '2px'
+              }}>
+                {monthAbbr}-{day}
+              </div>
+            );
+          }}
           datesSet={(dateInfo) => {
           handleDatesSet(dateInfo);
           // Track view type and date range

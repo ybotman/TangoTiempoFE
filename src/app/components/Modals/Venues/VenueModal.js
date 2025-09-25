@@ -8,7 +8,7 @@ import ModalHeader from '@/components/UI/ModalHeader';
 import { useVenues } from '@/hooks/useVenues';
 import { useUsers } from '@/hooks/useUsers';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import VenueModalAdd from './VenueModalAdd';
+import VenueModalAddWithSearch from './VenueModalAddWithSearch';
 import VenueModalEdit from './VenueModalEdit';
 import VenueModalMap from './VenueModalMap';
 import modalStyle from '@/components/Styles/modalStyles';
@@ -116,7 +116,7 @@ const VenueModal = ({ open, onClose }) => {
             }}
           >
             {currentTab === 'add' && (
-              <VenueModalAdd onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('map')} />
+              <VenueModalAddWithSearch onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('map')} />
             )}
             {currentTab === 'edit' && selectedVenue && (
               <VenueModalEdit
