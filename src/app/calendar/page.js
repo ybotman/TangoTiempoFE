@@ -798,15 +798,19 @@ const CalendarPage = () => {
             const fullMonth = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
                               'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'][month];
 
-            // First day of month shows full month name in bold
+            // First day of month shows full month name in bold with clear highlight
             if (day === 1) {
               return (
                 <div style={{
                   fontWeight: 'bold',
                   fontSize: '0.85rem',
-                  padding: '2px',
-                  borderTop: '2px solid #1976d2',
-                  marginTop: '-2px'
+                  padding: '4px 2px',
+                  borderTop: '3px solid #1976d2',
+                  backgroundColor: '#e3f2fd',
+                  marginTop: '-3px',
+                  marginLeft: '-2px',
+                  marginRight: '-2px',
+                  color: '#0d47a1'
                 }}>
                   {fullMonth}-{day}
                 </div>

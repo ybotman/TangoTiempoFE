@@ -35,7 +35,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { searchVenues } from '@/utils/geoLocations';
 import debounce from 'lodash/debounce';
 
-const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone }) => {
+const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation = null }) => {
   const { user } = useContext(AuthContext);
 
   // Entry mode: 'search' or 'manual'
@@ -85,10 +85,17 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone }) => {
 
       setSearchLoading(true);
       try {
-        const results = await searchVenues(query, {
+        const searchOptions = {
           limit: 8,
           types: 'poi,address'
-        });
+        };
+
+        // Add proximity bias if location is available
+        if (proximityLocation?.lng && proximityLocation?.lat) {
+          searchOptions.proximity = [proximityLocation.lng, proximityLocation.lat];
+        }
+
+        const results = await searchVenues(query, searchOptions);
         setSearchOptions(results);
       } catch (err) {
         console.error('Search error:', err);
@@ -437,6 +444,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone }) => {
                         {...params}
                         label="Search for venue or address"
                         placeholder="Start typing venue name or address..."
+                        helperText={proximityLocation ? `Searching near your location (${proximityLocation.radius || 20} miles)` : "Searching nationwide"}
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
@@ -757,7 +765,12 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone }) => {
 VenueModalAddWithSearch.propTypes = {
   onAdd: PropTypes.func.isRequired,
   refreshList: PropTypes.func.isRequired,
-  onDone: PropTypes.func.isRequired
+  onDone: PropTypes.func.isRequired,
+  proximityLocation: PropTypes.shape({
+    lat: PropTypes.number,
+    lng: PropTypes.number,
+    radius: PropTypes.number
+  })
 };
 
 export default VenueModalAddWithSearch;

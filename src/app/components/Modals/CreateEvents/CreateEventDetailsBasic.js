@@ -708,6 +708,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         onAdd={handleVenueCreated}
         refreshList={fetchVenues}
         onDone={() => setShowVenueModal(false)}
+        proximityLocation={savedLocation || currentLocation}
       />
     )}
     </>

@@ -116,7 +116,12 @@ const VenueModal = ({ open, onClose }) => {
             }}
           >
             {currentTab === 'add' && (
-              <VenueModalAddWithSearch onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('map')} />
+              <VenueModalAddWithSearch
+                onAdd={addVenue}
+                refreshList={handleListRefresh}
+                onDone={() => setCurrentTab('map')}
+                proximityLocation={mapCenter}
+              />
             )}
             {currentTab === 'edit' && selectedVenue && (
               <VenueModalEdit
