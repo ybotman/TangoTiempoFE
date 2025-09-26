@@ -125,17 +125,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const displayEndTime = venueEndDisplay || eventDetails?.extendedProps?.displayEndTime;
   const timezoneAbbr = eventDetails?.extendedProps?.timezoneAbbr || '';
 
-  // Debug timezone fields
-  console.log('Modal timezone debug:', {
-    hasVenueTimezone,
-    venueStartDisplay,
-    venueEndDisplay,
-    displayStartTime,
-    displayEndTime,
-    eventStart: eventDetails?.start,
-    eventEnd: eventDetails?.end
-  });
-
   // Use display times if available, otherwise fallback to event dates
   // For now, use venueStartDisplay directly if available, regardless of hasVenueTimezone flag
   const startDate = venueStartDisplay

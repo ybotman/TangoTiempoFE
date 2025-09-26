@@ -5,9 +5,18 @@ import PropTypes from 'prop-types';
 import { Box, Typography } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 
-const VenueModalMap = ({ venues, selectedVenueId, onEditVenue }) => {
+const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, initialCenter = null }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+
+  // Calculate zoom based on radius (miles to zoom level approximation)
+  const radiusToZoom = (radius) => {
+    if (radius <= 10) return 13;
+    if (radius <= 20) return 11;
+    if (radius <= 50) return 10;
+    if (radius <= 100) return 9;
+    return 8;
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current) return; // Ensure this only runs on the client
@@ -23,9 +32,18 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue }) => {
           shadowUrl: '/leaflet/marker-shadow.png',
         });
 
+        // Use provided center or default to US center
+        const defaultCenter = initialCenter
+          ? [initialCenter.lat, initialCenter.lng]
+          : [37.0902, -95.7129];
+
+        const defaultZoom = initialCenter?.radius
+          ? radiusToZoom(initialCenter.radius)
+          : 4;
+
         mapInstanceRef.current = L.map(mapRef.current, {
-          center: [37.0902, -95.7129],
-          zoom: 4,
+          center: defaultCenter,
+          zoom: defaultZoom,
         });
 
         L.tileLayer(
@@ -69,6 +87,20 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue }) => {
           .bindPopup(`<strong>${selectedVenue.name}</strong><br/>${selectedVenue.address1}<br/>${selectedVenue.city}, ${selectedVenue.state} ${selectedVenue.zip}`)
           .openPopup();
       } else {
+        // If we have initial center but no selected venue, focus on that area
+        if (initialCenter && venues.length > 0) {
+          const zoomLevel = initialCenter.radius ? radiusToZoom(initialCenter.radius) : 11;
+          map.setView([initialCenter.lat, initialCenter.lng], zoomLevel);
+        } else if (venues.length > 0 && venues[0].latitude) {
+          // Auto-fit to show all venue markers
+          const bounds = L.latLngBounds(venues
+            .filter(v => v.latitude && v.longitude)
+            .map(v => [v.latitude, v.longitude]));
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+          }
+        }
+
         // Show all venues with color coding based on active status
         venues.forEach((v) => {
           if (v.latitude && v.longitude) {
@@ -141,7 +173,7 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue }) => {
         mapInstanceRef.current = null;
       }
     };
-  }, [venues, selectedVenueId]);
+  }, [venues, selectedVenueId, initialCenter]);
 
   // Add event listener for edit button clicks
   useEffect(() => {
@@ -170,7 +202,13 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue }) => {
         </Typography>
       )}
       <Typography variant="caption" color="text.secondary" gutterBottom>
-        Blue markers = active venues, Grey markers = inactive venues. Click any marker to edit.
+        {venues.length === 0 ? (
+          initialCenter ?
+            `No venues found within ${initialCenter.radius || 20} miles of your location. Try zooming out or panning the map.` :
+            'No venues found. Add your first venue using the Add tab.'
+        ) : (
+          'Blue markers = active venues, Grey markers = inactive venues. Click any marker to edit.'
+        )}
       </Typography>
       <Box ref={mapRef} sx={{ flexGrow: 1, minHeight: 400 }} />
     </Box>
@@ -181,6 +219,11 @@ VenueModalMap.propTypes = {
   venues: PropTypes.array.isRequired,
   selectedVenueId: PropTypes.string,
   onEditVenue: PropTypes.func,
+  initialCenter: PropTypes.shape({
+    lat: PropTypes.number,
+    lng: PropTypes.number,
+    radius: PropTypes.number
+  })
 };
 
 export default VenueModalMap;

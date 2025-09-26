@@ -53,12 +53,37 @@ if (typeof window !== 'undefined') {
 const VenueMap = ({ latitude, longitude, venueName, address }) => {
   const [mounted, setMounted] = useState(false);
   const [mapError, setMapError] = useState(false);
+  const [mapKey, setMapKey] = useState(0);
 
   useEffect(() => {
-    setMounted(true);
+    // Longer delay to ensure DOM is ready and prevent race conditions
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      setMounted(false); // Reset on unmount
+    };
   }, []);
 
-  if (!mounted || mapError) {
+  // Force new map instance when coordinates change significantly
+  useEffect(() => {
+    if (mounted) {
+      // Reset and remount to avoid Leaflet state issues
+      setMounted(false);
+      setTimeout(() => {
+        setMapKey(prev => prev + 1);
+        setMounted(true);
+      }, 100);
+    }
+  }, [latitude, longitude]);
+
+  // Validate coordinates
+  const lat = parseFloat(latitude);
+  const lng = parseFloat(longitude);
+
+  if (!mounted || mapError || isNaN(lat) || isNaN(lng)) {
     return (
       <Box
         sx={{
@@ -70,12 +95,25 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
           borderRadius: 1
         }}
       >
-        <CircularProgress />
+        {isNaN(lat) || isNaN(lng) ? (
+          <div>Invalid coordinates</div>
+        ) : (
+          <CircularProgress />
+        )}
       </Box>
     );
   }
 
-  const position = [parseFloat(latitude), parseFloat(longitude)];
+  const position = [lat, lng];
+
+  // Prevent rendering if coordinates haven't changed meaningfully
+  if (!mounted) {
+    return (
+      <Box sx={{ height: 350, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   try {
     return (
@@ -85,6 +123,8 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
           zoom={16}
           style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={false}
+          key={`map-${mapKey}`} // Force new instance to avoid Leaflet state issues
+          whenReady={() => console.log('Map ready')}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -105,7 +145,20 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
   } catch (err) {
     console.error('Map render error:', err);
     setMapError(true);
-    return null;
+    return (
+      <Box
+        sx={{
+          height: 350,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'grey.100',
+          borderRadius: 1
+        }}
+      >
+        <div>Error loading map</div>
+      </Box>
+    );
   }
 };
 

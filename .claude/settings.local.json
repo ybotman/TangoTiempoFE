@@ -7,7 +7,19 @@
       "Bash(find:*)",
       "Bash(sed:*)",
       "Bash(awk:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git push:*)",
+      "Bash(./.ybotbot/jira-tools/jira-search.sh:*)",
+      "Bash(./.ybotbot/jira-tools/jira-transition.sh:*)",
+      "Bash(./.ybotbot/jira-tools/jira-get.sh:*)",
+      "WebSearch",
+      "WebFetch(domain:fullcalendar.io)",
+      "Bash(./.ybotbot/jira-tools/jira-comment.sh:*)",
+      "WebFetch(domain:docs.mapbox.com)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

@@ -96,7 +96,7 @@ const CalendarPage = () => {
 
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
-    return window.innerWidth >= 768 ? 'dayGridMonth' : 'list21Days';
+    return window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
   };
 
   // TIEMPO-246: Generate placeholder events without Date() conversions
@@ -600,8 +600,8 @@ const CalendarPage = () => {
     const handleWindowResize = () => {
       const calendarApi = calendarRef.current.getApi();
       if (window.innerWidth >= 768) {
-        calendarApi.changeView('dayGridMonth'); // Switch to Month view for large screens
-        setCurrentViewType('dayGridMonth');
+        calendarApi.changeView('dayGrid8Week'); // Switch to 8-week view for large screens
+        setCurrentViewType('dayGrid8Week');
       } else {
         calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
         setCurrentViewType('list21Days');
@@ -675,7 +675,7 @@ const CalendarPage = () => {
             </IconButton>
           </ButtonGroup>
 
-          {/* Date Range Display */}
+          {/* Date Range Display - Month title removed for TIEMPO-288 */}
           <div
             style={{
               flex: 1,
@@ -685,25 +685,15 @@ const CalendarPage = () => {
               alignItems: 'center',
             }}
           >
-            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-              {calendarRef.current
-                ? (() => {
-                    // TIEMPO-246: Format calendar date without timezone conversion
-                    const calDate = calendarRef.current.getApi().getDate();
-                    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-                                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-                    return `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
-                  })()
-                : 'LOADING CALENDAR...'}
-            </div>
+            {/* Month display removed - dates now show month abbreviations in cells */}
             <div style={{ fontSize: '0.75rem', color: '#888' }}>
             </div>
           </div>
 
           <ButtonGroup variant="outlined" aria-label="outlined button group">
             <IconButton onClick={() => {
-              calendarRef.current.getApi().changeView('dayGridMonth');
-              setCurrentViewType('dayGridMonth');
+              calendarRef.current.getApi().changeView('dayGrid8Week');
+              setCurrentViewType('dayGrid8Week');
             }}>
               <CalendarMonthIcon />
             </IconButton>
@@ -793,6 +783,53 @@ const CalendarPage = () => {
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
+          // TIEMPO-288: Custom date cell content with month abbreviations
+          dayCellContent={(arg) => {
+            // Apply to both month view and 8-week view
+            if (arg.view.type !== 'dayGridMonth' && arg.view.type !== 'dayGrid8Week' && arg.view.type !== 'dayGrid') {
+              return arg.dayNumberText;
+            }
+
+            const date = arg.date;
+            const day = date.getDate();
+            const month = date.getMonth();
+            const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                              'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][month];
+            const fullMonth = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                              'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'][month];
+
+            // First day of month shows full month name in bold with clear highlight
+            if (day === 1) {
+              return (
+                <div style={{
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  padding: '4px 2px',
+                  borderTop: '3px solid #1976d2',
+                  backgroundColor: '#e3f2fd',
+                  marginTop: '-3px',
+                  marginLeft: '-2px',
+                  marginRight: '-2px',
+                  color: '#0d47a1'
+                }}>
+                  {fullMonth}-{day}
+                </div>
+              );
+            }
+
+            // Regular days show abbreviated month with smaller font for month
+            return (
+              <div style={{
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '1px'
+              }}>
+                <span style={{ fontSize: '0.7rem', color: '#666' }}>{monthAbbr}-</span>
+                <span style={{ fontSize: '0.85rem' }}>{day}</span>
+              </div>
+            );
+          }}
           datesSet={(dateInfo) => {
           handleDatesSet(dateInfo);
           // Track view type and date range
@@ -887,6 +924,17 @@ const CalendarPage = () => {
           dayGridMonth: {
             titleFormat: { year: 'numeric', month: 'long' }, // Ensures title says "May 2025"
             eventMinHeight: 25, // Ensure enough height for title + category circles
+            fixedWeekCount: false, // Allow variable number of weeks
+            dayHeaderFormat: { weekday: 'short' }, // Keep day headers short
+          },
+          // Custom 8-week view
+          dayGrid8Week: {
+            type: 'dayGrid',
+            duration: { weeks: 8 },
+            buttonText: '8 Weeks',
+            fixedWeekCount: false,
+            eventMinHeight: 25,
+            dayHeaderFormat: { weekday: 'short' },
           },
         }}
         dayCellDidMount={({ date, el }) => {

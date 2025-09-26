@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test MapBox Search in Browser</title>
+</head>
+<body>
+    <h1>MapBox Search Test</h1>
+    <input type="text" id="searchInput" placeholder="Search venues..." value="Ultimate Tango">
+    <button onclick="testSearch()">Search</button>
+    <div id="results"></div>
+
+    <script>
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoidG9ieWJhbHNsZXkiLCJhIjoiY200ZWcyMW1yMHo5cTJrcTlneGVob2twbSJ9.Sfe3ak162fdRgnqCiYguVQ';
+        const BOSTON_LNG = -71.0589;
+        const BOSTON_LAT = 42.3601;
+
+        async function testSearch() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+
+            resultsDiv.innerHTML = 'Searching...';
+
+            let url = `https://api.mapbox.com/search/searchbox/v1/forward`;
+            url += `?q=${encodeURIComponent(query)}`;
+            url += `&access_token=${MAPBOX_TOKEN}`;
+            url += `&limit=10`;
+            url += `&country=us`;
+            url += `&proximity=${BOSTON_LNG},${BOSTON_LAT}`;
+
+            console.log('Search URL:', url);
+
+            try {
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Search results:', data);
+
+                if (data.features && data.features.length > 0) {
+                    resultsDiv.innerHTML = '<h2>Results:</h2>';
+                    data.features.forEach((feature, index) => {
+                        const name = feature.properties?.name || feature.text || 'Unknown';
+                        const address = feature.properties?.full_address || '';
+                        resultsDiv.innerHTML += `
+                            <div>
+                                <strong>${index + 1}. ${name}</strong><br>
+                                ${address}<br><br>
+                            </div>
+                        `;
+                    });
+                } else {
+                    resultsDiv.innerHTML = 'No results found';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

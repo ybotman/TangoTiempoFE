@@ -11,7 +11,7 @@ import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook
 import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
-import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
+import VenueModalAddWithSearch from '@/components/Modals/Venues/VenueModalAddWithSearch'; // TIEMPO-258: Import venue modal with search
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
@@ -179,13 +179,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       }));
       return;
     }
-
-    // Check if user selected "Add Venue" option
-    if (newValue.isAddVenue) {
-      setShowVenueModal(true);
-      return;
-    }
-
+    
     // Validate new value is a proper venue object
     if (typeof newValue !== 'object' || !newValue._id) {
       console.error('Invalid venue object received:', newValue);
@@ -233,6 +227,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   };
 
 
+  // TIEMPO-258: Handle venue creation callback
+  const handleVenueCreated = async (newVenue) => {
+// TIEMPO-276: Security cleanup - removed logging
+    
+    // Refresh venue list
+    await fetchVenues();
+    
+    // Auto-select the new venue
+    if (newVenue && newVenue._id) {
+      setEventData(prevData => ({
+        ...prevData,
+        venueId: newVenue._id,
+        venueName: newVenue.name || newVenue.shortName,
+        locationID: newVenue._id,
+        locationName: newVenue.name || newVenue.shortName,
+        venueLatitude: newVenue.latitude || null,
+        venueLongitude: newVenue.longitude || null
+      }));
+    }
+    
+    // Clear saved data
+    sessionStorage.removeItem('pendingEventData');
+    
+    // Close modal
+    setShowVenueModal(false);
+  };
   
   // Handle start date change
   const handleStartDateChange = (newDate) => {
@@ -353,14 +373,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         });
       }
     }
-
-    // Add "Add Venue" option at the very end
-    groupedOptions.push({
-      _id: 'add-new-venue',
-      name: '➕ Add New Venue',
-      isAddVenue: true
-    });
-
+    
     return groupedOptions;
   }, [filteredVenues, eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, currentLocation, savedLocation]);
 
@@ -530,7 +543,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         </Grid>
 
         {/* Venue Selection - Searchable Autocomplete */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={8}>
           <FormControl fullWidth>
             {isVenueReady ? (
             <Autocomplete
@@ -574,26 +587,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                     );
                   }
                 }
-
-                // Handle "Add Venue" option
-                if (option.isAddVenue) {
-                  return (
-                    <li {...props} key={option._id}>
-                      <Typography
-                        sx={{
-                          color: 'primary.main',
-                          fontWeight: 'bold',
-                          borderTop: '1px solid #e0e0e0',
-                          pt: 1,
-                          mt: 1
-                        }}
-                      >
-                        {option.name}
-                      </Typography>
-                    </li>
-                  );
-                }
-
+                
                 // Handle placeholder options
                 if (option.isPlaceholder && option.disabled) {
                   return (
@@ -620,7 +614,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                   </li>
                 );
               }}
-              getOptionDisabled={(option) => (option.isDivider && !option.isAddVenue) || option.disabled}
+              getOptionDisabled={(option) => option.isDivider || option.disabled}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -661,6 +655,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           </FormControl>
         </Grid>
 
+        {/* TIEMPO-258: Add Venue Button */}
+        <Grid item xs={12} md={4}>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<AddLocationIcon />}
+            disabled={true}
+            sx={{ 
+              height: '56px',
+              mt: { xs: 0, md: 0 }
+            }}
+          >
+            Coming Soon
+          </Button>
+        </Grid>
+
         {/* Cost Input */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
@@ -692,15 +702,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       </FormControl>
     </Box>
 
-    {/* TIEMPO-290: Venue Modal with Map/Add/Edit tabs */}
-    <VenueModal
-      open={showVenueModal}
-      onClose={() => {
-        setShowVenueModal(false);
-        // Refresh venues after modal closes
-        fetchVenues();
-      }}
-    />
+    {/* TIEMPO-258: Venue Add Modal */}
+    {showVenueModal && (
+      <VenueModalAddWithSearch
+        onAdd={handleVenueCreated}
+        refreshList={fetchVenues}
+        onDone={() => setShowVenueModal(false)}
+        proximityLocation={savedLocation || currentLocation}
+      />
+    )}
     </>
   );
 };
