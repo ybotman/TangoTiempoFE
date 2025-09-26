@@ -55,10 +55,19 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
   const [mapError, setMapError] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!mounted || mapError) {
+  // Validate coordinates
+  const lat = parseFloat(latitude);
+  const lng = parseFloat(longitude);
+
+  if (!mounted || mapError || isNaN(lat) || isNaN(lng)) {
     return (
       <Box
         sx={{
@@ -70,12 +79,16 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
           borderRadius: 1
         }}
       >
-        <CircularProgress />
+        {isNaN(lat) || isNaN(lng) ? (
+          <div>Invalid coordinates</div>
+        ) : (
+          <CircularProgress />
+        )}
       </Box>
     );
   }
 
-  const position = [parseFloat(latitude), parseFloat(longitude)];
+  const position = [lat, lng];
 
   try {
     return (
@@ -85,6 +98,7 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
           zoom={16}
           style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={false}
+          key={`map-${lat}-${lng}`} // Force re-render on coordinate change
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -105,7 +119,20 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
   } catch (err) {
     console.error('Map render error:', err);
     setMapError(true);
-    return null;
+    return (
+      <Box
+        sx={{
+          height: 350,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'grey.100',
+          borderRadius: 1
+        }}
+      >
+        <div>Error loading map</div>
+      </Box>
+    );
   }
 };
 
