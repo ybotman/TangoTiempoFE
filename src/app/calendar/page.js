@@ -791,8 +791,9 @@ const CalendarPage = () => {
             }
 
             const date = arg.date;
-            const day = date.getDate();
-            const month = date.getMonth();
+            // Use UTC methods to match calendar's UTC timezone setting
+            const day = date.getUTCDate();
+            const month = date.getUTCMonth();
             const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
                               'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][month];
             const fullMonth = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
@@ -938,10 +939,10 @@ const CalendarPage = () => {
           },
         }}
         dayCellDidMount={({ date, el }) => {
-          // TIEMPO-246: Compare dates without timezone conversion
+          // TIEMPO-246: Compare dates without timezone conversion - use UTC methods
           const today = new Date();
-          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-          const cellDateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+          const cellDateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 
           if (cellDateStr < todayStr) {
             el.style.backgroundColor = '#c0c0c0';
