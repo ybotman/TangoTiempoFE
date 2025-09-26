@@ -308,7 +308,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [saving, setSaving] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
-  const [, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Import event operations hook
@@ -719,11 +719,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
   // Handle modal close - clear form data
   const handleClose = () => {
+    // Check if there are unsaved changes
+    if (hasUnsavedChanges) {
+      if (!window.confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+        return;
+      }
+    }
+
     // Always clear success/error states when closing
     setSaveSuccess(false);
     setSaveError(null);
     setHasUnsavedChanges(false);
-    
+
     // Reset form to initial state when closing (only in create mode)
     if (!editMode) {
       setEventData({
@@ -813,7 +820,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
               You can only edit events in your assigned cities.
             </Typography>
             <Button onClick={handleClose} sx={{ mt: 2 }} variant="contained">
-              Close
+              Cancel
             </Button>
           </Box>
         ) : (
@@ -865,7 +872,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
         {/* Render tab content conditionally */}
         {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />}
-        {currentTab === 'repeating' && (
+        {currentTab === 'repeating' && eventData.isRepeating && (
           <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
@@ -882,7 +889,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'UPDATE' : 'Save Event')}
           </Button>
           <Button onClick={handleClose} variant="outlined" color="secondary">
-            Close
+            Cancel
           </Button>
         </Box>
         </>

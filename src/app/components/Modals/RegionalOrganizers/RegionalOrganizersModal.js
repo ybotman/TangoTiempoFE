@@ -82,13 +82,6 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
 
       // Update the organizer with all changes
       const updatedOrganizer = await updateOrganizer(organizer._id, allChanges);
-      
-      // TIEMPO-272: Log the response to debug isEnabled persistence
-      console.log('TIEMPO-272: Updated organizer response:', {
-        isEnabled: updatedOrganizer?.isEnabled,
-        allChanges,
-        fullResponse: updatedOrganizer
-      });
 
       // Clear unsaved changes and show success
       setUnsavedChanges({});

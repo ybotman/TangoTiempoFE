@@ -292,7 +292,8 @@ export function useEvents({
         if (currentLocation?.lat && currentLocation?.lng) {
           params.useGeoSearch = true;
           // Convert zoomRange (miles) to km for the API
-          const radiusInMiles = effectiveZoomRange || 50;
+          // Use context value or fallback to 200 miles
+          const radiusInMiles = effectiveZoomRange || 200;
           params.radius = `${Math.round(radiusInMiles * 1.60934)}km`;
           params.sortByDistance = true;
         }

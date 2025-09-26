@@ -8,7 +8,7 @@ import ModalHeader from '@/components/UI/ModalHeader';
 import { useVenues } from '@/hooks/useVenues';
 import { useUsers } from '@/hooks/useUsers';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import VenueModalAdd from './VenueModalAdd';
+import VenueModalAddWithSearch from './VenueModalAddWithSearch';
 import VenueModalEdit from './VenueModalEdit';
 import VenueModalMap from './VenueModalMap';
 import modalStyle from '@/components/Styles/modalStyles';
@@ -18,7 +18,7 @@ const VenueModal = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { venues, fetchVenues, addVenue, updateVenue } = useVenues();
   const { userData } = useUsers();
-  const { currentLocation } = useGeoLocation();
+  const { currentLocation, savedLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('map');
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
@@ -28,22 +28,25 @@ const VenueModal = ({ open, onClose }) => {
       setCurrentTab('map');
       setSelectedVenue(null);
       
-      // Get user's saved location or current location
-      const userLat = userData?.localUserInfo?.userDefaults?.latitude || currentLocation?.lat;
-      const userLng = userData?.localUserInfo?.userDefaults?.longitude || currentLocation?.lng;
-      
+      // Use savedLocation (user's default) first, then currentLocation, then fallback
+      const userLat = savedLocation?.lat || currentLocation?.lat;
+      const userLng = savedLocation?.lng || currentLocation?.lng;
+      // Use current location setting first (most recent), then saved preference, then defaults
+      // currentLocation reflects the user's active session settings
+      const zoomRange = currentLocation?.zoomRange || savedLocation?.zoomRange || userData?.localUserInfo?.userDefaults?.defaultZoomRange || 200;
+
       if (userLat && userLng) {
-        const location = { lat: userLat, lng: userLng, radius: 20 };
+        const location = { lat: userLat, lng: userLng, radius: zoomRange };
         setMapCenter(location);
-        fetchVenues(null, location); // Fetch venues within 20 miles
+        fetchVenues(null, location); // Fetch venues within radius
       } else {
         // Default to Boston if no location
-        const defaultLocation = { lat: 42.3601, lng: -71.0589, radius: 20 };
+        const defaultLocation = { lat: 42.3601, lng: -71.0589, radius: zoomRange };
         setMapCenter(defaultLocation);
         fetchVenues(null, defaultLocation);
       }
     }
-  }, [open, fetchVenues, userData, currentLocation]);
+  }, [open, fetchVenues, userData, currentLocation, savedLocation]);
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
@@ -62,7 +65,7 @@ const VenueModal = ({ open, onClose }) => {
     const location = { 
       lat: newCenter.lat, 
       lng: newCenter.lng, 
-      radius: 20 // Or calculate from bounds
+      radius: mapCenter?.radius || currentLocation?.zoomRange || savedLocation?.zoomRange || userData?.localUserInfo?.userDefaults?.defaultZoomRange || 200 // Use existing radius or user's settings
     };
     setMapCenter(location);
     fetchVenues(null, location);
@@ -116,7 +119,13 @@ const VenueModal = ({ open, onClose }) => {
             }}
           >
             {currentTab === 'add' && (
-              <VenueModalAdd onAdd={addVenue} refreshList={handleListRefresh} onDone={() => setCurrentTab('map')} />
+              <VenueModalAddWithSearch
+                onAdd={addVenue}
+                refreshList={handleListRefresh}
+                onDone={() => setCurrentTab('map')}
+                proximityLocation={mapCenter}
+                nearbyVenues={venues}
+              />
             )}
             {currentTab === 'edit' && selectedVenue && (
               <VenueModalEdit
