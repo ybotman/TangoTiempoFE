@@ -446,6 +446,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                     onInputChange={handleSearchInputChange}
                     options={searchOptions}
                     getOptionLabel={(option) => option.fullAddress || ''}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                     loading={searchLoading}
                     loadingText="Searching..."
                     noOptionsText={searchQuery.length < 3 ? "Type at least 3 characters" : "No venues found"}
@@ -469,8 +470,8 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                         }}
                       />
                     )}
-                    renderOption={(props, option) => (
-                      <ListItem {...props}>
+                    renderOption={(props, option, state) => (
+                      <ListItem {...props} key={`${option.id}-${state.index}`}>
                         <LocationOnIcon sx={{ mr: 1, color: 'text.secondary' }} />
                         <ListItemText
                           primary={option.name}
