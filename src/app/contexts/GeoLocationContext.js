@@ -441,50 +441,9 @@ export const GeoLocationProvider = ({ children }) => {
     if (isBostonCalendar && locationAPI?.fetchCities) {
       // TIEMPO-276: Security cleanup - removed iframe logging
       
-      // Fetch cities and find Boston
-      locationAPI.fetchCities().then(cities => {
-        // Log any cities missing required fields for debugging
-        const citiesWithMissingFields = cities.filter(city => !city.cityName || !city.divisionName);
-        if (citiesWithMissingFields.length > 0) {
-          console.warn('[GeoLocationContext] Cities with missing cityName or divisionName:', 
-            citiesWithMissingFields.length, 
-            'out of', 
-            cities.length, 
-            'total cities'
-          );
-        }
-        
-        const bostonCity = cities.find(city => 
-          city.cityName && city.cityName.toLowerCase() === 'boston' && 
-          city.divisionName && city.divisionName.toLowerCase() === 'massachusetts'
-        );
-        
-        if (bostonCity) {
-          // TIEMPO-276: Security cleanup - removed city logging
-          selectLocation({
-            country: {
-              id: bostonCity.countryID || null,
-              name: bostonCity.countryName || 'United States'
-            },
-            region: {
-              id: bostonCity.regionID || null,
-              name: bostonCity.regionName || 'North America'
-            },
-            division: {
-              id: bostonCity.divisionID || null,
-              name: bostonCity.divisionName || 'Massachusetts'
-            },
-            city: {
-              id: bostonCity.cityID || bostonCity._id || null,
-              name: bostonCity.cityName || 'Boston',
-              latitude: bostonCity.latitude || null,
-              longitude: bostonCity.longitude || null
-            }
-          });
-        }
-      }).catch(error => {
-        console.error('[GeoLocationContext] Error fetching cities for Boston selection:', error);
-      });
+      // City lookup removed - system migrated to geo-based coordinates
+      // Boston calendar now uses direct coordinates in BOSTON_CONFIG
+      // No longer need to search for Boston by cityName/divisionName
     }
   }, [locationAPI, selectLocation]);
 
