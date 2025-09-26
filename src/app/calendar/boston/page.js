@@ -675,6 +675,7 @@ const BostonCalendarPage = () => {
                 duration: { days: 21 },
                 buttonText: '21 days',
                 titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
+                listDayFormat: { weekday: 'long', month: 'long', day: 'numeric' },
               },
             }}
             eventClassNames={(arg) => {
