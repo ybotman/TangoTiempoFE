@@ -35,7 +35,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { searchVenues } from '@/utils/geoLocations';
 import debounce from 'lodash/debounce';
 
-const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation = null }) => {
+const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation = null, nearbyVenues = [] }) => {
   const { user } = useContext(AuthContext);
 
   // Entry mode: 'search' or 'manual'
@@ -429,12 +429,12 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
 
               {entryMode === 'search' ? (
                 <>
-                  {proximityLocation && (
+                  {proximityLocation && nearbyVenues.length > 0 && (
                     <Alert severity="info" sx={{ mb: 2 }}>
                       <Typography variant="body2">
-                        Results are prioritized near your map center. Not finding your venue?
+                        📍 Searching near {nearbyVenues[0]?.city || 'your map center'} (within {proximityLocation.radius || 50} miles)
                         <br />
-                        <strong>Tip:</strong> Switch to the Map tab to change your search area, or type the city name in your search.
+                        <strong>Tip:</strong> For best results, search by venue name only (e.g., "Ultimate Tango" not "Ultimate Tango Medford")
                       </Typography>
                     </Alert>
                   )}
@@ -453,11 +453,19 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Search for venue or address"
-                        placeholder="Start typing venue name or address..."
-                        helperText={proximityLocation ?
-                          `Searching near your location (prioritizes results within ${proximityLocation.radius || 20} miles)` :
-                          "Searching nationwide"}
+                        label={proximityLocation ?
+                          `Search venues within ${proximityLocation.radius || 50} miles` :
+                          "Search for venue or address"}
+                        placeholder="Try venue name only (e.g. 'Ultimate Tango')"
+                        helperText={(() => {
+                          if (proximityLocation && nearbyVenues.length > 0) {
+                            const nearestCity = nearbyVenues[0]?.city || nearbyVenues[0]?.address?.city || 'your area';
+                            return `Searching near ${nearestCity} - Results prioritized by proximity`;
+                          } else if (proximityLocation) {
+                            return `Searching within ${proximityLocation.radius || 50} miles of map center`;
+                          }
+                          return "Searching nationwide";
+                        })()}
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
@@ -783,7 +791,8 @@ VenueModalAddWithSearch.propTypes = {
     lat: PropTypes.number,
     lng: PropTypes.number,
     radius: PropTypes.number
-  })
+  }),
+  nearbyVenues: PropTypes.array
 };
 
 export default VenueModalAddWithSearch;

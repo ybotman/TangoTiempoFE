@@ -122,6 +122,7 @@ const VenueModal = ({ open, onClose }) => {
                 refreshList={handleListRefresh}
                 onDone={() => setCurrentTab('map')}
                 proximityLocation={mapCenter}
+                nearbyVenues={venues}
               />
             )}
             {currentTab === 'edit' && selectedVenue && (
