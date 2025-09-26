@@ -99,7 +99,15 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
         console.log('🔎 VenueModalAddWithSearch searching for:', query, 'with options:', searchOptions);
         const results = await searchVenues(query, searchOptions);
         console.log('📋 VenueModalAddWithSearch received results:', results);
-        setSearchOptions(results);
+
+        // Ensure results is an array
+        if (Array.isArray(results)) {
+          console.log('✅ Setting', results.length, 'search options');
+          setSearchOptions(results);
+        } else {
+          console.log('⚠️ Results is not an array:', typeof results);
+          setSearchOptions([]);
+        }
       } catch (err) {
         console.error('❌ VenueModalAddWithSearch search error:', err);
         console.error('Error details:', err.response?.data);
@@ -436,8 +444,6 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                     <Alert severity="info" sx={{ mb: 2 }}>
                       <Typography variant="body2">
                         📍 Searching near {nearbyVenues[0]?.city || 'your map center'} (within {proximityLocation.radius || 50} miles)
-                        <br />
-                        <strong>Tip:</strong> For best results, search by venue name only (e.g., "Ultimate Tango" not "Ultimate Tango Medford")
                       </Typography>
                     </Alert>
                   )}
@@ -448,8 +454,12 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                     inputValue={searchQuery}
                     onInputChange={handleSearchInputChange}
                     options={searchOptions}
-                    getOptionLabel={(option) => option.fullAddress || ''}
+                    getOptionLabel={(option) => {
+                      console.log('Getting label for option:', option);
+                      return option.fullAddress || option.name || '';
+                    }}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
+                    filterOptions={(x) => x}  // Disable MUI's built-in filtering
                     loading={searchLoading}
                     loadingText="Searching..."
                     noOptionsText={searchQuery.length < 3 ? "Type at least 3 characters" : "No venues found"}
@@ -459,7 +469,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                         label={proximityLocation ?
                           `Search venues within ${proximityLocation.radius || 50} miles` :
                           "Search for venue or address"}
-                        placeholder="Try venue name only (e.g. 'Ultimate Tango')"
+                        placeholder="Type venue name..."
                         helperText={(() => {
                           if (proximityLocation && nearbyVenues.length > 0) {
                             const nearestCity = nearbyVenues[0]?.city || nearbyVenues[0]?.address?.city || 'your area';
