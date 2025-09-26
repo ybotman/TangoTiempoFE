@@ -443,7 +443,8 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                   {proximityLocation && nearbyVenues.length > 0 && (
                     <Alert severity="info" sx={{ mb: 2 }}>
                       <Typography variant="body2">
-                        📍 Searching near {nearbyVenues[0]?.city || 'your map center'} (within {proximityLocation.radius || 50} miles)
+                        📍 Searching near {nearbyVenues[0]?.city || 'your map center'}
+                        {proximityLocation.radius && ` (within ${proximityLocation.radius} miles)`}
                       </Typography>
                     </Alert>
                   )}
@@ -466,8 +467,8 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label={proximityLocation ?
-                          `Search venues within ${proximityLocation.radius || 50} miles` :
+                        label={proximityLocation && proximityLocation.radius ?
+                          `Search venues within ${proximityLocation.radius} miles` :
                           "Search for venue or address"}
                         placeholder="Type venue name..."
                         helperText={(() => {
@@ -475,7 +476,9 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                             const nearestCity = nearbyVenues[0]?.city || nearbyVenues[0]?.address?.city || 'your area';
                             return `Searching near ${nearestCity} - Results prioritized by proximity`;
                           } else if (proximityLocation) {
-                            return `Searching within ${proximityLocation.radius || 50} miles of map center`;
+                            return proximityLocation.radius ?
+                              `Searching within ${proximityLocation.radius} miles of map center` :
+                              `Searching near map center`;
                           }
                           return "Searching nationwide";
                         })()}
