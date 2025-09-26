@@ -507,7 +507,7 @@ const BostonCalendarPage = () => {
                     const calDate = calendarRef.current.getApi().getDate();
                     const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
                                   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-                    return `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
+                    return `${months[calDate.getUTCMonth()]} ${calDate.getUTCFullYear()}`;
                   })()
                 : 'LOADING CALENDAR...'}
             </div>
@@ -597,6 +597,65 @@ const BostonCalendarPage = () => {
             eventClick={handleEventClick}
             // Remove dateClick for read-only view
             headerToolbar={false}
+            // TIEMPO-288: Custom date cell content with month abbreviations
+            dayCellContent={(arg) => {
+              // Apply to both month view and 8-week view
+              if (arg.view.type !== 'dayGridMonth' && arg.view.type !== 'dayGrid8Week' && arg.view.type !== 'dayGrid') {
+                return arg.dayNumberText;
+              }
+
+              const date = arg.date;
+              // Use UTC methods to match calendar's UTC timezone setting
+              const day = date.getUTCDate();
+              const month = date.getUTCMonth();
+              const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][month];
+              const fullMonth = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                                'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'][month];
+
+              // First day of month shows full month name in bold with clear highlight
+              if (day === 1) {
+                return (
+                  <div style={{
+                    fontWeight: 'bold',
+                    fontSize: '0.85rem',
+                    padding: '4px 2px',
+                    borderTop: '3px solid #1976d2',
+                    backgroundColor: '#e3f2fd',
+                    marginTop: '-3px',
+                    marginLeft: '-2px',
+                    marginRight: '-2px',
+                    color: '#0d47a1'
+                  }}>
+                    {fullMonth}-{day}
+                  </div>
+                );
+              }
+
+              // Regular days show abbreviated month with smaller font for month
+              return (
+                <div style={{
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '2px'
+                }}>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    color: '#666',
+                    fontWeight: 'normal'
+                  }}>
+                    {monthAbbr}
+                  </span>
+                  <span style={{
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {day}
+                  </span>
+                </div>
+              );
+            }}
             height="auto"
             dayMaxEvents={false}  // Show all events, not just 3
             eventDisplay="block"
@@ -649,8 +708,9 @@ const BostonCalendarPage = () => {
             dayCellDidMount={(arg) => {
               const { date, el } = arg;
               const today = new Date();
-              const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-              const cellDateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+              // Use UTC methods to match calendar's UTC timezone setting
+              const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+              const cellDateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
               
               // Apply gray background to past days (match main calendar #c0c0c0)
               if (cellDateStr < todayStr) {
