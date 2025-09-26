@@ -86,8 +86,9 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
       setSearchLoading(true);
       try {
         const searchOptions = {
-          limit: 8,
-          types: 'poi,address'
+          limit: 10,
+          useSearchBox: true  // Use Search Box API for better POI results
+          // Don't specify types - let it search all types
         };
 
         // Add proximity bias if location is available
