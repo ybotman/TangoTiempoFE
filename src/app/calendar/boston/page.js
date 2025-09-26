@@ -657,8 +657,6 @@ const BostonCalendarPage = () => {
               );
             }}
             height="auto"
-            dayMaxEvents={false}  // Show all events, not just 3
-            eventDisplay="block"
             // Add missing configurations from main calendar
             nextDayThreshold="04:00:00"  // Events until 4am count as previous day (matching main calendar)
             timeZone="UTC"  // Use UTC to prevent timezone conversions
@@ -694,8 +692,8 @@ const BostonCalendarPage = () => {
             eventDidMount={(info) => {
               const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
               
-              // For month view - transparent background, let renderEventContent handle styling
-              if (info.view.type === 'dayGridMonth') {
+              // For month view and 8-week view - transparent background, let renderEventContent handle styling
+              if (info.view.type === 'dayGridMonth' || info.view.type === 'dayGrid8Week' || info.view.type === 'dayGrid') {
                 info.el.style.backgroundColor = 'transparent';
                 info.el.style.borderColor = 'transparent';
                 info.el.style.border = 'none';
