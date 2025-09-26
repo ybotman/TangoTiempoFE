@@ -56,17 +56,27 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
   const [mapKey, setMapKey] = useState(0);
 
   useEffect(() => {
-    // Small delay to ensure DOM is ready
+    // Longer delay to ensure DOM is ready and prevent race conditions
     const timer = setTimeout(() => {
       setMounted(true);
-    }, 100);
+    }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setMounted(false); // Reset on unmount
+    };
   }, []);
 
   // Force new map instance when coordinates change significantly
   useEffect(() => {
-    setMapKey(prev => prev + 1);
+    if (mounted) {
+      // Reset and remount to avoid Leaflet state issues
+      setMounted(false);
+      setTimeout(() => {
+        setMapKey(prev => prev + 1);
+        setMounted(true);
+      }, 100);
+    }
   }, [latitude, longitude]);
 
   // Validate coordinates

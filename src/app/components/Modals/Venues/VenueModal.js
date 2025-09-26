@@ -31,7 +31,20 @@ const VenueModal = ({ open, onClose }) => {
       // Use savedLocation (user's default) first, then currentLocation, then fallback
       const userLat = savedLocation?.lat || currentLocation?.lat;
       const userLng = savedLocation?.lng || currentLocation?.lng;
-      const zoomRange = savedLocation?.zoomRange || currentLocation?.zoomRange || 50;
+      // Use current location setting first (most recent), then saved preference, then defaults
+      // currentLocation reflects the user's active session settings
+      const zoomRange = currentLocation?.zoomRange || savedLocation?.zoomRange || userData?.localUserInfo?.userDefaults?.defaultZoomRange || 200;
+
+      console.log('🏢 VENUE RADIUS:', {
+        savedLocation_zoomRange: savedLocation?.zoomRange,
+        currentLocation_zoomRange: currentLocation?.zoomRange,
+        userDefaults_defaultZoomRange: userData?.localUserInfo?.userDefaults?.defaultZoomRange,
+        FINAL_RADIUS: zoomRange,
+        source: currentLocation?.zoomRange ? 'currentLocation' :
+                savedLocation?.zoomRange ? 'savedLocation' :
+                userData?.localUserInfo?.userDefaults?.defaultZoomRange ? 'userDefaults' :
+                'fallback(200)'
+      });
 
       if (userLat && userLng) {
         const location = { lat: userLat, lng: userLng, radius: zoomRange };
@@ -39,7 +52,7 @@ const VenueModal = ({ open, onClose }) => {
         fetchVenues(null, location); // Fetch venues within radius
       } else {
         // Default to Boston if no location
-        const defaultLocation = { lat: 42.3601, lng: -71.0589, radius: 20 };
+        const defaultLocation = { lat: 42.3601, lng: -71.0589, radius: zoomRange };
         setMapCenter(defaultLocation);
         fetchVenues(null, defaultLocation);
       }
@@ -63,7 +76,7 @@ const VenueModal = ({ open, onClose }) => {
     const location = { 
       lat: newCenter.lat, 
       lng: newCenter.lng, 
-      radius: 20 // Or calculate from bounds
+      radius: mapCenter?.radius || currentLocation?.zoomRange || savedLocation?.zoomRange || userData?.localUserInfo?.userDefaults?.defaultZoomRange || 200 // Use existing radius or user's settings
     };
     setMapCenter(location);
     fetchVenues(null, location);

@@ -266,8 +266,8 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
           setStage(2);
         }
       } catch (err) {
-        console.error('Proximity check error:', err);
-        // Proceed anyway if proximity check fails
+        // Proximity check is optional - proceed if endpoint not available
+        console.log('Proximity check skipped (endpoint not available)');
         setStage(2);
       } finally {
         setLoading(false);
@@ -314,17 +314,23 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
           masteredCountryName: geocodeData.masteredCountryName
         });
 
-        // Step 2: Check for nearby venues
-        const nearbyResponse = await axios.post(`${baseURL}/api/venues/check-proximity`, {
-          latitude: geocodeData.latitude,
-          longitude: geocodeData.longitude
-        });
+        // Step 2: Check for nearby venues (optional - skip if endpoint not available)
+        try {
+          const nearbyResponse = await axios.post(`${baseURL}/api/venues/check-proximity`, {
+            latitude: geocodeData.latitude,
+            longitude: geocodeData.longitude
+          });
 
-        if (nearbyResponse.data?.nearbyVenues?.length > 0) {
-          setLocalNearbyVenues(nearbyResponse.data.nearbyVenues);
-          setProximityWarning(true);
-        } else {
-          // No issues, proceed to stage 2
+          if (nearbyResponse.data?.nearbyVenues?.length > 0) {
+            setLocalNearbyVenues(nearbyResponse.data.nearbyVenues);
+            setProximityWarning(true);
+          } else {
+            // No issues, proceed to stage 2
+            setStage(2);
+          }
+        } catch (proximityErr) {
+          // Proximity check is optional - proceed if endpoint not available
+          console.log('Proximity check skipped (endpoint not available)');
           setStage(2);
         }
       } else {

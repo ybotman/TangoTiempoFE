@@ -48,18 +48,19 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
  */
 export function useVenueSelection() {
   const { venues, loading: venuesLoading, error: venuesError, fetchVenues } = useVenues();
-  const { selectedLocation } = useGeoLocation();
+  const { selectedLocation, currentLocation, savedLocation } = useGeoLocation();
   const { userData } = useUsers();
-  
+
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [filteredVenues, setFilteredVenues] = useState([]);
   const [venueCategory, setVenueCategory] = useState('all');
   // Always use city view with radius filtering (keep for API compatibility)
   const [useDivisionScope, setUseDivisionScope] = useState(false);
-  
-  // Get radius from user preferences or default to 50
+
+  // Get radius from user preferences or location context
   const userDefaults = userData?.localUserInfo?.userDefaults;
-  const [radiusMiles, setRadiusMiles] = useState(userDefaults?.defaultZoomRange || 50);
+  const contextRadius = savedLocation?.zoomRange || currentLocation?.zoomRange;
+  const [radiusMiles, setRadiusMiles] = useState(userDefaults?.defaultZoomRange || contextRadius);
   
   // Filter venues based on location, category, scope, and radius
   useEffect(() => {

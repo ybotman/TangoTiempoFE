@@ -41,8 +41,9 @@ export function useVenues() {
         if (lat && lng) {
           params.lat = lat;
           params.lng = lng;
-          // Use zoomRange from context (user's saved preference) or radius from location or default
-          const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
+          // Use zoomRange from context (user's saved preference) or radius from location
+          // No hardcoded fallback - use what the context provides
+          const radiusValue = coordLocation.radius || coordLocation.zoomRange;
           params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
           params.sortByDistance = true; // Sort by closest first
         }

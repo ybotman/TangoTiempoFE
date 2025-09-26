@@ -872,7 +872,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
         {/* Render tab content conditionally */}
         {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />}
-        {currentTab === 'repeating' && (
+        {currentTab === 'repeating' && eventData.isRepeating && (
           <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
