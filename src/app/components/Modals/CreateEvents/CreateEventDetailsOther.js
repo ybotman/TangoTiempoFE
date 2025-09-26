@@ -20,7 +20,7 @@ import { useOrganizers } from '@/hooks/useOrganizers';
 
 const CreateEventDetailsOther = ({ eventData, setEventData }) => {
   const categories = useCategories(); // Fetch categories
-  const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers(); // Fetch organizers
+  const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers({ skipLocationFilter: true }); // Fetch ALL organizers for dropdown
 
   // Handle secondary category change
   const handleSecondCategoryChange = (event) => {
