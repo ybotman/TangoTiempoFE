@@ -53,6 +53,7 @@ if (typeof window !== 'undefined') {
 const VenueMap = ({ latitude, longitude, venueName, address }) => {
   const [mounted, setMounted] = useState(false);
   const [mapError, setMapError] = useState(false);
+  const [mapKey, setMapKey] = useState(0);
 
   useEffect(() => {
     // Small delay to ensure DOM is ready
@@ -62,6 +63,11 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Force new map instance when coordinates change significantly
+  useEffect(() => {
+    setMapKey(prev => prev + 1);
+  }, [latitude, longitude]);
 
   // Validate coordinates
   const lat = parseFloat(latitude);
@@ -90,6 +96,15 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
 
   const position = [lat, lng];
 
+  // Prevent rendering if coordinates haven't changed meaningfully
+  if (!mounted) {
+    return (
+      <Box sx={{ height: 350, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   try {
     return (
       <Box sx={{ height: 350, width: '100%', position: 'relative' }}>
@@ -98,7 +113,8 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
           zoom={16}
           style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={false}
-          key={`map-${lat}-${lng}`} // Force re-render on coordinate change
+          key={`map-${mapKey}`} // Force new instance to avoid Leaflet state issues
+          whenReady={() => console.log('Map ready')}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
