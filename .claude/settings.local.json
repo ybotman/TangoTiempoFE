@@ -19,7 +19,8 @@
       "WebFetch(domain:fullcalendar.io)",
       "Bash(./.ybotbot/jira-tools/jira-comment.sh:*)",
       "WebFetch(domain:docs.mapbox.com)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -11,8 +11,8 @@ export default function OrganizerJoinPage() {
         <div className={styles.heroContent}>
           <h1>Join as a Tango Event Organizer</h1>
           <p className={styles.subhead}>
-            Be part of the first FREE national tango calendar.
-            Help dancers find your milongas, practicas, and classes.
+            Be part of the most comprehensive FREE national tango calendar.
+            Help dancers find your milongas, practicas, classes, marathons, and festivals.
           </p>
           <div className={styles.heroCtas}>
             <Link href="/auth/login" className={styles.ctaPrimary}>

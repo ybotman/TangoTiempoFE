@@ -125,7 +125,11 @@ const BostonCalendarPage = () => {
   // Role context not used in Boston calendar
 
   // Local state for view type (not provided by hook)
-  const [currentViewType, setCurrentViewType] = useState('dayGridMonth');
+  // Start with 8-week view for desktop, list for mobile
+  const getInitialView = () => {
+    return typeof window !== 'undefined' && window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
+  };
+  const [currentViewType, setCurrentViewType] = useState(getInitialView());
 
   // Force Boston location on mount
   useEffect(() => {
@@ -417,9 +421,12 @@ const BostonCalendarPage = () => {
     const handleWindowResize = () => {
       const width = window.innerWidth;
       const calendarApi = calendarRef.current?.getApi();
-      
-      if (width < 768 && calendarApi && currentViewType === 'dayGridMonth') {
-        calendarApi.changeView('list21Days');
+
+      if (width >= 768) {
+        calendarApi.changeView('dayGrid8Week'); // Switch to 8-week view for large screens
+        setCurrentViewType('dayGrid8Week');
+      } else {
+        calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
         setCurrentViewType('list21Days');
       }
     };
@@ -491,7 +498,7 @@ const BostonCalendarPage = () => {
             </IconButton>
           </ButtonGroup>
 
-          {/* Date Range Display - Month Year Label */}
+          {/* Date Range Display - Month title removed to match main calendar */}
           <div
             style={{
               flex: 1,
@@ -501,26 +508,19 @@ const BostonCalendarPage = () => {
               alignItems: 'center',
             }}
           >
-            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-              {calendarRef.current
-                ? (() => {
-                    const calDate = calendarRef.current.getApi().getDate();
-                    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-                                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-                    return `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
-                  })()
-                : 'LOADING CALENDAR...'}
+            {/* Month display removed - dates now show month abbreviations in cells */}
+            <div style={{ fontSize: '0.75rem', color: '#888' }}>
             </div>
           </div>
 
           <ButtonGroup variant="outlined" size="small">
             <IconButton
               onClick={() => {
-                calendarRef.current?.getApi()?.changeView('dayGridMonth');
-                setCurrentViewType('dayGridMonth');
+                calendarRef.current?.getApi()?.changeView('dayGrid8Week');
+                setCurrentViewType('dayGrid8Week');
               }}
-              color={currentViewType === 'dayGridMonth' ? 'primary' : 'default'}
-              title="Month View"
+              color={currentViewType === 'dayGrid8Week' ? 'primary' : 'default'}
+              title="8 Week View"
             >
               <CalendarMonthIcon />
             </IconButton>
@@ -597,9 +597,66 @@ const BostonCalendarPage = () => {
             eventClick={handleEventClick}
             // Remove dateClick for read-only view
             headerToolbar={false}
+            // TIEMPO-288: Custom date cell content with month abbreviations
+            dayCellContent={(arg) => {
+              // Apply to both month view and 8-week view
+              if (arg.view.type !== 'dayGridMonth' && arg.view.type !== 'dayGrid8Week' && arg.view.type !== 'dayGrid') {
+                return arg.dayNumberText;
+              }
+
+              const date = arg.date;
+              // Use UTC methods to match calendar's UTC timezone setting
+              const day = date.getUTCDate();
+              const month = date.getUTCMonth();
+              const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][month];
+              const fullMonth = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                                'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'][month];
+
+              // First day of month shows full month name in bold with clear highlight
+              if (day === 1) {
+                return (
+                  <div style={{
+                    fontWeight: 'bold',
+                    fontSize: '0.85rem',
+                    padding: '4px 2px',
+                    borderTop: '3px solid #1976d2',
+                    backgroundColor: '#e3f2fd',
+                    marginTop: '-3px',
+                    marginLeft: '-2px',
+                    marginRight: '-2px',
+                    color: '#0d47a1'
+                  }}>
+                    {fullMonth}-{day}
+                  </div>
+                );
+              }
+
+              // Regular days show abbreviated month with smaller font for month
+              return (
+                <div style={{
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '2px'
+                }}>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    color: '#666',
+                    fontWeight: 'normal'
+                  }}>
+                    {monthAbbr}
+                  </span>
+                  <span style={{
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {day}
+                  </span>
+                </div>
+              );
+            }}
             height="auto"
-            dayMaxEvents={false}  // Show all events, not just 3
-            eventDisplay="block"
             // Add missing configurations from main calendar
             nextDayThreshold="04:00:00"  // Events until 4am count as previous day (matching main calendar)
             timeZone="UTC"  // Use UTC to prevent timezone conversions
@@ -616,6 +673,16 @@ const BostonCalendarPage = () => {
                 duration: { days: 21 },
                 buttonText: '21 days',
                 titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
+                listDayFormat: { weekday: 'long', month: 'long', day: 'numeric' },
+              },
+              // Custom 8-week view to match main calendar
+              dayGrid8Week: {
+                type: 'dayGrid',
+                duration: { weeks: 8 },
+                buttonText: '8 Weeks',
+                fixedWeekCount: false,
+                eventMinHeight: 25,
+                dayHeaderFormat: { weekday: 'short' },
               },
             }}
             eventClassNames={(arg) => {
@@ -625,8 +692,8 @@ const BostonCalendarPage = () => {
             eventDidMount={(info) => {
               const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
               
-              // For month view - transparent background, let renderEventContent handle styling
-              if (info.view.type === 'dayGridMonth') {
+              // For month view and 8-week view - transparent background, let renderEventContent handle styling
+              if (info.view.type === 'dayGridMonth' || info.view.type === 'dayGrid8Week' || info.view.type === 'dayGrid') {
                 info.el.style.backgroundColor = 'transparent';
                 info.el.style.borderColor = 'transparent';
                 info.el.style.border = 'none';
@@ -649,8 +716,9 @@ const BostonCalendarPage = () => {
             dayCellDidMount={(arg) => {
               const { date, el } = arg;
               const today = new Date();
-              const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-              const cellDateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+              // Use UTC methods to match calendar's UTC timezone setting
+              const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+              const cellDateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
               
               // Apply gray background to past days (match main calendar #c0c0c0)
               if (cellDateStr < todayStr) {
