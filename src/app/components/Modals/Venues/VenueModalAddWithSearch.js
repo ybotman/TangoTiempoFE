@@ -67,7 +67,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
   });
 
   const [geocodeResult, setGeocodeResult] = useState(null);
-  const [nearbyVenues, setNearbyVenues] = useState([]);
+  const [localNearbyVenues, setLocalNearbyVenues] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [proximityWarning, setProximityWarning] = useState(false);
@@ -195,7 +195,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
     });
     // Reset geocode when address changes
     setGeocodeResult(null);
-    setNearbyVenues([]);
+    setLocalNearbyVenues([]);
     setProximityWarning(false);
     setIsOverriding(false);
     setOverrideType(null);
@@ -248,7 +248,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
         });
 
         if (nearbyResponse.data?.nearbyVenues?.length > 0) {
-          setNearbyVenues(nearbyResponse.data.nearbyVenues);
+          setLocalNearbyVenues(nearbyResponse.data.nearbyVenues);
           setProximityWarning(true);
         } else {
           // No nearby venues, proceed to stage 2
@@ -271,7 +271,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
 
     setLoading(true);
     setError(null);
-    setNearbyVenues([]);
+    setLocalNearbyVenues([]);
     setProximityWarning(false);
     setIsOverriding(false);
     setOverrideType(null);
@@ -310,7 +310,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
         });
 
         if (nearbyResponse.data?.nearbyVenues?.length > 0) {
-          setNearbyVenues(nearbyResponse.data.nearbyVenues);
+          setLocalNearbyVenues(nearbyResponse.data.nearbyVenues);
           setProximityWarning(true);
         } else {
           // No issues, proceed to stage 2
@@ -337,7 +337,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
   const handleEditAddress = () => {
     setGeocodeResult(null);
     setProximityWarning(false);
-    setNearbyVenues([]);
+    setLocalNearbyVenues([]);
   };
 
   const handleSave = async () => {
@@ -741,7 +741,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
       )}
 
       {/* Proximity Warning Dialog */}
-      {proximityWarning && nearbyVenues.length > 0 && (
+      {proximityWarning && localNearbyVenues.length > 0 && (
         <Paper sx={{ mt: 2, p: 2, border: '2px solid', borderColor: 'warning.main' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <WarningIcon color="warning" sx={{ mr: 1 }} />
@@ -753,7 +753,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
             The following venues are within 100 yards of this location:
           </Typography>
           <List dense>
-            {nearbyVenues.map((venue, index) => (
+            {localNearbyVenues.map((venue, index) => (
               <ListItem key={index}>
                 <ListItemText
                   primary={venue.name}
