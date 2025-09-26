@@ -96,16 +96,12 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
           searchOptions.proximity = [proximityLocation.lng, proximityLocation.lat];
         }
 
-        console.log('🔎 VenueModalAddWithSearch searching for:', query, 'with options:', searchOptions);
         const results = await searchVenues(query, searchOptions);
-        console.log('📋 VenueModalAddWithSearch received results:', results);
 
         // Ensure results is an array
         if (Array.isArray(results)) {
-          console.log('✅ Setting', results.length, 'search options');
           setSearchOptions(results);
         } else {
-          console.log('⚠️ Results is not an array:', typeof results);
           setSearchOptions([]);
         }
       } catch (err) {
@@ -267,7 +263,6 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
         }
       } catch (err) {
         // Proximity check is optional - proceed if endpoint not available
-        console.log('Proximity check skipped (endpoint not available)');
         setStage(2);
       } finally {
         setLoading(false);
@@ -330,7 +325,6 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
           }
         } catch (proximityErr) {
           // Proximity check is optional - proceed if endpoint not available
-          console.log('Proximity check skipped (endpoint not available)');
           setStage(2);
         }
       } else {
@@ -338,7 +332,13 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
       }
     } catch (err) {
       console.error('Geocoding error:', err);
-      setError(err.response?.data?.message || 'Failed to geocode address. Please try again.');
+
+      // Handle specific backend error for cities not in database
+      if (err.response?.data?.message?.includes('No city found')) {
+        setError('This location is outside the supported city database. Currently, venues can only be added in cities with existing tango communities. Please contact support to add venues in new cities.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to geocode address. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -381,10 +381,12 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
         comments: venueData.comments.trim(),
         latitude: geocodeResult.latitude,
         longitude: geocodeResult.longitude,
-        masteredCityId: geocodeResult.masteredCityId,
-        masteredDivisionId: geocodeResult.masteredDivisionId,
-        masteredRegionId: geocodeResult.masteredRegionId,
-        masteredCountryId: geocodeResult.masteredCountryId
+        isActive: true,  // Ensure venues are created as active
+        // Make mastered IDs optional - venues can exist outside known cities
+        masteredCityId: geocodeResult.masteredCityId || null,
+        masteredDivisionId: geocodeResult.masteredDivisionId || null,
+        masteredRegionId: geocodeResult.masteredRegionId || null,
+        masteredCountryId: geocodeResult.masteredCountryId || null
       };
 
       await onAdd(data);
@@ -462,7 +464,6 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                     onInputChange={handleSearchInputChange}
                     options={searchOptions}
                     getOptionLabel={(option) => {
-                      console.log('Getting label for option:', option);
                       return option.fullAddress || option.name || '';
                     }}
                     isOptionEqualToValue={(option, value) => option.id === value.id}

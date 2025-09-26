@@ -35,17 +35,6 @@ const VenueModal = ({ open, onClose }) => {
       // currentLocation reflects the user's active session settings
       const zoomRange = currentLocation?.zoomRange || savedLocation?.zoomRange || userData?.localUserInfo?.userDefaults?.defaultZoomRange || 200;
 
-      console.log('🏢 VENUE RADIUS:', {
-        savedLocation_zoomRange: savedLocation?.zoomRange,
-        currentLocation_zoomRange: currentLocation?.zoomRange,
-        userDefaults_defaultZoomRange: userData?.localUserInfo?.userDefaults?.defaultZoomRange,
-        FINAL_RADIUS: zoomRange,
-        source: currentLocation?.zoomRange ? 'currentLocation' :
-                savedLocation?.zoomRange ? 'savedLocation' :
-                userData?.localUserInfo?.userDefaults?.defaultZoomRange ? 'userDefaults' :
-                'fallback(200)'
-      });
-
       if (userLat && userLng) {
         const location = { lat: userLat, lng: userLng, radius: zoomRange };
         setMapCenter(location);

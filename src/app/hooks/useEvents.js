@@ -294,14 +294,6 @@ export function useEvents({
           // Convert zoomRange (miles) to km for the API
           // Use context value or fallback to 200 miles
           const radiusInMiles = effectiveZoomRange || 200;
-
-          console.log('📅 EVENT RADIUS:', {
-            effectiveZoomRange: effectiveZoomRange,
-            FINAL_RADIUS_MILES: radiusInMiles,
-            FINAL_RADIUS_KM: Math.round(radiusInMiles * 1.60934),
-            source: effectiveZoomRange ? 'user settings' : 'fallback(200)'
-          });
-
           params.radius = `${Math.round(radiusInMiles * 1.60934)}km`;
           params.sortByDistance = true;
         }
