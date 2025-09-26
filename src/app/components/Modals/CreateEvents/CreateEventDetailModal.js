@@ -719,11 +719,18 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
   // Handle modal close - clear form data
   const handleClose = () => {
+    // Check if there are unsaved changes
+    if (hasUnsavedChanges) {
+      if (!window.confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+        return;
+      }
+    }
+
     // Always clear success/error states when closing
     setSaveSuccess(false);
     setSaveError(null);
     setHasUnsavedChanges(false);
-    
+
     // Reset form to initial state when closing (only in create mode)
     if (!editMode) {
       setEventData({
@@ -813,7 +820,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
               You can only edit events in your assigned cities.
             </Typography>
             <Button onClick={handleClose} sx={{ mt: 2 }} variant="contained">
-              Close
+              Cancel
             </Button>
           </Box>
         ) : (
@@ -882,7 +889,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'UPDATE' : 'Save Event')}
           </Button>
           <Button onClick={handleClose} variant="outlined" color="secondary">
-            Close
+            Cancel
           </Button>
         </Box>
         </>

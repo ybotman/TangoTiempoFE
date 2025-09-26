@@ -12,15 +12,18 @@ export async function searchVenues(query, options = {}) {
 
   const {
     proximity = null, // [lng, lat] for biasing results
-    limit = 5,
-    types = 'poi,address', // Can include: poi, address, postcode, place, neighborhood
+    limit = 10, // Increased to find more landmarks and venues
+    types = null, // Remove default - let MapBox search all types for better landmark coverage
     country = 'us' // ISO 3166 country code
   } = options;
 
   let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json`;
   url += `?access_token=${accessToken}`;
   url += `&limit=${limit}`;
-  url += `&types=${types}`;
+  // Only add types if explicitly specified - otherwise search all types
+  if (types) {
+    url += `&types=${types}`;
+  }
   url += `&country=${country}`;
 
   if (proximity) {
@@ -34,9 +37,14 @@ export async function searchVenues(query, options = {}) {
       return response.data.features.map(feature => {
         // Parse the place components
         const context = feature.context || [];
+
+        // Better name extraction for landmarks
+        // MapBox sometimes puts the landmark name in text, sometimes in properties.name
+        const placeName = feature.properties?.name || feature.text || '';
+
         const addressComponents = {
           address: feature.properties?.address || '',
-          name: feature.text || '',
+          name: placeName,
           fullAddress: feature.place_name || '',
           city: '',
           state: '',
@@ -81,8 +89,9 @@ export async function searchVenues(query, options = {}) {
           center: feature.center, // [lng, lat]
           latitude: feature.center[1],
           longitude: feature.center[0],
-          placeType: feature.place_type[0],
-          relevance: feature.relevance
+          placeType: feature.place_type?.[0] || 'place',
+          category: feature.properties?.category || null, // MapBox category if available
+          relevance: feature.relevance || 1
         };
       });
     }

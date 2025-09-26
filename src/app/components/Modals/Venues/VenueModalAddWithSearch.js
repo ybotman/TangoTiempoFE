@@ -428,6 +428,15 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
 
               {entryMode === 'search' ? (
                 <>
+                  {proximityLocation && (
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                      <Typography variant="body2">
+                        Results are prioritized near your map center. Not finding your venue?
+                        <br />
+                        <strong>Tip:</strong> Switch to the Map tab to change your search area, or type the city name in your search.
+                      </Typography>
+                    </Alert>
+                  )}
                   <Autocomplete
                     fullWidth
                     value={selectedVenue}
@@ -444,7 +453,9 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
                         {...params}
                         label="Search for venue or address"
                         placeholder="Start typing venue name or address..."
-                        helperText={proximityLocation ? `Searching near your location (${proximityLocation.radius || 20} miles)` : "Searching nationwide"}
+                        helperText={proximityLocation ?
+                          `Searching near your location (prioritizes results within ${proximityLocation.radius || 20} miles)` :
+                          "Searching nationwide"}
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,

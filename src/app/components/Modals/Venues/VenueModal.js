@@ -18,7 +18,7 @@ const VenueModal = ({ open, onClose }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { venues, fetchVenues, addVenue, updateVenue } = useVenues();
   const { userData } = useUsers();
-  const { currentLocation } = useGeoLocation();
+  const { currentLocation, savedLocation } = useGeoLocation();
   const [currentTab, setCurrentTab] = useState('map');
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
@@ -28,14 +28,15 @@ const VenueModal = ({ open, onClose }) => {
       setCurrentTab('map');
       setSelectedVenue(null);
       
-      // Get user's saved location or current location
-      const userLat = userData?.localUserInfo?.userDefaults?.latitude || currentLocation?.lat;
-      const userLng = userData?.localUserInfo?.userDefaults?.longitude || currentLocation?.lng;
-      
+      // Use savedLocation (user's default) first, then currentLocation, then fallback
+      const userLat = savedLocation?.lat || currentLocation?.lat;
+      const userLng = savedLocation?.lng || currentLocation?.lng;
+      const zoomRange = savedLocation?.zoomRange || currentLocation?.zoomRange || 50;
+
       if (userLat && userLng) {
-        const location = { lat: userLat, lng: userLng, radius: 20 };
+        const location = { lat: userLat, lng: userLng, radius: zoomRange };
         setMapCenter(location);
-        fetchVenues(null, location); // Fetch venues within 20 miles
+        fetchVenues(null, location); // Fetch venues within radius
       } else {
         // Default to Boston if no location
         const defaultLocation = { lat: 42.3601, lng: -71.0589, radius: 20 };
@@ -43,7 +44,7 @@ const VenueModal = ({ open, onClose }) => {
         fetchVenues(null, defaultLocation);
       }
     }
-  }, [open, fetchVenues, userData, currentLocation]);
+  }, [open, fetchVenues, userData, currentLocation, savedLocation]);
 
   const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
