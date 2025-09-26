@@ -657,8 +657,6 @@ const BostonCalendarPage = () => {
               );
             }}
             height="auto"
-            dayMaxEvents={false}  // Show all events, not just 3
-            eventDisplay="block"
             // Add missing configurations from main calendar
             nextDayThreshold="04:00:00"  // Events until 4am count as previous day (matching main calendar)
             timeZone="UTC"  // Use UTC to prevent timezone conversions
@@ -692,25 +690,26 @@ const BostonCalendarPage = () => {
               return category && category.name ? [`category-${category.name.toLowerCase().replace(/\s+/g, '-')}`] : [];
             }}
             eventDidMount={(info) => {
-              // Remove background color for list view to avoid double category display
-              if (info.view.type === 'listMonth' || info.view.type === 'list' || info.view.type === 'list21Days') {
+              const category = categories.find((cat) => cat.id === info.event.extendedProps.category);
+              
+              // For month view and 8-week view - transparent background, let renderEventContent handle styling
+              if (info.view.type === 'dayGridMonth' || info.view.type === 'dayGrid8Week' || info.view.type === 'dayGrid') {
+                info.el.style.backgroundColor = 'transparent';
+                info.el.style.borderColor = 'transparent';
+                info.el.style.border = 'none';
+                info.el.style.boxShadow = 'none';
+              }
+              
+              // For list view - transparent background to avoid double colors
+              if (info.view.type === 'list21Days' || info.view.type === 'listMonth') {
                 info.el.style.backgroundColor = 'transparent';
                 info.el.style.borderColor = '#ddd';
-
-                // Hide the list view dot/circle indicator in the time column
-                const dotElement = info.el.querySelector('.fc-list-event-dot');
-                if (dotElement) {
-                  dotElement.style.display = 'none';
+                
+                // Style the dot with category color
+                const dotEl = info.el.querySelector('.fc-list-event-dot');
+                if (dotEl && category) {
+                  dotEl.style.borderColor = category.color;
                 }
-
-                // Hide the default FullCalendar time display in list view
-                const timeElement = info.el.querySelector('.fc-list-event-time');
-                if (timeElement) {
-                  timeElement.style.display = 'none';
-                }
-
-                // Alternative: hide the entire time column border-left which contains the color indicator
-                info.el.style.borderLeft = 'none';
               }
             }}
             // Gray out past days in month view
