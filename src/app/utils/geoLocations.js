@@ -52,10 +52,21 @@ export async function searchVenues(query, options = {}) {
   }
 
   try {
-    const response = await axios.get(url);
+    console.log('🔍 Searching venues with URL:', url);
 
-    if (response.data.features) {
-      return response.data.features.map(feature => {
+    // Use fetch instead of axios for better browser compatibility
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('📦 Search response:', data);
+
+    if (data.features) {
+      console.log(`✅ Found ${data.features.length} results`);
+      return data.features.map(feature => {
         // Parse the place components
         const context = feature.context || [];
 
@@ -133,9 +144,16 @@ export async function searchVenues(query, options = {}) {
       });
     }
 
+    console.log('⚠️ No features in response');
     return [];
   } catch (error) {
-    console.error('Venue Search Error:', error.message, error.response?.data);
+    console.error('❌ Venue Search Error:', error.message);
+
+    // For fetch errors, we don't have error.response like axios
+    if (error.message.includes('HTTP error')) {
+      console.error('API returned an error status');
+    }
+
     throw error;
   }
 }

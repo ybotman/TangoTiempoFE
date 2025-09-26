@@ -96,10 +96,13 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
           searchOptions.proximity = [proximityLocation.lng, proximityLocation.lat];
         }
 
+        console.log('🔎 VenueModalAddWithSearch searching for:', query, 'with options:', searchOptions);
         const results = await searchVenues(query, searchOptions);
+        console.log('📋 VenueModalAddWithSearch received results:', results);
         setSearchOptions(results);
       } catch (err) {
-        console.error('Search error:', err);
+        console.error('❌ VenueModalAddWithSearch search error:', err);
+        console.error('Error details:', err.response?.data);
         setSearchOptions([]);
       } finally {
         setSearchLoading(false);
