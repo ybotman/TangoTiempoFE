@@ -125,7 +125,11 @@ const BostonCalendarPage = () => {
   // Role context not used in Boston calendar
 
   // Local state for view type (not provided by hook)
-  const [currentViewType, setCurrentViewType] = useState('dayGridMonth');
+  // Start with 8-week view for desktop, list for mobile
+  const getInitialView = () => {
+    return typeof window !== 'undefined' && window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
+  };
+  const [currentViewType, setCurrentViewType] = useState(getInitialView());
 
   // Force Boston location on mount
   useEffect(() => {
@@ -417,9 +421,12 @@ const BostonCalendarPage = () => {
     const handleWindowResize = () => {
       const width = window.innerWidth;
       const calendarApi = calendarRef.current?.getApi();
-      
-      if (width < 768 && calendarApi && currentViewType === 'dayGridMonth') {
-        calendarApi.changeView('list21Days');
+
+      if (width >= 768) {
+        calendarApi.changeView('dayGrid8Week'); // Switch to 8-week view for large screens
+        setCurrentViewType('dayGrid8Week');
+      } else {
+        calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
         setCurrentViewType('list21Days');
       }
     };
@@ -491,7 +498,7 @@ const BostonCalendarPage = () => {
             </IconButton>
           </ButtonGroup>
 
-          {/* Date Range Display - Month Year Label */}
+          {/* Date Range Display - Month title removed to match main calendar */}
           <div
             style={{
               flex: 1,
@@ -501,26 +508,19 @@ const BostonCalendarPage = () => {
               alignItems: 'center',
             }}
           >
-            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-              {calendarRef.current
-                ? (() => {
-                    const calDate = calendarRef.current.getApi().getDate();
-                    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-                                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-                    return `${months[calDate.getUTCMonth()]} ${calDate.getUTCFullYear()}`;
-                  })()
-                : 'LOADING CALENDAR...'}
+            {/* Month display removed - dates now show month abbreviations in cells */}
+            <div style={{ fontSize: '0.75rem', color: '#888' }}>
             </div>
           </div>
 
           <ButtonGroup variant="outlined" size="small">
             <IconButton
               onClick={() => {
-                calendarRef.current?.getApi()?.changeView('dayGridMonth');
-                setCurrentViewType('dayGridMonth');
+                calendarRef.current?.getApi()?.changeView('dayGrid8Week');
+                setCurrentViewType('dayGrid8Week');
               }}
-              color={currentViewType === 'dayGridMonth' ? 'primary' : 'default'}
-              title="Month View"
+              color={currentViewType === 'dayGrid8Week' ? 'primary' : 'default'}
+              title="8 Week View"
             >
               <CalendarMonthIcon />
             </IconButton>
@@ -676,6 +676,15 @@ const BostonCalendarPage = () => {
                 buttonText: '21 days',
                 titleFormat: { month: 'long', day: 'numeric', year: 'numeric' },
                 listDayFormat: { weekday: 'long', month: 'long', day: 'numeric' },
+              },
+              // Custom 8-week view to match main calendar
+              dayGrid8Week: {
+                type: 'dayGrid',
+                duration: { weeks: 8 },
+                buttonText: '8 Weeks',
+                fixedWeekCount: false,
+                eventMinHeight: 25,
+                dayHeaderFormat: { weekday: 'short' },
               },
             }}
             eventClassNames={(arg) => {
