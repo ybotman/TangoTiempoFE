@@ -281,6 +281,9 @@ const BostonCalendarPage = () => {
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForListView(event.start, event.end);
 
+      // Detect mobile for wrapping behavior
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
       return (
         <div style={{
           padding: '4px 2px',
@@ -294,7 +297,8 @@ const BostonCalendarPage = () => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            flexWrap: isMobile ? 'wrap' : 'nowrap'  // Enable wrapping on mobile
           }}>
             {/* Time range - matching main calendar */}
             {startTime && (
@@ -321,7 +325,7 @@ const BostonCalendarPage = () => {
                   fontWeight: 'normal',
                   color: '#666',
                   overflow: 'visible',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
                   flexShrink: 1,
                   lineHeight: '1.2',
                   textDecoration: isCanceled ? 'line-through' : 'none'
@@ -336,7 +340,7 @@ const BostonCalendarPage = () => {
                       fontWeight: 'bold',
                       color: '#333',
                       overflow: 'visible',
-                      whiteSpace: 'nowrap',
+                      whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
