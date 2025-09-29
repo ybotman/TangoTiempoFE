@@ -439,6 +439,19 @@ const BostonCalendarPage = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Hide FullCalendar's default time and dot columns in list view */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .fc-list-event-time {
+          display: none !important;
+        }
+        .fc-list-event-dot {
+          display: none !important;
+        }
+        .fc-list-event-graphic {
+          display: none !important;
+        }
+      `}} />
+
       {/* Boston Header Image */}
       <div style={{ 
         position: 'relative', 
