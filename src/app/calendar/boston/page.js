@@ -120,8 +120,8 @@ const BostonCalendarPage = () => {
     setSessionLocation
   } = useGeoLocation();
 
-  // Auth and Role contexts
-  const { user } = useContext(AuthContext);
+  // Auth context - user not used in read-only Boston calendar
+  useContext(AuthContext);
   // Role context not used in Boston calendar
 
   // Local state for view type (not provided by hook)
