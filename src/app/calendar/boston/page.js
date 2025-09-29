@@ -569,7 +569,7 @@ const BostonCalendarPage = () => {
         <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
           {eventsLoading && (
             <div style={{
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
@@ -591,10 +591,10 @@ const BostonCalendarPage = () => {
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite'
               }}></div>
-              <div style={{ 
-                fontSize: '16px', 
+              <div style={{
+                fontSize: '16px',
                 fontWeight: '500',
-                color: '#333' 
+                color: '#333'
               }}>
                 Loading events...
               </div>
