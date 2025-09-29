@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
-export const useOrganizers = () => {
+export const useOrganizers = (options = {}) => {
   const { selectedLocation } = useGeoLocation();
+  const { skipLocationFilter = false } = options; // Allow skipping location filter for dropdowns
 
   // Get location IDs for filtering with proper null checks
   const masteredRegionId = selectedLocation?.region?.id || null;
@@ -72,16 +73,19 @@ export const useOrganizers = () => {
     };
 
     // Add location filters from the GeoLocationContext with null checks
-    if (masteredRegionId) {
-      params.organizerRegion = masteredRegionId;
-    }
+    // Skip location filtering when used for dropdowns (need ALL organizers)
+    if (!skipLocationFilter) {
+      if (masteredRegionId) {
+        params.organizerRegion = masteredRegionId;
+      }
 
-    if (masteredDivisionId) {
-      params.organizerDivision = masteredDivisionId;
-    }
+      if (masteredDivisionId) {
+        params.organizerDivision = masteredDivisionId;
+      }
 
-    if (masteredCityId) {
-      params.organizerCity = masteredCityId;
+      if (masteredCityId) {
+        params.organizerCity = masteredCityId;
+      }
     }
 
     try {

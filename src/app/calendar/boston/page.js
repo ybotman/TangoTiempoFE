@@ -120,8 +120,8 @@ const BostonCalendarPage = () => {
     setSessionLocation
   } = useGeoLocation();
 
-  // Auth and Role contexts
-  const { user } = useContext(AuthContext);
+  // Auth context - user not used in read-only Boston calendar
+  useContext(AuthContext);
   // Role context not used in Boston calendar
 
   // Local state for view type (not provided by hook)
@@ -281,6 +281,9 @@ const BostonCalendarPage = () => {
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForListView(event.start, event.end);
 
+      // Detect mobile for wrapping behavior
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
       return (
         <div style={{
           padding: '4px 2px',
@@ -294,7 +297,8 @@ const BostonCalendarPage = () => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            flexWrap: isMobile ? 'wrap' : 'nowrap'  // Enable wrapping on mobile
           }}>
             {/* Time range - matching main calendar */}
             {startTime && (
@@ -321,7 +325,7 @@ const BostonCalendarPage = () => {
                   fontWeight: 'normal',
                   color: '#666',
                   overflow: 'visible',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
                   flexShrink: 1,
                   lineHeight: '1.2',
                   textDecoration: isCanceled ? 'line-through' : 'none'
@@ -336,7 +340,7 @@ const BostonCalendarPage = () => {
                       fontWeight: 'bold',
                       color: '#333',
                       overflow: 'visible',
-                      whiteSpace: 'nowrap',
+                      whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
@@ -439,6 +443,19 @@ const BostonCalendarPage = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Hide FullCalendar's default time and dot columns in list view */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .fc-list-event-time {
+          display: none !important;
+        }
+        .fc-list-event-dot {
+          display: none !important;
+        }
+        .fc-list-event-graphic {
+          display: none !important;
+        }
+      `}} />
+
       {/* Boston Header Image */}
       <div style={{ 
         position: 'relative', 
@@ -552,7 +569,7 @@ const BostonCalendarPage = () => {
         <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
           {eventsLoading && (
             <div style={{
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
@@ -574,10 +591,10 @@ const BostonCalendarPage = () => {
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite'
               }}></div>
-              <div style={{ 
-                fontSize: '16px', 
+              <div style={{
+                fontSize: '16px',
                 fontWeight: '500',
-                color: '#333' 
+                color: '#333'
               }}>
                 Loading events...
               </div>

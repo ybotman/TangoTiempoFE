@@ -19,7 +19,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
-  const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers(); // Fetch organizers for regular use
+  const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers({ skipLocationFilter: true }); // Fetch ALL organizers for dropdown
   const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
   
   // Use appropriate organizers based on selected role
