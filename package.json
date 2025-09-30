@@ -12,7 +12,16 @@
     "format": "prettier --write .",
     "snyk": "snyk test",
     "prep": "prettier --write . && npm run eslint && npm run build",
-    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
+    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:local": "CYPRESS_BASE_URL=http://localhost:3001 cypress run",
+    "cypress:run:test": "CYPRESS_BASE_URL=https://test.tangotiempo.com cypress run",
+    "cypress:run:readonly": "cypress run --spec 'cypress/e2e/01-readonly/**'",
+    "cypress:run:smoke": "CYPRESS_BASE_URL=https://tangotiempo.com cypress run --spec 'cypress/e2e/01-readonly/**'",
+    "test:e2e": "npm run cypress:run:local",
+    "test:e2e:headed": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --headed",
+    "test:e2e:chrome": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --browser chrome"
   },
   "engines": {
     "node": "=20.x"

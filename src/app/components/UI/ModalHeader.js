@@ -36,12 +36,13 @@ const ModalHeader = ({ title, onClose, actions, sx = {} }) => {
             {actions}
           </div>
         )}
-        <IconButton 
-          edge="end" 
-          color="inherit" 
-          onClick={onClose} 
+        <IconButton
+          edge="end"
+          color="inherit"
+          onClick={onClose}
           aria-label="close"
           size={isMobile ? "medium" : "small"}
+          data-testid="modal-close"
         >
           <CloseIcon />
         </IconButton>

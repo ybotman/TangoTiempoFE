@@ -1,0 +1,35 @@
+{
+  "milonga": {
+    "title": "Friday Night Milonga",
+    "category": "Milonga",
+    "venue": "Boston Tango Studio",
+    "organizer": "Boston Tango",
+    "startTime": "20:00",
+    "endTime": "23:30"
+  },
+  "class": {
+    "title": "Beginner Tango Class",
+    "category": "Class",
+    "venue": "Cambridge Dance Center",
+    "organizer": "Tango Cambridge",
+    "startTime": "19:00",
+    "endTime": "20:00"
+  },
+  "practica": {
+    "title": "Sunday Practica",
+    "category": "Practica",
+    "venue": "Somerville Community Center",
+    "organizer": "Somerville Tango",
+    "startTime": "14:00",
+    "endTime": "17:00"
+  },
+  "festival": {
+    "title": "Boston Tango Festival",
+    "category": "Festival",
+    "venue": "Boston Convention Center",
+    "organizer": "Boston Tango Festival",
+    "startTime": "10:00",
+    "endTime": "22:00",
+    "multiDay": true
+  }
+}

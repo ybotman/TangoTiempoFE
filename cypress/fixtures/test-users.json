@@ -1,0 +1,27 @@
+{
+  "readonly": {
+    "email": "test.readonly@tangotiempo.com",
+    "password": "TestPassword123!",
+    "displayName": "Test Readonly User"
+  },
+  "basicUser": {
+    "email": "test.user@tangotiempo.com",
+    "password": "TestPassword123!",
+    "displayName": "Test Basic User"
+  },
+  "organizer": {
+    "email": "test.organizer@tangotiempo.com",
+    "password": "TestPassword123!",
+    "displayName": "Test Organizer"
+  },
+  "admin": {
+    "email": "test.admin@tangotiempo.com",
+    "password": "TestPassword123!",
+    "displayName": "Test Admin"
+  },
+  "regionalAdmin": {
+    "email": "test.regional@tangotiempo.com",
+    "password": "TestPassword123!",
+    "displayName": "Test Regional Admin"
+  }
+}

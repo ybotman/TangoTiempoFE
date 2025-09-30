@@ -292,8 +292,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
 
   return (
     <>
-      <Modal open={open} onClose={onClose}>
-        <Box sx={getModalStyle(isMobile)}>
+      <Modal open={open} onClose={onClose} data-testid="event-modal">
+        <Box sx={getModalStyle(isMobile)} data-testid="event-modal-content">
           {/* Modal Header */}
           <ModalHeader 
             title={eventShortTitle} 
