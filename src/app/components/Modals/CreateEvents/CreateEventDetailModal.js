@@ -680,12 +680,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 // TIEMPO-276: Security cleanup - removed logging
         setSaveSuccess(true);
         setHasUnsavedChanges(false);
-        
-        // Show success message for 2 seconds then close
-        setTimeout(() => {
-          setSaveSuccess(false);
-          onClose(); // Call onClose directly instead of handleClose
-        }, 2000);
+
+        // TIEMPO-302: Close immediately to prevent flash of old values
+        // Parent component will refresh the calendar data
+        setSaveSuccess(false);
+        onClose();
       }
     } catch (error) {
       console.error('Error saving event:', error);

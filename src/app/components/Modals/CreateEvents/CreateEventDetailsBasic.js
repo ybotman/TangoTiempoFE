@@ -39,27 +39,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
   }, [venues, loadingVenues]);
   
-  // Set initial venue input value when venues are loaded or eventData changes
-  useEffect(() => {
-    // If we have a venue ID and venue name from event data, use it
-    if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
-      const newValue = eventData.venueName || eventData.locationName || '';
-      // Only update if different to prevent loops
-      if (venueInputValue !== newValue) {
-        setVenueInputValue(newValue);
-      }
-    } else if ((eventData.venueId || eventData.locationID) && venues.length > 0) {
-      // Try to find venue in loaded list
-      const currentVenue = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
-      if (currentVenue) {
-        const newValue = currentVenue.name || currentVenue.shortName || '';
-        // Only update if different to prevent loops
-        if (venueInputValue !== newValue) {
-          setVenueInputValue(newValue);
-        }
-      }
-    }
-  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues.length, venueInputValue]); // Add venueInputValue to dependencies
+  // TIEMPO-302: Don't set venue input value - let Autocomplete handle display
+  // Setting venueInputValue causes filtering which limits the dropdown to matching venues only
+  // The Autocomplete component will show the selected venue's name automatically
+  // useEffect removed - no longer needed
   
   // Filter venues based on search input
   useEffect(() => {
@@ -314,14 +297,14 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     
     // Always add a header for active venues if there are any venues at all
     if (venueOptionsArray.length > 0) {
-      // TIEMPO-276: Add location context header
-      const nearestCity = activeVenues[0]?.city || activeVenues[0]?.address?.city || 'your area';
+      // TIEMPO-302: Use geo context center city, not first venue's city
+      const nearestCity = currentLocation?.city || savedLocation?.city || 'your area';
       const radius = currentLocation?.zoomRange || savedLocation?.zoomRange || 50;
-      groupedOptions.push({ 
-        _id: 'location-header', 
-        isDivider: true, 
-        isHeader: true, 
-        text: `📍 Near ${nearestCity} (within ${radius} miles)` 
+      groupedOptions.push({
+        _id: 'location-header',
+        isDivider: true,
+        isHeader: true,
+        text: `📍 Near ${nearestCity} (within ${radius} miles)`
       });
       groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
       
@@ -339,18 +322,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       groupedOptions = [...groupedOptions, ...inactiveVenues];
     }
     
-    // If we have a selected venue that's not in the options, add it at the beginning
+    // TIEMPO-302: If we have a selected venue that's not in the geo-filtered options,
+    // add it to the list so it remains selectable, but still show all other venues
     if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
       const venueId = eventData.venueId || eventData.locationID;
       const exists = venueOptionsArray.some(v => v?._id === venueId);
-      if (!exists) {
-        // Add the placeholder venue to the beginning
-        groupedOptions.unshift({
-          _id: venueId,
-          name: eventData.venueName || eventData.locationName,
-          shortName: eventData.venueName || eventData.locationName,
-          isPlaceholder: true
-        });
+      if (!exists && groupedOptions.length > 0) {
+        // Insert the current venue after the headers but before other venues
+        // Find the index after the "Active Venues" header
+        const activeHeaderIndex = groupedOptions.findIndex(opt => opt._id === 'active-header');
+        if (activeHeaderIndex >= 0) {
+          groupedOptions.splice(activeHeaderIndex + 1, 0, {
+            _id: venueId,
+            name: `${eventData.venueName || eventData.locationName} (Current - outside filter range)`,
+            shortName: eventData.venueName || eventData.locationName,
+            isPlaceholder: true,
+            isActive: true  // Treat as active for grouping
+          });
+        } else {
+          // Fallback: add at the beginning if no header found
+          groupedOptions.unshift({
+            _id: venueId,
+            name: `${eventData.venueName || eventData.locationName} (Current)`,
+            shortName: eventData.venueName || eventData.locationName,
+            isPlaceholder: true
+          });
+        }
       }
     }
 
