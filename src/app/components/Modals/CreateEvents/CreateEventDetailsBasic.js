@@ -339,18 +339,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       groupedOptions = [...groupedOptions, ...inactiveVenues];
     }
     
-    // If we have a selected venue that's not in the options, add it at the beginning
+    // TIEMPO-302: If we have a selected venue that's not in the geo-filtered options,
+    // add it to the list so it remains selectable, but still show all other venues
     if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
       const venueId = eventData.venueId || eventData.locationID;
       const exists = venueOptionsArray.some(v => v?._id === venueId);
-      if (!exists) {
-        // Add the placeholder venue to the beginning
-        groupedOptions.unshift({
-          _id: venueId,
-          name: eventData.venueName || eventData.locationName,
-          shortName: eventData.venueName || eventData.locationName,
-          isPlaceholder: true
-        });
+      if (!exists && groupedOptions.length > 0) {
+        // Insert the current venue after the headers but before other venues
+        // Find the index after the "Active Venues" header
+        const activeHeaderIndex = groupedOptions.findIndex(opt => opt._id === 'active-header');
+        if (activeHeaderIndex >= 0) {
+          groupedOptions.splice(activeHeaderIndex + 1, 0, {
+            _id: venueId,
+            name: `${eventData.venueName || eventData.locationName} (Current - outside filter range)`,
+            shortName: eventData.venueName || eventData.locationName,
+            isPlaceholder: true,
+            isActive: true  // Treat as active for grouping
+          });
+        } else {
+          // Fallback: add at the beginning if no header found
+          groupedOptions.unshift({
+            _id: venueId,
+            name: `${eventData.venueName || eventData.locationName} (Current)`,
+            shortName: eventData.venueName || eventData.locationName,
+            isPlaceholder: true
+          });
+        }
       }
     }
 
