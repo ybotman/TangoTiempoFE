@@ -39,27 +39,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }
   }, [venues, loadingVenues]);
   
-  // Set initial venue input value when venues are loaded or eventData changes
-  useEffect(() => {
-    // If we have a venue ID and venue name from event data, use it
-    if ((eventData.venueId || eventData.locationID) && (eventData.venueName || eventData.locationName)) {
-      const newValue = eventData.venueName || eventData.locationName || '';
-      // Only update if different to prevent loops
-      if (venueInputValue !== newValue) {
-        setVenueInputValue(newValue);
-      }
-    } else if ((eventData.venueId || eventData.locationID) && venues.length > 0) {
-      // Try to find venue in loaded list
-      const currentVenue = venues.find(v => v?._id === (eventData.venueId || eventData.locationID));
-      if (currentVenue) {
-        const newValue = currentVenue.name || currentVenue.shortName || '';
-        // Only update if different to prevent loops
-        if (venueInputValue !== newValue) {
-          setVenueInputValue(newValue);
-        }
-      }
-    }
-  }, [eventData.venueId, eventData.locationID, eventData.venueName, eventData.locationName, venues.length, venueInputValue]); // Add venueInputValue to dependencies
+  // TIEMPO-302: Don't set venue input value - let Autocomplete handle display
+  // Setting venueInputValue causes filtering which limits the dropdown to matching venues only
+  // The Autocomplete component will show the selected venue's name automatically
+  // useEffect removed - no longer needed
   
   // Filter venues based on search input
   useEffect(() => {
@@ -314,14 +297,14 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     
     // Always add a header for active venues if there are any venues at all
     if (venueOptionsArray.length > 0) {
-      // TIEMPO-276: Add location context header
-      const nearestCity = activeVenues[0]?.city || activeVenues[0]?.address?.city || 'your area';
+      // TIEMPO-302: Use geo context center city, not first venue's city
+      const nearestCity = currentLocation?.city || savedLocation?.city || 'your area';
       const radius = currentLocation?.zoomRange || savedLocation?.zoomRange || 50;
-      groupedOptions.push({ 
-        _id: 'location-header', 
-        isDivider: true, 
-        isHeader: true, 
-        text: `📍 Near ${nearestCity} (within ${radius} miles)` 
+      groupedOptions.push({
+        _id: 'location-header',
+        isDivider: true,
+        isHeader: true,
+        text: `📍 Near ${nearestCity} (within ${radius} miles)`
       });
       groupedOptions.push({ _id: 'active-header', isDivider: true, isHeader: true, text: 'Active Venues' });
       
