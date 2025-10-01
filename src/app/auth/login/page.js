@@ -163,7 +163,7 @@ const LoginPage = () => {
           </Box>
 
           {/* Title with clear SIGN IN label */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }} data-testid="login-page">
             <LoginIcon sx={{ fontSize: 48, color: 'primary.main', mr: 2 }} />
             <Typography component="h1" variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
               SIGN IN
@@ -197,6 +197,7 @@ const LoginPage = () => {
                 size="large"
                 onClick={handleGoogleLogIn}
                 startIcon={<GoogleIcon sx={{ fontSize: 30 }} />}
+                data-testid="google-login-button"
                 sx={{
                   mb: 2,
                   py: 2,
@@ -256,6 +257,7 @@ const LoginPage = () => {
                 size="large"
                 onClick={() => setShowEmailForm(true)}
                 startIcon={<EmailIcon sx={{ fontSize: 30 }} />}
+                data-testid="email-login-button"
                 sx={{
                   py: 2,
                   textTransform: 'none',

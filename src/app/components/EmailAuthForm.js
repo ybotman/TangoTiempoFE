@@ -101,7 +101,7 @@ const EmailAuthForm = ({ mode, onSubmit, error }) => {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+    <Paper elevation={3} sx={{ p: 3, mb: 3 }} data-testid="email-auth-form">
       <Typography variant="h6" component="h2" gutterBottom>
         {isSignUp ? 'Create an Account' : 'Login with Email'}
       </Typography>
