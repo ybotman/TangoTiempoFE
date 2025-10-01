@@ -6,6 +6,44 @@
 
 ---
 
+## 🏗️ Infrastructure Architecture
+
+### Git Branches
+- **DEVL** - Development branch (runs E2E tests in GitHub Actions)
+- **TEST** - Test environment branch (deploys to Vercel test.tangotiempo.com)
+- **PROD** - Production branch (deploys to Vercel tangotiempo.com)
+
+### GitHub Environments
+- **TESTING** - Used by DEVL and TEST branches for secrets/variables
+- **PRODUCTION** - Used by PROD branch
+- **INTEGRATION** - Not currently used
+
+### Frontend Deployments (Vercel)
+- **test.tangotiempo.com** - Deployed from TEST branch
+- **tangotiempo.com** - Deployed from PROD branch
+- **DEVL branch** - NO Vercel deployment (runs locally in GitHub Actions)
+
+### Backend APIs (Azure)
+- **TEST Backend:** `https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net/api`
+- **PROD Backend:** `https://calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net/api`
+
+### E2E Testing Strategy
+- **DEVL Workflow:** Runs `npm run dev` inside GitHub Actions runner
+  - Frontend: `http://localhost:3001` (GitHub Actions runner)
+  - Backend: Azure TEST backend
+  - Environment: TESTING (GitHub environment)
+  - **CORS Consideration:** Backend may need to allow GitHub Actions IPs
+
+- **TEST Workflow:** Tests against deployed Vercel TEST site
+  - Frontend: `https://test.tangotiempo.com`
+  - Backend: Azure TEST backend
+
+- **PROD Workflow:** Smoke tests against production
+  - Frontend: `https://tangotiempo.com`
+  - Backend: Azure PROD backend
+
+---
+
 ## ✅ Configuration Complete
 
 ### GitHub Repository
