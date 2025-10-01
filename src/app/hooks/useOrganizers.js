@@ -265,12 +265,13 @@ export const useOrganizers = (options = {}) => {
       return null;
     }
 
+    const dataWithAppId = {
+      ...organizerData,
+      appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+    };
+
     try {
       setCreateLoading(true);
-      const dataWithAppId = {
-        ...organizerData,
-        appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
-      };
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
@@ -285,6 +286,10 @@ export const useOrganizers = (options = {}) => {
 
     } catch (error) {
       console.error('Error creating organizer:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Validation errors:', JSON.stringify(error.response?.data?.errors, null, 2));
+      console.error('Error response status:', error.response?.status);
+      console.error('Payload sent:', dataWithAppId);
       setError(error);
       return null;
 
