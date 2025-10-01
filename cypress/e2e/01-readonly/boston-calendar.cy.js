@@ -20,10 +20,12 @@ describe('Boston Calendar - Readonly Access', () => {
     it('should display 8-week view by default', () => {
       // Check for dayGrid view (8-week custom view uses dayGrid type)
       cy.get('.fc-view').should('exist');
-      cy.get('.fc-dayGrid-view, .fc-daygrid-view').should('exist');
 
-      // Verify multiple days are visible
-      cy.get('.fc-day, .fc-daygrid-day').should('have.length.at.least', 20);
+      // FullCalendar v6 uses .fc-daygrid (lowercase, no dash before "view")
+      cy.get('.fc-daygrid').should('exist');
+
+      // Verify multiple days are visible (v6 uses .fc-daygrid-day)
+      cy.get('.fc-daygrid-day').should('have.length.at.least', 20);
     });
 
     it('should display Boston-specific events', () => {
@@ -35,20 +37,20 @@ describe('Boston Calendar - Readonly Access', () => {
     });
 
     it('should navigate between date ranges', () => {
-      // Get initial visible dates from calendar
-      cy.get('.fc-daygrid-day, .fc-day').first().invoke('attr', 'data-date').as('initialDate');
+      // Get initial visible date from calendar
+      cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').then(initialDate => {
+        // Navigate to next period
+        cy.navigateCalendar('next');
 
-      // Navigate to next period
-      cy.navigateCalendar('next');
+        // Verify date range changed
+        cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').should('not.equal', initialDate);
 
-      // Verify date range changed
-      cy.get('.fc-daygrid-day, .fc-day').first().invoke('attr', 'data-date').should('not.equal', '@initialDate');
+        // Navigate back
+        cy.navigateCalendar('prev');
 
-      // Navigate back
-      cy.navigateCalendar('prev');
-
-      // Should return close to initial date
-      cy.get('.fc-daygrid-day, .fc-day').first().invoke('attr', 'data-date').should('equal', '@initialDate');
+        // Should return to initial date
+        cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').should('equal', initialDate);
+      });
     });
 
     it('should show event details on click', () => {
@@ -58,15 +60,18 @@ describe('Boston Calendar - Readonly Access', () => {
           // Click first event
           cy.get('.fc-event').first().click();
 
-          // Event modal should appear
-          cy.get('[data-testid="event-modal"]', { timeout: 5000 }).should('be.visible');
+          // MUI Modal becomes visible - wait for backdrop or modal content
+          // Using more flexible selector for MUI Modal
+          cy.get('.MuiModal-root', { timeout: 5000 }).should('be.visible');
 
           // Modal content should be visible
           cy.get('[data-testid="event-modal-content"]').should('be.visible');
 
-          // Close modal
+          // Close modal using the close button
           cy.get('[data-testid="modal-close"]').click();
-          cy.get('[data-testid="event-modal"]').should('not.be.visible');
+
+          // Modal should disappear
+          cy.get('.MuiModal-root').should('not.exist');
         }
       });
     });
@@ -87,8 +92,9 @@ describe('Boston Calendar - Readonly Access', () => {
 
     it('should display list view on mobile', () => {
       // Should show list view, not grid
-      cy.get('.fc-list-view, .fc-listMonth-view').should('exist');
-      cy.get('.fc-dayGrid-view, .fc-daygrid-view').should('not.exist');
+      // FullCalendar v6 uses .fc-list for list views
+      cy.get('.fc-list').should('exist');
+      cy.get('.fc-daygrid').should('not.exist');
     });
 
     it('should show events in list format', () => {
