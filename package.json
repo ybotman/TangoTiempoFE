@@ -21,7 +21,11 @@
     "cypress:run:smoke": "CYPRESS_BASE_URL=https://tangotiempo.com cypress run --spec 'cypress/e2e/01-readonly/**'",
     "test:e2e": "npm run cypress:run:local",
     "test:e2e:headed": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --headed",
-    "test:e2e:chrome": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --browser chrome"
+    "test:e2e:chrome": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --browser chrome",
+    "test:e2e:report": "npm run cypress:run:local && npm run report:merge && npm run report:generate",
+    "report:merge": "mochawesome-merge cypress/reports/*.json > cypress/reports/combined-report.json",
+    "report:generate": "marge cypress/reports/combined-report.json --reportDir cypress/reports/html --inline",
+    "report:clean": "rm -rf cypress/reports"
   },
   "engines": {
     "node": "=20.x"
@@ -81,6 +85,9 @@
     "eslint-plugin-cypress": "^4.3.0",
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.11.0",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^4.4.1",
+    "mochawesome-report-generator": "^6.3.0",
     "prettier": "^3.3.3"
   },
   "resolutions": {

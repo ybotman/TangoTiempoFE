@@ -107,3 +107,8 @@ public/AI-Guild-backup-*
 # Cypress test artifacts
 cypress/screenshots/
 cypress/videos/
+
+# Mochawesome test reports
+cypress/reports/
+cypress/reports/*.json
+cypress/reports/html/

@@ -24,6 +24,15 @@ export default defineConfig({
     retries: {
       runMode: 2,
       openMode: 0
+    },
+    // Mochawesome reporter configuration
+    reporter: 'mochawesome',
+    reporterOptions: {
+      reportDir: 'cypress/reports',
+      overwrite: false,
+      html: false,
+      json: true,
+      timestamp: 'mmddyyyy_HHMMss'
     }
   },
 
