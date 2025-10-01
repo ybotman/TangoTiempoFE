@@ -117,6 +117,13 @@ jobs:
           name: mochawesome-report-devl-${{ github.run_number }}
           path: devl-report
 
+      - name: Download DEVL screenshots from current run
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: cypress-screenshots-devl-${{ github.run_number }}
+          path: devl-screenshots
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -128,8 +135,26 @@ jobs:
           mkdir -p public/devl-reports/latest
           if [ -d "devl-report" ] && [ "$(ls -A devl-report 2>/dev/null)" ]; then
             cp -r devl-report/* public/devl-reports/latest/
+
+            # Copy screenshots if they exist
+            if [ -d "devl-screenshots" ] && [ "$(ls -A devl-screenshots 2>/dev/null)" ]; then
+              cp -r devl-screenshots/* public/devl-reports/latest/
+            fi
+
+            # Create index.html as copy of combined-report.html
+            if [ -f "public/devl-reports/latest/combined-report.html" ]; then
+              cp public/devl-reports/latest/combined-report.html public/devl-reports/latest/index.html
+            fi
+
+            # Create dated archive
             mkdir -p public/devl-reports/$DATE
             cp -r devl-report/* public/devl-reports/$DATE/
+            if [ -d "devl-screenshots" ] && [ "$(ls -A devl-screenshots 2>/dev/null)" ]; then
+              cp -r devl-screenshots/* public/devl-reports/$DATE/
+            fi
+            if [ -f "public/devl-reports/$DATE/combined-report.html" ]; then
+              cp public/devl-reports/$DATE/combined-report.html public/devl-reports/$DATE/index.html
+            fi
           else
             echo "<html><body><h1>No DEVL reports available</h1></body></html>" > public/devl-reports/latest/index.html
           fi
@@ -170,6 +195,9 @@ jobs:
               <a href="../index.html" class="back-link">← Back to All Environments</a>
               <h1>🟢 DEVL Environment - E2E Test Reports</h1>
               <a href="latest/index.html" class="report-link">📊 Latest Test Report</a>
+              <p style="text-align: center; color: #666; margin-top: 10px;">
+                <small>Direct link: <a href="latest/combined-report.html">combined-report.html</a></small>
+              </p>
               <h2>Historical Reports</h2>
             </div>
           </body>
