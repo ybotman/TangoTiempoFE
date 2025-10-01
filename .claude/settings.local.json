@@ -21,7 +21,12 @@
       "WebFetch(domain:docs.mapbox.com)",
       "Bash(npm run build:*)",
       "Bash(node:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Implement Cypress E2E testing framework Phase 1 - TIEMPO-299\n\n## Infrastructure Setup\n- Added npm scripts for Cypress test execution (local, test, smoke)\n- Created cypress.env.json for environment configuration\n- Updated cypress.config.js with proper port (3001) and retry logic\n\n## Custom Commands\n- Implemented authentication commands (login, logout)\n- Added calendar navigation commands (navigateCalendar, changeCalendarView)\n- Created event verification commands (checkEventExists, openEventDetails)\n- Added calendar assertion helpers (calendarShouldBeLoaded, shouldBeInView)\n\n## Test Data Fixtures\n- test-users.json - Test account credentials for different roles\n- boston-location.json - Location data for Boston calendar\n- sample-events.json - Sample event data\n- categories.json - Event category definitions\n\n## Strategic data-testid Attributes\nAdded minimal test IDs to:\n- Boston calendar page and container\n- Navigation buttons (prev/next/today)\n- View toggle buttons (8week/list)\n- Event modal and close button\n- Modal header component\n\n## Test Suites (Phase 1 - Readonly)\n- boston-calendar.cy.js - Boston calendar readonly tests (desktop/mobile)\n- main-calendar.cy.js - Main calendar with geo features\n\n## Documentation\n- Created cypress/README.md with setup, usage, best practices\n- Documented test structure and future phases\n\n## Design Approach\n- Minimal data-testid strategy - prefer FullCalendar stable classes\n- Custom commands for reusability\n- Environment-aware configuration\n- Retry logic for flaky network operations\n\nAll tests use real selectors from actual components. Ready for Phase 2 (Authentication).\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(echo:*)",
+      "Bash(npx cypress run:*)",
+      "Bash(git commit:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

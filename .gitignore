@@ -103,3 +103,7 @@ web_modules/
 **/.claude/settings.local.json
 .vercel
 public/AI-Guild-backup-*
+
+# Cypress test artifacts
+cypress/screenshots/
+cypress/videos/

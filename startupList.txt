@@ -1,5 +1,0 @@
-public/AI-Guild/Startup/Commands.md
-public/AI-Guild/Startup/Guild Overview.md
-public/AI-Guild/Startup/README FIRST.md
-public/AI-Guild/Startup/Roles.md
-public/AI-Guild/Startup/SuccessCriteria.md
