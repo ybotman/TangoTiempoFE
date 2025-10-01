@@ -44,11 +44,27 @@ jobs:
         env:
           CYPRESS_BASE_URL: http://localhost:3001
 
+      - name: Merge Mochawesome reports
+        if: always()
+        run: npm run report:merge
+
+      - name: Generate HTML report
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Mochawesome HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mochawesome-report-devl-${{ github.run_number }}
+          path: cypress/reports/html
+          retention-days: 7
+
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots-devl
+          name: cypress-screenshots-devl-${{ github.run_number }}
           path: cypress/screenshots
           retention-days: 7
           if-no-files-found: ignore
@@ -57,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-videos-devl
+          name: cypress-videos-devl-${{ github.run_number }}
           path: cypress/videos
           retention-days: 7
           if-no-files-found: ignore

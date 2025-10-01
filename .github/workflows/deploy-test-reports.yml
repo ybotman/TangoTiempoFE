@@ -1,0 +1,113 @@
+name: Deploy Test Reports to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Cypress E2E Tests - TEST"]
+    types:
+      - completed
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Download latest Mochawesome report
+        uses: actions/download-artifact@v4
+        with:
+          pattern: mochawesome-report-test-*
+          path: downloaded-reports
+          merge-multiple: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Prepare report directory
+        run: |
+          mkdir -p public/test-reports
+
+          # Copy latest report if it exists
+          if [ -d "downloaded-reports" ] && [ "$(ls -A downloaded-reports)" ]; then
+            cp -r downloaded-reports/* public/test-reports/latest/
+
+            # Create dated archive
+            DATE=$(date +%Y-%m-%d)
+            cp -r downloaded-reports/* public/test-reports/$DATE/
+          else
+            echo "No reports found, creating placeholder"
+            mkdir -p public/test-reports/latest
+            echo "<html><body><h1>No test reports available yet</h1></body></html>" > public/test-reports/latest/index.html
+          fi
+
+          # Create index page
+          cat > public/test-reports/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Cypress Test Reports - TangoTiempo</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              h1 { color: #333; }
+              .report-link {
+                display: block;
+                padding: 10px;
+                margin: 10px 0;
+                background: #f0f0f0;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #0066cc;
+              }
+              .report-link:hover { background: #e0e0e0; }
+            </style>
+          </head>
+          <body>
+            <h1>Cypress E2E Test Reports</h1>
+            <p>Environment: TEST</p>
+            <a href="latest/combined-report.html" class="report-link">📊 Latest Test Report</a>
+            <h2>Historical Reports</h2>
+            <div id="reports"></div>
+            <script>
+              const reportsDiv = document.getElementById('reports');
+              // Add date-based reports dynamically
+              const dates = [];
+              dates.forEach(date => {
+                const link = document.createElement('a');
+                link.href = date + '/combined-report.html';
+                link.className = 'report-link';
+                link.textContent = '📅 ' + date;
+                reportsDiv.appendChild(link);
+              });
+            </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public/test-reports'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
