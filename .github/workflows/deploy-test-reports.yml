@@ -173,7 +173,7 @@ jobs:
             <div class="container">
               <a href="../index.html" class="back-link">← Back to All Environments</a>
               <h1>🟡 TEST Environment - E2E Test Reports</h1>
-              <a href="latest/combined-report.html" class="report-link">📊 Latest Test Report</a>
+              <a href="latest/index.html" class="report-link">📊 Latest Test Report</a>
               <h2>Historical Reports</h2>
               <div id="reports"></div>
             </div>
