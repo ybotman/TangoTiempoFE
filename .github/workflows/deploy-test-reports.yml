@@ -2,7 +2,10 @@ name: Deploy Test Reports to GitHub Pages
 
 on:
   workflow_run:
-    workflows: ["Cypress E2E Tests - TEST"]
+    workflows:
+      - "Cypress E2E Tests - DEVL"
+      - "Cypress E2E Tests - TEST"
+      - "Cypress E2E Tests - PROD"
     types:
       - completed
   workflow_dispatch:  # Allow manual trigger
@@ -33,34 +36,111 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Download latest Mochawesome report
+      - name: Download DEVL reports
         uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: mochawesome-report-devl-*
+          path: downloaded-devl
+          merge-multiple: true
+
+      - name: Download TEST reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           pattern: mochawesome-report-test-*
-          path: downloaded-reports
+          path: downloaded-test
+          merge-multiple: true
+
+      - name: Download PROD reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: mochawesome-report-prod-*
+          path: downloaded-prod
           merge-multiple: true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Prepare report directory
+      - name: Prepare report directories
         run: |
-          mkdir -p public/test-reports
+          DATE=$(date +%Y-%m-%d)
 
-          # Copy latest report if it exists
-          if [ -d "downloaded-reports" ] && [ "$(ls -A downloaded-reports)" ]; then
-            mkdir -p public/test-reports/latest
-            cp -r downloaded-reports/* public/test-reports/latest/
-
-            # Create dated archive
-            DATE=$(date +%Y-%m-%d)
-            mkdir -p public/test-reports/$DATE
-            cp -r downloaded-reports/* public/test-reports/$DATE/
+          # DEVL reports
+          mkdir -p public/devl-reports
+          if [ -d "downloaded-devl" ] && [ "$(ls -A downloaded-devl 2>/dev/null)" ]; then
+            mkdir -p public/devl-reports/latest
+            cp -r downloaded-devl/* public/devl-reports/latest/
+            mkdir -p public/devl-reports/$DATE
+            cp -r downloaded-devl/* public/devl-reports/$DATE/
           else
-            echo "No reports found, creating placeholder"
+            mkdir -p public/devl-reports/latest
+            echo "<html><body><h1>No DEVL reports available yet</h1></body></html>" > public/devl-reports/latest/index.html
+          fi
+
+          # TEST reports
+          mkdir -p public/test-reports
+          if [ -d "downloaded-test" ] && [ "$(ls -A downloaded-test 2>/dev/null)" ]; then
+            mkdir -p public/test-reports/latest
+            cp -r downloaded-test/* public/test-reports/latest/
+            mkdir -p public/test-reports/$DATE
+            cp -r downloaded-test/* public/test-reports/$DATE/
+          else
             mkdir -p public/test-reports/latest
             echo "<html><body><h1>No TEST reports available yet</h1></body></html>" > public/test-reports/latest/index.html
           fi
+
+          # PROD reports
+          mkdir -p public/prod-reports
+          if [ -d "downloaded-prod" ] && [ "$(ls -A downloaded-prod 2>/dev/null)" ]; then
+            mkdir -p public/prod-reports/latest
+            cp -r downloaded-prod/* public/prod-reports/latest/
+            mkdir -p public/prod-reports/$DATE
+            cp -r downloaded-prod/* public/prod-reports/$DATE/
+          else
+            mkdir -p public/prod-reports/latest
+            echo "<html><body><h1>No PROD reports available yet</h1></body></html>" > public/prod-reports/latest/index.html
+          fi
+
+          # Create DEVL environment index page
+          cat > public/devl-reports/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>DEVL Environment - Cypress Reports</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+              .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              h1 { color: #333; border-bottom: 3px solid #4caf50; padding-bottom: 10px; }
+              .env-badge { display: inline-block; background: #4caf50; color: white; padding: 5px 15px; border-radius: 15px; font-weight: bold; }
+              .report-link {
+                display: block;
+                padding: 15px;
+                margin: 15px 0;
+                background: #f0f0f0;
+                border-radius: 8px;
+                text-decoration: none;
+                color: #0066cc;
+                border-left: 4px solid #4caf50;
+                transition: all 0.3s;
+              }
+              .report-link:hover { background: #e0e0e0; transform: translateX(5px); }
+              .back-link { color: #666; text-decoration: none; }
+              .back-link:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <a href="../index.html" class="back-link">← Back to All Environments</a>
+              <h1>🟢 DEVL Environment - E2E Test Reports</h1>
+              <a href="latest/index.html" class="report-link">📊 Latest Test Report</a>
+              <h2>Historical Reports</h2>
+              <div id="reports"></div>
+            </div>
+          </body>
+          </html>
+          EOF
 
           # Create TEST environment index page
           cat > public/test-reports/index.html <<'EOF'
@@ -94,6 +174,45 @@ jobs:
               <a href="../index.html" class="back-link">← Back to All Environments</a>
               <h1>🟡 TEST Environment - E2E Test Reports</h1>
               <a href="latest/combined-report.html" class="report-link">📊 Latest Test Report</a>
+              <h2>Historical Reports</h2>
+              <div id="reports"></div>
+            </div>
+          </body>
+          </html>
+          EOF
+
+          # Create PROD environment index page
+          cat > public/prod-reports/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>PROD Environment - Cypress Reports</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+              .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              h1 { color: #333; border-bottom: 3px solid #f44336; padding-bottom: 10px; }
+              .env-badge { display: inline-block; background: #f44336; color: white; padding: 5px 15px; border-radius: 15px; font-weight: bold; }
+              .report-link {
+                display: block;
+                padding: 15px;
+                margin: 15px 0;
+                background: #f0f0f0;
+                border-radius: 8px;
+                text-decoration: none;
+                color: #0066cc;
+                border-left: 4px solid #f44336;
+                transition: all 0.3s;
+              }
+              .report-link:hover { background: #e0e0e0; transform: translateX(5px); }
+              .back-link { color: #666; text-decoration: none; }
+              .back-link:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <a href="../index.html" class="back-link">← Back to All Environments</a>
+              <h1>🔴 PROD Environment - Smoke Test Reports</h1>
+              <a href="latest/index.html" class="report-link">📊 Latest Smoke Test Report</a>
               <h2>Historical Reports</h2>
               <div id="reports"></div>
             </div>
