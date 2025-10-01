@@ -119,9 +119,53 @@ describe('My Feature', () => {
 
 ## CI/CD Integration
 
-Tests run automatically via GitHub Actions on PR to TEST/PROD branches.
+Tests run automatically via GitHub Actions on all branches:
 
-See `.github/workflows/e2e-tests.yml` (to be created in Phase 2).
+### Workflows
+
+**DEVL Branch** (`.github/workflows/cypress-e2e-devl.yml`)
+- Triggers: Push/PR to DEVL
+- Runs: Full test suite against local build
+- Starts dev server, waits for port 3001
+- Uploads screenshots/videos on failure
+
+**TEST Branch** (`.github/workflows/cypress-e2e-test.yml`)
+- Triggers: Push/PR to TEST, Vercel deployment
+- Runs: Full test suite against https://test.tangotiempo.com
+- Works with Vercel preview deployments
+- Uploads screenshots/videos on failure
+
+**PROD/MAIN Branch** (`.github/workflows/cypress-e2e-prod.yml`)
+- Triggers: Push/PR to MAIN, Daily 6am UTC, Manual
+- Runs: **READONLY smoke tests only** (01-readonly/**)
+- Tests: https://tangotiempo.com
+- Auto-creates GitHub issue if scheduled run fails
+- 30-day artifact retention
+
+### Status Badges
+
+Add to your README.md:
+```markdown
+![DEVL Tests](https://github.com/YOUR_ORG/tangotiempo.com/workflows/Cypress%20E2E%20Tests%20-%20DEVL/badge.svg)
+![TEST Tests](https://github.com/YOUR_ORG/tangotiempo.com/workflows/Cypress%20E2E%20Tests%20-%20TEST/badge.svg)
+![PROD Smoke](https://github.com/YOUR_ORG/tangotiempo.com/workflows/Cypress%20Smoke%20Tests%20-%20PROD/badge.svg)
+```
+
+### Vercel Integration
+
+Workflows are optimized for Vercel deployments:
+- DEVL: Runs against local build (no Vercel needed)
+- TEST: Waits for Vercel deployment via `deployment_status` event
+- PROD: Tests live production site
+
+### Manual Triggers
+
+Run PROD smoke tests manually:
+1. Go to Actions tab in GitHub
+2. Select "Cypress Smoke Tests - PROD"
+3. Click "Run workflow"
+4. Choose branch
+5. Click "Run workflow"
 
 ## Troubleshooting
 

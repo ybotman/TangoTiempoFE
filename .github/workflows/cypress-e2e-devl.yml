@@ -1,0 +1,63 @@
+name: Cypress E2E Tests - DEVL
+
+on:
+  push:
+    branches:
+      - DEVL
+  pull_request:
+    branches:
+      - DEVL
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for Vercel deployment
+        run: |
+          echo "Waiting for Vercel preview deployment..."
+          sleep 30
+        if: github.event_name == 'pull_request'
+
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          browser: chrome
+          config: baseUrl=http://localhost:3001
+          start: npm run dev
+          wait-on: 'http://localhost:3001'
+          wait-on-timeout: 120
+        env:
+          CYPRESS_BASE_URL: http://localhost:3001
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-devl
+          path: cypress/screenshots
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos-devl
+          path: cypress/videos
+          retention-days: 7
+          if-no-files-found: ignore
