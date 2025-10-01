@@ -12,6 +12,7 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment: TESTING
 
     steps:
       - name: Checkout code
@@ -43,9 +44,13 @@ jobs:
           wait-on-timeout: 120
         env:
           CYPRESS_BASE_URL: http://localhost:3001
-          NEXT_PUBLIC_BE_URL: https://api.tangotiempo.com
+          NEXT_PUBLIC_BE_URL: ${{ secrets.NEXT_PUBLIC_BE_URL }}
           NEXT_PUBLIC_FE_URL: http://localhost:3001
           NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
+          NEXT_PUBLIC_IPSTACK_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_IPSTACK_ACCESS_TOKEN }}
+          NEXT_PUBLIC_GA_ID: ${{ vars.GA_ID }}
+          NEXT_PUBLIC_ENVIRONMENT: DEVL
 
       - name: Merge Mochawesome reports
         if: always()
