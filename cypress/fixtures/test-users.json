@@ -23,5 +23,12 @@
     "email": "test.regional@tangotiempo.com",
     "password": "TestPassword123!",
     "displayName": "Test Regional Admin"
+  },
+  "cicdAdmin": {
+    "email": "griffon.dater0g@icloud.com",
+    "password": "NEEDS_PASSWORD",
+    "displayName": "CI/CD Test Admin",
+    "environments": ["TEST"],
+    "note": "TEST environment only - Admin role for automated E2E testing in GitHub Actions"
   }
 }
