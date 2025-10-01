@@ -352,13 +352,13 @@ jobs:
           script: |
             const runNumber = context.runNumber;
             const repoUrl = 'https://ybotman.github.io/tangotiempo.com';
-            const reportUrl = `${repoUrl}/devl-reports/latest/index.html`;
+            const reportUrl = `${repoUrl}/devl-reports/latest/combined-report.html`;
             const directUrl = `${repoUrl}/devl-reports/latest/combined-report.html`;
             const dashboardUrl = `${repoUrl}/index.html`;
 
             const comment = `## 🧪 Cypress Test Results - DEVL
 
-**Run #${runNumber}** completed!
+**Run Number ${runNumber}** completed!
 
 ### 📊 View Test Reports:
 - 🎯 [**Latest DEVL Report**](${reportUrl})

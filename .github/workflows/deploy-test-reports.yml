@@ -3,7 +3,6 @@ name: Deploy Test Reports to GitHub Pages
 on:
   workflow_run:
     workflows:
-      - "Cypress E2E Tests - DEVL"
       - "Cypress E2E Tests - TEST"
       - "Cypress E2E Tests - PROD"
     types:

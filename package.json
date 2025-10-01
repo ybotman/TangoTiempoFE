@@ -24,7 +24,7 @@
     "test:e2e:chrome": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --browser chrome",
     "test:e2e:report": "npm run cypress:run:local && npm run report:merge && npm run report:generate",
     "report:merge": "mochawesome-merge cypress/reports/*.json > cypress/reports/combined-report.json",
-    "report:generate": "marge cypress/reports/combined-report.json --reportDir cypress/reports/html --inline",
+    "report:generate": "marge cypress/reports/combined-report.json --reportDir cypress/reports/html --inline --inlineAssets",
     "report:clean": "rm -rf cypress/reports"
   },
   "engines": {
