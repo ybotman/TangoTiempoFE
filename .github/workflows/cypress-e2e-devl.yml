@@ -43,6 +43,9 @@ jobs:
           wait-on-timeout: 120
         env:
           CYPRESS_BASE_URL: http://localhost:3001
+          NEXT_PUBLIC_BE_URL: http://localhost:3010
+          NEXT_PUBLIC_FE_URL: http://localhost:3001
+          NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
 
       - name: Merge Mochawesome reports
         if: always()
