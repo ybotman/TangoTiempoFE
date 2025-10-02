@@ -86,7 +86,6 @@
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.11.0",
     "mochawesome": "^7.1.4",
-    "mochawesome-addcontext": "^1.0.0",
     "mochawesome-merge": "^4.4.1",
     "mochawesome-report-generator": "^6.3.0",
     "prettier": "^3.3.3"
