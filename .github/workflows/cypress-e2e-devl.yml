@@ -131,31 +131,40 @@ jobs:
         run: |
           DATE=$(date +%Y-%m-%d)
 
+          # Debug: Check what was downloaded
+          echo "=== Checking downloaded artifacts ==="
+          ls -la devl-report/ || echo "devl-report directory not found"
+          ls -la devl-screenshots/ || echo "devl-screenshots directory not found"
+          echo "==================================="
+
           # Create DEVL reports folder
           mkdir -p public/devl-reports/latest
-          if [ -d "devl-report" ] && [ "$(ls -A devl-report 2>/dev/null)" ]; then
-            cp -r devl-report/* public/devl-reports/latest/
+
+          # Check if report exists and copy
+          if [ -f "devl-report/combined-report.html" ]; then
+            echo "✅ Found combined-report.html, copying to GitHub Pages..."
+            cp devl-report/combined-report.html public/devl-reports/latest/
+            cp devl-report/combined-report.html public/devl-reports/latest/index.html
 
             # Copy screenshots if they exist
-            if [ -d "devl-screenshots" ] && [ "$(ls -A devl-screenshots 2>/dev/null)" ]; then
-              cp -r devl-screenshots/* public/devl-reports/latest/
-            fi
-
-            # Create index.html as copy of combined-report.html
-            if [ -f "public/devl-reports/latest/combined-report.html" ]; then
-              cp public/devl-reports/latest/combined-report.html public/devl-reports/latest/index.html
+            if [ -d "devl-screenshots" ]; then
+              echo "✅ Found screenshots, copying..."
+              mkdir -p public/devl-reports/latest/screenshots
+              cp -r devl-screenshots/* public/devl-reports/latest/screenshots/ 2>/dev/null || echo "No screenshots to copy"
             fi
 
             # Create dated archive
             mkdir -p public/devl-reports/$DATE
-            cp -r devl-report/* public/devl-reports/$DATE/
-            if [ -d "devl-screenshots" ] && [ "$(ls -A devl-screenshots 2>/dev/null)" ]; then
-              cp -r devl-screenshots/* public/devl-reports/$DATE/
+            cp devl-report/combined-report.html public/devl-reports/$DATE/
+            cp devl-report/combined-report.html public/devl-reports/$DATE/index.html
+            if [ -d "devl-screenshots" ]; then
+              mkdir -p public/devl-reports/$DATE/screenshots
+              cp -r devl-screenshots/* public/devl-reports/$DATE/screenshots/ 2>/dev/null || true
             fi
-            if [ -f "public/devl-reports/$DATE/combined-report.html" ]; then
-              cp public/devl-reports/$DATE/combined-report.html public/devl-reports/$DATE/index.html
-            fi
+
+            echo "✅ DEVL reports deployed successfully"
           else
+            echo "❌ No combined-report.html found"
             echo "<html><body><h1>No DEVL reports available</h1></body></html>" > public/devl-reports/latest/index.html
           fi
 
