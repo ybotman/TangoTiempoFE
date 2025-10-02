@@ -204,7 +204,7 @@ jobs:
               FAIL_COUNT=$(find public/devl-reports/run-1/screenshots -name "*failed*.png" -type f | wc -l | tr -d ' ')
               PASS_COUNT=$(find public/devl-reports/run-1/screenshots -name "*passed*.png" -type f | wc -l | tr -d ' ')
 
-              echo '<div class="tabs"><div class="tab active" onclick="showTab(\"failures\")">❌ Failures <span class="count">'${FAIL_COUNT}'</span></div><div class="tab" onclick="showTab(\"successes\")">✅ Successes <span class="count">'${PASS_COUNT}'</span></div></div>' >> public/devl-reports/run-1/screenshots/index.html
+              echo '<div class="tabs"><div class="tab active" onclick="showTab(\"failures\",this)">❌ Failures <span class="count">'${FAIL_COUNT}'</span></div><div class="tab" onclick="showTab(\"successes\",this)">✅ Successes <span class="count">'${PASS_COUNT}'</span></div></div>' >> public/devl-reports/run-1/screenshots/index.html
 
               # Failures tab
               echo '<div id="failures" class="tab-content active"><div class="screenshot-grid">' >> public/devl-reports/run-1/screenshots/index.html
@@ -225,7 +225,7 @@ jobs:
               echo '</div></div>' >> public/devl-reports/run-1/screenshots/index.html
 
               # Add tab switching JavaScript
-              echo '<script>function showTab(tab){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));event.target.closest(".tab").classList.add("active");document.getElementById(tab).classList.add("active");}</script>' >> public/devl-reports/run-1/screenshots/index.html
+              echo '<script>function showTab(tab,el){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));el.classList.add("active");document.getElementById(tab).classList.add("active");}</script>' >> public/devl-reports/run-1/screenshots/index.html
 
               echo '</div></body></html>' >> public/devl-reports/run-1/screenshots/index.html
             fi
