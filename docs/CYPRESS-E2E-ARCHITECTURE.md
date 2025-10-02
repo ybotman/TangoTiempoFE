@@ -1,30 +1,34 @@
 # Cypress E2E Testing Architecture - TIEMPO-303
 
-**Last Updated:** October 1, 2025
+**Last Updated:** October 2, 2025 - Clarified DEVL environment uses GitHub Pages, not localhost
 
 ---
 
 ## Environment Architecture
 
-### DEVL LOCAL (Developer Machine)
-**Purpose:** Local development and testing
+### LOCAL (Developer Laptop)
+**Purpose:** Local development and testing on developer machine
 
-- **Frontend:** `localhost:3001` (Next.js dev server)
-- **Backend:** `localhost:3010` (local API server)
-- **MongoDB:** TEST MongoDB (remote, via backend connection)
-- **Use Case:** Developer writes code and tests locally
+- **Frontend:** `localhost:3001` (Next.js dev server - `npm run dev`)
+- **Backend:** `localhost:3010` (local backend API server)
+- **MongoDB:** TEST MongoDB (remote, accessed via local backend)
+- **Services:** Firebase, Mapbox (via local env vars)
+- **Use Case:** Developer writes code and tests locally before pushing
 
 ### DEVL Branch (GitHub Actions CI/CD)
-**Purpose:** Automated E2E testing on feature branches
+**Purpose:** Automated E2E testing against GitHub Pages static deployment
 
-- **Frontend:** `npm run dev` in GitHub Actions runner (`localhost:3001`)
+- **Frontend:** **GitHub Pages** - Static export from DEVL branch
+  `https://ybotman.github.io/tangotiempo.com/`
 - **Backend:** Azure TEST backend
-  `https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net/api`
+  `https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net`
 - **MongoDB:** TEST MongoDB (via Azure TEST backend)
+- **Services:** Firebase, Mapbox (via GitHub Actions secrets)
 - **Environment:** GitHub **TESTING** environment (provides secrets/variables)
 - **Test Reports:** Deployed to GitHub Pages
   `https://ybotman.github.io/tangotiempo.com/devl-reports/`
-- **⚠️ NO Vercel Deployment** - Frontend runs only in GitHub Actions runner
+- **⚠️ NO Vercel Deployment** - Uses GitHub Pages static build instead
+- **Why GitHub Pages:** Tests the actual static deployment users will see
 
 ### TEST Branch (Vercel + Azure)
 **Purpose:** Pre-production testing environment
@@ -53,15 +57,21 @@
 ## Git Branch Workflow
 
 ```
+LOCAL (laptop)
+  ├─ FE: localhost:3001 (npm run dev)
+  ├─ BE: localhost:3010 (local server)
+  └─ DB: TEST MongoDB
+
 DEVL (feature branches)
   ↓
-  → GitHub Actions CI/CD (runs Cypress, deploys reports to GitHub Pages)
+  → Build static export → Deploy to GitHub Pages
+  → GitHub Actions CI/CD tests GitHub Pages deployment
   → Merge to TEST when ready
 
 TEST (pre-production)
   ↓
   → Vercel deployment to test.tangotiempo.com
-  → GitHub Actions CI/CD (runs Cypress against Vercel deployment)
+  → GitHub Actions CI/CD tests Vercel deployment
   → Merge to PROD when validated
 
 PROD (production)
@@ -139,18 +149,20 @@ if [ "$VERCEL_GIT_COMMIT_REF" == "TEST" ] || [ "$VERCEL_GIT_COMMIT_REF" == "PROD
 **Runs:**
 1. Checkout code
 2. Install dependencies
-3. Start `npm run dev` in background
-4. Wait for localhost:3001
-5. Run Cypress tests against localhost:3001
-6. Generate Mochawesome HTML report with inline screenshots
-7. Deploy report to GitHub Pages (`devl-reports/`)
-8. Post commit comment with report link
+3. Build static export (`npm run build`)
+4. Deploy to GitHub Pages
+5. Wait for GitHub Pages deployment
+6. Run Cypress tests against GitHub Pages URL
+7. Generate Mochawesome HTML report with inline screenshots
+8. Deploy report to GitHub Pages (`devl-reports/`)
+9. Post commit comment with report link
 
 **Key Configuration:**
-- `baseUrl: http://localhost:3001`
+- `baseUrl: https://ybotman.github.io/tangotiempo.com`
 - Backend: Azure TEST (via env vars)
 - Environment: GitHub TESTING
 - No Vercel deployment
+- **Tests the actual static build that users will see**
 
 ### `.github/workflows/cypress-e2e-test.yml`
 **Triggers:**
