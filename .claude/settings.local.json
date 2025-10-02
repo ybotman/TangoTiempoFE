@@ -45,5 +45,6 @@
     "deny": [],
     "ask": []
   },
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "outputStyle": "default"
 }

@@ -6,7 +6,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
-import { useBackendHealth } from '@/hooks/useBackendHealth';
+import { useBackendHealth, useMapboxHealth, useFirebaseHealth } from '@/hooks/useBackendHealth';
 import MapIcon from '@mui/icons-material/Map';
 import packageJson from '../../../../package.json';
 // Removed userSettingsEvent - using GeoLocationContext instead
@@ -16,7 +16,9 @@ const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const { fetchOrganizerById } = useOrganizers();
-  const { isHealthy, backendUrl, isChecking } = useBackendHealth();
+  const backend = useBackendHealth();
+  const mapbox = useMapboxHealth();
+  const firebase = useFirebaseHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
   
   // Map mode forced true by product decision
@@ -82,40 +84,114 @@ const SiteHeader = () => {
       >
         Gift an Empanada
       </a>
+      {/* Version in top-right */}
       <div
         style={{
           position: 'absolute',
           top: '10px',
           right: '10px',
           color: 'white',
-          fontSize: '11px',
-          opacity: '0.9',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          padding: '5px 8px',
-          borderRadius: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
+          fontSize: '12px',
+          opacity: '0.8',
         }}
-        title={`Backend: ${backendUrl}${isHealthy === null ? ' (checking...)' : isHealthy ? ' (connected)' : ' (disconnected)'}`}
       >
-        {/* Health indicator dot */}
-        <span
+        {appVersion}
+      </div>
+
+      {/* Health Indicators below Gift Empanada */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '40px',
+          left: '10px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+      >
+        {/* Backend Health */}
+        <div
           style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            backgroundColor: isHealthy === null ? '#FFA500' : isHealthy ? '#00FF00' : '#FF0000',
-            display: 'inline-block',
-            animation: isChecking ? 'pulse 1.5s ease-in-out infinite' : 'none',
+            backgroundColor: 'rgba(0, 255, 255, 0.7)',
+            color: '#000',
+            padding: '4px 8px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 'normal',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
-        />
-        {/* Version */}
-        <span>{appVersion}</span>
-        {/* Backend URL (truncated) */}
-        <span style={{ fontSize: '10px', opacity: 0.8 }}>
-          {backendUrl.replace('https://', '').replace('http://', '').substring(0, 25)}...
-        </span>
+          title={`Backend: ${backend.backendUrl}${backend.isHealthy === null ? ' (checking...)' : backend.isHealthy ? ' (connected)' : ' (disconnected)'}`}
+        >
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: backend.isHealthy === null ? '#FFA500' : backend.isHealthy ? '#00FF00' : '#FF0000',
+              display: 'inline-block',
+              animation: backend.isChecking ? 'pulse 1.5s ease-in-out infinite' : 'none',
+            }}
+          />
+          <span>BE: {backend.backendUrl.replace('https://', '').replace('http://', '').substring(0, 20)}...</span>
+        </div>
+
+        {/* Mapbox Health */}
+        <div
+          style={{
+            backgroundColor: 'rgba(0, 255, 255, 0.7)',
+            color: '#000',
+            padding: '4px 8px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 'normal',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+          title={`Mapbox: ${mapbox.mapboxToken}${mapbox.isHealthy === null ? ' (checking...)' : mapbox.isHealthy ? ' (connected)' : ' (disconnected)'}`}
+        >
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: mapbox.isHealthy === null ? '#FFA500' : mapbox.isHealthy ? '#00FF00' : '#FF0000',
+              display: 'inline-block',
+              animation: mapbox.isChecking ? 'pulse 1.5s ease-in-out infinite' : 'none',
+            }}
+          />
+          <span>Mapbox</span>
+        </div>
+
+        {/* Firebase Health */}
+        <div
+          style={{
+            backgroundColor: 'rgba(0, 255, 255, 0.7)',
+            color: '#000',
+            padding: '4px 8px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 'normal',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+          title={`Firebase: ${firebase.firebaseConfig}${firebase.isHealthy === null ? ' (checking...)' : firebase.isHealthy ? ' (connected)' : ' (disconnected)'}`}
+        >
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: firebase.isHealthy === null ? '#FFA500' : firebase.isHealthy ? '#00FF00' : '#FF0000',
+              display: 'inline-block',
+              animation: firebase.isChecking ? 'pulse 1.5s ease-in-out infinite' : 'none',
+            }}
+          />
+          <span>Firebase</span>
+        </div>
       </div>
       <div
         className="map-icon-button"
