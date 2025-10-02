@@ -137,6 +137,25 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Download previous GitHub Pages deployment
+        continue-on-error: true
+        run: |
+          echo "📥 Downloading current GitHub Pages to preserve history..."
+          mkdir -p public
+          # Download current live Pages site
+          curl -sL https://ybotman.github.io/tangotiempo.com/devl-reports/run-1/ -o /tmp/check.html || true
+          if [ -f /tmp/check.html ] && ! grep -q "404" /tmp/check.html; then
+            echo "✅ Found existing Pages deployment, downloading runs..."
+            for i in 1 2 3 4 5; do
+              mkdir -p public/devl-reports/run-$i
+              curl -sL https://ybotman.github.io/tangotiempo.com/devl-reports/run-$i/metadata.json -o public/devl-reports/run-$i/metadata.json 2>/dev/null || echo "Run $i not found"
+              curl -sL https://ybotman.github.io/tangotiempo.com/devl-reports/run-$i/index.html -o public/devl-reports/run-$i/index.html 2>/dev/null || echo "Run $i index not found"
+              # Download screenshots directory (just metadata, not images for space)
+            done
+          else
+            echo "ℹ️ No existing Pages deployment found (first run or 404)"
+          fi
+
       - name: Prepare GitHub Pages structure
         run: |
           DATE=$(date +%Y-%m-%d)
