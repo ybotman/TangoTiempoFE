@@ -15,3 +15,27 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+
+// Import cypress-fail-fast to stop after 10 failures
+import 'cypress-fail-fast';
+
+// Add screenshot references to test context for Mochawesome
+// Cypress automatically captures screenshots on failure
+// This adds them to the mochawesome JSON for display in HTML report
+afterEach(function() {
+  if (this.currentTest && this.currentTest.state === 'failed') {
+    const { screenshots = [] } = this.currentTest;
+
+    // Add screenshot paths as test context (Mochawesome picks this up)
+    if (screenshots.length > 0) {
+      this.currentTest.context = this.currentTest.context || [];
+      screenshots.forEach((screenshot, index) => {
+        const relativePath = screenshot.path.replace(/.*\/cypress\//, '');
+        this.currentTest.context.push({
+          title: index === 0 ? 'Screenshot' : `Screenshot (Retry ${index})`,
+          value: relativePath
+        });
+      });
+    }
+  }
+});

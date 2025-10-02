@@ -24,7 +24,7 @@
     "test:e2e:chrome": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --browser chrome",
     "test:e2e:report": "npm run cypress:run:local && npm run report:merge && npm run report:generate",
     "report:merge": "mochawesome-merge cypress/reports/*.json > cypress/reports/combined-report.json",
-    "report:generate": "marge cypress/reports/combined-report.json --reportDir cypress/reports/html --inline --inlineAssets",
+    "report:generate": "marge cypress/reports/combined-report.json --reportDir cypress/reports/html --inline --inlineAssets --reportTitle \"Cypress E2E Test Report - Run ${GITHUB_RUN_NUMBER:-Local}\" --reportPageTitle \"DEVL Test Results\"",
     "report:clean": "rm -rf cypress/reports"
   },
   "engines": {
@@ -79,6 +79,7 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "cypress": "^14.3.2",
+    "cypress-fail-fast": "^7.1.1",
     "dotenv": "^17.2.2",
     "eslint": "^9.13.0",
     "eslint-config-next": "^15.0.1",

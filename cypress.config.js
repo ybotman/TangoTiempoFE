@@ -1,15 +1,21 @@
 import { defineConfig } from "cypress";
+import cypressFailFast from 'cypress-fail-fast/plugin.js';
 
 export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      // Install fail-fast plugin - stops after 10 failures
+      cypressFailFast(on, config);
 
       // Priority order: CLI args > process.env > cypress.env.json > default
       config.baseUrl = process.env.CYPRESS_BASE_URL || process.env.NEXT_PUBLIC_FE_URL || config.env.baseUrl || 'http://localhost:3001';
       config.env.apiUrl = process.env.NEXT_PUBLIC_BE_URL || config.env.apiUrl || 'http://localhost:3010';
 
       return config;
+    },
+    env: {
+      FAIL_FAST_STRATEGY: 'run',  // Stop entire test run, not just current spec
+      FAIL_FAST_BAIL: 10          // Stop after 10 failures
     },
     baseUrl: 'http://localhost:3001',
     viewportWidth: 1280,

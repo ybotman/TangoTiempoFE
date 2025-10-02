@@ -70,7 +70,17 @@ jobs:
 
       - name: Generate HTML report
         if: always()
-        run: npm run report:generate
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # Generate report with run number and URL in title
+          marge cypress/reports/combined-report.json \
+            --reportDir cypress/reports/html \
+            --inline \
+            --inlineAssets \
+            --reportTitle "Cypress E2E - DEVL Run #$GITHUB_RUN_NUMBER" \
+            --reportPageTitle "DEVL Tests - Run $GITHUB_RUN_NUMBER - View on GitHub: $GITHUB_RUN_URL"
 
       - name: Upload Mochawesome HTML report
         uses: actions/upload-artifact@v4
