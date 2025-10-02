@@ -12,7 +12,7 @@ import packageJson from '../../../../package.json';
 // Removed userSettingsEvent - using GeoLocationContext instead
 
 const SiteHeader = () => {
-  const { openMapCenterModal } = useGeoLocation();
+  const { openMapCenterModal, currentLocation, selectedLocation } = useGeoLocation();
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const { fetchOrganizerById } = useOrganizers();
@@ -191,6 +191,33 @@ const SiteHeader = () => {
             }}
           />
           <span>Firebase</span>
+        </div>
+
+        {/* Map Center Info - DEVL only, remove before PROD */}
+        <div
+          style={{
+            backgroundColor: 'rgba(255, 255, 0, 0.8)',
+            color: '#000',
+            padding: '4px 8px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 'normal',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            maxWidth: '200px',
+          }}
+          title={`Map Center Context - Nearest City and Coordinates`}
+        >
+          <div style={{ fontWeight: 'bold' }}>Map Center:</div>
+          <div>
+            {selectedLocation?.city?.name || 'No city selected'}
+          </div>
+          <div style={{ fontSize: '9px' }}>
+            {currentLocation?.lat && currentLocation?.lng
+              ? `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}`
+              : 'No coordinates'}
+          </div>
         </div>
       </div>
       <div

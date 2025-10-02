@@ -7,14 +7,13 @@ on:
   pull_request:
     branches:
       - TEST
-  deployment_status:  # Trigger after Vercel deployment
+  # deployment_status removed - was triggering on DEVL commits
+  # Workflow now only runs on explicit TEST branch pushes/PRs
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Only run on successful Vercel deployments or direct pushes
-    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
 
     steps:
       - name: Checkout code
