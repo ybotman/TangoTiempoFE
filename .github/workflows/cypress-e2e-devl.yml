@@ -176,6 +176,87 @@ jobs:
               echo "✅ Found screenshots, copying..."
               mkdir -p public/devl-reports/run-1/screenshots
               cp -r devl-screenshots/* public/devl-reports/run-1/screenshots/ 2>/dev/null || echo "No screenshots to copy"
+
+              # Create screenshots index page
+              cat > public/devl-reports/run-1/screenshots/index.html <<'SCREENSHOTS_EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Test Screenshots - Run ${RUN_NUM}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+              .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; }
+              h1 { color: #333; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+              .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+              .screenshot-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white; }
+              .screenshot-card img { width: 100%; height: 200px; object-fit: cover; cursor: pointer; }
+              .screenshot-card img:hover { opacity: 0.8; }
+              .screenshot-title { padding: 10px; font-size: 12px; color: #666; word-wrap: break-word; }
+              .back-link { color: #666; text-decoration: none; margin-bottom: 20px; display: inline-block; }
+              .back-link:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <a href="../index.html" class="back-link">← Back to Report</a>
+              <h1>📸 Test Failure Screenshots</h1>
+              <div class="screenshot-grid" id="screenshots"></div>
+            </div>
+            <script>
+              // Fetch all screenshot files
+              fetch('.')
+                .then(r => r.text())
+                .then(html => {
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(html, 'text/html');
+                  const links = Array.from(doc.querySelectorAll('a'))
+                    .map(a => a.getAttribute('href'))
+                    .filter(href => href && href.endsWith('.png'));
+
+                  const grid = document.getElementById('screenshots');
+
+                  if (links.length === 0) {
+                    // Fallback: list common screenshot paths
+                    const screenshots = [];
+                    SCREENSHOTS_EOF
+
+              # Find all screenshots and add them to the HTML
+              find public/devl-reports/run-1/screenshots -name "*.png" -type f | while read screenshot; do
+                rel_path=$(echo "$screenshot" | sed "s|public/devl-reports/run-1/screenshots/||")
+                echo "                    screenshots.push('$rel_path');" >> public/devl-reports/run-1/screenshots/index.html
+              done
+
+              cat >> public/devl-reports/run-1/screenshots/index.html <<'SCREENSHOTS_EOF2'
+
+                    screenshots.forEach(path => {
+                      const card = document.createElement('div');
+                      card.className = 'screenshot-card';
+                      card.innerHTML = `
+                        <a href="${path}" target="_blank">
+                          <img src="${path}" alt="${decodeURIComponent(path)}" />
+                        </a>
+                        <div class="screenshot-title">${decodeURIComponent(path)}</div>
+                      `;
+                      grid.appendChild(card);
+                    });
+                  } else {
+                    links.forEach(path => {
+                      const card = document.createElement('div');
+                      card.className = 'screenshot-card';
+                      card.innerHTML = `
+                        <a href="${path}" target="_blank">
+                          <img src="${path}" alt="${decodeURIComponent(path)}" />
+                        </a>
+                        <div class="screenshot-title">${decodeURIComponent(path)}</div>
+                      `;
+                      grid.appendChild(card);
+                    });
+                  }
+                });
+            </script>
+          </body>
+          </html>
+          SCREENSHOTS_EOF2
             fi
 
             # Create metadata file for run-1
@@ -232,6 +313,8 @@ jobs:
               .links a:hover { background: #45a049; }
               .links a.github { background: #333; }
               .links a.github:hover { background: #555; }
+              .links a.screenshots { background: #e91e63; }
+              .links a.screenshots:hover { background: #c2185b; }
               .back-link { color: #666; text-decoration: none; }
               .back-link:hover { text-decoration: underline; }
               .no-data { text-align: center; color: #999; padding: 40px; }
@@ -270,6 +353,7 @@ jobs:
                       </div>
                       <div class="links">
                         <a href="run-${i}/index.html" target="_blank">📄 View Report</a>
+                        <a href="run-${i}/screenshots/" target="_blank" class="screenshots">📸 Screenshots</a>
                         <a href="${meta.githubUrl}" target="_blank" class="github">🔗 GitHub Actions</a>
                       </div>
                     `;
@@ -434,14 +518,15 @@ jobs:
 
       - name: Comment with report links
         if: always()
+        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
             const runNumber = context.runNumber;
             const repoUrl = 'https://ybotman.github.io/tangotiempo.com';
-            const reportUrl = `${repoUrl}/devl-reports/latest/combined-report.html`;
-            const directUrl = `${repoUrl}/devl-reports/latest/combined-report.html`;
-            const dashboardUrl = `${repoUrl}/index.html`;
+            const reportUrl = `${repoUrl}/devl-reports/run-1/`;
+            const screenshotsUrl = `${repoUrl}/devl-reports/run-1/screenshots/`;
+            const dashboardUrl = `${repoUrl}/devl-reports/`;
 
             const commentParts = [
               '## 🧪 Cypress Test Results - DEVL',
@@ -450,11 +535,11 @@ jobs:
               '',
               '### 📊 View Test Reports:',
               `- 🎯 [**Latest DEVL Report**](${reportUrl})`,
-              `- 📄 [Direct Report Link](${directUrl})`,
-              `- 🏠 [All Environments Dashboard](${dashboardUrl})`,
+              `- 📸 [**Screenshots Gallery**](${screenshotsUrl})`,
+              `- 🏠 [All DEVL Runs Dashboard](${dashboardUrl})`,
               '',
               '### 📸 Screenshots & Details:',
-              'All failure screenshots are embedded in the report above.',
+              `View all failure screenshots in the [Screenshots Gallery](${screenshotsUrl})`,
               '',
               '---',
               '*Generated by Cypress E2E Tests - DEVL workflow*'
