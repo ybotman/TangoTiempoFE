@@ -4,12 +4,15 @@
 describe('Main Calendar - Readonly Access with Geo', () => {
 
   beforeEach(() => {
+    // Set map center BEFORE visiting to prevent MapCenterModal from blocking
+    // Oklahoma City: 1 event for testing (vs ~100 in Boston)
+    cy.setMapCenterDirectly('oklahoma-city');
+
     // Visit main calendar
     cy.visit('/calendar');
 
     // Wait for calendar to load
-    // Note: Main calendar may trigger location modal on first visit
-    cy.wait(2000); // Give time for auto-location logic
+    cy.wait(2000); // Give time for events to load
   });
 
   context('Desktop View', () => {

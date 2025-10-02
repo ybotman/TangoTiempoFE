@@ -67,7 +67,7 @@ Cypress.Commands.add('changeCalendarView', (viewType) => {
 });
 
 /**
- * Set location/map center
+ * Set location/map center via UI
  */
 Cypress.Commands.add('setLocation', (city) => {
   cy.get('[data-testid="map-center-btn"]').click();
@@ -75,6 +75,32 @@ Cypress.Commands.add('setLocation', (city) => {
   cy.get('[data-testid="location-result"]').first().click();
   cy.get('[data-testid="apply-location"]').click();
   cy.wait(1000); // Allow events to reload
+});
+
+/**
+ * Set map center directly in sessionStorage (bypasses MapCenterModal)
+ * Useful for CI/CD where localStorage is empty and modal blocks calendar
+ *
+ * Presets:
+ * - 'oklahoma-city': Single event location for testing
+ * - 'boston': ~100 events, default test area
+ * - Or pass custom { lat, lng, zoomRange }
+ */
+Cypress.Commands.add('setMapCenterDirectly', (location = 'oklahoma-city') => {
+  const presets = {
+    'oklahoma-city': { lat: 35.4676, lng: -97.5164, zoomRange: 50 },
+    'boston': { lat: 42.3601, lng: -71.0589, zoomRange: 50 }
+  };
+
+  const mapCenter = typeof location === 'string' ? presets[location] : location;
+
+  if (!mapCenter) {
+    throw new Error(`Unknown location preset: ${location}. Use 'oklahoma-city', 'boston', or custom object.`);
+  }
+
+  cy.window().then((win) => {
+    win.sessionStorage.setItem('currentLocation', JSON.stringify(mapCenter));
+  });
 });
 
 // ============================================

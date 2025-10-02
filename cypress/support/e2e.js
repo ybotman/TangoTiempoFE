@@ -20,22 +20,30 @@ import './commands'
 import 'cypress-fail-fast';
 
 // Add screenshot references to test context for Mochawesome
-// Cypress automatically captures screenshots on failure
-// This adds them to the mochawesome JSON for display in HTML report
+// Capture screenshots on BOTH success and failure to check for false positives
 afterEach(function() {
-  if (this.currentTest && this.currentTest.state === 'failed') {
-    const { screenshots = [] } = this.currentTest;
+  if (this.currentTest) {
+    const testName = this.currentTest.title;
+    const state = this.currentTest.state; // 'passed' or 'failed'
 
-    // Add screenshot paths as test context (Mochawesome picks this up)
-    if (screenshots.length > 0) {
-      this.currentTest.context = this.currentTest.context || [];
-      screenshots.forEach((screenshot, index) => {
-        const relativePath = screenshot.path.replace(/.*\/cypress\//, '');
-        this.currentTest.context.push({
-          title: index === 0 ? 'Screenshot' : `Screenshot (Retry ${index})`,
-          value: relativePath
+    // Capture screenshot for both passed and failed tests
+    if (state === 'passed') {
+      cy.screenshot(`${testName} (passed)`, { capture: 'viewport' });
+    }
+
+    // For failed tests, screenshots are auto-captured, just add to context
+    if (state === 'failed') {
+      const { screenshots = [] } = this.currentTest;
+      if (screenshots.length > 0) {
+        this.currentTest.context = this.currentTest.context || [];
+        screenshots.forEach((screenshot, index) => {
+          const relativePath = screenshot.path.replace(/.*\/cypress\//, '');
+          this.currentTest.context.push({
+            title: index === 0 ? 'Screenshot' : `Screenshot (Retry ${index})`,
+            value: relativePath
+          });
         });
-      });
+      }
     }
   }
 });
