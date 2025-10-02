@@ -100,18 +100,25 @@ export const useFirebaseHealth = () => {
       setIsChecking(true);
 
       try {
-        // Check if all required Firebase env vars are set
-        const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-        const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
-        const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+        // Firebase config is stored as Base64-encoded JSON in NEXT_PUBLIC_FIREBASE_JSON
+        const firebaseJson = process.env.NEXT_PUBLIC_FIREBASE_JSON;
 
-        // Firebase is "healthy" if config exists (can't ping API due to CORS)
-        if (apiKey && authDomain && projectId) {
-          setIsHealthy(true);
+        if (firebaseJson) {
+          // Try to decode and parse to verify it's valid (browser-compatible)
+          const decoded = atob(firebaseJson);
+          const config = JSON.parse(decoded);
+
+          // Check if required fields exist
+          if (config.apiKey && config.authDomain && config.projectId) {
+            setIsHealthy(true);
+          } else {
+            setIsHealthy(false);
+          }
         } else {
           setIsHealthy(false);
         }
       } catch (error) {
+        // Invalid Base64 or JSON
         setIsHealthy(false);
       } finally {
         setIsChecking(false);
@@ -121,7 +128,7 @@ export const useFirebaseHealth = () => {
     // Check on mount
     checkHealth();
 
-    // Re-check every 30 seconds (in case env vars change)
+    // Re-check every 30 seconds
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
   }, []);
