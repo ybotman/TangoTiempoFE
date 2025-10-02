@@ -204,7 +204,7 @@ jobs:
               FAIL_COUNT=$(find public/devl-reports/run-1/screenshots -name "*failed*.png" -type f | wc -l | tr -d ' ')
               PASS_COUNT=$(find public/devl-reports/run-1/screenshots -name "*passed*.png" -type f | wc -l | tr -d ' ')
 
-              echo '<div class="tabs"><div class="tab active" onclick="showTab(\"failures\",this)">❌ Failures <span class="count">'${FAIL_COUNT}'</span></div><div class="tab" onclick="showTab(\"successes\",this)">✅ Successes <span class="count">'${PASS_COUNT}'</span></div></div>' >> public/devl-reports/run-1/screenshots/index.html
+              echo '<div class="tabs"><div class="tab active" onclick="showTab('\''failures'\'',this)">&#10060; Failures <span class="count">'${FAIL_COUNT}'</span></div><div class="tab" onclick="showTab('\''successes'\'',this)">&#9989; Successes <span class="count">'${PASS_COUNT}'</span></div></div>' >> public/devl-reports/run-1/screenshots/index.html
 
               # Failures tab
               echo '<div id="failures" class="tab-content active"><div class="screenshot-grid">' >> public/devl-reports/run-1/screenshots/index.html
