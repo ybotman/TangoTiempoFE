@@ -1,6 +1,6 @@
 # Cypress E2E Testing Architecture - TIEMPO-303
 
-**Last Updated:** October 2, 2025 - Clarified DEVL environment uses GitHub Pages, not localhost
+**Last Updated:** October 2, 2025 - CORRECTED: DEVL uses VM localhost, GitHub Pages is ONLY for test reports (not app hosting)
 
 ---
 
@@ -16,10 +16,9 @@
 - **Use Case:** Developer writes code and tests locally before pushing
 
 ### DEVL Branch (GitHub Actions CI/CD)
-**Purpose:** Automated E2E testing against GitHub Pages static deployment
+**Purpose:** Automated E2E testing in GitHub VM (not deployed)
 
-- **Frontend:** **GitHub Pages** - Static export from DEVL branch
-  `https://ybotman.github.io/tangotiempo.com/`
+- **Frontend:** `localhost:3001` in GitHub Actions VM (`npm run dev`)
 - **Backend:** Azure TEST backend
   `https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net`
 - **MongoDB:** TEST MongoDB (via Azure TEST backend)
@@ -27,8 +26,8 @@
 - **Environment:** GitHub **TESTING** environment (provides secrets/variables)
 - **Test Reports:** Deployed to GitHub Pages
   `https://ybotman.github.io/tangotiempo.com/devl-reports/`
-- **⚠️ NO Vercel Deployment** - Uses GitHub Pages static build instead
-- **Why GitHub Pages:** Tests the actual static deployment users will see
+- **⚠️ NOT Deployed** - Only runs tests in VM, no public deployment
+- **Note:** GitHub Pages is ONLY for test reports, not app hosting
 
 ### TEST Branch (Vercel + Azure)
 **Purpose:** Pre-production testing environment
@@ -64,8 +63,9 @@ LOCAL (laptop)
 
 DEVL (feature branches)
   ↓
-  → Build static export → Deploy to GitHub Pages
-  → GitHub Actions CI/CD tests GitHub Pages deployment
+  → GitHub Actions VM runs localhost:3001 + tests
+  → Test reports deploy to GitHub Pages (reports only!)
+  → Application NOT deployed
   → Merge to TEST when ready
 
 TEST (pre-production)
@@ -149,20 +149,19 @@ if [ "$VERCEL_GIT_COMMIT_REF" == "TEST" ] || [ "$VERCEL_GIT_COMMIT_REF" == "PROD
 **Runs:**
 1. Checkout code
 2. Install dependencies
-3. Build static export (`npm run build`)
-4. Deploy to GitHub Pages
-5. Wait for GitHub Pages deployment
-6. Run Cypress tests against GitHub Pages URL
-7. Generate Mochawesome HTML report with inline screenshots
-8. Deploy report to GitHub Pages (`devl-reports/`)
-9. Post commit comment with report link
+3. Start `npm run dev` in background (localhost:3001 in VM)
+4. Wait for localhost:3001 to be ready
+5. Run Cypress tests against localhost:3001 in VM
+6. Generate Mochawesome HTML report with inline screenshots
+7. Deploy report to GitHub Pages (`devl-reports/`)
+8. Post commit comment with report link
 
 **Key Configuration:**
-- `baseUrl: https://ybotman.github.io/tangotiempo.com`
+- `baseUrl: http://localhost:3001` (inside GitHub Actions VM)
 - Backend: Azure TEST (via env vars)
 - Environment: GitHub TESTING
-- No Vercel deployment
-- **Tests the actual static build that users will see**
+- Application NOT deployed - only test reports go to GitHub Pages
+- **Tests development build in isolated VM**
 
 ### `.github/workflows/cypress-e2e-test.yml`
 **Triggers:**
