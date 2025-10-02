@@ -6,6 +6,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
+import { useBackendHealth } from '@/hooks/useBackendHealth';
 import MapIcon from '@mui/icons-material/Map';
 import packageJson from '../../../../package.json';
 // Removed userSettingsEvent - using GeoLocationContext instead
@@ -15,6 +16,7 @@ const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const { fetchOrganizerById } = useOrganizers();
+  const { isHealthy, backendUrl, isChecking } = useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
   
   // Map mode forced true by product decision
@@ -35,12 +37,19 @@ const SiteHeader = () => {
   }
 
   return (
-    <div style={{ 
-      position: 'relative', 
-      width: '100%', 
-      height: 'auto',
-      overflow: 'hidden' // Crop edges when zoomed
-    }}>
+    <>
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: 'auto',
+        overflow: 'hidden' // Crop edges when zoomed
+      }}>
       <Image
         src={headerImage}
         alt="Tango Tiempo"
@@ -79,11 +88,34 @@ const SiteHeader = () => {
           top: '10px',
           right: '10px',
           color: 'white',
-          fontSize: '12px',
-          opacity: '0.8', // Slight transparency to keep it inconspicuous
+          fontSize: '11px',
+          opacity: '0.9',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          padding: '5px 8px',
+          borderRadius: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
         }}
+        title={`Backend: ${backendUrl}${isHealthy === null ? ' (checking...)' : isHealthy ? ' (connected)' : ' (disconnected)'}`}
       >
-        {appVersion}
+        {/* Health indicator dot */}
+        <span
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: isHealthy === null ? '#FFA500' : isHealthy ? '#00FF00' : '#FF0000',
+            display: 'inline-block',
+            animation: isChecking ? 'pulse 1.5s ease-in-out infinite' : 'none',
+          }}
+        />
+        {/* Version */}
+        <span>{appVersion}</span>
+        {/* Backend URL (truncated) */}
+        <span style={{ fontSize: '10px', opacity: 0.8 }}>
+          {backendUrl.replace('https://', '').replace('http://', '').substring(0, 25)}...
+        </span>
       </div>
       <div
         className="map-icon-button"
@@ -123,7 +155,8 @@ const SiteHeader = () => {
         {/* Just the icon */}
         <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
