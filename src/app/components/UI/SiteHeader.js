@@ -109,34 +109,6 @@ const SiteHeader = () => {
           gap: '4px',
         }}
       >
-        {/* Backend Health */}
-        <div
-          style={{
-            backgroundColor: 'rgba(0, 255, 255, 0.7)',
-            color: '#000',
-            padding: '4px 8px',
-            borderRadius: '3px',
-            fontSize: '10px',
-            fontWeight: 'normal',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-          title={`Backend: ${backend.backendUrl}${backend.isHealthy === null ? ' (checking...)' : backend.isHealthy ? ' (connected)' : ' (disconnected)'}`}
-        >
-          <span
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: backend.isHealthy === null ? '#FFA500' : backend.isHealthy ? '#00FF00' : '#FF0000',
-              display: 'inline-block',
-              animation: backend.isChecking ? 'pulse 1.5s ease-in-out infinite' : 'none',
-            }}
-          />
-          <span>BE: {backend.backendUrl.replace('https://', '').replace('http://', '').substring(0, 20)}...</span>
-        </div>
-
         {/* Mapbox Health */}
         <div
           style={{
