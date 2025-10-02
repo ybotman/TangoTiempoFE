@@ -56,7 +56,7 @@ jobs:
           CYPRESS_BASE_URL: http://localhost:3001
           CYPRESS_TEST_USER_EMAIL: griffon.dater0g@icloud.com
           CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CICD_TEST_PASSWORD }}
-          NEXT_PUBLIC_BE_URL: https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net/api
+          NEXT_PUBLIC_BE_URL: https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net
           NEXT_PUBLIC_FE_URL: http://localhost:3001
           NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
           NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
