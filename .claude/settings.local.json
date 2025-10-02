@@ -26,7 +26,21 @@
       "Bash(echo:*)",
       "Bash(npx cypress run:*)",
       "Bash(git commit:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(gh run view:*)",
+      "Bash(curl:*)",
+      "Bash(gh run list:*)",
+      "Bash(git fetch:*)",
+      "Bash(xargs -I {} sh -c 'gh run cancel {} && echo \"\"\"\"Cancelled {}\"\"\"\"')",
+      "Bash(gh run cancel:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh run download:*)",
+      "Read(//private/tmp/devl-report-download/**)",
+      "Bash(timeout 10 curl -s -I \"https://ybotman.github.io/tangotiempo.com/devl-reports/latest/index.html\")",
+      "Bash(timeout 10 curl -s \"https://ybotman.github.io/tangotiempo.com/devl-reports/2025-10-02/combined-report.html\")",
+      "WebFetch(domain:ybotman.github.io)",
+      "Bash(gh api:*)"
     ],
     "deny": [],
     "ask": []
