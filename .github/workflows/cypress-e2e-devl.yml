@@ -179,15 +179,7 @@ jobs:
             fi
 
             # Create metadata file for run-1
-            cat > public/devl-reports/run-1/metadata.json <<METADATA
-{
-  "runNumber": ${RUN_NUM},
-  "timestamp": "${TIMESTAMP}",
-  "githubUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-  "branch": "DEVL",
-  "commit": "${{ github.sha }}"
-}
-METADATA
+            echo "{\"runNumber\":${RUN_NUM},\"timestamp\":\"${TIMESTAMP}\",\"githubUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",\"branch\":\"DEVL\",\"commit\":\"${{ github.sha }}\"}" > public/devl-reports/run-1/metadata.json
 
             echo "✅ DEVL reports deployed successfully (run-1 is latest)"
           else
