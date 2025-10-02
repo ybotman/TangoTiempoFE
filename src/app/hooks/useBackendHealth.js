@@ -94,34 +94,23 @@ export const useMapboxHealth = () => {
 export const useFirebaseHealth = () => {
   const [isHealthy, setIsHealthy] = useState(null);
   const [isChecking, setIsChecking] = useState(false);
-  const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '';
 
   useEffect(() => {
-    const checkHealth = async () => {
+    const checkHealth = () => {
       setIsChecking(true);
 
       try {
-        // Check if Firebase config exists
-        if (!firebaseApiKey) {
+        // Check if all required Firebase env vars are set
+        const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+        const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+        const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
+        // Firebase is "healthy" if config exists (can't ping API due to CORS)
+        if (apiKey && authDomain && projectId) {
+          setIsHealthy(true);
+        } else {
           setIsHealthy(false);
-          return;
         }
-
-        // Try to access Firebase Auth (lightweight check)
-        // If the key is valid, it should respond
-        const response = await fetch(
-          `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseApiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken: 'test' }),
-            signal: AbortSignal.timeout(5000)
-          }
-        );
-
-        // 400 means API is reachable (invalid token expected)
-        // Non-400 errors mean API issue
-        setIsHealthy(response.status === 400 || response.ok);
       } catch (error) {
         setIsHealthy(false);
       } finally {
@@ -129,10 +118,17 @@ export const useFirebaseHealth = () => {
       }
     };
 
+    // Check on mount
     checkHealth();
+
+    // Re-check every 30 seconds (in case env vars change)
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
-  }, [firebaseApiKey]);
+  }, []);
 
-  return { isHealthy, firebaseConfig: firebaseApiKey ? '***configured***' : 'not set', isChecking };
+  return {
+    isHealthy,
+    firebaseConfig: isHealthy ? '***configured***' : 'not configured',
+    isChecking
+  };
 };
