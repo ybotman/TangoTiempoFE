@@ -37,11 +37,15 @@ describe('Main Calendar - Readonly Access with Geo', () => {
     });
 
     it('should have navigation controls', () => {
-      // Check that navigation buttons exist in toolbar
-      cy.get('.fc-toolbar').should('exist');
+      // Test navigation by actually clicking and verifying date changes
+      cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').then(initialDate => {
+        // Navigate to next period using custom command
+        cy.navigateCalendar('next');
+        cy.wait(500);
 
-      // Should have multiple navigation buttons
-      cy.get('.fc-toolbar button').should('have.length.at.least', 2);
+        // Date should have changed
+        cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').should('not.equal', initialDate);
+      });
     });
 
     it('should navigate between date ranges', () => {
