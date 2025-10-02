@@ -140,6 +140,8 @@ jobs:
       - name: Prepare GitHub Pages structure
         run: |
           DATE=$(date +%Y-%m-%d)
+          TIMESTAMP=$(date +%Y-%m-%d\ %H:%M:%S\ UTC)
+          RUN_NUM=${{ github.run_number }}
 
           # Debug: Check what was downloaded
           echo "=== Checking downloaded artifacts ==="
@@ -148,34 +150,50 @@ jobs:
           echo "==================================="
 
           # Create DEVL reports folder
-          mkdir -p public/devl-reports/latest
+          mkdir -p public/devl-reports
 
-          # Check if report exists and copy
+          # Check if report exists
           if [ -f "devl-report/combined-report.html" ]; then
-            echo "✅ Found combined-report.html, copying to GitHub Pages..."
-            cp devl-report/combined-report.html public/devl-reports/latest/
-            cp devl-report/combined-report.html public/devl-reports/latest/index.html
+            echo "✅ Found combined-report.html, rotating last 5 runs..."
+
+            # Rotate existing runs: run-4 → run-5, run-3 → run-4, etc.
+            # Delete run-5 (oldest)
+            rm -rf public/devl-reports/run-5
+
+            # Shift runs: 4→5, 3→4, 2→3, 1→2
+            [ -d "public/devl-reports/run-4" ] && mv public/devl-reports/run-4 public/devl-reports/run-5
+            [ -d "public/devl-reports/run-3" ] && mv public/devl-reports/run-3 public/devl-reports/run-4
+            [ -d "public/devl-reports/run-2" ] && mv public/devl-reports/run-2 public/devl-reports/run-3
+            [ -d "public/devl-reports/run-1" ] && mv public/devl-reports/run-1 public/devl-reports/run-2
+
+            # Create new run-1 with current report
+            mkdir -p public/devl-reports/run-1
+            cp devl-report/combined-report.html public/devl-reports/run-1/
+            cp devl-report/combined-report.html public/devl-reports/run-1/index.html
 
             # Copy screenshots if they exist
             if [ -d "devl-screenshots" ]; then
               echo "✅ Found screenshots, copying..."
-              mkdir -p public/devl-reports/latest/screenshots
-              cp -r devl-screenshots/* public/devl-reports/latest/screenshots/ 2>/dev/null || echo "No screenshots to copy"
+              mkdir -p public/devl-reports/run-1/screenshots
+              cp -r devl-screenshots/* public/devl-reports/run-1/screenshots/ 2>/dev/null || echo "No screenshots to copy"
             fi
 
-            # Create dated archive
-            mkdir -p public/devl-reports/$DATE
-            cp devl-report/combined-report.html public/devl-reports/$DATE/
-            cp devl-report/combined-report.html public/devl-reports/$DATE/index.html
-            if [ -d "devl-screenshots" ]; then
-              mkdir -p public/devl-reports/$DATE/screenshots
-              cp -r devl-screenshots/* public/devl-reports/$DATE/screenshots/ 2>/dev/null || true
-            fi
+            # Create metadata file for run-1
+            cat > public/devl-reports/run-1/metadata.json <<METADATA
+{
+  "runNumber": ${RUN_NUM},
+  "timestamp": "${TIMESTAMP}",
+  "githubUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+  "branch": "DEVL",
+  "commit": "${{ github.sha }}"
+}
+METADATA
 
-            echo "✅ DEVL reports deployed successfully"
+            echo "✅ DEVL reports deployed successfully (run-1 is latest)"
           else
             echo "❌ No combined-report.html found"
-            echo "<html><body><h1>No DEVL reports available</h1></body></html>" > public/devl-reports/latest/index.html
+            mkdir -p public/devl-reports/run-1
+            echo "<html><body><h1>No DEVL reports available</h1></body></html>" > public/devl-reports/run-1/index.html
           fi
 
           # Create placeholders for TEST and PROD
@@ -183,42 +201,100 @@ jobs:
           echo "<html><body><h1>No TEST reports available yet</h1></body></html>" > public/test-reports/latest/index.html
           echo "<html><body><h1>No PROD reports available yet</h1></body></html>" > public/prod-reports/latest/index.html
 
-          # Create environment index pages
+          # Create environment index pages - Last 5 Runs
           cat > public/devl-reports/index.html <<'EOF'
           <!DOCTYPE html>
           <html>
           <head>
-            <title>DEVL Environment - Cypress Reports</title>
+            <title>DEVL Environment - Last 5 Test Runs</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-              .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
               h1 { color: #333; border-bottom: 3px solid #4caf50; padding-bottom: 10px; }
-              .report-link {
-                display: block;
-                padding: 15px;
+              .report-card {
+                padding: 20px;
                 margin: 15px 0;
-                background: #f0f0f0;
+                background: #f9f9f9;
                 border-radius: 8px;
-                text-decoration: none;
-                color: #0066cc;
                 border-left: 4px solid #4caf50;
-                transition: all 0.3s;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
               }
-              .report-link:hover { background: #e0e0e0; transform: translateX(5px); }
+              .report-card.latest { border-left-color: #2196F3; background: #e3f2fd; }
+              .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+              .run-title { font-size: 18px; font-weight: bold; color: #333; }
+              .run-number { background: #4caf50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 14px; }
+              .latest .run-number { background: #2196F3; }
+              .metadata { color: #666; font-size: 14px; margin: 8px 0; }
+              .links { margin-top: 12px; }
+              .links a {
+                display: inline-block;
+                margin-right: 15px;
+                padding: 8px 16px;
+                background: #4caf50;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                font-size: 14px;
+                transition: background 0.3s;
+              }
+              .links a:hover { background: #45a049; }
+              .links a.github { background: #333; }
+              .links a.github:hover { background: #555; }
               .back-link { color: #666; text-decoration: none; }
               .back-link:hover { text-decoration: underline; }
+              .no-data { text-align: center; color: #999; padding: 40px; }
             </style>
           </head>
           <body>
             <div class="container">
               <a href="../index.html" class="back-link">← Back to All Environments</a>
-              <h1>🟢 DEVL Environment - E2E Test Reports</h1>
-              <a href="latest/index.html" class="report-link">📊 Latest Test Report</a>
-              <p style="text-align: center; color: #666; margin-top: 10px;">
-                <small>Direct link: <a href="latest/combined-report.html">combined-report.html</a></small>
-              </p>
-              <h2>Historical Reports</h2>
+              <h1>🟢 DEVL Environment - Last 5 Test Runs</h1>
+              <div id="reports">
+                <div class="no-data">Loading reports...</div>
+              </div>
             </div>
+            <script>
+              async function loadReports() {
+                const reportsDiv = document.getElementById('reports');
+                reportsDiv.innerHTML = '';
+
+                for (let i = 1; i <= 5; i++) {
+                  try {
+                    const response = await fetch(`run-${i}/metadata.json`);
+                    if (!response.ok) continue;
+
+                    const meta = await response.json();
+                    const card = document.createElement('div');
+                    card.className = `report-card ${i === 1 ? 'latest' : ''}`;
+
+                    card.innerHTML = `
+                      <div class="report-header">
+                        <div class="run-title">${i === 1 ? '📊 Latest Run' : `Run ${i}`}</div>
+                        <div class="run-number">Run #${meta.runNumber}</div>
+                      </div>
+                      <div class="metadata">
+                        📅 ${meta.timestamp}<br>
+                        🔀 Branch: ${meta.branch} | Commit: ${meta.commit.substring(0, 7)}
+                      </div>
+                      <div class="links">
+                        <a href="run-${i}/index.html" target="_blank">📄 View Report</a>
+                        <a href="${meta.githubUrl}" target="_blank" class="github">🔗 GitHub Actions</a>
+                      </div>
+                    `;
+
+                    reportsDiv.appendChild(card);
+                  } catch (e) {
+                    console.log(`Run ${i} not available`);
+                  }
+                }
+
+                if (reportsDiv.children.length === 0) {
+                  reportsDiv.innerHTML = '<div class="no-data">No reports available yet</div>';
+                }
+              }
+
+              loadReports();
+            </script>
           </body>
           </html>
           EOF
