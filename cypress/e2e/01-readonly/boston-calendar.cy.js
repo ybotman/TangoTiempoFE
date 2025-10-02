@@ -60,18 +60,14 @@ describe('Boston Calendar - Readonly Access', () => {
           // Click first event
           cy.get('.fc-event').first().click();
 
-          // MUI Modal becomes visible - wait for backdrop or modal content
-          // Using more flexible selector for MUI Modal
-          cy.get('.MuiModal-root', { timeout: 5000 }).should('be.visible');
-
-          // Modal content should be visible
-          cy.get('[data-testid="event-modal-content"]').should('be.visible');
+          // Event modal should appear
+          cy.get('[data-testid="event-modal"]', { timeout: 5000 }).should('be.visible');
 
           // Close modal using the close button
           cy.get('[data-testid="modal-close"]').click();
 
           // Modal should disappear
-          cy.get('.MuiModal-root').should('not.exist');
+          cy.get('[data-testid="event-modal"]').should('not.exist');
         }
       });
     });

@@ -40,7 +40,8 @@
       "Bash(timeout 10 curl -s -I \"https://ybotman.github.io/tangotiempo.com/devl-reports/latest/index.html\")",
       "Bash(timeout 10 curl -s \"https://ybotman.github.io/tangotiempo.com/devl-reports/2025-10-02/combined-report.html\")",
       "WebFetch(domain:ybotman.github.io)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

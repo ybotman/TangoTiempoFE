@@ -41,9 +41,9 @@ Cypress.Commands.add('logout', () => {
  */
 Cypress.Commands.add('navigateCalendar', (direction) => {
   const buttonMap = {
-    prev: 'button[title="Previous"]',
-    next: 'button[title="Next"]',
-    today: 'button[title="Today"]'
+    prev: '[data-testid="nav-prev"]',
+    next: '[data-testid="nav-next"]',
+    today: '[data-testid="nav-today"]'
   };
 
   cy.get(buttonMap[direction]).click();
@@ -55,9 +55,9 @@ Cypress.Commands.add('navigateCalendar', (direction) => {
  */
 Cypress.Commands.add('changeCalendarView', (viewType) => {
   const viewMap = {
-    '8week': 'button[title="8 Week View"]',
-    'list': 'button[title="List View"]',
-    'month': 'button[title="Month View"]'
+    '8week': '[data-testid="view-8week"]',
+    'list': '[data-testid="view-list"]',
+    'month': '[data-testid="view-month"]'
   };
 
   if (viewMap[viewType]) {

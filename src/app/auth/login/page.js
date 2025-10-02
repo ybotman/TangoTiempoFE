@@ -152,7 +152,8 @@ const LoginPage = () => {
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={() => router.push('/calendar')}
-              sx={{ 
+              data-testid="back-to-calendar-button"
+              sx={{
                 textTransform: 'none',
                 color: 'text.secondary',
                 '&:hover': { backgroundColor: 'action.hover' }
@@ -217,6 +218,7 @@ const LoginPage = () => {
                 size="large"
                 onClick={handleAppleLogIn}
                 startIcon={<AppleIcon sx={{ fontSize: 30 }} />}
+                data-testid="apple-login-button"
                 sx={{
                   mb: 2,
                   py: 2,
@@ -236,6 +238,7 @@ const LoginPage = () => {
                 size="large"
                 disabled
                 startIcon={<FacebookIcon sx={{ fontSize: 30 }} />}
+                data-testid="facebook-login-button"
                 sx={{
                   mb: 2,
                   py: 2,

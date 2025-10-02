@@ -52,14 +52,14 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       // Get initial date
       cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').then(initialDate => {
         // Navigate to next period
-        cy.get('button').contains('keyboard_arrow_right').click();
+        cy.get('[data-testid="nav-next"]').click();
         cy.wait(500);
 
         // Date should have changed
         cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').should('not.equal', initialDate);
 
         // Navigate back
-        cy.get('button').contains('keyboard_arrow_left').click();
+        cy.get('[data-testid="nav-prev"]').click();
         cy.wait(500);
 
         // Should return to similar date
@@ -69,13 +69,13 @@ describe('Main Calendar - Readonly Access with Geo', () => {
 
     it('should return to today on today button click', () => {
       // Navigate forward multiple times
-      cy.get('button').contains('keyboard_arrow_right').click();
+      cy.get('[data-testid="nav-next"]').click();
       cy.wait(300);
-      cy.get('button').contains('keyboard_arrow_right').click();
+      cy.get('[data-testid="nav-next"]').click();
       cy.wait(300);
 
       // Click today
-      cy.get('button').contains('Today').click();
+      cy.get('[data-testid="nav-today"]').click();
       cy.wait(500);
 
       // Should show current date in view
@@ -96,10 +96,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
           cy.get('.fc-event').first().click();
 
           // Modal should appear
-          cy.get('.MuiModal-root', { timeout: 5000 }).should('be.visible');
-
-          // Modal should have event details
-          cy.get('[data-testid="event-modal-content"]').should('be.visible');
+          cy.get('[data-testid="event-modal"]', { timeout: 5000 }).should('be.visible');
         }
       });
     });
@@ -174,8 +171,8 @@ describe('Main Calendar - Readonly Access with Geo', () => {
 
     it('should have mobile navigation', () => {
       // Navigation buttons should work on mobile
-      cy.get('button').contains('keyboard_arrow_left').should('be.visible');
-      cy.get('button').contains('keyboard_arrow_right').should('be.visible');
+      cy.get('[data-testid="nav-prev"]').should('be.visible');
+      cy.get('[data-testid="nav-next"]').should('be.visible');
     });
 
     it('should handle event clicks on mobile', () => {
@@ -184,7 +181,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
           cy.get('.fc-event').first().click();
 
           // Modal should open on mobile
-          cy.get('.MuiModal-root', { timeout: 5000 }).should('be.visible');
+          cy.get('[data-testid="event-modal"]', { timeout: 5000 }).should('be.visible');
         }
       });
     });
@@ -192,23 +189,19 @@ describe('Main Calendar - Readonly Access with Geo', () => {
 
   context('View Switching', () => {
     it('should switch between calendar views', () => {
-      // Look for view toggle buttons (month, week, list)
-      cy.get('button').then($buttons => {
-        // Find view-related buttons
-        const viewButtons = $buttons.filter((i, btn) => {
-          const text = Cypress.$(btn).text().toLowerCase();
-          return text.includes('week') || text.includes('month') || text.includes('list');
-        });
+      // Switch to list view
+      cy.get('[data-testid="view-list"]').click();
+      cy.wait(500);
 
-        if (viewButtons.length > 0) {
-          // Click first view button
-          cy.wrap(viewButtons[0]).click();
-          cy.wait(500);
+      // Calendar should still be visible in list view
+      cy.get('.fc-list').should('exist');
 
-          // Calendar should still be visible
-          cy.get('.fc-view').should('exist');
-        }
-      });
+      // Switch back to 8-week view
+      cy.get('[data-testid="view-8week"]').click();
+      cy.wait(500);
+
+      // Calendar should be visible in grid view
+      cy.get('.fc-daygrid').should('exist');
     });
 
     it('should maintain functionality across view changes', () => {
@@ -216,7 +209,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-view').should('be.visible');
 
       // Try navigating
-      cy.get('button').contains('keyboard_arrow_right').click();
+      cy.get('[data-testid="nav-next"]').click();
       cy.wait(300);
 
       // Calendar should still function
@@ -229,7 +222,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
     it('should handle rapid navigation without errors', () => {
       // Navigate quickly through calendar
       for(let i = 0; i < 5; i++) {
-        cy.get('button').contains('keyboard_arrow_right').click();
+        cy.get('[data-testid="nav-next"]').click();
         cy.wait(100);
       }
 
@@ -240,7 +233,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
 
     it('should persist across page refresh', () => {
       // Navigate forward
-      cy.get('button').contains('keyboard_arrow_right').click();
+      cy.get('[data-testid="nav-next"]').click();
       cy.wait(500);
 
       // Refresh page
@@ -258,7 +251,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
     it('should handle empty date ranges gracefully', () => {
       // Navigate far into future where no events exist
       for(let i = 0; i < 24; i++) {
-        cy.get('button').contains('keyboard_arrow_right').click();
+        cy.get('[data-testid="nav-next"]').click();
         cy.wait(100);
       }
 
@@ -283,7 +276,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
     it('should handle month changes smoothly', () => {
       const start = Date.now();
 
-      cy.get('button').contains('keyboard_arrow_right').click();
+      cy.get('[data-testid="nav-next"]').click();
 
       cy.get('.fc-view').should('exist');
 
@@ -312,8 +305,8 @@ describe('Main Calendar - Readonly Access with Geo', () => {
 
     it('should have keyboard-accessible navigation', () => {
       // Navigation buttons should be focusable
-      cy.get('button').contains('keyboard_arrow_left').should('not.be.disabled');
-      cy.get('button').contains('keyboard_arrow_right').should('not.be.disabled');
+      cy.get('[data-testid="nav-prev"]').should('not.be.disabled');
+      cy.get('[data-testid="nav-next"]').should('not.be.disabled');
     });
   });
 });
