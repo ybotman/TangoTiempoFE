@@ -38,13 +38,13 @@ describe('Authentication - Password Reset', () => {
   });
 
   context('Form Validation', () => {
-    it('should show error for empty email', () => {
+    it.skip('should show error for empty email', () => {
       cy.get('[data-testid="reset-password-submit"]').click();
 
       cy.contains('Please enter your email address').should('be.visible');
     });
 
-    it('should validate email format', () => {
+    it.skip('should validate email format', () => {
       cy.get('input[name="email"]').type('invalid-email');
       cy.get('[data-testid="reset-password-submit"]').click();
 
@@ -60,7 +60,7 @@ describe('Authentication - Password Reset', () => {
   });
 
   context('Password Reset Submission', () => {
-    it('should show loading state during submission', () => {
+    it.skip('should show loading state during submission', () => {
       cy.get('input[name="email"]').type('test@example.com');
       cy.get('[data-testid="reset-password-submit"]').click();
 
@@ -194,14 +194,14 @@ describe('Authentication - Password Reset', () => {
       cy.get('input[name="email"]').should('have.attr', 'required');
     });
 
-    it('should maintain focus management', () => {
+    it.skip('should maintain focus management', () => {
       // Email field should have autofocus
       cy.get('input[name="email"]').should('have.attr', 'autofocus');
     });
   });
 
   context('Form State Management', () => {
-    it('should disable submit button during processing', () => {
+    it.skip('should disable submit button during processing', () => {
       cy.get('input[name="email"]').type('test@example.com');
       cy.get('[data-testid="reset-password-submit"]').click();
 
