@@ -109,20 +109,32 @@ describe('Authentication - Login', () => {
     });
   });
 
-  context('Navigation', () => {
-    it('should navigate to signup page from create account link', () => {
-      cy.contains('CREATE ACCOUNT').click();
+  context('Successful Login', () => {
+    it('should successfully login with valid credentials', () => {
+      // Get test credentials from environment
+      const email = Cypress.env('CYPRESS_TEST_USER_EMAIL');
+      const password = Cypress.env('CYPRESS_TEST_USER_PASSWORD');
 
-      // Should be on signup page
-      cy.url().should('include', '/auth/signup');
-      cy.get('[data-testid="signup-page"]').should('be.visible');
-    });
+      // Verify credentials are available
+      expect(email).to.exist;
+      expect(password).to.exist;
 
-    it('should navigate back to calendar', () => {
-      cy.contains('Back to Calendar').click();
+      // Click email login button to show form
+      cy.get('[data-testid="email-login-button"]').click();
+      cy.get('[data-testid="email-auth-form"]', { timeout: 5000 }).should('be.visible');
 
-      // Should redirect to calendar
-      cy.url().should('include', '/calendar');
+      // Fill in credentials
+      cy.get('input[name="email"]').clear().type(email);
+      cy.get('input[name="password"]').clear().type(password);
+
+      // Submit login form
+      cy.contains('button', 'Log In').click();
+
+      // Should redirect to calendar on successful login
+      cy.url().should('include', '/calendar', { timeout: 15000 });
+
+      // Verify user is logged in - calendar should be visible
+      cy.get('.fc-view', { timeout: 10000 }).should('be.visible');
     });
   });
 
@@ -155,32 +167,20 @@ describe('Authentication - Login', () => {
     });
   });
 
-  context('Successful Login', () => {
-    it('should successfully login with valid credentials', () => {
-      // Get test credentials from environment
-      const email = Cypress.env('CYPRESS_TEST_USER_EMAIL');
-      const password = Cypress.env('CYPRESS_TEST_USER_PASSWORD');
+  context('Navigation', () => {
+    it('should navigate to signup page from create account link', () => {
+      cy.contains('CREATE ACCOUNT').click();
 
-      // Verify credentials are available
-      expect(email).to.exist;
-      expect(password).to.exist;
+      // Should be on signup page
+      cy.url().should('include', '/auth/signup');
+      cy.get('[data-testid="signup-page"]').should('be.visible');
+    });
 
-      // Click email login button to show form
-      cy.get('[data-testid="email-login-button"]').click();
-      cy.get('[data-testid="email-auth-form"]', { timeout: 5000 }).should('be.visible');
+    it('should navigate back to calendar', () => {
+      cy.contains('Back to Calendar').click();
 
-      // Fill in credentials
-      cy.get('input[name="email"]').clear().type(email);
-      cy.get('input[name="password"]').clear().type(password);
-
-      // Submit login form
-      cy.contains('button', 'Log In').click();
-
-      // Should redirect to calendar on successful login
-      cy.url().should('include', '/calendar', { timeout: 15000 });
-
-      // Verify user is logged in - calendar should be visible
-      cy.get('.fc-view', { timeout: 10000 }).should('be.visible');
+      // Should redirect to calendar
+      cy.url().should('include', '/calendar');
     });
   });
 
