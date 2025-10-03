@@ -244,9 +244,11 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-view', { timeout: 10000 }).should('exist');
     });
 
-    it('should display calendar title/header', () => {
-      // Calendar should show current month/date range
-      cy.get('.fc-toolbar-title, .fc-header').should('exist');
+    it('should display calendar navigation controls', () => {
+      // Calendar uses custom navigation instead of default toolbar
+      cy.get('[data-testid="nav-prev"]').should('be.visible');
+      cy.get('[data-testid="nav-today"]').should('be.visible');
+      cy.get('[data-testid="nav-next"]').should('be.visible');
     });
 
     it('should handle empty date ranges gracefully', () => {
