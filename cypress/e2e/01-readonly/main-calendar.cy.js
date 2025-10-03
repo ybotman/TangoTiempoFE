@@ -89,11 +89,11 @@ describe('Main Calendar - Readonly Access with Geo', () => {
     });
 
     it('should show event details on click', () => {
-      // Check if events exist
-      cy.get('.fc-event').then($events => {
+      // Check if real events exist (exclude placeholders)
+      cy.get('.fc-event:not(.fc-placeholder-event)').then($events => {
         if ($events.length > 0) {
-          // Click first event
-          cy.get('.fc-event').first().click();
+          // Click first real event
+          cy.get('.fc-event:not(.fc-placeholder-event)').first().click();
 
           // Modal should appear
           cy.get('[data-testid="event-modal"]', { timeout: 5000 }).should('be.visible');
@@ -176,9 +176,10 @@ describe('Main Calendar - Readonly Access with Geo', () => {
     });
 
     it('should handle event clicks on mobile', () => {
-      cy.get('.fc-event').then($events => {
+      // Exclude placeholder events - they don't open modals
+      cy.get('.fc-event:not(.fc-placeholder-event)').then($events => {
         if ($events.length > 0) {
-          cy.get('.fc-event').first().click();
+          cy.get('.fc-event:not(.fc-placeholder-event)').first().click();
 
           // Modal should open on mobile
           cy.get('[data-testid="event-modal"]', { timeout: 5000 }).should('be.visible');

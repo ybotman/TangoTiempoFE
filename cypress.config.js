@@ -15,7 +15,7 @@ export default defineConfig({
     },
     env: {
       FAIL_FAST_STRATEGY: 'run',  // Stop entire test run, not just current spec
-      FAIL_FAST_BAIL: 1           // Stop after 1 failure (temporary for quick debugging)
+      FAIL_FAST_BAIL: 10          // Stop after 10 failures
     },
     baseUrl: 'http://localhost:3001',
     viewportWidth: 1280,
