@@ -1,14 +1,15 @@
 name: Cypress E2E Tests - TEST
 
 on:
-  push:
-    branches:
-      - TEST
-  pull_request:
-    branches:
-      - TEST
+  # Automated triggers disabled - run manually via workflow_dispatch or local npm scripts
+  # push:
+  #   branches:
+  #     - TEST
+  # pull_request:
+  #   branches:
+  #     - TEST
   # deployment_status removed - was triggering on DEVL commits
-  # Workflow now only runs on explicit TEST branch pushes/PRs
+  workflow_dispatch:  # Manual trigger from GitHub Actions UI
 
 jobs:
   cypress-run:

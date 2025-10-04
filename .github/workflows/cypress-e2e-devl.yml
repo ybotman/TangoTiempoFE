@@ -1,12 +1,14 @@
 name: Cypress E2E Tests - DEVL
 
 on:
-  push:
-    branches:
-      - DEVL
-  pull_request:
-    branches:
-      - DEVL
+  # Automated triggers disabled - run manually via workflow_dispatch or local npm scripts
+  # push:
+  #   branches:
+  #     - DEVL
+  # pull_request:
+  #   branches:
+  #     - DEVL
+  workflow_dispatch:  # Manual trigger from GitHub Actions UI
 
 permissions:
   contents: read

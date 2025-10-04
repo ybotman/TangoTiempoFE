@@ -1,16 +1,17 @@
 name: Cypress Smoke Tests - PROD
 
 on:
-  push:
-    branches:
-      - MAIN
-  pull_request:
-    branches:
-      - MAIN
-  schedule:
-    # Run daily at 6am UTC (2am EST) to catch production issues
-    - cron: '0 6 * * *'
-  workflow_dispatch:  # Allow manual trigger from GitHub Actions tab
+  # Automated triggers disabled - run manually via workflow_dispatch or local npm scripts
+  # push:
+  #   branches:
+  #     - MAIN
+  # pull_request:
+  #   branches:
+  #     - MAIN
+  # schedule:
+  #   # Run daily at 6am UTC (2am EST) to catch production issues
+  #   - cron: '0 6 * * *'
+  workflow_dispatch:  # Manual trigger from GitHub Actions UI
 
 jobs:
   cypress-smoke:
