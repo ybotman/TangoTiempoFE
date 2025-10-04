@@ -77,6 +77,7 @@ const ResetPasswordPage = () => {
             flexDirection: 'column',
             alignItems: 'center',
           }}
+          data-testid="reset-password-page"
         >
           {/* Title */}
           <Typography component="h1" variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
@@ -134,6 +135,7 @@ const ResetPasswordPage = () => {
                 variant="contained"
                 sx={{ mt: 3, mb: 2, py: 1.5 }}
                 disabled={loading || authLoading}
+                data-testid="reset-password-submit"
               >
                 {loading ? <CircularProgress size={24} /> : 'Send Reset Email'}
               </Button>

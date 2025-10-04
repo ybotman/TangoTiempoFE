@@ -771,7 +771,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
 
   return (
     <>
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose} data-testid="create-event-modal">
       <Box sx={modalStyle}>
         <Box display="flex" justifyContent="space-between" flexWrap="wrap">
           <Typography variant="h5" component="h2">

@@ -664,13 +664,13 @@ const CalendarPage = () => {
           }}
         >
           <ButtonGroup variant="outlined" aria-label="outlined button group">
-            <IconButton onClick={handlePrev}>
+            <IconButton onClick={handlePrev} title="Previous" data-testid="nav-prev">
               <ArrowBackIcon />
             </IconButton>
-            <IconButton onClick={handleToday}>
+            <IconButton onClick={handleToday} title="Today" data-testid="nav-today">
               <TodayIcon />
             </IconButton>
-            <IconButton onClick={handleNext}>
+            <IconButton onClick={handleNext} title="Next" data-testid="nav-next">
               <ArrowForwardIcon />
             </IconButton>
           </ButtonGroup>
@@ -694,13 +694,13 @@ const CalendarPage = () => {
             <IconButton onClick={() => {
               calendarRef.current.getApi().changeView('dayGrid8Week');
               setCurrentViewType('dayGrid8Week');
-            }}>
+            }} title="8 Week View" data-testid="view-8week">
               <CalendarMonthIcon />
             </IconButton>
             <IconButton onClick={() => {
               calendarRef.current.getApi().changeView('list21Days');
               setCurrentViewType('list21Days');
-            }}>
+            }} title="List View" data-testid="view-list">
               <ListIcon />
             </IconButton>
           </ButtonGroup>

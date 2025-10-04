@@ -159,11 +159,18 @@ export const useCalendarPage = () => {
 
   const handlePrev = () => {
     const api = calendarRef.current.getApi();
-    const currentDate = api.getDate();
+    const viewType = api.view.type;
 
-    // Move to first day of previous month
-    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-    api.gotoDate(prevMonth);
+    // For list views, advance by the view's duration (e.g., 21 days)
+    // This prevents gaps/overlaps when navigating in list view
+    if (viewType.includes('list')) {
+      api.prev();
+    } else {
+      // For month/grid views, jump to first of previous month
+      const currentDate = api.getDate();
+      const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      api.gotoDate(prevMonth);
+    }
 
     // Track previous navigation
     trackEvent({
@@ -176,11 +183,18 @@ export const useCalendarPage = () => {
 
   const handleNext = () => {
     const api = calendarRef.current.getApi();
-    const currentDate = api.getDate();
+    const viewType = api.view.type;
 
-    // Move to first day of next month
-    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    api.gotoDate(nextMonth);
+    // For list views, advance by the view's duration (e.g., 21 days)
+    // This prevents gaps/overlaps when navigating in list view
+    if (viewType.includes('list')) {
+      api.next();
+    } else {
+      // For month/grid views, jump to first of next month
+      const currentDate = api.getDate();
+      const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      api.gotoDate(nextMonth);
+    }
 
     // Track next navigation
     trackEvent({

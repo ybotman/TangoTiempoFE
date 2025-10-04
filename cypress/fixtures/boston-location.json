@@ -1,0 +1,16 @@
+{
+  "location": {
+    "lat": 42.3601,
+    "lng": -71.0589,
+    "zoomRange": 200,
+    "city": "Boston",
+    "state": "MA",
+    "displayName": "Boston, Massachusetts"
+  },
+  "nearbyLocations": [
+    "Cambridge, MA",
+    "Somerville, MA",
+    "Brookline, MA",
+    "Newton, MA"
+  ]
+}

@@ -1,9 +1,10 @@
 // UserSettingsApply.js
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -14,6 +15,7 @@ const UserSettingsApply = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const { user } = useContext(AuthContext); // Get Firebase user for email
   const { userData, updateUserData, loading: userDataLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
   const { createOrganizer, fetchOrganizerById, organizer } = useOrganizers();
@@ -111,11 +113,16 @@ const UserSettingsApply = () => {
         // Use a default region if user's region is not available
         const defaultRegionId = '66c4d99042ec462ea22484bd'; // Fallback region ID
 
+        const fullName = `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`;
+        const shortName = `${userData?.localUserInfo?.firstName || 'New'}${userData?.localUserInfo?.lastName ? ' ' + userData?.localUserInfo?.lastName.charAt(0) : ''}`;
+
         const organizerData = {
           linkedUserLogin: userData._id,
           firebaseUserId: userData.firebaseUserId || '',
-          name: `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`,
-          fullName: `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`,
+          name: fullName,
+          fullName: fullName,
+          shortName: shortName, // REQUIRED by backend - generated from user name
+          contactEmail: user?.email || userData.firebaseUserId || '', // REQUIRED by backend API - from Firebase Auth
           organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
           isActive: true,
           isEnabled: false,  // Requires manual enable for safety
@@ -129,6 +136,8 @@ const UserSettingsApply = () => {
             isOrchestra: false,
           },
         };
+
+        console.log('Creating organizer with data:', organizerData);
 
         const newOrganizer = await createOrganizer(organizerData);
 

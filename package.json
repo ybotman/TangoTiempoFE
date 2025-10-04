@@ -1,6 +1,6 @@
 {
   "name": "tangotiempo",
-  "version": "1.10.6",
+  "version": "1.10.7",
   "private": true,
   "proxy": "http://localhost:3010",
   "type": "module",
@@ -12,7 +12,20 @@
     "format": "prettier --write .",
     "snyk": "snyk test",
     "prep": "prettier --write . && npm run eslint && npm run build",
-    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep"
+    "cleanall": "npm cache clean --force && rm -rf node_modules package-lock.json && npm install && depcheck && npm run prep",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:local": "CYPRESS_BASE_URL=http://localhost:3001 cypress run",
+    "cypress:run:test": "CYPRESS_BASE_URL=https://test.tangotiempo.com cypress run",
+    "cypress:run:readonly": "cypress run --spec 'cypress/e2e/01-readonly/**'",
+    "cypress:run:smoke": "CYPRESS_BASE_URL=https://tangotiempo.com cypress run --spec 'cypress/e2e/01-readonly/**'",
+    "test:e2e": "npm run cypress:run:local",
+    "test:e2e:headed": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --headed",
+    "test:e2e:chrome": "CYPRESS_BASE_URL=http://localhost:3001 cypress run --browser chrome",
+    "test:e2e:report": "npm run cypress:run:local && npm run report:merge && npm run report:generate",
+    "report:merge": "mochawesome-merge cypress/reports/*.json > cypress/reports/combined-report.json",
+    "report:generate": "marge cypress/reports/combined-report.json --reportDir cypress/reports/html --inline --inlineAssets --reportTitle \"Cypress E2E Test Report - Run ${GITHUB_RUN_NUMBER:-Local}\" --reportPageTitle \"DEVL Test Results\"",
+    "report:clean": "rm -rf cypress/reports"
   },
   "engines": {
     "node": "=20.x"
@@ -66,12 +79,16 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "cypress": "^14.3.2",
+    "cypress-fail-fast": "^7.1.1",
     "dotenv": "^17.2.2",
     "eslint": "^9.13.0",
     "eslint-config-next": "^15.0.1",
     "eslint-plugin-cypress": "^4.3.0",
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.11.0",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^4.4.1",
+    "mochawesome-report-generator": "^6.3.0",
     "prettier": "^3.3.3"
   },
   "resolutions": {

@@ -1,0 +1,34 @@
+{
+  "categories": [
+    {
+      "id": "milonga",
+      "name": "Milonga",
+      "color": "#FF6B6B"
+    },
+    {
+      "id": "class",
+      "name": "Class",
+      "color": "#4ECDC4"
+    },
+    {
+      "id": "practica",
+      "name": "Practica",
+      "color": "#45B7D1"
+    },
+    {
+      "id": "workshop",
+      "name": "Workshop",
+      "color": "#96CEB4"
+    },
+    {
+      "id": "festival",
+      "name": "Festival",
+      "color": "#FFEAA7"
+    },
+    {
+      "id": "performance",
+      "name": "Performance",
+      "color": "#DDA15E"
+    }
+  ]
+}

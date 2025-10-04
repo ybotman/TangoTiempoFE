@@ -268,13 +268,14 @@ const MapCenterModal = ({ open, onClose }) => {
   };
   
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      data-testid="map-center-modal"
       PaperProps={{
-        sx: { 
+        sx: {
           height: '90vh',
           maxHeight: '900px'
         }

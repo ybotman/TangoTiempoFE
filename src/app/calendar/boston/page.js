@@ -442,7 +442,7 @@ const BostonCalendarPage = () => {
   }, [calendarRef, currentViewType]);
 
   return (
-    <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
+    <div data-testid="boston-calendar-page" style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       {/* Hide FullCalendar's default time and dot columns in list view */}
       <style dangerouslySetInnerHTML={{ __html: `
         .fc-list-event-time {
@@ -504,13 +504,13 @@ const BostonCalendarPage = () => {
           }}
         >
           <ButtonGroup variant="outlined" size="small">
-            <IconButton onClick={handlePrev} title="Previous">
+            <IconButton onClick={handlePrev} title="Previous" data-testid="nav-prev">
               <ArrowBackIcon />
             </IconButton>
-            <IconButton onClick={handleTodayClick} title="Today">
+            <IconButton onClick={handleTodayClick} title="Today" data-testid="nav-today">
               <TodayIcon />
             </IconButton>
-            <IconButton onClick={handleNext} title="Next">
+            <IconButton onClick={handleNext} title="Next" data-testid="nav-next">
               <ArrowForwardIcon />
             </IconButton>
           </ButtonGroup>
@@ -538,6 +538,7 @@ const BostonCalendarPage = () => {
               }}
               color={currentViewType === 'dayGrid8Week' ? 'primary' : 'default'}
               title="8 Week View"
+              data-testid="view-8week"
             >
               <CalendarMonthIcon />
             </IconButton>
@@ -548,6 +549,7 @@ const BostonCalendarPage = () => {
               }}
               color={currentViewType === 'list21Days' ? 'primary' : 'default'}
               title="List View"
+              data-testid="view-list"
             >
               <ListIcon />
             </IconButton>
@@ -566,7 +568,7 @@ const BostonCalendarPage = () => {
         )}
 
         {/* Main Calendar */}
-        <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
+        <div data-testid="calendar-container" style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
           {eventsLoading && (
             <div style={{
               position: 'fixed',

@@ -170,7 +170,7 @@ const SignUpPage = () => {
           </Box>
 
           {/* Title with clear SIGN UP label */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }} data-testid="signup-page">
             <PersonAddIcon sx={{ fontSize: 48, color: 'secondary.main', mr: 2 }} />
             <Typography component="h1" variant="h3" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
               SIGN UP
@@ -204,6 +204,7 @@ const SignUpPage = () => {
                 size="large"
                 onClick={handleGoogleSignUp}
                 startIcon={<GoogleIcon sx={{ fontSize: 30 }} />}
+                data-testid="google-signup-button"
                 sx={{
                   mb: 2,
                   py: 2,
@@ -263,6 +264,7 @@ const SignUpPage = () => {
                 size="large"
                 onClick={() => setShowEmailForm(true)}
                 startIcon={<EmailIcon sx={{ fontSize: 30 }} />}
+                data-testid="email-signup-button"
                 sx={{
                   py: 2,
                   textTransform: 'none',

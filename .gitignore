@@ -4,7 +4,7 @@
 node_modules/
 .pnp/
 .pnp.js
-package-lock.json
+# package-lock.json - UNCOMMENTED for CI/CD (GitHub Actions requires it)
 
 # Logs
 logs/
@@ -103,3 +103,12 @@ web_modules/
 **/.claude/settings.local.json
 .vercel
 public/AI-Guild-backup-*
+
+# Cypress test artifacts
+cypress/screenshots/
+cypress/videos/
+
+# Mochawesome test reports
+cypress/reports/
+cypress/reports/*.json
+cypress/reports/html/

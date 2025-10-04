@@ -13,6 +13,7 @@ const ViewAIEventDetails = ({ open, onClose, eventDetails }) => {
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      data-testid="ai-event-modal"
       PaperProps={{
         sx: {
           borderRadius: 2,
@@ -38,6 +39,7 @@ const ViewAIEventDetails = ({ open, onClose, eventDetails }) => {
         <IconButton
           onClick={onClose}
           size="small"
+          data-testid="ai-event-modal-close"
           sx={{
             color: 'grey.500',
             '&:hover': {
