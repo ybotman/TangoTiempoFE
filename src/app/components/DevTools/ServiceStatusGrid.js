@@ -70,17 +70,29 @@ const ServiceStatusGrid = () => {
   ];
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '45px',
-        left: '10px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        zIndex: 100,
-      }}
-    >
+    <>
+      {/* Hide on mobile - only show on desktop/laptop */}
+      <style jsx>{`
+        .service-status-grid {
+          display: flex;
+        }
+        @media (max-width: 767px) {
+          .service-status-grid {
+            display: none;
+          }
+        }
+      `}</style>
+      <div
+        className="service-status-grid"
+        style={{
+          position: 'absolute',
+          top: '45px',
+          left: '10px',
+          flexDirection: 'column',
+          gap: '2px',
+          zIndex: 100,
+        }}
+      >
       {gridRows.map((row, rowIndex) => (
         <div
           key={rowIndex}
@@ -111,7 +123,7 @@ const ServiceStatusGrid = () => {
                 }}
                 title={getTooltipContent(service)} // Basic browser tooltip
               >
-                {/* Custom tooltip for better mobile support */}
+                {/* Custom tooltip for desktop hover */}
                 {isHovered && (
                   <div
                     style={{
@@ -120,15 +132,15 @@ const ServiceStatusGrid = () => {
                       left: '0',
                       backgroundColor: 'rgba(0, 0, 0, 0.9)',
                       color: 'white',
-                      padding: '8px 12px',
+                      padding: '6px 10px',
                       borderRadius: '4px',
-                      fontSize: '11px',
+                      fontSize: '9px',
                       whiteSpace: 'pre-line',
-                      minWidth: '180px',
+                      minWidth: '160px',
                       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
                       zIndex: 1000,
                       pointerEvents: 'none',
-                      lineHeight: '1.4',
+                      lineHeight: '1.3',
                     }}
                   >
                     {getTooltipContent(service)}
@@ -139,7 +151,8 @@ const ServiceStatusGrid = () => {
           })}
         </div>
       ))}
-    </div>
+      </div>
+    </>
   );
 };
 
