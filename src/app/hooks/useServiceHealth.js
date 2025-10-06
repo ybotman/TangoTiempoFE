@@ -262,43 +262,42 @@ export const useServiceHealth = () => {
   };
 
   const checkAzureFunctions = async () => {
+    // Determine AF URL: localhost:7071 for dev, env variable for production
     const afEnabled = process.env.NEXT_PUBLIC_AF_ENABLED === 'true';
-    const afUrl = process.env.NEXT_PUBLIC_AF_URL;
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
-    if (!afEnabled || !afUrl) {
-      // Keep as disabled
+    // Always try to check if on localhost (for dev)
+    const isLocal = afUrl.includes('localhost');
+
+    if (!afEnabled && !isLocal) {
+      // Keep as disabled for production if not enabled
       return;
     }
 
+    // Check AF Health endpoint
     try {
-      // Check AF Health endpoint
+      const start = Date.now();
       const response = await fetch(`${afUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       });
+      const duration = Date.now() - start;
 
       if (response.ok) {
+        const data = await response.json();
         setServices(prev => ({
           ...prev,
           azureFunctions: {
             name: 'AF Health',
             status: 'healthy',
-            detail: afUrl,
-            accuracy: null
-          },
-          afEvents: {
-            name: 'AF Events',
-            status: 'healthy',
-            detail: 'Ready',
-            accuracy: null
-          },
-          afVenues: {
-            name: 'AF Venues',
-            status: 'healthy',
-            detail: 'Ready',
+            detail: `${afUrl} (${duration}ms)`,
             accuracy: null
           }
         }));
+
+        // Now check Events and Venues endpoints
+        checkAFEvents(afUrl);
+        checkAFVenues(afUrl);
       } else {
         throw new Error('AF health check failed');
       }
@@ -307,20 +306,86 @@ export const useServiceHealth = () => {
         ...prev,
         azureFunctions: {
           name: 'AF Health',
-          status: 'error',
-          detail: 'Unreachable',
+          status: isLocal ? 'disabled' : 'error',
+          detail: isLocal ? 'Not running (start with: func start)' : 'Unreachable',
           accuracy: null
         },
         afEvents: {
           name: 'AF Events',
-          status: 'error',
-          detail: 'Unreachable',
+          status: 'disabled',
+          detail: 'Not available',
           accuracy: null
         },
         afVenues: {
           name: 'AF Venues',
-          status: 'error',
-          detail: 'Unreachable',
+          status: 'disabled',
+          detail: 'Not available',
+          accuracy: null
+        }
+      }));
+    }
+  };
+
+  const checkAFEvents = async (afUrl) => {
+    try {
+      const response = await fetch(`${afUrl}/api/events?appId=1&limit=1`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (response.ok) {
+        setServices(prev => ({
+          ...prev,
+          afEvents: {
+            name: 'AF Events',
+            status: 'healthy',
+            detail: 'API Ready',
+            accuracy: null
+          }
+        }));
+      } else {
+        throw new Error('AF events not available');
+      }
+    } catch (error) {
+      setServices(prev => ({
+        ...prev,
+        afEvents: {
+          name: 'AF Events',
+          status: 'disabled',
+          detail: 'Coming soon',
+          accuracy: null
+        }
+      }));
+    }
+  };
+
+  const checkAFVenues = async (afUrl) => {
+    try {
+      const response = await fetch(`${afUrl}/api/venues?appId=1&limit=1`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (response.ok) {
+        setServices(prev => ({
+          ...prev,
+          afVenues: {
+            name: 'AF Venues',
+            status: 'healthy',
+            detail: 'API Ready',
+            accuracy: null
+          }
+        }));
+      } else {
+        throw new Error('AF venues not available');
+      }
+    } catch (error) {
+      setServices(prev => ({
+        ...prev,
+        afVenues: {
+          name: 'AF Venues',
+          status: 'disabled',
+          detail: 'Coming soon',
           accuracy: null
         }
       }));
