@@ -161,14 +161,19 @@ Row 3: 🟢 🟢 🟢  (All AF services green)
 ### Health Endpoint
 **Request**: `GET /api/health`
 
-**Response**:
+**Response** (ACTUAL from localhost:7071):
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-10-06T20:45:00Z",
-  "service": "Azure Functions - Master Calendar"
+  "timestamp": "2025-10-07T02:31:01.417Z",
+  "service": "calendar-be-af",
+  "environment": "development",
+  "version": "1.0.0",
+  "uptime": 159.77
 }
 ```
+
+**Status**: ✅ WORKING
 
 ### Events Endpoint (Future)
 **Request**: `GET /api/events?appId=1&limit=1`
@@ -190,16 +195,21 @@ Row 3: 🟢 🟢 🟢  (All AF services green)
 ## Swagger Documentation
 
 ### Accessing API Docs
-When backend Swagger is ready:
+✅ **Swagger is LIVE!**
 
 **Local**: `http://localhost:7071/api/docs`
 **Production**: `https://your-af-url.azurewebsites.net/api/docs`
 
 ### Available Documentation
-- Health check endpoints
-- Events API (CRUD operations)
-- Venues API (CRUD operations)
-- Categories, Roles, etc.
+✅ **Health Check** - `/api/health` (System monitoring)
+✅ **Health Version** - `/api/health/version` (Version info)
+✅ **Categories** - `/api/categories` (Event categories)
+✅ **Roles** - `/api/roles` (User roles)
+✅ **Metrics** - `/api/metrics` (Observability)
+🚧 **Events API** - `/api/calendars/{id}/events` (Coming soon)
+🚧 **Venues API** - (Coming soon)
+
+**Swagger JSON**: `http://localhost:7071/api/swagger.json`
 
 ---
 
