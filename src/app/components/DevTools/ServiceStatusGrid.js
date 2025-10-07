@@ -57,6 +57,11 @@ const ServiceStatusGrid = () => {
                        service.status === 'checking' ? '⌛' :
                        service.status === 'error' ? '✗' : '○';
 
+    // Add Swagger link for AF Health when healthy
+    if (service.name === 'AF Health' && service.status === 'healthy') {
+      return `${service.name}\nStatus: ${statusIcon} ${service.status}\n${service.detail}\n\nSwagger: localhost:7071/api/docs`;
+    }
+
     return `${service.name}\nStatus: ${statusIcon} ${service.status}\n${service.detail}`;
   };
 
