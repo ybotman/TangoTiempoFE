@@ -262,22 +262,28 @@ export const useServiceHealth = () => {
   };
 
   const checkAzureFunctions = async () => {
-    // Determine AF URL: localhost:7071 for dev, env variable for production
+    // Check if Azure Functions monitoring is enabled
     const afEnabled = process.env.NEXT_PUBLIC_AF_ENABLED === 'true';
-    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL;
 
-    // Always try to check if on localhost (for dev)
-    const isLocal = afUrl.includes('localhost');
+    // If not enabled and no URL configured, skip all AF checks
+    if (!afEnabled && !afUrl) {
+      return;
+    }
 
-    if (!afEnabled && !isLocal) {
-      // Keep as disabled for production if not enabled
+    // Default to localhost only in development (when no URL is set but we want to try local)
+    const effectiveUrl = afUrl || 'http://localhost:7071';
+    const isLocal = effectiveUrl.includes('localhost');
+
+    // In production (HTTPS), skip localhost checks (browser will block them)
+    if (isLocal && typeof window !== 'undefined' && window.location.protocol === 'https:') {
       return;
     }
 
     // Check AF Health endpoint
     try {
       const start = Date.now();
-      const response = await fetch(`${afUrl}/api/health`, {
+      const response = await fetch(`${effectiveUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       });
@@ -290,14 +296,14 @@ export const useServiceHealth = () => {
           azureFunctions: {
             name: 'AF Health',
             status: 'healthy',
-            detail: `${afUrl} (${duration}ms)`,
+            detail: `${effectiveUrl} (${duration}ms)`,
             accuracy: null
           }
         }));
 
         // Now check Events and Venues endpoints
-        checkAFEvents(afUrl);
-        checkAFVenues(afUrl);
+        checkAFEvents(effectiveUrl);
+        checkAFVenues(effectiveUrl);
       } else {
         throw new Error('AF health check failed');
       }
