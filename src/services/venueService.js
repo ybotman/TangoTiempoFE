@@ -133,20 +133,29 @@ export const updateVenue = async (venueId, venueData) => {
 
 /**
  * Delete a venue
- * 
+ *
  * @param {string} venueId - The ID of the venue to delete
+ * @param {string} firebaseToken - Firebase authentication token (required for authorization)
  * @returns {Promise<Object>} The response data
  */
-export const deleteVenue = async (venueId) => {
+export const deleteVenue = async (venueId, firebaseToken) => {
   try {
     if (!venueId) {
       throw new Error('Venue ID is required');
     }
-    
+
+    if (!firebaseToken) {
+      throw new Error('Authentication token is required');
+    }
+
     const baseURL = process.env.NEXT_PUBLIC_BE_URL;
-    
-    const response = await axios.delete(`${baseURL}/api/venues/${venueId}`);
-    
+
+    const response = await axios.delete(`${baseURL}/api/venues/${venueId}`, {
+      headers: {
+        'Authorization': `Bearer ${firebaseToken}`
+      }
+    });
+
     return response.data;
   } catch (error) {
     console.error(`Error deleting venue ${venueId}:`, error);

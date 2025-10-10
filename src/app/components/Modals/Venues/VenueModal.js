@@ -62,13 +62,22 @@ const VenueModal = ({ open, onClose }) => {
 
   const handleMapMove = (newCenter) => {
     // When map moves, fetch venues for the new area
-    const location = { 
-      lat: newCenter.lat, 
-      lng: newCenter.lng, 
+    const location = {
+      lat: newCenter.lat,
+      lng: newCenter.lng,
       radius: mapCenter?.radius || currentLocation?.zoomRange || savedLocation?.zoomRange || userData?.localUserInfo?.userDefaults?.defaultZoomRange || 200 // Use existing radius or user's settings
     };
     setMapCenter(location);
     fetchVenues(null, location);
+  };
+
+  const handleVenueDeleted = (venueId) => {
+    // Refresh the venue list after deletion
+    handleListRefresh();
+    // Clear selected venue if it was deleted
+    if (selectedVenue?._id === venueId) {
+      setSelectedVenue(null);
+    }
   };
 
   return (
@@ -139,10 +148,11 @@ const VenueModal = ({ open, onClose }) => {
               />
             )}
             {currentTab === 'map' && (
-              <VenueModalMap 
-                venues={venues} 
+              <VenueModalMap
+                venues={venues}
                 selectedVenueId={selectedVenue?._id}
                 onEditVenue={handleMapEditClick}
+                onVenueDeleted={handleVenueDeleted}
                 initialCenter={mapCenter}
                 onMapMove={handleMapMove}
               />
