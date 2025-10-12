@@ -243,7 +243,7 @@ const MapCenterModal = ({ open, onClose }) => {
       setMessage({ type: 'error', text: 'Please click on the map to set a location' });
       return;
     }
-    
+
     const locationData = {
       lat: parseFloat(centerLat),
       lng: parseFloat(centerLng),
@@ -252,9 +252,9 @@ const MapCenterModal = ({ open, onClose }) => {
 
     // Set location for current session
     setSessionLocation(locationData);
-    
-    setMessage({ type: 'success', text: 'Location set for this session!' });
-    
+
+    setMessage({ type: 'success', text: 'Map Center set for Session (temporary)!' });
+
     // Close modal after short delay
     setTimeout(() => {
       onClose();
@@ -298,19 +298,19 @@ const MapCenterModal = ({ open, onClose }) => {
               Welcome {user.displayName || user.email}!
             </Typography>
             <Typography variant="body2">
-              This location will be used for this session only.
+              You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent).
             </Typography>
-            <Typography variant="body2" sx={{ mt: 0.5 }}>
-              To save as your default location, go to <strong>User Settings → Location Preferences</strong>
+            <Typography variant="body2" sx={{ mt: 0.5, fontSize: '0.85rem', fontStyle: 'italic' }}>
+              Note: Cloud Default save functionality coming soon!
             </Typography>
           </Alert>
         ) : (
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ mb: 0.5 }}>
-              This location will be saved for this session only.
+              Set your map center for this <strong>Session</strong> (temporary only).
             </Typography>
             <Typography variant="body2">
-              <strong>Want to save permanently?</strong> Please log in to save your location preferences.
+              <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
             </Typography>
           </Alert>
         )}
@@ -383,15 +383,57 @@ const MapCenterModal = ({ open, onClose }) => {
         </Box>
       </DialogContent>
       
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          variant="contained" 
-          onClick={handleSet}
-          disabled={!isValidLatLng()}
-        >
-          Set Location
-        </Button>
+      <DialogActions sx={{ flexDirection: 'column', gap: 1, alignItems: 'stretch' }}>
+        {user ? (
+          // Authenticated User: Two button options
+          <>
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+              <Button
+                variant="outlined"
+                onClick={handleSet}
+                disabled={!isValidLatLng()}
+                sx={{ flex: 1 }}
+              >
+                Set Map Center (Session)
+              </Button>
+              <Button
+                variant="contained"
+                disabled={true}
+                title="Cloud Default save functionality coming soon!"
+                sx={{ flex: 1 }}
+              >
+                Save as Default (Coming Soon)
+              </Button>
+            </Box>
+            <Button onClick={onClose} fullWidth>Cancel</Button>
+          </>
+        ) : (
+          // Anonymous User: Session button + Sign Up prompt
+          <>
+            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+              <Button
+                variant="outlined"
+                onClick={handleSet}
+                disabled={!isValidLatLng()}
+                sx={{ flex: 1 }}
+              >
+                Set Map Center (Session)
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  // TODO: Open signup/login modal or redirect to signup
+                  window.location.href = '/login';
+                }}
+                sx={{ flex: 1 }}
+              >
+                Sign Up!
+              </Button>
+            </Box>
+            <Button onClick={onClose} fullWidth>Cancel</Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );
