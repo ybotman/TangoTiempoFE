@@ -34,8 +34,9 @@ URL_ENCODE_JQL() {
 
 ENCODED_JQL=$(URL_ENCODE_JQL "$JQL")
 
-# Make API request
-response=$(jira_request GET "/search?jql=$ENCODED_JQL&maxResults=100")
+# Make API request (use /search/jql for API v3)
+# Note: API v3 /search/jql requires explicit fields parameter (default is just id)
+response=$(jira_request GET "/search/jql?jql=$ENCODED_JQL&maxResults=100&fields=key,summary,status,issuetype,assignee,priority,created,updated")
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to fetch epic issues" >&2
@@ -50,7 +51,8 @@ if echo "$response" | grep -q '"errorMessages"'; then
 fi
 
 # Extract and display results
-TOTAL=$(echo "$response" | extract_field '.total')
+# Note: API v3 /search/jql doesn't return .total, only .issues array
+TOTAL=$(echo "$response" | jq -r '.issues | length')
 echo "Found $TOTAL issues in Epic $EPIC_KEY" >&2
 echo "" >&2
 

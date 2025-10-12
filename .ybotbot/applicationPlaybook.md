@@ -46,6 +46,102 @@ curl -s -X POST \
 4. Write to temp bash script to avoid shell escaping issues
 5. Successfully created TIEMPO-296 using this method
 
+## JIRA Tools Scripts (API v3 - UPDATED 2025-10-12)
+
+### Using .ybotbot/jira-tools/ Scripts
+
+**CRITICAL**: These scripts were fixed for JIRA API v3 on 2025-10-12 (TIEMPO-309)
+
+**Authentication Setup**:
+```bash
+export JIRA_EMAIL="toby.balsley@gmail.com"
+export JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+export JIRA_BASE_URL="https://hdtsllc.atlassian.net"
+```
+
+**Available Scripts** (all working as of 2025-10-12):
+
+1. **Search Tickets**:
+   ```bash
+   .ybotbot/jira-tools/jira-search.sh "project=TIEMPO AND statusCategory!=Done" 10
+   ```
+
+2. **Get Ticket Details**:
+   ```bash
+   .ybotbot/jira-tools/jira-get.sh TIEMPO-308 "key,summary,status"
+   ```
+
+3. **Create Ticket**:
+   ```bash
+   .ybotbot/jira-tools/jira-create.sh "Summary text" "Task" "Description text"
+   ```
+
+4. **Add Comment**:
+   ```bash
+   .ybotbot/jira-tools/jira-comment.sh TIEMPO-308 "Comment text"
+   ```
+
+   **⚠️ IMPORTANT - Comment Formatting Rules**:
+   - Use **plain text only** - no special formatting
+   - Avoid line breaks, bullets (•, -), markdown (**bold**), or emojis at start
+   - Convert bullets to comma-separated lists or periods
+   - Keep text simple and continuous
+   - If error "There was an error parsing JSON" occurs, simplify text and retry
+
+   **Example**:
+   ```bash
+   # ❌ WILL FAIL - Special formatting
+   "**Scout Mode**
+   - Found modal states
+   • Ready for next step"
+
+   # ✅ WILL WORK - Plain text
+   "Scout Mode complete. Found modal states. Ready for next step."
+   ```
+
+5. **Transition Status**:
+   ```bash
+   .ybotbot/jira-tools/jira-transition.sh TIEMPO-308 "In Progress"
+   ```
+
+6. **Get Epic Issues**:
+   ```bash
+   .ybotbot/jira-tools/jira-get-epic-issues.sh TIEMPO-305
+   ```
+
+### API v3 Migration (Fixed 2025-10-12)
+
+**What Changed**:
+- JIRA deprecated `/rest/api/3/search` → use `/rest/api/3/search/jql`
+- API v3 `/search/jql` requires explicit `fields` parameter (default is only `id`)
+- Response structure changed: `.total` no longer exists, use `.issues.length`
+
+**Files Fixed**:
+- `.ybotbot/jira-tools/jira-search.sh`
+- `.ybotbot/jira-tools/jira-get-epic-issues.sh`
+
+**Migration Guide**: See `.ybotbot/jira-tools/MIGRATION_GUIDE_API_V3.md`
+
+**For Other Projects**: Copy these two fixed scripts to other projects using same jira-tools (e.g., calendar-be/CALBE)
+
+### JIRA API v3 Direct Usage
+
+**Critical Requirements**:
+1. Use `/rest/api/3/search/jql?jql=...` (NOT `/rest/api/3/search`)
+2. MUST include `fields` parameter: `&fields=key,summary,status,assignee`
+3. Authentication via macOS keychain with account `"toby.balsley@gmail.com"`
+
+**Example Direct API Call**:
+```bash
+JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+JIRA_EMAIL="toby.balsley@gmail.com"
+
+curl -s -X GET \
+  -H "Authorization: Basic $(echo -n "${JIRA_EMAIL}:${JIRA_API_TOKEN}" | base64)" \
+  -H "Content-Type: application/json" \
+  "https://hdtsllc.atlassian.net/rest/api/3/search/jql?jql=project%3DTIEMPO%20AND%20statusCategory%21%3DDone&maxResults=10&fields=key,summary,status,assignee"
+```
+
 ## Application-Specific Documentation
 
 No additional application-specific documentation has been added yet.

@@ -1,5 +1,131 @@
 # Retrospective Playbook
 
+## Session: 2025-10-12 - JIRA Tools API v3 Migration & Script Fixes
+
+### Key Learnings
+
+#### JIRA Tools Scripts Fixed for API v3 ✅
+**SUCCESS**: Fixed 2 broken scripts and tested all 15 scripts
+
+**Problem Discovered**: JIRA deprecated `/rest/api/3/search` endpoint in favor of `/rest/api/3/search/jql`
+
+**Scripts Fixed**:
+1. `.ybotbot/jira-tools/jira-search.sh` - Line 40 (endpoint + fields parameter)
+2. `.ybotbot/jira-tools/jira-get-epic-issues.sh` - Line 38 (endpoint + fields parameter)
+
+**Key Changes Made**:
+```bash
+# OLD (broken):
+response=$(jira_request GET "/search?jql=$ENCODED_JQL&maxResults=$MAX_RESULTS")
+TOTAL=$(echo "$response" | extract_field '.total')
+
+# NEW (working):
+response=$(jira_request GET "/search/jql?jql=$ENCODED_JQL&maxResults=$MAX_RESULTS&fields=key,summary,status,assignee,reporter,priority,created,updated")
+TOTAL=$(echo "$response" | jq -r '.issues | length')
+```
+
+**Critical API v3 Discovery**:
+- `/search/jql` returns ONLY `id` by default - MUST include `fields` parameter
+- `.total` no longer exists in response - use `.issues.length` instead
+- Pagination changed: `nextPageToken` and `isLast` instead of `startAt`
+
+**Testing Results**:
+- ✅ jira-search.sh: Returns full ticket data with fields
+- ✅ jira-get.sh: Works correctly (already compatible)
+- ✅ jira-get-epic-issues.sh: Finds epic children correctly
+- ✅ All other 12 scripts: Already compatible (use different endpoints)
+
+**Documentation Created**:
+- `.ybotbot/jira-tools/MIGRATION_GUIDE_API_V3.md` (comprehensive guide)
+- JIRA Ticket TIEMPO-309 created for tracking rollout to other projects
+
+**CRITICAL INSTRUCTION FOR FUTURE SESSIONS**:
+When using jira-tools scripts:
+1. Always export authentication environment variables first:
+   ```bash
+   export JIRA_EMAIL="toby.balsley@gmail.com"
+   export JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+   export JIRA_BASE_URL="https://hdtsllc.atlassian.net"
+   ```
+2. Scripts are ready to use: `.ybotbot/jira-tools/jira-search.sh`, `jira-get.sh`, `jira-create.sh`, etc.
+3. For direct API calls, MUST include `fields` parameter in `/search/jql` endpoint
+4. See applicationPlaybook.md for updated JIRA integration patterns
+
+### What Worked Well
+1. Systematic research of all 15 scripts to identify issues
+2. Grep to find all API endpoint usage patterns
+3. Testing each script with real JIRA queries after fixes
+4. Comprehensive migration guide for other projects
+5. JIRA ticket created for tracking (TIEMPO-309)
+
+### What Needs Improvement
+1. Could have created tests to prevent future breakage
+2. Should automate detection of deprecated API endpoints
+
+### Process Improvements for Future Sessions
+1. **ALWAYS check applicationPlaybook.md for JIRA patterns FIRST**
+2. Use `.ybotbot/jira-tools/` scripts instead of direct API when possible
+3. When scripts fail, check for JIRA API deprecations/changes
+4. Update playbooks immediately after fixing systemic issues
+5. Create JIRA tickets to track rollout of fixes to other projects
+
+#### JIRA Comment Formatting Issues ⚠️
+**PROBLEM**: jira-comment.sh fails with "There was an error parsing JSON" when comment text contains special formatting
+
+**Failure Pattern** (2025-10-12 session):
+```bash
+# FAILED - Complex formatting with bullets, line breaks, special chars
+.ybotbot/jira-tools/jira-comment.sh TIEMPO-311 "🧭 Scout Mode - Investigation Complete
+
+**Calendar Page Structure** (src/app/calendar/page.js):
+- Modal states available at lines 66-90:
+  • isCreateModalOpen
+  • isViewDetailModalOpen..."
+
+# Error: "There was an error parsing JSON"
+```
+
+**Success Pattern**:
+```bash
+# SUCCEEDED - Simple single-line text, no special formatting
+.ybotbot/jira-tools/jira-comment.sh TIEMPO-311 "Scout Mode - Investigation Complete. Calendar page has modal states at lines 66-90 (isCreateModalOpen, isViewDetailModalOpen, isAIDetailModalOpen). GeoLocationContext imported at line 50..."
+```
+
+**Root Cause**:
+- jira-comment.sh uses ADF (Atlassian Document Format) via `text_to_adf` function
+- Function wraps text in paragraph structure but doesn't handle:
+  - Multi-line strings with actual line breaks
+  - Special characters that need JSON escaping (quotes, bullets, etc.)
+  - Markdown-style formatting (**, -, •)
+
+**Working Solution**:
+1. **Keep comments simple**: Single-line or continuous text
+2. **Avoid special chars**: No bullets (•), no markdown (**), no unescaped quotes
+3. **Use plain punctuation**: Commas and periods instead of bullets
+4. **Test incrementally**: If comment fails, simplify and retry
+
+**CRITICAL INSTRUCTION FOR FUTURE SESSIONS**:
+When adding JIRA comments via jira-comment.sh:
+1. Use plain text without special formatting
+2. Convert bullets to comma-separated lists
+3. Replace line breaks with periods/commas
+4. Avoid emojis at start of text (can cause issues)
+5. If error occurs, simplify text and retry immediately
+6. For complex formatting, consider using JIRA web UI instead
+
+**Example Conversion**:
+```bash
+# BAD - Will fail
+"**Bold Text**
+- Bullet point
+• Another bullet"
+
+# GOOD - Will work
+"Bold Text. Bullet point. Another bullet."
+```
+
+---
+
 ## Session: 2025-10-05 - Geolocation Gap Analysis & JIRA API Authentication
 
 ### Key Learnings
