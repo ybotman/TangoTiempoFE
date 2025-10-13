@@ -87,9 +87,47 @@ export const useCalendarPage = () => {
 
 
   const handleDatesSet = (dateInfo) => {
+    // BUGFIX: Convert UTC dates to local dates for list views
+    // When calendar is in UTC mode (timeZone="UTC"), FullCalendar provides dates in UTC
+    // But for list views, we want to show events for local "today", not UTC "today"
+    // For example, if it's Oct 22 11pm locally (Oct 23 3am UTC), we want events from Oct 22 local, not Oct 23 UTC
+
+    let startStr = dateInfo.startStr;
+    let endStr = dateInfo.endStr;
+
+    // Check if this is a list view by examining the view type
+    const viewType = dateInfo.view?.type || '';
+    const isListView = viewType.includes('list');
+
+    if (isListView) {
+      // Convert UTC dates to local dates
+      // Parse the UTC date strings
+      const startDate = new Date(dateInfo.start);
+      const endDate = new Date(dateInfo.end);
+
+      // Get the local date components
+      const localStartYear = startDate.getFullYear();
+      const localStartMonth = startDate.getMonth();
+      const localStartDay = startDate.getDate();
+
+      const localEndYear = endDate.getFullYear();
+      const localEndMonth = endDate.getMonth();
+      const localEndDay = endDate.getDate();
+
+      // BUGFIX: Use date-only format (YYYY-MM-DD) for list views
+      // This tells backend to match by calendar date, not specific UTC timestamp
+      // Format: "2025-10-06" instead of "2025-10-06T04:00:00.000Z"
+      const startDateOnly = `${localStartYear}-${String(localStartMonth + 1).padStart(2, '0')}-${String(localStartDay).padStart(2, '0')}`;
+      const endDateOnly = `${localEndYear}-${String(localEndMonth + 1).padStart(2, '0')}-${String(localEndDay).padStart(2, '0')}`;
+
+      // Use date-only strings for the API
+      startStr = startDateOnly;
+      endStr = endDateOnly;
+    }
+
     setDatesSet({
-      start: dateInfo.startStr,
-      end: dateInfo.endStr,
+      start: startStr,
+      end: endStr,
     });
   };
 

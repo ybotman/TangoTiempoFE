@@ -430,6 +430,10 @@ const BostonCalendarPage = () => {
         calendarApi.changeView('dayGrid8Week'); // Switch to 8-week view for large screens
         setCurrentViewType('dayGrid8Week');
       } else {
+        // BUGFIX: When switching to list view, navigate to local today first
+        const today = new Date();
+        const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        calendarApi.gotoDate(localToday);
         calendarApi.changeView('list21Days'); // Switch to List view for smaller screens
         setCurrentViewType('list21Days');
       }
@@ -544,8 +548,17 @@ const BostonCalendarPage = () => {
             </IconButton>
             <IconButton
               onClick={() => {
-                calendarRef.current?.getApi()?.changeView('list21Days');
-                setCurrentViewType('list21Days');
+                const api = calendarRef.current?.getApi();
+                if (api) {
+                  // BUGFIX: Force list view to start from local "today", not UTC "today"
+                  // When calendar is in UTC mode, we need to explicitly navigate to local date
+                  const today = new Date();
+                  const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                  // Navigate to today's date first, then switch view
+                  api.gotoDate(localToday);
+                  api.changeView('list21Days');
+                  setCurrentViewType('list21Days');
+                }
               }}
               color={currentViewType === 'list21Days' ? 'primary' : 'default'}
               title="List View"
@@ -734,16 +747,25 @@ const BostonCalendarPage = () => {
             // Gray out past days in month view
             dayCellDidMount={(arg) => {
               const { date, el } = arg;
+              // BUGFIX: Use LOCAL date for all day comparisons, not UTC
+              // When FullCalendar is in UTC mode, the cell dates are UTC
+              // But we want gray/today/future based on LOCAL date, not UTC date
               const today = new Date();
-              // Use UTC methods to match calendar's UTC timezone setting
-              const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+              const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
               const cellDateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
-              
-              // Apply gray background to past days (match main calendar #c0c0c0)
+
+              // Remove FullCalendar's built-in "today" class (which uses UTC)
+              el.classList.remove('fc-day-today');
+
               if (cellDateStr < todayStr) {
+                // Past days: gray
                 el.style.backgroundColor = '#c0c0c0';
+              } else if (cellDateStr === todayStr) {
+                // Today: add FullCalendar's today class back (for yellow highlight)
+                el.classList.add('fc-day-today');
               }
-              
+              // Future days: default styling
+
               // Also handle the category circles we add
               handleDayCellDidMount(arg);
             }}
