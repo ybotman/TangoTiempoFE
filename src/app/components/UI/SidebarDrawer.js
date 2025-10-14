@@ -391,8 +391,9 @@ const SidebarDrawer = ({ open, onClose }) => {
             </>
           )}
           
-          {/* Venues - Top level for Regional Organizers */}
-          {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+          {/* Venues - Top level for Regional Organizers and Regional Admins */}
+          {(selectedRole === listOfAllRoles.REGIONAL_ORGANIZER ||
+            selectedRole === listOfAllRoles.REGIONAL_ADMIN) && (
             <>
               <Divider />
               <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>

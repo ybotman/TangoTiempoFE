@@ -16,28 +16,28 @@ import UserLocationLoader from '@/components/UserLocationLoader';
 import dynamic from 'next/dynamic';
 
 // Dynamic import to avoid SSR issues with Leaflet
-const UnifiedLocationModal = dynamic(
-  () => import('@/components/Modals/misc/UnifiedLocationModal'),
+const MapCenterModal = dynamic(
+  () => import('@/components/Modals/misc/MapCenterModal'),
   { ssr: false }
 );
 
-// Wrapper component to render UnifiedLocationModal with context access
-const UnifiedLocationModalWrapper = () => {
-  const { 
-    mapCenterModalOpen, 
+// Wrapper component to render MapCenterModal with context access
+const MapCenterModalWrapper = () => {
+  const {
+    mapCenterModalOpen,
     closeMapCenterModal,
     setSessionLocation,
-    saveAndSetLocation,
+    saveToCloudDefault,
     currentLocation,
     savedLocation
   } = useGeoLocation();
-  
+
   return (
-    <UnifiedLocationModal 
-      open={mapCenterModalOpen} 
+    <MapCenterModal
+      open={mapCenterModalOpen}
       onClose={closeMapCenterModal}
       onSetLocation={setSessionLocation}
-      onSaveLocation={saveAndSetLocation}
+      onSaveLocation={saveToCloudDefault}
       initialLocation={currentLocation || savedLocation}
       savedLocation={savedLocation}
     />
@@ -61,7 +61,7 @@ const Providers = ({ children }) => {
                 <MasteredLocationLogger />
                 <UserLocationLoader />
                 <LocationPromptManager />
-                <UnifiedLocationModalWrapper />
+                <MapCenterModalWrapper />
                 {children}
               </EventDiscoveryProvider>
             </GeoLocationProvider>

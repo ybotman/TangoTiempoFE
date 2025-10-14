@@ -14,6 +14,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
+import MapIcon from '@mui/icons-material/Map';
 
 import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
@@ -745,7 +746,7 @@ const CalendarPage = () => {
         >
           {eventsLoading && (
             <div style={{
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
@@ -1026,6 +1027,43 @@ const CalendarPage = () => {
         onClose={() => setAIDetailModalOpen(false)}
         eventDetails={selectedAIEventDetails}
       />
+
+      {/* TIEMPO-311: Floating map icon button - shows when no modals are open */}
+      {!isCreateModalOpen && !isViewDetailModalOpen && !isAIDetailModalOpen && (
+        <div
+          className="map-icon-button"
+          onClick={() => openMapCenterModal()}
+          title="Click to explore other locations"
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            backgroundColor: 'white',
+            color: 'black',
+            padding: '8px',
+            borderRadius: '50%',
+            width: '36px',
+            height: '36px',
+            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f0f0';
+            e.currentTarget.style.boxShadow = '0px 3px 8px rgba(0, 0, 0, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
+          }}
+        >
+          <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
+        </div>
+      )}
     </div>
   );
 };

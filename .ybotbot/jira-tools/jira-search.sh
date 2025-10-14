@@ -36,8 +36,9 @@ echo "Searching: $JQL_QUERY" >&2
 echo "Max results: $MAX_RESULTS" >&2
 echo "" >&2
 
-# Make API request
-response=$(jira_request GET "/search?jql=$ENCODED_JQL&maxResults=$MAX_RESULTS")
+# Make API request (use /search/jql for API v3)
+# Note: API v3 /search/jql requires explicit fields parameter (default is just id)
+response=$(jira_request GET "/search/jql?jql=$ENCODED_JQL&maxResults=$MAX_RESULTS&fields=key,summary,status,assignee,reporter,priority,created,updated")
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to search tickets" >&2
@@ -52,8 +53,9 @@ if echo "$response" | grep -q '"errorMessages"'; then
 fi
 
 # Extract total and display summary
-TOTAL=$(echo "$response" | extract_field '.total')
-echo "Found $TOTAL total results (showing up to $MAX_RESULTS)" >&2
+# Note: API v3 /search/jql doesn't return .total, only .issues array
+TOTAL=$(echo "$response" | jq -r '.issues | length')
+echo "Showing $TOTAL results (max: $MAX_RESULTS)" >&2
 echo "" >&2
 
 # Parse and display results in a readable format

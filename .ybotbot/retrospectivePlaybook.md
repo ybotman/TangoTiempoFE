@@ -1,5 +1,274 @@
 # Retrospective Playbook
 
+## Session: 2025-10-12 - JIRA Tools API v3 Migration & Script Fixes
+
+### Key Learnings
+
+#### JIRA Tools Scripts Fixed for API v3 ✅
+**SUCCESS**: Fixed 2 broken scripts and tested all 15 scripts
+
+**Problem Discovered**: JIRA deprecated `/rest/api/3/search` endpoint in favor of `/rest/api/3/search/jql`
+
+**Scripts Fixed**:
+1. `.ybotbot/jira-tools/jira-search.sh` - Line 40 (endpoint + fields parameter)
+2. `.ybotbot/jira-tools/jira-get-epic-issues.sh` - Line 38 (endpoint + fields parameter)
+
+**Key Changes Made**:
+```bash
+# OLD (broken):
+response=$(jira_request GET "/search?jql=$ENCODED_JQL&maxResults=$MAX_RESULTS")
+TOTAL=$(echo "$response" | extract_field '.total')
+
+# NEW (working):
+response=$(jira_request GET "/search/jql?jql=$ENCODED_JQL&maxResults=$MAX_RESULTS&fields=key,summary,status,assignee,reporter,priority,created,updated")
+TOTAL=$(echo "$response" | jq -r '.issues | length')
+```
+
+**Critical API v3 Discovery**:
+- `/search/jql` returns ONLY `id` by default - MUST include `fields` parameter
+- `.total` no longer exists in response - use `.issues.length` instead
+- Pagination changed: `nextPageToken` and `isLast` instead of `startAt`
+
+**Testing Results**:
+- ✅ jira-search.sh: Returns full ticket data with fields
+- ✅ jira-get.sh: Works correctly (already compatible)
+- ✅ jira-get-epic-issues.sh: Finds epic children correctly
+- ✅ All other 12 scripts: Already compatible (use different endpoints)
+
+**Documentation Created**:
+- `.ybotbot/jira-tools/MIGRATION_GUIDE_API_V3.md` (comprehensive guide)
+- JIRA Ticket TIEMPO-309 created for tracking rollout to other projects
+
+**CRITICAL INSTRUCTION FOR FUTURE SESSIONS**:
+When using jira-tools scripts:
+1. Always export authentication environment variables first:
+   ```bash
+   export JIRA_EMAIL="toby.balsley@gmail.com"
+   export JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+   export JIRA_BASE_URL="https://hdtsllc.atlassian.net"
+   ```
+2. Scripts are ready to use: `.ybotbot/jira-tools/jira-search.sh`, `jira-get.sh`, `jira-create.sh`, etc.
+3. For direct API calls, MUST include `fields` parameter in `/search/jql` endpoint
+4. See applicationPlaybook.md for updated JIRA integration patterns
+
+### What Worked Well
+1. Systematic research of all 15 scripts to identify issues
+2. Grep to find all API endpoint usage patterns
+3. Testing each script with real JIRA queries after fixes
+4. Comprehensive migration guide for other projects
+5. JIRA ticket created for tracking (TIEMPO-309)
+
+### What Needs Improvement
+1. Could have created tests to prevent future breakage
+2. Should automate detection of deprecated API endpoints
+
+### Process Improvements for Future Sessions
+1. **ALWAYS check applicationPlaybook.md for JIRA patterns FIRST**
+2. Use `.ybotbot/jira-tools/` scripts instead of direct API when possible
+3. When scripts fail, check for JIRA API deprecations/changes
+4. Update playbooks immediately after fixing systemic issues
+5. Create JIRA tickets to track rollout of fixes to other projects
+
+#### JIRA Comment Formatting Issues ⚠️
+**PROBLEM**: jira-comment.sh fails with "There was an error parsing JSON" when comment text contains special formatting
+
+**Failure Pattern** (2025-10-12 session):
+```bash
+# FAILED - Complex formatting with bullets, line breaks, special chars
+.ybotbot/jira-tools/jira-comment.sh TIEMPO-311 "🧭 Scout Mode - Investigation Complete
+
+**Calendar Page Structure** (src/app/calendar/page.js):
+- Modal states available at lines 66-90:
+  • isCreateModalOpen
+  • isViewDetailModalOpen..."
+
+# Error: "There was an error parsing JSON"
+```
+
+**Success Pattern**:
+```bash
+# SUCCEEDED - Simple single-line text, no special formatting
+.ybotbot/jira-tools/jira-comment.sh TIEMPO-311 "Scout Mode - Investigation Complete. Calendar page has modal states at lines 66-90 (isCreateModalOpen, isViewDetailModalOpen, isAIDetailModalOpen). GeoLocationContext imported at line 50..."
+```
+
+**Root Cause**:
+- jira-comment.sh uses ADF (Atlassian Document Format) via `text_to_adf` function
+- Function wraps text in paragraph structure but doesn't handle:
+  - Multi-line strings with actual line breaks
+  - Special characters that need JSON escaping (quotes, bullets, etc.)
+  - Markdown-style formatting (**, -, •)
+
+**Working Solution**:
+1. **Keep comments simple**: Single-line or continuous text
+2. **Avoid special chars**: No bullets (•), no markdown (**), no unescaped quotes
+3. **Use plain punctuation**: Commas and periods instead of bullets
+4. **Test incrementally**: If comment fails, simplify and retry
+
+**CRITICAL INSTRUCTION FOR FUTURE SESSIONS**:
+When adding JIRA comments via jira-comment.sh:
+1. Use plain text without special formatting
+2. Convert bullets to comma-separated lists
+3. Replace line breaks with periods/commas
+4. Avoid emojis at start of text (can cause issues)
+5. If error occurs, simplify text and retry immediately
+6. For complex formatting, consider using JIRA web UI instead
+
+**Example Conversion**:
+```bash
+# BAD - Will fail
+"**Bold Text**
+- Bullet point
+• Another bullet"
+
+# GOOD - Will work
+"Bold Text. Bullet point. Another bullet."
+```
+
+---
+
+## Session: 2025-10-05 - Geolocation Gap Analysis & JIRA API Authentication
+
+### Key Learnings
+
+#### JIRA API Authentication Issues ⚠️
+**PROBLEM DISCOVERED**: Multiple authentication token formats in keychain causing confusion
+
+**Keychain Entries Found:**
+```bash
+# Entry 1: "jira-api-token" with account "tobybalsley"
+security find-generic-password -s "jira-api-token" -w
+# Returns: ATATT3xFfGF0... (Bearer token format)
+
+# Entry 2: "jira-email"
+security find-generic-password -s "jira-email" -w
+# Returns: tobybalsley@me.com
+
+# Historical entry: account "toby.balsley@gmail.com" (from 2025-01-28 session)
+```
+
+**Authentication Errors Encountered:**
+1. Bearer token format tried with Basic Auth → "Failed to parse Connect Session Auth Token"
+2. Basic Auth with tobybalsley@me.com → "Client must be authenticated to access this resource"
+3. Permission error → "You do not have permission to create issues in this project"
+
+**ROOT CAUSE**: Token stored in keychain appears to be Bearer/OAuth format, not API token for Basic Auth
+
+**CORRECT PATTERN** (from 2025-01-28 session):
+```bash
+# Use toby.balsley@gmail.com account (not tobybalsley@me.com)
+JIRA_EMAIL="toby.balsley@gmail.com"
+JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w)
+
+curl -X POST \
+  -H "Authorization: Basic $(echo -n "${JIRA_EMAIL}:${JIRA_API_TOKEN}" | base64)" \
+  -H "Content-Type: application/json" \
+  -d @payload.json \
+  "https://hdtsllc.atlassian.net/rest/api/2/issue"
+```
+
+**KEY DISCOVERIES:**
+- MCP JIRA tools confirmed broken - NEVER use them
+- Multiple email accounts in keychain (tobybalsley@me.com vs toby.balsley@gmail.com)
+- Must use account name flag `-a` when retrieving token from keychain
+- REST API v2 works, v3 may have permission issues
+- JIRA base URL is hdtsllc.atlassian.net (not tobybalsley.atlassian.net)
+
+**CRITICAL INSTRUCTION FOR FUTURE SESSIONS:**
+When user says "use API directly and mac security creds, NOT MCP":
+1. Check retrospectivePlaybook for working pattern
+2. Use toby.balsley@gmail.com account (from 2025-01-28 success)
+3. Retrieve token with `-a "toby.balsley@gmail.com"` flag
+4. Use /rest/api/2/ endpoint (v2), not v3
+5. Always test auth with `/rest/api/2/myself` first
+6. Never assume MCP tools work - they are broken
+
+#### Geolocation Implementation Gap Analysis ✅
+**SUCCESS**: Created comprehensive documentation for multi-LLM collaboration
+
+**Documents Created:**
+1. `docs/GEOLOCATION_GAP_ANALYSIS.md` (851 lines) - Complete gap analysis
+2. `docs/JIRA_EPIC_Google_Geolocation_Spec.md` (850+ lines) - Full Epic specification
+3. `docs/JIRA_CREATION_SUMMARY.md` - Executive summary
+4. `docs/JIRA_QUICK_CREATE_GUIDE.md` - Copy-paste ready descriptions
+5. `docs/JIRA_IMPORT_READY.json` - Structured JSON
+
+**Multi-LLM Collaboration Features:**
+- Self-contained stories (no conversation history needed)
+- Clear acceptance criteria (testable, unambiguous)
+- Step-by-step tasks (numbered with time estimates)
+- Reference documents (all specs linked)
+- Definition of done (measurable completion criteria)
+
+**Key Finding**: Google Geolocation API guideline describes comprehensive implementation that was never built. Actual system used ipapi.co (removed Jun 2025), now fully manual map-based selection.
+
+**Epic Structure:**
+- Story 1: Google Cloud setup (0.5 days)
+- Story 2: Backend /api/geo/ip-firstfix (2 days)
+- Story 3: Frontend Band A/B/C logic (2 days)
+- Story 4: FinalCenter persistence + telemetry (1.5 days)
+- Story 5: Testing + cleanup (1 day)
+- **Total: 7 days (1.4 developer-weeks)**
+
+### What Worked Well
+1. Comprehensive gap analysis with git history + documentation review
+2. Self-contained story structure for multi-LLM handoff
+3. Clear technical debt identification
+4. Band-based accuracy gating design (A/B/C)
+
+### What Needs Improvement
+1. JIRA API authentication pattern needs clarification in keychain
+2. Need single source of truth for JIRA credentials
+3. Should test JIRA auth BEFORE attempting Epic creation
+4. Consider storing working curl commands in `.ybotbot/jira-tools/`
+
+### Process Improvements for Future Sessions
+1. **ALWAYS check retrospectivePlaybook for JIRA auth pattern FIRST**
+2. Test auth with `/rest/api/2/myself` before creating issues
+3. Use `-a` flag with email when retrieving keychain passwords
+4. Prefer /rest/api/2/ over /rest/api/3/ for compatibility
+5. Document which email account has working JIRA permissions
+
+---
+
+## Session: 2025-01-28 - Participant Types Architecture & JIRA Integration
+
+### Key Learnings
+
+#### JIRA Integration with macOS Keychain ✅
+**SUCCESS PATTERN**: Using security command to retrieve stored tokens:
+```bash
+# Tokens stored in macOS keychain (found 2 entries)
+JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+JIRA_EMAIL="toby.balsley@gmail.com"
+
+# Create epic using direct API (MCP is broken)
+curl -s -X POST \
+  -H "Authorization: Basic $(echo -n "${JIRA_EMAIL}:${JIRA_API_TOKEN}" | base64)" \
+  -H "Content-Type: application/json" \
+  -d '{"fields": {...}}' \
+  "https://hdtsllc.atlassian.net/rest/api/2/issue"
+```
+
+**Key Discoveries:**
+- MCP JIRA functions are broken - always use direct API
+- Tokens stored with account name "toby.balsley@gmail.com" in keychain
+- Successfully created TIEMPO-296 epic
+- Bash scripts in `./.ybotbot/jira-tools/` need env vars but API calls work directly
+
+**Process That Works:**
+1. Check keychain for tokens: `security find-generic-password -s "jira-api-token"`
+2. Use bash script with token retrieval from keychain
+3. Parse response with jq: `| jq -r '.key // .errorMessages // .errors'`
+4. Always use hdtsllc.atlassian.net (not tobybalsley.atlassian.net from .jira-config)
+
+### Architecture Design Success
+- Strategic advisor agent provided excellent framework
+- Brainstorm agent generated creative participant type ideas
+- Clear separation: flags on users, capabilities in code
+- Document-first approach before implementation
+
+---
+
 ## Session: 2025-08-21 - Performance Investigation TIEMPO-257
 
 ### Key Learnings
