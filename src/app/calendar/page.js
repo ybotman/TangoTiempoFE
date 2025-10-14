@@ -14,6 +14,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
+import MapIcon from '@mui/icons-material/Map';
 
 import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
@@ -572,7 +573,7 @@ const CalendarPage = () => {
         const startStr = viewDateRange.start instanceof Date ? viewDateRange.start.toISOString() : viewDateRange.start;
         const endStr = viewDateRange.end instanceof Date ? viewDateRange.end.toISOString() : viewDateRange.end;
         const placeholders = generatePlaceholderEvents(startStr, endStr);
-        
+
         // TIEMPO-246: Filter dates using string comparison, not Date objects
         const eventDates = new Set(
           coloredFilteredEvents.map(event => {
@@ -580,13 +581,13 @@ const CalendarPage = () => {
             return (event.start || '').split('T')[0];
           })
         );
-        
+
         const neededPlaceholders = placeholders.filter(placeholder => {
           // Extract date part from placeholder start
           const placeholderDateStr = (placeholder.start || '').split('T')[0];
           return !eventDates.has(placeholderDateStr);
         });
-        
+
         // Combine with real events
         return [...coloredFilteredEvents, ...neededPlaceholders];
       }
@@ -698,7 +699,14 @@ const CalendarPage = () => {
               <CalendarMonthIcon />
             </IconButton>
             <IconButton onClick={() => {
-              calendarRef.current.getApi().changeView('list21Days');
+              const api = calendarRef.current.getApi();
+              // BUGFIX: Force list view to start from local "today", not UTC "today"
+              // When calendar is in UTC mode, we need to explicitly navigate to local date
+              const today = new Date();
+              const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+              // Navigate to today's date first, then switch view
+              api.gotoDate(localToday);
+              api.changeView('list21Days');
               setCurrentViewType('list21Days');
             }} title="List View" data-testid="view-list">
               <ListIcon />
@@ -738,7 +746,7 @@ const CalendarPage = () => {
         >
           {eventsLoading && (
             <div style={{
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
@@ -837,7 +845,31 @@ const CalendarPage = () => {
           if (calendarRef.current) {
             const view = calendarRef.current.getApi().view;
             setCurrentViewType(view.type);
-            setViewDateRange({ start: view.currentStart, end: view.currentEnd });
+
+            // BUGFIX: For list views, convert UTC dates to local dates
+            // This ensures placeholder generation uses the same dates as the API call
+            if (view.type.includes('list')) {
+              // Convert UTC Date objects to local date strings
+              const startDate = new Date(view.currentStart);
+              const endDate = new Date(view.currentEnd);
+
+              const localStartYear = startDate.getFullYear();
+              const localStartMonth = startDate.getMonth();
+              const localStartDay = startDate.getDate();
+
+              const localEndYear = endDate.getFullYear();
+              const localEndMonth = endDate.getMonth();
+              const localEndDay = endDate.getDate();
+
+              // Create ISO strings at local midnight
+              const localStartStr = `${localStartYear}-${String(localStartMonth + 1).padStart(2, '0')}-${String(localStartDay).padStart(2, '0')}T00:00:00`;
+              const localEndStr = `${localEndYear}-${String(localEndMonth + 1).padStart(2, '0')}-${String(localEndDay).padStart(2, '0')}T23:59:59`;
+
+              setViewDateRange({ start: localStartStr, end: localEndStr });
+            } else {
+              // For month/grid views, use FullCalendar's dates as-is
+              setViewDateRange({ start: view.currentStart, end: view.currentEnd });
+            }
           }
         }}
         nextDayThreshold="06:00:00"
@@ -939,14 +971,24 @@ const CalendarPage = () => {
           },
         }}
         dayCellDidMount={({ date, el }) => {
-          // TIEMPO-246: Compare dates without timezone conversion - use UTC methods
+          // BUGFIX: Use LOCAL date for all day comparisons, not UTC
+          // When FullCalendar is in UTC mode, the cell dates are UTC
+          // But we want gray/today/future based on LOCAL date, not UTC date
           const today = new Date();
-          const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
           const cellDateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 
+          // Remove FullCalendar's built-in "today" class (which uses UTC)
+          el.classList.remove('fc-day-today');
+
           if (cellDateStr < todayStr) {
+            // Past days: gray
             el.style.backgroundColor = '#c0c0c0';
+          } else if (cellDateStr === todayStr) {
+            // Today: add FullCalendar's today class back (for yellow highlight)
+            el.classList.add('fc-day-today');
           }
+          // Future days: default styling (no background color override)
         }}
       />
         </div>
@@ -985,6 +1027,43 @@ const CalendarPage = () => {
         onClose={() => setAIDetailModalOpen(false)}
         eventDetails={selectedAIEventDetails}
       />
+
+      {/* TIEMPO-311: Floating map icon button - shows when no modals are open */}
+      {!isCreateModalOpen && !isViewDetailModalOpen && !isAIDetailModalOpen && (
+        <div
+          className="map-icon-button"
+          onClick={() => openMapCenterModal()}
+          title="Click to explore other locations"
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            backgroundColor: 'white',
+            color: 'black',
+            padding: '8px',
+            borderRadius: '50%',
+            width: '36px',
+            height: '36px',
+            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f0f0';
+            e.currentTarget.style.boxShadow = '0px 3px 8px rgba(0, 0, 0, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
+          }}
+        >
+          <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
+        </div>
+      )}
     </div>
   );
 };

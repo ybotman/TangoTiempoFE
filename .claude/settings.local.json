@@ -32,7 +32,7 @@
       "Bash(curl:*)",
       "Bash(gh run list:*)",
       "Bash(git fetch:*)",
-      "Bash(xargs -I {} sh -c 'gh run cancel {} && echo \"\"\"\"Cancelled {}\"\"\"\"')",
+      "Bash(xargs -I {} sh -c 'gh run cancel {} && echo """"Cancelled {}""""')",
       "Bash(gh run cancel:*)",
       "Bash(gh workflow:*)",
       "Bash(gh run download:*)",
@@ -41,7 +41,16 @@
       "Bash(timeout 10 curl -s \"https://ybotman.github.io/tangotiempo.com/devl-reports/2025-10-02/combined-report.html\")",
       "WebFetch(domain:ybotman.github.io)",
       "Bash(gh api:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(security find-generic-password:*)",
+      "Bash(security find-internet-password:*)",
+      "Bash(./.ybotbot/jira-tools/create-geolocation-epic.sh:*)",
+      "Read(//Users/tobybalsley/Downloads/**)",
+      "Bash(npm run dev:*)",
+      "Bash(curl -s \"https://www.tangotiempo.com/api/events?shortname=Tango-Lab!\")",
+      "WebFetch(domain:calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net)",
+      "Bash(curl -s \"https://calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net/api/events?lat=42.3601&lng=-71.0589&radius=322km&useGeoSearch=true&sortByDistance=true&start=2025-10-05T00:00:00.000Z&end=2025-10-12T23:59:59.999Z&appId=1&limit=100\")",
+      "Bash(/tmp/jira-search-geo2.sh:*)"
     ],
     "deny": [],
     "ask": []
