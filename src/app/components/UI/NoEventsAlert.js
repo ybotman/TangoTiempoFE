@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'prop-types';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Alert, AlertTitle, Button, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
