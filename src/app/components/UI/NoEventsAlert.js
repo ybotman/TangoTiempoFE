@@ -78,6 +78,7 @@ const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
         <AlertTitle>No Events Found</AlertTitle>
         <Box sx={{ mb: 1 }}>
           No events found in this area and date range. Try adjusting your Map Center location to see more events.
+          Local organizers are invited to add their tango events to this free calendar!
         </Box>
         <Button
           size="small"
