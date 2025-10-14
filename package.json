@@ -31,7 +31,7 @@
     "node": "=20.x"
   },
   "dependencies": {
-    "@azure/storage-blob": "^12.25.0",
+    "@azure/storage-blob": "^12.28.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@fontsource/roboto": "^5.1.0",
