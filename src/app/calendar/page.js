@@ -24,6 +24,7 @@ import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEvent
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
+import NoEventsAlert from '@/components/UI/NoEventsAlert';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
@@ -783,6 +784,15 @@ const CalendarPage = () => {
               `}} />
             </div>
           )}
+
+          {/* No Events Alert - Show when no events are found */}
+          <NoEventsAlert
+            events={coloredFilteredEvents}
+            eventsLoading={eventsLoading}
+            onOpenMapCenter={openMapCenterModal}
+            sx={{ mx: 2 }}
+          />
+
           <FullCalendar
           plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
           // TIEMPO-239: CRITICAL - Set timezone to UTC to prevent browser conversion

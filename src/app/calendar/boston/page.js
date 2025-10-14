@@ -24,6 +24,7 @@ import { useCalendarPage } from '@/hooks/useCalendarPage';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
+import NoEventsAlert from '@/components/UI/NoEventsAlert';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 // RoleContext not needed for Boston calendar
@@ -116,8 +117,9 @@ const BostonCalendarPage = () => {
   </Head>;
 
   // Get GeoLocation context but we'll override it
-  const { 
-    setSessionLocation
+  const {
+    setSessionLocation,
+    openMapCenterModal
   } = useGeoLocation();
 
   // Auth context - user not used in read-only Boston calendar
@@ -621,6 +623,15 @@ const BostonCalendarPage = () => {
               `}} />
             </div>
           )}
+
+          {/* No Events Alert - Show when no events are found */}
+          <NoEventsAlert
+            events={coloredFilteredEvents}
+            eventsLoading={eventsLoading}
+            onOpenMapCenter={openMapCenterModal}
+            sx={{ mx: 2 }}
+          />
+
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
