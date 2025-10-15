@@ -21,8 +21,8 @@ export const useServiceHealth = () => {
 
     // Row 3: Azure Functions (Prep)
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afEvents: { name: 'AF Events', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afVenues: { name: 'AF Venues', status: 'disabled', detail: 'Not configured', accuracy: null },
+    afEvents: { name: 'AF Events', status: 'disabled', detail: 'Disabled', accuracy: null },
+    afVenues: { name: 'AF Venues', status: 'disabled', detail: 'Disabled', accuracy: null },
   });
 
   useEffect(() => {
@@ -233,18 +233,39 @@ export const useServiceHealth = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
-        const accuracy = 5000; // meters - city level approximation
 
-        setServices(prev => ({
-          ...prev,
-          geoAPI: {
-            name: 'Geo API',
-            status: 'healthy',
-            detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
-            accuracy: accuracy // meters
-          }
-        }));
+        // Extract actual location coordinates (not fallback)
+        const latitude = data.latitude;
+        const longitude = data.longitude;
+
+        // Only process if we have actual coordinates (not fallback)
+        if (latitude && longitude) {
+          // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
+          const accuracy = 5000; // meters - city level approximation
+
+          setServices(prev => ({
+            ...prev,
+            geoAPI: {
+              name: 'Geo API',
+              status: 'healthy',
+              detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
+              accuracy: accuracy, // meters
+              latitude: latitude,
+              longitude: longitude,
+              city: data.city || null,
+              region: data.region || null,
+              region_code: data.region_code || null,
+              postal: data.postal || null,
+              country: data.country || null,
+              country_name: data.country_name || null,
+              country_code: data.country_code || null,
+              timezone: data.timezone || null,
+              ip: data.ip || null
+            }
+          }));
+        } else {
+          throw new Error('No actual coordinates returned');
+        }
       } else {
         throw new Error('Geo API failed');
       }
@@ -255,7 +276,9 @@ export const useServiceHealth = () => {
           name: 'Geo API',
           status: 'error',
           detail: 'Unavailable',
-          accuracy: null
+          accuracy: null,
+          latitude: null,
+          longitude: null
         }
       }));
     }
@@ -301,9 +324,7 @@ export const useServiceHealth = () => {
           }
         }));
 
-        // Now check Events and Venues endpoints
-        checkAFEvents(effectiveUrl);
-        checkAFVenues(effectiveUrl);
+        // AF Events and Venues checks removed - keeping as grey dots
       } else {
         throw new Error('AF health check failed');
       }
@@ -315,88 +336,13 @@ export const useServiceHealth = () => {
           status: isLocal ? 'disabled' : 'error',
           detail: isLocal ? 'Not running (start with: func start)' : 'Unreachable',
           accuracy: null
-        },
-        afEvents: {
-          name: 'AF Events',
-          status: 'disabled',
-          detail: 'Not available',
-          accuracy: null
-        },
-        afVenues: {
-          name: 'AF Venues',
-          status: 'disabled',
-          detail: 'Not available',
-          accuracy: null
         }
+        // AF Events and Venues remain as disabled (grey) - no checks performed
       }));
     }
   };
 
-  const checkAFEvents = async (afUrl) => {
-    try {
-      const response = await fetch(`${afUrl}/api/events?appId=1&limit=1`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (response.ok) {
-        setServices(prev => ({
-          ...prev,
-          afEvents: {
-            name: 'AF Events',
-            status: 'healthy',
-            detail: 'API Ready',
-            accuracy: null
-          }
-        }));
-      } else {
-        throw new Error('AF events not available');
-      }
-    } catch (error) {
-      setServices(prev => ({
-        ...prev,
-        afEvents: {
-          name: 'AF Events',
-          status: 'disabled',
-          detail: 'Coming soon',
-          accuracy: null
-        }
-      }));
-    }
-  };
-
-  const checkAFVenues = async (afUrl) => {
-    try {
-      const response = await fetch(`${afUrl}/api/venues?appId=1&limit=1`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (response.ok) {
-        setServices(prev => ({
-          ...prev,
-          afVenues: {
-            name: 'AF Venues',
-            status: 'healthy',
-            detail: 'API Ready',
-            accuracy: null
-          }
-        }));
-      } else {
-        throw new Error('AF venues not available');
-      }
-    } catch (error) {
-      setServices(prev => ({
-        ...prev,
-        afVenues: {
-          name: 'AF Venues',
-          status: 'disabled',
-          detail: 'Coming soon',
-          accuracy: null
-        }
-      }));
-    }
-  };
+  // checkAFEvents and checkAFVenues removed - AF Events/Venues kept as disabled grey dots
 
   return services;
 };
