@@ -50,7 +50,26 @@ const ServiceStatusGrid = () => {
    */
   const getTooltipContent = (service) => {
     if (service.name === 'Geo API' && service.accuracy !== null) {
-      return `${service.name}\nProvider: ipapi.co\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
+      // Build comprehensive location info from ipapi.co data
+      const parts = [];
+
+      if (service.city) parts.push(service.city);
+      if (service.region_code) parts.push(service.region_code);
+      if (service.postal) parts.push(service.postal);
+
+      const locationLine = parts.length > 0 ? parts.join(', ') : 'Location data unavailable';
+
+      const coords = service.latitude && service.longitude
+        ? `${service.latitude.toFixed(4)}, ${service.longitude.toFixed(4)}`
+        : 'No coordinates';
+
+      const countryInfo = service.country_name && service.country_code
+        ? `${service.country_name} (${service.country_code})`
+        : service.country_name || service.country_code || '';
+
+      const timezoneInfo = service.timezone ? `\nTimezone: ${service.timezone}` : '';
+
+      return `${service.name}\nProvider: ipapi.co\n${locationLine}\n${countryInfo}${timezoneInfo}\nCoords: ${coords}\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
     }
 
     const statusIcon = service.status === 'healthy' ? '✓' :
