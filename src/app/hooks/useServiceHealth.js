@@ -19,9 +19,9 @@ export const useServiceHealth = () => {
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
     geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
 
-    // Row 3: Azure Functions (Prep)
+    // Row 3: Azure Functions & Additional Geo
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afEvents: { name: 'AF Events', status: 'disabled', detail: 'Disabled', accuracy: null },
+    googleGeoAPI: { name: 'Google Geo', status: 'checking', detail: '', accuracy: null },
     afVenues: { name: 'AF Venues', status: 'disabled', detail: 'Disabled', accuracy: null },
   });
 
@@ -33,6 +33,7 @@ export const useServiceHealth = () => {
     checkMongoDB();
     checkGoogleAnalytics();
     checkGeoAPI();
+    checkGoogleGeoAPI();
     checkAzureFunctions();
 
     // Re-check every 30 seconds
@@ -43,6 +44,7 @@ export const useServiceHealth = () => {
       checkMongoDB();
       checkGoogleAnalytics();
       checkGeoAPI();
+      checkGoogleGeoAPI();
       checkAzureFunctions();
     }, 30000);
 
@@ -276,6 +278,75 @@ export const useServiceHealth = () => {
           name: 'Geo API',
           status: 'error',
           detail: 'Unavailable',
+          accuracy: null,
+          latitude: null,
+          longitude: null
+        }
+      }));
+    }
+  };
+
+  const checkGoogleGeoAPI = async () => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
+
+    if (!apiKey) {
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'disabled',
+          detail: 'API key not configured',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ considerIp: true }),
+          signal: AbortSignal.timeout(5000)
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Google returns { location: { lat, lng }, accuracy }
+        const latitude = data.location?.lat;
+        const longitude = data.location?.lng;
+        const accuracy = data.accuracy || null; // in meters
+
+        if (latitude && longitude) {
+          setServices(prev => ({
+            ...prev,
+            googleGeoAPI: {
+              name: 'Google Geo',
+              status: 'healthy',
+              detail: `Google (±${accuracy ? (accuracy / 1000).toFixed(1) : '?'}km)`,
+              accuracy: accuracy,
+              latitude: latitude,
+              longitude: longitude
+            }
+          }));
+        } else {
+          throw new Error('No coordinates in response');
+        }
+      } else {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'error',
+          detail: error.message.includes('403') ? 'Referrer restriction' :
+                  error.message.includes('400') ? 'Invalid payload' : 'Unavailable',
           accuracy: null,
           latitude: null,
           longitude: null

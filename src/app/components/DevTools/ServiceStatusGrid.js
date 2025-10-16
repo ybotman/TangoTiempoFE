@@ -72,6 +72,15 @@ const ServiceStatusGrid = () => {
       return `${service.name}\nProvider: ipapi.co\n${locationLine}\n${countryInfo}${timezoneInfo}\nCoords: ${coords}\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
     }
 
+    // Google Geolocation API tooltip
+    if (service.name === 'Google Geo' && service.accuracy !== null) {
+      const coords = service.latitude && service.longitude
+        ? `${service.latitude.toFixed(4)}, ${service.longitude.toFixed(4)}`
+        : 'No coordinates';
+
+      return `${service.name}\nProvider: Google Geolocation API\nCoords: ${coords}\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
+    }
+
     const statusIcon = service.status === 'healthy' ? '✓' :
                        service.status === 'checking' ? '⌛' :
                        service.status === 'error' ? '✗' : '○';
@@ -86,11 +95,14 @@ const ServiceStatusGrid = () => {
 
   /**
    * Grid layout: 3 rows × 3 columns
+   * Row 1: Express BE, Firebase, Mapbox
+   * Row 2: MongoDB, Google GA, Geo API (ipapi.co)
+   * Row 3: AF Health, Google Geo (Google Geolocation API), AF Venues
    */
   const gridRows = [
     [services.expressBackend, services.firebase, services.mapbox],
     [services.mongodb, services.googleAnalytics, services.geoAPI],
-    [services.azureFunctions, services.afEvents, services.afVenues],
+    [services.azureFunctions, services.googleGeoAPI, services.afVenues],
   ];
 
   return (
