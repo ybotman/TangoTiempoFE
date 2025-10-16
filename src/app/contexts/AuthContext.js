@@ -97,7 +97,11 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Authorization': `Bearer ${idToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timezoneOffset: -new Date().getTimezoneOffset() // Negate because JS returns opposite sign
+        })
       }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
 
 // TIEMPO-276: Security cleanup - removed logging

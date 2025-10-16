@@ -1,5 +1,65 @@
 # Retrospective Playbook
 
+## Session: 2025-10-16 - Login Tracking Timezone Fix & Laptop/Desktop Sync Issue
+
+### Key Learnings
+
+#### Login Tracking Missing Timezone Data (TIEMPO-314) ⚠️
+**PROBLEM**: Frontend sending timezone but NOT timezoneOffset, causing null local time fields in MongoDB
+
+**Root Cause**:
+- JIRA comment from Oct 16 AM said fix was applied to lines 101-104
+- Code on laptop was missing the fix completely - no request body in login tracking call
+- Frontend was only sending headers, no body with timezone data
+- Backend requires both `timezone` and `timezoneOffset` to calculate `hourOfDayLocal` and `dayOfWeekLocal`
+
+**Fix Applied** (src/app/contexts/AuthContext.js:101-104):
+```javascript
+body: JSON.stringify({
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  timezoneOffset: -new Date().getTimezoneOffset() // Negate because JS returns opposite sign
+})
+```
+
+**JavaScript Timezone Quirk**:
+- `getTimezoneOffset()` returns OPPOSITE sign from UTC offset
+- EDT (UTC-4) returns `240` minutes
+- Must negate: `-new Date().getTimezoneOffset()` = `-240` for backend
+
+**CRITICAL DISCOVERY - Laptop vs Desktop Sync Issue** 🚨:
+- Previous JIRA comment said fix was applied, but code was missing on laptop
+- Possible causes:
+  1. Fix committed on desktop but not pushed to origin
+  2. Laptop branch diverged from desktop branch
+  3. Changes uncommitted on desktop
+  4. Git status not checked before switching machines
+
+**PROCESS FIX FOR FUTURE**:
+1. Always run `git status` before leaving a machine
+2. Always run `git fetch && git status` when switching machines
+3. Check for uncommitted changes on both machines before starting work
+4. Push frequently to keep laptop and desktop in sync
+5. Use `git log origin/BRANCH..HEAD` to check if local commits need pushing
+
+### What Worked Well
+1. Patch Mode applied fix quickly
+2. JIRA updated with clear documentation
+3. Problem identified through Azure Function debug output
+
+### What Needs Improvement
+1. Better git workflow between laptop and desktop
+2. Push commits more frequently
+3. Verify JIRA comments match actual code state
+
+### Process Improvements for Future Sessions
+1. **ALWAYS check git status on both machines during sync**
+2. Run `git status` before closing laptop/desktop session
+3. Push all commits before switching machines
+4. Use `git fetch` first thing when opening laptop/desktop
+5. When JIRA says "fix applied" - verify code actually has the fix
+
+---
+
 ## Session: 2025-10-12 - JIRA Tools API v3 Migration & Script Fixes
 
 ### Key Learnings
