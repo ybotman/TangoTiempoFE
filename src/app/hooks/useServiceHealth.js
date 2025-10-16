@@ -19,10 +19,10 @@ export const useServiceHealth = () => {
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
     geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
 
-    // Row 3: Azure Functions & Additional Geo
+    // Row 3: Azure Functions & Google Geo APIs
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
     googleGeoAPI: { name: 'Google Geo', status: 'checking', detail: '', accuracy: null },
-    afVenues: { name: 'AF Venues', status: 'disabled', detail: 'Disabled', accuracy: null },
+    googleReverseGeo: { name: 'Google Reverse', status: 'checking', detail: '', accuracy: null },
   });
 
   useEffect(() => {
@@ -34,6 +34,7 @@ export const useServiceHealth = () => {
     checkGoogleAnalytics();
     checkGeoAPI();
     checkGoogleGeoAPI();
+    checkGoogleReverseGeo();
     checkAzureFunctions();
 
     // Re-check every 30 seconds
@@ -45,6 +46,7 @@ export const useServiceHealth = () => {
       checkGoogleAnalytics();
       checkGeoAPI();
       checkGoogleGeoAPI();
+      checkGoogleReverseGeo();
       checkAzureFunctions();
     }, 30000);
 
@@ -353,6 +355,92 @@ export const useServiceHealth = () => {
         }
       }));
     }
+  };
+
+  const checkGoogleReverseGeo = async () => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
+
+    if (!apiKey) {
+      setServices(prev => ({
+        ...prev,
+        googleReverseGeo: {
+          name: 'Google Reverse',
+          status: 'disabled',
+          detail: 'API key not configured',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
+    // Use coordinates from Google Geo if available, otherwise try to get from ipapi
+    setServices(prev => {
+      const googleGeo = prev.googleGeoAPI;
+      const geoAPI = prev.geoAPI;
+
+      const lat = googleGeo?.latitude || geoAPI?.latitude;
+      const lng = googleGeo?.longitude || geoAPI?.longitude;
+
+      if (!lat || !lng) {
+        return {
+          ...prev,
+          googleReverseGeo: {
+            name: 'Google Reverse',
+            status: 'error',
+            detail: 'No coordinates available',
+            accuracy: null
+          }
+        };
+      }
+
+      // Call reverse geocoding API
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`, {
+        signal: AbortSignal.timeout(5000)
+      })
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.json();
+
+            if (data.status === 'OK' && data.results && data.results.length > 0) {
+              const address = data.results[0].formatted_address;
+              // Get short address (first part before first comma)
+              const shortAddress = address.split(',')[0];
+
+              setServices(prev => ({
+                ...prev,
+                googleReverseGeo: {
+                  name: 'Google Reverse',
+                  status: 'healthy',
+                  detail: shortAddress,
+                  accuracy: null,
+                  fullAddress: address,
+                  latitude: lat,
+                  longitude: lng
+                }
+              }));
+            } else {
+              throw new Error(`Geocoding failed: ${data.status}`);
+            }
+          } else {
+            const errorText = await response.text();
+            throw new Error(`API Error: ${response.status}`);
+          }
+        })
+        .catch((error) => {
+          setServices(prev => ({
+            ...prev,
+            googleReverseGeo: {
+              name: 'Google Reverse',
+              status: 'error',
+              detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
+              accuracy: null
+            }
+          }));
+        });
+
+      // Return current state while async fetch runs
+      return prev;
+    });
   };
 
   const checkAzureFunctions = async () => {
