@@ -86,8 +86,8 @@ const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay, venueAbb
   const startTime = parseVenueTime(venueStartDisplay);
   const endTime = parseVenueTime(venueEndDisplay);
 
-  // Add timezone abbreviation if provided (matching main calendar)
-  const endTimeWithTz = endTime && venueAbbr ? `${endTime} ${venueAbbr}` : endTime;
+  // TIEMPO-316: Removed timezone abbreviation from Boston calendar display
+  const endTimeWithTz = endTime;
 
   return {
     startTime: startTime,

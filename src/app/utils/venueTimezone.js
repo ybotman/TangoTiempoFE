@@ -60,11 +60,12 @@ export function formatVenueTimeRange(startTime, endTime, timezoneAbbr = '') {
   if (!end) return start.full;
   
   // If same AM/PM, only show it once
+  // TIEMPO-316: Removed timezone abbreviation from event detail modal
   if (start.ampm === end.ampm) {
-    return `${start.hour}:${start.minute}-${end.hour}:${end.minute} ${end.ampm}${timezoneAbbr ? ` ${timezoneAbbr}` : ''}`;
+    return `${start.hour}:${start.minute}-${end.hour}:${end.minute} ${end.ampm}`;
   }
-  
-  return `${start.time} - ${end.time}${timezoneAbbr ? ` ${timezoneAbbr}` : ''}`;
+
+  return `${start.time} - ${end.time}`;
 }
 
 /**

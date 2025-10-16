@@ -169,10 +169,10 @@ const CalendarPage = () => {
     
     const startTime = formatVenueTime(startStr);
     const endTime = formatVenueTime(endStr);
-    
-    // Add timezone abbreviation if provided
-    const endTimeWithTz = endTime && abbr ? `${endTime} ${abbr}` : endTime;
-    
+
+    // TIEMPO-316: Removed timezone abbreviation from calendar display
+    const endTimeWithTz = endTime;
+
     return {
       startTime: startTime,
       endTime: endTimeWithTz
