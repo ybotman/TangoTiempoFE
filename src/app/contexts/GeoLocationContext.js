@@ -454,27 +454,75 @@ export const GeoLocationProvider = ({ children }) => {
     setSavedLocation({
       lat: location.lat,
       lng: location.lng,
-      zoomRange: location.zoom
+      zoomRange: location.radiusMiles
     });
 
     // Also set as current location
     setCurrentLocationState({
       lat: location.lat,
       lng: location.lng,
-      zoomRange: location.zoom
+      zoomRange: location.radiusMiles
     });
 
     // Save to sessionStorage
     sessionStorage.setItem('currentLocation', JSON.stringify({
       lat: location.lat,
       lng: location.lng,
-      zoomRange: location.zoom
+      zoomRange: location.radiusMiles
     }));
 
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
 
     return result;
+  }, []);
+
+  // Fetch user's saved map center from Azure Functions Cloud Default (TIEMPO-312 Phase 2)
+  const fetchMapCenter = useCallback(async (firebaseToken) => {
+    const azureFunctionsURL = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+
+    try {
+      const response = await fetch(`${azureFunctionsURL}/api/mapcenter`, {
+        headers: {
+          'Authorization': `Bearer ${firebaseToken}`
+        }
+      });
+
+      const result = await response.json();
+
+      // Check for successful response with data
+      if (result.success && result.data) {
+        const location = {
+          lat: result.data.lat,
+          lng: result.data.lng,
+          zoomRange: result.data.radiusMiles  // Map backend radiusMiles to FE zoomRange
+          // result.data.zoom also available if needed for map display
+        };
+
+        // Update both saved and current location
+        setSavedLocation(location);
+        setCurrentLocationState(location);
+
+        // Save to sessionStorage
+        sessionStorage.setItem('currentLocation', JSON.stringify(location));
+
+        // Emit event to trigger refresh
+        locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+
+        return location;
+      } else if (result.success && !result.data) {
+        // User has no saved location - use defaults
+        console.log('[GeoLocationContext] No saved map center found, using defaults');
+        return null;
+      } else {
+        // Error response
+        console.error('[GeoLocationContext] Failed to fetch map center:', result.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('[GeoLocationContext] Error fetching map center:', error);
+      return null;
+    }
   }, []);
 
   // Compute location display text
@@ -531,6 +579,7 @@ export const GeoLocationProvider = ({ children }) => {
     setSessionLocation,
     saveAndSetLocation,
     saveToCloudDefault,
+    fetchMapCenter,
 
     // Direct access to API functions (if needed)
     fetchCities: locationAPI?.fetchCities,

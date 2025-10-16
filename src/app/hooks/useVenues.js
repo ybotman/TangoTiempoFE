@@ -37,13 +37,13 @@ export function useVenues() {
         // Handle both coordinate formats (lat/lng and latitude/longitude)
         const lat = coordLocation.lat || coordLocation.latitude;
         const lng = coordLocation.lng || coordLocation.longitude;
-        
+
         if (lat && lng) {
           params.lat = lat;
           params.lng = lng;
           // Use zoomRange from context (user's saved preference) or radius from location
-          // No hardcoded fallback - use what the context provides
-          const radiusValue = coordLocation.radius || coordLocation.zoomRange;
+          // Defensive fallback to 50 miles if undefined (prevents "undefinedmi" bug)
+          const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
           params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
           params.sortByDistance = true; // Sort by closest first
         }
