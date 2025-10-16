@@ -90,8 +90,18 @@ export const AuthProvider = ({ children }) => {
       const idToken = await firebaseUser.getIdToken();
 // TIEMPO-276: Security cleanup - removed logging
 
+      // Track login analytics (fire and forget - non-blocking)
+      const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+      fetch(`${afUrl}/api/user/login-track`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        }
+      }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
+
 // TIEMPO-276: Security cleanup - removed logging
-      
+
       // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
       const response = await dedupeFetch(
         `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
