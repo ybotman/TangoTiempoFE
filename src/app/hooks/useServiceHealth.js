@@ -166,9 +166,26 @@ export const useServiceHealth = () => {
   };
 
   const checkMongoDB = async () => {
-    const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
+    // MongoDB health check via Azure Functions (not Express BE)
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    const isLocal = afUrl.includes('localhost');
+
+    // In production (HTTPS), skip localhost checks (browser will block them)
+    if (isLocal && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      setServices(prev => ({
+        ...prev,
+        mongodb: {
+          name: 'MongoDB',
+          status: 'disabled',
+          detail: 'Local AF not accessible from HTTPS',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
     try {
-      const response = await fetch(`${backendUrl}/api/health/mongodb`, {
+      const response = await fetch(`${afUrl}/api/health/mongodb`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       });
@@ -192,8 +209,8 @@ export const useServiceHealth = () => {
         ...prev,
         mongodb: {
           name: 'MongoDB',
-          status: 'error',
-          detail: 'Connection failed',
+          status: isLocal ? 'disabled' : 'error',
+          detail: isLocal ? 'AF not running (start with: func start)' : 'Connection failed',
           accuracy: null
         }
       }));
