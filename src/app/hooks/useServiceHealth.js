@@ -19,10 +19,10 @@ export const useServiceHealth = () => {
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
     geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
 
-    // Row 3: Azure Functions (Prep)
+    // Row 3: Azure Functions & Google Geo APIs
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afEvents: { name: 'AF Events', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afVenues: { name: 'AF Venues', status: 'disabled', detail: 'Not configured', accuracy: null },
+    googleGeoAPI: { name: 'Google Geo', status: 'checking', detail: '', accuracy: null },
+    googleReverseGeo: { name: 'Google Reverse', status: 'checking', detail: '', accuracy: null },
   });
 
   useEffect(() => {
@@ -33,6 +33,8 @@ export const useServiceHealth = () => {
     checkMongoDB();
     checkGoogleAnalytics();
     checkGeoAPI();
+    checkGoogleGeoAPI();
+    checkGoogleReverseGeo();
     checkAzureFunctions();
 
     // Re-check every 30 seconds
@@ -43,6 +45,8 @@ export const useServiceHealth = () => {
       checkMongoDB();
       checkGoogleAnalytics();
       checkGeoAPI();
+      checkGoogleGeoAPI();
+      checkGoogleReverseGeo();
       checkAzureFunctions();
     }, 30000);
 
@@ -233,18 +237,39 @@ export const useServiceHealth = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
-        const accuracy = 5000; // meters - city level approximation
 
-        setServices(prev => ({
-          ...prev,
-          geoAPI: {
-            name: 'Geo API',
-            status: 'healthy',
-            detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
-            accuracy: accuracy // meters
-          }
-        }));
+        // Extract actual location coordinates (not fallback)
+        const latitude = data.latitude;
+        const longitude = data.longitude;
+
+        // Only process if we have actual coordinates (not fallback)
+        if (latitude && longitude) {
+          // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
+          const accuracy = 5000; // meters - city level approximation
+
+          setServices(prev => ({
+            ...prev,
+            geoAPI: {
+              name: 'Geo API',
+              status: 'healthy',
+              detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
+              accuracy: accuracy, // meters
+              latitude: latitude,
+              longitude: longitude,
+              city: data.city || null,
+              region: data.region || null,
+              region_code: data.region_code || null,
+              postal: data.postal || null,
+              country: data.country || null,
+              country_name: data.country_name || null,
+              country_code: data.country_code || null,
+              timezone: data.timezone || null,
+              ip: data.ip || null
+            }
+          }));
+        } else {
+          throw new Error('No actual coordinates returned');
+        }
       } else {
         throw new Error('Geo API failed');
       }
@@ -255,10 +280,167 @@ export const useServiceHealth = () => {
           name: 'Geo API',
           status: 'error',
           detail: 'Unavailable',
-          accuracy: null
+          accuracy: null,
+          latitude: null,
+          longitude: null
         }
       }));
     }
+  };
+
+  const checkGoogleGeoAPI = async () => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
+
+    if (!apiKey) {
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'disabled',
+          detail: 'API key not configured',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ considerIp: true }),
+          signal: AbortSignal.timeout(5000)
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Google returns { location: { lat, lng }, accuracy }
+        const latitude = data.location?.lat;
+        const longitude = data.location?.lng;
+        const accuracy = data.accuracy || null; // in meters
+
+        if (latitude && longitude) {
+          setServices(prev => ({
+            ...prev,
+            googleGeoAPI: {
+              name: 'Google Geo',
+              status: 'healthy',
+              detail: `Google (±${accuracy ? (accuracy / 1000).toFixed(1) : '?'}km)`,
+              accuracy: accuracy,
+              latitude: latitude,
+              longitude: longitude
+            }
+          }));
+        } else {
+          throw new Error('No coordinates in response');
+        }
+      } else {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'error',
+          detail: error.message.includes('403') ? 'Referrer restriction' :
+                  error.message.includes('400') ? 'Invalid payload' : 'Unavailable',
+          accuracy: null,
+          latitude: null,
+          longitude: null
+        }
+      }));
+    }
+  };
+
+  const checkGoogleReverseGeo = async () => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
+
+    if (!apiKey) {
+      setServices(prev => ({
+        ...prev,
+        googleReverseGeo: {
+          name: 'Google Reverse',
+          status: 'disabled',
+          detail: 'API key not configured',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
+    // Use coordinates from Google Geo if available, otherwise try to get from ipapi
+    setServices(prev => {
+      const googleGeo = prev.googleGeoAPI;
+      const geoAPI = prev.geoAPI;
+
+      const lat = googleGeo?.latitude || geoAPI?.latitude;
+      const lng = googleGeo?.longitude || geoAPI?.longitude;
+
+      if (!lat || !lng) {
+        return {
+          ...prev,
+          googleReverseGeo: {
+            name: 'Google Reverse',
+            status: 'error',
+            detail: 'No coordinates available',
+            accuracy: null
+          }
+        };
+      }
+
+      // Call reverse geocoding API
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`, {
+        signal: AbortSignal.timeout(5000)
+      })
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.json();
+
+            if (data.status === 'OK' && data.results && data.results.length > 0) {
+              const address = data.results[0].formatted_address;
+              // Get short address (first part before first comma)
+              const shortAddress = address.split(',')[0];
+
+              setServices(prev => ({
+                ...prev,
+                googleReverseGeo: {
+                  name: 'Google Reverse',
+                  status: 'healthy',
+                  detail: shortAddress,
+                  accuracy: null,
+                  fullAddress: address,
+                  latitude: lat,
+                  longitude: lng
+                }
+              }));
+            } else {
+              throw new Error(`Geocoding failed: ${data.status}`);
+            }
+          } else {
+            const errorText = await response.text();
+            throw new Error(`API Error: ${response.status}`);
+          }
+        })
+        .catch((error) => {
+          setServices(prev => ({
+            ...prev,
+            googleReverseGeo: {
+              name: 'Google Reverse',
+              status: 'error',
+              detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
+              accuracy: null
+            }
+          }));
+        });
+
+      // Return current state while async fetch runs
+      return prev;
+    });
   };
 
   const checkAzureFunctions = async () => {
@@ -301,9 +483,7 @@ export const useServiceHealth = () => {
           }
         }));
 
-        // Now check Events and Venues endpoints
-        checkAFEvents(effectiveUrl);
-        checkAFVenues(effectiveUrl);
+        // AF Events and Venues checks removed - keeping as grey dots
       } else {
         throw new Error('AF health check failed');
       }
@@ -315,88 +495,13 @@ export const useServiceHealth = () => {
           status: isLocal ? 'disabled' : 'error',
           detail: isLocal ? 'Not running (start with: func start)' : 'Unreachable',
           accuracy: null
-        },
-        afEvents: {
-          name: 'AF Events',
-          status: 'disabled',
-          detail: 'Not available',
-          accuracy: null
-        },
-        afVenues: {
-          name: 'AF Venues',
-          status: 'disabled',
-          detail: 'Not available',
-          accuracy: null
         }
+        // AF Events and Venues remain as disabled (grey) - no checks performed
       }));
     }
   };
 
-  const checkAFEvents = async (afUrl) => {
-    try {
-      const response = await fetch(`${afUrl}/api/events?appId=1&limit=1`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (response.ok) {
-        setServices(prev => ({
-          ...prev,
-          afEvents: {
-            name: 'AF Events',
-            status: 'healthy',
-            detail: 'API Ready',
-            accuracy: null
-          }
-        }));
-      } else {
-        throw new Error('AF events not available');
-      }
-    } catch (error) {
-      setServices(prev => ({
-        ...prev,
-        afEvents: {
-          name: 'AF Events',
-          status: 'disabled',
-          detail: 'Coming soon',
-          accuracy: null
-        }
-      }));
-    }
-  };
-
-  const checkAFVenues = async (afUrl) => {
-    try {
-      const response = await fetch(`${afUrl}/api/venues?appId=1&limit=1`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (response.ok) {
-        setServices(prev => ({
-          ...prev,
-          afVenues: {
-            name: 'AF Venues',
-            status: 'healthy',
-            detail: 'API Ready',
-            accuracy: null
-          }
-        }));
-      } else {
-        throw new Error('AF venues not available');
-      }
-    } catch (error) {
-      setServices(prev => ({
-        ...prev,
-        afVenues: {
-          name: 'AF Venues',
-          status: 'disabled',
-          detail: 'Coming soon',
-          accuracy: null
-        }
-      }));
-    }
-  };
+  // checkAFEvents and checkAFVenues removed - AF Events/Venues kept as disabled grey dots
 
   return services;
 };
