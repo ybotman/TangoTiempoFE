@@ -373,8 +373,6 @@ const ServiceStatusModal = ({ open, onClose }) => {
         </Box>
         {renderServiceAccordion(services.geoAPI, 'Geo API (ipapi.co)')}
         {renderServiceAccordion(services.googleGeoAPI, 'Google Geolocation API')}
-        {renderServiceAccordion(services.googleReverseGeo, 'Google Geocoding API (Reverse)')}
-        {renderServiceAccordion(services.googleTimezone, 'Google Time Zone API')}
 
         {/* Third-Party Services */}
         <Box sx={{ px: 3, pt: 3, pb: 1 }}>
