@@ -355,15 +355,6 @@ const ServiceStatusModal = ({ open, onClose }) => {
         </Box>
         {renderServiceAccordion(services.azureFunctions, 'AF Health')}
 
-        {/* Health Checks */}
-        <Box sx={{ px: 3, pt: 3, pb: 1 }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
-            Health Checks
-          </Typography>
-        </Box>
-        {renderDomainTestAccordion('MongoDB Health', 'health/mongodb', false)}
-        {renderDomainTestAccordion('Version Check', 'health/version', false)}
-
         {/* Domain Testing */}
         <Box sx={{ px: 3, pt: 3, pb: 1 }}>
           <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
