@@ -30,6 +30,7 @@ const ServiceStatusIcon = () => {
       services.azureFunctions,
       services.googleGeoAPI,
       services.googleReverseGeo,
+      services.googleTimezone,
     ];
 
     const hasError = allServices.some(s => s.status === 'error');

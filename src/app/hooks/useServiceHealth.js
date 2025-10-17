@@ -23,6 +23,7 @@ export const useServiceHealth = () => {
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
     googleGeoAPI: { name: 'Google Geo', status: 'checking', detail: '', accuracy: null },
     googleReverseGeo: { name: 'Google Reverse', status: 'checking', detail: '', accuracy: null },
+    googleTimezone: { name: 'Google Timezone', status: 'checking', detail: '', accuracy: null },
   });
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export const useServiceHealth = () => {
     checkGeoAPI();
     checkGoogleGeoAPI();
     checkGoogleReverseGeo();
+    checkGoogleTimezone();
     checkAzureFunctions();
 
     // Re-check every 30 seconds
@@ -47,6 +49,7 @@ export const useServiceHealth = () => {
       checkGeoAPI();
       checkGoogleGeoAPI();
       checkGoogleReverseGeo();
+      checkGoogleTimezone();
       checkAzureFunctions();
     }, 30000);
 
@@ -448,6 +451,99 @@ export const useServiceHealth = () => {
             ...prev,
             googleReverseGeo: {
               name: 'Google Reverse',
+              status: 'error',
+              detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
+              accuracy: null
+            }
+          }));
+        });
+
+      // Return current state while async fetch runs
+      return prev;
+    });
+  };
+
+  const checkGoogleTimezone = async () => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
+
+    if (!apiKey) {
+      setServices(prev => ({
+        ...prev,
+        googleTimezone: {
+          name: 'Google Timezone',
+          status: 'disabled',
+          detail: 'API key not configured',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
+    // Use coordinates from Google Geo if available, otherwise try to get from ipapi
+    setServices(prev => {
+      const googleGeo = prev.googleGeoAPI;
+      const geoAPI = prev.geoAPI;
+
+      const lat = googleGeo?.latitude || geoAPI?.latitude;
+      const lng = googleGeo?.longitude || geoAPI?.longitude;
+
+      if (!lat || !lng) {
+        return {
+          ...prev,
+          googleTimezone: {
+            name: 'Google Timezone',
+            status: 'error',
+            detail: 'No coordinates available',
+            accuracy: null
+          }
+        };
+      }
+
+      // Get current timestamp in seconds
+      const timestamp = Math.floor(Date.now() / 1000);
+
+      // Call timezone API
+      fetch(`https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${apiKey}`, {
+        signal: AbortSignal.timeout(5000)
+      })
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.json();
+
+            if (data.status === 'OK') {
+              const timeZoneId = data.timeZoneId; // e.g., "America/Los_Angeles"
+              const timeZoneName = data.timeZoneName; // e.g., "Pacific Standard Time"
+              const rawOffset = data.rawOffset / 3600; // Convert seconds to hours
+              const dstOffset = data.dstOffset / 3600; // DST offset in hours
+
+              setServices(prev => ({
+                ...prev,
+                googleTimezone: {
+                  name: 'Google Timezone',
+                  status: 'healthy',
+                  detail: `${timeZoneId} (UTC${rawOffset >= 0 ? '+' : ''}${rawOffset})`,
+                  accuracy: null,
+                  timeZoneId: timeZoneId,
+                  timeZoneName: timeZoneName,
+                  rawOffset: rawOffset,
+                  dstOffset: dstOffset,
+                  latitude: lat,
+                  longitude: lng
+                }
+              }));
+            } else {
+              throw new Error(`Timezone API failed: ${data.status}`);
+            }
+          } else {
+            const errorText = await response.text();
+            throw new Error(`API Error: ${response.status}`);
+          }
+        })
+        .catch((error) => {
+          setServices(prev => ({
+            ...prev,
+            googleTimezone: {
+              name: 'Google Timezone',
               status: 'error',
               detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
               accuracy: null

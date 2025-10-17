@@ -160,6 +160,32 @@ const ServiceStatusModal = ({ open, onClose }) => {
             </Box>
           )}
 
+          {/* Timezone-specific info */}
+          {service.timeZoneId && (
+            <Box sx={{ mb: 2 }}>
+              {service.timeZoneName && (
+                <Typography variant="body2" display="block" sx={{ mb: 0.5 }}>
+                  🕐 <strong>Timezone Name:</strong> {service.timeZoneName}
+                </Typography>
+              )}
+              {service.rawOffset !== undefined && (
+                <Typography variant="body2" display="block" sx={{ mb: 0.5 }}>
+                  ⏰ <strong>UTC Offset:</strong> UTC{service.rawOffset >= 0 ? '+' : ''}{service.rawOffset} hours
+                </Typography>
+              )}
+              {service.dstOffset !== undefined && service.dstOffset !== 0 && (
+                <Typography variant="body2" display="block" sx={{ mb: 0.5 }}>
+                  ☀️ <strong>DST Offset:</strong> +{service.dstOffset} hours
+                </Typography>
+              )}
+              {service.latitude && service.longitude && (
+                <Typography variant="body2" display="block">
+                  🧭 <strong>Coordinates:</strong> {service.latitude.toFixed(4)}, {service.longitude.toFixed(4)}
+                </Typography>
+              )}
+            </Box>
+          )}
+
           {/* Azure Functions Swagger link */}
           {service.name === 'AF Health' && service.status === 'healthy' && (
             <Box sx={{ mt: 2, p: 1, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
@@ -355,8 +381,9 @@ const ServiceStatusModal = ({ open, onClose }) => {
           </Typography>
         </Box>
         {renderServiceAccordion(services.geoAPI, 'Geo API (ipapi.co)')}
-        {renderServiceAccordion(services.googleGeoAPI, 'Google Geolocation')}
-        {renderServiceAccordion(services.googleReverseGeo, 'Google Reverse Geocoding')}
+        {renderServiceAccordion(services.googleGeoAPI, 'Google Geolocation API')}
+        {renderServiceAccordion(services.googleReverseGeo, 'Google Geocoding API (Reverse)')}
+        {renderServiceAccordion(services.googleTimezone, 'Google Time Zone API')}
 
         {/* Third-Party Services */}
         <Box sx={{ px: 3, pt: 3, pb: 1 }}>
