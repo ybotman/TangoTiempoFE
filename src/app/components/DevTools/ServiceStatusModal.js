@@ -16,7 +16,6 @@ import {
   Box,
   IconButton,
   TextField,
-  Alert,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloseIcon from '@mui/icons-material/Close';
@@ -207,9 +206,6 @@ const ServiceStatusModal = ({ open, onClose }) => {
               helperText={error}
               variant="outlined"
             />
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              TEMPORARY: This password protection is hardcoded for testing and will be removed soon.
-            </Alert>
           </DialogContent>
           <DialogActions>
             <Button onClick={onClose}>Cancel</Button>
