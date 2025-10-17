@@ -447,12 +447,15 @@ export const useServiceHealth = () => {
           }
         })
         .catch((error) => {
+          console.error('[Google Reverse Geo] Error:', error);
           setServices(prev => ({
             ...prev,
             googleReverseGeo: {
               name: 'Google Reverse',
               status: 'error',
-              detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
+              detail: error.message.includes('403') ? 'Referrer restriction' :
+                      error.message.includes('CORS') ? 'CORS error' :
+                      `Error: ${error.message.substring(0, 50)}`,
               accuracy: null
             }
           }));
@@ -540,12 +543,15 @@ export const useServiceHealth = () => {
           }
         })
         .catch((error) => {
+          console.error('[Google Timezone] Error:', error);
           setServices(prev => ({
             ...prev,
             googleTimezone: {
               name: 'Google Timezone',
               status: 'error',
-              detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
+              detail: error.message.includes('403') ? 'Referrer restriction' :
+                      error.message.includes('CORS') ? 'CORS error' :
+                      `Error: ${error.message.substring(0, 50)}`,
               accuracy: null
             }
           }));
