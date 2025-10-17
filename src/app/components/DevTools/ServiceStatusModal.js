@@ -176,6 +176,78 @@ const ServiceStatusModal = ({ open, onClose }) => {
     );
   };
 
+  /**
+   * Render domain test accordion
+   */
+  const renderDomainTestAccordion = (domain, endpoint, requiresAppId = false) => {
+    const baseUrl = 'https://calendar-be-af.azurewebsites.net/api';
+    const fullUrl = requiresAppId ? `${baseUrl}/${endpoint}?appId=1` : `${baseUrl}/${endpoint}`;
+    const curlCommand = `curl "${fullUrl}"`;
+
+    return (
+      <Accordion
+        key={domain}
+        sx={{
+          '&:before': {
+            display: 'none',
+          },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls={`${domain}-test-content`}
+          id={`${domain}-test-header`}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {domain}
+            </Typography>
+            <Chip
+              label={requiresAppId ? 'MongoDB' : 'Mock Data'}
+              size="small"
+              color={requiresAppId ? 'success' : 'warning'}
+              sx={{ fontSize: '0.7rem' }}
+            />
+          </Box>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+              🌐 Browser Test:
+            </Typography>
+            <Box sx={{ p: 1, backgroundColor: '#f5f5f5', borderRadius: 1, mb: 2 }}>
+              <Typography
+                variant="caption"
+                component="a"
+                href={fullUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: '#1976d2',
+                  textDecoration: 'none',
+                  '&:hover': { textDecoration: 'underline' },
+                  wordBreak: 'break-all'
+                }}
+              >
+                {fullUrl}
+              </Typography>
+            </Box>
+
+            <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+              💻 cURL Command:
+            </Typography>
+            <Box sx={{ p: 1, backgroundColor: '#f5f5f5', borderRadius: 1, fontFamily: 'monospace' }}>
+              <Typography variant="caption" sx={{ wordBreak: 'break-all' }}>
+                {curlCommand}
+              </Typography>
+            </Box>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
+
   // Show password dialog if not authenticated
   if (!isAuthenticated) {
     return (
@@ -256,6 +328,25 @@ const ServiceStatusModal = ({ open, onClose }) => {
           </Typography>
         </Box>
         {renderServiceAccordion(services.azureFunctions, 'AF Health')}
+
+        {/* Health Checks */}
+        <Box sx={{ px: 3, pt: 3, pb: 1 }}>
+          <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
+            Health Checks
+          </Typography>
+        </Box>
+        {renderDomainTestAccordion('MongoDB Health', 'health/mongodb', false)}
+        {renderDomainTestAccordion('Version Check', 'health/version', false)}
+
+        {/* Domain Testing */}
+        <Box sx={{ px: 3, pt: 3, pb: 1 }}>
+          <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
+            Domain Testing (appId=1)
+          </Typography>
+        </Box>
+        {renderDomainTestAccordion('Categories', 'categories', true)}
+        {renderDomainTestAccordion('Venues', 'venues', true)}
+        {renderDomainTestAccordion('Events', 'events', false)}
 
         {/* Geolocation Services */}
         <Box sx={{ px: 3, pt: 3, pb: 1 }}>
