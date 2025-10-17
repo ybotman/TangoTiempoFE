@@ -453,7 +453,8 @@ export const useServiceHealth = () => {
             googleReverseGeo: {
               name: 'Google Reverse',
               status: 'error',
-              detail: error.message.includes('403') ? 'Referrer restriction' :
+              detail: error.message.includes('REQUEST_DENIED') ? 'Billing required - Enable in Google Cloud Console' :
+                      error.message.includes('403') ? 'Referrer restriction' :
                       error.message.includes('CORS') ? 'CORS error' :
                       `Error: ${error.message.substring(0, 50)}`,
               accuracy: null
@@ -549,7 +550,8 @@ export const useServiceHealth = () => {
             googleTimezone: {
               name: 'Google Timezone',
               status: 'error',
-              detail: error.message.includes('403') ? 'Referrer restriction' :
+              detail: error.message.includes('REQUEST_DENIED') ? 'Billing required - Enable in Google Cloud Console' :
+                      error.message.includes('403') ? 'Referrer restriction' :
                       error.message.includes('CORS') ? 'CORS error' :
                       `Error: ${error.message.substring(0, 50)}`,
               accuracy: null
