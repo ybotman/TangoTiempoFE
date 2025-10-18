@@ -24,15 +24,15 @@ export function useGeoLocations() {
         return;
       }
       
-      // Use the backend proxy to avoid CORS issues
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
-      
+      // Use Azure Functions for geo IP lookup
+      const afUrl = process.env.NEXT_PUBLIC_AF_URL || '';
+
       // Add a timeout to the request
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-      
+
       try {
-        const response = await axios.get(`${baseURL}/api/firebase/geo/ip`, {
+        const response = await axios.get(`${afUrl}/api/geo/ip`, {
           signal: controller.signal
         });
         

@@ -309,9 +309,9 @@ export const useServiceHealth = () => {
   };
 
   const checkGeoAPI = async () => {
-    const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
     try {
-      const response = await fetch(`${backendUrl}/api/firebase/geo/ip`, {
+      const response = await fetch(`${afUrl}/api/geo/ip`, {
         signal: AbortSignal.timeout(5000)
       });
 
