@@ -64,14 +64,14 @@ export const useServiceHealth = () => {
     checkAzureFunctions();
     checkCloudflare();
 
-    // Re-check every 30 seconds
+    // Re-check every 30 seconds (TIEMPO-319: Removed checkGeoAPI to prevent rate limiting)
     const interval = setInterval(() => {
       checkExpressBackend();
       checkFirebase();
       checkMapbox();
       checkMongoDB();
       checkGoogleAnalytics();
-      checkGeoAPI();
+      // checkGeoAPI(); // REMOVED - Causes 429 rate limiting
       checkGoogleGeoAPI();
       checkAzureFunctions();
       checkCloudflare();

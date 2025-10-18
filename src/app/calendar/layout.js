@@ -16,13 +16,26 @@ const RootLayout = ({ children }) => {
   const selectedRegionName = selectedLocation?.region?.name;
 
   // TIEMPO-313: Visitor tracking on calendar page load (fire and forget)
+  // TIEMPO-319: Only track once per 24 hours per IP
   useEffect(() => {
     const trackVisitor = async () => {
       try {
+        // Check if we've already tracked this visitor today (24-hour rolling window)
+        const lastTracked = localStorage.getItem('visitor_last_tracked');
+        const now = Date.now();
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        if (lastTracked && (now - parseInt(lastTracked)) < TWENTY_FOUR_HOURS) {
+          const hoursLeft = Math.round((TWENTY_FOUR_HOURS - (now - parseInt(lastTracked))) / 3600000);
+          console.log(`[Visitor Tracking] Already tracked within 24h, skipping (${hoursLeft}h remaining)`);
+          return;
+        }
+
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
         // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-        const geoData = await fetchAllGeolocationData();
+        // TIEMPO-319: Use 24-hour cache for visitor tracking (1440 minutes)
+        const geoData = await fetchAllGeolocationData(1440);
 
         await fetch(`${afUrl}/api/visitor/track`, {
           method: 'POST',
@@ -46,6 +59,10 @@ const RootLayout = ({ children }) => {
             distance: geoData.distance
           })
         });
+
+        // Store the tracking timestamp after successful tracking
+        localStorage.setItem('visitor_last_tracked', now.toString());
+        console.log('[Visitor Tracking] Successfully tracked visitor');
       } catch (error) {
         // Silent failure - don't break user experience
         console.warn('[Visitor Tracking] Failed:', error.message);
