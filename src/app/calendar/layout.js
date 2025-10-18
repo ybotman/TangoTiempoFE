@@ -30,9 +30,16 @@ const RootLayout = ({ children }) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
+            // Page routing details
+            pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
+            hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
+            url: typeof window !== 'undefined' ? window.location.href : '',
+
+            // Timezone info
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timezoneOffset: -new Date().getTimezoneOffset(), // Negate for correct sign
+
+            // Geolocation data
             cloudflare: geoData.cloudflare,
             google: geoData.google,
             ipapi: geoData.ipapi,
