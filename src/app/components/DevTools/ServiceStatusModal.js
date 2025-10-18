@@ -152,11 +152,45 @@ const ServiceStatusModal = ({ open, onClose }) => {
                   📏 <strong>Accuracy:</strong> ±{(service.accuracy / 1000).toFixed(1)}km
                 </Typography>
               )}
+              {service.distanceToGoogle && (
+                <Typography variant="body2" display="block" sx={{ fontWeight: 600, color: '#FF5722', mb: 0.5 }}>
+                  📊 <strong>Distance to Google Geo API:</strong> {service.distanceToGoogle.km.toFixed(1)}km / {service.distanceToGoogle.mi.toFixed(1)}mi
+                </Typography>
+              )}
+              {service.distanceToIpapi && (
+                <Typography variant="body2" display="block" sx={{ fontWeight: 600, color: '#FF5722', mb: 0.5 }}>
+                  📊 <strong>Distance to ipapi.co:</strong> {service.distanceToIpapi.km.toFixed(1)}km / {service.distanceToIpapi.mi.toFixed(1)}mi
+                </Typography>
+              )}
               {service.fullAddress && (
                 <Typography variant="body2" display="block">
                   🏠 <strong>Address:</strong> {service.fullAddress}
                 </Typography>
               )}
+            </Box>
+          )}
+
+          {/* Cloudflare-specific info */}
+          {service.name === 'Cloudflare' && (
+            <Box sx={{ mb: 2 }}>
+              {service.ip && (
+                <Typography variant="body2" display="block" sx={{ mb: 0.5 }}>
+                  🌐 <strong>Visitor IP:</strong> {service.ip}
+                </Typography>
+              )}
+              {service.country && (
+                <Typography variant="body2" display="block" sx={{ mb: 0.5 }}>
+                  🌍 <strong>Country Code:</strong> {service.country}
+                </Typography>
+              )}
+              {service.ray && (
+                <Typography variant="body2" display="block" sx={{ mb: 0.5 }}>
+                  🔍 <strong>Cloudflare Ray ID:</strong> {service.ray}
+                </Typography>
+              )}
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                ℹ️ Cloudflare provides real visitor IP (bypassing proxies) and country code from edge servers
+              </Typography>
             </Box>
           )}
 
@@ -380,6 +414,7 @@ const ServiceStatusModal = ({ open, onClose }) => {
             Third-Party Services
           </Typography>
         </Box>
+        {renderServiceAccordion(services.cloudflare, 'Cloudflare CDN')}
         {renderServiceAccordion(services.mapbox, 'Mapbox Maps')}
         {renderServiceAccordion(services.googleAnalytics, 'Google Analytics')}
       </DialogContent>

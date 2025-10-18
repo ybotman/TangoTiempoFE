@@ -19,6 +19,22 @@ const RootLayout = ({ children }) => {
     const trackVisitor = async () => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+
+        // Fetch Cloudflare info to include in tracking
+        let cloudflareData = null;
+        try {
+          const cfResponse = await fetch(`${afUrl}/api/cloudflare/info`, {
+            signal: AbortSignal.timeout(2000) // Quick timeout - don't block page load
+          });
+          if (cfResponse.ok) {
+            const responseData = await cfResponse.json();
+            // Azure Functions wraps response in { success, data }
+            cloudflareData = responseData.data || responseData;
+          }
+        } catch (err) {
+          console.warn('[Visitor Tracking] Cloudflare fetch failed:', err.message);
+        }
+
         await fetch(`${afUrl}/api/visitor/track`, {
           method: 'POST',
           headers: {
@@ -27,7 +43,12 @@ const RootLayout = ({ children }) => {
           body: JSON.stringify({
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            timezoneOffset: -new Date().getTimezoneOffset() // Negate for correct sign
+            timezoneOffset: -new Date().getTimezoneOffset(), // Negate for correct sign
+            cloudflare: cloudflareData ? {
+              ip: cloudflareData.ip,
+              country: cloudflareData.country,
+              ray: cloudflareData.ray
+            } : null
           })
         });
       } catch (error) {

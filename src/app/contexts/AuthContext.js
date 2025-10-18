@@ -92,6 +92,22 @@ export const AuthProvider = ({ children }) => {
 
       // Track login analytics (fire and forget - non-blocking)
       const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+
+      // Fetch Cloudflare info to include in tracking
+      let cloudflareData = null;
+      try {
+        const cfResponse = await fetch(`${afUrl}/api/cloudflare/info`, {
+          signal: AbortSignal.timeout(2000) // Quick timeout - don't block login
+        });
+        if (cfResponse.ok) {
+          const responseData = await cfResponse.json();
+          // Azure Functions wraps response in { success, data }
+          cloudflareData = responseData.data || responseData;
+        }
+      } catch (err) {
+        console.warn('[Login Tracking] Cloudflare fetch failed:', err.message);
+      }
+
       fetch(`${afUrl}/api/user/login-track`, {
         method: 'POST',
         headers: {
@@ -100,7 +116,12 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify({
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          timezoneOffset: -new Date().getTimezoneOffset() // Negate because JS returns opposite sign
+          timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
+          cloudflare: cloudflareData ? {
+            ip: cloudflareData.ip,
+            country: cloudflareData.country,
+            ray: cloudflareData.ray
+          } : null
         })
       }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
 
