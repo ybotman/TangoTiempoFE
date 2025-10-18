@@ -257,10 +257,10 @@ const GeoComparisonDashboard = () => {
       });
     }
 
-    // Test 5: ipapi.co (AF - current)
+    // Test 5: ipapi.co (AF - renamed endpoint)
     const ipapiStart = Date.now();
     try {
-      const response = await fetch(`${afUrl}/api/geo/ip`, {
+      const response = await fetch(`${afUrl}/api/geo/ipapico/ip`, {
         signal: AbortSignal.timeout(5000)
       });
       const data = await response.json();
