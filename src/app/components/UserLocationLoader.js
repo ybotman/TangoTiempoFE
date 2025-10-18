@@ -1,24 +1,69 @@
 // UserLocationLoader.js
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { useUsers } from '@/hooks/useUsers';
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
 /**
- * Component that bridges user data with GeoLocationContext
- * Loads user's saved location preferences into the geo location context
+ * Component that bridges user authentication with GeoLocationContext
+ * Loads user's saved map center from Azure Functions Cloud Default on login
  */
 const UserLocationLoader = () => {
-  const { loadUserMapPreferences } = useGeoLocation();
-  const { userData } = useUsers();
+  const { fetchMapCenter } = useGeoLocation();
+  const { user, getIdToken } = useContext(AuthContext) || {};
+  const hasFetched = useRef(false);
+  const lastUserId = useRef(null);
 
   useEffect(() => {
-    if (userData && loadUserMapPreferences) {
-      // TIEMPO-276: Security cleanup - removed preferences logging
-      loadUserMapPreferences(userData);
+    // Only fetch once per user login
+    const currentUserId = user?.uid;
+
+    // Skip if:
+    // - No user (anonymous users don't need map center from cloud)
+    // - Missing required functions
+    // - Already fetched for this user
+    // - Same user as last time (no new login)
+    if (!user || !user.uid || !getIdToken || !fetchMapCenter) {
+      return;
     }
-  }, [userData, loadUserMapPreferences]);
+
+    if (hasFetched.current && lastUserId.current === currentUserId) {
+      return; // Already loaded for this user
+    }
+
+    const loadMapCenter = async () => {
+      try {
+        // Mark as fetching to prevent duplicates
+        hasFetched.current = true;
+        lastUserId.current = currentUserId;
+
+        // Clear old sessionStorage to force fresh fetch from Cloud Default
+        sessionStorage.removeItem('currentLocation');
+
+        // Get fresh Firebase token using AuthContext method
+        const token = await getIdToken();
+
+        // Skip if no valid token (401 would break mobile rendering)
+        if (!token) {
+          console.warn('[UserLocationLoader] No Firebase token available, skipping map center fetch');
+          hasFetched.current = false;
+          return;
+        }
+
+        // Fetch saved map center from Azure Functions
+        await fetchMapCenter(token);
+      } catch (error) {
+        console.error('[UserLocationLoader] Failed to load map center:', error);
+        // Reset flag on error to allow retry
+        hasFetched.current = false;
+        // Don't throw - allow page to render even if map center fetch fails
+      }
+    };
+
+    loadMapCenter();
+  }, [user?.uid, getIdToken, fetchMapCenter]);
 
   return null; // This is a logic-only component
 };

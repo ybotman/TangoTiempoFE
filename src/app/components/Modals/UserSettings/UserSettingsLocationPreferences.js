@@ -21,10 +21,10 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 /**
  * UserSettingsLocationPreferences - For logged-in users to save permanent location preferences
- * 
+ *
  * This component manages the user's saved location preferences that persist across sessions.
  * It's different from MapCenterModal which sets temporary session locations.
- * 
+ *
  * Data flow:
  * 1. Loads saved preferences from userData (backend)
  * 2. Falls back to savedLocation from GeoLocationContext if userData not loaded yet

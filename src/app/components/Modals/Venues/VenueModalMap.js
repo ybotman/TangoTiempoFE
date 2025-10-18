@@ -1,13 +1,81 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { AuthContext } from '@/contexts/AuthContext';
+import { deleteVenue } from '@/services/venueService';
 import 'leaflet/dist/leaflet.css';
 
-const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, initialCenter = null }) => {
+const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, onVenueDeleted, initialCenter = null }) => {
+  const { user } = useContext(AuthContext);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [venueToDelete, setVenueToDelete] = useState(null);
+  const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+
+  // Check if user can delete venues (Admin or RegionalAdmin only)
+  const canDeleteVenue = user?.roles?.some(role =>
+    role === 'Admin' || role === 'RegionalAdmin'
+  ) || false;
+
+  // Handle delete button click
+  const handleDeleteClick = (venueId) => {
+    const venue = venues.find(v => v._id === venueId);
+    if (!venue) return;
+
+    if (!canDeleteVenue) {
+      // User doesn't have permission - show permission dialog
+      setPermissionDialogOpen(true);
+      return;
+    }
+
+    // User has permission - show confirmation dialog
+    setVenueToDelete(venue);
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm and execute delete
+  const confirmDelete = async () => {
+    if (!venueToDelete || !user) return;
+
+    setDeleting(true);
+
+    try {
+      const token = await user.getIdToken();
+      await deleteVenue(venueToDelete._id, token);
+
+      // Success - notify parent component
+      if (onVenueDeleted) {
+        onVenueDeleted(venueToDelete._id);
+      }
+
+      // Close dialog
+      setDeleteDialogOpen(false);
+      setVenueToDelete(null);
+    } catch (error) {
+      console.error('Error deleting venue:', error);
+      let errorMessage = 'Failed to delete venue. Please try again.';
+
+      if (error.response?.status === 403) {
+        errorMessage = 'You do not have permission to delete this venue.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Venue not found.';
+        // Remove from list anyway
+        if (onVenueDeleted) {
+          onVenueDeleted(venueToDelete._id);
+        }
+      }
+
+      alert(errorMessage);
+      setDeleteDialogOpen(false);
+      setVenueToDelete(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // Calculate zoom based on radius (miles to zoom level approximation)
   const radiusToZoom = (radius) => {
@@ -124,19 +192,32 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, initialCenter = n
               marker = L.marker([v.latitude, v.longitude], { icon: greyIcon });
             }
             
-            // Create popup with Edit button
+            // Create popup with Edit and Delete buttons
+            const deleteButtonStyle = canDeleteVenue
+              ? 'background: #d32f2f; color: white; cursor: pointer;'
+              : 'background: #9e9e9e; color: #e0e0e0; cursor: not-allowed;';
+
             const popupContent = `
               <div style="min-width: 200px;">
                 <strong>${v.name}</strong><br/>
                 ${v.address1}<br/>
                 ${v.city}, ${v.state} ${v.zip}<br/>
                 <small>Status: ${v.isActive ? 'Active' : 'Inactive'}</small><br/>
-                <button 
-                  onclick="window.dispatchEvent(new CustomEvent('venue-edit', { detail: '${v._id}' }))"
-                  style="margin-top: 8px; padding: 4px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;"
-                >
-                  Edit
-                </button>
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                  <button
+                    onclick="window.dispatchEvent(new CustomEvent('venue-edit', { detail: '${v._id}' }))"
+                    style="padding: 4px 12px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onclick="window.dispatchEvent(new CustomEvent('venue-delete', { detail: '${v._id}' }))"
+                    style="padding: 4px 12px; ${deleteButtonStyle} border: none; border-radius: 4px; flex: 1;"
+                    ${!canDeleteVenue ? 'title="Admin or RegionalAdmin role required"' : ''}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             `;
             
@@ -175,7 +256,7 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, initialCenter = n
     };
   }, [venues, selectedVenueId, initialCenter]);
 
-  // Add event listener for edit button clicks
+  // Add event listeners for edit and delete button clicks
   useEffect(() => {
     const handleEditClick = (event) => {
       const venueId = event.detail;
@@ -185,9 +266,19 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, initialCenter = n
       }
     };
 
+    const handleDeleteButtonClick = (event) => {
+      const venueId = event.detail;
+      handleDeleteClick(venueId);
+    };
+
     window.addEventListener('venue-edit', handleEditClick);
-    return () => window.removeEventListener('venue-edit', handleEditClick);
-  }, [venues, onEditVenue]);
+    window.addEventListener('venue-delete', handleDeleteButtonClick);
+
+    return () => {
+      window.removeEventListener('venue-edit', handleEditClick);
+      window.removeEventListener('venue-delete', handleDeleteButtonClick);
+    };
+  }, [venues, onEditVenue, canDeleteVenue]);
 
   const selectedVenue = venues.find(v => v._id === selectedVenueId);
 
@@ -210,7 +301,68 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, initialCenter = n
           'Blue markers = active venues, Grey markers = inactive venues. Click any marker to edit.'
         )}
       </Typography>
-      <Box ref={mapRef} sx={{ flexGrow: 1, minHeight: 400 }} />
+      <Box ref={mapRef} sx={{ flexGrow: 1, minHeight: 400}} />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => !deleting && setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete venue <strong>{venueToDelete?.name}</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Permission Denied Dialog */}
+      <Dialog
+        open={permissionDialogOpen}
+        onClose={() => setPermissionDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Permission Required</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            You need Admin or Regional Admin permissions to delete venues.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            You can:
+          </Typography>
+          <Typography variant="body2" component="ul" sx={{ pl: 2 }}>
+            <li>Apply to become a Regional Admin for your area</li>
+            <li>Contact an existing admin to request venue deletion</li>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPermissionDialogOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
@@ -219,6 +371,7 @@ VenueModalMap.propTypes = {
   venues: PropTypes.array.isRequired,
   selectedVenueId: PropTypes.string,
   onEditVenue: PropTypes.func,
+  onVenueDeleted: PropTypes.func,
   initialCenter: PropTypes.shape({
     lat: PropTypes.number,
     lng: PropTypes.number,

@@ -1,17 +1,3 @@
-/**
- * MapCenterModal - For setting temporary location for current session
- * 
- * This modal allows users (logged-in or not) to set a temporary location
- * for filtering events in the current session. It doesn't save to backend.
- * 
- * For permanent saved locations, logged-in users should use:
- * User Settings > Location Preferences
- * 
- * Data flow:
- * 1. Loads currentLocation or savedLocation as initial values
- * 2. Saves to sessionStorage via setSessionLocation (temporary)
- * 3. Does NOT save to backend
- */
 'use client';
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
@@ -20,82 +6,75 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Box,
-  Typography,
-  Slider,
   Button,
+  Typography,
   IconButton,
   Alert,
-  CircularProgress,
+  Slider,
+  Tooltip,
+  useTheme,
+  useMediaQuery,
+  CircularProgress
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import 'leaflet/dist/leaflet.css';
-import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AuthContext } from '@/contexts/AuthContext';
+import 'leaflet/dist/leaflet.css';
 
-const MapCenterModal = ({ open, onClose }) => {
+// Dynamic import for avoiding SSR issues
+// Note: Using Leaflet directly; no MapContainer used in this implementation
+
+const MapCenterModal = ({
+  open,
+  onClose,
+  onSetLocation,
+  onSaveLocation,
+  initialLocation = { lat: 40.7128, lng: -74.0060, zoomRange: 50 },
+
+}) => {
   const { user } = useContext(AuthContext);
-  const { setSessionLocation, currentLocation, savedLocation } = useGeoLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  // Map references
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const circleRef = useRef(null);
   
-  // State for temporary location - start with saved preferences or temporary location
-  const [centerLat, setCenterLat] = useState('');
-  const [centerLng, setCenterLng] = useState('');
-  const [zoomRange, setZoomRange] = useState(50);
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [centerLat, setCenterLat] = useState(initialLocation.lat || '');
+  const [centerLng, setCenterLng] = useState(initialLocation.lng || '');
+  const [zoomRange, setZoomRange] = useState(initialLocation.zoomRange || 50);
+  // Removed scale text - not needed
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [mapLoading, setMapLoading] = useState(false);
   
-  // Load initial location when modal opens
+  // Initialize map - with retry logic for ref attachment
   useEffect(() => {
-    if (open) {
-      // First priority: current location
-      if (currentLocation?.lat) {
-        setCenterLat(currentLocation.lat?.toString() || '');
-        setCenterLng(currentLocation.lng?.toString() || '');
-        setZoomRange(currentLocation.zoomRange || 50);
-      }
-      // Second priority: saved location (for logged-in users)
-      else if (user && savedLocation?.lat) {
-        setCenterLat(savedLocation.lat?.toString() || '');
-        setCenterLng(savedLocation.lng?.toString() || '');
-        setZoomRange(savedLocation.zoomRange || 50);
-      }
-    }
-  }, [open, currentLocation, savedLocation, user]);
-  
-  // Initialize map when modal opens and is visible
-  useEffect(() => {
-    if (!open) {
-      // Clean up when modal closes
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        setMapInitialized(false);
-      }
-      return;
-    }
-
-    // Wait for modal to be fully open and rendered
-    const initTimer = setTimeout(() => {
-      if (!mapRef.current || mapInstanceRef.current) return;
-
-// TIEMPO-276: Security cleanup - removed logging
-      setMapLoading(true);
+    if (!open || mapInitialized) return;
+    
+    // Retry logic for waiting for ref to attach
+    let retryCount = 0;
+    const maxRetries = 10;
+    
+    const checkAndInit = () => {
+      retryCount++;
       
-      import('leaflet').then((L) => {
-        // Double-check refs
-        if (!mapRef.current || mapInstanceRef.current) {
-// TIEMPO-276: Security cleanup - removed logging
-          return;
-        }
+      if (mapRef.current) {
+        initializeMap();
+      } else if (retryCount < maxRetries) {
+        setTimeout(checkAndInit, 100);
+      } else {
+        setMessage({ type: 'error', text: 'Failed to initialize map container' });
+      }
+    };
+    
+    const initializeMap = async () => {
+      try {
+        // Dynamic import L to avoid SSR issues
+        const L = (await import('leaflet')).default;
         
         // Fix Leaflet's default icon path issues
         delete L.Icon.Default.prototype._getIconUrl;
@@ -104,124 +83,130 @@ const MapCenterModal = ({ open, onClose }) => {
           iconUrl: '/leaflet/marker-icon.png',
           shadowUrl: '/leaflet/marker-shadow.png',
         });
-
-        // Initialize with saved location or US center
-        const initialLat = centerLat ? parseFloat(centerLat) : 39.8283;
-        const initialLng = centerLng ? parseFloat(centerLng) : -98.5795;
-        const initialZoom = 4;
         
-// TIEMPO-276: Security cleanup - removed logging
+        // Initialize map
+        const initialLat = centerLat ? parseFloat(centerLat) : 40.7128;
+        const initialLng = centerLng ? parseFloat(centerLng) : -74.0060;
         
-        try {
-          mapInstanceRef.current = L.map(mapRef.current, {
-            center: [initialLat, initialLng],
-            zoom: initialZoom,
-            scrollWheelZoom: true,
-            zoomControl: true,
-          });
-          
-// TIEMPO-276: Security cleanup - removed logging
-          
-          // Add tile layer
-          L.tileLayer(
-            `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
-            {
-              maxZoom: 18,
-              tileSize: 512,
-              zoomOffset: -1,
-              attribution: '© Mapbox © OpenStreetMap'
-            }
-          ).addTo(mapInstanceRef.current);
-
-          // Force invalidate size after a moment
-          setTimeout(() => {
-            if (mapInstanceRef.current) {
-// TIEMPO-276: Security cleanup - removed logging
-              mapInstanceRef.current.invalidateSize();
-            }
-          }, 300);
-
-          // Add click handler
-          mapInstanceRef.current.on('click', (e) => {
-            const { lat, lng } = e.latlng;
-            setCenterLat(lat.toString());
-            setCenterLng(lng.toString());
-            updateMarker(lat, lng);
-          });
-
-          // If we have coordinates, add marker
-          if (centerLat && centerLng && isValidLatLng()) {
-            updateMarker(parseFloat(centerLat), parseFloat(centerLng));
+        const map = L.map(mapRef.current, {
+          center: [initialLat, initialLng],
+          zoom: 5,
+          scrollWheelZoom: true,
+          zoomControl: true
+        });
+        
+        // Add tile layer
+        L.tileLayer(
+          `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
+          {
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1,
+            attribution: '© Mapbox © OpenStreetMap'
           }
-
-          setMapInitialized(true);
-          setMapLoading(false);
-        } catch (error) {
-          console.error('Error creating map:', error);
-          setMapLoading(false);
-        }
-      }).catch(error => {
-        console.error('Error loading Leaflet:', error);
-        setMapLoading(false);
-      });
-    }, 500); // Longer delay to ensure modal transition completes
+        ).addTo(map);
+      
+        // Handle map click
+        map.on('click', (e) => {
+          const { lat, lng } = e.latlng;
+          updateMarker(lat, lng);
+          setCenterLat(lat.toFixed(6));
+          setCenterLng(lng.toFixed(6));
+        });
+      
+      // Force map to recalculate size after a delay
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+      
+        mapInstanceRef.current = map;
+        setMapInitialized(true);
+        
+        // Force resize after initialization
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 300);
+        
+      } catch (error) {
+        console.error('[MapCenterModal] Error initializing map:', error);
+        setMessage({ type: 'error', text: 'Failed to initialize map' });
+      }
+    };
     
-    return () => clearTimeout(initTimer);
-  }, [open]); // Only depend on open state
+    // Start the check and init process
+    checkAndInit();
+    
+    return () => {
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+        } catch {
+          // Ignore cleanup errors
+        }
+        mapInstanceRef.current = null;
+        setMapInitialized(false);
+      }
+    };
+  }, [open]);
   
-  // Helper to update marker and circle
-  const updateMarker = (lat, lng) => {
+  // Force map resize when modal fully opens
+  useEffect(() => {
+    if (open && mapInstanceRef.current) {
+      const timer = setTimeout(() => {
+        mapInstanceRef.current.invalidateSize();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+  
+  const updateMarker = async (lat, lng) => {
     if (!mapInstanceRef.current) return;
     
-    import('leaflet').then((L) => {
-      // Remove existing marker and circle
-      if (markerRef.current) {
-        mapInstanceRef.current.removeLayer(markerRef.current);
-      }
-      if (circleRef.current) {
-        mapInstanceRef.current.removeLayer(circleRef.current);
-      }
-
-      // Create custom icon
-      const customIcon = L.divIcon({
-        className: 'custom-map-marker',
-        html: `<div style="
-          background: #1976d2;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
-      });
-
-      // Add new marker
-      markerRef.current = L.marker([lat, lng], { icon: customIcon })
-        .addTo(mapInstanceRef.current);
-
-      // Add circle
-      circleRef.current = L.circle([lat, lng], {
-        radius: zoomRange * 1609.34,
-        fillColor: '#1976d2',
-        fillOpacity: 0.1,
-        color: '#1976d2',
-        weight: 2,
-        dashArray: '5, 5'
-      }).addTo(mapInstanceRef.current);
-      
-      // Center map
-      let targetZoom;
-      if (zoomRange <= 10) targetZoom = 10;
-      else if (zoomRange <= 25) targetZoom = 9;
-      else if (zoomRange <= 50) targetZoom = 8;
-      else if (zoomRange <= 100) targetZoom = 7;
-      else if (zoomRange <= 150) targetZoom = 6;
-      else targetZoom = 5;
-      
-      mapInstanceRef.current.setView([lat, lng], targetZoom, { animate: true });
+    // Dynamic import L to avoid SSR issues
+    const L = (await import('leaflet')).default;
+    
+    // Remove existing marker and circle
+    if (markerRef.current) {
+      markerRef.current.remove();
+    }
+    if (circleRef.current) {
+      circleRef.current.remove();
+    }
+    
+    // Create custom icon
+    const customIcon = L.divIcon({
+      className: 'custom-location-marker',
+      html: '<div style="background-color: #1976d2; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.4);"></div>',
+      iconSize: [16, 16],
+      iconAnchor: [8, 8]
     });
+    
+    // Add new marker
+    markerRef.current = L.marker([lat, lng], { icon: customIcon })
+      .addTo(mapInstanceRef.current);
+    
+    // Add circle
+    circleRef.current = L.circle([lat, lng], {
+      radius: zoomRange * 1609.34,
+      fillColor: '#1976d2',
+      fillOpacity: 0.1,
+      color: '#1976d2',
+      weight: 2,
+      dashArray: '5, 5'
+    }).addTo(mapInstanceRef.current);
+    
+    // Center map
+    let targetZoom;
+    if (zoomRange <= 10) targetZoom = 10;
+    else if (zoomRange <= 25) targetZoom = 9;
+    else if (zoomRange <= 50) targetZoom = 8;
+    else if (zoomRange <= 100) targetZoom = 7;
+    else if (zoomRange <= 150) targetZoom = 6;
+    else targetZoom = 5;
+    
+    mapInstanceRef.current.setView([lat, lng], targetZoom, { animate: true });
   };
   
   // Update circle when zoom range changes
@@ -231,40 +216,79 @@ const MapCenterModal = ({ open, onClose }) => {
     }
   }, [zoomRange]);
   
-  // Update marker when coordinates are loaded
+  // Update marker when location is set
   useEffect(() => {
-    if (mapInitialized && centerLat && centerLng && isValidLatLng()) {
+    if (mapInitialized && centerLat && centerLng) {
       updateMarker(parseFloat(centerLat), parseFloat(centerLng));
     }
   }, [mapInitialized, centerLat, centerLng]);
   
-  const handleSet = () => {
+  const handleSetTemp = () => {
     if (!centerLat || !centerLng) {
       setMessage({ type: 'error', text: 'Please click on the map to set a location' });
       return;
     }
-    
+
+    setLoading(true);
     const locationData = {
       lat: parseFloat(centerLat),
       lng: parseFloat(centerLng),
       zoomRange: zoomRange
     };
 
-    // Set location for current session
-    setSessionLocation(locationData);
-    
-    setMessage({ type: 'success', text: 'Location set for this session!' });
-    
-    // Close modal after short delay
+    onSetLocation(locationData);
+    setMessage({ type: 'success', text: 'Map Center set for Session (temporary)!' });
+    setLoading(false);
+
     setTimeout(() => {
       onClose();
     }, 500);
   };
   
-  const isValidLatLng = () => {
-    const lat = parseFloat(centerLat);
-    const lng = parseFloat(centerLng);
-    return !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  const handleSavePerm = async () => {
+    if (!centerLat || !centerLng) {
+      setMessage({ type: 'error', text: 'Please click on the map to set a location' });
+      return;
+    }
+
+    if (!user) {
+      setMessage({ type: 'error', text: 'Please log in to save Cloud Default' });
+      return;
+    }
+
+    setLoading(true);
+    const locationData = {
+      lat: parseFloat(centerLat),
+      lng: parseFloat(centerLng),
+      zoomRange: zoomRange
+    };
+
+    try {
+      // Get FRESH Firebase auth token (force refresh to avoid expired tokens)
+      // Import firebase auth to get fresh token
+      const { getAuth } = await import('firebase/auth');
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        throw new Error('User not logged in');
+      }
+
+      // Force refresh token to ensure it's not expired
+      const firebaseToken = await currentUser.getIdToken(true);
+
+      // Call saveToCloudDefault with Firebase token
+      await onSaveLocation(locationData, firebaseToken);
+      setMessage({ type: 'success', text: 'Location saved as Cloud Default!' });
+
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (error) {
+      console.error('[MapCenterModal] Error saving Cloud Default:', error);
+      setMessage({ type: 'error', text: `Failed to save: ${error.message}` });
+    }
+    setLoading(false);
   };
   
   return (
@@ -273,133 +297,243 @@ const MapCenterModal = ({ open, onClose }) => {
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      data-testid="map-center-modal"
       PaperProps={{
         sx: {
-          height: '90vh',
+          height: isMobile ? '95vh' : '90vh',
           maxHeight: '900px'
         }
       }}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <DialogTitle sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        borderBottom: 1,
+        borderColor: 'divider'
+      }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <MyLocationIcon color="primary" />
-          <Typography variant="h6">Set Location</Typography>
+          <LocationOnIcon color="primary" />
+          <Typography variant="h6">Map Center Settings</Typography>
         </Box>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
       
-      <DialogContent>
+      <DialogContent sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Click anywhere on the map to set your center point
+        </Typography>
+
+        {/* Phase 1 & 2: Alert messages explaining Session vs Cloud Default */}
         {user ? (
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
               Welcome {user.displayName || user.email}!
             </Typography>
             <Typography variant="body2">
-              This location will be used for this session only.
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 0.5 }}>
-              To save as your default location, go to <strong>User Settings → Location Preferences</strong>
+              You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent across devices).
             </Typography>
           </Alert>
         ) : (
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ mb: 0.5 }}>
-              This location will be saved for this session only.
+              Set your map center for this <strong>Session</strong> (temporary only).
             </Typography>
             <Typography variant="body2">
-              <strong>Want to save permanently?</strong> Please log in to save your location preferences.
+              <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
             </Typography>
           </Alert>
         )}
-        
+
         {message && (
-          <Alert severity={message.type} sx={{ mb: 2 }} onClose={() => setMessage(null)}>
+          <Alert
+            severity={message.type}
+            sx={{ mb: 2 }}
+            onClose={() => setMessage(null)}
+          >
             {message.text}
           </Alert>
         )}
         
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Click anywhere on the map to set your center point
-        </Typography>
-        
-        <Box
-          ref={mapRef}
-          sx={{
-            width: '100%',
-            height: '400px',
-            minHeight: '400px',
-            borderRadius: 1,
-            border: '2px solid',
-            borderColor: 'primary.main',
-            cursor: 'crosshair',
-            mb: 2,
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f5f5f5',
-            '& .leaflet-container': {
-              height: '100% !important',
-              width: '100% !important',
-              position: 'relative !important',
-            }
-          }}
-        >
-          {mapLoading && (
-            <Box sx={{ position: 'absolute', zIndex: 1000 }}>
-              <CircularProgress />
-              <Typography variant="body2" sx={{ mt: 1 }}>Loading map...</Typography>
-            </Box>
+        {/* Action Buttons - Phase 1: Auth-aware layout */}
+        <Box sx={{
+          display: 'flex',
+          gap: 1.5,
+          mb: 2,
+          justifyContent: 'center'
+        }}>
+          {/* Button 1: Set Map Center (Session) - Always visible */}
+          <Button
+            variant="outlined"
+            onClick={handleSetTemp}
+            disabled={loading || !centerLat || !centerLng}
+            startIcon={<MyLocationIcon sx={{ fontSize: 18 }} />}
+            size="small"
+            sx={{
+              px: 2,
+              py: 0.75,
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: '160px'
+            }}
+          >
+            Set Map Center (Session)
+          </Button>
+
+          {/* Button 2: Auth users see "Save as Default", Anonymous see "Sign Up" */}
+          {user ? (
+            <Tooltip
+              title="Save to your Cloud Default (permanent across devices)"
+              arrow
+            >
+              <span>
+                <Button
+                  variant="contained"
+                  onClick={handleSavePerm}
+                  disabled={loading || !centerLat || !centerLng}
+                  startIcon={<LocationOnIcon sx={{ fontSize: 18 }} />}
+                  size="small"
+                  sx={{
+                    px: 2,
+                    py: 0.75,
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    minWidth: '180px'
+                  }}
+                >
+                  Save as Default
+                </Button>
+              </span>
+            </Tooltip>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  window.location.href = '/auth/login';
+                }}
+                size="small"
+                sx={{
+                  px: 2,
+                  py: 0.75,
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  minWidth: '100px'
+                }}
+              >
+                Log In
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  window.location.href = '/auth/signup';
+                }}
+                size="small"
+                sx={{
+                  px: 2,
+                  py: 0.75,
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  minWidth: '100px'
+                }}
+              >
+                Sign Up
+              </Button>
+            </>
           )}
         </Box>
         
-        {centerLat && centerLng && isValidLatLng() && (
-          <Typography variant="caption" color="primary" sx={{ display: 'block', mb: 2 }}>
-            📍 Center: {parseFloat(centerLat).toFixed(5)}, {parseFloat(centerLng).toFixed(5)} • {zoomRange} mile radius
-          </Typography>
-        )}
-        
-        <Box sx={{ px: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Event Search Radius: {zoomRange} miles
+        {/* Zoom Range Slider */}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" gutterBottom>
+            Search Range: {zoomRange} miles
           </Typography>
           <Slider
             value={zoomRange}
             onChange={(e, newValue) => setZoomRange(newValue)}
-            min={1}
-            max={250}
+            min={5}
+            max={200}
+            step={5}
             marks={[
-              { value: 10, label: '10mi' },
+              { value: 5, label: '5mi' },
               { value: 50, label: '50mi' },
               { value: 100, label: '100mi' },
-              { value: 250, label: '250mi' },
+              { value: 200, label: '200mi' }
             ]}
             valueLabelDisplay="auto"
           />
         </Box>
-      </DialogContent>
-      
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          variant="contained" 
-          onClick={handleSet}
-          disabled={!isValidLatLng()}
+        
+        {/* Map Container */}
+        <Box
+          ref={mapRef}
+          sx={{
+            width: '100%',
+            height: isMobile ? '350px' : '400px',
+            borderRadius: 1,
+            border: '2px solid',
+            borderColor: 'primary.main',
+            cursor: 'crosshair',
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: '#f5f5f5',
+            '& .leaflet-container': {
+              height: '100% !important',
+              width: '100% !important',
+            }
+          }}
         >
-          Set Location
-        </Button>
-      </DialogActions>
+          {!mapInitialized && (
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              height: '100%'
+            }}>
+              <CircularProgress />
+            </Box>
+          )}
+        </Box>
+        
+        {/* Coordinates Display */}
+        {centerLat && centerLng && (
+          <Box sx={{ 
+            mt: 2, 
+            p: 1, 
+            bgcolor: 'grey.50',
+            borderRadius: 1
+          }}>
+            <Typography variant="caption" color="text.secondary">
+              Selected Location: {parseFloat(centerLat).toFixed(4)}°, {parseFloat(centerLng).toFixed(4)}°
+            </Typography>
+          </Box>
+        )}
+      </DialogContent>
     </Dialog>
   );
 };
 
+export default MapCenterModal;
+
 MapCenterModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  onSetLocation: PropTypes.func.isRequired,
+  onSaveLocation: PropTypes.func.isRequired,
+  initialLocation: PropTypes.shape({
+    lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    zoomRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }),
+  savedLocation: PropTypes.oneOfType([
+    PropTypes.shape({
+      lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      zoomRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    }),
+    PropTypes.oneOf([null])
+  ]),
 };
-
-export default MapCenterModal;

@@ -4,6 +4,33 @@
 import { useState, useEffect } from 'react';
 
 /**
+ * Calculate distance between two coordinates using Haversine formula
+ * @param {number} lat1 - Latitude of point 1
+ * @param {number} lon1 - Longitude of point 1
+ * @param {number} lat2 - Latitude of point 2
+ * @param {number} lon2 - Longitude of point 2
+ * @returns {object} - { km: number, mi: number }
+ */
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R_KM = 6371; // Earth's radius in kilometers
+  const R_MI = 3959; // Earth's radius in miles
+
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return {
+    km: R_KM * c,
+    mi: R_MI * c
+  };
+};
+
+/**
  * Consolidated health check hook for all services
  * Returns status for 9 services in 3x3 grid layout
  */
@@ -19,10 +46,10 @@ export const useServiceHealth = () => {
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
     geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
 
-    // Row 3: Azure Functions (Prep)
+    // Row 3: Azure Functions & Google Geo API
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afEvents: { name: 'AF Events', status: 'disabled', detail: 'Not configured', accuracy: null },
-    afVenues: { name: 'AF Venues', status: 'disabled', detail: 'Not configured', accuracy: null },
+    googleGeoAPI: { name: 'Google Geo', status: 'checking', detail: '', accuracy: null },
+    cloudflare: { name: 'Cloudflare', status: 'checking', detail: '', accuracy: null },
   });
 
   useEffect(() => {
@@ -33,7 +60,9 @@ export const useServiceHealth = () => {
     checkMongoDB();
     checkGoogleAnalytics();
     checkGeoAPI();
+    checkGoogleGeoAPI();
     checkAzureFunctions();
+    checkCloudflare();
 
     // Re-check every 30 seconds
     const interval = setInterval(() => {
@@ -43,11 +72,49 @@ export const useServiceHealth = () => {
       checkMongoDB();
       checkGoogleAnalytics();
       checkGeoAPI();
+      checkGoogleGeoAPI();
       checkAzureFunctions();
+      checkCloudflare();
     }, 30000);
 
     return () => clearInterval(interval);
   }, []);
+
+  // Calculate distance between Geo API and Google Geo API when both have coordinates
+  useEffect(() => {
+    const geoAPICoords = services.geoAPI;
+    const googleGeoCoords = services.googleGeoAPI;
+
+    // GUARD: Prevent infinite loop - only calculate if distance doesn't exist yet
+    if (geoAPICoords.distanceToGoogle || googleGeoCoords.distanceToIpapi) {
+      return;
+    }
+
+    // Only calculate if both services have coordinates
+    if (geoAPICoords.latitude && geoAPICoords.longitude &&
+        googleGeoCoords.latitude && googleGeoCoords.longitude) {
+
+      const distance = calculateDistance(
+        geoAPICoords.latitude,
+        geoAPICoords.longitude,
+        googleGeoCoords.latitude,
+        googleGeoCoords.longitude
+      );
+
+      // Update both services with distance information (ONE TIME ONLY)
+      setServices(prev => ({
+        ...prev,
+        geoAPI: {
+          ...prev.geoAPI,
+          distanceToGoogle: distance
+        },
+        googleGeoAPI: {
+          ...prev.googleGeoAPI,
+          distanceToIpapi: distance
+        }
+      }));
+    }
+  }, [services.geoAPI.latitude, services.geoAPI.longitude, services.googleGeoAPI.latitude, services.googleGeoAPI.longitude, services.geoAPI.distanceToGoogle, services.googleGeoAPI.distanceToIpapi]);
 
   const checkExpressBackend = async () => {
     const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
@@ -162,9 +229,26 @@ export const useServiceHealth = () => {
   };
 
   const checkMongoDB = async () => {
-    const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
+    // MongoDB health check via Azure Functions (not Express BE)
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    const isLocal = afUrl.includes('localhost');
+
+    // In production (HTTPS), skip localhost checks (browser will block them)
+    if (isLocal && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      setServices(prev => ({
+        ...prev,
+        mongodb: {
+          name: 'MongoDB',
+          status: 'disabled',
+          detail: 'Local AF not accessible from HTTPS',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
     try {
-      const response = await fetch(`${backendUrl}/api/health/mongodb`, {
+      const response = await fetch(`${afUrl}/api/health/mongodb`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       });
@@ -188,8 +272,8 @@ export const useServiceHealth = () => {
         ...prev,
         mongodb: {
           name: 'MongoDB',
-          status: 'error',
-          detail: 'Connection failed',
+          status: isLocal ? 'disabled' : 'error',
+          detail: isLocal ? 'AF not running (start with: func start)' : 'Connection failed',
           accuracy: null
         }
       }));
@@ -225,26 +309,47 @@ export const useServiceHealth = () => {
   };
 
   const checkGeoAPI = async () => {
-    const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
     try {
-      const response = await fetch(`${backendUrl}/api/firebase/geo/ip`, {
+      const response = await fetch(`${afUrl}/api/geo/ip`, {
         signal: AbortSignal.timeout(5000)
       });
 
       if (response.ok) {
         const data = await response.json();
-        // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
-        const accuracy = 5000; // meters - city level approximation
 
-        setServices(prev => ({
-          ...prev,
-          geoAPI: {
-            name: 'Geo API',
-            status: 'healthy',
-            detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
-            accuracy: accuracy // meters
-          }
-        }));
+        // Extract actual location coordinates (not fallback)
+        const latitude = data.latitude;
+        const longitude = data.longitude;
+
+        // Only process if we have actual coordinates (not fallback)
+        if (latitude && longitude) {
+          // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
+          const accuracy = 5000; // meters - city level approximation
+
+          setServices(prev => ({
+            ...prev,
+            geoAPI: {
+              name: 'Geo API',
+              status: 'healthy',
+              detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
+              accuracy: accuracy, // meters
+              latitude: latitude,
+              longitude: longitude,
+              city: data.city || null,
+              region: data.region || null,
+              region_code: data.region_code || null,
+              postal: data.postal || null,
+              country: data.country || null,
+              country_name: data.country_name || null,
+              country_code: data.country_code || null,
+              timezone: data.timezone || null,
+              ip: data.ip || null
+            }
+          }));
+        } else {
+          throw new Error('No actual coordinates returned');
+        }
       } else {
         throw new Error('Geo API failed');
       }
@@ -255,29 +360,106 @@ export const useServiceHealth = () => {
           name: 'Geo API',
           status: 'error',
           detail: 'Unavailable',
+          accuracy: null,
+          latitude: null,
+          longitude: null
+        }
+      }));
+    }
+  };
+
+  const checkGoogleGeoAPI = async () => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
+
+    if (!apiKey) {
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'disabled',
+          detail: 'API key not configured',
           accuracy: null
+        }
+      }));
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ considerIp: true }),
+          signal: AbortSignal.timeout(5000)
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Google returns { location: { lat, lng }, accuracy }
+        const latitude = data.location?.lat;
+        const longitude = data.location?.lng;
+        const accuracy = data.accuracy || null; // in meters
+
+        if (latitude && longitude) {
+          setServices(prev => ({
+            ...prev,
+            googleGeoAPI: {
+              name: 'Google Geo',
+              status: 'healthy',
+              detail: `Google (±${accuracy ? (accuracy / 1000).toFixed(1) : '?'}km)`,
+              accuracy: accuracy,
+              latitude: latitude,
+              longitude: longitude
+            }
+          }));
+        } else {
+          throw new Error('No coordinates in response');
+        }
+      } else {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'error',
+          detail: error.message.includes('403') ? 'Referrer restriction' :
+                  error.message.includes('400') ? 'Invalid payload' : 'Unavailable',
+          accuracy: null,
+          latitude: null,
+          longitude: null
         }
       }));
     }
   };
 
   const checkAzureFunctions = async () => {
-    // Determine AF URL: localhost:7071 for dev, env variable for production
+    // Check if Azure Functions monitoring is enabled
     const afEnabled = process.env.NEXT_PUBLIC_AF_ENABLED === 'true';
-    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL;
 
-    // Always try to check if on localhost (for dev)
-    const isLocal = afUrl.includes('localhost');
+    // If not enabled and no URL configured, skip all AF checks
+    if (!afEnabled && !afUrl) {
+      return;
+    }
 
-    if (!afEnabled && !isLocal) {
-      // Keep as disabled for production if not enabled
+    // Default to localhost only in development (when no URL is set but we want to try local)
+    const effectiveUrl = afUrl || 'http://localhost:7071';
+    const isLocal = effectiveUrl.includes('localhost');
+
+    // In production (HTTPS), skip localhost checks (browser will block them)
+    if (isLocal && typeof window !== 'undefined' && window.location.protocol === 'https:') {
       return;
     }
 
     // Check AF Health endpoint
     try {
       const start = Date.now();
-      const response = await fetch(`${afUrl}/api/health`, {
+      const response = await fetch(`${effectiveUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       });
@@ -290,14 +472,12 @@ export const useServiceHealth = () => {
           azureFunctions: {
             name: 'AF Health',
             status: 'healthy',
-            detail: `${afUrl} (${duration}ms)`,
+            detail: `${effectiveUrl} (${duration}ms)`,
             accuracy: null
           }
         }));
 
-        // Now check Events and Venues endpoints
-        checkAFEvents(afUrl);
-        checkAFVenues(afUrl);
+        // AF Events and Venues checks removed - keeping as grey dots
       } else {
         throw new Error('AF health check failed');
       }
@@ -309,83 +489,50 @@ export const useServiceHealth = () => {
           status: isLocal ? 'disabled' : 'error',
           detail: isLocal ? 'Not running (start with: func start)' : 'Unreachable',
           accuracy: null
-        },
-        afEvents: {
-          name: 'AF Events',
-          status: 'disabled',
-          detail: 'Not available',
-          accuracy: null
-        },
-        afVenues: {
-          name: 'AF Venues',
-          status: 'disabled',
-          detail: 'Not available',
-          accuracy: null
         }
+        // AF Events and Venues remain as disabled (grey) - no checks performed
       }));
     }
   };
 
-  const checkAFEvents = async (afUrl) => {
+  // checkAFEvents and checkAFVenues removed - AF Events/Venues kept as disabled grey dots
+
+  const checkCloudflare = async () => {
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
     try {
-      const response = await fetch(`${afUrl}/api/events?appId=1&limit=1`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000),
+      const response = await fetch(`${afUrl}/api/cloudflare/info`, {
+        signal: AbortSignal.timeout(5000)
       });
 
       if (response.ok) {
+        const responseData = await response.json();
+        // Azure Functions wraps response in { success, data }
+        const data = responseData.data || responseData;
+        const ip = data.ip || 'Unknown';
+        const country = data.country || 'Unknown';
+
         setServices(prev => ({
           ...prev,
-          afEvents: {
-            name: 'AF Events',
+          cloudflare: {
+            name: 'Cloudflare',
             status: 'healthy',
-            detail: 'API Ready',
-            accuracy: null
+            detail: `${ip} (${country})`,
+            accuracy: null,
+            ip: ip,
+            country: country,
+            ray: data.ray || null
           }
         }));
       } else {
-        throw new Error('AF events not available');
+        throw new Error('Cloudflare API failed');
       }
     } catch (error) {
       setServices(prev => ({
         ...prev,
-        afEvents: {
-          name: 'AF Events',
-          status: 'disabled',
-          detail: 'Coming soon',
-          accuracy: null
-        }
-      }));
-    }
-  };
-
-  const checkAFVenues = async (afUrl) => {
-    try {
-      const response = await fetch(`${afUrl}/api/venues?appId=1&limit=1`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (response.ok) {
-        setServices(prev => ({
-          ...prev,
-          afVenues: {
-            name: 'AF Venues',
-            status: 'healthy',
-            detail: 'API Ready',
-            accuracy: null
-          }
-        }));
-      } else {
-        throw new Error('AF venues not available');
-      }
-    } catch (error) {
-      setServices(prev => ({
-        ...prev,
-        afVenues: {
-          name: 'AF Venues',
-          status: 'disabled',
-          detail: 'Coming soon',
+        cloudflare: {
+          name: 'Cloudflare',
+          status: 'error',
+          detail: 'Unavailable',
           accuracy: null
         }
       }));

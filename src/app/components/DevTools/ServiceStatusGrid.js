@@ -50,7 +50,44 @@ const ServiceStatusGrid = () => {
    */
   const getTooltipContent = (service) => {
     if (service.name === 'Geo API' && service.accuracy !== null) {
-      return `${service.name}\nProvider: ipapi.co\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
+      // Build comprehensive location info from ipapi.co data
+      const parts = [];
+
+      if (service.city) parts.push(service.city);
+      if (service.region_code) parts.push(service.region_code);
+      if (service.postal) parts.push(service.postal);
+
+      const locationLine = parts.length > 0 ? parts.join(', ') : 'Location data unavailable';
+
+      const coords = service.latitude && service.longitude
+        ? `${service.latitude.toFixed(4)}, ${service.longitude.toFixed(4)}`
+        : 'No coordinates';
+
+      const countryInfo = service.country_name && service.country_code
+        ? `${service.country_name} (${service.country_code})`
+        : service.country_name || service.country_code || '';
+
+      const timezoneInfo = service.timezone ? `\nTimezone: ${service.timezone}` : '';
+
+      return `${service.name}\nProvider: ipapi.co\n${locationLine}\n${countryInfo}${timezoneInfo}\nCoords: ${coords}\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
+    }
+
+    // Google Geolocation API tooltip
+    if (service.name === 'Google Geo' && service.accuracy !== null) {
+      const coords = service.latitude && service.longitude
+        ? `${service.latitude.toFixed(4)}, ${service.longitude.toFixed(4)}`
+        : 'No coordinates';
+
+      return `${service.name}\nProvider: Google Geolocation API\nCoords: ${coords}\nAccuracy: ±${(service.accuracy / 1000).toFixed(1)}km\nStatus: ✓ ${service.status}`;
+    }
+
+    // Google Reverse Geocoding tooltip
+    if (service.name === 'Google Reverse' && service.fullAddress) {
+      const coords = service.latitude && service.longitude
+        ? `${service.latitude.toFixed(4)}, ${service.longitude.toFixed(4)}`
+        : 'No coordinates';
+
+      return `${service.name}\nProvider: Google Geocoding API\nAddress: ${service.fullAddress}\nCoords: ${coords}\nStatus: ✓ ${service.status}`;
     }
 
     const statusIcon = service.status === 'healthy' ? '✓' :
@@ -67,11 +104,14 @@ const ServiceStatusGrid = () => {
 
   /**
    * Grid layout: 3 rows × 3 columns
+   * Row 1: Express BE, Firebase, Mapbox
+   * Row 2: MongoDB, Google GA, Geo API (ipapi.co)
+   * Row 3: AF Health, Google Geo (Geolocation), Google Reverse (Geocoding)
    */
   const gridRows = [
     [services.expressBackend, services.firebase, services.mapbox],
     [services.mongodb, services.googleAnalytics, services.geoAPI],
-    [services.azureFunctions, services.afEvents, services.afVenues],
+    [services.azureFunctions, services.googleGeoAPI, services.googleReverseGeo],
   ];
 
   return (

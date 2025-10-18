@@ -2,8 +2,11 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { Container, Typography, Button, Box } from '@mui/material';
+import { Container, Typography, Button, Box, Card, CardContent } from '@mui/material';
 import Image from 'next/image';
+import HomeIcon from '@mui/icons-material/Home';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import LoginIcon from '@mui/icons-material/Login';
 
 const NotFoundPage = () => {
   useEffect(() => {
@@ -12,34 +15,112 @@ const NotFoundPage = () => {
       window.gtag('event', 'page_view', {
         page_path: '/404',
         page_title: '404 Not Found',
-        referrer: document.referrer || 'direct', // Capture referrer or mark as direct if none
+        referrer: document.referrer || 'direct',
       });
     }
   }, []);
 
   return (
-    <Container style={{ textAlign: 'center', marginTop: '50px' }}>
+    <Container maxWidth="md" style={{ textAlign: 'center', marginTop: '50px', marginBottom: '50px' }}>
+      {/* Hero Image */}
       <Image
-        src="/404-tango.webp"
-        alt="Tango 404 Image"
-        width={600}
-        height={400}
+        src="/404-tangotiempo.png"
+        alt="Tango Tiempo 404"
+        width={800}
+        height={533}
         priority
-        style={{ maxWidth: '100%', height: 'auto', marginBottom: '20px' }}
+        style={{ maxWidth: '100%', height: 'auto', marginBottom: '30px' }}
       />
-      <Typography variant="h3" component="h1" gutterBottom>
-        Oops! Looks like we boleo-ed against the Line of Dance.
+
+      {/* Subtext */}
+      <Typography variant="h6" style={{ margin: '20px 0 40px 0', color: 'text.secondary' }}>
+        The page you're looking for doesn't exist. Let us help you get back on track!
       </Typography>
-      <Typography variant="h6" style={{ margin: '20px 0' }}>
-        The page you are looking for doesn&lsquo;t exist. We will go fix this soon! Let us help you get back on track!
-      </Typography>
-      <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-        <Link href="/calendar" passHref>
-          <Button variant="contained" color="primary">
-            Go to Calendar
-          </Button>
-        </Link>
+
+      {/* Links Section */}
+      <Box display="flex" flexDirection="column" alignItems="center" gap={3} sx={{ mb: 4 }}>
+
+        {/* TangoTiempo.com */}
+        <Card sx={{ width: '100%', maxWidth: 500 }}>
+          <CardContent>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <HomeIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+              TangoTiempo.com
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              The United States' premiere Argentine Tango calendar. Discover milongas, festivals, and workshops across the country.
+            </Typography>
+            <Link href="https://tangotiempo.com" passHref>
+              <Button variant="contained" color="primary" fullWidth>
+                Visit TangoTiempo.com
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* BostonTangoCalendar.com */}
+        <Card sx={{ width: '100%', maxWidth: 500 }}>
+          <CardContent>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <CalendarMonthIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+              BostonTangoCalendar.com
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              Your dedicated source for all Argentine Tango events in the Boston area. Find local milongas, classes, and special events.
+            </Typography>
+            <Link href="https://bostontangocalendar.com" passHref>
+              <Button variant="contained" color="secondary" fullWidth>
+                Visit BostonTangoCalendar.com
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* TangoTiempo.com Login */}
+        <Card sx={{ width: '100%', maxWidth: 500 }}>
+          <CardContent>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <LoginIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+              TangoTiempo.com Login
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              Access your account to manage events, view your profile, and connect with the tango community.
+            </Typography>
+            <Link href="https://tangotiempo.com/auth/signin" passHref>
+              <Button variant="outlined" color="primary" fullWidth>
+                Login to TangoTiempo
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* BostonTangoCalendar.com Login */}
+        <Card sx={{ width: '100%', maxWidth: 500 }}>
+          <CardContent>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <LoginIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+              BostonTangoCalendar.com Login
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              Sign in to your Boston Tango Calendar account to manage your local event listings and preferences.
+            </Typography>
+            <Link href="https://bostontangocalendar.com/auth/signin" passHref>
+              <Button variant="outlined" color="secondary" fullWidth>
+                Login to BostonTangoCalendar
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
       </Box>
+
+      {/* Fallback Calendar Link */}
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+        Or continue to{' '}
+        <Link href="/calendar" style={{ textDecoration: 'underline' }}>
+          our calendar
+        </Link>
+      </Typography>
     </Container>
   );
 };

@@ -24,7 +24,7 @@ This document explains how the frontend monitors Azure Functions health status u
 
 ### Production
 - **Base URL**: Set via `NEXT_PUBLIC_AF_URL` environment variable
-- **Example**: `https://CalendarBEAF-PROD.azurewebsites.net`
+- **Production URL**: `https://calendarbeaf-prod.azurewebsites.net`
 
 ---
 
@@ -39,11 +39,23 @@ NEXT_PUBLIC_AF_ENABLED=false  # Set to true when AF is running
 NEXT_PUBLIC_AF_URL=http://localhost:7071  # Optional, defaults to this
 ```
 
-**.env.production** (Production):
+**Vercel Production** (Add via Vercel Dashboard):
 ```env
 NEXT_PUBLIC_AF_ENABLED=true
-NEXT_PUBLIC_AF_URL=https://CalendarBEAF-PROD.azurewebsites.net
+NEXT_PUBLIC_AF_URL=https://calendarbeaf-prod.azurewebsites.net
 ```
+
+### Adding Environment Variables to Vercel
+
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Select your project: **tangotiempo.com**
+3. Go to **Settings** → **Environment Variables**
+4. Add two variables:
+   - `NEXT_PUBLIC_AF_ENABLED` = `true`
+   - `NEXT_PUBLIC_AF_URL` = `https://calendarbeaf-prod.azurewebsites.net`
+5. Select environment: **Production** (and optionally Preview)
+6. Click **Save**
+7. **Redeploy** your production site for changes to take effect
 
 ---
 
