@@ -44,7 +44,7 @@ export const useServiceHealth = () => {
     // Row 2: Data & Tracking
     mongodb: { name: 'MongoDB', status: 'checking', detail: '', accuracy: null },
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
-    geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
+    geoAPI: { name: 'Geo API', status: 'disabled', detail: 'Manual check only (rate limited)', accuracy: null },
 
     // Row 3: Azure Functions & Google Geo API
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
@@ -53,18 +53,18 @@ export const useServiceHealth = () => {
   });
 
   useEffect(() => {
-    // Check all services
+    // Check all services (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
     checkExpressBackend();
     checkFirebase();
     checkMapbox();
     checkMongoDB();
     checkGoogleAnalytics();
-    checkGeoAPI();
+    // checkGeoAPI(); // REMOVED - Only check manually in GeoComparisonDashboard (ipapi.co 1K/month limit)
     checkGoogleGeoAPI();
     checkAzureFunctions();
     checkCloudflare();
 
-    // Re-check every 30 seconds (TIEMPO-319: Removed checkGeoAPI to prevent rate limiting)
+    // Re-check every 30 seconds
     const interval = setInterval(() => {
       checkExpressBackend();
       checkFirebase();
