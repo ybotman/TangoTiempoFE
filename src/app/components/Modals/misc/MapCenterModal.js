@@ -407,23 +407,42 @@ const MapCenterModal = ({
               </span>
             </Tooltip>
           ) : (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => {
-                window.location.href = '/login';
-              }}
-              size="small"
-              sx={{
-                px: 2,
-                py: 0.75,
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                minWidth: '100px'
-              }}
-            >
-              Sign Up!
-            </Button>
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  window.location.href = '/auth/login';
+                }}
+                size="small"
+                sx={{
+                  px: 2,
+                  py: 0.75,
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  minWidth: '100px'
+                }}
+              >
+                Log In
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  window.location.href = '/auth/signup';
+                }}
+                size="small"
+                sx={{
+                  px: 2,
+                  py: 0.75,
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  minWidth: '100px'
+                }}
+              >
+                Sign Up
+              </Button>
+            </>
           )}
         </Box>
         

@@ -6,7 +6,7 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
-import ServiceStatusGrid from '@/components/DevTools/ServiceStatusGrid';
+import ServiceStatusIcon from '@/components/DevTools/ServiceStatusIcon';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
@@ -80,8 +80,8 @@ const SiteHeader = () => {
         Gift an Empanada
       </a>
 
-      {/* Service Status Grid - 3x3 monitoring grid */}
-      <ServiceStatusGrid />
+      {/* Service Status Icon - Opens modal with service health details */}
+      <ServiceStatusIcon />
 
       {/* Version in top-right */}
       <div

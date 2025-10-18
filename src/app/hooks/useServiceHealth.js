@@ -4,6 +4,33 @@
 import { useState, useEffect } from 'react';
 
 /**
+ * Calculate distance between two coordinates using Haversine formula
+ * @param {number} lat1 - Latitude of point 1
+ * @param {number} lon1 - Longitude of point 1
+ * @param {number} lat2 - Latitude of point 2
+ * @param {number} lon2 - Longitude of point 2
+ * @returns {object} - { km: number, mi: number }
+ */
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R_KM = 6371; // Earth's radius in kilometers
+  const R_MI = 3959; // Earth's radius in miles
+
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return {
+    km: R_KM * c,
+    mi: R_MI * c
+  };
+};
+
+/**
  * Consolidated health check hook for all services
  * Returns status for 9 services in 3x3 grid layout
  */
@@ -19,10 +46,10 @@ export const useServiceHealth = () => {
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
     geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
 
-    // Row 3: Azure Functions & Google Geo APIs
+    // Row 3: Azure Functions & Google Geo API
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
     googleGeoAPI: { name: 'Google Geo', status: 'checking', detail: '', accuracy: null },
-    googleReverseGeo: { name: 'Google Reverse', status: 'checking', detail: '', accuracy: null },
+    cloudflare: { name: 'Cloudflare', status: 'checking', detail: '', accuracy: null },
   });
 
   useEffect(() => {
@@ -34,8 +61,8 @@ export const useServiceHealth = () => {
     checkGoogleAnalytics();
     checkGeoAPI();
     checkGoogleGeoAPI();
-    checkGoogleReverseGeo();
     checkAzureFunctions();
+    checkCloudflare();
 
     // Re-check every 30 seconds
     const interval = setInterval(() => {
@@ -46,12 +73,45 @@ export const useServiceHealth = () => {
       checkGoogleAnalytics();
       checkGeoAPI();
       checkGoogleGeoAPI();
-      checkGoogleReverseGeo();
       checkAzureFunctions();
+      checkCloudflare();
     }, 30000);
 
     return () => clearInterval(interval);
   }, []);
+
+  // Calculate distance between Geo API and Google Geo API when both have coordinates
+  useEffect(() => {
+    const geoAPICoords = services.geoAPI;
+    const googleGeoCoords = services.googleGeoAPI;
+
+    // Only calculate if both services have coordinates
+    if (geoAPICoords.latitude && geoAPICoords.longitude &&
+        googleGeoCoords.latitude && googleGeoCoords.longitude) {
+
+      const distance = calculateDistance(
+        geoAPICoords.latitude,
+        geoAPICoords.longitude,
+        googleGeoCoords.latitude,
+        googleGeoCoords.longitude
+      );
+
+      // Update both services with distance information
+      setServices(prev => ({
+        ...prev,
+        geoAPI: {
+          ...prev.geoAPI,
+          detail: `ipapi.co (±${(prev.geoAPI.accuracy / 1000).toFixed(1)}km) | Δ${distance.km.toFixed(1)}km / ${distance.mi.toFixed(1)}mi`,
+          distanceToGoogle: distance
+        },
+        googleGeoAPI: {
+          ...prev.googleGeoAPI,
+          detail: `Google (±${prev.googleGeoAPI.accuracy ? (prev.googleGeoAPI.accuracy / 1000).toFixed(1) : '?'}km) | Δ${distance.km.toFixed(1)}km / ${distance.mi.toFixed(1)}mi`,
+          distanceToIpapi: distance
+        }
+      }));
+    }
+  }, [services.geoAPI.latitude, services.geoAPI.longitude, services.googleGeoAPI.latitude, services.googleGeoAPI.longitude]);
 
   const checkExpressBackend = async () => {
     const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
@@ -374,92 +434,6 @@ export const useServiceHealth = () => {
     }
   };
 
-  const checkGoogleReverseGeo = async () => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
-
-    if (!apiKey) {
-      setServices(prev => ({
-        ...prev,
-        googleReverseGeo: {
-          name: 'Google Reverse',
-          status: 'disabled',
-          detail: 'API key not configured',
-          accuracy: null
-        }
-      }));
-      return;
-    }
-
-    // Use coordinates from Google Geo if available, otherwise try to get from ipapi
-    setServices(prev => {
-      const googleGeo = prev.googleGeoAPI;
-      const geoAPI = prev.geoAPI;
-
-      const lat = googleGeo?.latitude || geoAPI?.latitude;
-      const lng = googleGeo?.longitude || geoAPI?.longitude;
-
-      if (!lat || !lng) {
-        return {
-          ...prev,
-          googleReverseGeo: {
-            name: 'Google Reverse',
-            status: 'error',
-            detail: 'No coordinates available',
-            accuracy: null
-          }
-        };
-      }
-
-      // Call reverse geocoding API
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`, {
-        signal: AbortSignal.timeout(5000)
-      })
-        .then(async (response) => {
-          if (response.ok) {
-            const data = await response.json();
-
-            if (data.status === 'OK' && data.results && data.results.length > 0) {
-              const address = data.results[0].formatted_address;
-              // Get short address (first part before first comma)
-              const shortAddress = address.split(',')[0];
-
-              setServices(prev => ({
-                ...prev,
-                googleReverseGeo: {
-                  name: 'Google Reverse',
-                  status: 'healthy',
-                  detail: shortAddress,
-                  accuracy: null,
-                  fullAddress: address,
-                  latitude: lat,
-                  longitude: lng
-                }
-              }));
-            } else {
-              throw new Error(`Geocoding failed: ${data.status}`);
-            }
-          } else {
-            const errorText = await response.text();
-            throw new Error(`API Error: ${response.status}`);
-          }
-        })
-        .catch((error) => {
-          setServices(prev => ({
-            ...prev,
-            googleReverseGeo: {
-              name: 'Google Reverse',
-              status: 'error',
-              detail: error.message.includes('403') ? 'Referrer restriction' : 'Unavailable',
-              accuracy: null
-            }
-          }));
-        });
-
-      // Return current state while async fetch runs
-      return prev;
-    });
-  };
-
   const checkAzureFunctions = async () => {
     // Check if Azure Functions monitoring is enabled
     const afEnabled = process.env.NEXT_PUBLIC_AF_ENABLED === 'true';
@@ -519,6 +493,48 @@ export const useServiceHealth = () => {
   };
 
   // checkAFEvents and checkAFVenues removed - AF Events/Venues kept as disabled grey dots
+
+  const checkCloudflare = async () => {
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    try {
+      const response = await fetch(`${afUrl}/api/cloudflare/info`, {
+        signal: AbortSignal.timeout(5000)
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        // Azure Functions wraps response in { success, data }
+        const data = responseData.data || responseData;
+        const ip = data.ip || 'Unknown';
+        const country = data.country || 'Unknown';
+
+        setServices(prev => ({
+          ...prev,
+          cloudflare: {
+            name: 'Cloudflare',
+            status: 'healthy',
+            detail: `${ip} (${country})`,
+            accuracy: null,
+            ip: ip,
+            country: country,
+            ray: data.ray || null
+          }
+        }));
+      } else {
+        throw new Error('Cloudflare API failed');
+      }
+    } catch (error) {
+      setServices(prev => ({
+        ...prev,
+        cloudflare: {
+          name: 'Cloudflare',
+          status: 'error',
+          detail: 'Unavailable',
+          accuracy: null
+        }
+      }));
+    }
+  };
 
   return services;
 };
