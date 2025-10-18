@@ -8,7 +8,6 @@
 // Cache for geolocation data to prevent excessive API calls
 let geolocationCache = null;
 let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -41,16 +40,19 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 /**
  * Fetch all geolocation data from multiple sources in parallel
  * Returns Cloudflare, Google Geolocation API, and IP API data with distance calculation
- * TIEMPO-319: Added caching to prevent 429 rate limiting (health checks run every 30s)
- * @param {boolean} forceRefresh - Skip cache and fetch fresh data
+ * TIEMPO-319: Added configurable caching to prevent 429 rate limiting
+ * @param {number} cacheMinutes - Cache duration in minutes (default 5, use 480 for login, 1440 for visitor)
  * @returns {Promise<object>} - { cloudflare, google, ipapi, distance }
  */
-export const fetchAllGeolocationData = async (forceRefresh = false) => {
-  // Check cache first (unless force refresh)
-  if (!forceRefresh && geolocationCache && cacheTimestamp) {
+export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
+  const CACHE_DURATION = cacheMinutes * 60 * 1000; // Convert minutes to milliseconds
+
+  // Check cache first
+  if (geolocationCache && cacheTimestamp) {
     const cacheAge = Date.now() - cacheTimestamp;
     if (cacheAge < CACHE_DURATION) {
-      console.log(`[Tracking] Using cached geolocation (age: ${Math.round(cacheAge / 1000)}s)`);
+      const ageMinutes = Math.round(cacheAge / 60000);
+      console.log(`[Tracking] Using cached geolocation (age: ${ageMinutes}m of ${cacheMinutes}m cache)`);
       return geolocationCache;
     }
   }
