@@ -363,7 +363,7 @@ const ServiceStatusModal = ({ open, onClose }) => {
         </Box>
         {renderDomainTestAccordion('Categories', 'categories', true)}
         {renderDomainTestAccordion('Venues', 'venues', true)}
-        {renderDomainTestAccordion('Events', 'events', false)}
+        {renderDomainTestAccordion('Events', 'events', true)}
 
         {/* Geolocation Services */}
         <Box sx={{ px: 3, pt: 3, pb: 1 }}>
