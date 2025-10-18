@@ -75,16 +75,19 @@ const GeoComparisonDashboard = () => {
     const testResults = [];
     const startTime = Date.now();
 
-    // Test 1: BigDataCloud (AF - will fail until deployed)
+    // Test 1: BigDataCloud (AF)
     const bigDataCloudStart = Date.now();
     try {
       const response = await fetch(`${afUrl}/api/geo/bigdatacloud/ip`, {
         signal: AbortSignal.timeout(5000)
       });
-      const data = await response.json();
+      const apiResponse = await response.json();
+      // Backend returns { success, data, timestamp } structure
+      const data = apiResponse.success ? apiResponse.data : {};
+      const error = !apiResponse.success ? apiResponse.error?.message : null;
       testResults.push({
         name: 'BigDataCloud',
-        status: response.ok ? 'success' : 'error',
+        status: apiResponse.success && response.ok ? 'success' : 'error',
         ip: data.ip || '-',
         latitude: data.latitude || '-',
         longitude: data.longitude || '-',
@@ -93,7 +96,7 @@ const GeoComparisonDashboard = () => {
         country: data.country_name || data.country || '-',
         accuracy: data.accuracy ? `${(data.accuracy / 1000).toFixed(1)}km` : '-',
         responseTime: `${Date.now() - bigDataCloudStart}ms`,
-        error: data.error || null,
+        error: error,
         source: 'Azure Function',
       });
     } catch (err) {
@@ -113,16 +116,19 @@ const GeoComparisonDashboard = () => {
       });
     }
 
-    // Test 2: Abstract API (AF - will fail until deployed)
+    // Test 2: Abstract API (AF)
     const abstractStart = Date.now();
     try {
       const response = await fetch(`${afUrl}/api/geo/abstract/ip`, {
         signal: AbortSignal.timeout(5000)
       });
-      const data = await response.json();
+      const apiResponse = await response.json();
+      // Backend returns { success, data, timestamp } structure
+      const data = apiResponse.success ? apiResponse.data : {};
+      const error = !apiResponse.success ? apiResponse.error?.message : null;
       testResults.push({
         name: 'Abstract API',
-        status: response.ok ? 'success' : 'error',
+        status: apiResponse.success && response.ok ? 'success' : 'error',
         ip: data.ip || '-',
         latitude: data.latitude || '-',
         longitude: data.longitude || '-',
@@ -131,7 +137,7 @@ const GeoComparisonDashboard = () => {
         country: data.country_name || data.country || '-',
         accuracy: data.accuracy ? `${(data.accuracy / 1000).toFixed(1)}km` : '-',
         responseTime: `${Date.now() - abstractStart}ms`,
-        error: data.error || null,
+        error: error,
         source: 'Azure Function',
       });
     } catch (err) {
@@ -184,7 +190,7 @@ const GeoComparisonDashboard = () => {
         source: 'Frontend (Direct)',
       });
 
-      // Test 4: Mapbox Reverse Geocoding (AF - will fail until deployed)
+      // Test 4: Mapbox Reverse Geocoding (AF)
       // Only run if Google succeeded
       if (response.ok && googleLat && googleLng) {
         const mapboxStart = Date.now();
@@ -198,10 +204,13 @@ const GeoComparisonDashboard = () => {
             }),
             signal: AbortSignal.timeout(5000)
           });
-          const mapboxData = await mapboxResponse.json();
+          const mapboxApiResponse = await mapboxResponse.json();
+          // Backend returns { success, data, timestamp } structure
+          const mapboxData = mapboxApiResponse.success ? mapboxApiResponse.data : {};
+          const mapboxError = !mapboxApiResponse.success ? mapboxApiResponse.error?.message : null;
           testResults.push({
             name: 'Mapbox (from Google)',
-            status: mapboxResponse.ok ? 'success' : 'error',
+            status: mapboxApiResponse.success && mapboxResponse.ok ? 'success' : 'error',
             ip: '-',
             latitude: mapboxData.latitude || googleLat,
             longitude: mapboxData.longitude || googleLng,
@@ -210,7 +219,7 @@ const GeoComparisonDashboard = () => {
             country: mapboxData.country || '-',
             accuracy: '-',
             responseTime: `${Date.now() - mapboxStart}ms`,
-            error: mapboxData.error || null,
+            error: mapboxError,
             source: 'Azure Function',
             address: mapboxData.formatted_address || null,
           });
@@ -292,11 +301,13 @@ const GeoComparisonDashboard = () => {
       const response = await fetch(`${afUrl}/api/cloudflare/info`, {
         signal: AbortSignal.timeout(5000)
       });
-      const data = await response.json();
-      const cfData = data.data || data;
+      const apiResponse = await response.json();
+      // Backend returns { success, data, timestamp } structure
+      const cfData = apiResponse.success ? apiResponse.data : {};
+      const error = !apiResponse.success ? apiResponse.error?.message : null;
       testResults.push({
         name: 'Cloudflare',
-        status: response.ok ? 'success' : 'error',
+        status: apiResponse.success && response.ok ? 'success' : 'error',
         ip: cfData.ip || '-',
         latitude: '-',
         longitude: '-',
@@ -305,7 +316,7 @@ const GeoComparisonDashboard = () => {
         country: cfData.country || '-',
         accuracy: 'Country-level',
         responseTime: `${Date.now() - cloudflareStart}ms`,
-        error: data.error || null,
+        error: error,
         source: 'Azure Function',
       });
     } catch (err) {
@@ -532,7 +543,7 @@ const GeoComparisonDashboard = () => {
                             )}
                             {result.error && (
                               <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>
-                                ⚠️ {result.error}
+                                ⚠️ {typeof result.error === 'string' ? result.error : result.error.message || 'Error occurred'}
                               </Typography>
                             )}
                           </Box>
