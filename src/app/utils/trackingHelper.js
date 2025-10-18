@@ -1,7 +1,14 @@
 /**
  * Tracking Helper - Shared utilities for visitor and user login/logout tracking
  * Fetches geolocation data from multiple sources and calculates distances
+ *
+ * TIEMPO-319: Added caching to prevent 429 rate limiting errors
  */
+
+// Cache for geolocation data to prevent excessive API calls
+let geolocationCache = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -34,9 +41,21 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 /**
  * Fetch all geolocation data from multiple sources in parallel
  * Returns Cloudflare, Google Geolocation API, and IP API data with distance calculation
+ * TIEMPO-319: Added caching to prevent 429 rate limiting (health checks run every 30s)
+ * @param {boolean} forceRefresh - Skip cache and fetch fresh data
  * @returns {Promise<object>} - { cloudflare, google, ipapi, distance }
  */
-export const fetchAllGeolocationData = async () => {
+export const fetchAllGeolocationData = async (forceRefresh = false) => {
+  // Check cache first (unless force refresh)
+  if (!forceRefresh && geolocationCache && cacheTimestamp) {
+    const cacheAge = Date.now() - cacheTimestamp;
+    if (cacheAge < CACHE_DURATION) {
+      console.log(`[Tracking] Using cached geolocation (age: ${Math.round(cacheAge / 1000)}s)`);
+      return geolocationCache;
+    }
+  }
+
+  console.log('[Tracking] Fetching fresh geolocation data...');
   const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
   const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
 
@@ -108,10 +127,16 @@ export const fetchAllGeolocationData = async () => {
     );
   }
 
-  return {
+  const result = {
     cloudflare,
     google,
     ipapi,
     distance
   };
+
+  // Cache the result
+  geolocationCache = result;
+  cacheTimestamp = Date.now();
+
+  return result;
 };
