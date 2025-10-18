@@ -95,7 +95,8 @@ export const AuthProvider = ({ children }) => {
       const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
       // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-      fetchAllGeolocationData().then(geoData => {
+      // TIEMPO-319: Use 8-hour cache for login tracking (480 minutes)
+      fetchAllGeolocationData(480).then(geoData => {
         fetch(`${afUrl}/api/user/login-track`, {
           method: 'POST',
           headers: {

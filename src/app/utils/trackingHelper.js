@@ -1,7 +1,13 @@
 /**
  * Tracking Helper - Shared utilities for visitor and user login/logout tracking
  * Fetches geolocation data from multiple sources and calculates distances
+ *
+ * TIEMPO-319: Added caching to prevent 429 rate limiting errors
  */
+
+// Cache for geolocation data to prevent excessive API calls
+let geolocationCache = null;
+let cacheTimestamp = null;
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -34,14 +40,29 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 /**
  * Fetch all geolocation data from multiple sources in parallel
  * Returns Cloudflare, Google Geolocation API, and IP API data with distance calculation
+ * TIEMPO-319: Added configurable caching to prevent 429 rate limiting
+ * @param {number} cacheMinutes - Cache duration in minutes (default 5, use 480 for login, 1440 for visitor)
  * @returns {Promise<object>} - { cloudflare, google, ipapi, distance }
  */
-export const fetchAllGeolocationData = async () => {
+export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
+  const CACHE_DURATION = cacheMinutes * 60 * 1000; // Convert minutes to milliseconds
+
+  // Check cache first
+  if (geolocationCache && cacheTimestamp) {
+    const cacheAge = Date.now() - cacheTimestamp;
+    if (cacheAge < CACHE_DURATION) {
+      const ageMinutes = Math.round(cacheAge / 60000);
+      console.log(`[Tracking] Using cached geolocation (age: ${ageMinutes}m of ${cacheMinutes}m cache)`);
+      return geolocationCache;
+    }
+  }
+
+  console.log('[Tracking] Fetching fresh geolocation data...');
   const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
   const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
 
-  // Fetch all three sources in parallel using Promise.allSettled for graceful failures
-  const [cloudflareResult, googleResult, ipapiResult] = await Promise.allSettled([
+  // Fetch Cloudflare and Google in parallel using Promise.allSettled for graceful failures
+  const [cloudflareResult, googleResult] = await Promise.allSettled([
     // 1. Cloudflare API
     fetch(`${afUrl}/api/cloudflare/info`, {
       signal: AbortSignal.timeout(2000)
@@ -56,18 +77,32 @@ export const fetchAllGeolocationData = async () => {
         body: JSON.stringify({ considerIp: true }),
         signal: AbortSignal.timeout(2000)
       }
-    ).then(res => res.ok ? res.json() : null) : Promise.resolve(null),
-
-    // 3. IP API
-    fetch(`${afUrl}/api/geo/ip`, {
-      signal: AbortSignal.timeout(2000)
-    }).then(res => res.ok ? res.json() : null)
+    ).then(res => res.ok ? res.json() : null) : Promise.resolve(null)
   ]);
 
   // Extract data from settled promises
   const cloudflareData = cloudflareResult.status === 'fulfilled' ? cloudflareResult.value : null;
   const googleData = googleResult.status === 'fulfilled' ? googleResult.value : null;
-  const ipapiData = ipapiResult.status === 'fulfilled' ? ipapiResult.value : null;
+
+  // 3. If Google succeeded, use Mapbox to get city/region/country from coordinates
+  let mapboxData = null;
+  if (googleData?.location?.lat && googleData?.location?.lng) {
+    try {
+      const mapboxResponse = await fetch(`${afUrl}/api/geo/mapbox/reverse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: googleData.location.lat,
+          longitude: googleData.location.lng
+        }),
+        signal: AbortSignal.timeout(2000)
+      });
+      const mapboxJson = await mapboxResponse.json();
+      mapboxData = mapboxJson.success ? mapboxJson.data : null;
+    } catch (err) {
+      console.warn('[Tracking] Mapbox reverse geocoding failed:', err.message);
+    }
+  }
 
   // Format Cloudflare data
   const cloudflare = cloudflareData?.data ? {
@@ -80,38 +115,35 @@ export const fetchAllGeolocationData = async () => {
     ray: cloudflareData.ray || null
   } : null);
 
-  // Format Google data
+  // Format Google data (primary source for coordinates)
   const google = googleData?.location ? {
     latitude: googleData.location.lat || null,
     longitude: googleData.location.lng || null,
     accuracy: googleData.accuracy || null
   } : null;
 
-  // Format IP API data
-  const ipapi = ipapiData ? {
-    latitude: ipapiData.latitude || null,
-    longitude: ipapiData.longitude || null,
-    city: ipapiData.city || null,
-    region: ipapiData.region || null,
-    postal: ipapiData.postal || null,
-    country: ipapiData.country || null
+  // Format Mapbox data (address details from Google coordinates)
+  const mapbox = mapboxData ? {
+    latitude: mapboxData.latitude || google?.latitude || null,
+    longitude: mapboxData.longitude || google?.longitude || null,
+    city: mapboxData.city || null,
+    region: mapboxData.region || null,
+    postal: mapboxData.postal || null,
+    country: mapboxData.country || null,
+    formatted_address: mapboxData.formatted_address || null
   } : null;
 
-  // Calculate distance between Google and IP API coordinates
-  let distance = null;
-  if (google?.latitude && google?.longitude && ipapi?.latitude && ipapi?.longitude) {
-    distance = calculateDistance(
-      google.latitude,
-      google.longitude,
-      ipapi.latitude,
-      ipapi.longitude
-    );
-  }
-
-  return {
+  // No distance calculation needed (Mapbox uses Google's coordinates)
+  const result = {
     cloudflare,
     google,
-    ipapi,
-    distance
+    mapbox, // Replaced ipapi with mapbox
+    distance: null // No longer calculating distance between two different sources
   };
+
+  // Cache the result
+  geolocationCache = result;
+  cacheTimestamp = Date.now();
+
+  return result;
 };

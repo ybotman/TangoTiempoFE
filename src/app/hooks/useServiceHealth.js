@@ -44,7 +44,7 @@ export const useServiceHealth = () => {
     // Row 2: Data & Tracking
     mongodb: { name: 'MongoDB', status: 'checking', detail: '', accuracy: null },
     googleAnalytics: { name: 'Google Analytics', status: 'checking', detail: '', accuracy: null },
-    geoAPI: { name: 'Geo API', status: 'checking', detail: '', accuracy: null },
+    geoAPI: { name: 'Geo API', status: 'disabled', detail: 'Manual check only (rate limited)', accuracy: null },
 
     // Row 3: Azure Functions & Google Geo API
     azureFunctions: { name: 'AF Health', status: 'disabled', detail: 'Not configured', accuracy: null },
@@ -53,13 +53,13 @@ export const useServiceHealth = () => {
   });
 
   useEffect(() => {
-    // Check all services
+    // Check all services (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
     checkExpressBackend();
     checkFirebase();
     checkMapbox();
     checkMongoDB();
     checkGoogleAnalytics();
-    checkGeoAPI();
+    // checkGeoAPI(); // REMOVED - Only check manually in GeoComparisonDashboard (ipapi.co 1K/month limit)
     checkGoogleGeoAPI();
     checkAzureFunctions();
     checkCloudflare();
@@ -71,7 +71,7 @@ export const useServiceHealth = () => {
       checkMapbox();
       checkMongoDB();
       checkGoogleAnalytics();
-      checkGeoAPI();
+      // checkGeoAPI(); // REMOVED - Causes 429 rate limiting
       checkGoogleGeoAPI();
       checkAzureFunctions();
       checkCloudflare();
@@ -311,7 +311,7 @@ export const useServiceHealth = () => {
   const checkGeoAPI = async () => {
     const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
     try {
-      const response = await fetch(`${afUrl}/api/geo/ip`, {
+      const response = await fetch(`${afUrl}/api/geo/ipapico/ip`, {
         signal: AbortSignal.timeout(5000)
       });
 

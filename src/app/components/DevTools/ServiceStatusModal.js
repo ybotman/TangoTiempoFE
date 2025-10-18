@@ -20,6 +20,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloseIcon from '@mui/icons-material/Close';
 import { useServiceHealth } from '@/hooks/useServiceHealth';
+import GeoComparisonDashboard from './GeoComparisonDashboard';
 
 /**
  * Service Status Modal
@@ -402,9 +403,16 @@ const ServiceStatusModal = ({ open, onClose }) => {
         {/* Geolocation Services */}
         <Box sx={{ px: 3, pt: 3, pb: 1 }}>
           <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
-            Geolocation Services
+            Geolocation Services (TIEMPO-321)
           </Typography>
         </Box>
+
+        {/* Comparison Dashboard */}
+        <Box sx={{ px: 3, pb: 2 }}>
+          <GeoComparisonDashboard />
+        </Box>
+
+        {/* Individual Service Details */}
         {renderServiceAccordion(services.geoAPI, 'Geo API (ipapi.co)')}
         {renderServiceAccordion(services.googleGeoAPI, 'Google Geolocation API')}
 

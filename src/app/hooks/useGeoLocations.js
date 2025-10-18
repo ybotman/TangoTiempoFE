@@ -24,7 +24,7 @@ export function useGeoLocations() {
         return;
       }
       
-      // Use Azure Functions for geo IP lookup
+      // Use Azure Functions BigDataCloud for geo IP lookup (better accuracy, no rate limits)
       const afUrl = process.env.NEXT_PUBLIC_AF_URL || '';
 
       // Add a timeout to the request
@@ -32,31 +32,23 @@ export function useGeoLocations() {
       const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
       try {
-        const response = await axios.get(`${afUrl}/api/geo/ip`, {
+        const response = await axios.get(`${afUrl}/api/geo/bigdatacloud/ip`, {
           signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
-        
-        // Check for rate limiting
-        if (response.status === 429) {
-          console.warn('Geo IP service rate limited, using default location');
-          sessionStorage.setItem('geo_rate_limited', 'true');
-          // Set a timeout to clear the rate limit flag after 5 minutes
-          setTimeout(() => {
-            sessionStorage.removeItem('geo_rate_limited');
-          }, 5 * 60 * 1000);
-          throw new Error('Rate limited');
+
+        // BigDataCloud returns { success, data, timestamp } structure
+        const apiResponse = response.data;
+
+        if (!apiResponse.success) {
+          throw new Error(apiResponse.error?.message || 'BigDataCloud API failed');
         }
-        
-        const data = response.data;
+
+        const data = apiResponse.data;
         if (data && data.latitude && data.longitude) {
           setLatitude(data.latitude);
           setLongitude(data.longitude);
-        } else if (data && data.fallback) {
-          // Use fallback coordinates if provided
-          setLatitude(data.fallback.latitude);
-          setLongitude(data.fallback.longitude);
 // TIEMPO-276: Security cleanup - removed logging
         } else {
           throw new Error('Unable to retrieve geolocation data.');
