@@ -364,7 +364,7 @@ const ServiceStatusModal = ({ open, onClose }) => {
       }}
     >
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Service Status Dashboard</Typography>
+        <Typography variant="h6" component="span">Service Status Dashboard</Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>
