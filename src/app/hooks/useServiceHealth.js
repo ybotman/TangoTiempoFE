@@ -85,6 +85,11 @@ export const useServiceHealth = () => {
     const geoAPICoords = services.geoAPI;
     const googleGeoCoords = services.googleGeoAPI;
 
+    // GUARD: Prevent infinite loop - only calculate if distance doesn't exist yet
+    if (geoAPICoords.distanceToGoogle || googleGeoCoords.distanceToIpapi) {
+      return;
+    }
+
     // Only calculate if both services have coordinates
     if (geoAPICoords.latitude && geoAPICoords.longitude &&
         googleGeoCoords.latitude && googleGeoCoords.longitude) {
@@ -96,22 +101,20 @@ export const useServiceHealth = () => {
         googleGeoCoords.longitude
       );
 
-      // Update both services with distance information
+      // Update both services with distance information (ONE TIME ONLY)
       setServices(prev => ({
         ...prev,
         geoAPI: {
           ...prev.geoAPI,
-          detail: `ipapi.co (±${(prev.geoAPI.accuracy / 1000).toFixed(1)}km) | Δ${distance.km.toFixed(1)}km / ${distance.mi.toFixed(1)}mi`,
           distanceToGoogle: distance
         },
         googleGeoAPI: {
           ...prev.googleGeoAPI,
-          detail: `Google (±${prev.googleGeoAPI.accuracy ? (prev.googleGeoAPI.accuracy / 1000).toFixed(1) : '?'}km) | Δ${distance.km.toFixed(1)}km / ${distance.mi.toFixed(1)}mi`,
           distanceToIpapi: distance
         }
       }));
     }
-  }, [services.geoAPI.latitude, services.geoAPI.longitude, services.googleGeoAPI.latitude, services.googleGeoAPI.longitude]);
+  }, [services.geoAPI.latitude, services.geoAPI.longitude, services.googleGeoAPI.latitude, services.googleGeoAPI.longitude, services.geoAPI.distanceToGoogle, services.googleGeoAPI.distanceToIpapi]);
 
   const checkExpressBackend = async () => {
     const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
