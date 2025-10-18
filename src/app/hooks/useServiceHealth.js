@@ -311,7 +311,7 @@ export const useServiceHealth = () => {
   const checkGeoAPI = async () => {
     const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
     try {
-      const response = await fetch(`${afUrl}/api/geo/ip`, {
+      const response = await fetch(`${afUrl}/api/geo/ipapico/ip`, {
         signal: AbortSignal.timeout(5000)
       });
 
