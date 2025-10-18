@@ -23,6 +23,7 @@ import {
 import { auth, facebookProvider, googleProvider, appleProvider } from '@/utils/firebase';
 import axios from 'axios';
 import { dedupeFetch } from '@/utils/dedupeFetch';
+import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 
 // Create Auth Context
 export const AuthContext = createContext();
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }) => {
 
       if (currentUser) {
 // TIEMPO-276: Security cleanup - removed logging
-        await setUserData(currentUser);
+        await setUserData(currentUser, 'auto');
       } else {
 // TIEMPO-276: Security cleanup - removed logging
         setUser(null);
@@ -82,7 +83,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Function to fetch and set combined user data
-  const setUserData = async (firebaseUser) => {
+  const setUserData = async (firebaseUser, loginType = 'manual') => {
 // TIEMPO-276: Security cleanup - removed logging
     // const startTime = Date.now();
 
@@ -93,37 +94,25 @@ export const AuthProvider = ({ children }) => {
       // Track login analytics (fire and forget - non-blocking)
       const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
-      // Fetch Cloudflare info to include in tracking
-      let cloudflareData = null;
-      try {
-        const cfResponse = await fetch(`${afUrl}/api/cloudflare/info`, {
-          signal: AbortSignal.timeout(2000) // Quick timeout - don't block login
-        });
-        if (cfResponse.ok) {
-          const responseData = await cfResponse.json();
-          // Azure Functions wraps response in { success, data }
-          cloudflareData = responseData.data || responseData;
-        }
-      } catch (err) {
-        console.warn('[Login Tracking] Cloudflare fetch failed:', err.message);
-      }
-
-      fetch(`${afUrl}/api/user/login-track`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${idToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
-          cloudflare: cloudflareData ? {
-            ip: cloudflareData.ip,
-            country: cloudflareData.country,
-            ray: cloudflareData.ray
-          } : null
-        })
-      }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
+      // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
+      fetchAllGeolocationData().then(geoData => {
+        fetch(`${afUrl}/api/user/login-track`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            loginType: loginType, // 'auto' or 'manual'
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
+            cloudflare: geoData.cloudflare,
+            google: geoData.google,
+            ipapi: geoData.ipapi,
+            distance: geoData.distance
+          })
+        }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
+      }).catch(err => console.warn('[Login Tracking] Geolocation fetch failed:', err.message));
 
 // TIEMPO-276: Security cleanup - removed logging
 

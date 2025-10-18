@@ -24,6 +24,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
+import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const router = useRouter();
@@ -223,17 +224,43 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 <Button onClick={() => setLogoutConfirmOpen(false)} color="primary">
                   No
                 </Button>
-                <Button 
+                <Button
                   onClick={async () => {
-                    // Log the logout event
+                    // Track logout to Azure Functions (fire and forget)
+                    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+                    try {
+                      const geoData = await fetchAllGeolocationData();
+                      const token = user?.token || (await user?.getIdToken?.());
+
+                      fetch(`${afUrl}/api/user/logout-track`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                          timezoneOffset: -new Date().getTimezoneOffset(),
+                          cloudflare: geoData.cloudflare,
+                          google: geoData.google,
+                          ipapi: geoData.ipapi,
+                          distance: geoData.distance
+                        })
+                      }).catch(err => console.warn('[Logout Tracking] Failed:', err.message));
+                    } catch (err) {
+                      console.warn('[Logout Tracking] Geolocation fetch failed:', err.message);
+                    }
+
+                    // Log the logout event to Express Backend (existing)
                     await logAuthEvent('LOGOUT', true, {
                       userRole: selectedRole,
                       userId: user?.uid
                     });
+
                     // Perform the logout
                     logOut();
-                  }} 
-                  color="secondary" 
+                  }}
+                  color="secondary"
                   autoFocus>
                   Yes
                 </Button>
