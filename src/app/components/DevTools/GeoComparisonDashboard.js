@@ -38,6 +38,14 @@ const Popup = dynamic(
   { ssr: false }
 );
 
+// Leaflet core (for custom icons) - client-side only
+let L = null;
+if (typeof window !== 'undefined') {
+  import('leaflet').then((leaflet) => {
+    L = leaflet.default || leaflet;
+  });
+}
+
 /**
  * Geolocation Services Comparison Dashboard (TIEMPO-321)
  * Tests and compares all geolocation services side-by-side
@@ -405,33 +413,32 @@ const GeoComparisonDashboard = () => {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
                 {mapMarkers.map((marker, index) => {
-                  // Import leaflet for custom icon (only on client side)
-                  if (typeof window !== 'undefined') {
-                    const L = require('leaflet');
-                    const icon = new L.DivIcon({
+                  // Create custom icon if Leaflet is loaded
+                  let icon = undefined;
+                  if (typeof window !== 'undefined' && L && L.DivIcon) {
+                    icon = new L.DivIcon({
                       className: 'custom-marker',
                       html: `<div style="background-color: ${getMarkerColor(marker.name)}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">${index + 1}</div>`,
                       iconSize: [24, 24],
                       iconAnchor: [12, 12],
                     });
-
-                    return (
-                      <Marker
-                        key={index}
-                        position={[marker.latitude, marker.longitude]}
-                        icon={icon}
-                      >
-                        <Popup>
-                          <strong>{marker.name}</strong><br />
-                          Lat: {marker.latitude.toFixed(4)}<br />
-                          Lng: {marker.longitude.toFixed(4)}<br />
-                          {marker.city !== '-' && `City: ${marker.city}`}<br />
-                          {marker.accuracy !== '-' && `Accuracy: ${marker.accuracy}`}
-                        </Popup>
-                      </Marker>
-                    );
                   }
-                  return null;
+
+                  return (
+                    <Marker
+                      key={index}
+                      position={[marker.latitude, marker.longitude]}
+                      icon={icon}
+                    >
+                      <Popup>
+                        <strong>{marker.name}</strong><br />
+                        Lat: {marker.latitude.toFixed(4)}<br />
+                        Lng: {marker.longitude.toFixed(4)}<br />
+                        {marker.city !== '-' && `City: ${marker.city}`}<br />
+                        {marker.accuracy !== '-' && `Accuracy: ${marker.accuracy}`}
+                      </Popup>
+                    </Marker>
+                  );
                 })}
               </MapContainer>
             )}
