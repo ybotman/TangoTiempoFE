@@ -547,6 +547,174 @@ END OF FILE: JIRA-MCP-STRATEGY.md
 ================================================================================
 
 
+================================================================================
+START OF FILE: AGENT-MESSAGING-SYSTEM.md
+================================================================================
+
+# Agent Messaging System (TIEMPO-322)
+
+**Repository**: https://github.com/ybotman/masterCalendarCollab
+**Local Path**: `/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages`
+
+## What This Is
+
+Git-based asynchronous messaging system for AI-GUILD agents (Sarah, Ben, Fulton, Fred, Donna, Azule, Gotan) to communicate across projects.
+
+## Quick Start on Session Restart
+
+### 1. Check Your Inbox
+```bash
+cd /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages
+git pull origin main
+ls -lt inbox/YOUR_NAME/    # Replace YOUR_NAME with: sarah, ben, fulton, fred, donna, azule
+```
+
+### 2. Read Messages
+```bash
+# Read latest message
+cat $(ls -t inbox/YOUR_NAME/*.json | head -1) | jq '.'
+
+# Read specific message
+cat inbox/YOUR_NAME/msg_YYYYMMDD_HHMMSS_sender_NNN.json | jq '.'
+```
+
+### 3. Send Messages
+```bash
+cd /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages
+
+cat > inbox/RECIPIENT/msg_$(date +%Y%m%d_%H%M%S)_YOUR_NAME_001.json <<'EOF'
+{
+  "from": "YOUR_NAME",
+  "to": ["RECIPIENT"],
+  "subject": "Message subject",
+  "body": "Message content here",
+  "ticket": "TIEMPO-XXX",
+  "priority": "normal"
+}
+EOF
+
+git add inbox/
+git commit -m "Message: YOUR_NAME -> RECIPIENT (subject)"
+git push origin main
+```
+
+### 4. Message-Aware Mode (Optional)
+
+Enable background polling to check for messages every 30 seconds:
+
+```bash
+# Create poller script (replace YOUR_NAME)
+cat > /tmp/YOUR_NAME-message-poller.sh <<'POLLEREOF'
+#!/bin/bash
+echo "🔔 YOUR_NAME Message Poller Started"
+echo "Checking inbox/YOUR_NAME every 30 seconds..."
+
+while true; do
+  cd /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages
+  git pull origin main --quiet 2>/dev/null
+
+  NEW_COUNT=$(find inbox/YOUR_NAME -name "*.json" -mmin -1 2>/dev/null | wc -l)
+
+  if [ $NEW_COUNT -gt 0 ]; then
+    echo ""
+    echo "📬 NEW MESSAGE for YOUR_NAME!"
+    find inbox/YOUR_NAME -name "*.json" -mmin -1 -exec basename {} \;
+  fi
+
+  sleep 30
+done
+POLLEREOF
+
+chmod +x /tmp/YOUR_NAME-message-poller.sh
+/tmp/YOUR_NAME-message-poller.sh &
+```
+
+**To stop message-aware mode:**
+```bash
+pkill -f "YOUR_NAME-message-poller.sh"
+```
+
+## Agent Inbox Locations
+
+- **sarah**: inbox/sarah/
+- **fred**: inbox/fred/
+- **ben**: inbox/ben/
+- **donna**: inbox/donna/
+- **fulton**: inbox/fulton/
+- **azule**: inbox/azule/
+- **gotan**: inbox/gotan/
+- **broadcast**: inbox/broadcast/ (all agents check this)
+
+## Message Format
+
+**Required fields:**
+```json
+{
+  "from": "agent-name",
+  "to": ["recipient-name"],
+  "subject": "Brief subject",
+  "body": "Full message content"
+}
+```
+
+**Optional fields:**
+```json
+{
+  "ticket": "TIEMPO-XXX | CALBE-XXX | CALBEAF-XXX",
+  "priority": "low | normal | high | urgent",
+  "timestamp": "ISO 8601 timestamp",
+  "in_reply_to": "msg_id_of_original"
+}
+```
+
+## Archive Messages
+
+After reading and processing messages:
+
+```bash
+mkdir -p archive/$(date +%Y-%m-%d)
+mv inbox/YOUR_NAME/msg_*.json archive/$(date +%Y-%m-%d)/
+git add inbox/ archive/
+git commit -m "Archive processed messages"
+git push origin main
+```
+
+## When to Check Messages
+
+1. **At session start** - After reading playbooks
+2. **After completing major work** - Before SNR/handoff
+3. **Before context switches** - Ticket, role, or branch changes
+4. **When explicitly told** - "check messages", "message-aware on"
+
+## Common Recipients by Agent
+
+**Sarah (Frontend):**
+- ben (Backend)
+- fred (Frontend Architect)
+- fulton (Azure Functions)
+- broadcast (All agents)
+
+**Ben (Backend):**
+- sarah (Frontend)
+- donna (Backend Architect)
+- fulton (Azure Functions)
+- broadcast (All agents)
+
+**Fulton (Azure Functions):**
+- sarah (Frontend)
+- ben (Backend)
+- azule (AF Architect)
+- broadcast (All agents)
+
+**Architects (Fred, Donna, Azule):**
+- Receive questions from their respective developers
+- Send guidance/decisions back
+
+================================================================================
+END OF FILE: AGENT-MESSAGING-SYSTEM.md
+================================================================================
+
+
 ---
 
 End of playbook
