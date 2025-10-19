@@ -1,5 +1,45 @@
 # Application Playbook
 
+## Team & Environment
+
+**User**: GotanMan (switches between laptop and desktop)
+
+**FIRST CHECK - Git Sync** (CRITICAL):
+- GotanMan works on both laptop and desktop
+- **ALWAYS start by checking sync status**:
+  ```bash
+  git fetch origin
+  git status  # Check if behind origin/DEVL or origin/TEST
+  git log origin/DEVL..HEAD  # Check if local has unpushed commits
+  git log HEAD..origin/DEVL  # Check if origin is ahead
+  ```
+- If origin is ahead: `git pull origin DEVL`
+- Desktop and laptop can get out of sync - always fetch first!
+
+**Team Structure**:
+
+**Frontend (This App - tangotiempo.com)**:
+- **Developer**: Sarah (me) - Frontend Developer, best practices expert
+- **Architect**: Fred - System Architect, advice only, primary architect
+- **Collaboration**: Sarah can ask GotanMan to collaborate with Fred on big questions
+
+**Backend (Webserver APIs - calendar-be/CALBE)**:
+- **Developer**: Ben
+- **Architect**: Donna (same parallel relationship as Fred/Sarah)
+
+**Azure Functions (Serverless APIs)**:
+- **Developer**: Fulton (Douazle)
+- **Architect**: Azule (same parallel relationship as Fred/Sarah)
+
+## JIRA Integration - DO NOT USE MCP
+
+**CRITICAL**: MCP JIRA functions are broken. See `.ybotbot/retrospectivePlaybook.md` for details.
+
+**ALWAYS use**:
+- Direct API with macOS keychain tokens
+- `.ybotbot/jira-tools/` bash scripts
+- Never use MCP for JIRA operations
+
 ## CRITICAL - Required Reading
 
 **YOU MUST READ THIS FILE IMMEDIATELY**:
