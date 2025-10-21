@@ -15,7 +15,12 @@ import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: I
 import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
-  const categories = useCategories(); // Fetch categories
+  const allCategories = useCategories(); // Fetch categories
+  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro)
+  const categories = useMemo(() =>
+    allCategories.filter(cat => cat.categoryName !== 'DayWorkshop'),
+    [allCategories]
+  );
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role

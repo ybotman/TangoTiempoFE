@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { validateEventCategoryRules } from '@/utils/eventCategoryValidation'; // TIEMPO-291
 
 // TIEMPO-246: Configure dayjs for venue timezone support
 dayjs.extend(utc);
@@ -310,10 +311,21 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [validationErrors, setValidationErrors] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [categoryValidationErrors, setCategoryValidationErrors] = useState([]); // TIEMPO-291
+
+  // TIEMPO-291: Validate category rules whenever dates or categories change
+  useEffect(() => {
+    if (eventData.startDate && eventData.endDate && eventData.categoryFirst) {
+      const validation = validateEventCategoryRules(eventData, selectedRole);
+      setCategoryValidationErrors(validation.errors);
+    } else {
+      setCategoryValidationErrors([]);
+    }
+  }, [eventData.startDate, eventData.endDate, eventData.categoryFirst, eventData.categorySecond, eventData.categoryThird, selectedRole]);
 
   // Import event operations hook
   const { createEvent, updateEvent } = useEventOperations();
-  
+
   // Check if all required fields are filled
   const isFormValid = () => {
     // Basic validation for all events
@@ -327,9 +339,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       eventData.description?.trim()
     );
 
-    // If not a repeating event, basic validation is enough
+    // TIEMPO-291: Check category validation (blocks save for RegionalOrganizer)
+    const categoryValid = categoryValidationErrors.length === 0;
+
+    // If not a repeating event, basic validation + category validation is enough
     if (!eventData.isRepeating) {
-      return basicValidation;
+      return basicValidation && categoryValid;
     }
 
     // Additional validation for repeating events
@@ -371,7 +386,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
     }
 
-    return basicValidation && hasRecurrenceType && hasRecurrenceDays && hasValidEndCondition;
+    return basicValidation && categoryValid && hasRecurrenceType && hasRecurrenceDays && hasValidEndCondition;
   };
 
   const validateEventData = () => {
@@ -801,7 +816,21 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             {saveError}
           </Alert>
         )}
-        
+
+        {/* TIEMPO-291: Category validation errors */}
+        {categoryValidationErrors.length > 0 && (
+          <Alert severity="error" sx={{ my: 1 }}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>
+              Category Validation Error:
+            </Typography>
+            {categoryValidationErrors.map((error, index) => (
+              <Typography key={index} variant="body2">
+                • {error}
+              </Typography>
+            ))}
+          </Alert>
+        )}
+
         {/* Success message */}
         {saveSuccess && (
           <Alert severity="success" sx={{ my: 1 }}>
