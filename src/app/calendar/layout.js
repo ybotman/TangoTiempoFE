@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'; // Import prop-types
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
+import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -45,6 +46,7 @@ const RootLayout = ({ children }) => {
           body: JSON.stringify({
             // Page routing details
             pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
+            page: typeof window !== 'undefined' ? window.location.pathname : '/calendar', // TIEMPO-323: Backend expects 'page' field
             hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
             url: typeof window !== 'undefined' ? window.location.href : '',
 
@@ -83,6 +85,58 @@ const RootLayout = ({ children }) => {
       // TIEMPO-276: Security cleanup - removed region logging
     }
   }, [userDisplayName, selectedRegionName]);
+
+  // TIEMPO-323: MapCenter tracking for logged-in users
+  // Subscribe to location change events and track to backend
+  useEffect(() => {
+    // Only track for logged-in users with valid Firebase token
+    if (!user || !user.token) {
+      return; // Not logged in, skip tracking
+    }
+
+    // Helper function to track MapCenter changes
+    const trackMapCenterChange = async (location) => {
+      try {
+        const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+
+        await fetch(`${afUrl}/api/user/mapcenter-track`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            mapCenter: {
+              lat: location.lat,
+              lng: location.lng
+            },
+            page: typeof window !== 'undefined' ? window.location.pathname : '/calendar'
+          })
+        });
+
+        console.log('[MapCenter Tracking] Successfully tracked MapCenter change');
+      } catch (error) {
+        // Silent failure - don't break user experience
+        console.warn('[MapCenter Tracking] Failed:', error.message);
+      }
+    };
+
+    // Subscribe to location change events
+    const unsubscribe = locationEventBus.on(
+      LOCATION_EVENTS.LOCATION_CHANGED,
+      (location) => {
+        // Only track if location has valid coordinates
+        if (location?.lat && location?.lng) {
+          trackMapCenterChange(location);
+        }
+      }
+    );
+
+    // Cleanup subscription on unmount or when user changes
+    return () => {
+      unsubscribe();
+    };
+  }, [user]); // Re-subscribe if user changes (login/logout)
 
   return <>{children}</>;
 };
