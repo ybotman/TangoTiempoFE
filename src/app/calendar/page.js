@@ -600,6 +600,7 @@ const CalendarPage = () => {
 // TIEMPO-276: Security cleanup - removed logging
   useEffect(() => {
     const handleWindowResize = () => {
+      if (!calendarRef.current) return;
       const calendarApi = calendarRef.current.getApi();
       if (window.innerWidth >= 768) {
         calendarApi.changeView('dayGrid8Week'); // Switch to 8-week view for large screens
@@ -694,12 +695,14 @@ const CalendarPage = () => {
 
           <ButtonGroup variant="outlined" aria-label="outlined button group">
             <IconButton onClick={() => {
+              if (!calendarRef.current) return;
               calendarRef.current.getApi().changeView('dayGrid8Week');
               setCurrentViewType('dayGrid8Week');
             }} title="8 Week View" data-testid="view-8week">
               <CalendarMonthIcon />
             </IconButton>
             <IconButton onClick={() => {
+              if (!calendarRef.current) return;
               const api = calendarRef.current.getApi();
               // BUGFIX: Force list view to start from local "today", not UTC "today"
               // When calendar is in UTC mode, we need to explicitly navigate to local date
