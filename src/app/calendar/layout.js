@@ -82,14 +82,9 @@ const RootLayout = ({ children }) => {
     }
   }, [userDisplayName, selectedRegionName]);
 
-  // TIEMPO-323: MapCenter tracking for logged-in users
+  // TIEMPO-323: MapCenter tracking for all users (logged-in and anonymous)
   // Subscribe to location change events and track to backend
   useEffect(() => {
-    // Only track for logged-in users with valid Firebase token
-    if (!user || !user.token) {
-      return; // Not logged in, skip tracking
-    }
-
     // Helper function to track MapCenter changes
     const trackMapCenterChange = async (location) => {
       try {
@@ -98,12 +93,17 @@ const RootLayout = ({ children }) => {
         // Get geolocation data (IP-based lat/long)
         const geoData = await fetchAllGeolocationData();
 
+        // Build headers - include auth token only if user is logged in
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        if (user?.token) {
+          headers['Authorization'] = `Bearer ${user.token}`;
+        }
+
         await fetch(`${afUrl}/api/user/mapcenter-track`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${user.token}`,
-            'Content-Type': 'application/json'
-          },
+          headers,
           body: JSON.stringify({
             // Requested map center (user's selected location)
             mapCenter: {
@@ -112,7 +112,7 @@ const RootLayout = ({ children }) => {
             },
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
 
-            // IP-based geolocation data
+            // IP-based geolocation data (always included)
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timezoneOffset: -new Date().getTimezoneOffset(),
             cloudflare: geoData.cloudflare,
