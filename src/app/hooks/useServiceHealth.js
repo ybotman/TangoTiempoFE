@@ -53,21 +53,21 @@ export const useServiceHealth = () => {
   });
 
   useEffect(() => {
-    // Disable health checks in development to reduce console noise
-    // Azure Functions and other services may not be running locally
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[ServiceHealth] Health checks disabled in development mode');
+    // Check if health checks are disabled via .env.local flag
+    // Set NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS=true to disable (reduces CORS/localhost noise)
+    if (process.env.NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS === 'true') {
+      console.log('[ServiceHealth] Health checks disabled via NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS flag');
       // Set all services to disabled status
       setServices(prev => ({
-        expressBackend: { ...prev.expressBackend, status: 'disabled', detail: 'Dev mode' },
-        firebase: { ...prev.firebase, status: 'disabled', detail: 'Dev mode' },
-        mapbox: { ...prev.mapbox, status: 'disabled', detail: 'Dev mode' },
-        mongodb: { ...prev.mongodb, status: 'disabled', detail: 'Dev mode' },
-        googleAnalytics: { ...prev.googleAnalytics, status: 'disabled', detail: 'Dev mode' },
-        geoAPI: { ...prev.geoAPI, status: 'disabled', detail: 'Dev mode' },
-        azureFunctions: { ...prev.azureFunctions, status: 'disabled', detail: 'Dev mode' },
-        googleGeoAPI: { ...prev.googleGeoAPI, status: 'disabled', detail: 'Dev mode' },
-        cloudflare: { ...prev.cloudflare, status: 'disabled', detail: 'Dev mode' },
+        expressBackend: { ...prev.expressBackend, status: 'disabled', detail: 'Disabled by flag' },
+        firebase: { ...prev.firebase, status: 'disabled', detail: 'Disabled by flag' },
+        mapbox: { ...prev.mapbox, status: 'disabled', detail: 'Disabled by flag' },
+        mongodb: { ...prev.mongodb, status: 'disabled', detail: 'Disabled by flag' },
+        googleAnalytics: { ...prev.googleAnalytics, status: 'disabled', detail: 'Disabled by flag' },
+        geoAPI: { ...prev.geoAPI, status: 'disabled', detail: 'Disabled by flag' },
+        azureFunctions: { ...prev.azureFunctions, status: 'disabled', detail: 'Disabled by flag' },
+        googleGeoAPI: { ...prev.googleGeoAPI, status: 'disabled', detail: 'Disabled by flag' },
+        cloudflare: { ...prev.cloudflare, status: 'disabled', detail: 'Disabled by flag' },
       }));
       return; // Exit early, don't run health checks
     }
