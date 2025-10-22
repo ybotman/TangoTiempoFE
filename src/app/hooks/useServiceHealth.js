@@ -53,6 +53,25 @@ export const useServiceHealth = () => {
   });
 
   useEffect(() => {
+    // Disable health checks in development to reduce console noise
+    // Azure Functions and other services may not be running locally
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ServiceHealth] Health checks disabled in development mode');
+      // Set all services to disabled status
+      setServices(prev => ({
+        expressBackend: { ...prev.expressBackend, status: 'disabled', detail: 'Dev mode' },
+        firebase: { ...prev.firebase, status: 'disabled', detail: 'Dev mode' },
+        mapbox: { ...prev.mapbox, status: 'disabled', detail: 'Dev mode' },
+        mongodb: { ...prev.mongodb, status: 'disabled', detail: 'Dev mode' },
+        googleAnalytics: { ...prev.googleAnalytics, status: 'disabled', detail: 'Dev mode' },
+        geoAPI: { ...prev.geoAPI, status: 'disabled', detail: 'Dev mode' },
+        azureFunctions: { ...prev.azureFunctions, status: 'disabled', detail: 'Dev mode' },
+        googleGeoAPI: { ...prev.googleGeoAPI, status: 'disabled', detail: 'Dev mode' },
+        cloudflare: { ...prev.cloudflare, status: 'disabled', detail: 'Dev mode' },
+      }));
+      return; // Exit early, don't run health checks
+    }
+
     // Check all services (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
     checkExpressBackend();
     checkFirebase();
