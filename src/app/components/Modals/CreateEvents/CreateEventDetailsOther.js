@@ -1,17 +1,17 @@
 // src/components/OtherEventDetails.js
 
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  FormControl, 
-  InputLabel, 
-  MenuItem, 
-  Grid, 
-  CircularProgress, 
-  Switch, 
-  FormControlLabel, 
-  Tooltip 
+import React, { useMemo } from 'react';
+import {
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Grid,
+  CircularProgress,
+  Switch,
+  FormControlLabel,
+  Tooltip
 } from '@mui/material';
 import Select from '@mui/material/Select';
 import PropTypes from 'prop-types';
@@ -19,7 +19,16 @@ import useCategories from '@/hooks/useCategories';
 import { useOrganizers } from '@/hooks/useOrganizers';
 
 const CreateEventDetailsOther = ({ eventData, setEventData }) => {
-  const categories = useCategories(); // Fetch categories
+  const allCategories = useCategories(); // Fetch categories
+  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
+  const categories = useMemo(() =>
+    allCategories.filter(cat =>
+      cat.categoryName !== 'DayWorkshop' &&
+      cat.categoryName !== 'Trip' &&
+      cat.categoryName !== 'Unknown'
+    ),
+    [allCategories]
+  );
   const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers({ skipLocationFilter: true }); // Fetch ALL organizers for dropdown
 
   // Handle secondary category change
