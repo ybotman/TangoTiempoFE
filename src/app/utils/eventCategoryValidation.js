@@ -5,6 +5,7 @@
  * 1. SHORT events (Milonga, Practica, Class) must be < 24 hours
  * 2. LONG events (Festival, Encuentro, Marathon, Workshop) must be >= 48 hours
  * 3. SHORT and LONG categories cannot be mixed (mutual exclusion)
+ * 4. SHORT and LONG events cannot exceed 7 days (168 hours)
  *
  * RegionalAdmin bypasses all validation.
  */
@@ -54,6 +55,13 @@ export const validateEventCategoryRules = (eventData, selectedRole) => {
       const categoryName = categoryFirst === 'Workshop' ? 'Workshops' : `${categoryFirst}s`;
       errors.push(`${categoryName} must be 48 hours or longer. Current duration: ${Math.round(durationHours)} hours.`);
     }
+  }
+
+  // Rule 4: SHORT and LONG events cannot exceed 7 days (168 hours)
+  const isShortOrLong = SHORT_CATEGORIES.includes(categoryFirst) || LONG_CATEGORIES.includes(categoryFirst);
+  if (isShortOrLong && durationHours > 168) {
+    const durationDays = Math.round(durationHours / 24);
+    errors.push(`Events cannot exceed 7 days. Current duration: ${durationDays} days (${Math.round(durationHours)} hours).`);
   }
 
   // Rule 3: Mutual exclusion - SHORT and LONG cannot be mixed
