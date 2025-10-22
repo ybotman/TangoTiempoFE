@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'; // Import prop-types
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
+import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
 
 const RootLayout = ({ children }) => {
@@ -34,6 +35,9 @@ const RootLayout = ({ children }) => {
 
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
+        // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
+        const browserGeoData = await getGeolocationData();
+
         // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
         // TIEMPO-319: Use 24-hour cache for visitor tracking (1440 minutes)
         const geoData = await fetchAllGeolocationData(1440);
@@ -54,11 +58,18 @@ const RootLayout = ({ children }) => {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timezoneOffset: -new Date().getTimezoneOffset(), // Negate for correct sign
 
-            // Geolocation data
+            // Geolocation data (existing)
             cloudflare: geoData.cloudflare,
             google: geoData.google,
             ipapi: geoData.ipapi,
-            distance: geoData.distance
+            distance: geoData.distance,
+
+            // TIEMPO-324: 3-tier geolocation (browser GPS, Google API)
+            google_browser_lat: browserGeoData.google_browser_lat,
+            google_browser_long: browserGeoData.google_browser_long,
+            google_browser_accuracy: browserGeoData.google_browser_accuracy,
+            google_api_lat: browserGeoData.google_api_lat,
+            google_api_long: browserGeoData.google_api_long
           })
         });
 
