@@ -16,9 +16,13 @@ import PropTypes from 'prop-types';
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
   const allCategories = useCategories(); // Fetch categories
-  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro)
+  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
   const categories = useMemo(() =>
-    allCategories.filter(cat => cat.categoryName !== 'DayWorkshop'),
+    allCategories.filter(cat =>
+      cat.categoryName !== 'DayWorkshop' &&
+      cat.categoryName !== 'Trip' &&
+      cat.categoryName !== 'Unknown'
+    ),
     [allCategories]
   );
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook

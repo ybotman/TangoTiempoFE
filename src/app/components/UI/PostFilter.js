@@ -15,6 +15,7 @@ import { categoryColors } from '@/utils/categoryColors';
 
 const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
   // Define the ordered categories
+  // TIEMPO-291: Removed DayWorkshop (replaced by Encuentro), removed Trip and Unknown
   const orderedCategories = [
     'Milonga',
     'Practica',
@@ -22,17 +23,22 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
     'Marathon',
     'Festival',
     'Workshop',
-    'DayWorkshop',
-    'Trip',
-    'Other',
-    'Unknown',
+    'Encuentro',
   ];
 
   // Make a safe copy of categories if it's an array, otherwise use an empty array
   const categoriesSafe = Array.isArray(categories) ? [...categories] : [];
-  
+
+  // TIEMPO-291: Filter out DayWorkshop, Trip, and Unknown
   // Sort the categories based on their order in orderedCategories
-  const sortedCategories = categoriesSafe.filter(cat => cat && typeof cat === 'object' && cat.categoryName)
+  const sortedCategories = categoriesSafe.filter(cat =>
+    cat &&
+    typeof cat === 'object' &&
+    cat.categoryName &&
+    cat.categoryName !== 'DayWorkshop' &&
+    cat.categoryName !== 'Trip' &&
+    cat.categoryName !== 'Unknown'
+  )
     .sort((a, b) => {
       const indexA = orderedCategories.indexOf(a.categoryName);
       const indexB = orderedCategories.indexOf(b.categoryName);

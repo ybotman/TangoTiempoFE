@@ -2,7 +2,7 @@
  * Event Category Duration Validation (TIEMPO-291)
  *
  * Rules:
- * 1. SHORT events (Milonga, Practica, Class) must be < 24 hours
+ * 1. SHORT events (Milonga, Practica, Class) must be >= 15 minutes and < 24 hours
  * 2. LONG events (Festival, Encuentro, Marathon, Workshop) must be >= 48 hours
  * 3. SHORT and LONG categories cannot be mixed (mutual exclusion)
  * 4. SHORT and LONG events cannot exceed 7 days (168 hours)
@@ -40,9 +40,14 @@ export const validateEventCategoryRules = (eventData, selectedRole) => {
   }
 
   const durationHours = eventData.endDate.diff(eventData.startDate, 'hour', true);
+  const durationMinutes = eventData.endDate.diff(eventData.startDate, 'minute', true);
 
-  // Rule 1: SHORT events must be < 24 hours
+  // Rule 1: SHORT events must be >= 15 minutes and < 24 hours
   if (SHORT_CATEGORIES.includes(categoryFirst)) {
+    if (durationMinutes < 15) {
+      const categoryName = categoryFirst === 'Class' ? 'Classes' : `${categoryFirst}s`;
+      errors.push(`${categoryName} must be at least 15 minutes. Current duration: ${Math.round(durationMinutes)} minutes.`);
+    }
     if (durationHours >= 24) {
       const categoryName = categoryFirst === 'Class' ? 'Classes' : `${categoryFirst}s`;
       errors.push(`${categoryName} must be less than 24 hours. Current duration: ${Math.round(durationHours)} hours.`);

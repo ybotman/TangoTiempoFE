@@ -20,9 +20,13 @@ import { useOrganizers } from '@/hooks/useOrganizers';
 
 const CreateEventDetailsOther = ({ eventData, setEventData }) => {
   const allCategories = useCategories(); // Fetch categories
-  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro)
+  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
   const categories = useMemo(() =>
-    allCategories.filter(cat => cat.categoryName !== 'DayWorkshop'),
+    allCategories.filter(cat =>
+      cat.categoryName !== 'DayWorkshop' &&
+      cat.categoryName !== 'Trip' &&
+      cat.categoryName !== 'Unknown'
+    ),
     [allCategories]
   );
   const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers({ skipLocationFilter: true }); // Fetch ALL organizers for dropdown
