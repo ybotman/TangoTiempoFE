@@ -12,9 +12,35 @@ export const usePostFilter = (events, categories, selectedOrganizers = [], selec
     }
   }, [categories]);
 
-  // Update handleCategoryChange to toggle categories
+  // TIEMPO-327: Two-stage toggle behavior
+  // Stage 1: When all categories are ON, clicking one turns OFF all others
+  // Stage 2: Normal toggle behavior after that
   const handleCategoryChange = (categoryName) => {
     setActiveCategories((prevCategories) => {
+      // Safety check: ensure categories exist and have data
+      if (!categories || categories.length === 0) {
+        // Fallback to normal toggle if categories not loaded
+        if (prevCategories.includes(categoryName)) {
+          return prevCategories.filter((cat) => cat !== categoryName);
+        } else {
+          return [...prevCategories, categoryName];
+        }
+      }
+
+      // Get all valid category names (excluding filtered ones like DayWorkshop, Trip, Unknown)
+      const allCategoryNames = categories.map((cat) => cat.categoryName);
+
+      // Stage 1: "Select Only This" - When ALL categories are active
+      const allCategoriesActive = allCategoryNames.every((catName) =>
+        prevCategories.includes(catName)
+      );
+
+      if (allCategoriesActive) {
+        // Turn off all others, keep only the clicked category
+        return [categoryName];
+      }
+
+      // Stage 2: Normal Toggle
       if (prevCategories.includes(categoryName)) {
         // Remove the category
         return prevCategories.filter((cat) => cat !== categoryName);
