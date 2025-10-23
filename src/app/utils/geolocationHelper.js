@@ -42,21 +42,16 @@ export const getBrowserGeolocation = async () => {
 };
 
 /**
- * Priority 2: Get Google Geolocation API coordinates
+ * Priority 2: Get Google Geolocation API coordinates (via AFA proxy)
  * No permission required, uses WiFi/cell towers
  * @returns {Promise<object|null>} { lat, long } or null
  */
 export const getGoogleAPIGeolocation = async () => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
-
-  if (!apiKey) {
-    console.warn('[Geolocation] Google API key not configured');
-    return null;
-  }
+  const afaUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+      `${afaUrl}/api/geo/google-geolocate`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,10 +61,11 @@ export const getGoogleAPIGeolocation = async () => {
     );
 
     if (!response.ok) {
-      throw new Error(`Google API error: ${response.status}`);
+      throw new Error(`AFA Google Geo API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const result = await response.json();
+    const data = result.data || result; // Handle AFA wrapper
 
     if (!data.location?.lat || !data.location?.lng) {
       throw new Error('No location data in response');

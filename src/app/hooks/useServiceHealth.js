@@ -376,24 +376,11 @@ export const useServiceHealth = () => {
   };
 
   const checkGoogleGeoAPI = async () => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
-
-    if (!apiKey) {
-      setServices(prev => ({
-        ...prev,
-        googleGeoAPI: {
-          name: 'Google Geo',
-          status: 'disabled',
-          detail: 'API key not configured',
-          accuracy: null
-        }
-      }));
-      return;
-    }
+    const afaUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
     try {
       const response = await fetch(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+        `${afaUrl}/api/geo/google-geolocate`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -403,8 +390,9 @@ export const useServiceHealth = () => {
       );
 
       if (response.ok) {
-        const data = await response.json();
-        // Google returns { location: { lat, lng }, accuracy }
+        const result = await response.json();
+        // AFA returns { success, data: { location: { lat, lng }, accuracy } }
+        const data = result.data || result; // Handle both AFA and direct response formats
         const latitude = data.location?.lat;
         const longitude = data.location?.lng;
         const accuracy = data.accuracy || null; // in meters

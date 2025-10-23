@@ -59,7 +59,6 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
 
   console.log('[Tracking] Fetching fresh geolocation data...');
   const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
-  const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
 
   // Fetch Cloudflare and Google in parallel using Promise.allSettled for graceful failures
   const [cloudflareResult, googleResult] = await Promise.allSettled([
@@ -68,16 +67,16 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
       signal: AbortSignal.timeout(2000)
     }).then(res => res.ok ? res.json() : null),
 
-    // 2. Google Geolocation API
-    googleApiKey ? fetch(
-      `https://www.googleapis.com/geolocation/v1/geolocate?key=${googleApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ considerIp: true }),
-        signal: AbortSignal.timeout(2000)
-      }
-    ).then(res => res.ok ? res.json() : null) : Promise.resolve(null)
+    // 2. Google Geolocation API (via AFA proxy)
+    fetch(`${afUrl}/api/geo/google-geolocate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ considerIp: true }),
+      signal: AbortSignal.timeout(2000)
+    }).then(res => {
+      if (!res.ok) return null;
+      return res.json().then(result => result.data || result);
+    })
   ]);
 
   // Extract data from settled promises
