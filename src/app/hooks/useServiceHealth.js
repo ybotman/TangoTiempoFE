@@ -72,7 +72,8 @@ export const useServiceHealth = () => {
       return; // Exit early, don't run health checks
     }
 
-    // Check all services (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
+    // Check all services ONCE on mount (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
+    // User can refresh page to re-check service health
     checkExpressBackend();
     checkFirebase();
     checkMapbox();
@@ -83,20 +84,7 @@ export const useServiceHealth = () => {
     checkAzureFunctions();
     checkCloudflare();
 
-    // Re-check every 30 seconds
-    const interval = setInterval(() => {
-      checkExpressBackend();
-      checkFirebase();
-      checkMapbox();
-      checkMongoDB();
-      checkGoogleAnalytics();
-      // checkGeoAPI(); // REMOVED - Causes 429 rate limiting
-      checkGoogleGeoAPI();
-      checkAzureFunctions();
-      checkCloudflare();
-    }, 30000);
-
-    return () => clearInterval(interval);
+    // REMOVED: 30-second polling interval - no longer needed, user can refresh page if needed
   }, []);
 
   // Calculate distance between Geo API and Google Geo API when both have coordinates
