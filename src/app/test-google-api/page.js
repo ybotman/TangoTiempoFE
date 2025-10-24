@@ -15,7 +15,13 @@ export default function TestGoogleAPI() {
     setResults(null);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || 'AIzaSyBkwYU2yV-0MaxAYs4fdFbSTajhRTFkACc';
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+
+      if (!apiKey) {
+        setError('NEXT_PUBLIC_GOOGLE_API_KEY is not configured');
+        setLoading(false);
+        return;
+      }
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
       
       const response = await fetch(url);

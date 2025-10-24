@@ -53,7 +53,27 @@ export const useServiceHealth = () => {
   });
 
   useEffect(() => {
-    // Check all services (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
+    // Check if health checks are disabled via .env.local flag
+    // Set NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS=true to disable (reduces CORS/localhost noise)
+    if (process.env.NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS === 'true') {
+      console.log('[ServiceHealth] Health checks disabled via NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS flag');
+      // Set all services to disabled status
+      setServices(prev => ({
+        expressBackend: { ...prev.expressBackend, status: 'disabled', detail: 'Disabled by flag' },
+        firebase: { ...prev.firebase, status: 'disabled', detail: 'Disabled by flag' },
+        mapbox: { ...prev.mapbox, status: 'disabled', detail: 'Disabled by flag' },
+        mongodb: { ...prev.mongodb, status: 'disabled', detail: 'Disabled by flag' },
+        googleAnalytics: { ...prev.googleAnalytics, status: 'disabled', detail: 'Disabled by flag' },
+        geoAPI: { ...prev.geoAPI, status: 'disabled', detail: 'Disabled by flag' },
+        azureFunctions: { ...prev.azureFunctions, status: 'disabled', detail: 'Disabled by flag' },
+        googleGeoAPI: { ...prev.googleGeoAPI, status: 'disabled', detail: 'Disabled by flag' },
+        cloudflare: { ...prev.cloudflare, status: 'disabled', detail: 'Disabled by flag' },
+      }));
+      return; // Exit early, don't run health checks
+    }
+
+    // Check all services ONCE on mount (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
+    // User can refresh page to re-check service health
     checkExpressBackend();
     checkFirebase();
     checkMapbox();
@@ -64,20 +84,7 @@ export const useServiceHealth = () => {
     checkAzureFunctions();
     checkCloudflare();
 
-    // Re-check every 30 seconds
-    const interval = setInterval(() => {
-      checkExpressBackend();
-      checkFirebase();
-      checkMapbox();
-      checkMongoDB();
-      checkGoogleAnalytics();
-      // checkGeoAPI(); // REMOVED - Causes 429 rate limiting
-      checkGoogleGeoAPI();
-      checkAzureFunctions();
-      checkCloudflare();
-    }, 30000);
-
-    return () => clearInterval(interval);
+    // REMOVED: 30-second polling interval - no longer needed, user can refresh page if needed
   }, []);
 
   // Calculate distance between Geo API and Google Geo API when both have coordinates
@@ -369,24 +376,11 @@ export const useServiceHealth = () => {
   };
 
   const checkGoogleGeoAPI = async () => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY;
-
-    if (!apiKey) {
-      setServices(prev => ({
-        ...prev,
-        googleGeoAPI: {
-          name: 'Google Geo',
-          status: 'disabled',
-          detail: 'API key not configured',
-          accuracy: null
-        }
-      }));
-      return;
-    }
+    const afaUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
     try {
       const response = await fetch(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+        `${afaUrl}/api/geo/google-geolocate`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -396,8 +390,9 @@ export const useServiceHealth = () => {
       );
 
       if (response.ok) {
-        const data = await response.json();
-        // Google returns { location: { lat, lng }, accuracy }
+        const result = await response.json();
+        // AFA returns { success, data: { location: { lat, lng }, accuracy } }
+        const data = result.data || result; // Handle both AFA and direct response formats
         const latitude = data.location?.lat;
         const longitude = data.location?.lng;
         const accuracy = data.accuracy || null; // in meters

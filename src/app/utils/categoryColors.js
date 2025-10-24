@@ -7,7 +7,7 @@ export const categoryColors = {
   Marathon: 'Orange',
   Class: 'yellow',
   Workshop: 'HotPink',
-  DayWorkshop: 'PaleGreen',
+  Encuentro: 'PaleGreen',
   Trip: 'yellowGreen',
   Unknown: 'lightGrey',
 

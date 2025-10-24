@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { validateEventCategoryRules } from '@/utils/eventCategoryValidation'; // TIEMPO-291
 
 // TIEMPO-246: Configure dayjs for venue timezone support
 dayjs.extend(utc);
@@ -310,26 +311,76 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [validationErrors, setValidationErrors] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [categoryValidationErrors, setCategoryValidationErrors] = useState([]); // TIEMPO-291
+  const [dateValidationErrors, setDateValidationErrors] = useState([]); // Date validation errors
+
+  // TIEMPO-291: Validate category rules whenever dates or categories change
+  useEffect(() => {
+    if (eventData.startDate && eventData.endDate && eventData.categoryFirst) {
+      const validation = validateEventCategoryRules(eventData, selectedRole);
+      setCategoryValidationErrors(validation.errors);
+    } else {
+      setCategoryValidationErrors([]);
+    }
+  }, [eventData.startDate, eventData.endDate, eventData.categoryFirst, eventData.categorySecond, eventData.categoryThird, selectedRole]);
+
+  // Validate dates whenever they change
+  useEffect(() => {
+    const errors = [];
+
+    if (eventData.startDate && (!eventData.startDate.isValid || !eventData.startDate.isValid())) {
+      errors.push('Start date is invalid. Please select a valid date.');
+    }
+
+    if (eventData.endDate && (!eventData.endDate.isValid || !eventData.endDate.isValid())) {
+      errors.push('End date is invalid. Please select a valid date.');
+    }
+
+    if (eventData.startDate && eventData.endDate &&
+        eventData.startDate.isValid && eventData.startDate.isValid() &&
+        eventData.endDate.isValid && eventData.endDate.isValid() &&
+        eventData.endDate.isBefore(eventData.startDate)) {
+      errors.push('End date cannot be before start date.');
+    }
+
+    setDateValidationErrors(errors);
+  }, [eventData.startDate, eventData.endDate]);
 
   // Import event operations hook
   const { createEvent, updateEvent } = useEventOperations();
-  
+
   // Check if all required fields are filled
   const isFormValid = () => {
+    // Check for invalid dates first
+    const datesValid = !!(
+      eventData.startDate &&
+      eventData.endDate &&
+      eventData.startDate.isValid &&
+      eventData.startDate.isValid() &&
+      eventData.endDate.isValid &&
+      eventData.endDate.isValid() &&
+      !eventData.endDate.isBefore(eventData.startDate)
+    );
+
     // Basic validation for all events
     const basicValidation = !!(
       eventData.title?.trim() &&
       (eventData.shortTitle?.trim() || eventData.shortName?.trim()) &&
-      eventData.startDate &&
-      eventData.endDate &&
+      datesValid &&
       eventData.categoryFirstId &&
       eventData.venueId &&
       eventData.description?.trim()
     );
 
-    // If not a repeating event, basic validation is enough
+    // TIEMPO-291: Check category validation (blocks save for RegionalOrganizer)
+    const categoryValid = categoryValidationErrors.length === 0;
+
+    // Check date validation (blocks save when dates are invalid)
+    const dateValid = dateValidationErrors.length === 0;
+
+    // If not a repeating event, basic validation + category validation + date validation is enough
     if (!eventData.isRepeating) {
-      return basicValidation;
+      return basicValidation && categoryValid && dateValid;
     }
 
     // Additional validation for repeating events
@@ -371,28 +422,41 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
     }
 
-    return basicValidation && hasRecurrenceType && hasRecurrenceDays && hasValidEndCondition;
+    return basicValidation && categoryValid && dateValid && hasRecurrenceType && hasRecurrenceDays && hasValidEndCondition;
   };
 
   const validateEventData = () => {
     const errors = [];
-    
+
     // Check required fields
     if (!eventData.title || eventData.title.trim() === '') {
       errors.push({ field: 'Title', message: 'Event title is required', required: true });
     }
-    
-    if ((!eventData.shortTitle || eventData.shortTitle.trim() === '') && 
+
+    if ((!eventData.shortTitle || eventData.shortTitle.trim() === '') &&
         (!eventData.shortName || eventData.shortName.trim() === '')) {
       errors.push({ field: 'Short Title', message: 'Short title is required (max 15 characters)', required: true });
     }
-    
+
     if (!eventData.startDate) {
       errors.push({ field: 'Start Date', message: 'Event start date is required', required: true });
+    } else if (!eventData.startDate.isValid || !eventData.startDate.isValid()) {
+      errors.push({ field: 'Start Date', message: 'Start date is invalid. Please select a valid date.', required: true });
     }
-    
+
     if (!eventData.endDate) {
       errors.push({ field: 'End Date', message: 'Event end date is required', required: true });
+    } else if (!eventData.endDate.isValid || !eventData.endDate.isValid()) {
+      errors.push({ field: 'End Date', message: 'End date is invalid. Please select a valid date.', required: true });
+    }
+
+    // Check if end date is before start date (only if both dates are valid)
+    if (eventData.startDate && eventData.endDate &&
+        eventData.startDate.isValid && eventData.startDate.isValid() &&
+        eventData.endDate.isValid && eventData.endDate.isValid()) {
+      if (eventData.endDate.isBefore(eventData.startDate)) {
+        errors.push({ field: 'End Date', message: 'End date cannot be before start date', required: true });
+      }
     }
     
     if (!eventData.categoryFirstId) {
@@ -801,7 +865,35 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             {saveError}
           </Alert>
         )}
-        
+
+        {/* Date validation errors */}
+        {dateValidationErrors.length > 0 && (
+          <Alert severity="error" sx={{ my: 1 }}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>
+              Date Validation Error:
+            </Typography>
+            {dateValidationErrors.map((error, index) => (
+              <Typography key={index} variant="body2">
+                • {error}
+              </Typography>
+            ))}
+          </Alert>
+        )}
+
+        {/* TIEMPO-291: Category validation errors */}
+        {categoryValidationErrors.length > 0 && (
+          <Alert severity="error" sx={{ my: 1 }}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>
+              Category Validation Error:
+            </Typography>
+            {categoryValidationErrors.map((error, index) => (
+              <Typography key={index} variant="body2">
+                • {error}
+              </Typography>
+            ))}
+          </Alert>
+        )}
+
         {/* Success message */}
         {saveSuccess && (
           <Alert severity="success" sx={{ my: 1 }}>

@@ -30,7 +30,7 @@ The `NEXT_PUBLIC_FIREBASE_JSON` value is base64-encoded. When decoded, it return
 
 ```json
 {
-  "apiKey": "AIzaSyBbyJuxuCIY-BwxLPItpQbtegAkAMo755o",
+  "apiKey": "AIzaSy[REDACTED - Use NEXT_PUBLIC_FIREBASE_JSON env var]",
   "authDomain": "tangotiempo-257ff.firebaseapp.com",
   "projectId": "tangotiempo-257ff",
   "storageBucket": "tangotiempo-257ff.appspot.com",
@@ -39,6 +39,8 @@ The `NEXT_PUBLIC_FIREBASE_JSON` value is base64-encoded. When decoded, it return
   "measurementId": "G-8DED6NXCJ8"
 }
 ```
+
+**Note**: The actual Firebase configuration is stored securely in the `NEXT_PUBLIC_FIREBASE_JSON` environment variable (base64-encoded). Never commit raw API keys to version control.
 
 ---
 

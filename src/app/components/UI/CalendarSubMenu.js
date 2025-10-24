@@ -39,6 +39,17 @@ const CalendarSubMenu = ({ menuAnchor, handleClose, menuItems, onActionSelected 
       onClose={handleClose}
       anchorReference="anchorPosition"
       anchorPosition={getAdjustedPosition()}
+      disableRestoreFocus
+      slotProps={{
+        root: {
+          slotProps: {
+            backdrop: {
+              // Prevent aria-hidden on backdrop when menu items have focus
+              invisible: false,
+            },
+          },
+        },
+      }}
     >
       {menuItems.map((item, index) => (
         <MenuItem key={index} onClick={() => onActionSelected(item.action)}>

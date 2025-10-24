@@ -64,7 +64,6 @@ const GeoComparisonDashboard = () => {
   const [error, setError] = useState(null);
 
   const afUrl = typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_AF_URL : '';
-  const googleApiKey = typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_GOOGLE_GEO_API_KEY : '';
 
   /**
    * Test all geolocation services simultaneously
@@ -157,11 +156,11 @@ const GeoComparisonDashboard = () => {
       });
     }
 
-    // Test 3: Google Geolocation API (Frontend - current)
+    // Test 3: Google Geolocation API (via AFA proxy)
     const googleStart = Date.now();
     try {
       const response = await fetch(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${googleApiKey}`,
+        `${afUrl}/api/geo/google-geolocate`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -169,7 +168,8 @@ const GeoComparisonDashboard = () => {
           signal: AbortSignal.timeout(5000)
         }
       );
-      const data = await response.json();
+      const apiResponse = await response.json();
+      const data = apiResponse.data || apiResponse; // Handle AFA wrapper
 
       // Store Google result for Mapbox test
       const googleLat = data.location?.lat;
@@ -177,7 +177,7 @@ const GeoComparisonDashboard = () => {
 
       testResults.push({
         name: 'Google Geo API',
-        status: response.ok ? 'success' : 'error',
+        status: apiResponse.success && response.ok ? 'success' : 'error',
         ip: '-',
         latitude: googleLat || '-',
         longitude: googleLng || '-',
@@ -186,8 +186,8 @@ const GeoComparisonDashboard = () => {
         country: '-',
         accuracy: data.accuracy ? `${(data.accuracy / 1000).toFixed(1)}km` : '-',
         responseTime: `${Date.now() - googleStart}ms`,
-        error: data.error?.message || null,
-        source: 'Frontend (Direct)',
+        error: apiResponse.error?.message || data.error?.message || null,
+        source: 'Azure Function',
       });
 
       // Test 4: Mapbox Reverse Geocoding (AF)

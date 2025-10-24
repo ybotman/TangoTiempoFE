@@ -269,6 +269,39 @@ const SidebarDrawer = ({ open, onClose }) => {
                 <ListItemText primary="User Settings" />
               </ListItem>
 
+              {/* Event Organizer Settings - moved next to User Settings */}
+              {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
+                <>
+                  <ListItem
+                    button="true"
+                    onClick={() => {
+                      setRegionalOrganizerOpen(true);
+                      onClose();
+                    }}
+                  >
+                    <ListItemIcon>
+                      <GroupIcon sx={{ color: 'green' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Event Organizer Settings" />
+                  </ListItem>
+
+                  {/* Venues - nested under Event Organizer Settings */}
+                  <ListItem
+                    button="true"
+                    onClick={() => {
+                      setVenueModalOpen(true);
+                      onClose();
+                    }}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon>
+                      <BusinessIcon sx={{ color: 'teal' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Venues" secondary="Manage event locations" />
+                  </ListItem>
+                </>
+              )}
+
               {/* TIEMPO-259: Map Center Menu Item */}
               <ListItem
                 button="true"
@@ -305,25 +338,9 @@ const SidebarDrawer = ({ open, onClose }) => {
                   </ListItem>
                 </Link>
               )}
-              
+
               {/* Role-specific menu items */}
-              {selectedRole === listOfAllRoles.REGIONAL_ORGANIZER && (
-            <>
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setRegionalOrganizerOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <GroupIcon sx={{ color: 'green' }} />
-                </ListItemIcon>
-                <ListItemText primary="Event Organizer Settings" />
-              </ListItem>
-            </>
-          )}
-          {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
+              {selectedRole === listOfAllRoles.SYSTEM_ADMIN && (
             <>
               <ListItem
                 button="true"
@@ -390,33 +407,11 @@ const SidebarDrawer = ({ open, onClose }) => {
               {/* Close authentication section */}
             </>
           )}
-          
-          {/* Venues - Top level for Regional Organizers and Regional Admins */}
-          {(selectedRole === listOfAllRoles.REGIONAL_ORGANIZER ||
-            selectedRole === listOfAllRoles.REGIONAL_ADMIN) && (
-            <>
-              <Divider />
-              <Typography variant="caption" color="textSecondary" sx={{ pl: 2, pt: 1 }}>
-                Event Management
-              </Typography>
-              <ListItem
-                button="true"
-                onClick={() => {
-                  setVenueModalOpen(true);
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <BusinessIcon sx={{ color: 'teal' }} />
-                </ListItemIcon>
-                <ListItemText primary="Venues" />
-              </ListItem>
-            </>
-          )}
-          
+
           <Divider />
 
-          {/* Event Explorer - Top Level */}
+          {/* Event Explorer - TEMPORARILY HIDDEN - Will be re-enabled later */}
+          {/*
           <Link href="/explorer" passHref>
             <ListItem
               button="true"
@@ -425,13 +420,14 @@ const SidebarDrawer = ({ open, onClose }) => {
               <ListItemIcon>
                 <PublicIcon sx={{ color: 'primary.main' }} />
               </ListItemIcon>
-              <ListItemText 
-                primary="Event Explorer" 
+              <ListItemText
+                primary="Event Explorer"
                 secondary="Discover events worldwide"
               />
             </ListItem>
           </Link>
-          
+          */}
+
           {/* Information Accordion - Collapsed by Default */}
           <Accordion defaultExpanded={false} sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}>
             <AccordionSummary
