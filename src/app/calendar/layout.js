@@ -8,6 +8,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
+import { getOrCreateVisitorId } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor ID tracking
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -18,10 +19,14 @@ const RootLayout = ({ children }) => {
   const selectedRegionName = selectedLocation?.region?.name;
 
   // TIEMPO-313: Visitor tracking on calendar page load (fire and forget)
+  // TIEMPO-329: Now includes visitor_id cookie for persistent identity
   useEffect(() => {
     const trackVisitor = async () => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+
+        // TIEMPO-329: Get or create persistent visitor_id (UUID cookie)
+        const visitorId = getOrCreateVisitorId();
 
         // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
         const browserGeoData = await getGeolocationData();
@@ -35,6 +40,9 @@ const RootLayout = ({ children }) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            // TIEMPO-329: Visitor identity
+            visitor_id: visitorId,
+
             // Page routing details
             pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar', // TIEMPO-323: Backend expects 'page' field
@@ -60,7 +68,7 @@ const RootLayout = ({ children }) => {
           })
         });
 
-        console.log('[Visitor Tracking] Successfully tracked visitor');
+        console.log('[Visitor Tracking] Successfully tracked visitor with ID:', visitorId);
       } catch (error) {
         // Silent failure - don't break user experience
         console.warn('[Visitor Tracking] Failed:', error.message);
