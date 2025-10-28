@@ -75,21 +75,26 @@ const WelcomeModal = ({ open, onClose }) => {
   const [userState, setUserState] = useState(null);
   const [internalOpen, setInternalOpen] = useState(false);
 
-  // Determine user state on mount and when user changes
+  // BUGFIX: Determine user state ONLY ONCE on mount
+  // Lock the state to prevent race condition where cookie gets created mid-render
   useEffect(() => {
-    const state = determineUserState(user);
-    setUserState(state);
-    console.log('[WelcomeModal] User state determined:', state);
+    // Only determine state if not already set
+    if (userState === null) {
+      const state = determineUserState(user);
+      setUserState(state);
+      console.log('[WelcomeModal] User state determined (locked):', state);
 
-    // Only show modal for states that require it
-    if (state === 'FIRST_TIME_VISITOR' ||
-        state === 'RETURNING_VISITOR' ||
-        state === 'FIRST_LOGIN_USER') {
-      setInternalOpen(true);
-    } else {
-      setInternalOpen(false);
+      // Only show modal for states that require it
+      if (state === 'FIRST_TIME_VISITOR' ||
+          state === 'RETURNING_VISITOR' ||
+          state === 'FIRST_LOGIN_USER') {
+        setInternalOpen(true);
+      } else {
+        setInternalOpen(false);
+      }
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]); // Only re-run if user login state changes
 
   /**
    * Handle "Get Started" button click
