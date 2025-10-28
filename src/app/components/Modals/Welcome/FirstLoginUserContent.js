@@ -8,7 +8,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   DialogTitle,
   DialogContent,
@@ -28,7 +28,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CategoryIcon from '@mui/icons-material/Category';
 import PeopleIcon from '@mui/icons-material/People';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 
 /**
  * FirstLoginUserContent Component
@@ -40,7 +40,7 @@ import { useAuth } from '@/contexts/AuthContext';
  * @param {Function} props.onSkip - Callback when user clicks "Remind Me Later"
  */
 const FirstLoginUserContent = ({ onGetStarted, onSkip }) => {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   const [checklist, setChecklist] = useState([
     {
       id: 'location',

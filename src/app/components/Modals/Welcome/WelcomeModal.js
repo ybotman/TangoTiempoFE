@@ -13,9 +13,9 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Dialog, Slide } from '@mui/material';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import {
   isFirstTimeVisitor,
@@ -70,7 +70,7 @@ const determineUserState = (user) => {
  * @param {Function} props.onClose - Callback when modal closes
  */
 const WelcomeModal = ({ open, onClose }) => {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   const { openMapCenterModal } = useGeoLocation();
   const [userState, setUserState] = useState(null);
   const [internalOpen, setInternalOpen] = useState(false);
