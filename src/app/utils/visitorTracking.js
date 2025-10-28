@@ -16,6 +16,7 @@ const WELCOME_SHOWN_KEY = 'welcome_shown';
 const WELCOME_SHOWN_AT_KEY = 'welcome_shown_at';
 const VISITOR_FIRST_VISIT_KEY = 'visitor_first_visit';
 const LAST_MAP_CENTER_KEY = 'last_map_center';
+const VISIT_COUNT_KEY = 'visit_count'; // TIEMPO-329: Track visit number for onboarding flow
 
 /**
  * Get or create a persistent visitor ID using UUID
@@ -236,9 +237,54 @@ export const clearVisitorData = () => {
     localStorage.removeItem(WELCOME_SHOWN_AT_KEY);
     localStorage.removeItem(VISITOR_FIRST_VISIT_KEY);
     localStorage.removeItem(LAST_MAP_CENTER_KEY);
+    localStorage.removeItem(VISIT_COUNT_KEY);
   }
 
   console.log('[Visitor] All visitor data cleared');
+};
+
+/**
+ * Increment and get visit count
+ * Call this on each page load to track visitor return behavior
+ *
+ * @returns {number} Current visit number (1, 2, 3, ...)
+ *
+ * @example
+ * const visitNum = incrementVisitCount();
+ * // Returns: 1 (first visit), 2 (second), etc.
+ */
+export const incrementVisitCount = () => {
+  if (typeof localStorage === 'undefined') return 1;
+
+  const current = parseInt(localStorage.getItem(VISIT_COUNT_KEY) || '0', 10);
+  const next = current + 1;
+
+  localStorage.setItem(VISIT_COUNT_KEY, next.toString());
+  console.log('[Visitor] Visit count:', next);
+
+  return next;
+};
+
+/**
+ * Get current visit count without incrementing
+ *
+ * @returns {number} Current visit number (0 if never visited)
+ */
+export const getVisitCount = () => {
+  if (typeof localStorage === 'undefined') return 0;
+  return parseInt(localStorage.getItem(VISIT_COUNT_KEY) || '0', 10);
+};
+
+/**
+ * Reset visit count (for testing)
+ *
+ * @example
+ * resetVisitCount(); // Next visit will be #1
+ */
+export const resetVisitCount = () => {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.removeItem(VISIT_COUNT_KEY);
+  console.log('[Visitor] Visit count reset');
 };
 
 /**
@@ -257,6 +303,7 @@ export const getVisitorState = () => {
     welcomeShown: wasWelcomeShown(),
     welcomeShownAt: getWelcomeShownAt(),
     firstVisit: getFirstVisitTimestamp(),
-    lastMapCenter: getLastMapCenter()
+    lastMapCenter: getLastMapCenter(),
+    visitCount: getVisitCount()
   };
 };

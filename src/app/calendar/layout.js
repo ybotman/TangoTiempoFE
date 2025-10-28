@@ -12,7 +12,7 @@ import { getOrCreateVisitorId } from '@/utils/visitorTracking'; // TIEMPO-329: V
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { selectedLocation } = useGeoLocation();
+  const { selectedLocation, currentLocation, setSessionLocation } = useGeoLocation();
 
   // Extract stable values to prevent infinite loops
   const userDisplayName = user?.displayName;
@@ -30,6 +30,22 @@ const RootLayout = ({ children }) => {
 
         // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
         const browserGeoData = await getGeolocationData();
+
+        // TIEMPO-329 Phase 1.1: Auto-center map from GPS if no location selected
+        // If no saved location AND GPS available, set as default map center (75mi zoom)
+        if ((!currentLocation?.lat && !currentLocation?.lng) &&
+            browserGeoData?.google_browser_lat &&
+            browserGeoData?.google_browser_long) {
+
+          console.log('[Auto-Center] Setting map center from GPS:',
+            browserGeoData.google_browser_lat, browserGeoData.google_browser_long);
+
+          setSessionLocation({
+            lat: browserGeoData.google_browser_lat,
+            lng: browserGeoData.google_browser_long,
+            zoomRange: 75  // 75-mile radius as requested
+          });
+        }
 
         // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
         const geoData = await fetchAllGeolocationData();

@@ -20,11 +20,14 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import {
   isFirstTimeVisitor,
   wasWelcomeShown,
-  setWelcomeShown
+  setWelcomeShown,
+  getVisitCount,
+  incrementVisitCount
 } from '@/utils/visitorTracking';
 import FirstTimeVisitorContent from './FirstTimeVisitorContent';
 import ReturningVisitorContent from './ReturningVisitorContent';
 import FirstLoginUserContent from './FirstLoginUserContent';
+import SignupPromptContent from './SignupPromptContent';
 
 // Transition animation for modal
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -33,20 +36,28 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 /**
  * Determine which user state applies
+ * TIEMPO-329 Phase 1.1: Simplified onboarding pattern
  *
  * @param {Object} user - Firebase user object (null if not logged in)
- * @returns {string} User state: FIRST_TIME_VISITOR, RETURNING_VISITOR, FIRST_LOGIN_USER, or LOGGED_IN_RETURNING
+ * @returns {string} User state: FIRST_TIME_VISITOR, WELCOME_BACK, SIGNUP_PROMPT, FIRST_LOGIN_USER, or SILENT
  */
 const determineUserState = (user) => {
+  // Increment visit count on each page load
+  const visitCount = incrementVisitCount();
+
+  console.log('[WelcomeModal] Visit #', visitCount, '| User:', user ? 'logged in' : 'anonymous');
+
   // Priority 1: Check authentication status
   if (!user) {
-    // Anonymous visitor
-    if (isFirstTimeVisitor() && !wasWelcomeShown()) {
-      return 'FIRST_TIME_VISITOR';  // Show full welcome modal
-    } else if (!isFirstTimeVisitor() && !wasWelcomeShown()) {
-      return 'RETURNING_VISITOR';  // Show welcome back banner
+    // Anonymous visitor - use visit counter pattern
+    if (visitCount === 1) {
+      return 'FIRST_TIME_VISITOR';  // Visit 1: Full welcome
+    } else if (visitCount === 2) {
+      return 'WELCOME_BACK';  // Visit 2: Welcome back
+    } else if (visitCount >= 5) {
+      return 'SIGNUP_PROMPT';  // Visit 5+: Encourage signup
     } else {
-      return 'ANONYMOUS_RETURNING';  // No modal
+      return 'SILENT';  // Visits 3-4: Silent load
     }
   } else {
     // Authenticated user
@@ -138,13 +149,8 @@ const WelcomeModal = ({ open, onClose }) => {
 
   // Don't render if state doesn't require modal
   if (!userState ||
-      userState === 'ANONYMOUS_RETURNING' ||
+      userState === 'SILENT' ||
       userState === 'LOGGED_IN_RETURNING') {
-    return null;
-  }
-
-  // Don't render if welcome was already shown
-  if (wasWelcomeShown()) {
     return null;
   }
 
@@ -172,8 +178,15 @@ const WelcomeModal = ({ open, onClose }) => {
         />
       )}
 
-      {userState === 'RETURNING_VISITOR' && (
+      {userState === 'WELCOME_BACK' && (
         <ReturningVisitorContent
+          onClose={handleSkip}
+        />
+      )}
+
+      {userState === 'SIGNUP_PROMPT' && (
+        <SignupPromptContent
+          onSignup={handleSkip}
           onClose={handleSkip}
         />
       )}
