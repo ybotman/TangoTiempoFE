@@ -15,6 +15,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { Dialog, Slide } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import {
@@ -22,7 +23,8 @@ import {
   wasWelcomeShown,
   setWelcomeShown,
   getVisitCount,
-  incrementVisitCount
+  incrementVisitCount,
+  getLastMapCenter
 } from '@/utils/visitorTracking';
 import FirstTimeVisitorContent from './FirstTimeVisitorContent';
 import ReturningVisitorContent from './ReturningVisitorContent';
@@ -81,8 +83,9 @@ const determineUserState = (user) => {
  * @param {Function} props.onClose - Callback when modal closes
  */
 const WelcomeModal = ({ open, onClose }) => {
+  const router = useRouter();
   const { user } = useContext(AuthContext);
-  const { openMapCenterModal } = useGeoLocation();
+  const { openMapCenterModal, setSessionLocation } = useGeoLocation();
   const [userState, setUserState] = useState(null);
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -108,22 +111,72 @@ const WelcomeModal = ({ open, onClose }) => {
   }, [user]); // Only re-run if user login state changes
 
   /**
-   * Handle "Get Started" button click
+   * Handle "Select My Location" button click
+   * Checks for stored location first, restores if available, otherwise opens map modal
+   */
+  const handleSelectLocation = () => {
+    // Check for stored location
+    const storedLocation = getLastMapCenter();
+
+    if (storedLocation) {
+      console.log('[WelcomeModal] Restoring previous location:', storedLocation);
+
+      // Restore location to session
+      setSessionLocation(storedLocation);
+
+      // Mark welcome as shown
+      setWelcomeShown();
+
+      // Close modal
+      setInternalOpen(false);
+      onClose();
+    } else {
+      console.log('[WelcomeModal] No stored location, opening MapCenterModal');
+
+      // No stored location - open map modal
+      setWelcomeShown();
+      setInternalOpen(false);
+      onClose();
+
+      // Small delay to let welcome modal close first
+      setTimeout(() => {
+        openMapCenterModal();
+      }, 300);
+    }
+  };
+
+  /**
+   * Handle "Sign Up" button click
+   * Redirects to signup page
+   */
+  const handleSignup = () => {
+    console.log('[WelcomeModal] Redirecting to signup');
+    setWelcomeShown();
+    setInternalOpen(false);
+    onClose();
+    router.push('/auth/signup');
+  };
+
+  /**
+   * Handle "Login" link click
+   * Redirects to login page
+   */
+  const handleLogin = () => {
+    console.log('[WelcomeModal] Redirecting to login');
+    setWelcomeShown();
+    setInternalOpen(false);
+    onClose();
+    router.push('/auth/login');
+  };
+
+  /**
+   * Handle "Get Started" button click (for other user states)
    * Marks welcome as shown and opens appropriate next action
    */
   const handleGetStarted = () => {
     setWelcomeShown();
 
-    if (userState === 'FIRST_TIME_VISITOR') {
-      // Open map center modal for location selection
-      console.log('[WelcomeModal] Opening MapCenterModal for first-time visitor');
-      setInternalOpen(false);
-      onClose();
-      // Small delay to let welcome modal close first
-      setTimeout(() => {
-        openMapCenterModal();
-      }, 300);
-    } else if (userState === 'RETURNING_VISITOR') {
+    if (userState === 'RETURNING_VISITOR') {
       // Just close - location is already restored
       console.log('[WelcomeModal] Closing for returning visitor');
       setInternalOpen(false);
@@ -173,8 +226,9 @@ const WelcomeModal = ({ open, onClose }) => {
       {/* Render appropriate content based on user state */}
       {userState === 'FIRST_TIME_VISITOR' && (
         <FirstTimeVisitorContent
-          onGetStarted={handleGetStarted}
-          onSkip={handleSkip}
+          onSelectLocation={handleSelectLocation}
+          onSignup={handleSignup}
+          onLogin={handleLogin}
         />
       )}
 
