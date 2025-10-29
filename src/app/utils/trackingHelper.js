@@ -157,3 +157,16 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
 
   return result;
 };
+
+/**
+ * Get cached geolocation data without making new API calls
+ * Used by MapCenterModal to set intelligent default location
+ *
+ * @returns {object|null} Cached geolocation data or null if no cache
+ * @returns {object.cloudflare} Cloudflare data (ip, country, ray)
+ * @returns {object.google} Google Geolocation API data (latitude, longitude, accuracy)
+ * @returns {object.mapbox} Mapbox reverse geocode data (city, region, country)
+ */
+export const getCachedGeolocation = () => {
+  return geolocationCache;
+};
