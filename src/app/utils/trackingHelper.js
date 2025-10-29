@@ -47,6 +47,17 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
   const CACHE_DURATION = cacheMinutes * 60 * 1000; // Convert minutes to milliseconds
 
+  // Skip Azure Functions calls on localhost (prevents 403 errors when AF not running)
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('[Tracking] Skipping geolocation fetch on localhost - Azure Functions not running');
+    return {
+      cloudflare: null,
+      google: null,
+      mapbox: null,
+      distance: null
+    };
+  }
+
   // Check cache first
   if (geolocationCache && cacheTimestamp) {
     const cacheAge = Date.now() - cacheTimestamp;
