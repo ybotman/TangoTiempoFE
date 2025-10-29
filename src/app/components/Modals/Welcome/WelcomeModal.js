@@ -100,7 +100,8 @@ const WelcomeModal = ({ open, onClose }) => {
 
       // Only show modal for states that require it
       if (state === 'FIRST_TIME_VISITOR' ||
-          state === 'RETURNING_VISITOR' ||
+          state === 'WELCOME_BACK' ||
+          state === 'SIGNUP_PROMPT' ||
           state === 'FIRST_LOGIN_USER') {
         setInternalOpen(true);
       } else {
