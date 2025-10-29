@@ -13,6 +13,8 @@ import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
 import LocationPromptManager from '@/components/LocationPromptManager';
 import UserLocationLoader from '@/components/UserLocationLoader';
+import { getCachedGeolocation } from '@/utils/trackingHelper';
+import { getCountryMapLocation } from '@/utils/countryCenter';
 import dynamic from 'next/dynamic';
 
 // Dynamic import to avoid SSR issues with Leaflet
@@ -32,13 +34,48 @@ const MapCenterModalWrapper = () => {
     savedLocation
   } = useGeoLocation();
 
+  // Smart fallback chain for initial location:
+  // 1. currentLocation (user's explicit selection)
+  // 2. savedLocation (user's saved preference)
+  // 3. Google geolocation (from tracking cache - best accuracy)
+  // 4. Cloudflare country center (country-level fallback)
+  // 5. null (no default - let modal handle it)
+  const getInitialLocation = () => {
+    // Priority 1 & 2: User selections
+    if (currentLocation) return currentLocation;
+    if (savedLocation) return savedLocation;
+
+    // Priority 3 & 4: Cached geolocation data
+    const cachedGeo = getCachedGeolocation();
+
+    // Try Google geolocation (most accurate)
+    if (cachedGeo?.google?.latitude && cachedGeo?.google?.longitude) {
+      return {
+        lat: cachedGeo.google.latitude,
+        lng: cachedGeo.google.longitude,
+        zoomRange: 50
+      };
+    }
+
+    // Fallback to Cloudflare country center
+    if (cachedGeo?.cloudflare?.country) {
+      const countryLocation = getCountryMapLocation(cachedGeo.cloudflare.country);
+      if (countryLocation) {
+        return countryLocation;
+      }
+    }
+
+    // No fallback - modal will handle null location
+    return null;
+  };
+
   return (
     <MapCenterModal
       open={mapCenterModalOpen}
       onClose={closeMapCenterModal}
       onSetLocation={setSessionLocation}
       onSaveLocation={saveToCloudDefault}
-      initialLocation={currentLocation || savedLocation}
+      initialLocation={getInitialLocation()}
       savedLocation={savedLocation}
     />
   );
