@@ -47,6 +47,17 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
   const CACHE_DURATION = cacheMinutes * 60 * 1000; // Convert minutes to milliseconds
 
+  // Skip Azure Functions calls on localhost (prevents 403 errors when AF not running)
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('[Tracking] Skipping geolocation fetch on localhost - Azure Functions not running');
+    return {
+      cloudflare: null,
+      google: null,
+      mapbox: null,
+      distance: null
+    };
+  }
+
   // Check cache first
   if (geolocationCache && cacheTimestamp) {
     const cacheAge = Date.now() - cacheTimestamp;
@@ -145,4 +156,17 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
   cacheTimestamp = Date.now();
 
   return result;
+};
+
+/**
+ * Get cached geolocation data without making new API calls
+ * Used by MapCenterModal to set intelligent default location
+ *
+ * @returns {object|null} Cached geolocation data or null if no cache
+ * @returns {object.cloudflare} Cloudflare data (ip, country, ray)
+ * @returns {object.google} Google Geolocation API data (latitude, longitude, accuracy)
+ * @returns {object.mapbox} Mapbox reverse geocode data (city, region, country)
+ */
+export const getCachedGeolocation = () => {
+  return geolocationCache;
 };

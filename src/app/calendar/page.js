@@ -29,6 +29,8 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
+import WelcomeModal from '@/components/Modals/Welcome/WelcomeModal'; // TIEMPO-329: Welcome modal
+import { wasWelcomeShown } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor tracking
 
 const CalendarPage = () => {
   <Head>
@@ -47,10 +49,13 @@ const CalendarPage = () => {
 
   // State to track if we've auto-opened the map
   const [hasAutoOpenedMap, setHasAutoOpenedMap] = useState(false);
-  
+
+  // TIEMPO-329: Welcome modal state
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
   // Get GeoLocation context for auto-opening map
   const { openLocationSettings, openMapCenterModal } = useGeoLocation();
-  
+
   // Get auth context to check if user is logged in
   const { user } = useContext(AuthContext);
 
@@ -619,9 +624,20 @@ const CalendarPage = () => {
     };
   }, [calendarRef]); // Add calendarRef to the dependency array
 
-  // Auto-open map if no location is selected
+  // TIEMPO-329: Show welcome modal on first page load (takes precedence over map auto-open)
   useEffect(() => {
-    if (noLocationSelected && !hasAutoOpenedMap) {
+    if (!wasWelcomeShown()) {
+      // Delay slightly to ensure page is ready
+      const timer = setTimeout(() => {
+        setShowWelcomeModal(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Auto-open map if no location is selected (only if welcome wasn't shown)
+  useEffect(() => {
+    if (noLocationSelected && !hasAutoOpenedMap && wasWelcomeShown()) {
       // Small delay to ensure page is loaded
       const timer = setTimeout(() => {
         if (!user) {
@@ -633,7 +649,7 @@ const CalendarPage = () => {
         }
         setHasAutoOpenedMap(true);
       }, 500);
-      
+
       return () => clearTimeout(timer);
     }
   }, [noLocationSelected, hasAutoOpenedMap, openLocationSettings, openMapCenterModal, user]);
@@ -1039,6 +1055,12 @@ const CalendarPage = () => {
         open={isAIDetailModalOpen}
         onClose={() => setAIDetailModalOpen(false)}
         eventDetails={selectedAIEventDetails}
+      />
+
+      {/* TIEMPO-329: Welcome Modal - Shows on first visit based on user state */}
+      <WelcomeModal
+        open={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
       />
 
       {/* TIEMPO-311: Floating map icon button - shows when no modals are open */}

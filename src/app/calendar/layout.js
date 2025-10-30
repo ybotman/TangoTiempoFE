@@ -8,23 +8,44 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
+import { getOrCreateVisitorId } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor ID tracking
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { selectedLocation } = useGeoLocation();
+  const { selectedLocation, currentLocation, setSessionLocation } = useGeoLocation();
 
   // Extract stable values to prevent infinite loops
   const userDisplayName = user?.displayName;
   const selectedRegionName = selectedLocation?.region?.name;
 
   // TIEMPO-313: Visitor tracking on calendar page load (fire and forget)
+  // TIEMPO-329: Now includes visitor_id cookie for persistent identity
   useEffect(() => {
     const trackVisitor = async () => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
+        // TIEMPO-329: Get or create persistent visitor_id (UUID cookie)
+        const visitorId = getOrCreateVisitorId();
+
         // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
         const browserGeoData = await getGeolocationData();
+
+        // TIEMPO-329 Phase 1.1: Auto-center map from GPS if no location selected
+        // If no saved location AND GPS available, set as default map center (75mi zoom)
+        if ((!currentLocation?.lat && !currentLocation?.lng) &&
+            browserGeoData?.google_browser_lat &&
+            browserGeoData?.google_browser_long) {
+
+          console.log('[Auto-Center] Setting map center from GPS:',
+            browserGeoData.google_browser_lat, browserGeoData.google_browser_long);
+
+          setSessionLocation({
+            lat: browserGeoData.google_browser_lat,
+            lng: browserGeoData.google_browser_long,
+            zoomRange: 75  // 75-mile radius as requested
+          });
+        }
 
         // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
         const geoData = await fetchAllGeolocationData();
@@ -35,6 +56,9 @@ const RootLayout = ({ children }) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            // TIEMPO-329: Visitor identity
+            visitor_id: visitorId,
+
             // Page routing details
             pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar', // TIEMPO-323: Backend expects 'page' field
@@ -60,7 +84,7 @@ const RootLayout = ({ children }) => {
           })
         });
 
-        console.log('[Visitor Tracking] Successfully tracked visitor');
+        console.log('[Visitor Tracking] Successfully tracked visitor with ID:', visitorId);
       } catch (error) {
         // Silent failure - don't break user experience
         console.warn('[Visitor Tracking] Failed:', error.message);

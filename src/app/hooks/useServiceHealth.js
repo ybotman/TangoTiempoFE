@@ -72,6 +72,10 @@ export const useServiceHealth = () => {
       return; // Exit early, don't run health checks
     }
 
+    // Detect localhost environment
+    const isLocalhost = typeof window !== 'undefined' &&
+                       window.location.hostname === 'localhost';
+
     // Check all services ONCE on mount (TIEMPO-321: Removed checkGeoAPI from auto-checks to prevent rate limiting)
     // User can refresh page to re-check service health
     checkExpressBackend();
@@ -80,8 +84,30 @@ export const useServiceHealth = () => {
     checkMongoDB();
     checkGoogleAnalytics();
     // checkGeoAPI(); // REMOVED - Only check manually in GeoComparisonDashboard (ipapi.co 1K/month limit)
-    checkGoogleGeoAPI();
-    checkAzureFunctions();
+
+    // Skip Azure Functions checks on localhost (prevents 403 errors when AF not running)
+    if (!isLocalhost) {
+      checkGoogleGeoAPI();
+      checkAzureFunctions();
+    } else {
+      console.log('[ServiceHealth] Skipping Azure Functions checks on localhost');
+      setServices(prev => ({
+        ...prev,
+        googleGeoAPI: {
+          name: 'Google Geo',
+          status: 'disabled',
+          detail: 'Localhost mode - AF not running',
+          accuracy: null
+        },
+        azureFunctions: {
+          name: 'AF Health',
+          status: 'disabled',
+          detail: 'Localhost mode - AF not running',
+          accuracy: null
+        }
+      }));
+    }
+
     checkCloudflare();
 
     // REMOVED: 30-second polling interval - no longer needed, user can refresh page if needed

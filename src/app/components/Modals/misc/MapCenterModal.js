@@ -31,22 +31,22 @@ const MapCenterModal = ({
   onClose,
   onSetLocation,
   onSaveLocation,
-  initialLocation = { lat: 40.7128, lng: -74.0060, zoomRange: 50 },
+  initialLocation = null, // No hardcoded default - use smart fallback from Providers
 
 }) => {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const circleRef = useRef(null);
-  
+
   const [mapInitialized, setMapInitialized] = useState(false);
-  const [centerLat, setCenterLat] = useState(initialLocation.lat || '');
-  const [centerLng, setCenterLng] = useState(initialLocation.lng || '');
-  const [zoomRange, setZoomRange] = useState(initialLocation.zoomRange || 50);
+  const [centerLat, setCenterLat] = useState(initialLocation?.lat || '');
+  const [centerLng, setCenterLng] = useState(initialLocation?.lng || '');
+  const [zoomRange, setZoomRange] = useState(initialLocation?.zoomRange || 50);
   // Removed scale text - not needed
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
