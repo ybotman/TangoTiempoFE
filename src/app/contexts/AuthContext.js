@@ -623,22 +623,34 @@ export const AuthProvider = ({ children }) => {
 
   // Password Reset
   const resetPassword = async (email) => {
-// TIEMPO-276: Security cleanup - removed logging
     try {
-      setLoading(true);
-      setError('');
-      
-// TIEMPO-276: Security cleanup - removed logging
+      // NOTE: Do NOT call setLoading/setError here - it causes AuthContext state changes
+      // that unmount/remount child components, losing their local state!
+      // The calling component handles its own loading state.
+
+      // First, check what sign-in methods are available for this email
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+      if (signInMethods.length === 0) {
+        return {
+          success: false,
+          error: 'No account found with this email address. Please check the email or sign up first.'
+        };
+      }
+
+      if (!signInMethods.includes('password')) {
+        return {
+          success: false,
+          error: `This account uses ${signInMethods.join(', ')} sign-in. Please use that method to login instead of resetting your password.`
+        };
+      }
+
       await sendPasswordResetEmail(auth, email);
-// TIEMPO-276: Security cleanup - removed logging
-      
-      setLoading(false);
+
       return { success: true };
     } catch (err) {
-      console.error('Error sending password reset email:', err);
-      console.error('Error code:', err.code);
-      console.error('Error message:', err.message);
-      
+      console.error('Password reset error:', err.code, err.message);
+
       let errorMessage = 'Failed to send password reset email.';
       if (err.code === 'auth/user-not-found') {
         errorMessage = 'No account found with this email address.';
@@ -647,9 +659,7 @@ export const AuthProvider = ({ children }) => {
       } else if (err.code === 'auth/too-many-requests') {
         errorMessage = 'Too many requests. Please try again later.';
       }
-      
-      setError(errorMessage);
-      setLoading(false);
+
       return { success: false, error: errorMessage };
     }
   };
