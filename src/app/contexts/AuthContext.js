@@ -93,40 +93,45 @@ export const AuthProvider = ({ children }) => {
 // TIEMPO-276: Security cleanup - removed logging
 
       // Track login analytics (fire and forget - non-blocking)
-      const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+      // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('[Login Tracking] Skipping on localhost - Azure Functions not running');
+      } else {
+        const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
-      // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
-      getGeolocationData().then(browserGeoData => {
-        // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-        // TIEMPO-319: Use 8-hour cache for login tracking (480 minutes)
-        fetchAllGeolocationData(480).then(geoData => {
-          fetch(`${afUrl}/api/user/login-track`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${idToken}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              loginType: loginType, // 'auto' or 'manual'
-              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
+        // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
+        getGeolocationData().then(browserGeoData => {
+          // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
+          // TIEMPO-319: Use 8-hour cache for login tracking (480 minutes)
+          fetchAllGeolocationData(480).then(geoData => {
+            fetch(`${afUrl}/api/user/login-track`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                loginType: loginType, // 'auto' or 'manual'
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
 
-              // Existing geolocation data
-              cloudflare: geoData.cloudflare,
-              google: geoData.google,
-              ipapi: geoData.ipapi,
-              distance: geoData.distance,
+                // Existing geolocation data
+                cloudflare: geoData.cloudflare,
+                google: geoData.google,
+                ipapi: geoData.ipapi,
+                distance: geoData.distance,
 
-              // TIEMPO-324: 3-tier geolocation (browser GPS, Google API)
-              google_browser_lat: browserGeoData.google_browser_lat,
-              google_browser_long: browserGeoData.google_browser_long,
-              google_browser_accuracy: browserGeoData.google_browser_accuracy,
-              google_api_lat: browserGeoData.google_api_lat,
-              google_api_long: browserGeoData.google_api_long
-            })
-          }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
-        }).catch(err => console.warn('[Login Tracking] Geolocation fetch failed:', err.message));
-      }).catch(err => console.warn('[Login Tracking] Browser geolocation failed:', err.message));
+                // TIEMPO-324: 3-tier geolocation (browser GPS, Google API)
+                google_browser_lat: browserGeoData.google_browser_lat,
+                google_browser_long: browserGeoData.google_browser_long,
+                google_browser_accuracy: browserGeoData.google_browser_accuracy,
+                google_api_lat: browserGeoData.google_api_lat,
+                google_api_long: browserGeoData.google_api_long
+              })
+            }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
+          }).catch(err => console.warn('[Login Tracking] Geolocation fetch failed:', err.message));
+        }).catch(err => console.warn('[Login Tracking] Browser geolocation failed:', err.message));
+      }
 
 // TIEMPO-276: Security cleanup - removed logging
 
