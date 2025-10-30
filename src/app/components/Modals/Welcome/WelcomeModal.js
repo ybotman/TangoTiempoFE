@@ -61,10 +61,10 @@ const determineUserState = (user) => {
       state = 'FIRST_TIME_VISITOR';  // Visit 1: Full welcome
     } else if (visitCount === 2) {
       state = 'WELCOME_BACK';  // Visit 2: Welcome back
-    } else if (visitCount >= 5) {
-      state = 'SIGNUP_PROMPT';  // Visit 5+: Encourage signup
+    } else if (visitCount >= 5 && visitCount % 5 === 0) {
+      state = 'SIGNUP_PROMPT';  // Visits 5, 10, 15, 20...: Encourage signup
     } else {
-      state = 'SILENT';  // Visits 3-4: Silent load
+      state = 'SILENT';  // All other visits: Silent load
     }
     console.log('[WelcomeModal DEBUG] Anonymous user state:', state);
     return state;
