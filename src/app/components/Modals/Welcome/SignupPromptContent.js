@@ -19,7 +19,8 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Link
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -34,16 +35,10 @@ import StarIcon from '@mui/icons-material/Star';
  *
  * @param {Object} props
  * @param {Function} props.onSignup - Callback when user clicks "Create Account"
+ * @param {Function} props.onLogin - Callback when user clicks "Login" link
  * @param {Function} props.onClose - Callback when user clicks "Maybe Later"
  */
-const SignupPromptContent = ({ onSignup, onClose }) => {
-  const handleSignup = () => {
-    // TODO: Navigate to signup page
-    console.log('[SignupPrompt] User clicked Create Account');
-    onClose();
-    // For now, just close - Phase 2 will implement actual signup
-    // window.location.href = '/signup';
-  };
+const SignupPromptContent = ({ onSignup, onLogin, onClose }) => {
 
   return (
     <>
@@ -115,21 +110,38 @@ const SignupPromptContent = ({ onSignup, onClose }) => {
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">
-          Maybe Later
-        </Button>
-        <Button
-          onClick={handleSignup}
-          variant="contained"
-          size="large"
-          sx={{
-            bgcolor: '#0ea5e9',
-            '&:hover': { bgcolor: '#0284c7' }
-          }}
-        >
-          Create Free Account
-        </Button>
+      <DialogActions sx={{ flexDirection: 'column', gap: 1, px: 3, pb: 2 }}>
+        {/* Login link row */}
+        <Box sx={{ width: '100%', textAlign: 'center', mb: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Already have an account?{' '}
+            <Link
+              component="button"
+              onClick={onLogin}
+              sx={{ cursor: 'pointer' }}
+            >
+              Login
+            </Link>
+          </Typography>
+        </Box>
+
+        {/* Action buttons row */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Button onClick={onClose} color="inherit">
+            Maybe Later
+          </Button>
+          <Button
+            onClick={onSignup}
+            variant="contained"
+            size="large"
+            sx={{
+              bgcolor: '#0ea5e9',
+              '&:hover': { bgcolor: '#0284c7' }
+            }}
+          >
+            Create Free Account
+          </Button>
+        </Box>
       </DialogActions>
     </>
   );
