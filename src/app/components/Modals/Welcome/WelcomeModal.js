@@ -234,7 +234,7 @@ const WelcomeModal = ({ open, onClose }) => {
 
   return (
     <Dialog
-      open={open && internalOpen}
+      open={internalOpen}
       onClose={handleSkip}
       TransitionComponent={Transition}
       maxWidth="md"
