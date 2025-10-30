@@ -46,30 +46,41 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const determineUserState = (user) => {
   // Increment visit count on each page load
   const visitCount = incrementVisitCount();
+  const welcomeShown = wasWelcomeShown();
 
-  console.log('[WelcomeModal] Visit #', visitCount, '| User:', user ? 'logged in' : 'anonymous');
+  console.log('[WelcomeModal DEBUG] ======================');
+  console.log('[WelcomeModal DEBUG] Visit count:', visitCount);
+  console.log('[WelcomeModal DEBUG] User authenticated:', user ? 'YES' : 'NO');
+  console.log('[WelcomeModal DEBUG] Welcome shown before:', welcomeShown);
 
   // Priority 1: Check authentication status
   if (!user) {
     // Anonymous visitor - use visit counter pattern
+    let state;
     if (visitCount === 1) {
-      return 'FIRST_TIME_VISITOR';  // Visit 1: Full welcome
+      state = 'FIRST_TIME_VISITOR';  // Visit 1: Full welcome
     } else if (visitCount === 2) {
-      return 'WELCOME_BACK';  // Visit 2: Welcome back
+      state = 'WELCOME_BACK';  // Visit 2: Welcome back
     } else if (visitCount >= 5) {
-      return 'SIGNUP_PROMPT';  // Visit 5+: Encourage signup
+      state = 'SIGNUP_PROMPT';  // Visit 5+: Encourage signup
     } else {
-      return 'SILENT';  // Visits 3-4: Silent load
+      state = 'SILENT';  // Visits 3-4: Silent load
     }
+    console.log('[WelcomeModal DEBUG] Anonymous user state:', state);
+    return state;
   } else {
     // Authenticated user
     const isFirstLogin = localStorage.getItem('is_first_login') === 'true';
+    console.log('[WelcomeModal DEBUG] First login flag:', isFirstLogin);
 
-    if (isFirstLogin && !wasWelcomeShown()) {
-      return 'FIRST_LOGIN_USER';  // Show onboarding checklist
+    let state;
+    if (isFirstLogin && !welcomeShown) {
+      state = 'FIRST_LOGIN_USER';  // Show onboarding checklist
     } else {
-      return 'LOGGED_IN_RETURNING';  // No modal, auto-load prefs
+      state = 'LOGGED_IN_RETURNING';  // No modal, auto-load prefs
     }
+    console.log('[WelcomeModal DEBUG] Authenticated user state:', state);
+    return state;
   }
 };
 
@@ -92,21 +103,31 @@ const WelcomeModal = ({ open, onClose }) => {
   // BUGFIX: Determine user state ONLY ONCE on mount
   // Lock the state to prevent race condition where cookie gets created mid-render
   useEffect(() => {
+    console.log('[WelcomeModal DEBUG] useEffect triggered, userState:', userState, 'user:', user ? 'authenticated' : 'anonymous');
+
     // Only determine state if not already set
     if (userState === null) {
       const state = determineUserState(user);
       setUserState(state);
-      console.log('[WelcomeModal] User state determined (locked):', state);
+      console.log('[WelcomeModal DEBUG] User state locked:', state);
 
       // Only show modal for states that require it
-      if (state === 'FIRST_TIME_VISITOR' ||
-          state === 'WELCOME_BACK' ||
-          state === 'SIGNUP_PROMPT' ||
-          state === 'FIRST_LOGIN_USER') {
+      const shouldOpen = state === 'FIRST_TIME_VISITOR' ||
+                         state === 'WELCOME_BACK' ||
+                         state === 'SIGNUP_PROMPT' ||
+                         state === 'FIRST_LOGIN_USER';
+
+      console.log('[WelcomeModal DEBUG] Should open modal?', shouldOpen, '(state:', state + ')');
+
+      if (shouldOpen) {
         setInternalOpen(true);
+        console.log('[WelcomeModal DEBUG] Setting internalOpen = TRUE');
       } else {
         setInternalOpen(false);
+        console.log('[WelcomeModal DEBUG] Setting internalOpen = FALSE');
       }
+    } else {
+      console.log('[WelcomeModal DEBUG] User state already set to:', userState, '- skipping determination');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]); // Only re-run if user login state changes
@@ -205,8 +226,11 @@ const WelcomeModal = ({ open, onClose }) => {
   if (!userState ||
       userState === 'SILENT' ||
       userState === 'LOGGED_IN_RETURNING') {
+    console.log('[WelcomeModal DEBUG] Early return - NOT rendering modal. State:', userState);
     return null;
   }
+
+  console.log('[WelcomeModal DEBUG] Rendering modal. State:', userState, 'open:', open, 'internalOpen:', internalOpen);
 
   return (
     <Dialog
@@ -226,31 +250,43 @@ const WelcomeModal = ({ open, onClose }) => {
     >
       {/* Render appropriate content based on user state */}
       {userState === 'FIRST_TIME_VISITOR' && (
-        <FirstTimeVisitorContent
-          onSelectLocation={handleSelectLocation}
-          onSignup={handleSignup}
-          onLogin={handleLogin}
-        />
+        <>
+          {console.log('[WelcomeModal DEBUG] Rendering: FirstTimeVisitorContent')}
+          <FirstTimeVisitorContent
+            onSelectLocation={handleSelectLocation}
+            onSignup={handleSignup}
+            onLogin={handleLogin}
+          />
+        </>
       )}
 
       {userState === 'WELCOME_BACK' && (
-        <ReturningVisitorContent
-          onClose={handleSkip}
-        />
+        <>
+          {console.log('[WelcomeModal DEBUG] Rendering: ReturningVisitorContent')}
+          <ReturningVisitorContent
+            onClose={handleSkip}
+          />
+        </>
       )}
 
       {userState === 'SIGNUP_PROMPT' && (
-        <SignupPromptContent
-          onSignup={handleSkip}
-          onClose={handleSkip}
-        />
+        <>
+          {console.log('[WelcomeModal DEBUG] Rendering: SignupPromptContent')}
+          <SignupPromptContent
+            onSignup={handleSkip}
+            onClose={handleSkip}
+          />
+        </>
       )}
 
       {userState === 'FIRST_LOGIN_USER' && (
-        <FirstLoginUserContent
-          onGetStarted={handleGetStarted}
-          onSkip={handleSkip}
-        />
+        <>
+          {console.log('[WelcomeModal DEBUG] Rendering: FirstLoginUserContent')}
+          <FirstLoginUserContent
+            onGetStarted={handleGetStarted}
+            onSkip={handleSkip}
+          />
+        </>
       )}
     </Dialog>
   );
