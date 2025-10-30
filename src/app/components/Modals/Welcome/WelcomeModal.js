@@ -273,7 +273,8 @@ const WelcomeModal = ({ open, onClose }) => {
         <>
           {console.log('[WelcomeModal DEBUG] Rendering: SignupPromptContent')}
           <SignupPromptContent
-            onSignup={handleSkip}
+            onSignup={handleSignup}
+            onLogin={handleLogin}
             onClose={handleSkip}
           />
         </>
