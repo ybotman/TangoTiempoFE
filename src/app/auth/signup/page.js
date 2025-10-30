@@ -177,6 +177,16 @@ const SignUpPage = () => {
             </Typography>
           </Box>
 
+          {/* Info about multiple sign-in methods */}
+          <Alert severity="info" sx={{ width: '100%', mb: 3 }}>
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <strong>Good to know:</strong> You can use the same email address with different sign-in methods (Google, Apple, Facebook, or Email).
+            </Typography>
+            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+              Your account stays the same, but some advanced features work best when you use Google or Apple sign-in.
+            </Typography>
+          </Alert>
+
           {/* Login prompt at the top */}
           <Box sx={{ mb: 3, textAlign: 'center' }}>
             <Typography variant="body1">

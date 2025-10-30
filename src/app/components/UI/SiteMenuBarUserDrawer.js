@@ -152,12 +152,15 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
 
         {!user ? (
           <Box>
-            <Button variant="contained" color="primary" fullWidth href="/auth/login" sx={{ marginBottom: 2 }}>
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ marginBottom: 2 }}>
+              Are you new to TangoTiempo?
+            </Typography>
+            <Button variant="contained" color="primary" fullWidth href="/auth/login" sx={{ marginBottom: 1 }}>
               Sign In
             </Button>
-            <Typography variant="body2" color="text.secondary" align="center">
-              New to TangoTiempo? Create an account when you sign in.
-            </Typography>
+            <Button variant="outlined" color="primary" fullWidth href="/auth/signup">
+              Create Account
+            </Button>
           </Box>
         ) : (
           <Box>

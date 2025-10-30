@@ -423,6 +423,40 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Save to Cloud Default via Azure Functions (TIEMPO-312 Phase 2)
   const saveToCloudDefault = useCallback(async (locationData, firebaseToken) => {
+    // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('[GeoLocationContext] Skipping Cloud Default save on localhost - Azure Functions not running');
+
+      // Still update local state and sessionStorage for localhost testing
+      const location = {
+        lat: locationData.lat,
+        lng: locationData.lng,
+        radiusMiles: locationData.zoomRange || 50
+      };
+
+      setSavedLocation({
+        lat: location.lat,
+        lng: location.lng,
+        zoomRange: location.radiusMiles
+      });
+
+      setCurrentLocationState({
+        lat: location.lat,
+        lng: location.lng,
+        zoomRange: location.radiusMiles
+      });
+
+      sessionStorage.setItem('currentLocation', JSON.stringify({
+        lat: location.lat,
+        lng: location.lng,
+        zoomRange: location.radiusMiles
+      }));
+
+      locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+
+      return { success: true, message: 'Saved locally (localhost mode)' };
+    }
+
     // Backend accepts radiusMiles (5-200) for search distance
     // and optional zoom (1-20) for visual map zoom level
     const location = {
@@ -479,6 +513,26 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Fetch user's saved map center from Azure Functions Cloud Default (TIEMPO-312 Phase 2)
   const fetchMapCenter = useCallback(async (firebaseToken) => {
+    // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('[GeoLocationContext] Skipping Cloud Default fetch on localhost - Azure Functions not running');
+
+      // Check sessionStorage for locally saved location
+      const savedLocal = sessionStorage.getItem('currentLocation');
+      if (savedLocal) {
+        try {
+          const location = JSON.parse(savedLocal);
+          setSavedLocation(location);
+          setCurrentLocationState(location);
+          return location;
+        } catch (err) {
+          console.warn('[GeoLocationContext] Failed to parse saved location from sessionStorage:', err);
+        }
+      }
+
+      return null; // No saved location on localhost
+    }
+
     const azureFunctionsURL = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
     try {
