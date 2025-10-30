@@ -25,6 +25,7 @@ const ResetPasswordPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -32,7 +33,6 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TIEMPO-276: Security cleanup - removed email logging
     setError('');
     setSuccess(false);
 
@@ -48,23 +48,22 @@ const ResetPasswordPage = () => {
     }
 
     setLoading(true);
-    // TIEMPO-276: Security cleanup - removed function call logging
-    
+
     try {
       const result = await resetPassword(email);
-      // TIEMPO-276: Security cleanup - removed result logging
-      
-      if (result.success) {
+
+      if (result && result.success) {
+        setLoading(false);
         setSuccess(true);
-        setEmail('');
+        // Keep email in field so user can resend if needed
       } else {
-        setError(result.error || 'Failed to send reset email');
+        setLoading(false);
+        setError(result?.error || 'Failed to send reset email');
       }
     } catch (err) {
       console.error('Password reset error:', err);
-      setError('An unexpected error occurred');
-    } finally {
       setLoading(false);
+      setError('An unexpected error occurred');
     }
   };
 
@@ -92,11 +91,14 @@ const ResetPasswordPage = () => {
           {/* Success Message */}
           {success && (
             <Alert severity="success" sx={{ width: '100%', mb: 2 }}>
-              <Typography variant="body2">
-                Password reset email sent! Check your inbox for instructions.
+              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                ✓ Email Sent Successfully!
               </Typography>
-              <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                Didn&apos;t receive it? Check your spam folder or try again.
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                We&apos;ve sent a password reset link to your email address. Click the link in the email to reset your password.
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
+                💡 Didn&apos;t receive it? Check your spam/junk folder, or click &quot;Send Reset Email&quot; below to try again.
               </Typography>
             </Alert>
           )}
@@ -109,38 +111,36 @@ const ResetPasswordPage = () => {
           )}
 
           {/* Form */}
-          {!success && (
-            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                InputProps={{
-                  startAdornment: <EmailIcon sx={{ mr: 1, color: 'action.active' }} />,
-                }}
-              />
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus={!success}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              InputProps={{
+                startAdornment: <EmailIcon sx={{ mr: 1, color: 'action.active' }} />,
+              }}
+            />
 
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, py: 1.5 }}
-                disabled={loading || authLoading}
-                data-testid="reset-password-submit"
-              >
-                {loading ? <CircularProgress size={24} /> : 'Send Reset Email'}
-              </Button>
-            </Box>
-          )}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, py: 1.5 }}
+              disabled={loading || authLoading}
+              data-testid="reset-password-submit"
+            >
+              {loading ? <CircularProgress size={24} /> : success ? 'Resend Reset Email' : 'Send Reset Email'}
+            </Button>
+          </Box>
 
           {/* Back to Login Link */}
           <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 0.5 }}>
