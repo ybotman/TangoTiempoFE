@@ -177,7 +177,7 @@ const LoginPage = () => {
               <strong>Good to know:</strong> You can use the same email address with different sign-in methods (Google, Apple, Facebook, or Email).
             </Typography>
             <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-              Your account stays the same, but some advanced features work best when you use Google or Apple sign-in.
+              Your account stays the same, but some advanced features work best when you use Facebook, Google, or Apple sign-in.
             </Typography>
           </Alert>
 
