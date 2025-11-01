@@ -20,6 +20,43 @@ const RootLayout = ({ children }) => {
 
   // TIEMPO-313: Visitor tracking on calendar page load (fire and forget)
   // TIEMPO-329: Now includes visitor_id cookie for persistent identity
+  // 🚨 HOT FIX 2025-11-01: DISABLED TO STOP GOOGLE API CHARGES
+  // TODO: Re-enable after Maps Platform free tier is configured
+  // See: docs/TRACKING-SYSTEM-DEEP-DIVE-ANALYSIS.md
+  useEffect(() => {
+    console.log('[Visitor Tracking] DISABLED - Hot fix to stop Google API charges');
+    console.log('[Visitor Tracking] Re-enable after Maps Platform $200 free tier is configured');
+
+    // KEEP AUTO-CENTER FEATURE (doesn't cost money)
+    const autoCenter = async () => {
+      try {
+        // TIEMPO-324: Get browser GPS only (no Google API call)
+        const browserGeoData = await getGeolocationData();
+
+        // TIEMPO-329 Phase 1.1: Auto-center map from GPS if no location selected
+        if ((!currentLocation?.lat && !currentLocation?.lng) &&
+            browserGeoData?.google_browser_lat &&
+            browserGeoData?.google_browser_long) {
+
+          console.log('[Auto-Center] Setting map center from GPS:',
+            browserGeoData.google_browser_lat, browserGeoData.google_browser_long);
+
+          setSessionLocation({
+            lat: browserGeoData.google_browser_lat,
+            lng: browserGeoData.google_browser_long,
+            zoomRange: 75  // 75-mile radius as requested
+          });
+        }
+      } catch (error) {
+        console.warn('[Auto-Center] Failed:', error.message);
+      }
+    };
+
+    autoCenter();
+  }, []); // Empty dependency array - only fire once on mount
+
+  // 🚨 ORIGINAL TRACKING CODE - COMMENTED OUT TO STOP CHARGES
+  /*
   useEffect(() => {
     const trackVisitor = async () => {
       try {
@@ -94,6 +131,7 @@ const RootLayout = ({ children }) => {
     // Track visitor once on mount
     trackVisitor();
   }, []); // Empty dependency array - only fire once on mount
+  */
 
   useEffect(() => {
     if (userDisplayName) {
@@ -107,7 +145,16 @@ const RootLayout = ({ children }) => {
   }, [userDisplayName, selectedRegionName]);
 
   // TIEMPO-323: MapCenter tracking for all users (logged-in and anonymous)
-  // Subscribe to location change events and track to backend
+  // 🚨 HOT FIX 2025-11-01: DISABLED TO STOP GOOGLE API CHARGES
+  // TODO: Re-enable after Maps Platform free tier is configured
+  useEffect(() => {
+    console.log('[MapCenter Tracking] DISABLED - Hot fix to stop Google API charges');
+    // No subscription to location events - no tracking
+    return () => {}; // No-op cleanup
+  }, [user]);
+
+  // 🚨 ORIGINAL MAP CENTER TRACKING - COMMENTED OUT TO STOP CHARGES
+  /*
   useEffect(() => {
     // Helper function to track MapCenter changes
     const trackMapCenterChange = async (location) => {
@@ -168,6 +215,7 @@ const RootLayout = ({ children }) => {
       unsubscribe();
     };
   }, [user]); // Re-subscribe if user changes (login/logout)
+  */
 
   return <>{children}</>;
 };
