@@ -13,7 +13,6 @@ import {
   OAuthProvider,
   linkWithCredential,
   EmailAuthProvider,
-  fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -420,43 +419,46 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // Get sign-in methods for this email
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      if (methods.length > 0) {
-        let existingProvider;
+      // Firebase deprecated fetchSignInMethodsForEmail
+      // Try each provider in order of likelihood: Google, Email, Facebook, Apple
+      const providers = [
+        { name: 'Google', provider: new GoogleAuthProvider() },
+        { name: 'Facebook', provider: facebookProvider },
+        { name: 'Apple', provider: new OAuthProvider('apple.com') }
+      ];
 
-        // Determine existing provider
-        if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
-          existingProvider = new GoogleAuthProvider();
-        } else if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
-          existingProvider = new EmailAuthProvider();
-        } else if (methods.includes(FacebookAuthProvider.PROVIDER_ID)) {
-          existingProvider = new FacebookAuthProvider();
-        } else if (methods.includes('apple.com')) {
-          existingProvider = new OAuthProvider('apple.com');
-        } else {
-          // Handle unknown providers gracefully
-          setError('Please sign in using your existing provider.');
-          return null;
+      // Try signing in with each provider
+      let existingUserResult = null;
+      for (const { name, provider } of providers) {
+        try {
+          console.log(`[Account Linking] Trying ${name} provider for ${email}`);
+          existingUserResult = await signInWithPopup(auth, provider);
+          console.log(`[Account Linking] Successfully signed in with ${name}`);
+          break; // Found the right provider
+        } catch (popupError) {
+          // If popup fails, try next provider
+          if (popupError.code !== 'auth/popup-closed-by-user' &&
+              popupError.code !== 'auth/cancelled-popup-request') {
+            console.log(`[Account Linking] ${name} provider failed:`, popupError.code);
+          }
+          continue;
         }
+      }
 
-        // Prompt the user to sign in with the existing provider
-        const existingUserResult = await signInWithPopup(auth, existingProvider);
-
-        // Link the pending credential to the existing user
-        await linkWithCredential(existingUserResult.user, pendingCred);
-
-        // Fetch or create user in backend
-        await handleBackendUser(existingUserResult.user);
-        await setUserData(existingUserResult.user); // Update user data
-        setLoading(false);
-        return existingUserResult.user;
-      } else {
-        // No sign-in methods found for the email
-        setError('No existing sign-in methods found for this email.');
+      if (!existingUserResult) {
+        setError('Please sign in with your existing account to link providers.');
         setLoading(false);
         return null;
       }
+
+      // Link the pending credential to the existing user
+      await linkWithCredential(existingUserResult.user, pendingCred);
+
+      // Fetch or create user in backend
+      await handleBackendUser(existingUserResult.user);
+      await setUserData(existingUserResult.user); // Update user data
+      setLoading(false);
+      return existingUserResult.user;
     } catch (linkError) {
       console.error('Error during account linking:', linkError);
       setError(linkError.message || 'An unexpected error occurred during account linking.');
@@ -633,23 +635,8 @@ export const AuthProvider = ({ children }) => {
       // that unmount/remount child components, losing their local state!
       // The calling component handles its own loading state.
 
-      // First, check what sign-in methods are available for this email
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-
-      if (signInMethods.length === 0) {
-        return {
-          success: false,
-          error: 'No account found with this email address. Please check the email or sign up first.'
-        };
-      }
-
-      if (!signInMethods.includes('password')) {
-        return {
-          success: false,
-          error: `This account uses ${signInMethods.join(', ')} sign-in. Please use that method to login instead of resetting your password.`
-        };
-      }
-
+      // Firebase deprecated fetchSignInMethodsForEmail - it now returns empty arrays
+      // Instead, just attempt to send reset email and let Firebase handle errors
       await sendPasswordResetEmail(auth, email);
 
       return { success: true };
