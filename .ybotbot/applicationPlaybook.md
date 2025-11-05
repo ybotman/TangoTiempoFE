@@ -31,6 +31,19 @@
 - **Developer**: Fulton (Douazle)
 - **Architect**: Azule (same parallel relationship as Fred/Sarah)
 
+**Infrastructure Operations (CALOPS)**:
+- **Monitoring Dashboard**: CALOPS project (separate app)
+- **Purpose**: Cost tracking and monitoring for all infrastructure services
+- **Services Monitored**:
+  - Google Cloud APIs (Geolocation, Geocoding, Time Zone, Maps)
+  - Vercel hosting (deployments, builds, bandwidth)
+  - Azure Functions (executions, duration, data transfer)
+  - Azure App Service (calendar-be compute and data)
+  - MongoDB Atlas (storage, operations, data transfer)
+- **JIRA Epic**: CALOPS-38 (Infrastructure Cost Monitoring Dashboard)
+- **Dashboard Task**: CALOPS-39 (Google Cloud Cost Tracking Dashboard)
+- **Integration**: Links to TIEMPO-332 Phase 2 cache metrics
+
 ## JIRA Integration - DO NOT USE MCP
 
 **CRITICAL**: MCP JIRA functions are broken. See `.ybotbot/retrospectivePlaybook.md` for details.
