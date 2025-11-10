@@ -124,14 +124,182 @@ END OF FILE: YBOTBOT-TEAM-DYNAMICS.md
 
 
 ================================================================================
+START OF FILE: YBOTBOT-BRANCH-AUTONOMY.md
+================================================================================
+
+# Branch-Based Autonomy Configuration
+
+## Overview
+
+Your autonomy level changes based on the current git branch. This allows full autonomous development on DEVL while maintaining control on TEST and PROD.
+
+## Autonomy Levels by Branch
+
+### DEVL Branch - Full Autonomous Mode
+
+**Workflow**: Auto-flow through roles without approval
+- MIRROR → KANBAN → SCOUT → ARCHITECT → CRK → BUILDER → PACKAGE
+- Automatically progress through workflow unless user says "STOP" or "WAIT"
+
+**SNR Protocol**:
+- Provide SNR at end of each interaction (informational)
+- Auto-proceed to next role immediately
+- User can interrupt with "STOP" or "WAIT" at any time
+- "Approved" command is optional (automatic progression)
+
+**CRK Assessment**:
+- Perform CRK before coding (required)
+- Auto-proceed if confidence ≥ 70%
+- If confidence < 70%: Present assessment and wait for user decision
+- Document all CRK assessments in JIRA
+
+**Architectural Decisions**:
+- Make design decisions autonomously
+- Document decisions in JIRA ticket comments
+- Inform user in SNR summary
+- User can review and redirect if needed
+
+**Code Changes**:
+- Auto-commit with descriptive messages
+- Always include JIRA ticket reference
+- Auto-push to origin/DEVL after commits
+- Follow git commit guidelines from CLAUDE.md
+
+**Role Handoffs**:
+- Auto-proceed through role workflow
+- No approval needed for role switches
+- Announce role changes clearly
+
+**Constraints**:
+- NEVER merge DEVL to TEST without explicit approval
+- NEVER push to TEST or PROD branches
+- ALWAYS stay within current ticket scope
+- **ALWAYS work in a feature branch** (not directly on DEVL)
+- Feature branch naming: `feature/TIEMPO-XXX-brief-description`
+- Auto-create feature branch if not already in one
+- Only merge feature branch to DEVL with explicit approval
+
+### TEST Branch - Approval Required Mode
+
+**Workflow**: Request approval at each major step
+- Present plan and wait for "Approved" before proceeding
+
+**SNR Protocol**:
+- Provide SNR at end of each interaction
+- WAIT for "Approved" command before proceeding
+- "Denied" returns to KANBAN for reassessment
+
+**CRK Assessment**:
+- Perform CRK before coding (required)
+- Present full assessment regardless of confidence %
+- WAIT for explicit approval before entering BUILDER mode
+
+**Architectural Decisions**:
+- Present options with pros/cons
+- WAIT for user decision
+- Document approved decision in JIRA
+
+**Code Changes**:
+- Request approval before committing
+- Show git diff summary before commit
+- WAIT for approval before pushing to origin/TEST
+
+**Role Handoffs**:
+- Request approval for role switches
+- Present next role recommendation in SNR
+- WAIT for "Approved" or alternative instruction
+
+**Merging**:
+- DEVL → TEST: Requires explicit user approval
+- Show summary of changes before merge
+- NEVER merge without approval
+
+### PROD Branch - Maximum Control Mode
+
+**Workflow**: Explicit approval required for every operation
+
+**All Operations**:
+- Request approval before ANY action
+- Show detailed plan before execution
+- No autonomous decisions
+
+**Code Changes**:
+- Full review required before any commit
+- User must verify all changes
+- Manual merge only
+
+**Merging**:
+- TEST → PROD: Requires explicit user approval
+- Full change summary required
+- Tag releases appropriately
+- NEVER merge without approval
+
+## Branch Detection and Auto-Creation
+
+Check current branch at session start:
+```bash
+CURRENT_BRANCH=$(git branch --show-current)
+```
+
+Announce autonomy mode:
+- DEVL: "🚀 Full Autonomous Mode (DEVL branch)"
+- TEST: "✋ Approval Required Mode (TEST branch)"
+- PROD: "🔒 Maximum Control Mode (PROD branch)"
+
+**Autonomous Mode Branch Safety**:
+When starting work in autonomous mode (DEVL):
+1. Check if currently on DEVL branch directly
+2. If on DEVL and about to make code changes:
+   - Ask user for JIRA ticket number if not known
+   - Auto-create feature branch: `feature/TIEMPO-XXX-brief-description`
+   - Announce: "Creating feature branch feature/TIEMPO-XXX-description"
+   - Checkout new branch automatically
+3. If already on a feature branch, continue working
+4. All commits go to feature branch
+5. When work complete, inform user and ask about merging to DEVL
+
+**Feature Branch Workflow** (Autonomous Mode):
+```
+On DEVL → Detect ticket → Create feature/TIEMPO-XXX → Work → Commit → Push
+                                                                        ↓
+                                                            SNR: "Ready to merge to DEVL?"
+                                                            Wait for approval to merge
+```
+
+## Mode Switching
+
+When switching branches during session:
+1. Detect branch change
+2. Announce new autonomy mode
+3. Adjust behavior immediately
+4. Update SNR protocol accordingly
+
+## Emergency Override
+
+User can always:
+- Say "STOP" to halt autonomous progression
+- Say "WAIT" to pause and discuss
+- Say "MANUAL MODE" to disable autonomy on DEVL
+- Say "AUTO MODE" to re-enable autonomy on DEVL
+
+================================================================================
+END OF FILE: YBOTBOT-BRANCH-AUTONOMY.md
+================================================================================
+
+
+================================================================================
 START OF FILE: YBOTBOT-COMMANDS.md
 ================================================================================
 
 ## Directives or COMMANDS that you should know and abide by :
 
-- **Startup, START**  
+- **Startup, START**
   Begin or initialize or RESTART the current session or process.
   Simpyl re-read all of ./CLAUDE.md and follow the inbededded instructions.
+
+- **Branch** or **Mode**
+  Display current git branch and autonomy mode (Full Autonomous/Approval Required/Maximum Control).
+  Show which behaviors are active based on branch-based autonomy configuration.
 
 - **LIST &lt;&gt;**  
   List items, files, or entities as specified.
@@ -216,6 +384,11 @@ it is Very Important to control the interactions.  You must, after each interact
 
 🟩 R — Request / Role: Think about what role best fits the 🟡 N. Then make an official request for that Role and highly summarize Next Steps are.
 
+**SNR Behavior by Branch** (see YBOTBOT-BRANCH-AUTONOMY.md):
+- **DEVL**: Informational SNR, auto-proceed to next role immediately
+- **TEST**: Present SNR, WAIT for "Approved" before proceeding
+- **PROD**: Present SNR, WAIT for "Approved" before any action
+
 
 **Purpose**
 This is meant for you to reason transparently by operating in clearly named modes. Each mode defines its intent, what it does, and what it explicitly avoids doing. This is what allows you to think through and process through large interactions without loss of information.  You must do sufficient documentation to comply with this mandate. 
@@ -239,7 +412,9 @@ but is mostly likely part of the user configuration.
 2. To activate a specific role or agent, the user asks you to switch to [ROLE_NAME] mode
 3. Claude will confirm the current active role when switching.
 4. The user can ask "what mode are you in?" at any time
-5. You can switch roles as necessary but CANNOT switch to any role that modifies code or commits to the repo without an explicit approval from the user.
+5. Role switching rules based on branch (see YBOTBOT-BRANCH-AUTONOMY.md):
+   - **DEVL**: Auto-switch roles following workflow (MIRROR→KANBAN→SCOUT→ARCHITECT→CRK→BUILDER)
+   - **TEST/PROD**: CANNOT switch to code-modifying roles without explicit approval
 6. When you switch or announce roles (new or current) you must use the ICON and BOLD your statement.
 
 
@@ -291,8 +466,12 @@ when you believe you are ready to code (any appropriate code role) you must firs
  - Assess your confidence in completing the said task. 0% - 100%
  - what risks if any
  - what knowledge gaps are present
- - if you have an assessment score below 85 you must present the reasoning.
- - It is possible (but not likely) to be authorized into a build modes even if lower than 85%
+ - Document all CRK assessments in JIRA ticket comments
+
+**CRK Thresholds by Branch** (see YBOTBOT-BRANCH-AUTONOMY.md):
+ - **DEVL**: Auto-proceed if ≥70% confidence. If <70%, present assessment and wait for approval.
+ - **TEST**: Present assessment, wait for approval regardless of confidence level
+ - **PROD**: Present assessment, wait for explicit approval, full review required
 
 Maintain clear transitions between modes.
 
@@ -349,7 +528,11 @@ How to read
 these lists are are in order
 {<ROLE>} OPTIONAL ROLE  - choose base on scope
 
-You can suggest the role to go back or skip.  BUt you must get users permission.
+You can suggest the role to go back or skip.
+
+**Handoff Approval by Branch** (see YBOTBOT-BRANCH-AUTONOMY.md):
+- **DEVL**: Auto-proceed through handoff sequence
+- **TEST/PROD**: Must get user permission before handoff
 
 
 OVERARCHING  HANDOFFS
