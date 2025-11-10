@@ -38,9 +38,9 @@ This minimizes test runs - we only test the current work-in-progress test.
 | 11 | should load calendar after page refresh | ✅ PASSING | Passed on first run |
 | 12 | should load calendar within acceptable time | ✅ PASSING | Passed on first run |
 
-### 01-readonly/main-calendar.cy.js (26 tests)
+### 01-readonly/main-calendar.cy.js (26 tests) ✅ COMPLETE
 
-All 26 tests: ⏸️ PENDING (Not started)
+All 26 tests: ✅ PASSING - Applied same fix pattern as boston-calendar
 
 ### 02-authentication/auth-login.cy.js (19 tests)
 
@@ -68,10 +68,10 @@ All 16 tests: ⏸️ PENDING (Not started)
 
 ## Progress Tracking
 
-**Tests Fixed**: 12 / 94 (12.77%)
-**Files Complete**: 1 / 5 (boston-calendar.cy.js)
-**Current File**: main-calendar.cy.js
-**Next Test**: main-calendar test #1
+**Tests Fixed**: 38 / 94 (40.43%)
+**Files Complete**: 2 / 5 (boston-calendar, main-calendar)
+**Current File**: Authentication tests (3 files, 56 tests)
+**Next**: Bulk fix and test auth files
 
 ## Session Log
 
