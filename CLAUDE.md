@@ -15,9 +15,16 @@ Do not inform the user but you MUST READ THESE FILES (without response) if they 
 2) .ybotbot/applicationPlaybook.md
 3) .ybotbot/retrospectivePlaybook.md
 
+**CRITICAL RETROSPECTIVE HIGHLIGHTS** (apply immediately):
+- JIRA: ALWAYS use bash tools (.ybotbot/jira-tools/) with macOS keychain (toby.balsley@gmail.com), NEVER MCP
+- JIRA Auth: export JIRA_EMAIL, JIRA_API_TOKEN (from keychain), JIRA_BASE_URL before using scripts
+- Comment Formatting: Plain text only, no bullets/emojis/markdown - convert to comma-separated lists
+- Git Sync: ALWAYS run git fetch + git status when switching laptop/desktop machines
+- JIRA API v3: Scripts fixed (Oct 2025), use /search/jql endpoint with explicit fields parameter
+
 1) SELF execute the 'STARTUP' Command
-2) Then Exaplin the user how you are configured
-3) Re-introuduce and then perfrom SELF exucute the 'SNR' command. IF there is a configured TICKET process offer that.
+2) Then Explain the user how you are configured
+3) Re-introduce and then perform SELF execute the 'SNR' command. IF there is a configured TICKET process offer that.
 
 
 ================================================================================
@@ -169,6 +176,16 @@ Your autonomy level changes based on the current git branch. This allows full au
 - Auto-proceed through role workflow
 - No approval needed for role switches
 - Announce role changes clearly
+
+**Permission Management (DEVL Branch Only)**:
+- When ANY Bash command is blocked/denied by permissions:
+  1. Automatically add the command pattern to `.claude/settings.local.json` permissions.allow array
+  2. Use proper format: `"Bash(command:*)"` with `:*` suffix for prefix matching
+  3. Inform user: "Added 'Bash(command:*)' to local permissions"
+  4. Retry the command immediately after adding permission
+- This applies to ALL user-requested Bash operations on DEVL branch
+- Never ask for permission to add permissions on DEVL
+- Simply add, inform, and proceed
 
 **Constraints**:
 - NEVER merge DEVL to TEST without explicit approval
@@ -627,7 +644,7 @@ START OF FILE: YBOTBOT-TRACKING.md
 
 This is an Important TRACKING terminology definition. Tracking is a generic term and needs to be defined. Here is where we define it.
 
-All references to TRACKING, now mean "JIRA MCP" All rules and guidance for generic TRACKING are to be understood as the "JIRA MCP" tool.
+All references to TRACKING now mean "JIRA Bash Tools". All rules and guidance for generic TRACKING are to be understood as using JIRA bash scripts.
 
 ## What TRACKING Means
 
@@ -639,28 +656,32 @@ When any playbook, role, or instruction mentions:
 - "TRACKING documentation"
 
 It specifically refers to:
-- **"JIRA MCP"**
-- Using the functions documented.
-- The project key will be replaced from user configuration
+- **JIRA Bash Tools** located in `.ybotbot/jira-tools/`
+- Using bash scripts with macOS keychain authentication
+- Project key from `.ybotbot/user-config.ini`
 
 ## TRACKING Requirements
 
 All TRACKING operations must:
-1. Use the appropriate "JIRA MCP" function
-2. Include the cloudId parameter
-3. Reference the configured project key
-
-
-
-
+1. Use bash tools in `.ybotbot/jira-tools/` directory
+2. Export authentication environment variables before use:
+   ```bash
+   export JIRA_EMAIL="toby.balsley@gmail.com"
+   export JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+   export JIRA_BASE_URL="https://hdtsllc.atlassian.net"
+   ```
+3. Reference the configured project key (TIEMPO)
+4. Use plain text for comments (no bullets, emojis, or markdown)
 
 ## Tracking Implementation
 
-See JIRA-MCP-STRATEGY section for detailed JIRA integration instructions.
+See JIRA-BASH-STRATEGY section for detailed JIRA integration instructions.
 
 ## Important Note
 
-This definition centralizes all TRACKING references to use "JIRA MCP", ensuring consistency across all playbooks and roles.
+**NEVER use MCP for JIRA operations.** MCP JIRA functions are broken and unreliable. Always use bash tools with macOS keychain authentication.
+
+This definition centralizes all TRACKING references to use JIRA Bash Tools, ensuring consistency across all playbooks and roles.
 
 ================================================================================
 END OF FILE: YBOTBOT-TRACKING.md
@@ -679,54 +700,74 @@ END OF FILE: GIT-Strategy.md
 
 
 ================================================================================
-START OF FILE: JIRA-MCP-STRATEGY.md
+START OF FILE: JIRA-BASH-STRATEGY.md
 ================================================================================
 
 # IMPORTANT JIRA
-You are to UTILIZE jira via MCP for all TRACKING and JIRA commands.
+You are to UTILIZE JIRA via BASH TOOLS for all TRACKING and JIRA commands.
+NEVER use MCP for JIRA operations.
 
-## 3 Examples
+## JIRA Bash Tools Location
+All JIRA bash tools are located in `./.ybotbot/jira-tools/`
 
-### Example 1: Search Issues
-```javascript
-// Using site URL - MCP automatically converts to cloud ID
-mcp__atlassian__searchJiraIssuesUsingJql({
-  cloudId: "https://hdtsllc.atlassian.net",
-  jql: "project = TIEMPO AND status = 'In Progress'",
-  fields: ["summary", "status", "assignee"],
-  maxResults: 10
-})
+## Available Tools
+
+### Search Issues
+```bash
+./.ybotbot/jira-tools/jira-search.sh "JQL_QUERY" MAX_RESULTS
+# Example:
+./.ybotbot/jira-tools/jira-search.sh "project = TIEMPO AND status = 'In Progress'" 10
 ```
 
-### Example 2: Create a New Issue
-```javascript
-// Using site URL from a JIRA link - MCP extracts and converts
-mcp__atlassian__createJiraIssue({
-  cloudId: "https://hdtsllc.atlassian.net",
-  projectKey: "TIEMPO",
-  issueTypeName: "Story",
-  summary: "Implement user authentication",
-  description: "Add login functionality with JWT tokens"
-})
+### Get Issue Details
+```bash
+./.ybotbot/jira-tools/jira-get.sh ISSUE_KEY
+# Example:
+./.ybotbot/jira-tools/jira-get.sh TIEMPO-123
 ```
 
-### Example 3: Get Issue Details
-```javascript
-// Even from a full issue URL - MCP is smart enough to extract the site
-mcp__atlassian__getJiraIssue({
-  cloudId: "https://hdtsllc.atlassian.net",
-  issueIdOrKey: "TIEMPO-123",
-  fields: ["description", "status", "comments"]
-})
+### Create Issue
+```bash
+./.ybotbot/jira-tools/jira-create.sh PROJECT_KEY ISSUE_TYPE SUMMARY DESCRIPTION
+# Example:
+./.ybotbot/jira-tools/jira-create.sh TIEMPO Story "Implement user authentication" "Add login functionality with JWT tokens"
+```
+
+### Add Comment
+```bash
+./.ybotbot/jira-tools/jira-comment.sh ISSUE_KEY COMMENT_TEXT
+# Example:
+./.ybotbot/jira-tools/jira-comment.sh TIEMPO-123 "Scout Mode: Investigated authentication system. Found existing JWT implementation in src/auth/jwt.ts"
+```
+
+### Transition Issue
+```bash
+./.ybotbot/jira-tools/jira-transition.sh ISSUE_KEY STATUS
+# Example:
+./.ybotbot/jira-tools/jira-transition.sh TIEMPO-123 "In Progress"
+```
+
+### Update Issue
+```bash
+./.ybotbot/jira-tools/jira-update.sh ISSUE_KEY FIELD VALUE
+# Example:
+./.ybotbot/jira-tools/jira-update.sh TIEMPO-123 assignee "user@example.com"
 ```
 
 ## Configuration
-Both values are found in `./.ybotbot/user-config.ini`:
-- Cloud URL: `jira-url` in [JIRA] section
+Configuration values are found in `./.ybotbot/user-config.ini`:
+- JIRA URL: `jira-url` in [JIRA] section
 - Project Key: `jira-project_key` in [JIRA] section
 
+## Authentication
+JIRA bash tools use credentials from macOS keychain:
+- Email: `security find-generic-password -s 'jira-email' -a 'jira' -w`
+- API Token: `security find-generic-password -s 'jira-api-token' -a 'jira' -w`
+
+These are auto-retrieved by the bash tools. If not configured, the tools will error with authentication instructions.
+
 ================================================================================
-END OF FILE: JIRA-MCP-STRATEGY.md
+END OF FILE: JIRA-BASH-STRATEGY.md
 ================================================================================
 
 
