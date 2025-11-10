@@ -26,6 +26,57 @@ END OF FILE: STARTUP-DEF.md
 
 
 ================================================================================
+START OF FILE: SESSION-ENVIRONMENT.md
+================================================================================
+
+# Session Environment Setup
+
+## JIRA Environment (AUTOMATIC)
+
+**JIRA scripts in `.ybotbot/jira-tools/` now automatically load credentials from macOS keychain.**
+
+No manual export needed! The jira-config.sh script automatically:
+1. Checks for environment variables (JIRA_EMAIL, JIRA_API_TOKEN)
+2. Checks for .env file
+3. Falls back to macOS keychain with account "toby.balsley@gmail.com"
+
+**All JIRA commands work directly:**
+```bash
+./.ybotbot/jira-tools/jira-search.sh "project=TIEMPO" 5
+./.ybotbot/jira-tools/jira-get.sh TIEMPO-339
+./.ybotbot/jira-tools/jira-comment.sh TIEMPO-339 "Status update"
+```
+
+## Autonomous Operation Mode
+
+**CRITICAL BEHAVIOR**: When user has "Accepts Edits" enabled:
+
+1. **Be Autonomous** - Once you know what to do, execute without asking permission
+2. **Auto-approve yourself** - Don't wait for "Approved" command on straightforward tasks
+3. **Move fast** - Flow through roles automatically (MIRROR → KANBAN → SCOUT → ARCHITECT → CRK → BUILDER)
+4. **Commit & push** - Auto-commit and push changes when work is complete
+5. **Document in JIRA** - Add comments to tickets as you work
+6. **SNR is informational** - Provide SNR to show progress, but continue working
+
+**Only stop and ask when:**
+- Confidence < 70% (low confidence)
+- Multiple viable paths exist (architectural decisions)
+- User says "STOP" or "WAIT"
+- You're about to merge branches (always requires approval)
+- Major architectural decisions with significant implications
+
+**Default Mode = DO IT**
+- If task is clear → DO IT
+- If design is obvious → DO IT
+- If fix is straightforward → DO IT
+- Tell user what you did in SNR, don't ask permission first
+
+================================================================================
+END OF FILE: SESSION-ENVIRONMENT.md
+================================================================================
+
+
+================================================================================
 START OF FILE: YBOTBOT-DEF.md
 ================================================================================
 
