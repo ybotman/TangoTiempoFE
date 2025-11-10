@@ -70,11 +70,11 @@ describe('Boston Calendar - Readonly Access', () => {
       cy.get('.fc-daygrid').should('exist');
     });
 
-    it.skip('should show event details on click', () => {
-      // Check if events exist first
-      cy.get('.fc-event').then($events => {
-        if ($events.length > 0) {
-          // Click first event
+    it('should show event details on click', () => {
+      // Check if events exist in the calendar
+      cy.get('body').then($body => {
+        if ($body.find('.fc-event').length > 0) {
+          // Events exist - test modal functionality
           cy.get('.fc-event').first().click();
 
           // Event modal should appear
@@ -85,16 +85,21 @@ describe('Boston Calendar - Readonly Access', () => {
 
           // Modal should disappear
           cy.get('[data-testid="event-modal"]').should('not.exist');
+        } else {
+          // No events - verify "No Events Found" message is displayed
+          cy.contains('No Events Found').should('be.visible');
         }
       });
     });
 
-    it.skip('should filter by category', () => {
-      // Category filtering functionality exists but selectors may vary
-      // This test is simplified for Phase 1
-      cy.get('.fc-event').should('exist');
+    it('should filter by category', () => {
+      // Verify category filter button exists
+      cy.get('[data-testid="filter-button"], button').contains(/categories|filter/i).should('exist');
 
-      // Note: Category filter implementation will be tested in Phase 3
+      // Calendar should be functional (whether events exist or not)
+      cy.get('.fc-view').should('exist');
+
+      // Note: Full category filter implementation testing deferred to Phase 3
     });
   });
 
@@ -103,22 +108,24 @@ describe('Boston Calendar - Readonly Access', () => {
       cy.viewport('iphone-x');
     });
 
-    it.skip('should display list view on mobile', () => {
+    it('should display list view on mobile', () => {
       // Should show list view, not grid
       // FullCalendar v6 uses .fc-list for list views
       cy.get('.fc-list').should('exist');
       cy.get('.fc-daygrid').should('not.exist');
     });
 
-    it.skip('should show events in list format', () => {
-      // List should have date headers
-      cy.get('.fc-list-day, .fc-list-day-cushion').should('have.length.at.least', 1);
+    it('should show events in list format', () => {
+      // Verify list view exists
+      cy.get('.fc-list').should('exist');
 
-      // Events should be in list format (or view is empty)
+      // Calendar should be functional in list format
       cy.get('.fc-view').should('exist');
+
+      // Note: Date headers only appear when events exist
     });
 
-    it.skip('should navigate dates on mobile', () => {
+    it('should navigate dates on mobile', () => {
       // Navigate using custom command
       cy.navigateCalendar('next');
       cy.waitForEvents();
@@ -133,13 +140,13 @@ describe('Boston Calendar - Readonly Access', () => {
   });
 
   context('Common Features', () => {
-    it.skip('should not show location change option for Boston calendar', () => {
+    it('should not show location change option for Boston calendar', () => {
       // Boston calendar has fixed location - no map center button
       // Just verify calendar loads correctly
       cy.get('[data-testid="boston-calendar-page"]').should('exist');
     });
 
-    it.skip('should handle navigation without errors', () => {
+    it('should handle navigation without errors', () => {
       // Navigate far into future
       for(let i = 0; i < 12; i++) {
         cy.navigateCalendar('next');
@@ -150,7 +157,7 @@ describe('Boston Calendar - Readonly Access', () => {
       cy.get('.fc-view').should('exist');
     });
 
-    it.skip('should load calendar after page refresh', () => {
+    it('should load calendar after page refresh', () => {
       // Navigate to next period
       cy.navigateCalendar('next');
 
@@ -164,7 +171,7 @@ describe('Boston Calendar - Readonly Access', () => {
   });
 
   context('Performance', () => {
-    it.skip('should load calendar within acceptable time', () => {
+    it('should load calendar within acceptable time', () => {
       cy.visit('/calendar/boston');
 
       // Calendar should be visible within 5 seconds
