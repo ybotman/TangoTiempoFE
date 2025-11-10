@@ -17,7 +17,7 @@ describe('Boston Calendar - Readonly Access', () => {
       cy.viewport(1280, 720);
     });
 
-    it.skip('should display 8-week view by default', () => {
+    it('should display 8-week view by default', () => {
       // Check for dayGrid view (8-week custom view uses dayGrid type)
       cy.get('.fc-view').should('exist');
 
