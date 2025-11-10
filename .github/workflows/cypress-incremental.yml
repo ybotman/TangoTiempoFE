@@ -9,7 +9,7 @@ name: Cypress Incremental Test Enablement
 on:
   push:
     branches:
-      - test/cypress-enable-*
+      - cypress-enable-*
   workflow_dispatch:  # Manual trigger for testing
 
 permissions:
