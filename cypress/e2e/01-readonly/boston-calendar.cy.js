@@ -28,12 +28,23 @@ describe('Boston Calendar - Readonly Access', () => {
       cy.get('.fc-daygrid-day').should('have.length.at.least', 20);
     });
 
-    it.skip('should display Boston-specific events', () => {
-      // Events should be visible (may be 0 if no events in range)
-      cy.get('.fc-event').should('exist');
+    it('should display Boston-specific events', () => {
+      // Calendar should load successfully
+      cy.get('.fc-view').should('exist');
 
-      // Note: Location display may not exist in Boston calendar (locked location)
-      // Boston calendar doesn't show location selector
+      // Check if events exist OR if "No Events Found" message is displayed
+      cy.get('body').then($body => {
+        if ($body.find('.fc-event').length > 0) {
+          // Events exist - verify they're visible
+          cy.get('.fc-event').should('be.visible');
+        } else {
+          // No events in current range - verify "No Events Found" message
+          cy.contains('No Events Found').should('be.visible');
+        }
+      });
+
+      // Boston calendar should not show location selector (locked to Boston)
+      cy.get('[data-testid="location-selector"]').should('not.exist');
     });
 
     it.skip('should navigate between date ranges', () => {
