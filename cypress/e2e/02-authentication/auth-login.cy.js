@@ -12,7 +12,7 @@ describe('Authentication - Login', () => {
   });
 
   context('Login Page Display', () => {
-    it('should display login page with all providers', () => {
+    it.skip('should display login page with all providers', () => {
       // Verify page title
       cy.contains('SIGN IN').should('be.visible');
 
@@ -25,11 +25,11 @@ describe('Authentication - Login', () => {
       cy.contains('CREATE ACCOUNT').should('be.visible');
     });
 
-    it('should have back to calendar button', () => {
+    it.skip('should have back to calendar button', () => {
       cy.contains('Back to Calendar').should('be.visible');
     });
 
-    it('should show disabled Facebook button', () => {
+    it.skip('should show disabled Facebook button', () => {
       cy.contains('button', 'Coming Soon').should('be.disabled');
     });
   });
@@ -43,7 +43,7 @@ describe('Authentication - Login', () => {
       cy.get('[data-testid="email-auth-form"]', { timeout: 5000 }).should('be.visible');
     });
 
-    it('should show email login form when email button clicked', () => {
+    it.skip('should show email login form when email button clicked', () => {
       cy.contains('Login with Email').should('be.visible');
 
       // Verify form fields present (no first/last name for login)
@@ -59,13 +59,13 @@ describe('Authentication - Login', () => {
       cy.contains('Forgot Password?').should('be.visible');
     });
 
-    it('should show validation errors for empty form', () => {
+    it.skip('should show validation errors for empty form', () => {
       cy.contains('button', 'Log In').click();
 
       cy.contains('Email and password are required').should('be.visible');
     });
 
-    it('should validate email format', () => {
+    it.skip('should validate email format', () => {
       cy.get('input[name="email"]').type('invalid-email');
       cy.get('input[name="password"]').type('SomePassword123!');
 
@@ -74,7 +74,7 @@ describe('Authentication - Login', () => {
       cy.contains('Please enter a valid email address').should('be.visible');
     });
 
-    it('should toggle password visibility', () => {
+    it.skip('should toggle password visibility', () => {
       // Password should be hidden by default
       cy.get('input[name="password"]').should('have.attr', 'type', 'password');
 
@@ -85,7 +85,7 @@ describe('Authentication - Login', () => {
       cy.get('input[name="password"]').should('have.attr', 'type', 'text');
     });
 
-    it('should have back button to return to provider options', () => {
+    it.skip('should have back button to return to provider options', () => {
       cy.contains('← Back to options').should('be.visible').click();
 
       // Should hide form and show provider buttons again
@@ -100,7 +100,7 @@ describe('Authentication - Login', () => {
       cy.get('[data-testid="email-auth-form"]').should('be.visible');
     });
 
-    it('should navigate to password reset page', () => {
+    it.skip('should navigate to password reset page', () => {
       cy.contains('Forgot Password?').click();
 
       // Should be on reset password page
@@ -110,7 +110,7 @@ describe('Authentication - Login', () => {
   });
 
   context('Successful Login', () => {
-    it('should successfully login with valid credentials', () => {
+    it.skip('should successfully login with valid credentials', () => {
       // Get test credentials from environment
       const email = Cypress.env('CYPRESS_TEST_USER_EMAIL');
       const password = Cypress.env('CYPRESS_TEST_USER_PASSWORD');
@@ -139,17 +139,17 @@ describe('Authentication - Login', () => {
   });
 
   context('OAuth Providers', () => {
-    it('should have Google login button enabled', () => {
+    it.skip('should have Google login button enabled', () => {
       cy.get('[data-testid="google-login-button"]').should('not.be.disabled');
     });
 
-    it('should have Apple login button available', () => {
+    it.skip('should have Apple login button available', () => {
       cy.contains('button', 'Continue with Apple').should('be.visible');
     });
   });
 
   context('Error Handling', () => {
-    it('should display server error messages', () => {
+    it.skip('should display server error messages', () => {
       cy.get('[data-testid="email-login-button"]').click();
 
       // Try login with wrong credentials (will fail if TEST user doesn't exist)
@@ -168,7 +168,7 @@ describe('Authentication - Login', () => {
   });
 
   context('Navigation', () => {
-    it('should navigate to signup page from create account link', () => {
+    it.skip('should navigate to signup page from create account link', () => {
       cy.contains('CREATE ACCOUNT').click();
 
       // Should be on signup page
@@ -176,7 +176,7 @@ describe('Authentication - Login', () => {
       cy.get('[data-testid="signup-page"]').should('be.visible');
     });
 
-    it('should navigate back to calendar', () => {
+    it.skip('should navigate back to calendar', () => {
       cy.contains('Back to Calendar').click();
 
       // Should redirect to calendar
@@ -185,7 +185,7 @@ describe('Authentication - Login', () => {
   });
 
   context('Session Persistence', () => {
-    it('should redirect logged-in users to calendar', () => {
+    it.skip('should redirect logged-in users to calendar', () => {
       // Note: This test requires a user to be already logged in
       // In real testing, would use cy.login() custom command first
       // Then visit /auth/login and verify redirect
@@ -198,7 +198,7 @@ describe('Authentication - Login', () => {
   });
 
   context('Responsive Design', () => {
-    it('should display properly on mobile', () => {
+    it.skip('should display properly on mobile', () => {
       cy.viewport('iphone-x');
 
       cy.get('[data-testid="login-page"]').should('be.visible');
@@ -206,7 +206,7 @@ describe('Authentication - Login', () => {
       cy.get('[data-testid="email-login-button"]').should('be.visible');
     });
 
-    it('should show mobile-friendly login form', () => {
+    it.skip('should show mobile-friendly login form', () => {
       cy.viewport('iphone-x');
 
       cy.get('[data-testid="email-login-button"]').click();

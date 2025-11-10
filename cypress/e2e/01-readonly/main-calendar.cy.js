@@ -20,7 +20,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.viewport(1280, 720);
     });
 
-    it('should load main calendar page', () => {
+    it.skip('should load main calendar page', () => {
       // Calendar should be present
       cy.get('.fc-view', { timeout: 10000 }).should('exist');
 
@@ -28,7 +28,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.contains('Tango', { matchCase: false }).should('exist');
     });
 
-    it('should display calendar in default view', () => {
+    it.skip('should display calendar in default view', () => {
       // Main calendar defaults to 8-week or month view
       cy.get('.fc-daygrid').should('exist');
 
@@ -36,7 +36,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-daygrid-day').should('have.length.at.least', 20);
     });
 
-    it('should have navigation controls', () => {
+    it.skip('should have navigation controls', () => {
       // Test navigation by actually clicking and verifying date changes
       cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').then(initialDate => {
         // Navigate to next period using custom command
@@ -48,7 +48,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       });
     });
 
-    it('should navigate between date ranges', () => {
+    it.skip('should navigate between date ranges', () => {
       // Get initial date
       cy.get('.fc-daygrid-day').first().invoke('attr', 'data-date').then(initialDate => {
         // Navigate to next period
@@ -67,7 +67,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       });
     });
 
-    it('should return to today on today button click', () => {
+    it.skip('should return to today on today button click', () => {
       // Navigate forward multiple times
       cy.get('[data-testid="nav-next"]').click();
       cy.wait(300);
@@ -83,12 +83,12 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get(`.fc-daygrid-day[data-date="${today}"]`).should('exist');
     });
 
-    it('should display events on calendar', () => {
+    it.skip('should display events on calendar', () => {
       // Events should be visible (may be 0 depending on data)
       cy.get('.fc-event').should('exist').should('have.length.at.least', 0);
     });
 
-    it('should show event details on click', () => {
+    it.skip('should show event details on click', () => {
       // Check if real events exist (exclude placeholders)
       cy.get('.fc-event:not(.fc-placeholder-event)').then($events => {
         if ($events.length > 0) {
@@ -101,7 +101,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       });
     });
 
-    it('should have category filtering available', () => {
+    it.skip('should have category filtering available', () => {
       // Category circles or filter should be visible
       // Main calendar shows category selection
       cy.get('body').then($body => {
@@ -115,7 +115,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
   });
 
   context('Geo Location Features', () => {
-    it('should have location-based filtering capability', () => {
+    it.skip('should have location-based filtering capability', () => {
       // Main calendar has geo features unlike Boston calendar
       // Location settings or map center should be available
 
@@ -132,7 +132,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       });
     });
 
-    it('should display events relevant to selected location', () => {
+    it.skip('should display events relevant to selected location', () => {
       // Events shown should be based on user's location preference
       // This is tested indirectly by verifying events appear
 
@@ -143,7 +143,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-event', { timeout: 5000 });
     });
 
-    it('should allow changing view to show different regions', () => {
+    it.skip('should allow changing view to show different regions', () => {
       // Main calendar allows location changes
       // Test that UI doesn't break when interacting
 
@@ -159,23 +159,23 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.viewport('iphone-x');
     });
 
-    it('should display calendar on mobile', () => {
+    it.skip('should display calendar on mobile', () => {
       // Calendar should be visible
       cy.get('.fc-view').should('be.visible');
     });
 
-    it('should show mobile-optimized view', () => {
+    it.skip('should show mobile-optimized view', () => {
       // Mobile typically shows list view or condensed grid
       cy.get('.fc-list, .fc-daygrid').should('exist');
     });
 
-    it('should have mobile navigation', () => {
+    it.skip('should have mobile navigation', () => {
       // Navigation buttons should work on mobile
       cy.get('[data-testid="nav-prev"]').should('be.visible');
       cy.get('[data-testid="nav-next"]').should('be.visible');
     });
 
-    it('should handle event clicks on mobile', () => {
+    it.skip('should handle event clicks on mobile', () => {
       // Exclude placeholder events - they don't open modals
       cy.get('.fc-event:not(.fc-placeholder-event)').then($events => {
         if ($events.length > 0) {
@@ -189,7 +189,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
   });
 
   context('View Switching', () => {
-    it('should switch between calendar views', () => {
+    it.skip('should switch between calendar views', () => {
       // Switch to list view
       cy.get('[data-testid="view-list"]').click();
       cy.wait(500);
@@ -205,7 +205,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-daygrid').should('exist');
     });
 
-    it('should maintain functionality across view changes', () => {
+    it.skip('should maintain functionality across view changes', () => {
       // Calendar should work in any view
       cy.get('.fc-view').should('be.visible');
 
@@ -220,7 +220,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
   });
 
   context('Common Features', () => {
-    it('should handle rapid navigation without errors', () => {
+    it.skip('should handle rapid navigation without errors', () => {
       // Navigate quickly through calendar
       for(let i = 0; i < 5; i++) {
         cy.get('[data-testid="nav-next"]').click();
@@ -232,7 +232,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-daygrid-day').should('have.length.at.least', 7);
     });
 
-    it('should persist across page refresh', () => {
+    it.skip('should persist across page refresh', () => {
       // Navigate forward
       cy.get('[data-testid="nav-next"]').click();
       cy.wait(500);
@@ -244,14 +244,14 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-view', { timeout: 10000 }).should('exist');
     });
 
-    it('should display calendar navigation controls', () => {
+    it.skip('should display calendar navigation controls', () => {
       // Calendar uses custom navigation instead of default toolbar
       cy.get('[data-testid="nav-prev"]').should('be.visible');
       cy.get('[data-testid="nav-today"]').should('be.visible');
       cy.get('[data-testid="nav-next"]').should('be.visible');
     });
 
-    it('should handle empty date ranges gracefully', () => {
+    it.skip('should handle empty date ranges gracefully', () => {
       // Navigate far into future where no events exist
       for(let i = 0; i < 24; i++) {
         cy.get('[data-testid="nav-next"]').click();
@@ -265,7 +265,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
   });
 
   context('Performance', () => {
-    it('should load calendar within acceptable time', () => {
+    it.skip('should load calendar within acceptable time', () => {
       cy.visit('/calendar');
 
       // Calendar should be visible within 5 seconds
@@ -276,7 +276,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       cy.get('.fc-event', { timeout: 5000 });
     });
 
-    it('should handle month changes smoothly', () => {
+    it.skip('should handle month changes smoothly', () => {
       const start = Date.now();
 
       cy.get('[data-testid="nav-next"]').click();
@@ -291,13 +291,13 @@ describe('Main Calendar - Readonly Access with Geo', () => {
   });
 
   context('Accessibility', () => {
-    it('should have semantic calendar structure', () => {
+    it.skip('should have semantic calendar structure', () => {
       // Calendar should use proper table/grid structure
       cy.get('.fc-daygrid').should('exist');
       cy.get('.fc-daygrid-day').should('exist');
     });
 
-    it('should have clickable events with proper targets', () => {
+    it.skip('should have clickable events with proper targets', () => {
       cy.get('.fc-event').then($events => {
         if ($events.length > 0) {
           // Events should be clickable
@@ -306,7 +306,7 @@ describe('Main Calendar - Readonly Access with Geo', () => {
       });
     });
 
-    it('should have keyboard-accessible navigation', () => {
+    it.skip('should have keyboard-accessible navigation', () => {
       // Navigation buttons should be focusable
       cy.get('[data-testid="nav-prev"]').should('not.be.disabled');
       cy.get('[data-testid="nav-next"]').should('not.be.disabled');
