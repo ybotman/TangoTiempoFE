@@ -12,7 +12,7 @@ describe('Authentication - Signup', () => {
   });
 
   context('Signup Page Display', () => {
-    it.skip('should display signup page with all providers', () => {
+    it('should display signup page with all providers', () => {
       // Verify page title
       cy.contains('SIGN UP').should('be.visible');
 
@@ -25,11 +25,11 @@ describe('Authentication - Signup', () => {
       cy.contains('SIGN IN').should('be.visible');
     });
 
-    it.skip('should have back to calendar button', () => {
+    it('should have back to calendar button', () => {
       cy.contains('Back to Calendar').should('be.visible');
     });
 
-    it.skip('should show disabled Facebook button with coming soon', () => {
+    it('should show disabled Facebook button with coming soon', () => {
       cy.contains('button', 'Coming Soon').should('be.disabled');
     });
   });
@@ -43,7 +43,7 @@ describe('Authentication - Signup', () => {
       cy.get('[data-testid="email-auth-form"]', { timeout: 5000 }).should('be.visible');
     });
 
-    it.skip('should show email signup form when email button clicked', () => {
+    it('should show email signup form when email button clicked', () => {
       cy.contains('Create an Account').should('be.visible');
 
       // Verify all form fields present
@@ -57,7 +57,7 @@ describe('Authentication - Signup', () => {
       cy.contains('button', 'Sign Up').should('be.visible');
     });
 
-    it.skip('should show validation errors for empty form submission', () => {
+    it('should show validation errors for empty form submission', () => {
       // Try to submit empty form
       cy.contains('button', 'Sign Up').click();
 
@@ -65,7 +65,7 @@ describe('Authentication - Signup', () => {
       cy.contains('Email and password are required').should('be.visible');
     });
 
-    it.skip('should validate email format', () => {
+    it('should validate email format', () => {
       cy.get('input[name="firstName"]').type('Test');
       cy.get('input[name="lastName"]').type('User');
       cy.get('input[name="email"]').type('invalid-email');
@@ -77,7 +77,7 @@ describe('Authentication - Signup', () => {
       cy.contains('Please enter a valid email address').should('be.visible');
     });
 
-    it.skip('should validate password requirements', () => {
+    it('should validate password requirements', () => {
       cy.get('input[name="firstName"]').type('Test');
       cy.get('input[name="lastName"]').type('User');
       cy.get('input[name="email"]').type('test@example.com');
@@ -89,7 +89,7 @@ describe('Authentication - Signup', () => {
       cy.contains('Password must be at least 8 characters').should('be.visible');
     });
 
-    it.skip('should validate password confirmation match', () => {
+    it('should validate password confirmation match', () => {
       cy.get('input[name="firstName"]').type('Test');
       cy.get('input[name="lastName"]').type('User');
       cy.get('input[name="email"]').type('test@example.com');
@@ -101,7 +101,7 @@ describe('Authentication - Signup', () => {
       cy.contains('Passwords do not match').should('be.visible');
     });
 
-    it.skip('should require first and last name', () => {
+    it('should require first and last name', () => {
       cy.get('input[name="email"]').type('test@example.com');
       cy.get('input[name="password"]').type('TestPass123!');
       cy.get('input[name="confirmPassword"]').type('TestPass123!');
@@ -111,7 +111,7 @@ describe('Authentication - Signup', () => {
       cy.contains('First name and last name are required').should('be.visible');
     });
 
-    it.skip('should toggle password visibility', () => {
+    it('should toggle password visibility', () => {
       // Password should be hidden by default
       cy.get('input[name="password"]').should('have.attr', 'type', 'password');
 
@@ -122,7 +122,7 @@ describe('Authentication - Signup', () => {
       cy.get('input[name="password"]').should('have.attr', 'type', 'text');
     });
 
-    it.skip('should have back button to return to provider options', () => {
+    it('should have back button to return to provider options', () => {
       cy.contains('← Back to options').should('be.visible').click();
 
       // Should hide form and show provider buttons again
@@ -132,7 +132,7 @@ describe('Authentication - Signup', () => {
   });
 
   context('Navigation', () => {
-    it.skip('should navigate to login page from signup link', () => {
+    it('should navigate to login page from signup link', () => {
       cy.contains('SIGN IN').click();
 
       // Should be on login page
@@ -140,7 +140,7 @@ describe('Authentication - Signup', () => {
       cy.get('[data-testid="login-page"]').should('be.visible');
     });
 
-    it.skip('should navigate back to calendar', () => {
+    it('should navigate back to calendar', () => {
       cy.contains('Back to Calendar').click();
 
       // Should redirect to calendar
@@ -149,7 +149,7 @@ describe('Authentication - Signup', () => {
   });
 
   context('OAuth Providers', () => {
-    it.skip('should attempt Google signup when button clicked', () => {
+    it('should attempt Google signup when button clicked', () => {
       // Note: Can't fully test OAuth flow in E2E (requires external popup)
       // But can verify button triggers action
       cy.get('[data-testid="google-signup-button"]').should('not.be.disabled');
@@ -160,7 +160,7 @@ describe('Authentication - Signup', () => {
   });
 
   context('Responsive Design', () => {
-    it.skip('should display properly on mobile', () => {
+    it('should display properly on mobile', () => {
       cy.viewport('iphone-x');
 
       cy.get('[data-testid="signup-page"]').should('be.visible');
@@ -168,7 +168,7 @@ describe('Authentication - Signup', () => {
       cy.get('[data-testid="email-signup-button"]').should('be.visible');
     });
 
-    it.skip('should show mobile-friendly form', () => {
+    it('should show mobile-friendly form', () => {
       cy.viewport('iphone-x');
 
       cy.get('[data-testid="email-signup-button"]').click();
