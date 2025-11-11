@@ -64,11 +64,11 @@ jobs:
       - name: Prepare GitHub Pages deployment
         if: always()
         run: |
-          mkdir -p gh-pages/test-reports/run-${{ github.run_number }}
-          cp -r cypress/reports/html/* gh-pages/test-reports/run-${{ github.run_number }}/
+          mkdir -p _site/test-reports/run-${{ github.run_number }}
+          cp -r cypress/reports/html/* _site/test-reports/run-${{ github.run_number }}/
 
           # Create or update index page with links to all test runs
-          cat > gh-pages/test-reports/index.html <<'EOF'
+          cat > _site/test-reports/index.html <<'EOF'
           <!DOCTYPE html>
           <html>
           <head>
@@ -93,14 +93,19 @@ jobs:
           </html>
           EOF
 
+          # Create .nojekyll to disable Jekyll processing
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
       - name: Deploy to GitHub Pages
         if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./gh-pages
-          keep_files: true
-          destination_dir: .
+        uses: actions/deploy-pages@v4
+        id: deployment
 
       - name: Add workflow summary
         if: always()
