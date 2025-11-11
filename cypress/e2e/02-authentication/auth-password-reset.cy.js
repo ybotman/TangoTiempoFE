@@ -41,14 +41,19 @@ describe('Authentication - Password Reset', () => {
     it('should show error for empty email', () => {
       cy.get('[data-testid="reset-password-submit"]').click();
 
-      cy.contains('Please enter your email address').should('be.visible');
+      // HTML5 validation prevents form submission
+      // Check that input is marked as invalid
+      cy.get('input[name="email"]').should('have.prop', 'validity').should('have.property', 'valid', false);
+      cy.get('input[name="email"]').should('have.prop', 'validationMessage').and('not.be.empty');
     });
 
     it('should validate email format', () => {
       cy.get('input[name="email"]').type('invalid-email');
       cy.get('[data-testid="reset-password-submit"]').click();
 
-      cy.contains('Please enter a valid email address').should('be.visible');
+      // HTML5 validation marks email field as invalid
+      cy.get('input[name="email"]').should('have.prop', 'validity').should('have.property', 'valid', false);
+      cy.get('input[name="email"]').should('have.prop', 'validationMessage').and('include', '@');
     });
 
     it('should accept valid email format', () => {
@@ -195,8 +200,8 @@ describe('Authentication - Password Reset', () => {
     });
 
     it('should maintain focus management', () => {
-      // Email field should have autofocus
-      cy.get('input[name="email"]').should('have.attr', 'autofocus');
+      // Email field should be focused when page loads
+      cy.get('input[name="email"]').should('be.focused');
     });
   });
 
