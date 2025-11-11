@@ -11,6 +11,11 @@ on:
   # deployment_status removed - was triggering on DEVL commits
   workflow_dispatch:  # Manual trigger from GitHub Actions UI
 
+permissions:
+  contents: write  # Required for GitHub Pages deployment
+  pages: write
+  id-token: write
+
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
