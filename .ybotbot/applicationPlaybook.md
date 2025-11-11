@@ -105,12 +105,15 @@ curl -s -X POST \
 
 **CRITICAL**: These scripts were fixed for JIRA API v3 on 2025-10-12 (TIEMPO-309)
 
-**Authentication Setup**:
-```bash
-export JIRA_EMAIL="toby.balsley@gmail.com"
-export JIRA_API_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
-export JIRA_BASE_URL="https://hdtsllc.atlassian.net"
-```
+**Authentication - AUTOMATIC (No exports needed)**:
+- Scripts automatically load credentials from macOS keychain via jira-config.sh
+- Keychain account: "toby.balsley@gmail.com"
+- Token stored under service: "jira-api-token"
+
+**⚠️ IMPORTANT - Permission Pattern Matching**:
+- **ALWAYS call scripts directly**: `./.ybotbot/jira-tools/jira-search.sh`
+- **NEVER prepend export statements** - this breaks permission patterns in CLAUDE.md
+- Scripts auto-load credentials, exports are unnecessary and cause permission prompts
 
 **Available Scripts** (all working as of 2025-10-12):
 
