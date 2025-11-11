@@ -65,28 +65,128 @@ jobs:
         if: always()
         run: |
           mkdir -p _site/test-reports/run-${{ github.run_number }}
+
+          # Copy main report to both combined-report.html AND index.html
           cp -r cypress/reports/html/* _site/test-reports/run-${{ github.run_number }}/
+          cp _site/test-reports/run-${{ github.run_number }}/combined-report.html _site/test-reports/run-${{ github.run_number }}/index.html
+
+          # Copy screenshots to dedicated screenshots subdirectory
+          if [ -d "cypress/screenshots" ]; then
+            echo "✅ Found screenshots, copying to run-${{ github.run_number }}/screenshots/"
+            mkdir -p _site/test-reports/run-${{ github.run_number }}/screenshots
+            cp -r cypress/screenshots/* _site/test-reports/run-${{ github.run_number }}/screenshots/ 2>/dev/null || echo "No screenshots to copy"
+
+            # Count screenshots
+            FAIL_COUNT=$(find _site/test-reports/run-${{ github.run_number }}/screenshots -name "*failed*.png" -type f | wc -l | tr -d ' ')
+            PASS_COUNT=$(find _site/test-reports/run-${{ github.run_number }}/screenshots -name "*passed*.png" -type f | wc -l | tr -d ' ')
+
+            # Create screenshots index page with tabs for Failures and Successes
+            cat > _site/test-reports/run-${{ github.run_number }}/screenshots/index.html <<'SCREENSHOTS_EOF'
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TEST Screenshots - Run ${{ github.run_number }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; }
+    h1 { color: #333; border-bottom: 2px solid #ffc107; padding-bottom: 10px; }
+    .tabs { display: flex; gap: 10px; margin: 20px 0; border-bottom: 2px solid #ddd; }
+    .tab { padding: 10px 20px; cursor: pointer; background: #f0f0f0; border: 1px solid #ddd; border-bottom: none; border-radius: 5px 5px 0 0; transition: all 0.3s; }
+    .tab.active { background: white; border-bottom: 2px solid white; margin-bottom: -2px; font-weight: bold; }
+    .tab:hover { background: #e0e0e0; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+    .screenshot-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white; }
+    .screenshot-card.passed { border-left: 4px solid #4caf50; }
+    .screenshot-card.failed { border-left: 4px solid #f44336; }
+    .screenshot-card img { width: 100%; height: 200px; object-fit: cover; cursor: pointer; }
+    .screenshot-card img:hover { opacity: 0.8; }
+    .screenshot-title { padding: 10px; font-size: 12px; color: #666; word-wrap: break-word; }
+    .back-link { color: #666; text-decoration: none; margin-bottom: 20px; display: inline-block; }
+    .back-link:hover { text-decoration: underline; }
+    .count { background: #666; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">← Back to TEST Reports</a> |
+    <a href="../index.html" class="back-link">← Back to Report</a>
+    <h1>📸 TEST Environment Screenshots - Run ${{ github.run_number }}</h1>
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('failures', this)">❌ Failures <span class="count">FAIL_COUNT_PLACEHOLDER</span></div>
+      <div class="tab" onclick="showTab('successes', this)">✅ Successes <span class="count">PASS_COUNT_PLACEHOLDER</span></div>
+    </div>
+    <div id="failures" class="tab-content active">
+      <div class="screenshot-grid">
+        FAILURES_PLACEHOLDER
+      </div>
+    </div>
+    <div id="successes" class="tab-content">
+      <div class="screenshot-grid">
+        SUCCESSES_PLACEHOLDER
+      </div>
+    </div>
+    <script>
+      function showTab(tab, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(tab).classList.add('active');
+      }
+    </script>
+  </div>
+</body>
+</html>
+SCREENSHOTS_EOF
+
+            # Replace placeholders with actual counts
+            sed -i "s/FAIL_COUNT_PLACEHOLDER/$FAIL_COUNT/g" _site/test-reports/run-${{ github.run_number }}/screenshots/index.html
+            sed -i "s/PASS_COUNT_PLACEHOLDER/$PASS_COUNT/g" _site/test-reports/run-${{ github.run_number }}/screenshots/index.html
+
+            # Generate failure screenshot cards
+            FAILURES_HTML=""
+            find _site/test-reports/run-${{ github.run_number }}/screenshots -name "*failed*.png" -type f | while read screenshot; do
+              rel_path=$(echo "$screenshot" | sed "s|_site/test-reports/run-${{ github.run_number }}/screenshots/||")
+              filename=$(basename "$rel_path")
+              FAILURES_HTML="$FAILURES_HTML<div class='screenshot-card failed'><a href='$rel_path' target='_blank'><img src='$rel_path' alt='$filename'/></a><div class='screenshot-title'>$filename</div></div>"
+            done
+            sed -i "s|FAILURES_PLACEHOLDER|$FAILURES_HTML|g" _site/test-reports/run-${{ github.run_number }}/screenshots/index.html
+
+            # Generate success screenshot cards
+            SUCCESSES_HTML=""
+            find _site/test-reports/run-${{ github.run_number }}/screenshots -name "*passed*.png" -type f | while read screenshot; do
+              rel_path=$(echo "$screenshot" | sed "s|_site/test-reports/run-${{ github.run_number }}/screenshots/||")
+              filename=$(basename "$rel_path")
+              SUCCESSES_HTML="$SUCCESSES_HTML<div class='screenshot-card passed'><a href='$rel_path' target='_blank'><img src='$rel_path' alt='$filename'/></a><div class='screenshot-title'>$filename</div></div>"
+            done
+            sed -i "s|SUCCESSES_PLACEHOLDER|$SUCCESSES_HTML|g" _site/test-reports/run-${{ github.run_number }}/screenshots/index.html
+          fi
 
           # Create or update index page with links to all test runs
           cat > _site/test-reports/index.html <<'EOF'
           <!DOCTYPE html>
           <html>
           <head>
-            <title>TangoTiempo Test Reports</title>
+            <title>TangoTiempo TEST Reports</title>
             <style>
               body { font-family: Arial; margin: 40px; background: #f5f5f5; }
-              h1 { color: #1976d2; }
-              .run { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-              .run a { color: #1976d2; text-decoration: none; font-weight: bold; }
+              h1 { color: #ffc107; }
+              .run { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #ffc107; }
+              .run a { color: #1976d2; text-decoration: none; font-weight: bold; margin-right: 15px; }
               .run a:hover { text-decoration: underline; }
-              .info { color: #666; font-size: 14px; }
+              .info { color: #666; font-size: 14px; margin-top: 8px; }
+              .back-link { color: #666; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+              .back-link:hover { text-decoration: underline; }
             </style>
           </head>
           <body>
-            <h1>🧪 TangoTiempo Test Reports</h1>
+            <a href="../index.html" class="back-link">← Back to All Environments</a>
+            <h1>🟡 TEST Environment - E2E Test Reports</h1>
             <p>Automated Cypress E2E test results from TEST environment</p>
             <div class="run">
-              <a href="./run-${{ github.run_number }}/combined-report.html">Run #${{ github.run_number }} - Latest</a>
+              <a href="./run-${{ github.run_number }}/index.html">📄 Run #${{ github.run_number }} - Latest Report</a>
+              <a href="./run-${{ github.run_number }}/screenshots/">📸 Screenshots</a>
               <div class="info">Run at: ${{ github.event.head_commit.timestamp }}</div>
             </div>
           </body>
