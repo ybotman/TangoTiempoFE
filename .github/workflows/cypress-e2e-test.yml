@@ -16,9 +16,9 @@ permissions:
   pages: write
   id-token: write
 
-# Allow one concurrent deployment
+# Allow one concurrent deployment across ALL environments (DEVL/TEST share same Pages site)
 concurrency:
-  group: "pages-test"
+  group: "pages"
   cancel-in-progress: false
 
 jobs:
