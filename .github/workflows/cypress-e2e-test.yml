@@ -44,11 +44,69 @@ jobs:
         if: always()
         run: npm run report:merge
 
-      - name: Generate HTML report
+      - name: Copy screenshots to report directory
+        if: always()
+        run: |
+          mkdir -p cypress/reports/screenshots
+          if [ -d "cypress/screenshots" ]; then
+            cp -r cypress/screenshots/* cypress/reports/screenshots/ || true
+          fi
+
+      - name: Generate HTML report with embedded screenshots
         if: always()
         run: npm run report:generate
 
-      - name: Upload Mochawesome HTML report
+      - name: Prepare GitHub Pages deployment
+        if: always()
+        run: |
+          mkdir -p gh-pages/test-reports/run-${{ github.run_number }}
+          cp -r cypress/reports/html/* gh-pages/test-reports/run-${{ github.run_number }}/
+
+          # Create or update index page with links to all test runs
+          cat > gh-pages/test-reports/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>TangoTiempo Test Reports</title>
+            <style>
+              body { font-family: Arial; margin: 40px; background: #f5f5f5; }
+              h1 { color: #1976d2; }
+              .run { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+              .run a { color: #1976d2; text-decoration: none; font-weight: bold; }
+              .run a:hover { text-decoration: underline; }
+              .info { color: #666; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <h1>🧪 TangoTiempo Test Reports</h1>
+            <p>Automated Cypress E2E test results from TEST environment</p>
+            <div class="run">
+              <a href="./run-${{ github.run_number }}/combined-report.html">Run #${{ github.run_number }} - Latest</a>
+              <div class="info">Run at: ${{ github.event.head_commit.timestamp }}</div>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages
+          keep_files: true
+          destination_dir: .
+
+      - name: Add workflow summary
+        if: always()
+        run: |
+          echo "## 🧪 Cypress Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **View Full Report:** https://ybotman.github.io/tangotiempo.com/test-reports/run-${{ github.run_number }}/combined-report.html" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **All Test Reports:** https://ybotman.github.io/tangotiempo.com/test-reports/" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Mochawesome HTML report (backup)
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -56,16 +114,16 @@ jobs:
           path: cypress/reports/html
           retention-days: 7
 
-      - name: Upload screenshots on failure
+      - name: Upload screenshots (backup)
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: cypress-screenshots-test-${{ github.run_number }}
           path: cypress/screenshots
           retention-days: 7
           if-no-files-found: ignore
 
-      - name: Upload videos
+      - name: Upload videos (backup)
         uses: actions/upload-artifact@v4
         if: always()
         with:
