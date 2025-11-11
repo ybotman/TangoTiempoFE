@@ -23,7 +23,7 @@ export const getBrowserGeolocation = async () => {
       const options = {
         enableHighAccuracy: true, // Use GPS for best accuracy
         timeout: 5000, // 5 second timeout
-        maximumAge: 0 // No cache, always get fresh position
+        maximumAge: 300000 // 5 minute cache - reduces GPS prompts and battery drain
       };
 
       navigator.geolocation.getCurrentPosition(resolve, reject, options);

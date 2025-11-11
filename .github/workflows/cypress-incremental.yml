@@ -1,0 +1,256 @@
+name: Cypress Incremental Test Enablement
+
+# TIEMPO-339: Autonomous system to enable Cypress tests one at a time
+# Runs on feature branches matching test/cypress-enable-*
+# Tests against Vercel preview deployment
+# Auto-enables next test if current test passes
+# Stops and notifies on failures
+
+on:
+  push:
+    branches:
+      - cypress-enable-*
+  workflow_dispatch:  # Manual trigger for testing
+
+permissions:
+  contents: write  # Allow pushing commits
+  pull-requests: write  # Allow creating PR comments
+  actions: read
+
+# Prevent concurrent runs on same branch
+concurrency:
+  group: cypress-incremental-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-enabled-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: TESTING
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for Vercel preview deployment
+        id: vercel-wait
+        run: |
+          echo "Waiting for Vercel preview deployment..."
+          sleep 60
+
+          # Extract branch name
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Branch: $BRANCH_NAME"
+
+          # Vercel preview URL pattern
+          PREVIEW_URL="https://tangotiempo-${BRANCH_NAME//\//-}-ybotmans-projects.vercel.app"
+          echo "Expected preview URL: $PREVIEW_URL"
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+
+          # Wait up to 5 minutes for deployment to be ready
+          for i in {1..30}; do
+            if curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" | grep -q "200"; then
+              echo "✅ Vercel preview deployment is ready!"
+              exit 0
+            fi
+            echo "Waiting for deployment... attempt $i/30"
+            sleep 10
+          done
+
+          echo "⚠️ Could not verify Vercel deployment, proceeding anyway..."
+
+      - name: Count enabled vs skipped tests
+        id: test-count
+        run: |
+          TOTAL_TESTS=$(grep -r "it(\|it\.skip(" cypress/e2e/ | wc -l | tr -d ' ')
+          SKIPPED_TESTS=$(grep -r "it\.skip(" cypress/e2e/ | wc -l | tr -d ' ')
+          ENABLED_TESTS=$((TOTAL_TESTS - SKIPPED_TESTS))
+
+          echo "Total tests: $TOTAL_TESTS"
+          echo "Enabled tests: $ENABLED_TESTS"
+          echo "Skipped tests: $SKIPPED_TESTS"
+
+          echo "total=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "enabled=$ENABLED_TESTS" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
+
+      - name: Run Cypress on enabled tests only
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          browser: chrome
+          config: video=true,screenshotOnRunFailure=true
+        env:
+          CYPRESS_BASE_URL: ${{ steps.vercel-wait.outputs.preview_url }}
+          CYPRESS_TEST_USER_EMAIL: griffon.dater0g@icloud.com
+          CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CICD_TEST_PASSWORD }}
+          NEXT_PUBLIC_BE_URL: https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net
+          NEXT_PUBLIC_FIREBASE_JSON: ${{ secrets.NEXT_PUBLIC_FIREBASE_JSON }}
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
+          NEXT_PUBLIC_IPSTACK_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_IPSTACK_ACCESS_TOKEN }}
+          NEXT_PUBLIC_GA_ID: ${{ vars.GA_ID }}
+          NEXT_PUBLIC_ENVIRONMENT: TEST
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-incremental-${{ github.run_number }}
+          path: cypress/screenshots
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos-incremental-${{ github.run_number }}
+          path: cypress/videos
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Generate test report
+        if: always()
+        run: |
+          mkdir -p cypress/reports
+          echo "# Cypress Incremental Test Report" > cypress/reports/summary.md
+          echo "" >> cypress/reports/summary.md
+          echo "**Run #${{ github.run_number }}**" >> cypress/reports/summary.md
+          echo "**Branch:** ${{ github.ref_name }}" >> cypress/reports/summary.md
+          echo "**Enabled Tests:** ${{ steps.test-count.outputs.enabled }}/${{ steps.test-count.outputs.total }}" >> cypress/reports/summary.md
+          echo "**Skipped Tests:** ${{ steps.test-count.outputs.skipped }}" >> cypress/reports/summary.md
+
+      - name: Check consecutive failures
+        if: failure()
+        id: check-failures
+        run: |
+          # Track consecutive failures in a file
+          FAILURE_FILE=".github/cypress-failure-count.txt"
+
+          if [ -f "$FAILURE_FILE" ]; then
+            FAILURE_COUNT=$(cat "$FAILURE_FILE")
+            FAILURE_COUNT=$((FAILURE_COUNT + 1))
+          else
+            FAILURE_COUNT=1
+          fi
+
+          echo $FAILURE_COUNT > "$FAILURE_FILE"
+          echo "failure_count=$FAILURE_COUNT" >> $GITHUB_OUTPUT
+
+          if [ $FAILURE_COUNT -ge 3 ]; then
+            echo "❌ 3 consecutive failures detected - STOPPING autonomous loop"
+            echo "should_stop=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Failure $FAILURE_COUNT/3 - continuing"
+            echo "should_stop=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Enable next test
+        if: success()
+        id: enable-next
+        run: |
+          chmod +x .github/scripts/enable-next-test.sh
+
+          if .github/scripts/enable-next-test.sh; then
+            echo "✅ Enabled next test"
+            echo "has_more=true" >> $GITHUB_OUTPUT
+
+            # Reset failure count on success
+            rm -f .github/cypress-failure-count.txt
+          else
+            echo "🎉 All tests enabled!"
+            echo "has_more=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push next test
+        if: success() && steps.enable-next.outputs.has_more == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add cypress/e2e/
+          git commit -m "test: Enable next Cypress test (TIEMPO-339)
+
+          Automated commit from cypress-incremental workflow
+          Run: ${{ github.run_number }}
+          Enabled: ${{ steps.test-count.outputs.enabled }}/${{ steps.test-count.outputs.total }}"
+
+          git push
+
+      - name: Create failure issue
+        if: failure() && steps.check-failures.outputs.should_stop == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Cypress Incremental: 3 Consecutive Failures',
+              body: `## Cypress Incremental Test Enablement Failed
+
+              **Run:** #${{ github.run_number }}
+              **Branch:** ${{ github.ref_name }}
+              **Commit:** ${{ github.sha }}
+
+              The autonomous test enablement has encountered 3 consecutive failures and has been stopped.
+
+              **Test Status:**
+              - Enabled: ${{ steps.test-count.outputs.enabled }}/${{ steps.test-count.outputs.total }}
+              - Skipped: ${{ steps.test-count.outputs.skipped }}
+
+              **Action Required:**
+              1. Review screenshots: [Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              2. Fix failing tests
+              3. Manually trigger workflow to resume
+
+              **Related:**
+              - JIRA: [TIEMPO-339](https://hdtsllc.atlassian.net/browse/TIEMPO-339)
+              - Parent: [TIEMPO-299](https://hdtsllc.atlassian.net/browse/TIEMPO-299)
+              `,
+              labels: ['cypress', 'testing', 'automated', 'needs-attention']
+            });
+
+      - name: Comment on commit with progress
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const enabled = '${{ steps.test-count.outputs.enabled }}';
+            const total = '${{ steps.test-count.outputs.total }}';
+            const skipped = '${{ steps.test-count.outputs.skipped }}';
+            const hasMore = '${{ steps.enable-next.outputs.has_more }}';
+
+            let emoji = status === 'success' ? '✅' : '❌';
+            let message = `## ${emoji} Cypress Incremental Test - Run #${{ github.run_number }}\n\n`;
+            message += `**Status:** ${status}\n`;
+            message += `**Progress:** ${enabled}/${total} tests enabled (${skipped} remaining)\n`;
+            message += `**Branch:** ${{ github.ref_name }}\n\n`;
+
+            if (status === 'success' && hasMore === 'true') {
+              message += '🔄 Next test enabled - triggering new cycle...\n';
+            } else if (status === 'success' && hasMore === 'false') {
+              message += '🎉 **ALL TESTS ENABLED!** Ready to merge to DEVL.\n';
+            } else {
+              message += '⚠️ Tests failed - review artifacts and fix issues.\n';
+            }
+
+            message += `\n[View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: message
+            });
