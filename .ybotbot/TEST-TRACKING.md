@@ -99,3 +99,26 @@ All 26 tests: ✅ PASSING - Applied same fix pattern as boston-calendar
 - Status: ✅ PASSING
 - Note: May need deeper investigation into navigation date-change behavior
 
+
+**Password Reset Validation Tests (auth-password-reset.cy.js)**
+- Issue: Tests expected custom error text ("Please enter your email address", "Please enter a valid email address")
+- Actual: Form uses HTML5 validation with native browser messages
+- Problem: HTML5 validation messages appear as browser tooltips, not in DOM text content
+- Fix: Changed tests to check input field's validity property:
+  - Empty field: `validity.valid === false`
+  - Invalid email: `validationMessage.includes('@')`
+- Result: 18/21 tests passing (3 skipped - need backend)
+- Commit: b809b58
+
+## Final Results
+
+**Total: 90/94 tests passing (95.74%)**
+
+All test files complete:
+- ✅ boston-calendar.cy.js: 12/12 (100%)
+- ✅ main-calendar.cy.js: 26/26 (100%)
+- ✅ auth-login.cy.js: 18/19 (95% - 1 needs test credentials)
+- ✅ auth-password-reset.cy.js: 18/21 (86% - 3 need backend integration)
+- ✅ auth-signup.cy.js: 16/16 (100%)
+
+HTML Report: cypress/reports/html/combined-report.html
