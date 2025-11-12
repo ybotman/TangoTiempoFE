@@ -24,37 +24,44 @@ Cypress.Commands.add('login', (email, password) => {
 
 /**
  * Dismiss welcome modal if it appears
- * The welcome modal shows "Welcome to Tango Tiempo" and offers location selection
+ * The welcome modal shows "Welcome to Tango Tiempo!" and has a "Select My Location" button
+ *
+ * This modal appears for:
+ * - First-time visitors (new IP address)
+ * - Users who haven't set localStorage welcome flag
+ *
+ * To bypass the modal completely in tests, we clear localStorage and set the welcome flag
  */
 Cypress.Commands.add('dismissWelcomeModal', () => {
-  // Check if welcome modal exists (it may not appear every time)
+  // STRATEGY 1: Prevent modal from appearing by setting localStorage flag
+  // This is more reliable than trying to dismiss after it appears
+  cy.window().then((win) => {
+    // Set welcome shown flag to prevent modal
+    win.localStorage.setItem('welcome_shown', 'true');
+
+    // Also set visit count to 3+ to avoid welcome back modal (visits 2) and signup prompt (visits 5, 10, 15...)
+    win.localStorage.setItem('visit_count', '3');
+
+    console.log('[Cypress] Set localStorage flags to prevent welcome modal');
+  });
+
+  // STRATEGY 2: If modal still appears (timing issue), dismiss it
+  cy.wait(500); // Brief wait for modal to potentially appear
+
   cy.get('body').then($body => {
-    // Look for common welcome modal indicators
-    if ($body.find('[data-testid="welcome-modal"]').length > 0 ||
-        $body.text().includes('Welcome to Tango Tiempo')) {
+    // Check if "Welcome to Tango Tiempo!" text exists (exact match from FirstTimeVisitorContent)
+    if ($body.text().includes('Welcome to Tango Tiempo!')) {
+      console.log('[Cypress] Welcome modal detected - dismissing');
 
-      // Try to click close button (various possible selectors)
-      cy.get('body').then($modal => {
-        // Option 1: Click close/dismiss button
-        if ($modal.find('[data-testid="modal-close"]').length > 0) {
-          cy.get('[data-testid="modal-close"]').click();
-        }
-        // Option 2: Click "Select Location" or similar button
-        else if ($modal.find('button').filter(':contains("Select")').length > 0) {
-          cy.contains('button', 'Select').first().click();
-        }
-        // Option 3: Click any dismiss/continue button
-        else if ($modal.find('button').filter(':contains("Continue")').length > 0) {
-          cy.contains('button', 'Continue').click();
-        }
-        // Option 4: Press ESC key
-        else {
-          cy.get('body').type('{esc}');
-        }
-      });
+      // Click the "Select My Location" button (exact text from FirstTimeVisitorContent line 101)
+      cy.contains('button', 'Select My Location').click({ force: true });
 
-      // Wait for modal to disappear
-      cy.get('[data-testid="welcome-modal"]', { timeout: 3000 }).should('not.exist');
+      // Wait for modal to close
+      cy.wait(1000);
+
+      console.log('[Cypress] Welcome modal dismissed');
+    } else {
+      console.log('[Cypress] No welcome modal detected');
     }
   });
 });
@@ -201,6 +208,7 @@ Cypress.Commands.add('clearCategoryFilters', () => {
 
 /**
  * Assert calendar is loaded
+ * Handles welcome modal dismissal before checking calendar
  */
 Cypress.Commands.add('calendarShouldBeLoaded', () => {
   // First dismiss welcome modal if it appears
