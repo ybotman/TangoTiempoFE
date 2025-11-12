@@ -23,6 +23,43 @@ Cypress.Commands.add('login', (email, password) => {
 });
 
 /**
+ * Dismiss welcome modal if it appears
+ * The welcome modal shows "Welcome to Tango Tiempo" and offers location selection
+ */
+Cypress.Commands.add('dismissWelcomeModal', () => {
+  // Check if welcome modal exists (it may not appear every time)
+  cy.get('body').then($body => {
+    // Look for common welcome modal indicators
+    if ($body.find('[data-testid="welcome-modal"]').length > 0 ||
+        $body.text().includes('Welcome to Tango Tiempo')) {
+
+      // Try to click close button (various possible selectors)
+      cy.get('body').then($modal => {
+        // Option 1: Click close/dismiss button
+        if ($modal.find('[data-testid="modal-close"]').length > 0) {
+          cy.get('[data-testid="modal-close"]').click();
+        }
+        // Option 2: Click "Select Location" or similar button
+        else if ($modal.find('button').filter(':contains("Select")').length > 0) {
+          cy.contains('button', 'Select').first().click();
+        }
+        // Option 3: Click any dismiss/continue button
+        else if ($modal.find('button').filter(':contains("Continue")').length > 0) {
+          cy.contains('button', 'Continue').click();
+        }
+        // Option 4: Press ESC key
+        else {
+          cy.get('body').type('{esc}');
+        }
+      });
+
+      // Wait for modal to disappear
+      cy.get('[data-testid="welcome-modal"]', { timeout: 3000 }).should('not.exist');
+    }
+  });
+});
+
+/**
  * Logout current user
  */
 Cypress.Commands.add('logout', () => {
@@ -166,6 +203,10 @@ Cypress.Commands.add('clearCategoryFilters', () => {
  * Assert calendar is loaded
  */
 Cypress.Commands.add('calendarShouldBeLoaded', () => {
+  // First dismiss welcome modal if it appears
+  cy.dismissWelcomeModal();
+
+  // Then wait for calendar to load
   cy.get('.fc-view', { timeout: 10000 }).should('be.visible');
   cy.get('.fc-event', { timeout: 5000 }).should('have.length.at.least', 0); // At least container exists
 });

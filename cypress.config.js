@@ -11,11 +11,18 @@ export default defineConfig({
       config.baseUrl = process.env.CYPRESS_BASE_URL || process.env.NEXT_PUBLIC_FE_URL || config.env.baseUrl || 'http://localhost:3001';
       config.env.apiUrl = process.env.NEXT_PUBLIC_BE_URL || config.env.apiUrl || 'http://localhost:3010';
 
+      // Test user credentials (can be overridden by environment variables)
+      config.env.testUserEmail = process.env.CYPRESS_TEST_USER_EMAIL || config.env.testUserEmail || 'griffon.dater0g@icloud.com';
+      config.env.testUserPassword = process.env.CYPRESS_TEST_USER_PASSWORD || config.env.testUserPassword || 'ENT!fmy9xwn!dqp8hzm';
+
       return config;
     },
     env: {
       FAIL_FAST_STRATEGY: 'run',  // Stop entire test run, not just current spec
-      FAIL_FAST_BAIL: 9999        // Temporarily disabled to see all failures
+      FAIL_FAST_BAIL: 9999,       // Temporarily disabled to see all failures
+      // Test credentials for non-production environments (DEVL/TEST)
+      testUserEmail: 'griffon.dater0g@icloud.com',
+      testUserPassword: 'ENT!fmy9xwn!dqp8hzm'
     },
     baseUrl: 'http://localhost:3001',
     viewportWidth: 1280,
