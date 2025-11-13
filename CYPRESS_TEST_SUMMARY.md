@@ -67,7 +67,7 @@ Tests that don't require authentication - verifying public calendar access and b
 - ✅ Calendar persists after page refresh
 - ✅ Performance benchmarks met
 
-**Test Count**: 13 tests across 4 contexts
+**Test Count**: 12 tests across 4 contexts
 
 ---
 
@@ -116,7 +116,7 @@ Tests that don't require authentication - verifying public calendar access and b
 - ✅ Clickable events with proper targets
 - ✅ Keyboard-accessible navigation buttons
 
-**Test Count**: 24 tests across 7 contexts
+**Test Count**: 26 tests across 7 contexts
 
 ---
 
@@ -216,7 +216,7 @@ Tests covering user authentication flows including signup, login, and password r
 - ✅ Mobile layout displays properly (iPhone X)
 - ✅ Mobile form is scrollable and visible
 
-**Test Count**: 14 tests across 4 contexts
+**Test Count**: 16 tests across 4 contexts
 
 ---
 
@@ -257,7 +257,7 @@ Tests covering user authentication flows including signup, login, and password r
 - ✅ Required attribute set
 - ✅ Email field auto-focused on load
 
-**Test Count**: 12 tests across 8 contexts  
+**Test Count**: 18 tests across 8 contexts  
 **Skipped**: 3 tests (require Firebase email service configuration)
 
 ---
@@ -417,14 +417,14 @@ CYPRESS_BASE_URL=https://test.tangotiempo.com npx cypress run
 
 | Area | Tests | Status |
 |------|-------|--------|
-| **Readonly Calendar** | 37 | ✅ Complete |
-| - Boston Calendar | 13 | ✅ |
-| - Main Calendar | 24 | ✅ |
-| **Authentication** | 44 | ✅ Complete |
+| **Readonly Calendar** | 38 | ✅ Complete |
+| - Boston Calendar | 12 | ✅ |
+| - Main Calendar | 26 | ✅ |
+| **Authentication** | 52 | ✅ Complete |
 | - Login Flow | 18 | ✅ (1 skipped) |
-| - Signup Flow | 14 | ✅ |
-| - Password Reset | 12 | ✅ (3 skipped) |
-| **Total Active Tests** | 77 | ✅ |
+| - Signup Flow | 16 | ✅ |
+| - Password Reset | 18 | ✅ (3 skipped) |
+| **Total Active Tests** | 86 | ✅ |
 | **Total Skipped Tests** | 4 | ⏭️ (Require test user setup) |
 
 ### Test Categories Breakdown
@@ -581,7 +581,7 @@ npm run dev
 
 - **Total Test Files**: 5
 - **Total Test Contexts**: 23
-- **Total Test Cases**: 81 (77 active, 4 skipped)
+- **Total Test Cases**: 90 (86 active, 4 skipped)
 - **Custom Commands**: 20
 - **Test Fixtures**: 4
 - **GitHub Workflows**: 3
