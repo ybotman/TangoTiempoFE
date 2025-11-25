@@ -82,6 +82,58 @@ export const useCalendarPage = () => {
   // Initialize event operations
   const { getEventById } = useEventOperations();
 
+  // TIEMPO-256: Check for deep-linked event ID from shared URL
+  // When user arrives from /event/[id], sessionStorage contains the event ID to open
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !eventsLoading && events && events.length > 0) {
+      const openEventId = sessionStorage.getItem('openEventId');
+      if (openEventId) {
+        // Clear immediately to prevent re-opening on refresh
+        sessionStorage.removeItem('openEventId');
+
+        // Find the event in loaded events first (faster)
+        const eventInList = events.find(e => e._id === openEventId);
+        if (eventInList) {
+          // Transform to FullCalendar event format and open modal
+          const transformedEvent = {
+            id: eventInList._id,
+            title: eventInList.title,
+            start: eventInList.venueStartDisplay || eventInList.startTime,
+            end: eventInList.venueEndDisplay || eventInList.endTime,
+            extendedProps: {
+              ...eventInList,
+              _id: eventInList._id,
+            },
+          };
+          setSelectedEventDetails(transformedEvent);
+          setViewDetailModalOpen(true);
+        } else {
+          // Event not in current view - fetch it directly from API
+          getEventById(openEventId)
+            .then(eventData => {
+              if (eventData) {
+                const transformedEvent = {
+                  id: eventData._id,
+                  title: eventData.title,
+                  start: eventData.venueStartDisplay || eventData.startTime,
+                  end: eventData.venueEndDisplay || eventData.endTime,
+                  extendedProps: {
+                    ...eventData,
+                    _id: eventData._id,
+                  },
+                };
+                setSelectedEventDetails(transformedEvent);
+                setViewDetailModalOpen(true);
+              }
+            })
+            .catch(err => {
+              console.error('TIEMPO-256: Failed to fetch deep-linked event:', err);
+            });
+        }
+      }
+    }
+  }, [events, eventsLoading, getEventById]);
+
   // Note: Role change refresh is handled automatically by useEvents hook
   // which has selectedRole in its dependency array
 
