@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, Box, Typography, Tabs, Tab, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip, useTheme, useMediaQuery } from '@mui/material';
+import { Modal, Box, Typography, Tabs, Tab, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip, useTheme, useMediaQuery, Snackbar, IconButton } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ShareIcon from '@mui/icons-material/Share';
+import CloseIcon from '@mui/icons-material/Close';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
@@ -46,6 +48,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const [showImageTab, setShowImageTab] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // TIEMPO-256: Share functionality state
+  const [shareSnackbarOpen, setShareSnackbarOpen] = useState(false);
   
   // Mobile detection
   const theme = useTheme();
@@ -253,42 +257,92 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     // Note: We no longer use the internal edit mode since we open the proper edit modal
   };
 
+  // TIEMPO-256: Handle share button click
+  const handleShareClick = async () => {
+    const eventId = eventDetails?.extendedProps?._id;
+    if (!eventId) return;
+
+    const shareUrl = `https://tangotiempo.com/event/${eventId}`;
+    const shareTitle = eventDetails?.extendedProps?.shortTitle || eventDetails?.title || 'Tango Event';
+    const shareText = `Check out this tango event: ${shareTitle}`;
+
+    // Try native share first (mobile devices)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return; // Success - don't show snackbar
+      } catch (err) {
+        // User cancelled or error - fall through to clipboard
+        if (err.name === 'AbortError') return; // User cancelled
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareSnackbarOpen(true);
+    } catch (err) {
+      // Final fallback - show URL in alert
+      alert(`Share this link:\n${shareUrl}`);
+    }
+  };
+
   // No longer needed - editMode is handled by parent component
 
-  // Create header actions for edit/delete buttons
-  const headerActions = canEditEvent ? (
+  // Create header actions - Share button for everyone, Edit/Delete for organizers
+  const headerActions = (
     <>
+      {/* TIEMPO-256: Share button - visible to all users */}
       <Button
-        onClick={handleEditClick}
+        onClick={handleShareClick}
         size="small"
-        startIcon={<EditIcon fontSize="small" />}
+        startIcon={<ShareIcon fontSize="small" />}
         sx={{ fontSize: '0.875rem' }}
       >
-        Edit
+        Share
       </Button>
-      <Button
-        onClick={handleDeleteClick}
-        size="small"
-        color="error"
-        startIcon={<DeleteIcon fontSize="small" />}
-        sx={{ fontSize: '0.875rem' }}
-      >
-        Delete
-      </Button>
+      {/* Edit/Delete buttons - only for event owners */}
+      {canEditEvent && (
+        <>
+          <Button
+            onClick={handleEditClick}
+            size="small"
+            startIcon={<EditIcon fontSize="small" />}
+            sx={{ fontSize: '0.875rem' }}
+          >
+            Edit
+          </Button>
+          <Button
+            onClick={handleDeleteClick}
+            size="small"
+            color="error"
+            startIcon={<DeleteIcon fontSize="small" />}
+            sx={{ fontSize: '0.875rem' }}
+          >
+            Delete
+          </Button>
+        </>
+      )}
+      {/* Message for Regional Admins viewing events outside their cities */}
+      {!canEditEvent && selectedRole === 'RegionalAdmin' && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{
+            fontStyle: 'italic',
+            fontSize: '0.75rem',
+            px: 2
+          }}
+        >
+          {eventDetails?.extendedProps?.masteredCityName || 'City'} - not in your assigned cities
+        </Typography>
+      )}
     </>
-  ) : (selectedRole === 'RegionalAdmin' ? (
-    <Typography 
-      variant="caption" 
-      color="text.secondary"
-      sx={{ 
-        fontStyle: 'italic',
-        fontSize: '0.75rem',
-        px: 2
-      }}
-    >
-      {eventDetails?.extendedProps?.masteredCityName || 'City'} - not in your assigned cities
-    </Typography>
-  ) : null);
+  );
 
   return (
     <>
@@ -463,6 +517,24 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* TIEMPO-256: Share link copied snackbar */}
+      <Snackbar
+        open={shareSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setShareSnackbarOpen(false)}
+        message="Event link copied to clipboard!"
+        action={
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={() => setShareSnackbarOpen(false)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
     </>
   );
 };
