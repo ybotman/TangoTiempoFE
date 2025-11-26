@@ -11,7 +11,18 @@ import { Box, Typography, Button, CircularProgress, Paper, Chip } from '@mui/mat
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ShareIcon from '@mui/icons-material/Share';
 import Image from 'next/image';
-import { categoryColors } from '@/utils/categoryColors';
+
+// TIEMPO-256: Inline category colors to avoid importing utils that may pull in leaflet
+const categoryColors = {
+  'Milonga': '#FF6B6B',
+  'Practica': '#4ECDC4',
+  'Class': '#45B7D1',
+  'Workshop': '#96CEB4',
+  'Festival': '#FFEAA7',
+  'Concert': '#DDA0DD',
+  'Show': '#F39C12',
+  'Other': '#95A5A6',
+};
 
 // Format date for display
 function formatEventDate(dateString) {

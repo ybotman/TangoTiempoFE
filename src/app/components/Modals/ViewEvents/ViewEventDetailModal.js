@@ -266,8 +266,14 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     const shareTitle = eventDetails?.extendedProps?.shortTitle || eventDetails?.title || 'Tango Event';
     const shareText = `Check out this tango event: ${shareTitle}`;
 
-    // Try native share first (mobile devices)
-    if (navigator.share) {
+    // Check if truly mobile (not just navigator.share support)
+    // Desktop Safari has navigator.share but gives poor UX
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      typeof navigator !== 'undefined' ? navigator.userAgent : ''
+    );
+
+    // Use native share only on mobile devices
+    if (isMobileDevice && navigator.share) {
       try {
         await navigator.share({
           title: shareTitle,
@@ -281,7 +287,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       }
     }
 
-    // Fallback: copy to clipboard
+    // Desktop and fallback: copy to clipboard
     try {
       await navigator.clipboard.writeText(shareUrl);
       setShareSnackbarOpen(true);
