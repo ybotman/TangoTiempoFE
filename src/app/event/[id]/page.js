@@ -6,8 +6,17 @@
 // - SEO indexing of individual events
 
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import PropTypes from 'prop-types';
 import EventPageClient from './EventPageClient';
+
+// Get dynamic base URL from request headers (supports proxy domains)
+function getBaseUrl() {
+  const headersList = headers();
+  const host = headersList.get('host') || 'tangotiempo.com';
+  const protocol = headersList.get('x-forwarded-proto') || 'https';
+  return `${protocol}://${host}`;
+}
 
 // Backend API URL
 const BE_URL = process.env.NEXT_PUBLIC_BE_URL || 'https://calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net';
@@ -123,8 +132,9 @@ export async function generateMetadata({ params }) {
     ? `${socialDescription}. ${truncatedDesc}`
     : truncatedDesc;
 
-  // Canonical URL
-  const canonicalUrl = `https://tangotiempo.com/event/${id}`;
+  // Dynamic URL based on request host (supports proxy domains)
+  const baseUrl = getBaseUrl();
+  const canonicalUrl = `${baseUrl}/event/${id}`;
 
   return {
     title: `${shortTitle} | TangoTiempo`,
@@ -146,7 +156,7 @@ export async function generateMetadata({ params }) {
         },
       ] : [
         {
-          url: 'https://tangotiempo.com/TT-Logo-Image.png',
+          url: `${baseUrl}/TT-Logo-Image.png`,
           width: 1200,
           height: 630,
           alt: 'TangoTiempo',
@@ -159,7 +169,7 @@ export async function generateMetadata({ params }) {
       card: eventImage ? 'summary_large_image' : 'summary',
       title: shortTitle,
       description: fullDescription,
-      images: eventImage ? [eventImage] : ['https://tangotiempo.com/TT-Logo-Image.png'],
+      images: eventImage ? [eventImage] : [`${baseUrl}/TT-Logo-Image.png`],
     },
 
     // Additional metadata
@@ -188,6 +198,9 @@ export default async function EventPage({ params }) {
   const event = eventData.event || eventData;
   const meta = eventData.meta || {};
 
+  // Get dynamic base URL for this request
+  const baseUrl = getBaseUrl();
+
   // Create structured data for SEO (Event schema)
   const structuredData = {
     '@context': 'https://schema.org',
@@ -213,7 +226,7 @@ export default async function EventPage({ params }) {
       name: event.ownerOrganizerName || event.organizer?.name || '',
     },
     image: event.eventImage || event.imageUrl || meta.image || '',
-    url: `https://tangotiempo.com/event/${id}`,
+    url: `${baseUrl}/event/${id}`,
   };
 
   return (
