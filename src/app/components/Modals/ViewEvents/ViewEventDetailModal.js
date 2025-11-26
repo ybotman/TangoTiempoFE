@@ -262,7 +262,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     const eventId = eventDetails?.extendedProps?._id;
     if (!eventId) return;
 
-    const shareUrl = `https://tangotiempo.com/event/${eventId}`;
+    // Use current domain for share URL (supports multiple domains)
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tangotiempo.com';
+    const shareUrl = `${baseUrl}/event/${eventId}`;
     const shareTitle = eventDetails?.extendedProps?.shortTitle || eventDetails?.title || 'Tango Event';
     const shareText = `Check out this tango event: ${shareTitle}`;
 
@@ -355,17 +357,44 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       <Modal open={open} onClose={onClose} data-testid="event-modal">
         <Box sx={getModalStyle(isMobile)} data-testid="event-modal-content">
           {/* Modal Header */}
-          <ModalHeader 
-            title={eventShortTitle} 
+          <ModalHeader
+            title={eventShortTitle}
             onClose={onClose}
             actions={headerActions}
           />
-          
+
+          {/* TIEMPO-256: Shareable link display - dynamic domain */}
+          {eventDetails?.extendedProps?._id && (
+            <Box
+              sx={{
+                px: isMobile ? 2 : 3,
+                py: 0.5,
+                bgcolor: 'grey.100',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.7rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                Share: {typeof window !== 'undefined' ? window.location.host : 'tangotiempo.com'}/event/{eventDetails.extendedProps._id}
+              </Typography>
+            </Box>
+          )}
+
           {/* Modal Content */}
-          <Box sx={{ 
-            flex: 1, 
+          <Box sx={{
+            flex: 1,
             overflow: 'auto',
-            p: isMobile ? 2 : 3 
+            p: isMobile ? 2 : 3
           }}>
             {/* Full Title Display (if different from short title) */}
             {eventShortTitle !== eventTitle && (
@@ -524,23 +553,41 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         </DialogActions>
       </Dialog>
 
-      {/* TIEMPO-256: Share link copied snackbar */}
+      {/* TIEMPO-256: Share link copied snackbar - more visible */}
       <Snackbar
         open={shareSnackbarOpen}
         autoHideDuration={3000}
         onClose={() => setShareSnackbarOpen(false)}
-        message="Event link copied to clipboard!"
-        action={
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ zIndex: 9999 }}
+      >
+        <Box
+          sx={{
+            bgcolor: 'success.main',
+            color: 'white',
+            px: 3,
+            py: 1.5,
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            boxShadow: 4,
+            fontSize: '1rem',
+            fontWeight: 'bold',
+          }}
+        >
+          <ShareIcon fontSize="small" />
+          Event link copied to clipboard!
           <IconButton
             size="small"
-            aria-label="close"
             color="inherit"
             onClick={() => setShareSnackbarOpen(false)}
+            sx={{ ml: 1 }}
           >
             <CloseIcon fontSize="small" />
           </IconButton>
-        }
-      />
+        </Box>
+      </Snackbar>
     </>
   );
 };

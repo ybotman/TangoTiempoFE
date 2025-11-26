@@ -4,10 +4,9 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
-import { Box, Typography, Button, CircularProgress, Paper, Chip } from '@mui/material';
+import { Box, Typography, Button, Paper, Chip } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ShareIcon from '@mui/icons-material/Share';
 import Image from 'next/image';
@@ -54,36 +53,13 @@ function formatEventTime(startStr, endStr) {
 
 export default function EventPageClient({ eventId, eventData }) {
   const router = useRouter();
-  const [isRedirecting, setIsRedirecting] = useState(true);
-  const [showFallback, setShowFallback] = useState(false);
 
-  useEffect(() => {
-    // Store event ID in sessionStorage so calendar can open the modal
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('openEventId', eventId);
-
-      // Redirect to calendar after a brief moment
-      // This allows the meta tags to be served for social media crawlers
-      const timer = setTimeout(() => {
-        router.push('/calendar');
-      }, 100);
-
-      // Show fallback content if redirect takes too long
-      const fallbackTimer = setTimeout(() => {
-        setShowFallback(true);
-        setIsRedirecting(false);
-      }, 3000);
-
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(fallbackTimer);
-      };
-    }
-  }, [eventId, router]);
+  // Get dynamic base URL for sharing
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tangotiempo.com';
 
   // Handle share button click
   const handleShare = async () => {
-    const shareUrl = `https://tangotiempo.com/event/${eventId}`;
+    const shareUrl = `${baseUrl}/event/${eventId}`;
     const shareTitle = eventData?.title || eventData?.shortTitle || 'Tango Event';
     const shareText = eventData?.description?.substring(0, 100) || 'Check out this tango event!';
 
@@ -111,10 +87,10 @@ export default function EventPageClient({ eventId, eventData }) {
     });
   };
 
-  // Handle "View on Calendar" button
+  // Handle "View on Calendar" button - navigates to calendar with this event
   const handleViewOnCalendar = () => {
-    sessionStorage.setItem('openEventId', eventId);
-    router.push('/calendar');
+    // Use URL query param instead of sessionStorage (more reliable)
+    router.push(`/calendar?event=${eventId}`);
   };
 
   // Extract event details
@@ -131,28 +107,8 @@ export default function EventPageClient({ eventId, eventData }) {
   const categorySecond = eventData?.categorySecond || '';
   const categoryThird = eventData?.categoryThird || '';
 
-  // Show loading state while redirecting
-  if (isRedirecting && !showFallback) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-          gap: 2,
-        }}
-      >
-        <CircularProgress />
-        <Typography variant="body1" color="text.secondary">
-          Loading event details...
-        </Typography>
-      </Box>
-    );
-  }
-
-  // Fallback content - full event display if redirect fails or for crawlers
+  // TIEMPO-256: Always show event details - no auto-redirect
+  // This page serves as the shareable landing page for social media
   return (
     <Box
       sx={{
@@ -162,6 +118,25 @@ export default function EventPageClient({ eventId, eventData }) {
       }}
     >
       <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+        {/* TIEMPO-256: Prominent "View Full Calendar" button at top */}
+        <Button
+          variant="contained"
+          size="large"
+          fullWidth
+          startIcon={<CalendarMonthIcon />}
+          onClick={handleViewOnCalendar}
+          sx={{
+            mb: 2,
+            py: 1.5,
+            fontSize: '1.1rem',
+            fontWeight: 'bold',
+            bgcolor: 'primary.main',
+            '&:hover': { bgcolor: 'primary.dark' },
+          }}
+        >
+          View Full Event in Calendar
+        </Button>
+
         {/* Event Image */}
         {eventImage && (
           <Box
@@ -265,16 +240,8 @@ export default function EventPageClient({ eventId, eventData }) {
           </Box>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Share only (View Calendar is at top) */}
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <Button
-            variant="contained"
-            startIcon={<CalendarMonthIcon />}
-            onClick={handleViewOnCalendar}
-            sx={{ flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
-          >
-            View on Calendar
-          </Button>
           <Button
             variant="outlined"
             startIcon={<ShareIcon />}

@@ -7,6 +7,7 @@
 // This ensures that if nearestCity is not yet defined, we pass empty strings to useEvents, preventing runtime errors.
 
 import { useState, useRef, useEffect, useContext } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useEvents, useEventOperations } from '@/hooks/useEvents';
 import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
@@ -23,6 +24,10 @@ import { listOfAllRoles } from '@/utils/masterData';
 import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
 export const useCalendarPage = () => {
+  // TIEMPO-256: URL params for deep linking
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [clickedDate, setClickedDate] = useState(null);
@@ -82,57 +87,69 @@ export const useCalendarPage = () => {
   // Initialize event operations
   const { getEventById } = useEventOperations();
 
-  // TIEMPO-256: Check for deep-linked event ID from shared URL
-  // When user arrives from /event/[id], sessionStorage contains the event ID to open
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !eventsLoading && events && events.length > 0) {
-      const openEventId = sessionStorage.getItem('openEventId');
-      if (openEventId) {
-        // Clear immediately to prevent re-opening on refresh
-        sessionStorage.removeItem('openEventId');
+  // TIEMPO-256: Check for deep-linked event ID from URL query param
+  // When user clicks "View on Calendar" from /event/[id], URL has ?event=xxx
+  const deepLinkProcessedRef = useRef(false);
 
-        // Find the event in loaded events first (faster)
-        const eventInList = events.find(e => e._id === openEventId);
-        if (eventInList) {
-          // Transform to FullCalendar event format and open modal
-          const transformedEvent = {
-            id: eventInList._id,
-            title: eventInList.title,
-            start: eventInList.venueStartDisplay || eventInList.startTime,
-            end: eventInList.venueEndDisplay || eventInList.endTime,
-            extendedProps: {
-              ...eventInList,
-              _id: eventInList._id,
-            },
-          };
-          setSelectedEventDetails(transformedEvent);
-          setViewDetailModalOpen(true);
-        } else {
-          // Event not in current view - fetch it directly from API
-          getEventById(openEventId)
-            .then(eventData => {
-              if (eventData) {
-                const transformedEvent = {
-                  id: eventData._id,
-                  title: eventData.title,
-                  start: eventData.venueStartDisplay || eventData.startTime,
-                  end: eventData.venueEndDisplay || eventData.endTime,
-                  extendedProps: {
-                    ...eventData,
-                    _id: eventData._id,
-                  },
-                };
-                setSelectedEventDetails(transformedEvent);
-                setViewDetailModalOpen(true);
-              }
-            })
-            .catch(err => {
-              console.error('TIEMPO-256: Failed to fetch deep-linked event:', err);
-            });
-        }
+  useEffect(() => {
+    // Get event ID from URL query param
+    const eventIdFromUrl = searchParams?.get('event');
+
+    // Only run once, after initial loading completes
+    if (eventIdFromUrl && !eventsLoading && !deepLinkProcessedRef.current) {
+      // Mark as processed IMMEDIATELY (sync) to prevent duplicate runs
+      deepLinkProcessedRef.current = true;
+      console.log('TIEMPO-256: Found deep-linked event ID from URL:', eventIdFromUrl);
+
+      // Clear the URL param to prevent re-triggering on refresh
+      router.replace('/calendar', { scroll: false });
+
+      // Find the event in loaded events first (faster)
+      const eventInList = events?.find(e => e._id === eventIdFromUrl);
+      if (eventInList) {
+        console.log('TIEMPO-256: Event found in loaded events, opening modal');
+        // Transform to FullCalendar event format and open modal
+        const transformedEvent = {
+          id: eventInList._id,
+          title: eventInList.title,
+          start: eventInList.venueStartDisplay || eventInList.startTime,
+          end: eventInList.venueEndDisplay || eventInList.endTime,
+          extendedProps: {
+            ...eventInList,
+            _id: eventInList._id,
+          },
+        };
+        setSelectedEventDetails(transformedEvent);
+        setViewDetailModalOpen(true);
+      } else {
+        // Event not in current view - fetch it directly from API
+        console.log('TIEMPO-256: Event not in view, fetching from API...');
+        getEventById(eventIdFromUrl)
+          .then(eventData => {
+            if (eventData) {
+              console.log('TIEMPO-256: Event fetched, opening modal');
+              const transformedEvent = {
+                id: eventData._id,
+                title: eventData.title,
+                start: eventData.venueStartDisplay || eventData.startTime,
+                end: eventData.venueEndDisplay || eventData.endTime,
+                extendedProps: {
+                  ...eventData,
+                  _id: eventData._id,
+                },
+              };
+              setSelectedEventDetails(transformedEvent);
+              setViewDetailModalOpen(true);
+            } else {
+              console.error('TIEMPO-256: Event not found:', eventIdFromUrl);
+            }
+          })
+          .catch(err => {
+            console.error('TIEMPO-256: Failed to fetch deep-linked event:', err);
+          });
       }
     }
-  }, [events, eventsLoading, getEventById]);
+  }, [searchParams, events, eventsLoading, getEventById, router]);
 
   // Note: Role change refresh is handled automatically by useEvents hook
   // which has selectedRole in its dependency array
