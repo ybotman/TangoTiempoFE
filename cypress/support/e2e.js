@@ -19,6 +19,30 @@ import './commands'
 // Import cypress-fail-fast to stop after 10 failures
 import 'cypress-fail-fast';
 
+// ============================================
+// Global Test Setup - Prevent Welcome Modal
+// ============================================
+/**
+ * Set localStorage flags BEFORE window loads to prevent welcome modal
+ * This runs before each page visit, ensuring flags are set early
+ *
+ * The welcome modal (TIEMPO-329) appears for:
+ * - Visit 1: First-time visitor (full welcome)
+ * - Visit 2: Welcome back
+ * - Visits 5, 10, 15, 20...: Signup prompt
+ *
+ * By setting visit_count to 3 and welcome_shown to true, we bypass all modals
+ */
+Cypress.on('window:before:load', (win) => {
+  // Prevent welcome modal from appearing
+  win.localStorage.setItem('welcome_shown', 'true');
+
+  // Set visit count to 3 to avoid welcome back (2) and signup prompts (5, 10, 15...)
+  win.localStorage.setItem('visit_count', '3');
+
+  console.log('[Cypress Global Setup] localStorage flags set BEFORE window load to prevent welcome modal');
+});
+
 // Add screenshot references to test context for Mochawesome
 // Capture screenshots on BOTH success and failure to check for false positives
 afterEach(function() {

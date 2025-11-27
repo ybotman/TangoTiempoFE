@@ -26,10 +26,13 @@ fi
 
 # Method 3: Keychain (macOS)
 if [ -z "$JIRA_AUTH" ] && command -v security &> /dev/null; then
-    JIRA_EMAIL=$(security find-generic-password -s "jira-email" -w 2>/dev/null || echo "")
-    JIRA_TOKEN=$(security find-generic-password -s "jira-api-token" -w 2>/dev/null || echo "")
+    # Use account-specific lookup for toby.balsley@gmail.com
+    JIRA_EMAIL="toby.balsley@gmail.com"
+    JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null || echo "")
     if [ -n "$JIRA_EMAIL" ] && [ -n "$JIRA_TOKEN" ]; then
         export JIRA_AUTH="$JIRA_EMAIL:$JIRA_TOKEN"
+        export JIRA_EMAIL="$JIRA_EMAIL"
+        export JIRA_API_TOKEN="$JIRA_TOKEN"
     fi
 fi
 

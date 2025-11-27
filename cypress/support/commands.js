@@ -23,6 +23,50 @@ Cypress.Commands.add('login', (email, password) => {
 });
 
 /**
+ * Dismiss welcome modal if it appears
+ * The welcome modal shows "Welcome to Tango Tiempo!" and has a "Select My Location" button
+ *
+ * This modal appears for:
+ * - First-time visitors (new IP address)
+ * - Users who haven't set localStorage welcome flag
+ *
+ * To bypass the modal completely in tests, we clear localStorage and set the welcome flag
+ */
+Cypress.Commands.add('dismissWelcomeModal', () => {
+  // STRATEGY 1: Prevent modal from appearing by setting localStorage flag
+  // This is more reliable than trying to dismiss after it appears
+  cy.window().then((win) => {
+    // Set welcome shown flag to prevent modal
+    win.localStorage.setItem('welcome_shown', 'true');
+
+    // Also set visit count to 3+ to avoid welcome back modal (visits 2) and signup prompt (visits 5, 10, 15...)
+    win.localStorage.setItem('visit_count', '3');
+
+    console.log('[Cypress] Set localStorage flags to prevent welcome modal');
+  });
+
+  // STRATEGY 2: If modal still appears (timing issue), dismiss it
+  cy.wait(500); // Brief wait for modal to potentially appear
+
+  cy.get('body').then($body => {
+    // Check if "Welcome to Tango Tiempo!" text exists (exact match from FirstTimeVisitorContent)
+    if ($body.text().includes('Welcome to Tango Tiempo!')) {
+      console.log('[Cypress] Welcome modal detected - dismissing');
+
+      // Click the "Select My Location" button (exact text from FirstTimeVisitorContent line 101)
+      cy.contains('button', 'Select My Location').click({ force: true });
+
+      // Wait for modal to close
+      cy.wait(1000);
+
+      console.log('[Cypress] Welcome modal dismissed');
+    } else {
+      console.log('[Cypress] No welcome modal detected');
+    }
+  });
+});
+
+/**
  * Logout current user
  */
 Cypress.Commands.add('logout', () => {
@@ -164,8 +208,13 @@ Cypress.Commands.add('clearCategoryFilters', () => {
 
 /**
  * Assert calendar is loaded
+ * Handles welcome modal dismissal before checking calendar
  */
 Cypress.Commands.add('calendarShouldBeLoaded', () => {
+  // First dismiss welcome modal if it appears
+  cy.dismissWelcomeModal();
+
+  // Then wait for calendar to load
   cy.get('.fc-view', { timeout: 10000 }).should('be.visible');
   cy.get('.fc-event', { timeout: 5000 }).should('have.length.at.least', 0); // At least container exists
 });

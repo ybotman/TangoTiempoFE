@@ -3,7 +3,8 @@
     "deploymentEnabled": {
       "DEVL": false,
       "TEST": true,
-      "PROD": true
+      "PROD": true,
+      "cypress-enable-*": true
     }
   }
 }

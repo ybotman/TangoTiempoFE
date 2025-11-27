@@ -85,7 +85,8 @@ const RootLayout = ({ children }) => {
         }
 
         // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-        const geoData = await fetchAllGeolocationData();
+        // PHASE 1.2: Use 24-hour cache for visitor tracking (users unlikely to move between sessions)
+        const geoData = await fetchAllGeolocationData(1440); // 1440 minutes = 24 hours
 
         await fetch(`${afUrl}/api/visitor/track`, {
           method: 'POST',
@@ -162,7 +163,8 @@ const RootLayout = ({ children }) => {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
         // Get geolocation data (IP-based lat/long)
-        const geoData = await fetchAllGeolocationData();
+        // PHASE 1.2: Use 1-hour cache for map center changes (balance freshness vs cost)
+        const geoData = await fetchAllGeolocationData(60); // 60 minutes = 1 hour
 
         // Build headers - include auth token only if user is logged in
         const headers = {

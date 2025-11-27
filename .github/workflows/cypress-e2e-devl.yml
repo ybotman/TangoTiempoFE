@@ -15,9 +15,9 @@ permissions:
   pages: write
   id-token: write
 
-# Allow one concurrent deployment
+# Allow one concurrent deployment across ALL environments (DEVL/TEST share same Pages site)
 concurrency:
-  group: "pages-devl"
+  group: "pages"
   cancel-in-progress: false
 
 jobs:
@@ -55,7 +55,7 @@ jobs:
           wait-on-timeout: 120
         env:
           CYPRESS_BASE_URL: http://localhost:3001
-          CYPRESS_TEST_USER_EMAIL: griffon.dater0g@icloud.com
+          CYPRESS_TEST_USER_EMAIL: ${{ secrets.CICD_TEST_EMAIL }}
           CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CICD_TEST_PASSWORD }}
           NEXT_PUBLIC_BE_URL: https://calendarbe-test-bpg5caaqg5chbndu.eastus-01.azurewebsites.net
           NEXT_PUBLIC_FE_URL: http://localhost:3001
