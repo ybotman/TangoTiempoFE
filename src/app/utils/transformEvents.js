@@ -207,16 +207,18 @@ export function transformEvents(events) {
 }
 
 // Parse RRULE string to FullCalendar v6 object format
+// TIEMPO-250: dtstart uses venue local time (no Z suffix) for proper DST handling
+// This allows rrule.js to maintain consistent local time across DST boundaries
 function parseRRuleToObject(rruleString, startDate) {
   // First pass: get frequency
   let frequency = null;
-  
+
   try {
     const parts = rruleString.split(';');
-    
+
     const rruleObj = {
-      // TIEMPO-239: Use venue time directly if available (no Z suffix)
-      // Otherwise keep as UTC for backward compatibility
+      // TIEMPO-239/250: Use venue time directly (no Z suffix = local time)
+      // rrule.js will handle DST transitions correctly with local time format
       dtstart: startDate
     };
   parts.forEach(part => {
@@ -249,9 +251,10 @@ function parseRRuleToObject(rruleString, startDate) {
           }).filter(Boolean);
           
           if (positionalDays.length > 0) {
-            // Some RRULE parsers need these separated
+            // TIEMPO-250: Some RRULE parsers need these separated
+            // Use UPPERCASE day codes for RFC 5545 compliance and rrule.js compatibility
             rruleObj.bysetpos = positionalDays.map(pd => pd.pos);
-            rruleObj.byweekday = positionalDays.map(pd => pd.day);
+            rruleObj.byweekday = positionalDays.map(pd => pd.day.toUpperCase());
           }
         } else {
           // For weekly, convert to lowercase array

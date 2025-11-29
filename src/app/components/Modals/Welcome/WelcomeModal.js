@@ -48,39 +48,27 @@ const determineUserState = (user) => {
   const visitCount = incrementVisitCount();
   const welcomeShown = wasWelcomeShown();
 
-  console.log('[WelcomeModal DEBUG] ======================');
-  console.log('[WelcomeModal DEBUG] Visit count:', visitCount);
-  console.log('[WelcomeModal DEBUG] User authenticated:', user ? 'YES' : 'NO');
-  console.log('[WelcomeModal DEBUG] Welcome shown before:', welcomeShown);
-
   // Priority 1: Check authentication status
   if (!user) {
     // Anonymous visitor - use visit counter pattern
-    let state;
     if (visitCount === 1) {
-      state = 'FIRST_TIME_VISITOR';  // Visit 1: Full welcome
+      return 'FIRST_TIME_VISITOR';  // Visit 1: Full welcome
     } else if (visitCount === 2) {
-      state = 'WELCOME_BACK';  // Visit 2: Welcome back
+      return 'WELCOME_BACK';  // Visit 2: Welcome back
     } else if (visitCount >= 5 && visitCount % 5 === 0) {
-      state = 'SIGNUP_PROMPT';  // Visits 5, 10, 15, 20...: Encourage signup
+      return 'SIGNUP_PROMPT';  // Visits 5, 10, 15, 20...: Encourage signup
     } else {
-      state = 'SILENT';  // All other visits: Silent load
+      return 'SILENT';  // All other visits: Silent load
     }
-    console.log('[WelcomeModal DEBUG] Anonymous user state:', state);
-    return state;
   } else {
     // Authenticated user
     const isFirstLogin = localStorage.getItem('is_first_login') === 'true';
-    console.log('[WelcomeModal DEBUG] First login flag:', isFirstLogin);
 
-    let state;
     if (isFirstLogin && !welcomeShown) {
-      state = 'FIRST_LOGIN_USER';  // Show onboarding checklist
+      return 'FIRST_LOGIN_USER';  // Show onboarding checklist
     } else {
-      state = 'LOGGED_IN_RETURNING';  // No modal, auto-load prefs
+      return 'LOGGED_IN_RETURNING';  // No modal, auto-load prefs
     }
-    console.log('[WelcomeModal DEBUG] Authenticated user state:', state);
-    return state;
   }
 };
 
@@ -103,13 +91,10 @@ const WelcomeModal = ({ open, onClose }) => {
   // BUGFIX: Determine user state ONLY ONCE on mount
   // Lock the state to prevent race condition where cookie gets created mid-render
   useEffect(() => {
-    console.log('[WelcomeModal DEBUG] useEffect triggered, userState:', userState, 'user:', user ? 'authenticated' : 'anonymous');
-
     // Only determine state if not already set
     if (userState === null) {
       const state = determineUserState(user);
       setUserState(state);
-      console.log('[WelcomeModal DEBUG] User state locked:', state);
 
       // Only show modal for states that require it
       const shouldOpen = state === 'FIRST_TIME_VISITOR' ||
@@ -117,17 +102,7 @@ const WelcomeModal = ({ open, onClose }) => {
                          state === 'SIGNUP_PROMPT' ||
                          state === 'FIRST_LOGIN_USER';
 
-      console.log('[WelcomeModal DEBUG] Should open modal?', shouldOpen, '(state:', state + ')');
-
-      if (shouldOpen) {
-        setInternalOpen(true);
-        console.log('[WelcomeModal DEBUG] Setting internalOpen = TRUE');
-      } else {
-        setInternalOpen(false);
-        console.log('[WelcomeModal DEBUG] Setting internalOpen = FALSE');
-      }
-    } else {
-      console.log('[WelcomeModal DEBUG] User state already set to:', userState, '- skipping determination');
+      setInternalOpen(shouldOpen);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]); // Only re-run if user login state changes
@@ -141,20 +116,12 @@ const WelcomeModal = ({ open, onClose }) => {
     const storedLocation = getLastMapCenter();
 
     if (storedLocation) {
-      console.log('[WelcomeModal] Restoring previous location:', storedLocation);
-
       // Restore location to session
       setSessionLocation(storedLocation);
-
-      // Mark welcome as shown
       setWelcomeShown();
-
-      // Close modal
       setInternalOpen(false);
       onClose();
     } else {
-      console.log('[WelcomeModal] No stored location, opening MapCenterModal');
-
       // No stored location - open map modal
       setWelcomeShown();
       setInternalOpen(false);
@@ -172,7 +139,6 @@ const WelcomeModal = ({ open, onClose }) => {
    * Redirects to signup page
    */
   const handleSignup = () => {
-    console.log('[WelcomeModal] Redirecting to signup');
     setWelcomeShown();
     setInternalOpen(false);
     onClose();
@@ -184,7 +150,6 @@ const WelcomeModal = ({ open, onClose }) => {
    * Redirects to login page
    */
   const handleLogin = () => {
-    console.log('[WelcomeModal] Redirecting to login');
     setWelcomeShown();
     setInternalOpen(false);
     onClose();
@@ -197,18 +162,9 @@ const WelcomeModal = ({ open, onClose }) => {
    */
   const handleGetStarted = () => {
     setWelcomeShown();
-
-    if (userState === 'RETURNING_VISITOR') {
-      // Just close - location is already restored
-      console.log('[WelcomeModal] Closing for returning visitor');
-      setInternalOpen(false);
-      onClose();
-    } else if (userState === 'FIRST_LOGIN_USER') {
-      // TODO: Open user settings modal for onboarding
-      console.log('[WelcomeModal] TODO: Open onboarding flow');
-      setInternalOpen(false);
-      onClose();
-    }
+    setInternalOpen(false);
+    onClose();
+    // TODO: Open user settings modal for onboarding if FIRST_LOGIN_USER
   };
 
   /**
@@ -219,18 +175,14 @@ const WelcomeModal = ({ open, onClose }) => {
     setWelcomeShown();
     setInternalOpen(false);
     onClose();
-    console.log('[WelcomeModal] Skipped welcome');
   };
 
   // Don't render if state doesn't require modal
   if (!userState ||
       userState === 'SILENT' ||
       userState === 'LOGGED_IN_RETURNING') {
-    console.log('[WelcomeModal DEBUG] Early return - NOT rendering modal. State:', userState);
     return null;
   }
-
-  console.log('[WelcomeModal DEBUG] Rendering modal. State:', userState, 'open:', open, 'internalOpen:', internalOpen);
 
   return (
     <Dialog
@@ -250,44 +202,32 @@ const WelcomeModal = ({ open, onClose }) => {
     >
       {/* Render appropriate content based on user state */}
       {userState === 'FIRST_TIME_VISITOR' && (
-        <>
-          {console.log('[WelcomeModal DEBUG] Rendering: FirstTimeVisitorContent')}
-          <FirstTimeVisitorContent
-            onSelectLocation={handleSelectLocation}
-            onSignup={handleSignup}
-            onLogin={handleLogin}
-          />
-        </>
+        <FirstTimeVisitorContent
+          onSelectLocation={handleSelectLocation}
+          onSignup={handleSignup}
+          onLogin={handleLogin}
+        />
       )}
 
       {userState === 'WELCOME_BACK' && (
-        <>
-          {console.log('[WelcomeModal DEBUG] Rendering: ReturningVisitorContent')}
-          <ReturningVisitorContent
-            onClose={handleSkip}
-          />
-        </>
+        <ReturningVisitorContent
+          onClose={handleSkip}
+        />
       )}
 
       {userState === 'SIGNUP_PROMPT' && (
-        <>
-          {console.log('[WelcomeModal DEBUG] Rendering: SignupPromptContent')}
-          <SignupPromptContent
-            onSignup={handleSignup}
-            onLogin={handleLogin}
-            onClose={handleSkip}
-          />
-        </>
+        <SignupPromptContent
+          onSignup={handleSignup}
+          onLogin={handleLogin}
+          onClose={handleSkip}
+        />
       )}
 
       {userState === 'FIRST_LOGIN_USER' && (
-        <>
-          {console.log('[WelcomeModal DEBUG] Rendering: FirstLoginUserContent')}
-          <FirstLoginUserContent
-            onGetStarted={handleGetStarted}
-            onSkip={handleSkip}
-          />
-        </>
+        <FirstLoginUserContent
+          onGetStarted={handleGetStarted}
+          onSkip={handleSkip}
+        />
       )}
     </Dialog>
   );
