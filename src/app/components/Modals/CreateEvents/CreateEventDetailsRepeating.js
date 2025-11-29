@@ -204,8 +204,8 @@ const MaterialUISwitch = styled(Switch)(() => ({
 }));
 
 const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
-  // Default to weekly if monthly is selected (since monthly is disabled)
-  const initialType = eventData.recurrenceType === 'monthly' ? 'weekly' : (eventData.recurrenceType || 'weekly');
+  // TIEMPO-250: Monthly re-enabled - use recurrence type as-is
+  const initialType = eventData.recurrenceType || 'weekly';
   const [recurrenceType, setRecurrenceType] = useState(initialType);
   const [recurrenceDays, setRecurrenceDays] = useState(eventData.recurrenceDays || []);
   const [monthlyDays, setMonthlyDays] = useState(eventData.monthlyDays || []);
@@ -264,11 +264,8 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   }, [eventData._id]); // Only re-run when editing a different event
 
   // Handle Recurrence Type Change
+  // TIEMPO-250: Monthly re-enabled - allow all recurrence types
   const handleRecurrenceTypeChange = (e) => {
-    // Prevent selection of monthly (it's disabled but just in case)
-    if (e.target.value === 'monthly') {
-      return;
-    }
     setRecurrenceType(e.target.value);
     setRecurrenceDays([]);
     setMonthlyDays([]);
@@ -283,10 +280,13 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   };
 
   // Convert date to RRULE format (YYYYMMDDTHHMMSS - local time)
+  // TIEMPO-250: Use LOCAL time format (no Z suffix) for proper DST handling
+  // Per RFC 5545: Local time format allows rrule.js to handle DST transitions correctly
+  // The venue's local time is preserved across DST boundaries
   const dateToRRuleFormat = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    // Use local end of day (23:59:59) not UTC
+    // Use local end of day (23:59:59) - NO Z suffix for venue local time
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -328,8 +328,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     }
     
     // Validate UNTIL date format if present
+    // TIEMPO-250: Accept both with and without Z suffix (local time is valid per TIEMPO-239)
     const untilMatch = rrule.match(/UNTIL=(\w+)/);
-    if (untilMatch && !/^\d{8}T\d{6}Z$/.test(untilMatch[1])) {
+    if (untilMatch && !/^\d{8}T\d{6}Z?$/.test(untilMatch[1])) {
       errors.push('Invalid UNTIL date format');
     }
     
@@ -463,10 +464,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
-          <MenuItem value="monthly" disabled>
+          <MenuItem value="monthly">
             <Box display="flex" alignItems="center" gap={1}>
               <span>Monthly</span>
-              <Typography variant="caption" color="text.secondary">(Coming Soon)</Typography>
+              <Typography variant="caption" color="primary">(Beta)</Typography>
             </Box>
           </MenuItem>
         </TextField>
@@ -487,12 +488,14 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         )}
       </Box>
 
-      {/* Monthly Disabled Notice */}
-      <Box sx={{ mt: 2, p: 1.5, bgcolor: 'warning.light', borderRadius: 1, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="body2" color="warning.dark">
-          ⚠️ Monthly recurrence is temporarily disabled while we improve its functionality. Please use non-repeating events instead of monthly.
-        </Typography>
-      </Box>
+      {/* Monthly Beta Notice - only show when monthly is selected */}
+      {recurrenceType === 'monthly' && (
+        <Box sx={{ mt: 2, p: 1.5, bgcolor: 'info.light', borderRadius: 1, display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2" color="info.dark">
+            Monthly recurrence is in beta. Best supported patterns: 1st-4th or Last [Day] of month (e.g., 2nd Saturday, Last Friday).
+          </Typography>
+        </Box>
+      )}
 
       {/* End Date vs Number of Occurrences */}
       <Box marginTop={3}>
