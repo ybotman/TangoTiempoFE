@@ -24,8 +24,6 @@ const RootLayout = ({ children }) => {
   // TODO: Re-enable after Maps Platform free tier is configured
   // See: docs/TRACKING-SYSTEM-DEEP-DIVE-ANALYSIS.md
   useEffect(() => {
-    console.log('[Visitor Tracking] DISABLED - Hot fix to stop Google API charges');
-    console.log('[Visitor Tracking] Re-enable after Maps Platform $200 free tier is configured');
 
     // KEEP AUTO-CENTER FEATURE (doesn't cost money)
     const autoCenter = async () => {
