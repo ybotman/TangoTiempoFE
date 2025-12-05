@@ -267,6 +267,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     }
   }, [editMode, user, fetchOrganizerById]);
 
+  // Check if event is multi-day (long event like marathon/encuentro)
+  const isMultiDayEvent = (() => {
+    if (!eventData.startDate || !eventData.endDate) return false;
+    const start = eventData.startDate.format ? eventData.startDate.format('YYYY-MM-DD') : eventData.startDate.split('T')[0];
+    const end = eventData.endDate.format ? eventData.endDate.format('YYYY-MM-DD') : eventData.endDate.split('T')[0];
+    return start !== end;
+  })();
+
   // Validate current tab when isRepeating changes
   useEffect(() => {
     // If we're on the repeating tab but isRepeating is false, switch to basic
@@ -274,6 +282,16 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       setCurrentTab('basic');
     }
   }, [eventData.isRepeating, currentTab]);
+
+  // Disable repeating if event becomes multi-day
+  useEffect(() => {
+    if (isMultiDayEvent && eventData.isRepeating) {
+      setEventData(prev => ({ ...prev, isRepeating: false }));
+      if (currentTab === 'repeating') {
+        setCurrentTab('basic');
+      }
+    }
+  }, [isMultiDayEvent, eventData.isRepeating, currentTab]);
 
   // TIEMPO-246: Recalculate event times when venue timezone changes
   useEffect(() => {
@@ -841,18 +859,24 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <Typography variant="h5" component="h2">
             {editMode ? 'Edit Event' : 'Create Event'}
           </Typography>
-          <Tooltip title={selectedRole === 'RegionalOrganizer' || selectedRole === 'RegionalAdmin' ? "Enable recurring events (Beta)" : "Repeating events feature coming in July 2025"}>
+          <Tooltip title={
+            isMultiDayEvent
+              ? "Multi-day events (marathons, encuentros) cannot repeat"
+              : (selectedRole === 'RegionalOrganizer' || selectedRole === 'RegionalAdmin'
+                ? "Enable recurring events"
+                : "Repeating events feature coming in July 2025")
+          }>
             <span>
               <FormControlLabel
-                control={<Switch 
-                  checked={eventData.isRepeating} 
-                  onChange={handleToggleRepeating} 
-                  color="primary" 
-                  disabled={selectedRole !== 'RegionalOrganizer' && selectedRole !== 'RegionalAdmin'}
+                control={<Switch
+                  checked={eventData.isRepeating}
+                  onChange={handleToggleRepeating}
+                  color="primary"
+                  disabled={isMultiDayEvent || (selectedRole !== 'RegionalOrganizer' && selectedRole !== 'RegionalAdmin')}
                 />}
                 label="Repeating"
                 labelPlacement="start"
-                disabled={selectedRole !== 'RegionalOrganizer' && selectedRole !== 'RegionalAdmin'}
+                disabled={isMultiDayEvent || (selectedRole !== 'RegionalOrganizer' && selectedRole !== 'RegionalAdmin')}
               />
             </span>
           </Tooltip>
