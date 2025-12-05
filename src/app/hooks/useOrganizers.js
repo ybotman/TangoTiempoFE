@@ -61,8 +61,9 @@ export const useOrganizers = (options = {}) => {
 
   // Fetch organizers based on selected location hierarchy from GeoLocationContext
   const fetchOrganizers = useCallback(async () => {
-    // Try to use cached data first
-    if (getCachedOrganizers()) {
+    // TIEMPO-325: Skip cache when fetching ALL organizers for dropdowns
+    // Cache may have filtered/stale data that doesn't include all organizers
+    if (!skipLocationFilter && getCachedOrganizers()) {
       return;
     }
 
@@ -124,7 +125,7 @@ export const useOrganizers = (options = {}) => {
     } finally {
       setFetchLoading(false);
     }
-  }, [masteredRegionId, masteredDivisionId, masteredCityId, getCachedOrganizers, cacheOrganizers]);
+  }, [masteredRegionId, masteredDivisionId, masteredCityId, skipLocationFilter, getCachedOrganizers, cacheOrganizers]);
 
   // Implement retry with exponential backoff
   const fetchWithRetry = useCallback(() => {
