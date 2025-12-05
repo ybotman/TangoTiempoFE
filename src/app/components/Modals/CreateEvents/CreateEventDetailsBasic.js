@@ -32,6 +32,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
   
   // Use appropriate organizers based on selected role
+  // TIEMPO-325: RegionalOrganizer now gets dropdown with ALL organizers (like SystemAdmin)
+  // RegionalAdmin gets filtered organizers by their allowed regions
   const organizers = selectedRole === 'RegionalAdmin' ? raOrganizers : regularOrganizers;
   const loadingOrganizers = selectedRole === 'RegionalAdmin' ? loadingRAOrganizers : loadingRegularOrganizers;
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
@@ -481,10 +483,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           />
         </Grid>
         
-        {/* Owner Organizer - Display for RO, Selection for RA */}
+        {/* Owner Organizer - TIEMPO-325: Selection for RA and RO, Display only for other roles */}
         <Grid item xs={12} md={6}>
-          {selectedRole === 'RegionalAdmin' ? (
-            // RegionalAdmin: Show organizer selector
+          {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') ? (
+            // TIEMPO-325: RegionalAdmin and RegionalOrganizer get organizer dropdown
+            // RO defaults to their linked organizer but can select any organizer
             <FormControl fullWidth required>
               <InputLabel id="organizer-label">Event Organizer</InputLabel>
               <Select
@@ -498,20 +501,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                 <MenuItem value="" disabled>
                   <em>{loadingOrganizers ? 'Loading organizers...' : 'Select an organizer'}</em>
                 </MenuItem>
-                {organizers.map((organizer) => (
-                  <MenuItem key={organizer._id} value={organizer._id}>
-                    {organizer.fullName || organizer.organizerName || organizer.name} ({organizer.shortName || organizer.organizerShortName})
+                {organizers.map((org) => (
+                  <MenuItem key={org._id} value={org._id}>
+                    {org.fullName || org.organizerName || org.name} ({org.shortName || org.organizerShortName})
                   </MenuItem>
                 ))}
               </Select>
               {organizers.length === 0 && !loadingOrganizers && (
                 <Alert severity="info" sx={{ mt: 1 }}>
-                  No organizers available in your administrative regions. Contact an administrator if this seems incorrect.
+                  {selectedRole === 'RegionalAdmin'
+                    ? 'No organizers available in your administrative regions. Contact an administrator if this seems incorrect.'
+                    : 'No organizers available. Contact an administrator if this seems incorrect.'}
                 </Alert>
               )}
             </FormControl>
           ) : (
-            // RegionalOrganizer: Show display only
+            // Other roles (SystemAdmin, etc.): Show display only
             <FormControl fullWidth>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
