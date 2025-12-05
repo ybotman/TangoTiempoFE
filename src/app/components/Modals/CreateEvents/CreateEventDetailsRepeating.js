@@ -203,6 +203,85 @@ const MaterialUISwitch = styled(Switch)(() => ({
   },
 }));
 
+// Frequency-based limits for recurrence
+const RECURRENCE_LIMITS = {
+  daily: { maxCount: 10, maxMonths: 0, maxDays: 10 },
+  weekly: { maxCount: 53, maxMonths: 13, maxDays: 0 },
+  monthly: { maxCount: 13, maxMonths: 13, maxDays: 0 },
+};
+
+// Helper to get day abbreviation from date
+const getDayAbbreviation = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  return days[date.getDay()];
+};
+
+// Helper to calculate end date from count and frequency
+const calculateEndDateFromCount = (startDate, count, frequency) => {
+  if (!startDate || !count) return '';
+  const start = new Date(startDate);
+  const result = new Date(start);
+
+  switch (frequency) {
+    case 'daily':
+      result.setDate(result.getDate() + (parseInt(count, 10) - 1));
+      break;
+    case 'weekly':
+      result.setDate(result.getDate() + ((parseInt(count, 10) - 1) * 7));
+      break;
+    case 'monthly':
+      result.setMonth(result.getMonth() + (parseInt(count, 10) - 1));
+      break;
+    default:
+      return '';
+  }
+
+  return result.toISOString().split('T')[0];
+};
+
+// Helper to calculate count from end date and frequency
+const calculateCountFromEndDate = (startDate, endDate, frequency) => {
+  if (!startDate || !endDate) return '';
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = end - start;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  let count;
+  switch (frequency) {
+    case 'daily':
+      count = diffDays + 1;
+      break;
+    case 'weekly':
+      count = Math.ceil(diffDays / 7) + 1;
+      break;
+    case 'monthly':
+      count = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+      break;
+    default:
+      return '';
+  }
+
+  return Math.max(1, count).toString();
+};
+
+// Helper to get max end date based on frequency
+const getMaxEndDate = (startDate, frequency) => {
+  if (!startDate) return '';
+  const start = new Date(startDate);
+  const limits = RECURRENCE_LIMITS[frequency] || RECURRENCE_LIMITS.weekly;
+
+  if (limits.maxDays > 0) {
+    start.setDate(start.getDate() + limits.maxDays);
+  } else if (limits.maxMonths > 0) {
+    start.setMonth(start.getMonth() + limits.maxMonths);
+  }
+
+  return start.toISOString().split('T')[0];
+};
+
 const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   // TIEMPO-250: Monthly re-enabled - use recurrence type as-is
   const initialType = eventData.recurrenceType || 'weekly';
@@ -213,10 +292,14 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   const [excludeDates, setExcludeDates] = useState(eventData.excludeDatesString || eventData.excludeDates || '');
   const [endDate, setEndDate] = useState(eventData.recurrenceEndDate || '');
   const [occurrences, setOccurrences] = useState(eventData.recurrenceCount || '');
-  // sendReminder feature removed - was not implemented
+  // Track if we've initialized the day checkbox from start date
+  const [hasInitializedDay, setHasInitializedDay] = useState(false);
 
   // State to handle switching between End Date and Occurrences
   const [useEndDate, setUseEndDate] = useState(eventData.useEndDate !== undefined ? eventData.useEndDate : true);
+
+  // Get current limits based on frequency
+  const currentLimits = RECURRENCE_LIMITS[recurrenceType] || RECURRENCE_LIMITS.weekly;
 
   // Update local state when eventData changes (for edit mode)
   // Only run once when component mounts or eventData._id changes
@@ -263,13 +346,50 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     }
   }, [eventData._id]); // Only re-run when editing a different event
 
+  // Pre-check day checkbox based on event start date (only for new events)
+  useEffect(() => {
+    if (!hasInitializedDay && eventData.startDate && recurrenceDays.length === 0 && monthlyDays.length === 0) {
+      const dayAbbrev = getDayAbbreviation(eventData.startDate);
+      if (dayAbbrev) {
+        if (recurrenceType === 'weekly') {
+          setRecurrenceDays([dayAbbrev]);
+        } else if (recurrenceType === 'monthly') {
+          setMonthlyDays([dayAbbrev]);
+        }
+        setHasInitializedDay(true);
+      }
+    }
+  }, [eventData.startDate, recurrenceType, hasInitializedDay, recurrenceDays.length, monthlyDays.length]);
+
   // Handle Recurrence Type Change
   // TIEMPO-250: Monthly re-enabled - allow all recurrence types
   const handleRecurrenceTypeChange = (e) => {
-    setRecurrenceType(e.target.value);
-    setRecurrenceDays([]);
-    setMonthlyDays([]);
-    setMonthlyWeeks([]);
+    const newType = e.target.value;
+    setRecurrenceType(newType);
+    // Pre-select day based on start date for new frequency type
+    const dayAbbrev = getDayAbbreviation(eventData.startDate);
+    if (dayAbbrev) {
+      if (newType === 'weekly') {
+        setRecurrenceDays([dayAbbrev]);
+        setMonthlyDays([]);
+        setMonthlyWeeks([]);
+      } else if (newType === 'monthly') {
+        setMonthlyDays([dayAbbrev]);
+        setRecurrenceDays([]);
+        setMonthlyWeeks([]);
+      } else {
+        setRecurrenceDays([]);
+        setMonthlyDays([]);
+        setMonthlyWeeks([]);
+      }
+    } else {
+      setRecurrenceDays([]);
+      setMonthlyDays([]);
+      setMonthlyWeeks([]);
+    }
+    // Clear and reset limits when changing frequency
+    setEndDate('');
+    setOccurrences('');
   };
 
   // Handle switching between End Date and Occurrences
@@ -277,6 +397,43 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     setUseEndDate(!useEndDate);
     setEndDate(''); // Clear the value of endDate when switching
     setOccurrences(''); // Clear occurrences when switching
+  };
+
+  // Handle end date change with sync to occurrences
+  const handleEndDateChange = (e) => {
+    const newEndDate = e.target.value;
+    const maxDate = getMaxEndDate(eventData.startDate, recurrenceType);
+
+    // Enforce max date
+    if (maxDate && newEndDate > maxDate) {
+      setEndDate(maxDate);
+      const syncedCount = calculateCountFromEndDate(eventData.startDate, maxDate, recurrenceType);
+      setOccurrences(syncedCount);
+    } else {
+      setEndDate(newEndDate);
+      // Sync count from date
+      const syncedCount = calculateCountFromEndDate(eventData.startDate, newEndDate, recurrenceType);
+      const limitedCount = Math.min(parseInt(syncedCount, 10) || 1, currentLimits.maxCount).toString();
+      setOccurrences(limitedCount);
+    }
+  };
+
+  // Handle occurrences change with sync to end date
+  const handleOccurrencesChange = (e) => {
+    let newCount = parseInt(e.target.value, 10) || '';
+
+    // Enforce max count
+    if (newCount && newCount > currentLimits.maxCount) {
+      newCount = currentLimits.maxCount;
+    }
+
+    setOccurrences(newCount.toString());
+
+    // Sync end date from count
+    if (newCount) {
+      const syncedDate = calculateEndDateFromCount(eventData.startDate, newCount, recurrenceType);
+      setEndDate(syncedDate);
+    }
   };
 
   // Convert date to RRULE format (YYYYMMDDTHHMMSS - local time)
@@ -500,7 +657,10 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       {/* End Date vs Number of Occurrences */}
       <Box marginTop={3}>
         <Typography variant="subtitle2" gutterBottom>
-          When should the recurrence end?
+          How long should the series run? (Count and Until Date stay in sync)
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+          Max: {currentLimits.maxCount} occurrences / {currentLimits.maxMonths > 0 ? `${currentLimits.maxMonths} months` : `${currentLimits.maxDays} days`}
         </Typography>
         <Box display="flex" alignItems="center" gap={2}>
           <TextField
@@ -508,32 +668,34 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
             type="date"
             InputLabelProps={{ shrink: true }}
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            disabled={!useEndDate}
-            helperText={useEndDate ? "Events will repeat until this date" : ""}
-            sx={{ opacity: useEndDate ? 1 : 0.5 }}
+            onChange={handleEndDateChange}
+            inputProps={{
+              min: eventData.startDate ? new Date(eventData.startDate).toISOString().split('T')[0] : undefined,
+              max: getMaxEndDate(eventData.startDate, recurrenceType) || undefined,
+            }}
+            helperText={endDate ? `Synced: ${occurrences || '?'} occurrences` : 'Select end date'}
+            sx={{ minWidth: 180 }}
           />
           <Box display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="caption" color={useEndDate ? "primary" : "text.secondary"}>
-              Until Date
+            <Typography variant="caption" color="primary">
+              Synced
             </Typography>
-            <MaterialUISwitch 
-              checked={!useEndDate} 
-              onChange={() => handleSwitchChange()} 
+            <MaterialUISwitch
+              checked={!useEndDate}
+              onChange={() => handleSwitchChange()}
             />
-            <Typography variant="caption" color={!useEndDate ? "primary" : "text.secondary"}>
-              Count
+            <Typography variant="caption" color="text.secondary">
+              Toggle
             </Typography>
           </Box>
           <TextField
             label="Number of Occurrences"
             type="number"
-            inputProps={{ min: 1, max: 365 }}
+            inputProps={{ min: 1, max: currentLimits.maxCount }}
             value={occurrences}
-            onChange={(e) => setOccurrences(e.target.value)}
-            sx={{ width: '180px', opacity: !useEndDate ? 1 : 0.5 }}
-            disabled={useEndDate}
-            helperText={!useEndDate ? "Repeat this many times" : ""}
+            onChange={handleOccurrencesChange}
+            sx={{ width: '180px' }}
+            helperText={occurrences ? `Until: ${endDate || 'calculating...'}` : `Max ${currentLimits.maxCount}`}
           />
         </Box>
       </Box>
@@ -608,21 +770,15 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         </Box>
       )}
 
-      {/* Exclude Dates - Backend now supports this! */}
+      {/* Exclude Dates */}
       <Box marginTop={2}>
-        <Alert severity="info" sx={{ mb: 2 }}>
-          <Typography variant="body2">
-            <strong>Beta Feature:</strong> Exclude dates are now supported! Enter specific dates to skip in your recurring series. 
-            Dates must be in YYYY-MM-DD format (e.g., 2025-10-10).
-          </Typography>
-        </Alert>
         <TextField
           fullWidth
           label="Exclude Dates (comma separated, format: YYYY-MM-DD)"
           value={excludeDates}
           onChange={(e) => setExcludeDates(e.target.value)}
           onBlur={handleExcludeDatesBlur}
-          helperText="Enter dates to skip in YYYY-MM-DD format, separated by commas (e.g., 2024-12-25, 2024-12-31)"
+          helperText="Optional: Enter dates to skip (e.g., 2024-12-25, 2024-12-31)"
         />
       </Box>
 
