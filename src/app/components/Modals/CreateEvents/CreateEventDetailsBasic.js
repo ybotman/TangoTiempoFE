@@ -1,14 +1,12 @@
 import React, { useEffect, useContext, useState, useMemo } from 'react';
-import { Box, Typography, FormControl, InputLabel, TextField, Grid, CircularProgress, Alert, Autocomplete, Select, MenuItem, Button } from '@mui/material';
-import AddLocationIcon from '@mui/icons-material/AddLocation';
+import { Box, Typography, FormControl, TextField, Grid, CircularProgress, Alert, Autocomplete } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hook
-import { useOrganizers } from '@/hooks/useOrganizers'; // Import organizers hook for RA selection
-import { useRAOrganizers } from '@/hooks/useRAOrganizers'; // Import specialized RA organizers hook
+import { useOrganizers } from '@/hooks/useOrganizers'; // TIEMPO-325: Import organizers hook for type-ahead dropdown
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
@@ -28,14 +26,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
-  const { organizers: regularOrganizers, loading: loadingRegularOrganizers } = useOrganizers({ skipLocationFilter: true }); // Fetch ALL organizers for dropdown
-  const { organizers: raOrganizers, loading: loadingRAOrganizers } = useRAOrganizers(); // Fetch RA-specific organizers
-  
-  // Use appropriate organizers based on selected role
-  // TIEMPO-325: RegionalOrganizer now gets dropdown with ALL organizers (like SystemAdmin)
-  // RegionalAdmin gets filtered organizers by their allowed regions
-  const organizers = selectedRole === 'RegionalAdmin' ? raOrganizers : regularOrganizers;
-  const loadingOrganizers = selectedRole === 'RegionalAdmin' ? loadingRAOrganizers : loadingRegularOrganizers;
+  // TIEMPO-325: Fetch ALL organizers for dropdown (no filtering) - use type-ahead for usability
+  const { organizers, loading: loadingOrganizers } = useOrganizers({ skipLocationFilter: true });
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
@@ -140,19 +132,25 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, title }));
   };
 
-  // Handle organizer selection for RA users
-  const handleOrganizerChange = (event) => {
-    const selectedOrganizerId = event.target.value;
-    
-    // Find the selected organizer to get its name
-    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
-    
+  // TIEMPO-325: Handle organizer selection from Autocomplete
+  const handleOrganizerChange = (event, newValue) => {
+    if (!newValue) {
+      // Clear organizer selection
+      setEventData(prevData => ({
+        ...prevData,
+        ownerOrganizerID: '',
+        ownerOrganizerName: '',
+        ownerOrganizerShortName: ''
+      }));
+      return;
+    }
+
     // Store the ID, name, and shortName (use fullName as fallback for shortName)
-    setEventData(prevData => ({ 
-      ...prevData, 
-      ownerOrganizerID: selectedOrganizerId,
-      ownerOrganizerName: selectedOrganizer ? selectedOrganizer.fullName : '',
-      ownerOrganizerShortName: selectedOrganizer ? (selectedOrganizer.shortName || selectedOrganizer.fullName) : ''
+    setEventData(prevData => ({
+      ...prevData,
+      ownerOrganizerID: newValue._id,
+      ownerOrganizerName: newValue.fullName || '',
+      ownerOrganizerShortName: newValue.shortName || newValue.fullName || ''
     }));
   };
 
@@ -261,12 +259,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, endDate: newDate }));
   };
 
-  // Memoize the organizer select value to prevent re-computation during render
-  const organizerSelectValue = useMemo(() => {
-    if (!eventData.ownerOrganizerID) return '';
-    return organizers.some(org => org._id === eventData.ownerOrganizerID) 
-      ? eventData.ownerOrganizerID 
-      : '';
+  // TIEMPO-325: Memoize selected organizer object for Autocomplete
+  const selectedOrganizer = useMemo(() => {
+    if (!eventData.ownerOrganizerID) return null;
+    return organizers.find(org => org._id === eventData.ownerOrganizerID) || null;
   }, [eventData.ownerOrganizerID, organizers]);
 
   // Memoize the selected category to prevent re-computation during render
@@ -486,35 +482,43 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         {/* Owner Organizer - TIEMPO-325: Selection for RA and RO, Display only for other roles */}
         <Grid item xs={12} md={6}>
           {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') ? (
-            // TIEMPO-325: RegionalAdmin and RegionalOrganizer get organizer dropdown
-            // RO defaults to their linked organizer but can select any organizer
-            <FormControl fullWidth required>
-              <InputLabel id="organizer-label">Event Organizer</InputLabel>
-              <Select
-                labelId="organizer-label"
-                value={organizerSelectValue}
-                onChange={handleOrganizerChange}
-                label="Event Organizer"
-                required
-                disabled={loadingOrganizers}
-              >
-                <MenuItem value="" disabled>
-                  <em>{loadingOrganizers ? 'Loading organizers...' : 'Select an organizer'}</em>
-                </MenuItem>
-                {organizers.map((org) => (
-                  <MenuItem key={org._id} value={org._id}>
-                    {org.fullName || org.organizerName || org.name} ({org.shortName || org.organizerShortName})
-                  </MenuItem>
-                ))}
-              </Select>
-              {organizers.length === 0 && !loadingOrganizers && (
-                <Alert severity="info" sx={{ mt: 1 }}>
-                  {selectedRole === 'RegionalAdmin'
-                    ? 'No organizers available in your administrative regions. Contact an administrator if this seems incorrect.'
-                    : 'No organizers available. Contact an administrator if this seems incorrect.'}
-                </Alert>
+            // TIEMPO-325: RegionalAdmin and RegionalOrganizer get Autocomplete type-ahead
+            // Shows ALL organizers (no filtering), type-ahead for usability with large lists
+            <Autocomplete
+              options={organizers}
+              loading={loadingOrganizers}
+              value={selectedOrganizer}
+              onChange={handleOrganizerChange}
+              getOptionLabel={(option) => {
+                if (!option || typeof option !== 'object') return '';
+                const name = option.fullName || option.organizerName || option.name || '';
+                const short = option.shortName || option.organizerShortName || '';
+                return short ? `${name} (${short})` : name;
+              }}
+              isOptionEqualToValue={(option, value) => option?._id === value?._id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Event Organizer (type to search)"
+                  required
+                  error={!eventData.ownerOrganizerID}
+                  helperText={!eventData.ownerOrganizerID ? 'Organizer is required' : `${organizers.length} organizers available`}
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
               )}
-            </FormControl>
+              fullWidth
+              disablePortal
+              noOptionsText="No organizers found"
+              loadingText="Loading organizers..."
+            />
           ) : (
             // Other roles (SystemAdmin, etc.): Show display only
             <FormControl fullWidth>
