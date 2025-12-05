@@ -61,15 +61,17 @@ export const useOrganizers = (options = {}) => {
 
   // Fetch organizers based on selected location hierarchy from GeoLocationContext
   const fetchOrganizers = useCallback(async () => {
-    // Try to use cached data first
-    if (getCachedOrganizers()) {
+    // TIEMPO-325: Skip cache when fetching ALL organizers for dropdowns
+    // Cache may have filtered/stale data that doesn't include all organizers
+    if (!skipLocationFilter && getCachedOrganizers()) {
       return;
     }
 
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
     const params = {
       appId,
-      isActive: true // Only fetch active organizers by default
+      isActive: true, // Only fetch active organizers by default
+      limit: 5000 // TIEMPO-325: Fetch all organizers in one request (no pagination needed for dropdowns)
     };
 
     // Add location filters from the GeoLocationContext with null checks
@@ -99,8 +101,10 @@ export const useOrganizers = (options = {}) => {
 
 // TIEMPO-276: Security cleanup - removed logging
 
-      // Ensure we're setting an array
-      const organizersData = Array.isArray(response.data) ? response.data : [];
+      // TIEMPO-325: Handle both array and {organizers: [], pagination: {}} response formats
+      const organizersData = Array.isArray(response.data)
+        ? response.data
+        : (Array.isArray(response.data?.organizers) ? response.data.organizers : []);
       setOrganizers(organizersData);
       setError(null);
       setRetryCount(0); // Reset retry count on success
@@ -121,7 +125,7 @@ export const useOrganizers = (options = {}) => {
     } finally {
       setFetchLoading(false);
     }
-  }, [masteredRegionId, masteredDivisionId, masteredCityId, getCachedOrganizers, cacheOrganizers]);
+  }, [masteredRegionId, masteredDivisionId, masteredCityId, skipLocationFilter, getCachedOrganizers, cacheOrganizers]);
 
   // Implement retry with exponential backoff
   const fetchWithRetry = useCallback(() => {
