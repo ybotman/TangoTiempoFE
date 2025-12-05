@@ -4,12 +4,16 @@
 
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { Box, Typography, Button, Paper, Chip } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ShareIcon from '@mui/icons-material/Share';
 import Image from 'next/image';
+
+// Default event image (header image) when no event image exists
+const DEFAULT_EVENT_IMAGE = '/images/TangoTiempo3.jpg';
 
 // TIEMPO-256: Inline category colors to avoid importing utils that may pull in leaflet
 const categoryColors = {
@@ -54,6 +58,10 @@ function formatEventTime(startStr, endStr) {
 export default function EventPageClient({ eventId, eventData }) {
   const router = useRouter();
 
+  // Extract event image with fallback to default
+  const initialImage = eventData?.eventImage || eventData?.imageUrl || DEFAULT_EVENT_IMAGE;
+  const [imageSrc, setImageSrc] = useState(initialImage);
+
   // Get dynamic base URL for sharing
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tangotiempo.com';
 
@@ -93,11 +101,17 @@ export default function EventPageClient({ eventId, eventData }) {
     router.push(`/calendar?event=${eventId}`);
   };
 
+  // Handle image load error - fallback to default
+  const handleImageError = () => {
+    if (imageSrc !== DEFAULT_EVENT_IMAGE) {
+      setImageSrc(DEFAULT_EVENT_IMAGE);
+    }
+  };
+
   // Extract event details
   const title = eventData?.title || eventData?.shortTitle || 'Tango Event';
   const shortTitle = eventData?.shortTitle || title;
   const description = eventData?.description || '';
-  const eventImage = eventData?.eventImage || eventData?.imageUrl || '';
   const venueName = eventData?.venueName || eventData?.venue?.name || '';
   const venueCity = eventData?.venueMasteredCityName || eventData?.venue?.city || '';
   const organizerName = eventData?.ownerOrganizerName || eventData?.organizer?.name || '';
@@ -137,27 +151,26 @@ export default function EventPageClient({ eventId, eventData }) {
           View Full Event in Calendar
         </Button>
 
-        {/* Event Image */}
-        {eventImage && (
-          <Box
-            sx={{
-              width: '100%',
-              height: { xs: 200, sm: 300 },
-              position: 'relative',
-              mb: 2,
-              borderRadius: 1,
-              overflow: 'hidden',
-            }}
-          >
-            <Image
-              src={eventImage}
-              alt={title}
-              fill
-              style={{ objectFit: 'cover' }}
-              priority
-            />
-          </Box>
-        )}
+        {/* Event Image - always show with fallback to default */}
+        <Box
+          sx={{
+            width: '100%',
+            height: { xs: 200, sm: 300 },
+            position: 'relative',
+            mb: 2,
+            borderRadius: 1,
+            overflow: 'hidden',
+          }}
+        >
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            style={{ objectFit: 'cover' }}
+            priority
+            onError={handleImageError}
+          />
+        </Box>
 
         {/* Event Title */}
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
