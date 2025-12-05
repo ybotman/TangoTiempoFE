@@ -99,8 +99,10 @@ export const useOrganizers = (options = {}) => {
 
 // TIEMPO-276: Security cleanup - removed logging
 
-      // Ensure we're setting an array
-      const organizersData = Array.isArray(response.data) ? response.data : [];
+      // TIEMPO-325: Handle both array and {organizers: [], pagination: {}} response formats
+      const organizersData = Array.isArray(response.data)
+        ? response.data
+        : (Array.isArray(response.data?.organizers) ? response.data.organizers : []);
       setOrganizers(organizersData);
       setError(null);
       setRetryCount(0); // Reset retry count on success
