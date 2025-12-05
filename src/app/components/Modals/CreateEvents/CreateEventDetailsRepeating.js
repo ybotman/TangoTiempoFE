@@ -645,15 +645,6 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         )}
       </Box>
 
-      {/* Monthly Beta Notice - only show when monthly is selected */}
-      {recurrenceType === 'monthly' && (
-        <Box sx={{ mt: 2, p: 1.5, bgcolor: 'info.light', borderRadius: 1, display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" color="info.dark">
-            Monthly recurrence is in beta. Best supported patterns: 1st-4th or Last [Day] of month (e.g., 2nd Saturday, Last Friday).
-          </Typography>
-        </Box>
-      )}
-
       {/* End Date vs Number of Occurrences */}
       <Box marginTop={3}>
         <Typography variant="subtitle2" gutterBottom>
