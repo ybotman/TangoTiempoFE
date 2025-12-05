@@ -69,7 +69,8 @@ export const useOrganizers = (options = {}) => {
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
     const params = {
       appId,
-      isActive: true // Only fetch active organizers by default
+      isActive: true, // Only fetch active organizers by default
+      limit: 5000 // TIEMPO-325: Fetch all organizers in one request (no pagination needed for dropdowns)
     };
 
     // Add location filters from the GeoLocationContext with null checks
