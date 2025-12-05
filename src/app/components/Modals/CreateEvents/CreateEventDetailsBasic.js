@@ -87,42 +87,46 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setFilteredVenues(filtered);
   }, [venues, venueInputValue]);
   
+  // TIEMPO-325: Track if we've set the initial default organizer for RO
+  const [hasSetInitialOrganizer, setHasSetInitialOrganizer] = useState(false);
+
   // Set owner organizer info from user context when component mounts (only for RegionalOrganizer)
+  // TIEMPO-325: Only set default ONCE on mount, don't override user selections
   useEffect(() => {
-    if (selectedRole === 'RegionalOrganizer' && user && user.backendInfo?.regionalOrganizerInfo?.organizerId) {
+    if (selectedRole === 'RegionalOrganizer' &&
+        user &&
+        user.backendInfo?.regionalOrganizerInfo?.organizerId &&
+        !hasSetInitialOrganizer &&
+        !eventData.ownerOrganizerID) { // Only set if not already set
       // Extract organizer information
       const orgInfo = user.backendInfo.regionalOrganizerInfo;
       const orgId = user.backendInfo.regionalOrganizerInfo.organizerId;
-      const orgName = user.backendInfo.regionalOrganizerInfo.organizerName || 
-                     (user.backendInfo.localUserInfo && 
+      const orgName = user.backendInfo.regionalOrganizerInfo.organizerName ||
+                     (user.backendInfo.localUserInfo &&
                       `${user.backendInfo.localUserInfo.firstName || ''} ${user.backendInfo.localUserInfo.lastName || ''}`.trim());
-      
-      
+
+
       // Check if all required flags are set for the regionalOrganizerInfo
       const allFlagsEnabled = orgInfo.isActive && orgInfo.isEnabled && orgInfo.isApproved;
       if (!allFlagsEnabled) {
         console.warn('Regional organizer flags not all enabled - this will cause permission issues when creating events');
       }
-      
-      setEventData(prevData => {
-        // Only update if values are different to prevent infinite loops
-        if (prevData.ownerOrganizerID !== orgId || prevData.ownerOrganizerName !== (orgName || orgInfo.fullName || user.displayName || 'Your Organization')) {
-          // Use the fetched organizer data if available
-          const organizerData = organizer || orgInfo;
-          const shortName = organizerData?.shortName || organizerData?.fullName || orgName || 'Event Organizer';
-          
-          return {
-            ...prevData,
-            // Owner Organizer data is set automatically from the current user's organization
-            ownerOrganizerID: orgId,
-            ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization',
-            ownerOrganizerShortName: shortName
-          };
-        }
-        return prevData;
-      });
+
+      // Use the fetched organizer data if available
+      const organizerData = organizer || orgInfo;
+      const shortName = organizerData?.shortName || organizerData?.fullName || orgName || 'Event Organizer';
+
+      setEventData(prevData => ({
+        ...prevData,
+        // Owner Organizer data is set automatically from the current user's organization
+        ownerOrganizerID: orgId,
+        ownerOrganizerName: orgName || orgInfo.fullName || user.displayName || 'Your Organization',
+        ownerOrganizerShortName: shortName
+      }));
+
+      setHasSetInitialOrganizer(true);
     }
-  }, [user, selectedRole, organizer, setEventData]); // Add selectedRole and organizer dependencies
+  }, [user, selectedRole, organizer, setEventData, hasSetInitialOrganizer, eventData.ownerOrganizerID]);
 
   // Category change is now handled inline in the Autocomplete component
 
@@ -496,6 +500,15 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                 return short ? `${name} (${short})` : name;
               }}
               isOptionEqualToValue={(option, value) => option?._id === value?._id}
+              // TIEMPO-325: Case-insensitive search on fullName and shortName
+              filterOptions={(options, { inputValue }) => {
+                const searchTerm = inputValue.toLowerCase();
+                return options.filter(option => {
+                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                });
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
