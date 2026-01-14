@@ -21,6 +21,9 @@ function getBaseUrl() {
 // Backend API URL
 const BE_URL = process.env.NEXT_PUBLIC_BE_URL || 'https://calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net';
 
+// Default event image (header image) when no event image exists
+const DEFAULT_EVENT_IMAGE = '/images/TangoTiempo3.jpg';
+
 // Fetch event data from backend
 async function getEventData(eventId) {
   try {
@@ -141,35 +144,29 @@ export async function generateMetadata({ params }) {
     description: fullDescription || 'View event details on TangoTiempo - The Argentine Tango Calendar',
 
     // OpenGraph for Facebook, WhatsApp, LinkedIn
+    // Use event image if available, otherwise use default header image
     openGraph: {
       title: shortTitle,
       description: fullDescription,
       url: canonicalUrl,
       siteName: 'TangoTiempo',
       type: 'website',
-      images: eventImage ? [
+      images: [
         {
-          url: eventImage,
+          url: eventImage || `${baseUrl}${DEFAULT_EVENT_IMAGE}`,
           width: 1200,
           height: 630,
           alt: shortTitle,
-        },
-      ] : [
-        {
-          url: `${baseUrl}/TT-Logo-Image.png`,
-          width: 1200,
-          height: 630,
-          alt: 'TangoTiempo',
         },
       ],
     },
 
     // Twitter Card
     twitter: {
-      card: eventImage ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title: shortTitle,
       description: fullDescription,
-      images: eventImage ? [eventImage] : [`${baseUrl}/TT-Logo-Image.png`],
+      images: [eventImage || `${baseUrl}${DEFAULT_EVENT_IMAGE}`],
     },
 
     // Additional metadata
