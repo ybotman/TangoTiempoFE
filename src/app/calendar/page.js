@@ -331,34 +331,34 @@ const CalendarPage = () => {
                   </div>
                 )}
                 <CategoryCircles eventProps={event.extendedProps} />
-                {organizerShort && (
+                {eventShortTitle && (
                   <>
                     <div style={{
                       fontSize: '0.75rem',
-                      fontWeight: 'normal',
-                      color: '#666',
+                      fontWeight: 'bold',
+                      color: '#333',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.0',
                       textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {organizerShort}
+                      {eventShortTitle}
                     </div>
-                    {eventShortTitle && (
+                    {organizerShort && (
                       <>
                         <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
                         <div style={{
                           fontSize: '0.75rem',
-                          fontWeight: 'bold',
-                          color: '#333',
+                          fontWeight: 'normal',
+                          color: '#666',
                           overflow: 'visible',
                           whiteSpace: 'nowrap',
                           flexShrink: 1,
                           lineHeight: '1.0',
                           textDecoration: isCanceled ? 'line-through' : 'none'
                         }}>
-                          {eventShortTitle}
+                          {organizerShort}
                         </div>
                       </>
                     )}
@@ -368,7 +368,24 @@ const CalendarPage = () => {
             )}
           </div>
           
-          {/* Row 2: Featured image for isFeatured events */}
+          {/* Row 2: Event title with recurring indicator - SMALLER */}
+          <div style={{
+            fontSize: '0.65rem',
+            fontWeight: 'normal',
+            lineHeight: '1.1',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
+            flex: 1,
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
+          }}>
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+          </div>
+
+          {/* Row 3: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '2px',
@@ -388,23 +405,6 @@ const CalendarPage = () => {
               />
             </div>
           )}
-
-          {/* Row 3: Event title with recurring indicator - SMALLER */}
-          <div style={{
-            fontSize: '0.65rem',
-            fontWeight: 'normal',
-            lineHeight: '1.1',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            flex: 1,
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
         </div>
       );
     } else {
@@ -476,34 +476,34 @@ const CalendarPage = () => {
                 )}
                 {/* Category circles */}
                 <CategoryCircles eventProps={event.extendedProps} />
-                {organizerShort && (
+                {eventShortTitle && (
                   <>
                     <div style={{
                       fontSize: '0.85rem',
-                      fontWeight: 'normal',
-                      color: '#666',
+                      fontWeight: 'bold',
+                      color: '#333',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {organizerShort}
+                      {eventShortTitle}
                     </div>
-                    {eventShortTitle && (
+                    {organizerShort && (
                       <>
                         <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
                         <div style={{
                           fontSize: '0.85rem',
-                          fontWeight: 'bold',
-                          color: '#333',
+                          fontWeight: 'normal',
+                          color: '#666',
                           overflow: 'visible',
                           whiteSpace: 'nowrap',
                           flexShrink: 1,
                           lineHeight: '1.2',
                           textDecoration: isCanceled ? 'line-through' : 'none'
                         }}>
-                          {eventShortTitle}
+                          {organizerShort}
                         </div>
                       </>
                     )}
@@ -513,7 +513,23 @@ const CalendarPage = () => {
             )}
           </div>
           
-          {/* Row 2: Featured image for isFeatured events */}
+          {/* Row 2: Event title with recurring indicator - SMALLER */}
+          <div style={{
+            fontSize: '0.7rem',
+            fontWeight: 'normal',
+            lineHeight: '1.2',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
+          }}>
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+          </div>
+
+          {/* Row 3: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '4px',
@@ -533,22 +549,6 @@ const CalendarPage = () => {
               />
             </div>
           )}
-
-          {/* Row 3: Event title with recurring indicator - SMALLER */}
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 'normal',
-            lineHeight: '1.2',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
         </div>
       );
     }
