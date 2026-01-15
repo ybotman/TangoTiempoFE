@@ -369,8 +369,8 @@ const CalendarPage = () => {
           </div>
           
           {/* Row 2: Event title with recurring indicator - SMALLER */}
-          <div style={{ 
-            fontSize: '0.65rem', 
+          <div style={{
+            fontSize: '0.65rem',
             fontWeight: 'normal',
             lineHeight: '1.1',
             wordWrap: 'break-word',
@@ -384,6 +384,27 @@ const CalendarPage = () => {
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
           </div>
+
+          {/* Row 3: Featured image for isFeatured events */}
+          {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
+            <div style={{
+              marginTop: '2px',
+              display: 'flex',
+              justifyContent: 'center'
+            }}>
+              <img
+                src={event.extendedProps.featuredImage}
+                alt=""
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '30px',
+                  objectFit: 'contain',
+                  borderRadius: '2px'
+                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
         </div>
       );
     } else {
@@ -493,8 +514,8 @@ const CalendarPage = () => {
           </div>
           
           {/* Row 2: Event title with recurring indicator - SMALLER */}
-          <div style={{ 
-            fontSize: '0.7rem', 
+          <div style={{
+            fontSize: '0.7rem',
             fontWeight: 'normal',
             lineHeight: '1.2',
             wordWrap: 'break-word',
@@ -507,6 +528,27 @@ const CalendarPage = () => {
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
           </div>
+
+          {/* Row 3: Featured image for isFeatured events */}
+          {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
+            <div style={{
+              marginTop: '4px',
+              display: 'flex',
+              justifyContent: 'flex-start'
+            }}>
+              <img
+                src={event.extendedProps.featuredImage}
+                alt=""
+                style={{
+                  maxWidth: '120px',
+                  maxHeight: '40px',
+                  objectFit: 'contain',
+                  borderRadius: '3px'
+                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
         </div>
       );
     }
