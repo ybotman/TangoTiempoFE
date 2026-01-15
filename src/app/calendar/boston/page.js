@@ -259,24 +259,7 @@ const BostonCalendarPage = () => {
             )}
           </div>
           
-          {/* Row 2: Event title - with wrapping */}
-          <div style={{
-            fontSize: '0.65rem',
-            fontWeight: 'normal',
-            lineHeight: '1.1',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            flex: 1,
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
-
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 2: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '2px',
@@ -296,6 +279,23 @@ const BostonCalendarPage = () => {
               />
             </div>
           )}
+
+          {/* Row 3: Event title - with wrapping */}
+          <div style={{
+            fontSize: '0.65rem',
+            fontWeight: 'normal',
+            lineHeight: '1.1',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
+            flex: 1,
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
+          }}>
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+          </div>
         </div>
       );
     } else {
@@ -376,23 +376,7 @@ const BostonCalendarPage = () => {
             )}
           </div>
 
-          {/* Row 2: Event title with recurring indicator - SMALLER */}
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 'normal',
-            lineHeight: '1.2',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
-
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 2: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '4px',
@@ -412,6 +396,22 @@ const BostonCalendarPage = () => {
               />
             </div>
           )}
+
+          {/* Row 3: Event title with recurring indicator - SMALLER */}
+          <div style={{
+            fontSize: '0.7rem',
+            fontWeight: 'normal',
+            lineHeight: '1.2',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
+            color: '#555',
+            textDecoration: isCanceled ? 'line-through' : 'none'
+          }}>
+            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+          </div>
         </div>
       );
     }
