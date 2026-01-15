@@ -223,35 +223,35 @@ const BostonCalendarPage = () => {
             )}
             {/* Category bubbles */}
             <CategoryCircles eventProps={event.extendedProps} />
-            {/* Organizer and Venue - matching main calendar exactly */}
-            {organizerShort && (
+            {/* ShortTitle and Organizer - matching main calendar exactly */}
+            {eventShortTitle && (
               <>
                 <div style={{
                   fontSize: '0.75rem',
-                  fontWeight: 'normal',
-                  color: '#666',
+                  fontWeight: 'bold',
+                  color: '#333',
                   overflow: 'visible',
                   whiteSpace: 'nowrap',
                   flexShrink: 1,
                   lineHeight: '1.0',
                   textDecoration: isCanceled ? 'line-through' : 'none'
                 }}>
-                  {organizerShort}
+                  {eventShortTitle}
                 </div>
-                {eventShortTitle && (
+                {organizerShort && (
                   <>
                     <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
                     <div style={{
                       fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      color: '#333',
+                      fontWeight: 'normal',
+                      color: '#666',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.0',
                       textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {eventShortTitle}
+                      {organizerShort}
                     </div>
                   </>
                 )}
@@ -260,8 +260,8 @@ const BostonCalendarPage = () => {
           </div>
           
           {/* Row 2: Event title - with wrapping */}
-          <div style={{ 
-            fontSize: '0.65rem', 
+          <div style={{
+            fontSize: '0.65rem',
             fontWeight: 'normal',
             lineHeight: '1.1',
             wordWrap: 'break-word',
@@ -275,6 +275,27 @@ const BostonCalendarPage = () => {
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
           </div>
+
+          {/* Row 3: Featured image for isFeatured events */}
+          {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
+            <div style={{
+              marginTop: '2px',
+              display: 'flex',
+              justifyContent: 'center'
+            }}>
+              <img
+                src={event.extendedProps.featuredImage}
+                alt=""
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '30px',
+                  objectFit: 'contain',
+                  borderRadius: '2px'
+                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
         </div>
       );
     } else {
@@ -320,34 +341,34 @@ const BostonCalendarPage = () => {
             )}
             {/* Category circles */}
             <CategoryCircles eventProps={event.extendedProps} />
-            {organizerShort && (
+            {eventShortTitle && (
               <>
                 <div style={{
                   fontSize: '0.85rem',
-                  fontWeight: 'normal',
-                  color: '#666',
+                  fontWeight: 'bold',
+                  color: '#333',
                   overflow: 'visible',
                   whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
                   flexShrink: 1,
                   lineHeight: '1.2',
                   textDecoration: isCanceled ? 'line-through' : 'none'
                 }}>
-                  {organizerShort}
+                  {eventShortTitle}
                 </div>
-                {eventShortTitle && (
+                {organizerShort && (
                   <>
                     <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
                     <div style={{
                       fontSize: '0.85rem',
-                      fontWeight: 'bold',
-                      color: '#333',
+                      fontWeight: 'normal',
+                      color: '#666',
                       overflow: 'visible',
                       whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {eventShortTitle}
+                      {organizerShort}
                     </div>
                   </>
                 )}
@@ -370,6 +391,27 @@ const BostonCalendarPage = () => {
           }}>
             {event.extendedProps?.isRecurring && '🔄 '}{event.title}
           </div>
+
+          {/* Row 3: Featured image for isFeatured events */}
+          {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
+            <div style={{
+              marginTop: '4px',
+              display: 'flex',
+              justifyContent: 'flex-start'
+            }}>
+              <img
+                src={event.extendedProps.featuredImage}
+                alt=""
+                style={{
+                  maxWidth: '120px',
+                  maxHeight: '40px',
+                  objectFit: 'contain',
+                  borderRadius: '3px'
+                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
         </div>
       );
     }
