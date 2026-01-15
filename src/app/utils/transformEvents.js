@@ -75,6 +75,7 @@ export function transformEvents(events) {
         ownerOrganizerName: event.ownerOrganizerName,
         featured: event.featured || event.isFeatured,
         isFeatured: event.isFeatured || event.featured,
+        featuredImage: event.featuredImage || null,
         expiresAt: event.expiresAt,
         tmpCreator: event.tmpCreator,
         tmpVenueId: event.tmpVenueId,
