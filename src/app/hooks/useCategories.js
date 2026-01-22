@@ -1,7 +1,9 @@
 //app/hooks/useCategories.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 
 import { useState, useEffect } from 'react';
 import { dedupeFetch } from '@/utils/dedupeFetch';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const useCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -11,7 +13,8 @@ const useCategories = () => {
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
         // TIEMPO-257: Use dedupeFetch to prevent duplicate category calls
-        const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/categories`, {
+        // Migration: Now uses getApiBaseUrl() for BE/AF switching
+        const response = await dedupeFetch(`${getApiBaseUrl()}/api/categories`, {
           params: { appId },
         });
         // Handle the response data which might have a nested categories array
