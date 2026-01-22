@@ -1,4 +1,6 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 /**
  * Uploads a file to the server, which will then handle Azure storage.
@@ -31,7 +33,7 @@ export const uploadEventImage = async (file, authToken = null) => {
     
     // Upload to our backend API, which will handle Azure storage
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BE_URL}/api/events/upload-image`, 
+      `${getApiBaseUrl()}/api/events/upload-image`, 
       formData,
       { headers }
     );
