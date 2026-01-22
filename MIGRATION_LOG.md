@@ -2,73 +2,123 @@
 
 **Agent**: Quinn
 **Started**: 2026-01-22
-**Status**: IN PROGRESS
+**Status**: COMPLETE (FE Code Migration)
 
 ---
 
-## Endpoint Migration Checklist
+## Summary
 
-| # | Endpoint | Method | FE File | AF Status | FE Status | Commit (AF) | Commit (FE) | Notes |
-|---|----------|--------|---------|-----------|-----------|-------------|-------------|-------|
-| 1 | /api/categories | GET | useCategories.js | EXISTS | DONE | - | 0b7b6df | Parity verified 2025-12-04 |
-| 2 | /api/roles | GET | useRoles.js | EXISTS | DONE | - | ce165ad | Parity verified 2025-12-04 |
-| 3 | /api/health | GET | useServiceHealth.js | EXISTS | SKIP | - | - | Already uses AF_URL directly |
-| 4 | /api/venues | GET | useVenues.js | EXISTS | DONE | - | 6f6e7c8 | Parity verified 2025-12-04 |
-| 5 | /api/venues/:id | GET | venueService.js | EXISTS | DONE | - | 6f6e7c8 | Parity verified 2025-12-04 |
-| 6 | /api/organizers | GET | useOrganizers.js | EXISTS | DONE | - | 6f6e7c8 | Parity verified 2025-12-04 |
-| 7 | /api/events | GET | useEvents.js | EXISTS | DONE | - | 6f6e7c8 | Parity verified 2025-12-04 |
-| 8 | /api/events/id/:id | GET | useEvents.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 9 | /api/events/post | POST | useEvents.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 10 | /api/venues | POST | venueService.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 11 | /api/events/:id | PUT | useEvents.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 12 | /api/venues/:id | PUT | venueService.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 13 | /api/events/:id | DELETE | useEvents.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 14 | /api/venues/:id | DELETE | venueService.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 15 | /api/events/ra/* | POST/PUT/DELETE | useEvents.js | CHECK | DONE | - | 6f6e7c8 | RA endpoints - verify AF support |
-| 16 | /api/organizers/:id | GET | useOrganizers.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 17 | /api/organizers | POST | useOrganizers.js | EXISTS | DONE | - | 6f6e7c8 | |
-| 18 | /api/organizers/:id | PUT | useOrganizers.js | EXISTS | DONE | - | 6f6e7c8 | |
+All FE Client Component API calls now use `apiUrlResolver.js` which switches between:
+- `NEXT_PUBLIC_BE_URL` (calendar-be) when `NEXT_PUBLIC_AF_ENABLED=false`
+- `NEXT_PUBLIC_AF_URL` (calendar-be-af) when `NEXT_PUBLIC_AF_ENABLED=true`
+
+**To test**: Set `NEXT_PUBLIC_AF_ENABLED=true` in `.env.local`
 
 ---
 
-## Session Log
+## Files Migrated (Using apiUrlResolver)
 
-### 2026-01-22 - Phase 0: Discovery & Planning
+### Hooks (11 files)
+- useCategories.js
+- useRoles.js
+- useVenues.js
+- useOrganizers.js
+- useEvents.js (includes RA endpoints)
+- useUsers.js
+- useMasteredLocations.js
+- useMasteredCities.js
+- useUserLogins.js
+- useRAOrganizers.js
+- useBackendHealth.js
+- useImages.js
+- useActivityLogger.js
+- useMigratedOrganizers.js
 
-**Quinn**: Created migration plan and log. Key findings:
-- 49 files in TT make API calls to calendar-be
-- Azure Functions already exist for most endpoints
-- Feature flag `NEXT_PUBLIC_AF_ENABLED` already exists
-- Existing parity report (2025-12-04) confirms all GET endpoints PASS
-- Will create central URL resolver for clean migration
+### Services (1 file)
+- venueService.js
 
-### 2026-01-22 - Phase 1: Core Migrations Complete
+### Contexts (2 files)
+- AuthContext.js
+- LocationAPIContext.js
 
-**Quinn**: Migrated all major hooks and services:
+### Utils (1 file)
+- uploadEventImages.js
 
-1. Created `src/utils/apiUrlResolver.js` - Central BE/AF URL resolver
-2. Migrated `useCategories.js` - commit 0b7b6df
-3. Migrated `useRoles.js` - commit ce165ad
-4. Migrated `useVenues.js` - commit 6f6e7c8
-5. Migrated `useOrganizers.js` - commit 6f6e7c8
-6. Migrated `useEvents.js` - commit 6f6e7c8
-7. Migrated `venueService.js` - commit 6f6e7c8
+### Components (10 files)
+- VenueModalAdd.js
+- VenueModalEdit.js
+- VenueModalAddWithSearch.js
+- VenueUpcomingEvents.js
+- VenueGeocodeModal.js
+- RegionalOrganizersSettings.js
+- RegionalOrganizersDelegated.js
+- RegionMenu.js
+- CreateEventDetailModal.js
+- ViewEventDetailsOrganizer.js
 
-**Status**: Core endpoint migration complete. Toggle `NEXT_PUBLIC_AF_ENABLED=true` to test.
-
-**Blocked**: MongoDB connection (ECONNRESET) - IP whitelist needs update on Atlas
-
-**Remaining**:
-- Find and migrate any other files using NEXT_PUBLIC_BE_URL
-- Test with AF enabled
-- Verify RA endpoints work with AF
+### Pages (1 file)
+- explorer/page.js
 
 ---
 
-## Team Communications
+## Files NOT Migrated (By Design)
 
-| Date | From | To | Subject | Status |
-|------|------|-----|---------|--------|
-| 2026-01-22 | Quinn | Sarah, Ben, Fulton | Migration kickoff | SENT |
-| 2026-01-22 | Quinn | Sarah, Fulton | Core migration complete | PENDING |
+### Server Components (SSR - use env directly)
+- event/[id]/page.js - Social sharing/SEO page
+- organizers/[slug]/page.js - Organizer profile page
 
+### Health Check Hooks (Check both backends)
+- useServiceHealth.js - Intentionally checks BE and AF separately
+
+### API Routes (Server-side)
+- api/health/version/route.js
+
+### Debug Components
+- EnvVariablesDebug.js - Shows raw env vars
+
+---
+
+## Commits
+
+| Commit | Description |
+|--------|-------------|
+| 0b7b6df | Phase 0 + categories |
+| ce165ad | roles |
+| 6f6e7c8 | core hooks/services |
+| fb74e8a | migration log update |
+| 362234e | additional hooks |
+| 350b011 | more hooks |
+| 493edde | contexts and utils |
+| 6e4d35d | components |
+| b60e03a | pages and modals |
+
+---
+
+## Testing Checklist
+
+- [ ] MongoDB Atlas IP whitelist updated for localhost
+- [ ] Set `NEXT_PUBLIC_AF_ENABLED=true` in .env.local
+- [ ] Start Azure Functions: `cd calendar-be-af && func start`
+- [ ] Start TangoTiempo: `cd tangotiempo.com && npm run dev`
+- [ ] Test: Categories load on homepage
+- [ ] Test: Events display on calendar
+- [ ] Test: Venues load in dropdowns
+- [ ] Test: Organizers display correctly
+- [ ] Test: Create event (RO role)
+- [ ] Test: Edit event
+- [ ] Test: Delete event
+
+---
+
+## Notes
+
+### RA Endpoints
+Regional Admin endpoints (`/api/events/ra/*`) are migrated but need verification that AF supports them.
+
+### Parity Reference
+All GET endpoint parity verified in `calendar-be-af/.ybotbot/parity-report-2025-12-04.md`
+
+---
+
+**Migration Completed**: 2026-01-22
+**Agent**: Quinn
