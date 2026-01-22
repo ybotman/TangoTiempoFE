@@ -25,6 +25,7 @@ import ModalHeader from '../../UI/ModalHeader';
 import modalStyle from '../../Styles/modalStyles';
 import VenueMap from './VenueMap';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const VenueGeocodeModal = ({ open, onClose }) => {
   const [venueData, setVenueData] = useState({
@@ -87,7 +88,7 @@ const VenueGeocodeModal = ({ open, onClose }) => {
     setProximityWarning(false);
 
     try {
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+      const baseURL = getApiBaseUrl();
       const addressString = buildAddressString();
       
       // Step 1: Geocode the address
@@ -155,7 +156,7 @@ const VenueGeocodeModal = ({ open, onClose }) => {
     setError(null);
 
     try {
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+      const baseURL = getApiBaseUrl();
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
       
       const payload = {

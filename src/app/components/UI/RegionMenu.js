@@ -7,6 +7,7 @@ import { List, ListItem, ListItemText, IconButton, Typography, Box } from '@mui/
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const RegionMenu = ({ onClose }) => {
   const { selectLocation } = useGeoLocation();
@@ -21,7 +22,7 @@ const RegionMenu = ({ onClose }) => {
     const fetchRegions = async () => {
       try {
         const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/regions/activeRegions`, {
+        const response = await axios.get(`${getApiBaseUrl()}/api/regions/activeRegions`, {
           params: { appId }
         });
         setRegions(response.data || []);

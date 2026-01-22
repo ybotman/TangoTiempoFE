@@ -23,6 +23,7 @@ import {
   ToggleButtonGroup
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import SaveIcon from '@mui/icons-material/Save';
 import WarningIcon from '@mui/icons-material/Warning';
 import EditIcon from '@mui/icons-material/Edit';
@@ -248,7 +249,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
       // Already have coordinates from search, check for nearby venues
       setLoading(true);
       try {
-        const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+        const baseURL = getApiBaseUrl();
         const nearbyResponse = await axios.post(`${baseURL}/api/venues/check-proximity`, {
           latitude: geocodeResult.latitude,
           longitude: geocodeResult.longitude
@@ -283,7 +284,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
     setOverrideType(null);
 
     try {
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+      const baseURL = getApiBaseUrl();
       const addressString = buildAddressString();
 
       // Step 1: Geocode the address
