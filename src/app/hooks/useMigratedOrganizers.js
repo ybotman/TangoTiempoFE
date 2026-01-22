@@ -1,6 +1,8 @@
 // @/hooks/useMigratedOrganizers.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 
 import { useState, useEffect, useCallback } from 'react';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export const useMigratedOrganizers = () => {
   const [organizers, setOrganizers] = useState([]);
@@ -14,7 +16,7 @@ export const useMigratedOrganizers = () => {
 
       // Fetch organizers data - only enabled organizers
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const organizersResponse = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers?appId=${appId}&isApproved=true&isEnabled=true`);
+      const organizersResponse = await fetch(`${getApiBaseUrl()}/api/organizers?appId=${appId}&isApproved=true&isEnabled=true`);
       if (!organizersResponse.ok) {
         throw new Error('Failed to fetch organizers');
       }
@@ -22,7 +24,7 @@ export const useMigratedOrganizers = () => {
       const organizersData = organizersResult.organizers || [];
 
       // Fetch user logins data to match with organizers
-      const userLoginsResponse = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/all?appId=${appId}`);
+      const userLoginsResponse = await fetch(`${getApiBaseUrl()}/api/userlogins/all?appId=${appId}`);
       if (!userLoginsResponse.ok) {
         throw new Error('Failed to fetch user logins');
       }
@@ -51,7 +53,7 @@ export const useMigratedOrganizers = () => {
           
           try {
             const eventsResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_BE_URL}/api/events?appId=${appId}&ownerId=${organizer._id}&limit=1`
+              `${getApiBaseUrl()}/api/events?appId=${appId}&ownerId=${organizer._id}&limit=1`
             );
             if (eventsResponse.ok) {
               const eventsData = await eventsResponse.json();
@@ -60,7 +62,7 @@ export const useMigratedOrganizers = () => {
               // If has events, get the actual count
               if (hasEvents) {
                 const countResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_BE_URL}/api/events/count?appId=${appId}&ownerId=${organizer._id}`
+                  `${getApiBaseUrl()}/api/events/count?appId=${appId}&ownerId=${organizer._id}`
                 );
                 if (countResponse.ok) {
                   const countData = await countResponse.json();

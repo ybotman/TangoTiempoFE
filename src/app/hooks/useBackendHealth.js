@@ -1,7 +1,9 @@
 // hooks/useBackendHealth.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 /**
  * Hook to monitor backend server health
@@ -10,7 +12,7 @@ import { useState, useEffect } from 'react';
 export const useBackendHealth = () => {
   const [isHealthy, setIsHealthy] = useState(null); // null = not checked yet
   const [isChecking, setIsChecking] = useState(false);
-  const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
+  const backendUrl = getApiBaseUrl() || 'http://localhost:3010';
 
   useEffect(() => {
     const checkHealth = async () => {

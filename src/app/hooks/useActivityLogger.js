@@ -1,5 +1,7 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useCallback, useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 /**
  * Custom hook for logging user activities to the backend
@@ -33,7 +35,7 @@ export const useActivityLogger = () => {
       // Log to console for debugging
       // TIEMPO-276: Security cleanup - removed logging
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/frontend-logs`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/frontend-logs`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`,
@@ -61,7 +63,7 @@ export const useActivityLogger = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/frontend-logs/batch`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/frontend-logs/batch`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`,
