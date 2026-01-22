@@ -1,5 +1,7 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export const useMasteredCities = (includeInactive = false) => {
   const [masteredCities, setMasteredCities] = useState([]);
@@ -10,7 +12,7 @@ export const useMasteredCities = (includeInactive = false) => {
     try {
       setLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+      const baseURL = getApiBaseUrl();
       
       // Fetch all data in parallel
       const [citiesRes, divisionsRes, regionsRes, countriesRes] = await Promise.all([

@@ -1,7 +1,9 @@
 // src/hooks/useRAOrganizers.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useCallback, useEffect, useState, useContext, useMemo } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 /**
  * Specialized hook for RegionalAdmin users to fetch organizers 
@@ -77,7 +79,7 @@ export const useRAOrganizers = () => {
             masteredCityId: cityId // Use the correct parameter name from backend
           };
 
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, {
+          const response = await axios.get(`${getApiBaseUrl()}/api/organizers`, {
             params,
             headers: {
               Authorization: `Bearer ${token}`
