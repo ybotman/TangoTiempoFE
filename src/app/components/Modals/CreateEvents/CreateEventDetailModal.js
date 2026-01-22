@@ -20,6 +20,7 @@ import { validateEventCategoryRules } from '@/utils/eventCategoryValidation'; //
 dayjs.extend(utc);
 dayjs.extend(timezone);
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const modalStyle = {
   position: 'absolute',
@@ -603,7 +604,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             // TIEMPO-284: Fetch organizer data directly via API
             const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
             const response = await axios.get(
-              `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${orgInfo.organizerId}`,
+              `${getApiBaseUrl()}/api/organizers/${orgInfo.organizerId}`,
               { params: { appId } }
             );
             const organizerData = response.data;
@@ -662,7 +663,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             
             // Call API to activate only isActive flag
             const response = await axios.post(
-              `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
+              `${getApiBaseUrl()}/api/userlogins/activate-organizer`,
               { firebaseUserId: user.uid },
               { 
                 headers: { Authorization: `Bearer ${token}` },
@@ -691,7 +692,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             // Force a refresh of the user data from backend
             try {
               await axios.get(
-                `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`,
+                `${getApiBaseUrl()}/api/userlogins/firebase/${user.uid}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`

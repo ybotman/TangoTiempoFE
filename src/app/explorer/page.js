@@ -23,6 +23,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import PublicIcon from '@mui/icons-material/Public';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import { format, addMonths } from 'date-fns';
 import 'leaflet/dist/leaflet.css';
 import { createClusterIcon } from '@/components/EventDiscovery/clusterIcon';
@@ -125,7 +126,7 @@ const ExplorerPage = () => {
         }
       }
       
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events/summary`, { 
+      const response = await axios.get(`${getApiBaseUrl()}/api/events/summary`, { 
         params,
         headers 
       });
