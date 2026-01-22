@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getApiBaseUrl } from '@/utils/apiUrlResolver';
+import { getApiBaseUrl, isAFEnabled } from '@/utils/apiUrlResolver';
 
 /**
  * Hook to monitor backend server health
@@ -13,6 +13,8 @@ export const useBackendHealth = () => {
   const [isHealthy, setIsHealthy] = useState(null); // null = not checked yet
   const [isChecking, setIsChecking] = useState(false);
   const backendUrl = getApiBaseUrl() || 'http://localhost:3010';
+  // AF uses /api/health, BE uses /health
+  const healthPath = isAFEnabled() ? '/api/health' : '/health';
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -20,7 +22,7 @@ export const useBackendHealth = () => {
 
       try {
         // Try to ping the backend health endpoint
-        const response = await fetch(`${backendUrl}/health`, {
+        const response = await fetch(`${backendUrl}${healthPath}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(5000), // 5 second timeout
@@ -42,7 +44,7 @@ export const useBackendHealth = () => {
     const interval = setInterval(checkHealth, 30000);
 
     return () => clearInterval(interval);
-  }, [backendUrl]);
+  }, [backendUrl, healthPath]);
 
   return { isHealthy, backendUrl, isChecking };
 };
