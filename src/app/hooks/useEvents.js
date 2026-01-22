@@ -1,3 +1,4 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -6,6 +7,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useEventDiscovery } from '@/contexts/EventDiscoveryContext';
 import { dedupeFetch } from '@/utils/dedupeFetch';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 /**
  * Helper function to resolve location parameters based on various sources
@@ -329,7 +331,7 @@ export function useEvents({
 
       // Call the unified endpoint
       // TIEMPO-257: Use dedupeFetch to prevent duplicate event calls
-      const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
+      const response = await dedupeFetch(`${getApiBaseUrl()}/api/events`, {
         params,
         timeout: 15000, // 15 second timeout
       });
@@ -695,8 +697,8 @@ export function useEventOperations() {
 // TIEMPO-276: Security cleanup - removed logging
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
-        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/create`
-        : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/post`;
+        ? `${getApiBaseUrl()}/api/events/ra/create`
+        : `${getApiBaseUrl()}/api/events/post`;
       
 // TIEMPO-276: Security cleanup - removed logging
       const response = await axios.post(endpoint, preparedData, config);
@@ -904,8 +906,8 @@ export function useEventOperations() {
       
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
-        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
-        : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`;
+        ? `${getApiBaseUrl()}/api/events/ra/${eventId}`
+        : `${getApiBaseUrl()}/api/events/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`;
       
 // TIEMPO-276: Security cleanup - removed logging
       const response = await axios.put(endpoint, preparedData, config);
@@ -972,8 +974,8 @@ export function useEventOperations() {
       
       // Route to appropriate endpoint based on selected role
       const endpoint = selectedRole === 'RegionalAdmin' 
-        ? `${process.env.NEXT_PUBLIC_BE_URL}/api/events/ra/${eventId}`
-        : `${process.env.NEXT_PUBLIC_BE_URL}/api/events/${eventId}?${queryParams.toString()}`;
+        ? `${getApiBaseUrl()}/api/events/ra/${eventId}`
+        : `${getApiBaseUrl()}/api/events/${eventId}?${queryParams.toString()}`;
       
 // TIEMPO-276: Security cleanup - removed logging
       const response = await axios.delete(endpoint, config);
@@ -997,7 +999,7 @@ export function useEventOperations() {
   const getEventById = async (eventId) => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/events/id/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`
+        `${getApiBaseUrl()}/api/events/id/${eventId}?appId=${process.env.NEXT_PUBLIC_APPLICATION_ID}`
       );
       
       return response.data;

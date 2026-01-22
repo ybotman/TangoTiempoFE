@@ -1,12 +1,15 @@
 /**
  * Venue Service - Provides functions for venue operations
- * 
+ *
  * This service abstracts venue-related API calls and operations,
  * creating a clean interface for components and hooks to use.
  * Created to resolve React Hooks ESLint issues in useEvents.js.
+ *
+ * Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
  */
 
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 /**
  * Get a list of venues with optional filtering
@@ -26,7 +29,7 @@ import axios from 'axios';
  */
 export const getVenues = async (options = {}) => {
   try {
-    const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+    const baseURL = getApiBaseUrl();
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
     
     // Prepare parameters
@@ -60,7 +63,7 @@ export const getVenueById = async (venueId, populate = false) => {
       throw new Error('Venue ID is required');
     }
     
-    const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+    const baseURL = getApiBaseUrl();
     
     const response = await axios.get(`${baseURL}/api/venues/${venueId}`, {
       params: { populate: populate.toString() },
@@ -82,7 +85,7 @@ export const getVenueById = async (venueId, populate = false) => {
  */
 export const createVenue = async (venueData) => {
   try {
-    const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+    const baseURL = getApiBaseUrl();
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
     
     // Ensure appId is included
@@ -113,7 +116,7 @@ export const updateVenue = async (venueId, venueData) => {
       throw new Error('Venue ID is required');
     }
     
-    const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+    const baseURL = getApiBaseUrl();
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
     
     // Ensure appId is included
@@ -148,7 +151,7 @@ export const deleteVenue = async (venueId, firebaseToken) => {
       throw new Error('Authentication token is required');
     }
 
-    const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+    const baseURL = getApiBaseUrl();
 
     const response = await axios.delete(`${baseURL}/api/venues/${venueId}`, {
       headers: {

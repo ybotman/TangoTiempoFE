@@ -1,10 +1,12 @@
 // @/hooks/useVenues.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { dedupeFetch } from '@/utils/dedupeFetch';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export function useVenues() {
   const [venues, setVenues] = useState([]);
@@ -59,7 +61,7 @@ export function useVenues() {
       
       // TIEMPO-276: Use dedupeFetch with location-aware params for proper caching
       // The cache key includes lat/lng/radius, so location changes will fetch fresh data
-      const response = await dedupeFetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, { params });
+      const response = await dedupeFetch(`${getApiBaseUrl()}/api/venues`, { params });
       
       // Handle the API response which can come in different formats
       if (response.data && response.data.venues && Array.isArray(response.data.venues)) {
@@ -108,7 +110,7 @@ export function useVenues() {
         ...data,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues`, dataWithAppId);
+      const response = await axios.post(`${getApiBaseUrl()}/api/venues`, dataWithAppId);
       // Refresh venues list after adding a new one
       fetchVenues();
       return response.data;
@@ -128,7 +130,7 @@ export function useVenues() {
         ...data,
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
       };
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`, dataWithAppId);
+      const response = await axios.put(`${getApiBaseUrl()}/api/venues/${id}`, dataWithAppId);
       return response.data;
     } catch (err) {
       setError(err.message);
@@ -143,7 +145,7 @@ export function useVenues() {
     setError(null);
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const response = await axios.delete(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${id}`, {
+      const response = await axios.delete(`${getApiBaseUrl()}/api/venues/${id}`, {
         params: { appId },
       });
       return response.data;
@@ -171,7 +173,7 @@ export function useVenues() {
       }
       
 // TIEMPO-276: Security cleanup - removed logging
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/venues/${venueId}`, {
+      const response = await axios.get(`${getApiBaseUrl()}/api/venues/${venueId}`, {
         params: { appId, populate: populate.toString() },
       });
       
