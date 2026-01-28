@@ -15,6 +15,7 @@ import {
 import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const VenueUpcomingEvents = ({ venue }) => {
   const [events, setEvents] = useState([]);
@@ -44,7 +45,7 @@ const VenueUpcomingEvents = ({ venue }) => {
 // TIEMPO-276: Security cleanup - removed logging
         
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/events/`,
+          `${getApiBaseUrl()}/api/events/`,
           { params }
         );
 

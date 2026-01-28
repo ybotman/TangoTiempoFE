@@ -23,6 +23,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import EditIcon from '@mui/icons-material/Edit';
 import VenueMap from '../VenueGeocode/VenueMap';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import { useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 
@@ -119,7 +120,7 @@ const VenueModalAdd = ({ onAdd, refreshList, onDone }) => {
     setOverrideType(null);
 
     try {
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+      const baseURL = getApiBaseUrl();
       const addressString = buildAddressString();
       
       // Step 1: Geocode the address

@@ -1,5 +1,7 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export const useRoles = () => {
   const [roles, setRoles] = useState([]);
@@ -12,7 +14,8 @@ export const useRoles = () => {
 
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/roles`, {
+      // Migration: Now uses getApiBaseUrl() for BE/AF switching
+      const response = await axios.get(`${getApiBaseUrl()}/api/roles`, {
         params: { appId }, // Add appId as a query parameter
       });
 

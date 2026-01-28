@@ -23,6 +23,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import WarningIcon from '@mui/icons-material/Warning';
 import VenueMap from '../VenueGeocode/VenueMap';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const VenueModalEdit = ({ venue, onUpdate, refreshList, onDone }) => {
   const [venueData, setVenueData] = useState({
@@ -140,7 +141,7 @@ const VenueModalEdit = ({ venue, onUpdate, refreshList, onDone }) => {
     setProximityWarning(false);
 
     try {
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+      const baseURL = getApiBaseUrl();
       const addressString = buildAddressString();
       
       // Step 1: Geocode the address

@@ -1,7 +1,9 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useCallback, useEffect, useState, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 import { dedupeFetch } from '@/utils/dedupeFetch';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export const useUsers = () => {
   const auth = useContext(AuthContext);
@@ -48,7 +50,7 @@ export const useUsers = () => {
     }
 
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID; // Get appId from environment
-    const endpoint = `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`;
+    const endpoint = `${getApiBaseUrl()}/api/userlogins/firebase/${user.uid}`;
 
     try {
       setLoading(true);
@@ -110,7 +112,7 @@ export const useUsers = () => {
         // This endpoint expects firebaseUserId and appId in the request body
         // It properly handles localUserInfo nesting
         const response = await axios.put(
-          `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/updateUserInfo`,
+          `${getApiBaseUrl()}/api/userlogins/updateUserInfo`,
           dataToUpdate,
           { timeout: 15000 } // Add a longer client-side timeout for potentially slow operations
         );

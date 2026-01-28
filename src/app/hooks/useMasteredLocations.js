@@ -1,7 +1,9 @@
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 'use client';
 
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export function useMasteredLocations() {
   const [countries, setCountries] = useState([]);
@@ -22,7 +24,7 @@ export function useMasteredLocations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const baseURL = process.env.NEXT_PUBLIC_BE_URL;
+  const baseURL = getApiBaseUrl();
 
   const fetchCountries = useCallback(
     async (isActive = true) => {

@@ -1,9 +1,11 @@
 // @/hooks/useUserLogins.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_BE_URL;
+// Note: getApiBaseUrl() is now a function call, will be evaluated at runtime
 
 export const useUserLogins = () => {
   const [userLogins, setUserLogins] = useState([]);
@@ -19,9 +21,9 @@ export const useUserLogins = () => {
     const fetchData = async () => {
       try {
         const [userResponse, roleResponse, organizerResponse] = await Promise.all([
-          axios.get(`${apiBaseUrl}/api/userlogins/all`),
-          axios.get(`${apiBaseUrl}/api/roles`),
-          axios.get(`${apiBaseUrl}/api/organizers`),
+          axios.get(`${getApiBaseUrl()}/api/userlogins/all`),
+          axios.get(`${getApiBaseUrl()}/api/roles`),
+          axios.get(`${getApiBaseUrl()}/api/organizers`),
         ]);
 
         const userLoginsData = userResponse.data.map((user) => ({
@@ -153,14 +155,14 @@ export const useUserLogins = () => {
 
   const handleSaveChanges = async (user) => {
     try {
-      await axios.put(`${apiBaseUrl}/api/userlogins/updateUserInfo`, {
+      await axios.put(`${getApiBaseUrl()}/api/userlogins/updateUserInfo`, {
         firebaseUserId: user.firebaseUserId,
         firstName: user.localUserInfo.firstName,
         lastName: user.localUserInfo.lastName,
         loginUserName: user.localUserInfo.loginUserName,
       });
 
-      await axios.put(`${apiBaseUrl}/api/userlogins/${user.firebaseUserId}/roles`, {
+      await axios.put(`${getApiBaseUrl()}/api/userlogins/${user.firebaseUserId}/roles`, {
         roleIds: user.roleIds,
       });
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import {
   Box,
   Typography,
@@ -89,7 +90,7 @@ const RegionalOrganizersSettings = ({ organizerId, organizer, updateOrganizer, o
           delegatedOrganizerIds.map(async (id) => {
             if (!id) return null;
             try {
-              const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${id}`);
+              const response = await axios.get(`${getApiBaseUrl()}/api/organizers/${id}`);
               return response.data;
             } catch (error) {
               console.error(`Failed to fetch organizer ${id}:`, error);

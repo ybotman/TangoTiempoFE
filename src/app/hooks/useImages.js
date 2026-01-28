@@ -1,9 +1,11 @@
 // src/hooks/useImages.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 
 import { useState, useEffect } from 'react';
 import { BlobServiceClient } from '@azure/storage-blob';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export const useImages = (organizerId) => {
   const [images, setImages] = useState([]);
@@ -18,7 +20,7 @@ export const useImages = (organizerId) => {
     setLoading(true);
     try {
       // Request SAS token from backend
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/generate-sas-token`);
+      const response = await axios.post(`${getApiBaseUrl()}/api/organizers/generate-sas-token`);
       const { sasToken } = response.data;
 
       if (!sasToken) {
@@ -57,7 +59,7 @@ export const useImages = (organizerId) => {
     setLoading(true);
     try {
       // Request SAS token from backend
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/generate-sas-token`);
+      const response = await axios.post(`${getApiBaseUrl()}/api/organizers/generate-sas-token`);
       const { sasToken } = response.data;
 
       if (!sasToken) {

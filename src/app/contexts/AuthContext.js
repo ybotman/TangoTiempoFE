@@ -1,4 +1,5 @@
 // app/contexts/AuthContext.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 
 'use client';
 
@@ -24,6 +25,7 @@ import axios from 'axios';
 import { dedupeFetch } from '@/utils/dedupeFetch';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 // Create Auth Context
 export const AuthContext = createContext();
@@ -145,7 +147,7 @@ export const AuthProvider = ({ children }) => {
 
       // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
       const response = await dedupeFetch(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+        `${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`,
         {
           headers: {
             Authorization: `Bearer ${idToken}`,
@@ -481,7 +483,7 @@ export const AuthProvider = ({ children }) => {
     const idToken = await firebaseUser.getIdToken();
     try {
 // TIEMPO-276: Security cleanup - removed logging
-      await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`, {
+      await axios.get(`${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -500,7 +502,7 @@ export const AuthProvider = ({ children }) => {
           photoUrl: firebaseUser.photoURL || '',
         };
 
-        const roleResponse = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`, userData, {
+        const roleResponse = await axios.post(`${getApiBaseUrl()}/api/userlogins/`, userData, {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
