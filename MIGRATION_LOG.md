@@ -283,18 +283,29 @@ Deploy to TEST and switch to AF for read operations:
 
 Additional requirements before merge:
 
-- [ ] Fulton confirms these GET endpoints exist in AF:
-  - [ ] /api/events (list, by ID, summary, count)
-  - [ ] /api/categories
-  - [ ] /api/roles
-  - [ ] /api/venues (list, by ID, geocode, check-proximity)
-  - [ ] /api/organizers (list, by ID, by firebase ID)
-  - [ ] /api/regions/activeRegions
-  - [ ] /api/userlogins/firebase/:id, /all
-  - [ ] /api/masteredLocations/* (countries, regions, divisions, cities, nearest)
+- [x] **Fulton confirms GET endpoints ready (2026-01-28)**:
+  - [x] GET /api/events (list, by ID)
+  - [x] GET /api/userlogins/firebase/:id (commit 6e017c7e)
+  - [x] GET /api/organizers
+  - [x] GET /api/venues
+  - [x] GET /api/categories
+  - [x] GET /api/roles
+- [x] **Fulton pushed RA write endpoints (2026-01-28)**:
+  - [x] POST /api/events/ra/create
+  - [x] PUT /api/events/ra/{eventId}
+  - [x] DELETE /api/events/ra/{eventId}
+- [x] **AF version bumped to 1.19.0** (package.json + swagger.json synced)
 - [ ] MongoDB Atlas IP whitelist updated for AF
 - [ ] AF CORS allows TEST domain
 - [ ] AF has same Firebase auth validation as BE
+
+### Fulton Status Update (2026-01-28)
+```
+calendar-be-af branch: migrate-tt-to-functions
+Commits pushed:
+- efbdd641 feat: Add RA event endpoints and update Event swagger schema
+- 842b9d01 chore: Bump version to 1.19.0, sync swagger version
+```
 
 ---
 
