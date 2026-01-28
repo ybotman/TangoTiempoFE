@@ -155,19 +155,21 @@ export function transformEvents(events) {
         };
         
         // Add exdate if there are excluded dates
+        // FullCalendar's RRule plugin expects exdate as Date objects
         if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0) {
           // Extract time from the event's start date
-          const eventStartTime = event.startDate.split('T')[1]; // Gets "23:00:00.000Z"
-          
+          const eventStartTime = event.startDate.split('T')[1]; // Gets "16:00:00.000Z"
+
           // Transform each excluded date to match the event's start time
+          // Convert to Date objects as required by FullCalendar's RRule plugin
           recurringEvent.exdate = event.excludedDates.map(excludedDate => {
-            const excludedDateOnly = excludedDate.split('T')[0]; // Gets "2025-10-10"
+            const excludedDateOnly = excludedDate.split('T')[0]; // Gets "2026-02-07"
             // Combine excluded date with event's start time
             const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
-            // TIEMPO-239: Return as-is for venue times
-            return exdateWithTime;
+            // Return as Date object for FullCalendar RRule plugin compatibility
+            return new Date(exdateWithTime);
           });
-          
+
           // Excluded dates processed and added to event
         }
         

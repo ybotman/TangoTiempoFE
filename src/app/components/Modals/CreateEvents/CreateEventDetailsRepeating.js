@@ -7,8 +7,8 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Switch,
   Alert,
+  Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
@@ -146,62 +146,6 @@ function parseRRuleDate(rruleDate) {
   }
   return rruleDate;
 }
-
-// Custom MaterialUISwitch definition
-const MaterialUISwitch = styled(Switch)(() => ({
-  width: 62,
-  height: 34,
-  padding: 7,
-  '& .MuiSwitch-switchBase': {
-    margin: 1,
-    padding: 0,
-    transform: 'translateX(6px)',
-    '&.Mui-checked': {
-      color: '#fff',
-      transform: 'translateX(22px)',
-      '& .MuiSwitch-thumb:before': {
-        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><text x="2" y="15" font-size="14" font-family="Arial" fill="${encodeURIComponent(
-          '#fff'
-        )}">#</text></svg>')`,
-      },
-      '& + .MuiSwitch-track': {
-        opacity: 1,
-        backgroundColor: '#aab4be',
-      },
-    },
-  },
-  '& .MuiSwitch-thumb': {
-    backgroundColor: '#001e3c',
-    width: 32,
-    height: 32,
-    '&::before': {
-      content: "''",
-      position: 'absolute',
-      width: '100%',
-      height: '100%',
-      left: 0,
-      top: 0,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="${encodeURIComponent(
-        '#fff'
-      )}" stroke-width="1" stroke="${encodeURIComponent('#fff')}" /><line x1="7" y1="3" x2="7" y2="17" stroke="${encodeURIComponent(
-        '#fff'
-      )}" stroke-width="1" /><line x1="13" y1="3" x2="13" y2="17" stroke="${encodeURIComponent(
-        '#fff'
-      )}" stroke-width="1" /><line x1="3" y1="7" x2="17" y2="7" stroke="${encodeURIComponent(
-        '#fff'
-      )}" stroke-width="1" /><line x1="3" y1="13" x2="17" y2="13" stroke="${encodeURIComponent(
-        '#fff'
-      )}" stroke-width="1" /></svg>')`, // Grid icon for month
-    },
-  },
-  '& .MuiSwitch-track': {
-    opacity: 1,
-    backgroundColor: '#aab4be',
-    borderRadius: 20 / 2,
-  },
-}));
 
 // Frequency-based limits for recurrence
 const RECURRENCE_LIMITS = {
@@ -393,16 +337,13 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   };
 
   // Handle switching between End Date and Occurrences
-  const handleSwitchChange = () => {
-    setUseEndDate(!useEndDate);
-    setEndDate(''); // Clear the value of endDate when switching
-    setOccurrences(''); // Clear occurrences when switching
-  };
-
   // Handle end date change with sync to occurrences
+  // When user edits date, that becomes the "master" for RRULE (UNTIL)
   const handleEndDateChange = (e) => {
     const newEndDate = e.target.value;
     const maxDate = getMaxEndDate(eventData.startDate, recurrenceType);
+
+    setUseEndDate(true); // Date field edited → use UNTIL in RRULE
 
     // Enforce max date
     if (maxDate && newEndDate > maxDate) {
@@ -419,8 +360,11 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
   };
 
   // Handle occurrences change with sync to end date
+  // When user edits count, that becomes the "master" for RRULE (COUNT)
   const handleOccurrencesChange = (e) => {
     let newCount = parseInt(e.target.value, 10) || '';
+
+    setUseEndDate(false); // Count field edited → use COUNT in RRULE
 
     // Enforce max count
     if (newCount && newCount > currentLimits.maxCount) {
@@ -621,12 +565,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         >
           <MenuItem value="daily">Daily</MenuItem>
           <MenuItem value="weekly">Weekly</MenuItem>
-          <MenuItem value="monthly">
-            <Box display="flex" alignItems="center" gap={1}>
-              <span>Monthly</span>
-              <Typography variant="caption" color="primary">(Beta)</Typography>
-            </Box>
-          </MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
         </TextField>
         {eventData.startDate && (
           <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
@@ -648,46 +587,61 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
       {/* End Date vs Number of Occurrences */}
       <Box marginTop={3}>
         <Typography variant="subtitle2" gutterBottom>
-          How long should the series run? (Count and Until Date stay in sync)
+          How long should the series run?
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-          Max: {currentLimits.maxCount} occurrences / {currentLimits.maxMonths > 0 ? `${currentLimits.maxMonths} months` : `${currentLimits.maxDays} days`}
-        </Typography>
-        <Box display="flex" alignItems="center" gap={2}>
-          <TextField
-            label="Repeat Until Date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={endDate}
-            onChange={handleEndDateChange}
-            inputProps={{
-              min: eventData.startDate ? new Date(eventData.startDate).toISOString().split('T')[0] : undefined,
-              max: getMaxEndDate(eventData.startDate, recurrenceType) || undefined,
-            }}
-            helperText={endDate ? `Synced: ${occurrences || '?'} occurrences` : 'Select end date'}
-            sx={{ minWidth: 180 }}
+        <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
+          <Typography variant="caption" color="text.secondary">
+            Edit either field — the other updates automatically.
+          </Typography>
+          <Chip
+            label={useEndDate ? 'Using: Date' : 'Using: Count'}
+            size="small"
+            color="primary"
+            variant="outlined"
           />
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="caption" color="primary">
-              Synced
-            </Typography>
-            <MaterialUISwitch
-              checked={!useEndDate}
-              onChange={() => handleSwitchChange()}
+        </Box>
+        <Box display="flex" alignItems="flex-start" gap={2}>
+          <Box>
+            <TextField
+              label="Repeat Until Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={endDate}
+              onChange={handleEndDateChange}
+              inputProps={{
+                min: eventData.startDate ? new Date(eventData.startDate).toISOString().split('T')[0] : undefined,
+                max: getMaxEndDate(eventData.startDate, recurrenceType) || undefined,
+              }}
+              helperText={`Max: ${currentLimits.maxMonths > 0 ? `${currentLimits.maxMonths} months` : `${currentLimits.maxDays} days`}`}
+              sx={{
+                minWidth: 180,
+                '& .MuiOutlinedInput-root': useEndDate ? {
+                  borderColor: 'primary.main',
+                  '& fieldset': { borderColor: 'primary.main', borderWidth: 2 }
+                } : {}
+              }}
             />
-            <Typography variant="caption" color="text.secondary">
-              Toggle
-            </Typography>
           </Box>
-          <TextField
-            label="Number of Occurrences"
-            type="number"
-            inputProps={{ min: 1, max: currentLimits.maxCount }}
-            value={occurrences}
-            onChange={handleOccurrencesChange}
-            sx={{ width: '180px' }}
-            helperText={occurrences ? `Until: ${endDate || 'calculating...'}` : `Max ${currentLimits.maxCount}`}
-          />
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+            or
+          </Typography>
+          <Box>
+            <TextField
+              label="Number of Occurrences"
+              type="number"
+              inputProps={{ min: 1, max: currentLimits.maxCount }}
+              value={occurrences}
+              onChange={handleOccurrencesChange}
+              sx={{
+                width: '180px',
+                '& .MuiOutlinedInput-root': !useEndDate ? {
+                  borderColor: 'primary.main',
+                  '& fieldset': { borderColor: 'primary.main', borderWidth: 2 }
+                } : {}
+              }}
+              helperText={`Max: ${currentLimits.maxCount} occurrences`}
+            />
+          </Box>
         </Box>
       </Box>
 
@@ -767,7 +721,13 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
           fullWidth
           label="Exclude Dates (comma separated, format: YYYY-MM-DD)"
           value={excludeDates}
-          onChange={(e) => setExcludeDates(e.target.value)}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            setExcludeDates(newValue);
+            // Parse dates on change as well to ensure they're captured before save
+            const parsedDates = parseExcludedDates(newValue);
+            setValidatedExcludeDates(parsedDates);
+          }}
           onBlur={handleExcludeDatesBlur}
           helperText="Optional: Enter dates to skip (e.g., 2024-12-25, 2024-12-31)"
         />
