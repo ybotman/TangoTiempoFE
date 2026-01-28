@@ -135,6 +135,17 @@ export function transformEvents(events) {
         // Parse RRULE string to FullCalendar v6 object format
         // TIEMPO-239: Pass venue times if available for RRULE parsing
         const startForRRule = useVenueTime ? displayTimes.startTime : event.startDate;
+
+        // Ensure we have a valid start date for RRULE parsing
+        if (!startForRRule) {
+          console.warn('No valid start date for recurring event, skipping:', event.title);
+          return {
+            ...baseEvent,
+            start: event.startDate,
+            end: event.endDate,
+          };
+        }
+
         const rruleObj = parseRRuleToObject(cleanedRRule, startForRRule);
         
         
@@ -156,21 +167,27 @@ export function transformEvents(events) {
         
         // Add exdate if there are excluded dates
         // FullCalendar's RRule plugin expects exdate as Date objects
-        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0) {
+        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0 && event.startDate) {
           // Extract time from the event's start date
-          const eventStartTime = event.startDate.split('T')[1]; // Gets "16:00:00.000Z"
+          const startDateStr = typeof event.startDate === 'string' ? event.startDate : '';
+          const eventStartTime = startDateStr.includes('T') ? startDateStr.split('T')[1] : '00:00:00.000Z';
 
           // Transform each excluded date to match the event's start time
-          // Convert to Date objects as required by FullCalendar's RRule plugin
-          recurringEvent.exdate = event.excludedDates.map(excludedDate => {
-            const excludedDateOnly = excludedDate.split('T')[0]; // Gets "2026-02-07"
-            // Combine excluded date with event's start time
-            const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
-            // Return as Date object for FullCalendar RRule plugin compatibility
-            return new Date(exdateWithTime);
-          });
+          // Filter out any invalid dates and convert to Date objects
+          const validExdates = event.excludedDates
+            .filter(excludedDate => excludedDate && typeof excludedDate === 'string')
+            .map(excludedDate => {
+              const excludedDateOnly = excludedDate.includes('T') ? excludedDate.split('T')[0] : excludedDate;
+              const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
+              const dateObj = new Date(exdateWithTime);
+              // Only return valid dates
+              return isNaN(dateObj.getTime()) ? null : dateObj;
+            })
+            .filter(date => date !== null);
 
-          // Excluded dates processed and added to event
+          if (validExdates.length > 0) {
+            recurringEvent.exdate = validExdates;
+          }
         }
         
         return recurringEvent;
