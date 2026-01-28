@@ -232,6 +232,72 @@ Both BE and AF connect to the **same MongoDB Atlas cluster**.
 
 ---
 
+## Path to TEST (2026-01-28)
+
+### What's on `migrate-tt-to-functions` Branch
+
+| Type | Commits | Description |
+|------|---------|-------------|
+| **Bug Fixes** | `f5ba2c8` | Time reset fix, mobile save button, exclude dates |
+| **Migration Code** | `a5c8b30`, `b60e03a`, etc. | apiUrlResolver + 27 files migrated |
+| **Documentation** | `d9f0c7b`, `9f624fc` | Full endpoint audit, config docs |
+
+### Two Deployment Options
+
+#### Option 1: Bug Fixes Only (AF_ENABLED=false)
+Deploy to TEST but keep using calendar-be (Express):
+
+```
+1. Merge migrate-tt-to-functions → TEST
+2. Deploy with NEXT_PUBLIC_AF_ENABLED=false
+3. Bug fixes go live, migration code is dormant
+4. Test AF separately when Fulton confirms readiness
+```
+
+**Pros**: Bug fixes to users immediately, no AF risk
+**Cons**: Doesn't validate AF in TEST yet
+
+#### Option 2: Bug Fixes + GET Validation (AF_ENABLED=true)
+Deploy to TEST and switch to AF for read operations:
+
+```
+1. Fulton confirms GET endpoints ready in AF
+2. Update MongoDB Atlas IP whitelist for AF
+3. Merge migrate-tt-to-functions → TEST
+4. Deploy with NEXT_PUBLIC_AF_ENABLED=true
+5. Validate all GET operations work
+6. Keep POST/PUT/DELETE... (need endpoint-specific routing or full parity)
+```
+
+**Pros**: Validates AF in real environment
+**Cons**: Requires Fulton confirmation first, higher risk
+
+### Pre-Deployment Checklist (Either Option)
+
+- [ ] Push `migrate-tt-to-functions` to origin
+- [ ] Create PR: `migrate-tt-to-functions` → `TEST`
+- [ ] Review changes (bug fixes + migration code)
+- [ ] Decide AF_ENABLED setting for TEST
+
+### If Choosing Option 2 (AF_ENABLED=true)
+
+Additional requirements before merge:
+
+- [ ] Fulton confirms these GET endpoints exist in AF:
+  - [ ] /api/events (list, by ID, summary, count)
+  - [ ] /api/categories
+  - [ ] /api/roles
+  - [ ] /api/venues (list, by ID, geocode, check-proximity)
+  - [ ] /api/organizers (list, by ID, by firebase ID)
+  - [ ] /api/regions/activeRegions
+  - [ ] /api/userlogins/firebase/:id, /all
+  - [ ] /api/masteredLocations/* (countries, regions, divisions, cities, nearest)
+- [ ] MongoDB Atlas IP whitelist updated for AF
+- [ ] AF CORS allows TEST domain
+- [ ] AF has same Firebase auth validation as BE
+
+---
+
 ## Rollback Plan
 
 ### Immediate Rollback (< 5 minutes)
