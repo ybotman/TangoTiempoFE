@@ -166,24 +166,25 @@ export function transformEvents(events) {
         };
         
         // Add exdate if there are excluded dates
-        // FullCalendar's RRule plugin expects exdate as Date objects
+        // FullCalendar's RRule plugin expects exdate as ISO strings (parseMarker parses them)
         if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0 && event.startDate) {
           // Extract time from the event's start date
           const startDateStr = typeof event.startDate === 'string' ? event.startDate : '';
           const eventStartTime = startDateStr.includes('T') ? startDateStr.split('T')[1] : '00:00:00.000Z';
 
           // Transform each excluded date to match the event's start time
-          // Filter out any invalid dates and convert to Date objects
+          // FullCalendar rrule plugin calls parseMarker() on exdate values,
+          // which expects ISO strings, not Date objects
           const validExdates = event.excludedDates
             .filter(excludedDate => excludedDate && typeof excludedDate === 'string')
             .map(excludedDate => {
               const excludedDateOnly = excludedDate.includes('T') ? excludedDate.split('T')[0] : excludedDate;
               const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
+              // Validate the date is parseable
               const dateObj = new Date(exdateWithTime);
-              // Only return valid dates
-              return isNaN(dateObj.getTime()) ? null : dateObj;
+              return isNaN(dateObj.getTime()) ? null : exdateWithTime;
             })
-            .filter(date => date !== null);
+            .filter(exdate => exdate !== null);
 
           if (validExdates.length > 0) {
             recurringEvent.exdate = validExdates;
