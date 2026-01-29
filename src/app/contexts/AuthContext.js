@@ -94,17 +94,9 @@ export const AuthProvider = ({ children }) => {
 // TIEMPO-276: Security cleanup - removed logging
 
       // Track login analytics (fire and forget - non-blocking)
-      // 🚨 HOT FIX 2025-11-01: DISABLED TO STOP GOOGLE API CHARGES
-      // TODO: Re-enable after Maps Platform free tier is configured
-      // See: docs/TRACKING-SYSTEM-DEEP-DIVE-ANALYSIS.md
-      console.log('[Login Tracking] DISABLED - Hot fix to stop Google API charges');
-      console.log('[Login Tracking] Re-enable after Maps Platform $200 free tier is configured');
-
-      // 🚨 ORIGINAL LOGIN TRACKING CODE - COMMENTED OUT TO STOP CHARGES
-      /*
       // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
       if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        console.log('[Login Tracking] Skipping on localhost - Azure Functions not running');
+        // Localhost - skip login tracking
       } else {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
@@ -122,7 +114,7 @@ export const AuthProvider = ({ children }) => {
               body: JSON.stringify({
                 loginType: loginType, // 'auto' or 'manual'
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
+                timezoneOffset: -new Date().getTimezoneOffset(),
 
                 // Existing geolocation data
                 cloudflare: geoData.cloudflare,
@@ -138,10 +130,9 @@ export const AuthProvider = ({ children }) => {
                 google_api_long: browserGeoData.google_api_long
               })
             }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
-          }).catch(err => console.warn('[Login Tracking] Geolocation fetch failed:', err.message));
-        }).catch(err => console.warn('[Login Tracking] Browser geolocation failed:', err.message));
+          }).catch(err => console.warn('[Login Tracking] Geo fetch failed:', err.message));
+        }).catch(err => console.warn('[Login Tracking] Browser geo failed:', err.message));
       }
-      */
 
 // TIEMPO-276: Security cleanup - removed logging
 

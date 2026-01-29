@@ -54,9 +54,9 @@ export const getOrCreateVisitorId = () => {
       localStorage.setItem(VISITOR_FIRST_VISIT_KEY, new Date().toISOString());
     }
 
-    console.log('[Visitor] New visitor_id created:', visitorId);
+    // New visitor_id created
   } else {
-    console.log('[Visitor] Existing visitor_id found:', visitorId);
+    // Existing visitor_id found
   }
 
   return visitorId;
@@ -112,7 +112,7 @@ export const setWelcomeShown = () => {
 
   localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
   localStorage.setItem(WELCOME_SHOWN_AT_KEY, new Date().toISOString());
-  console.log('[Visitor] Welcome modal marked as shown');
+  // Welcome modal marked as shown
 };
 
 /**
@@ -141,7 +141,7 @@ export const resetWelcomeShown = () => {
 
   localStorage.removeItem(WELCOME_SHOWN_KEY);
   localStorage.removeItem(WELCOME_SHOWN_AT_KEY);
-  console.log('[Visitor] Welcome shown flag reset');
+  // Welcome shown flag reset
 };
 
 /**
@@ -189,7 +189,7 @@ export const saveLastMapCenter = (mapCenter) => {
   }
 
   localStorage.setItem(LAST_MAP_CENTER_KEY, JSON.stringify(mapCenter));
-  console.log('[Visitor] Map center saved:', mapCenter);
+  // Map center saved
 };
 
 /**
@@ -240,7 +240,7 @@ export const clearVisitorData = () => {
     localStorage.removeItem(VISIT_COUNT_KEY);
   }
 
-  console.log('[Visitor] All visitor data cleared');
+  // All visitor data cleared
 };
 
 /**
@@ -260,7 +260,6 @@ export const incrementVisitCount = () => {
   const next = current + 1;
 
   localStorage.setItem(VISIT_COUNT_KEY, next.toString());
-  console.log('[Visitor] Visit count:', next);
 
   return next;
 };
@@ -284,7 +283,6 @@ export const getVisitCount = () => {
 export const resetVisitCount = () => {
   if (typeof localStorage === 'undefined') return;
   localStorage.removeItem(VISIT_COUNT_KEY);
-  console.log('[Visitor] Visit count reset');
 };
 
 /**
