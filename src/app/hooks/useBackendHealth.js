@@ -17,20 +17,32 @@ export const useBackendHealth = () => {
   const healthPath = isAFEnabled() ? '/api/health' : '/health';
 
   useEffect(() => {
+    let failureCount = 0;
+    const MAX_FAILURES = 3; // Stop polling after 3 consecutive failures
+
     const checkHealth = async () => {
+      // Circuit breaker: stop polling after consecutive failures
+      if (failureCount >= MAX_FAILURES) {
+        return;
+      }
+
       setIsChecking(true);
 
       try {
-        // Try to ping the backend health endpoint
         const response = await fetch(`${backendUrl}${healthPath}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000), // 5 second timeout
+          signal: AbortSignal.timeout(5000),
         });
 
+        if (response.ok) {
+          failureCount = 0; // Reset on success
+        } else {
+          failureCount++;
+        }
         setIsHealthy(response.ok);
       } catch (error) {
-        // Backend is down or unreachable
+        failureCount++;
         setIsHealthy(false);
       } finally {
         setIsChecking(false);
@@ -40,7 +52,7 @@ export const useBackendHealth = () => {
     // Check on mount
     checkHealth();
 
-    // Re-check every 30 seconds
+    // Re-check every 30 seconds (stops after MAX_FAILURES consecutive failures)
     const interval = setInterval(checkHealth, 30000);
 
     return () => clearInterval(interval);
@@ -59,24 +71,35 @@ export const useMapboxHealth = () => {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
 
   useEffect(() => {
+    let failureCount = 0;
+    const MAX_FAILURES = 3;
+
     const checkHealth = async () => {
+      if (failureCount >= MAX_FAILURES) {
+        return;
+      }
+
       setIsChecking(true);
 
       try {
-        // Check if token exists and test Mapbox API
         if (!mapboxToken) {
           setIsHealthy(false);
           return;
         }
 
-        // Ping Mapbox geocoding API with a simple query
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/test.json?access_token=${mapboxToken}`,
           { signal: AbortSignal.timeout(5000) }
         );
 
+        if (response.ok) {
+          failureCount = 0;
+        } else {
+          failureCount++;
+        }
         setIsHealthy(response.ok);
       } catch (error) {
+        failureCount++;
         setIsHealthy(false);
       } finally {
         setIsChecking(false);
