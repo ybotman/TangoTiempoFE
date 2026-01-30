@@ -10,7 +10,7 @@ import { JSDOM } from 'jsdom';
 import { notFound } from 'next/navigation';
 import winston from 'winston';
 import PropTypes from 'prop-types';
-import { getApiBaseUrl } from '@/app/utils/apiUrlResolver';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 // Set up logging with Winston
 const logger = winston.createLogger({

@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import PropTypes from 'prop-types';
 import EventPageClient from './EventPageClient';
-import { getApiBaseUrl } from '@/app/utils/apiUrlResolver';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 // Get dynamic base URL from request headers (supports proxy domains)
 function getBaseUrl() {
