@@ -28,7 +28,7 @@
     "report:clean": "rm -rf cypress/reports"
   },
   "engines": {
-    "node": "=20.x"
+    "node": "=22.x"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.25.0",
