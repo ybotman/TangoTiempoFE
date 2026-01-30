@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import PropTypes from 'prop-types';
 import EventPageClient from './EventPageClient';
+import { getApiBaseUrl } from '@/app/utils/apiUrlResolver';
 
 // Get dynamic base URL from request headers (supports proxy domains)
 function getBaseUrl() {
@@ -18,8 +19,8 @@ function getBaseUrl() {
   return `${protocol}://${host}`;
 }
 
-// Backend API URL
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL || 'https://calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net';
+// API URL - resolved via apiUrlResolver (supports AF/BE switching)
+const API_URL = getApiBaseUrl();
 
 // Default event image (header image) when no event image exists
 const DEFAULT_EVENT_IMAGE = '/images/TangoTiempo3.jpg';
@@ -32,7 +33,7 @@ async function getEventData(eventId) {
       return null;
     }
 
-    const response = await fetch(`${BE_URL}/api/events/id/${eventId}?appId=1`, {
+    const response = await fetch(`${API_URL}/api/events/id/${eventId}?appId=1`, {
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
 

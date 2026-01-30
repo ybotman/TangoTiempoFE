@@ -10,6 +10,7 @@ import { JSDOM } from 'jsdom';
 import { notFound } from 'next/navigation';
 import winston from 'winston';
 import PropTypes from 'prop-types';
+import { getApiBaseUrl } from '@/app/utils/apiUrlResolver';
 
 // Set up logging with Winston
 const logger = winston.createLogger({
@@ -29,7 +30,7 @@ const sanitizeHTML = (htmlString) => {
 
 export async function generateStaticParams() {
   try {
-    const beUrl = process.env.NEXT_PUBLIC_BE_URL || 'https://default-url.com';
+    const beUrl = getApiBaseUrl();
     const timeout = Number(process.env.NEXT_PUBLIC_STATIC_PAGE_GENERATION_TIMEOUT || '120') * 1000;
 
     logger.info('Starting generateStaticParams');
