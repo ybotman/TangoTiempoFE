@@ -5,81 +5,70 @@ TangoTiempo uses React's Context API extensively to manage state across the appl
 
 ## Context Hierarchy
 
+> **Updated 2026-01-29** - Provider order and naming reflects current state
+
 Provider initialization order (from Providers.js):
 1. **AuthProvider** - Authentication state
-2. **RegionsProvider** - Legacy location system (being deprecated)
-3. **LocalizationProvider** - Date/time localization 
-4. **RoleProvider** - User role management
-5. **GeoLocationProvider** - Unified location system (→ now initializes BEFORE MasteredLocationProvider)
-6. **MasteredLocationProvider** - Canonical location data from backend
+2. **LocalizationProvider** - Date/time localization
+3. **RoleProvider** - User role management
+4. **LocationAPIProvider** - Pure API data layer (renamed from MasteredLocationContext, no state beyond loading/error)
+5. **GeoLocationProvider** - Unified location system (uses LocationAPIProvider for data)
+6. **EventDiscoveryProvider** - AI event filtering
+
+Helper components mounted inside providers:
+- **MasteredLocationLogger** - No-op (logging removed via TIEMPO-276)
+- **UserLocationLoader** - Bridges user data to GeoLocationContext
+- **LocationPromptManager** - LocationSelector dialog (hardcoded to never show)
+- **MapCenterModalWrapper** - Map-based location picker
+
+**Note:** RegionsProvider has been removed from the provider hierarchy.
 
 ## Location Context System Analysis
 
-### Three Interrelated Location Contexts
+### Two Location Contexts (as of 2026-01-29)
 
-TangoTiempo has three contexts for location management:
+TangoTiempo now has two active location contexts:
 
-1. **GeoLocationContext**
-   - Purpose: A unified location system that handles both the user's actual geographic location AND the selected location for filtering content
+1. **LocationAPIContext** (renamed from MasteredLocationContext)
+   - Purpose: Pure API data provider for mastered location services. No state management beyond loading/error.
+   - File: `src/app/contexts/LocationAPIContext.js`
+   - Exports: `useLocationAPI()` (new name) and `useMasteredLocation()` (compat alias)
+   - Functions: `fetchNearestCity`, `fetchCities`, `fetchRegions`, `fetchDivisions`
+   - All functions call `/api/masteredLocations/*` endpoints
+   - Emits events via LocationEventBus (no circular dependency)
+
+2. **GeoLocationContext**
+   - Purpose: Unified location state management
    - Key State:
-     - userLocation: The user's actual physical coordinates (from IP-based geolocation)
-     - selectedLocation: The location for filtering content (city, division, region structure)
+     - userLocation: User's physical coordinates
+     - selectedLocation: Location for filtering content
+     - currentLocation, savedLocation, temporaryLocation: Session/preference state
    - Role:
-     - Acts as the high-level context that both stores the user's physical location
-     - Manages the selected filtering location (which may be different from where the user is)
-     - Gradually replacing RegionsContext with more modern functionality
+     - Uses `useLocationAPI()` for nearest city lookups
+     - Manages map center mode (lat/lng + radius)
+     - Single source of truth for location state
 
-2. **MasteredLocationContext**
-   - Purpose: Provides canonical location data from the backend database
-   - Key State:
-     - nearestCity: The nearest canonical city to the user's location with complete hierarchy info
-   - Role:
-     - Ensures locations match the canonical database structure
-     - Provides authoritative location data that matches backend records
-     - Supplies validated location IDs needed for API calls
+**Removed/Dead:**
+- **RegionsContext** - Fully removed from provider hierarchy
+- **MasteredLocationContext** - Renamed to LocationAPIContext
+- **LocationPromptManager** - Mounted but hardcoded to never show LocationSelector
+- **MasteredLocationLogger** - Mounted but no-op (logging stripped by TIEMPO-276)
 
-3. **RegionsContext** (Deprecated)
-   - Purpose: Legacy system for region selection
-   - Key State:
-     - selectedRegion, selectedDivision, selectedCity
-     - selectedRegionID
-   - Role:
-     - Being phased out in favor of GeoLocationContext
-     - Maintained for backward compatibility with older components
+### Circular Dependency - RESOLVED
 
-### The Circular Dependency Problem
+The circular dependency between GeoLocationContext and MasteredLocationContext has been resolved by refactoring MasteredLocationContext into **LocationAPIContext**, a pure API data provider with no state dependencies on other contexts.
 
-A critical architectural issue exists between GeoLocationContext and MasteredLocationContext:
-
+**Current architecture:**
 ```
-GeoLocationContext ←→ MasteredLocationContext
+LocationAPIProvider (pure API layer, no context dependencies)
+  └── GeoLocationProvider (uses useLocationAPI() for data)
+        └── Components
 ```
 
-- **GeoLocationContext** imports `useMasteredLocation` from MasteredLocationContext
-- **MasteredLocationContext** imports `useGeoLocation` from GeoLocationContext
-
-This creates a bootstrapping problem during initialization.
-
-### Current Solution
-
-The circular dependency is currently managed through several mechanisms:
-
-1. **Provider Order Change**:
-   - GeoLocationProvider now initializes before MasteredLocationProvider
-   - This allows GeoLocationContext to have a stable identity before MasteredLocationContext tries to use it
-
-2. **Function Registration Pattern**:
-   - GeoLocationContext defines a `registerMasteredLocationFunctions` method
-   - MasteredLocationContext calls this method after initialization to register its capabilities
-   - This allows deferred dependency resolution
-
-3. **Standalone Implementation**:
-   - GeoLocationContext includes its own `fetchNearestCityImpl` function
-   - This provides fallback functionality when MasteredLocationContext isn't fully initialized
-
-4. **Null Handling**:
-   - Both contexts handle null values from each other
-   - Default values and fallbacks are provided for when dependencies aren't yet available
+- **LocationAPIContext** has ZERO imports from other contexts
+- **GeoLocationContext** imports `useLocationAPI` (one-way dependency)
+- Provider order: LocationAPIProvider wraps GeoLocationProvider
+- LocationEventBus handles cross-concern communication without imports
 
 ## Implications for Venue Selection
 
