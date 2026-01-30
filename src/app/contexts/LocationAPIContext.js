@@ -1,22 +1,24 @@
 // src/app/contexts/LocationAPIContext.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 'use client';
 
 /**
  * LocationAPIContext - Pure API data provider for location services
- * 
+ *
  * This context is a renamed and refactored version of MasteredLocationContext.
  * It serves as a pure data provider that:
  * - Makes API calls to fetch location data
  * - Emits events via LocationEventBus
  * - Has NO state management beyond loading/error states
  * - Has NO dependencies on other contexts (breaks circular dependencies)
- * 
+ *
  * The term "Mastered" refers to the curated/verified location list from the API
  */
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const LocationAPIContext = createContext();
 
@@ -62,7 +64,7 @@ export const LocationAPIProvider = ({ children }) => {
     
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const baseURL = getApiBaseUrl() || '';
       const url = `${baseURL}/api/masteredLocations/nearestMastered?latitude=${parsedLatitude}&longitude=${parsedLongitude}&maxDistance=${maxDistance}&isActive=true&appId=${appId}`;
 
       // TIEMPO-276: Security cleanup - removed API logging
@@ -168,7 +170,7 @@ export const LocationAPIProvider = ({ children }) => {
     
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const baseURL = getApiBaseUrl() || '';
 
       let url = `${baseURL}/api/masteredLocations/cities?appId=${appId}&isActive=${isActive ? 'true' : 'false'}`;
       if (divisionId) {
@@ -269,7 +271,7 @@ export const LocationAPIProvider = ({ children }) => {
     
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const baseURL = getApiBaseUrl() || '';
 
       let url = `${baseURL}/api/masteredLocations/regions?appId=${appId}&isActive=${isActive ? 'true' : 'false'}`;
       if (countryId) {
@@ -343,7 +345,7 @@ export const LocationAPIProvider = ({ children }) => {
     
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const baseURL = process.env.NEXT_PUBLIC_BE_URL || '';
+      const baseURL = getApiBaseUrl() || '';
 
       let url = `${baseURL}/api/masteredLocations/divisions?appId=${appId}&isActive=${isActive ? 'true' : 'false'}`;
       if (regionId) {

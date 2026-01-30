@@ -20,6 +20,7 @@ import { validateEventCategoryRules } from '@/utils/eventCategoryValidation'; //
 dayjs.extend(utc);
 dayjs.extend(timezone);
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const modalStyle = {
   position: 'absolute',
@@ -30,9 +31,12 @@ const modalStyle = {
   maxWidth: '600px',
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 3,
   maxHeight: '90vh',
-  overflowY: 'auto',
+  // Use flex layout to keep buttons visible at bottom
+  display: 'flex',
+  flexDirection: 'column',
+  // Mobile safe area padding for devices with home indicator
+  paddingBottom: 'env(safe-area-inset-bottom, 0px)',
 };
 
 const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, eventToEdit = null }) => {
@@ -117,9 +121,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   };
   
   // Initialize event data with helper function
-  const [eventData, setEventData] = useState(() => 
+  const [eventData, setEventData] = useState(() =>
     getInitialEventData(selectedDate, selectedLocation, null, null)
   );
+
+  // Track if user has manually modified the time fields
+  const [hasUserModifiedTime, setHasUserModifiedTime] = useState(false);
 
   // Refresh event data and related data when modal opens or location changes
   useEffect(() => {
@@ -209,7 +216,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         }
         
         setHasUnsavedChanges(false); // Reset unsaved changes for edit mode
-        
+        setHasUserModifiedTime(true); // In edit mode, treat times as user-set (don't auto-recalculate)
+
         // Validate Regional Admin city access for edit mode
         if (selectedRole === 'RegionalAdmin') {
           const raAllowedCities = user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || [];
@@ -251,6 +259,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         const initialData = getInitialEventData(selectedDate, selectedLocation, null, null);
         setEventData(initialData);
         setHasUnsavedChanges(false); // Reset unsaved changes for create mode
+        setHasUserModifiedTime(false); // Reset time modification flag for create mode
       }
 
       // Log current location for debugging
@@ -294,34 +303,21 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   }, [isMultiDayEvent, eventData.isRepeating, currentTab]);
 
   // TIEMPO-246: Recalculate event times when venue timezone changes
+  // Only recalculate if user hasn't manually modified the time fields
   useEffect(() => {
-    if (!editMode && eventData.venueTimezone && open) {
-      // Only recalculate if venue timezone has changed and we're in create mode
-      const currentStartDate = eventData.startDate;
-      const currentEndDate = eventData.endDate;
-      
-      // Check if times need recalculation (if they're still in default time)
-      // This prevents recalculation if user has manually changed times
-      if (currentStartDate && currentEndDate) {
-        const startHour = currentStartDate.hour ? currentStartDate.hour() : 19;
-        const isDefaultTime = startHour === 19 && currentStartDate.minute() === 0;
-        
-        if (isDefaultTime) {
-          // Recalculate times in the new venue timezone
-          const newStartDate = getDefaultStartTime(selectedDate, eventData.venueTimezone);
-          const newEndDate = newStartDate.add(3, 'hour');
-          
-          // TIEMPO-276: Security cleanup - removed logging
-          
-          setEventData(prev => ({
-            ...prev,
-            startDate: newStartDate,
-            endDate: newEndDate
-          }));
-        }
-      }
+    if (!editMode && eventData.venueTimezone && open && !hasUserModifiedTime) {
+      // Only recalculate if venue timezone has changed, we're in create mode,
+      // and user hasn't manually touched the time fields
+      const newStartDate = getDefaultStartTime(selectedDate, eventData.venueTimezone);
+      const newEndDate = newStartDate.add(3, 'hour');
+
+      setEventData(prev => ({
+        ...prev,
+        startDate: newStartDate,
+        endDate: newEndDate
+      }));
     }
-  }, [eventData.venueTimezone, editMode, selectedDate, open]);
+  }, [eventData.venueTimezone, editMode, selectedDate, open, hasUserModifiedTime]);
 
   const [saveError, setSaveError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -603,7 +599,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             // TIEMPO-284: Fetch organizer data directly via API
             const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
             const response = await axios.get(
-              `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${orgInfo.organizerId}`,
+              `${getApiBaseUrl()}/api/organizers/${orgInfo.organizerId}`,
               { params: { appId } }
             );
             const organizerData = response.data;
@@ -662,7 +658,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             
             // Call API to activate only isActive flag
             const response = await axios.post(
-              `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/activate-organizer`,
+              `${getApiBaseUrl()}/api/userlogins/activate-organizer`,
               { firebaseUserId: user.uid },
               { 
                 headers: { Authorization: `Bearer ${token}` },
@@ -691,7 +687,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             // Force a refresh of the user data from backend
             try {
               await axios.get(
-                `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${user.uid}`,
+                `${getApiBaseUrl()}/api/userlogins/firebase/${user.uid}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`
@@ -855,6 +851,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     <>
     <Modal open={open} onClose={handleClose} data-testid="create-event-modal">
       <Box sx={modalStyle}>
+        {/* Header - fixed at top */}
+        <Box sx={{ p: 3, pb: 1, flexShrink: 0 }}>
         <Box display="flex" justifyContent="space-between" flexWrap="wrap">
           <Typography variant="h5" component="h2">
             {editMode ? 'Edit Event' : 'Create Event'}
@@ -881,7 +879,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             </span>
           </Tooltip>
         </Box>
+        </Box>
 
+        {/* Scrollable content area */}
+        <Box sx={{ flex: 1, overflowY: 'auto', px: 3 }}>
 
         {/* Error message */}
         {saveError && (
@@ -986,29 +987,51 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         </Tabs>
 
         {/* Render tab content conditionally */}
-        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />}
+        {currentTab === 'basic' && <CreateEventDetailsBasic eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} onTimeModified={() => setHasUserModifiedTime(true)} />}
         {currentTab === 'repeating' && eventData.isRepeating && (
           <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
+        </>
+        )}
+        </Box>
 
-        <Box mt={2} display="flex" justifyContent="space-between">
-          <Button 
-            onClick={handleSave} 
-            variant="contained" 
+        {/* Sticky footer with buttons - always visible */}
+        <Box
+          sx={{
+            p: 2,
+            px: 3,
+            flexShrink: 0,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 2,
+            // Extra padding for mobile safe area
+            pb: { xs: 'calc(16px + env(safe-area-inset-bottom, 0px))', sm: 2 }
+          }}
+        >
+          <Button
+            onClick={handleSave}
+            variant="contained"
             color="primary"
             disabled={saving || !isFormValid()}
             startIcon={saving && <CircularProgress size={20} />}
+            sx={{ flex: 1, minHeight: 48 }}
           >
             {saving ? 'Saving...' : saveSuccess ? 'Saved!' : (editMode ? 'UPDATE' : 'Save Event')}
           </Button>
-          <Button onClick={handleClose} variant="outlined" color="secondary">
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            color="secondary"
+            sx={{ minHeight: 48 }}
+          >
             Cancel
           </Button>
         </Box>
-        </>
-        )}
       </Box>
     </Modal>
     

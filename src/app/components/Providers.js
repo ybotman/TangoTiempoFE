@@ -10,8 +10,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocationAPIProvider } from '@/contexts/LocationAPIContext';
 import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationContext';
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
-import MasteredLocationLogger from '@/utils/MasteredLocationLogger';
-import LocationPromptManager from '@/components/LocationPromptManager';
 import UserLocationLoader from '@/components/UserLocationLoader';
 import { getCachedGeolocation } from '@/utils/trackingHelper';
 import { getCountryMapLocation } from '@/utils/countryCenter';
@@ -90,14 +88,11 @@ const Providers = ({ children }) => {
             Hierarchical provider model:
             LocationAPIProvider provides the data service layer
             GeoLocationProvider uses LocationAPIProvider for data
-            MasteredLocationLogger must be inside both contexts to access data
           */}
           <LocationAPIProvider>
             <GeoLocationProvider>
               <EventDiscoveryProvider>
-                <MasteredLocationLogger />
                 <UserLocationLoader />
-                <LocationPromptManager />
                 <MapCenterModalWrapper />
                 {children}
               </EventDiscoveryProvider>

@@ -150,6 +150,20 @@ export const useServiceHealth = () => {
   }, [services.geoAPI.latitude, services.geoAPI.longitude, services.googleGeoAPI.latitude, services.googleGeoAPI.longitude, services.geoAPI.distanceToGoogle, services.googleGeoAPI.distanceToIpapi]);
 
   const checkExpressBackend = async () => {
+    // Skip Express health check when AF is enabled (BE is intentionally stopped)
+    if (process.env.NEXT_PUBLIC_AF_ENABLED === 'true') {
+      setServices(prev => ({
+        ...prev,
+        expressBackend: {
+          name: 'Express Backend',
+          status: 'disabled',
+          detail: 'Stopped (AF enabled)',
+          accuracy: null
+        }
+      }));
+      return;
+    }
+
     const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
     try {
       const start = Date.now();

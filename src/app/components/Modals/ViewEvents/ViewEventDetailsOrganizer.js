@@ -27,6 +27,7 @@ import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const ViewEventDetailsOrganizer = ({ eventDetails }) => {
   const [error, setError] = useState(null);
@@ -68,7 +69,7 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
         limit: 10 // Get up to 10 upcoming events
       };
       
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/events`, {
+      const response = await axios.get(`${getApiBaseUrl()}/api/events`, {
         params,
         timeout: 15000
       });

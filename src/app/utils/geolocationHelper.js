@@ -14,7 +14,7 @@
  */
 export const getBrowserGeolocation = async () => {
   if (!navigator.geolocation) {
-    console.log('[Geolocation] Browser geolocation not supported');
+    // Browser geolocation not supported
     return null;
   }
 
@@ -36,7 +36,6 @@ export const getBrowserGeolocation = async () => {
     };
   } catch (error) {
     // User denied permission, timeout, or position unavailable
-    console.log('[Geolocation] Browser GPS unavailable:', error.message);
     return null;
   }
 };
@@ -107,7 +106,6 @@ export const getGeolocationData = async () => {
     result.google_browser_lat = browserGeo.lat;
     result.google_browser_long = browserGeo.long;
     result.google_browser_accuracy = browserGeo.accuracy;
-    console.log('[Geolocation] ✅ Using browser GPS (10m accuracy)');
     return result; // Don't call Google API if GPS works
   }
 
@@ -116,12 +114,11 @@ export const getGeolocationData = async () => {
   if (googleGeo) {
     result.google_api_lat = googleGeo.lat;
     result.google_api_long = googleGeo.long;
-    console.log('[Geolocation] ⚠️ Using Google API (WiFi/cell tower, 50-500m accuracy)');
     return result;
   }
 
   // Priority 3: Fall back to ipinfo.io (city-level: ~10km)
   // Backend handles this automatically if no frontend geolocation provided
-  console.log('[Geolocation] ❌ Falling back to ipinfo.io (backend, 10km accuracy)');
-  return result; // All null, backend will populate ipinfo_* fields
+  // Falling back to ipinfo.io (backend handles this)
+  return result;
 };

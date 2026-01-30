@@ -467,6 +467,7 @@ export const GeoLocationProvider = ({ children }) => {
 
     // Call Azure Functions PUT /api/mapcenter
     const azureFunctionsURL = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
 
     const response = await fetch(`${azureFunctionsURL}/api/mapcenter`, {
       method: 'PUT',
@@ -474,7 +475,7 @@ export const GeoLocationProvider = ({ children }) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${firebaseToken}`
       },
-      body: JSON.stringify(location)
+      body: JSON.stringify({ ...location, appId })
     });
 
     if (!response.ok) {
@@ -534,9 +535,10 @@ export const GeoLocationProvider = ({ children }) => {
     }
 
     const azureFunctionsURL = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
 
     try {
-      const response = await fetch(`${azureFunctionsURL}/api/mapcenter`, {
+      const response = await fetch(`${azureFunctionsURL}/api/mapcenter?appId=${appId}`, {
         headers: {
           'Authorization': `Bearer ${firebaseToken}`
         }

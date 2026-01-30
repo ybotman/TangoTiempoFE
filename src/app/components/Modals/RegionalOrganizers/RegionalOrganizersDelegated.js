@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { Box, Typography, Button, CircularProgress, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
 import Select from '@mui/material/Select';
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds = [], organizers = [], updateOrganizer }) => {
   // Ensure delegatedOrganizerIds is always a valid array
@@ -20,7 +21,7 @@ const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds =
 
   const fetchOrganizerById = async (organizerId) => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`);
+      const response = await axios.get(`${getApiBaseUrl()}/api/organizers/${organizerId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching organizer:', error);

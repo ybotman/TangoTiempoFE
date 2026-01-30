@@ -12,49 +12,10 @@ import { getOrCreateVisitorId } from '@/utils/visitorTracking'; // TIEMPO-329: V
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { selectedLocation, currentLocation, setSessionLocation } = useGeoLocation();
-
-  // Extract stable values to prevent infinite loops
-  const userDisplayName = user?.displayName;
-  const selectedRegionName = selectedLocation?.region?.name;
+  const { currentLocation, setSessionLocation } = useGeoLocation();
 
   // TIEMPO-313: Visitor tracking on calendar page load (fire and forget)
   // TIEMPO-329: Now includes visitor_id cookie for persistent identity
-  // 🚨 HOT FIX 2025-11-01: DISABLED TO STOP GOOGLE API CHARGES
-  // TODO: Re-enable after Maps Platform free tier is configured
-  // See: docs/TRACKING-SYSTEM-DEEP-DIVE-ANALYSIS.md
-  useEffect(() => {
-
-    // KEEP AUTO-CENTER FEATURE (doesn't cost money)
-    const autoCenter = async () => {
-      try {
-        // TIEMPO-324: Get browser GPS only (no Google API call)
-        const browserGeoData = await getGeolocationData();
-
-        // TIEMPO-329 Phase 1.1: Auto-center map from GPS if no location selected
-        if ((!currentLocation?.lat && !currentLocation?.lng) &&
-            browserGeoData?.google_browser_lat &&
-            browserGeoData?.google_browser_long) {
-
-          console.log('[Auto-Center] Setting map center from GPS:',
-            browserGeoData.google_browser_lat, browserGeoData.google_browser_long);
-
-          setSessionLocation({
-            lat: browserGeoData.google_browser_lat,
-            lng: browserGeoData.google_browser_long,
-            zoomRange: 75  // 75-mile radius as requested
-          });
-        }
-      } catch (error) {
-        console.warn('[Auto-Center] Failed:', error.message);
-      }
-    };
-
-    autoCenter();
-  }, []); // Empty dependency array - only fire once on mount
-
-  // 🚨 ORIGINAL TRACKING CODE - COMMENTED OUT TO STOP CHARGES
-  /*
   useEffect(() => {
     const trackVisitor = async () => {
       try {
@@ -63,17 +24,13 @@ const RootLayout = ({ children }) => {
         // TIEMPO-329: Get or create persistent visitor_id (UUID cookie)
         const visitorId = getOrCreateVisitorId();
 
-        // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
+        // TIEMPO-324: Get 3-tier geolocation data (browser GPS -> Google API -> ipinfo fallback)
         const browserGeoData = await getGeolocationData();
 
         // TIEMPO-329 Phase 1.1: Auto-center map from GPS if no location selected
-        // If no saved location AND GPS available, set as default map center (75mi zoom)
         if ((!currentLocation?.lat && !currentLocation?.lng) &&
             browserGeoData?.google_browser_lat &&
             browserGeoData?.google_browser_long) {
-
-          console.log('[Auto-Center] Setting map center from GPS:',
-            browserGeoData.google_browser_lat, browserGeoData.google_browser_long);
 
           setSessionLocation({
             lat: browserGeoData.google_browser_lat,
@@ -82,8 +39,13 @@ const RootLayout = ({ children }) => {
           });
         }
 
+        // Skip AF tracking calls on localhost
+        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+          return;
+        }
+
         // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-        // PHASE 1.2: Use 24-hour cache for visitor tracking (users unlikely to move between sessions)
+        // PHASE 1.2: Use 24-hour cache for visitor tracking
         const geoData = await fetchAllGeolocationData(1440); // 1440 minutes = 24 hours
 
         await fetch(`${afUrl}/api/visitor/track`, {
@@ -92,26 +54,17 @@ const RootLayout = ({ children }) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            // TIEMPO-329: Visitor identity
             visitor_id: visitorId,
-
-            // Page routing details
             pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
-            page: typeof window !== 'undefined' ? window.location.pathname : '/calendar', // TIEMPO-323: Backend expects 'page' field
+            page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
             hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
             url: typeof window !== 'undefined' ? window.location.href : '',
-
-            // Timezone info
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            timezoneOffset: -new Date().getTimezoneOffset(), // Negate for correct sign
-
-            // Geolocation data (existing)
+            timezoneOffset: -new Date().getTimezoneOffset(),
             cloudflare: geoData.cloudflare,
             google: geoData.google,
             ipapi: geoData.ipapi,
             distance: geoData.distance,
-
-            // TIEMPO-324: 3-tier geolocation (browser GPS, Google API)
             google_browser_lat: browserGeoData.google_browser_lat,
             google_browser_long: browserGeoData.google_browser_long,
             google_browser_accuracy: browserGeoData.google_browser_accuracy,
@@ -119,55 +72,30 @@ const RootLayout = ({ children }) => {
             google_api_long: browserGeoData.google_api_long
           })
         });
-
-        console.log('[Visitor Tracking] Successfully tracked visitor with ID:', visitorId);
       } catch (error) {
         // Silent failure - don't break user experience
         console.warn('[Visitor Tracking] Failed:', error.message);
       }
     };
 
-    // Track visitor once on mount
     trackVisitor();
   }, []); // Empty dependency array - only fire once on mount
-  */
-
-  useEffect(() => {
-    if (userDisplayName) {
-      // TIEMPO-276: Security cleanup - removed user logging
-    }
-
-    // Use GeoLocationContext instead of RegionsContext for logging
-    if (selectedRegionName) {
-      // TIEMPO-276: Security cleanup - removed region logging
-    }
-  }, [userDisplayName, selectedRegionName]);
 
   // TIEMPO-323: MapCenter tracking for all users (logged-in and anonymous)
-  // 🚨 HOT FIX 2025-11-01: DISABLED TO STOP GOOGLE API CHARGES
-  // TODO: Re-enable after Maps Platform free tier is configured
   useEffect(() => {
-    console.log('[MapCenter Tracking] DISABLED - Hot fix to stop Google API charges');
-    // No subscription to location events - no tracking
-    return () => {}; // No-op cleanup
-  }, [user]);
+    // Skip on localhost
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      return () => {};
+    }
 
-  // 🚨 ORIGINAL MAP CENTER TRACKING - COMMENTED OUT TO STOP CHARGES
-  /*
-  useEffect(() => {
-    // Helper function to track MapCenter changes
     const trackMapCenterChange = async (location) => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
-        // Get geolocation data (IP-based lat/long)
-        // PHASE 1.2: Use 1-hour cache for map center changes (balance freshness vs cost)
-        const geoData = await fetchAllGeolocationData(60); // 60 minutes = 1 hour
+        // PHASE 1.2: Use 1-hour cache for map center changes
+        const geoData = await fetchAllGeolocationData(60);
 
-        // Build headers - include auth token only if user is logged in
-        const headers = {
-          'Content-Type': 'application/json'
-        };
+        const headers = { 'Content-Type': 'application/json' };
         if (user?.token) {
           headers['Authorization'] = `Bearer ${user.token}`;
         }
@@ -176,14 +104,8 @@ const RootLayout = ({ children }) => {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            // Requested map center (user's selected location)
-            mapCenter: {
-              lat: location.lat,
-              lng: location.lng
-            },
+            mapCenter: { lat: location.lat, lng: location.lng },
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
-
-            // IP-based geolocation data (always included)
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timezoneOffset: -new Date().getTimezoneOffset(),
             cloudflare: geoData.cloudflare,
@@ -191,31 +113,22 @@ const RootLayout = ({ children }) => {
             ipapi: geoData.ipapi
           })
         });
-
-        console.log('[MapCenter Tracking] Successfully tracked MapCenter change');
       } catch (error) {
-        // Silent failure - don't break user experience
         console.warn('[MapCenter Tracking] Failed:', error.message);
       }
     };
 
-    // Subscribe to location change events
     const unsubscribe = locationEventBus.on(
       LOCATION_EVENTS.LOCATION_CHANGED,
       (location) => {
-        // Only track if location has valid coordinates
         if (location?.lat && location?.lng) {
           trackMapCenterChange(location);
         }
       }
     );
 
-    // Cleanup subscription on unmount or when user changes
-    return () => {
-      unsubscribe();
-    };
-  }, [user]); // Re-subscribe if user changes (login/logout)
-  */
+    return () => { unsubscribe(); };
+  }, [user]);
 
   return <>{children}</>;
 };

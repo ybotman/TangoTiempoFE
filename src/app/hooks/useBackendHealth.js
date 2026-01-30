@@ -1,7 +1,9 @@
 // hooks/useBackendHealth.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getApiBaseUrl, isAFEnabled } from '@/utils/apiUrlResolver';
 
 /**
  * Hook to monitor backend server health
@@ -10,23 +12,37 @@ import { useState, useEffect } from 'react';
 export const useBackendHealth = () => {
   const [isHealthy, setIsHealthy] = useState(null); // null = not checked yet
   const [isChecking, setIsChecking] = useState(false);
-  const backendUrl = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:3010';
+  const backendUrl = getApiBaseUrl() || 'http://localhost:3010';
+  // AF uses /api/health, BE uses /health
+  const healthPath = isAFEnabled() ? '/api/health' : '/health';
 
   useEffect(() => {
+    let failureCount = 0;
+    const MAX_FAILURES = 3; // Stop polling after 3 consecutive failures
+
     const checkHealth = async () => {
+      // Circuit breaker: stop polling after consecutive failures
+      if (failureCount >= MAX_FAILURES) {
+        return;
+      }
+
       setIsChecking(true);
 
       try {
-        // Try to ping the backend health endpoint
-        const response = await fetch(`${backendUrl}/health`, {
+        const response = await fetch(`${backendUrl}${healthPath}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000), // 5 second timeout
+          signal: AbortSignal.timeout(5000),
         });
 
+        if (response.ok) {
+          failureCount = 0; // Reset on success
+        } else {
+          failureCount++;
+        }
         setIsHealthy(response.ok);
       } catch (error) {
-        // Backend is down or unreachable
+        failureCount++;
         setIsHealthy(false);
       } finally {
         setIsChecking(false);
@@ -36,11 +52,11 @@ export const useBackendHealth = () => {
     // Check on mount
     checkHealth();
 
-    // Re-check every 30 seconds
+    // Re-check every 30 seconds (stops after MAX_FAILURES consecutive failures)
     const interval = setInterval(checkHealth, 30000);
 
     return () => clearInterval(interval);
-  }, [backendUrl]);
+  }, [backendUrl, healthPath]);
 
   return { isHealthy, backendUrl, isChecking };
 };
@@ -55,24 +71,35 @@ export const useMapboxHealth = () => {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
 
   useEffect(() => {
+    let failureCount = 0;
+    const MAX_FAILURES = 3;
+
     const checkHealth = async () => {
+      if (failureCount >= MAX_FAILURES) {
+        return;
+      }
+
       setIsChecking(true);
 
       try {
-        // Check if token exists and test Mapbox API
         if (!mapboxToken) {
           setIsHealthy(false);
           return;
         }
 
-        // Ping Mapbox geocoding API with a simple query
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/test.json?access_token=${mapboxToken}`,
           { signal: AbortSignal.timeout(5000) }
         );
 
+        if (response.ok) {
+          failureCount = 0;
+        } else {
+          failureCount++;
+        }
         setIsHealthy(response.ok);
       } catch (error) {
+        failureCount++;
         setIsHealthy(false);
       } finally {
         setIsChecking(false);

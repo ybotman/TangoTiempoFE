@@ -12,7 +12,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: I
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
 import PropTypes from 'prop-types';
 
-const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null }) => {
+const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null, onTimeModified = null }) => {
   const allCategories = useCategories(); // Fetch categories
   // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
   const categories = useMemo(() =>
@@ -232,14 +232,17 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   
   // Handle start date change
   const handleStartDateChange = (newDate) => {
+    // Notify parent that user has manually modified time
+    if (onTimeModified) onTimeModified();
+
     // Convert to dayjs objects for comparison
     const newDayjsDate = dayjs(newDate);
     const currentEndDate = dayjs(eventData.endDate);
-    
+
     // If end date is before the new start date, update end date to match start date
     if (currentEndDate.isBefore(newDayjsDate)) {
-      setEventData(prevData => ({ 
-        ...prevData, 
+      setEventData(prevData => ({
+        ...prevData,
         startDate: newDate,
         endDate: newDate
       }));
@@ -250,10 +253,13 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   
   // Handle end date change
   const handleEndDateChange = (newDate) => {
+    // Notify parent that user has manually modified time
+    if (onTimeModified) onTimeModified();
+
     // Convert to dayjs objects for comparison
     const newDayjsDate = dayjs(newDate);
     const currentStartDate = dayjs(eventData.startDate);
-    
+
     // Ensure end date is not before start date
     if (newDayjsDate.isBefore(currentStartDate)) {
       // If selected end date is before start date, don't update
@@ -756,6 +762,7 @@ CreateEventDetailsBasic.propTypes = {
   setEventData: PropTypes.func.isRequired,
   editMode: PropTypes.bool,
   organizer: PropTypes.object,
+  onTimeModified: PropTypes.func,
 };
 
 export default CreateEventDetailsBasic;

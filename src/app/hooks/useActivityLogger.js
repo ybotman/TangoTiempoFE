@@ -1,125 +1,31 @@
-import { useCallback, useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
+import { useCallback } from 'react';
 
 /**
- * Custom hook for logging user activities to the backend
- * Uses the /api/frontend-logs endpoint to track user interactions
+ * Custom hook for logging user activities
+ * DISABLED: BE /api/frontend-logs endpoint returns 400 and spams console.
+ * Future: calops should use Azure Functions Application Insights instead.
  */
 export const useActivityLogger = () => {
-  const { user } = useContext(AuthContext);
 
-  const logActivity = useCallback(async (action, resource, resourceId = null, details = {}) => {
-    // Don't log if no user is authenticated
-    if (!user?.token) {
-      console.debug('Activity logging skipped - no authenticated user');
-      return;
-    }
+  // DISABLED: Frontend activity logging to BE /api/frontend-logs
+  // The BE endpoint returns 400 and spams console on every onChange event.
+  // Future: calops should use Azure Functions Application Insights instead
+  // of custom app-level logging. Re-architect when moving to AF analytics.
+  const logActivity = useCallback(async () => {
+    // No-op - disabled
+  }, []);
 
-    try {
-      const logData = {
-        action,
-        resource,
-        resourceId,
-        details: {
-          ...details,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          // Include user's current role
-          userRole: user.selectedRole || user.role || 'NamedUser',
-          userId: user.uid
-        }
-      };
+  const logBatchActivities = useCallback(async () => {
+    // No-op - disabled (see comment above)
+  }, []);
 
-      // Log to console for debugging
-      // TIEMPO-276: Security cleanup - removed logging
+  const logAuthEvent = useCallback(async () => {
+    // No-op - disabled
+  }, []);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/frontend-logs`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(logData)
-      });
-
-      if (!response.ok) {
-        console.error('Activity logging failed:', response.status, response.statusText);
-      }
-    } catch (error) {
-      // Log errors but don't throw - logging failures shouldn't break UX
-      console.error('Failed to log activity:', error);
-    }
-  }, [user]);
-
-  /**
-   * Batch log multiple activities at once
-   * @param {Array} activities - Array of activity objects
-   */
-  const logBatchActivities = useCallback(async (activities) => {
-    if (!user?.token || !activities?.length) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/frontend-logs/batch`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          events: activities.map(activity => ({
-            ...activity,
-            details: {
-              ...activity.details,
-              timestamp: new Date().toISOString(),
-              userAgent: navigator.userAgent,
-              userRole: user.selectedRole || user.role || 'NamedUser',
-              userId: user.uid
-            }
-          }))
-        })
-      });
-
-      if (!response.ok) {
-        console.error('Batch activity logging failed:', response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error('Failed to log batch activities:', error);
-    }
-  }, [user]);
-
-  /**
-   * Helper function to log authentication events
-   */
-  const logAuthEvent = useCallback((type, success = true, details = {}) => {
-    return logActivity(
-      type,
-      'authentication',
-      user?.uid || details.userId || null,
-      {
-        success,
-        method: details.method || 'unknown',
-        ...details
-      }
-    );
-  }, [user, logActivity]);
-
-  /**
-   * Helper function to log role changes
-   */
-  const logRoleChange = useCallback((previousRole, newRole, details = {}) => {
-    return logActivity(
-      'ROLE_CHANGE',
-      'user',
-      user?.uid,
-      {
-        previousRole,
-        newRole,
-        ...details
-      }
-    );
-  }, [user, logActivity]);
+  const logRoleChange = useCallback(async () => {
+    // No-op - disabled
+  }, []);
 
   return {
     logActivity,

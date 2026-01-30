@@ -45,37 +45,29 @@
       "Bash(npm run dev:*)",
       "WebFetch(domain:calendarbe-prod-a7b3ahe3bteqa6a7.eastus-01.azurewebsites.net)",
       "Bash(/tmp/jira-search-geo2.sh:*)",
-
       "Bash(lsof -ti\\:3001 | xargs kill -9)",
       "Bash(lsof -ti\\:3010 | xargs kill -9)",
       "Bash(lsof -i\\:3001)",
       "Bash(lsof -i\\:3010)",
       "Bash(lsof -i\\:*)",
       "Bash(ps aux | grep node)",
-
       "Bash(npm install:*)",
       "Bash(npm update:*)",
       "Bash(rm -rf node_modules && npm install)",
       "Bash(rm -rf node_modules package-lock.json && npm install)",
-
       "Bash(npm run eslint:*)",
       "Bash(npm run format:*)",
       "Bash(npm run prep:*)",
-
       "Bash(rm -rf .next && npm run build)",
       "Bash(ls -lh .next/)",
-
       "Bash(npm run test\\:e2e:*)",
       "Bash(npm run cypress\\:run\\:local:*)",
       "Bash(npm run report\\:clean:*)",
-
       "Bash(rm -rf .next/cache)",
       "Bash(npm cache clean --force)",
       "Bash(npm run cleanall)",
-
       "Bash(rm -rf .next/)",
       "Bash(rm -rf cypress/reports/)",
-
       "Bash(node -v)",
       "Bash(npm -v)",
       "Bash(which node)",
@@ -84,7 +76,6 @@
       "Bash(git status)",
       "Bash(git diff:*)",
       "Bash(git branch:*)",
-
       "Bash(git stash:*)",
       "Bash(git stash)",
       "Bash(git reset:*)",
@@ -109,7 +100,6 @@
       "Bash(git ls-files:*)",
       "Bash(git shortlog:*)",
       "Bash(git archive:*)",
-
       "Bash(./.ybotbot/jira-tools/jira-add-to-epic.sh:*)",
       "Bash(./.ybotbot/jira-tools/jira-config.sh:*)",
       "Bash(./.ybotbot/jira-tools/jira-create-subtask.sh:*)",
@@ -119,7 +109,8 @@
       "Bash(./.ybotbot/jira-tools/jira-link-issues.sh:*)",
       "Bash(./.ybotbot/jira-tools/jira-update.sh:*)",
       "Bash(./.ybotbot/jira-tools/jira-webhook-register.sh:*)",
-      "Bash(./.ybotbot/jira-tools/jira-webhook-server.sh:*)"
+      "Bash(./.ybotbot/jira-tools/jira-webhook-server.sh:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

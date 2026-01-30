@@ -1,7 +1,9 @@
 // src/hooks/useOrganizers.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export const useOrganizers = (options = {}) => {
   const { selectedLocation } = useGeoLocation();
@@ -94,7 +96,7 @@ export const useOrganizers = (options = {}) => {
       setFetchLoading(true);
 // TIEMPO-276: Security cleanup - removed logging
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`, {
+      const response = await axios.get(`${getApiBaseUrl()}/api/organizers`, {
         params,
         timeout: 10000 // 10 second timeout to prevent hanging requests
       });
@@ -164,7 +166,7 @@ export const useOrganizers = (options = {}) => {
     try {
       setFetchLoading(true);
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`, {
+      const response = await axios.get(`${getApiBaseUrl()}/api/organizers/${organizerId}`, {
         params: { appId },
         timeout: 10000 // 10 second timeout
       });
@@ -197,7 +199,7 @@ export const useOrganizers = (options = {}) => {
 
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/firebase/${firebaseUserId}`, {
+      const response = await axios.get(`${getApiBaseUrl()}/api/organizers/firebase/${firebaseUserId}`, {
         params: { appId },
         timeout: 10000 // 10 second timeout
       });
@@ -241,7 +243,7 @@ export const useOrganizers = (options = {}) => {
       };
 
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers/${organizerId}`,
+        `${getApiBaseUrl()}/api/organizers/${organizerId}`,
         dataWithAppId,
         { timeout: 10000 } // 10 second timeout
       );
@@ -278,7 +280,7 @@ export const useOrganizers = (options = {}) => {
       setCreateLoading(true);
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/organizers`,
+        `${getApiBaseUrl()}/api/organizers`,
         dataWithAppId,
         { timeout: 10000 } // 10 second timeout
       );

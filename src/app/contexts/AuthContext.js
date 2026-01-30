@@ -1,4 +1,5 @@
 // app/contexts/AuthContext.js
+// Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
 
 'use client';
 
@@ -24,6 +25,7 @@ import axios from 'axios';
 import { dedupeFetch } from '@/utils/dedupeFetch';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 // Create Auth Context
 export const AuthContext = createContext();
@@ -92,17 +94,9 @@ export const AuthProvider = ({ children }) => {
 // TIEMPO-276: Security cleanup - removed logging
 
       // Track login analytics (fire and forget - non-blocking)
-      // 🚨 HOT FIX 2025-11-01: DISABLED TO STOP GOOGLE API CHARGES
-      // TODO: Re-enable after Maps Platform free tier is configured
-      // See: docs/TRACKING-SYSTEM-DEEP-DIVE-ANALYSIS.md
-      console.log('[Login Tracking] DISABLED - Hot fix to stop Google API charges');
-      console.log('[Login Tracking] Re-enable after Maps Platform $200 free tier is configured');
-
-      // 🚨 ORIGINAL LOGIN TRACKING CODE - COMMENTED OUT TO STOP CHARGES
-      /*
       // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
       if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        console.log('[Login Tracking] Skipping on localhost - Azure Functions not running');
+        // Localhost - skip login tracking
       } else {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
@@ -120,7 +114,7 @@ export const AuthProvider = ({ children }) => {
               body: JSON.stringify({
                 loginType: loginType, // 'auto' or 'manual'
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timezoneOffset: -new Date().getTimezoneOffset(), // Negate because JS returns opposite sign
+                timezoneOffset: -new Date().getTimezoneOffset(),
 
                 // Existing geolocation data
                 cloudflare: geoData.cloudflare,
@@ -136,16 +130,15 @@ export const AuthProvider = ({ children }) => {
                 google_api_long: browserGeoData.google_api_long
               })
             }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
-          }).catch(err => console.warn('[Login Tracking] Geolocation fetch failed:', err.message));
-        }).catch(err => console.warn('[Login Tracking] Browser geolocation failed:', err.message));
+          }).catch(err => console.warn('[Login Tracking] Geo fetch failed:', err.message));
+        }).catch(err => console.warn('[Login Tracking] Browser geo failed:', err.message));
       }
-      */
 
 // TIEMPO-276: Security cleanup - removed logging
 
       // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
       const response = await dedupeFetch(
-        `${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`,
+        `${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`,
         {
           headers: {
             Authorization: `Bearer ${idToken}`,
@@ -481,7 +474,7 @@ export const AuthProvider = ({ children }) => {
     const idToken = await firebaseUser.getIdToken();
     try {
 // TIEMPO-276: Security cleanup - removed logging
-      await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/firebase/${firebaseUser.uid}`, {
+      await axios.get(`${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -500,7 +493,7 @@ export const AuthProvider = ({ children }) => {
           photoUrl: firebaseUser.photoURL || '',
         };
 
-        const roleResponse = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/api/userlogins/`, userData, {
+        const roleResponse = await axios.post(`${getApiBaseUrl()}/api/userlogins/`, userData, {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
