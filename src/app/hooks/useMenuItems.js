@@ -1,36 +1,19 @@
 // src/hooks/useMenuItems.js
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { listOfAllRoles } from '@/utils/masterData';
-import { useOrganizers } from '@/hooks/useOrganizers';
 
 const useMenuItems = () => {
   const { selectedRole } = useContext(RoleContext);
   const { user } = useContext(AuthContext);
   const { selectedLocation } = useGeoLocation();
-  
-  // TIEMPO-272: Get organizer data from the organizer collection
-  const { organizer, fetchOrganizerById } = useOrganizers();
-  
-  // Fetch organizer when we have the ID
-  useEffect(() => {
-    const organizerId = user?.backendInfo?.regionalOrganizerInfo?.organizerId;
-    if (organizerId && selectedRole === listOfAllRoles.REGIONAL_ORGANIZER) {
-      fetchOrganizerById(organizerId);
-    }
-  }, [user, selectedRole, fetchOrganizerById]);
-  
-  // TIEMPO-272: Check organizer.isEnabled from organizer collection, not user collection
+
+  // TIEMPO-272: Check isEnabled from user's regionalOrganizerInfo (set at login)
   const isOrganizerProfileComplete = () => {
     if (!user?.backendInfo?.regionalOrganizerInfo) return false;
-    
-    // TIEMPO-272 FIX: Check isEnabled from the organizer collection for accurate status
-    // The organizer collection has the current state, user collection may be stale
-    const isEnabled = organizer?.isEnabled === true;
-    
-    return isEnabled;
+    return user.backendInfo.regionalOrganizerInfo.isEnabled === true;
   };
 
   const getMenuItems = (context) => {
