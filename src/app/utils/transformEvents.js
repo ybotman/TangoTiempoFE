@@ -86,6 +86,11 @@ export function transformEvents(events) {
         ownerOrganizerShortName: event.ownerOrganizerShortName || event.shortName || '',
         // Add AI event detection
         isDiscovered: event.isDiscovered || false,
+        // AI discovery metadata - source URL and discovery date
+        sourceLink: event.source || null,
+        discoverySource: event.discoverySource || null,
+        discoveryDate: event.discoveredFirstDate || null,
+        eventDescription: event.description || null,
         // Add isRepeating flag
         isRepeating: event.isRepeating || false,
         // Add excludedDates for edit mode
