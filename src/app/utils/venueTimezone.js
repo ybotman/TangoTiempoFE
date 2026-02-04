@@ -104,7 +104,12 @@ export function getEventDisplayTimes(event) {
  */
 export function formatVenueDate(dateString) {
   if (!dateString) return '';
-  
+
+  // Handle Date objects (e.g., from FullCalendar) by converting to ISO string
+  if (typeof dateString !== 'string') {
+    dateString = dateString instanceof Date ? dateString.toISOString() : String(dateString);
+  }
+
   const [datePart] = dateString.split('T');
   const [year, month, day] = datePart.split('-');
   
