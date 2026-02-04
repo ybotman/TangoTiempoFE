@@ -21,10 +21,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AuthContext } from '@/contexts/AuthContext';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
+import { createDensityClusterIcon } from '@/components/EventDiscovery/clusterIcon';
 import 'leaflet/dist/leaflet.css';
-
-// Dynamic import for avoiding SSR issues
-// Note: Using Leaflet directly; no MapContainer used in this implementation
 
 const MapCenterModal = ({
   open,
@@ -42,13 +41,16 @@ const MapCenterModal = ({
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const circleRef = useRef(null);
+  const clusterLayerRef = useRef(null);
+  const fetchTimerRef = useRef(null);
 
   const [mapInitialized, setMapInitialized] = useState(false);
   const [centerLat, setCenterLat] = useState(initialLocation?.lat || '');
   const [centerLng, setCenterLng] = useState(initialLocation?.lng || '');
   const [zoomRange, setZoomRange] = useState(initialLocation?.zoomRange || 50);
-  // Removed scale text - not needed
   const [loading, setLoading] = useState(false);
+  const [clusterLoading, setClusterLoading] = useState(false);
+  const [clusterMeta, setClusterMeta] = useState(null);
   const [message, setMessage] = useState(null);
   
   // Initialize map - with retry logic for ref attachment
@@ -106,26 +108,41 @@ const MapCenterModal = ({
           }
         ).addTo(map);
       
-        // Handle map click
+        // TIEMPO-360: Create cluster layer for event density overlay
+        clusterLayerRef.current = L.layerGroup().addTo(map);
+
+        // Handle map click — only set center if not clicking a cluster marker
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
           updateMarker(lat, lng);
           setCenterLat(lat.toFixed(6));
           setCenterLng(lng.toFixed(6));
         });
-      
-      // Force map to recalculate size after a delay
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
-      
+
+        // TIEMPO-360: Fetch clusters on zoom/pan
+        const fetchClustersForBounds = () => {
+          if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
+          fetchTimerRef.current = setTimeout(() => {
+            fetchEventClusters(map);
+          }, 500);
+        };
+
+        map.on('moveend', fetchClustersForBounds);
+        map.on('zoomend', fetchClustersForBounds);
+
+        // Force map to recalculate size after a delay
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 100);
+
         mapInstanceRef.current = map;
         setMapInitialized(true);
-        
-        // Force resize after initialization
+
+        // Force resize after initialization, then fetch initial clusters
         setTimeout(() => {
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
+            fetchEventClusters(mapInstanceRef.current);
           }
         }, 300);
         
@@ -139,6 +156,8 @@ const MapCenterModal = ({
     checkAndInit();
     
     return () => {
+      if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
+      if (clusterLayerRef.current) clusterLayerRef.current = null;
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
@@ -209,6 +228,89 @@ const MapCenterModal = ({
     mapInstanceRef.current.setView([lat, lng], targetZoom, { animate: true });
   };
   
+  // TIEMPO-360: Fetch event density clusters from /api/events/summary
+  const fetchEventClusters = async (map) => {
+    if (!map || !clusterLayerRef.current) return;
+
+    const bounds = map.getBounds();
+    const zoom = map.getZoom();
+    const boundsObj = {
+      north: bounds.getNorth(),
+      south: bounds.getSouth(),
+      east: bounds.getEast(),
+      west: bounds.getWest()
+    };
+
+    // Build date range: current month + 6 months
+    const now = new Date();
+    const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const endMonth = new Date(now.getFullYear(), now.getMonth() + 6, 1);
+    const endDate = `${endMonth.getFullYear()}-${String(endMonth.getMonth() + 1).padStart(2, '0')}`;
+
+    setClusterLoading(true);
+    try {
+      const { default: axios } = await import('axios');
+      const response = await axios.get(`${getApiBaseUrl()}/api/events/summary`, {
+        params: {
+          appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
+          format: 'clusters',
+          zoom,
+          bounds: JSON.stringify(boundsObj),
+          startDate,
+          endDate
+        },
+        timeout: 10000
+      });
+
+      const clusters = response.data?.clusters || [];
+      setClusterMeta(response.data?.metadata || null);
+
+      // Clear existing cluster markers
+      clusterLayerRef.current.clearLayers();
+
+      const L = (await import('leaflet')).default;
+
+      // Add cluster markers (read-only — clicking does NOT set map center)
+      clusters.forEach(cluster => {
+        if (!cluster.center?.lat || !cluster.center?.lng) return;
+
+        const icon = createDensityClusterIcon(
+          cluster.eventCount,
+          cluster.discoveredCount || 0
+        );
+        if (!icon) return;
+
+        const marker = L.marker([cluster.center.lat, cluster.center.lng], {
+          icon,
+          interactive: true,
+          bubblingMouseEvents: false // Prevent click from reaching the map
+        });
+
+        // Tooltip on hover showing name + count
+        const tooltipContent = `<strong>${cluster.name || 'Events'}</strong><br/>${cluster.eventCount} event${cluster.eventCount !== 1 ? 's' : ''}`;
+        marker.bindTooltip(tooltipContent, {
+          direction: 'top',
+          offset: [0, -10],
+          className: 'density-cluster-tooltip'
+        });
+
+        // Click cluster to zoom in (not set center)
+        marker.on('click', (e) => {
+          L.DomEvent.stopPropagation(e);
+          if (cluster.canDrillDown) {
+            map.setView([cluster.center.lat, cluster.center.lng], zoom + 3, { animate: true });
+          }
+        });
+
+        clusterLayerRef.current.addLayer(marker);
+      });
+    } catch (error) {
+      console.warn('[MapCenterModal] Failed to fetch event clusters:', error.message);
+    } finally {
+      setClusterLoading(false);
+    }
+  };
+
   // Update circle when zoom range changes
   useEffect(() => {
     if (circleRef.current && centerLat && centerLng) {
@@ -467,33 +569,69 @@ const MapCenterModal = ({
           />
         </Box>
         
-        {/* Map Container */}
-        <Box
-          ref={mapRef}
-          sx={{
-            width: '100%',
-            height: isMobile ? '350px' : '400px',
-            borderRadius: 1,
-            border: '2px solid',
-            borderColor: 'primary.main',
-            cursor: 'crosshair',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#f5f5f5',
-            '& .leaflet-container': {
-              height: '100% !important',
-              width: '100% !important',
-            }
-          }}
-        >
-          {!mapInitialized && (
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              height: '100%'
+        {/* Map Container with density overlay */}
+        <Box sx={{ position: 'relative' }}>
+          <Box
+            ref={mapRef}
+            sx={{
+              width: '100%',
+              height: isMobile ? '350px' : '400px',
+              borderRadius: 1,
+              border: '2px solid',
+              borderColor: 'primary.main',
+              cursor: 'crosshair',
+              position: 'relative',
+              overflow: 'hidden',
+              backgroundColor: '#f5f5f5',
+              '& .leaflet-container': {
+                height: '100% !important',
+                width: '100% !important',
+              }
+            }}
+          >
+            {!mapInitialized && (
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%'
+              }}>
+                <CircularProgress />
+              </Box>
+            )}
+          </Box>
+
+          {/* TIEMPO-360: Event density legend + loading */}
+          {mapInitialized && (
+            <Box sx={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              bgcolor: 'rgba(255,255,255,0.92)',
+              borderRadius: 1,
+              px: 1.5,
+              py: 0.75,
+              boxShadow: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              zIndex: 1000,
+              pointerEvents: 'none'
             }}>
-              <CircularProgress />
+              {clusterLoading && <CircularProgress size={14} />}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#1976d2' }} />
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>Events</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#7B1FA2' }} />
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>AI Discovered</Typography>
+              </Box>
+              {clusterMeta && (
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', lineHeight: 1 }}>
+                  {clusterMeta.totalEvents || 0} total
+                </Typography>
+              )}
             </Box>
           )}
         </Box>
