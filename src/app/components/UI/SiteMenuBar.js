@@ -5,12 +5,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 
-const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange }) => {
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
@@ -108,6 +109,16 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Tooltip title={showDiscovered ? "Hide AI-Discovered events" : "Show AI-Discovered events"} arrow>
+          <IconButton
+            onClick={onDiscoveredToggle}
+            sx={{
+              color: showDiscovered ? 'primary.main' : 'action.disabled',
+            }}
+          >
+            <AutoAwesomeIcon />
+          </IconButton>
+        </Tooltip>
         {!showSearchField && (
           <Tooltip title="Search events" arrow>
             <IconButton onClick={() => setShowSearchField(true)}>
