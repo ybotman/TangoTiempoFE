@@ -20,6 +20,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import axios from 'axios';
 import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import { createDensityClusterIcon } from '@/components/EventDiscovery/clusterIcon';
@@ -249,7 +250,6 @@ const MapCenterModal = ({
 
     setClusterLoading(true);
     try {
-      const { default: axios } = await import('axios');
       const response = await axios.get(`${getApiBaseUrl()}/api/events/summary`, {
         params: {
           appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
