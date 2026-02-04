@@ -11,6 +11,7 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
   const formatDateRange = (start, end) => {
     // TIEMPO-246: Format dates without timezone conversion
     const formatFullDate = (dateStr) => {
+      if (dateStr instanceof Date) dateStr = dateStr.toISOString();
       const [datePart] = (dateStr || '').split('T');
       if (!datePart) return '';
       const [year, month, day] = datePart.split('-');
