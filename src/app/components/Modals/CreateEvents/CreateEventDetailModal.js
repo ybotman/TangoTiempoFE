@@ -267,14 +267,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     }
   }, [open, selectedLocation, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
-  // Fetch organizer data when in create mode and user is RO
+  // Fetch organizer data when modal is open in create mode and user is RO
   useEffect(() => {
-    // Check if user has regionalOrganizerInfo with an organizerId (indicates they are an RO)
-    if (!editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
-      // TIEMPO-276: Security cleanup - removed logging
+    if (open && !editMode && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
       fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
     }
-  }, [editMode, user, fetchOrganizerById]);
+  }, [open, editMode, user, fetchOrganizerById]);
 
   // Check if event is multi-day (long event like marathon/encuentro)
   const isMultiDayEvent = (() => {
