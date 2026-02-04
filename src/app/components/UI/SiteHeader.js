@@ -1,30 +1,17 @@
 // app/components/UI/SiteHeader.js
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import Image from 'next/image';
 import { RoleContext } from '@/contexts/RoleContext';
-import { AuthContext } from '@/contexts/AuthContext';
-import { useOrganizers } from '@/hooks/useOrganizers';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import ServiceStatusIcon from '@/components/DevTools/ServiceStatusIcon';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
-  const { user } = useContext(AuthContext);
-  const { fetchOrganizerById } = useOrganizers();
-  const backend = useBackendHealth();
+  useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
-  
-  // Map mode forced true by product decision
-  
-  // Fetch organizer data when user is a RegionalOrganizer
-  useEffect(() => {
-    if (selectedRole === 'RegionalOrganizer' && user?.backendInfo?.regionalOrganizerInfo?.organizerId) {
-      fetchOrganizerById(user.backendInfo.regionalOrganizerInfo.organizerId);
-    }
-  }, [selectedRole, user, fetchOrganizerById]);
-  
+
   // Determine which image to use based on role
   let headerImage = '/images/TangoTiempo3.jpg'; // Default image
   if (selectedRole === 'RegionalOrganizer') {
@@ -35,6 +22,7 @@ const SiteHeader = () => {
 
   return (
     <>
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
