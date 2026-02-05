@@ -137,22 +137,45 @@ function aggregateEvents(events, level) {
         socialCount: 0,
         eventCount: 0,
         discoveredCount: 0,
+        classCount: 0,      // Class events (venue level only)
+        otherCount: 0,      // Other/Unknown events (venue level only)
         categoryCounts: {},
         totalCount: 0,
+        events: [], // Store events for venue-level popup
       });
     }
 
     const group = groups.get(key.id);
     const { isSocial, isEvent, isDiscovered, category } = categorizeEvent(event);
 
-    // High-level counts
+    // High-level counts (Milonga/Practica and Festival/Encuentro/etc)
     if (isSocial) group.socialCount++;
     if (isEvent) group.eventCount++;
     if (isDiscovered) group.discoveredCount++;
 
+    // Class and Other counts (shown at venue level)
+    if (category === 'Class') group.classCount++;
+    if (category === 'Other' || category === 'Unknown' || category === 'Trip') group.otherCount++;
+
     // Full category counts (for venue level)
     group.categoryCounts[category] = (group.categoryCounts[category] || 0) + 1;
     group.totalCount++;
+
+    // Store event summary for venue/city-level popup
+    if (level === 'venue' || level === 'city') {
+      group.events.push({
+        title: event.title || event.shortTitle || 'Untitled',
+        startDate: event.startDate,
+        // Use venue local time for display (already timezone-adjusted by backend)
+        venueStartDisplay: event.venueStartDisplay || event.startDate,
+        venueAbbr: event.venueAbbr || '',
+        categoryFirst: event.categoryFirst || 'Other',
+        isDiscovered: event.isDiscovered || false,
+        // For recurring events, store recurrence info to calculate occurrences
+        isRepeating: event.isRepeating || false,
+        recurrenceRule: event.recurrenceRule || null,
+      });
+    }
   });
 
   return Array.from(groups.values());

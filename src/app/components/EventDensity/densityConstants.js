@@ -50,11 +50,11 @@ export const CATEGORY_COLORS = {
 
 export const ZOOM_LEVELS = {
   CONTINENT: { min: 1, max: 2 },
-  COUNTRY: { min: 3, max: 5 },
-  REGION: { min: 6, max: 8 },
-  DIVISION: { min: 9, max: 10 },
-  CITY: { min: 11, max: 11 },
-  VENUE: { min: 12, max: 22 },  // Venues at zoom 12 (~1hr drive view)
+  COUNTRY: { min: 3, max: 3 },    // Only very zoomed out
+  REGION: { min: 4, max: 6 },     // USA-level view shows regions
+  DIVISION: { min: 7, max: 9 },
+  CITY: { min: 10, max: 11 },
+  VENUE: { min: 12, max: 22 },    // Venues at zoom 12 (~1hr drive view)
 };
 
 export const getAggregationLevel = (zoom) => {
