@@ -284,8 +284,7 @@ const MapCenterModal = ({
         const icon = createDensityClusterIcon(
           L,
           cluster.eventCount,
-          cluster.discoveredCount || 0,
-          cluster.name || ''
+          cluster.discoveredCount || 0
         );
         if (!icon) return;
 
