@@ -743,29 +743,48 @@ const MapCenterModal = ({
         </IconButton>
       </DialogTitle>
       
-      <DialogContent sx={{ p: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Click anywhere on the map to set your center point
-        </Typography>
+      <DialogContent sx={{ p: isMobile ? 1 : 2 }}>
+        {/* Compact instruction - hidden on mobile */}
+        {!isMobile && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Click anywhere on the map to set your center point
+          </Typography>
+        )}
 
-        {/* Phase 1 & 2: Alert messages explaining Session vs Cloud Default */}
+        {/* Alert - compact on mobile */}
         {user ? (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-              Welcome {user.displayName || user.email}!
-            </Typography>
-            <Typography variant="body2">
-              You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent across devices).
-            </Typography>
+          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
+            {isMobile ? (
+              <Typography variant="caption">
+                Save for <strong>Session</strong> or <strong>Cloud Default</strong>
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                  Welcome {user.displayName || user.email}!
+                </Typography>
+                <Typography variant="body2">
+                  You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent across devices).
+                </Typography>
+              </>
+            )}
           </Alert>
         ) : (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 0.5 }}>
-              Set your map center for this <strong>Session</strong> (temporary only).
-            </Typography>
-            <Typography variant="body2">
-              <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
-            </Typography>
+          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
+            {isMobile ? (
+              <Typography variant="caption">
+                Set center for <strong>Session</strong>. Sign up to save permanently!
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  Set your map center for this <strong>Session</strong> (temporary only).
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
+                </Typography>
+              </>
+            )}
           </Alert>
         )}
 
@@ -779,71 +798,63 @@ const MapCenterModal = ({
           </Alert>
         )}
         
-        {/* Action Buttons - Phase 1: Auth-aware layout */}
+        {/* Action Buttons - Compact on mobile */}
         <Box sx={{
           display: 'flex',
-          gap: 1.5,
-          mb: 2,
-          justifyContent: 'center'
+          gap: isMobile ? 0.5 : 1.5,
+          mb: 1,
+          justifyContent: 'center',
+          flexWrap: 'wrap'
         }}>
           {/* Button 1: Set Map Center (Session) - Always visible */}
           <Button
             variant="outlined"
             onClick={handleSetTemp}
             disabled={loading || !centerLat || !centerLng}
-            startIcon={<MyLocationIcon sx={{ fontSize: 18 }} />}
+            startIcon={!isMobile && <MyLocationIcon sx={{ fontSize: 16 }} />}
             size="small"
             sx={{
-              px: 2,
-              py: 0.75,
-              fontSize: '0.875rem',
+              px: isMobile ? 1 : 2,
+              py: 0.5,
+              fontSize: isMobile ? '0.7rem' : '0.875rem',
               fontWeight: 500,
-              minWidth: '160px'
+              minWidth: isMobile ? 'auto' : '160px'
             }}
           >
-            Set Map Center (Session)
+            {isMobile ? 'Session' : 'Set Map Center (Session)'}
           </Button>
 
           {/* Button 2: Auth users see "Save as Default", Anonymous see "Sign Up" */}
           {user ? (
-            <Tooltip
-              title="Save to your Cloud Default (permanent across devices)"
-              arrow
+            <Button
+              variant="contained"
+              onClick={handleSavePerm}
+              disabled={loading || !centerLat || !centerLng}
+              startIcon={!isMobile && <LocationOnIcon sx={{ fontSize: 16 }} />}
+              size="small"
+              sx={{
+                px: isMobile ? 1 : 2,
+                py: 0.5,
+                fontSize: isMobile ? '0.7rem' : '0.875rem',
+                fontWeight: 500,
+                minWidth: isMobile ? 'auto' : '180px'
+              }}
             >
-              <span>
-                <Button
-                  variant="contained"
-                  onClick={handleSavePerm}
-                  disabled={loading || !centerLat || !centerLng}
-                  startIcon={<LocationOnIcon sx={{ fontSize: 18 }} />}
-                  size="small"
-                  sx={{
-                    px: 2,
-                    py: 0.75,
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    minWidth: '180px'
-                  }}
-                >
-                  Save as Default
-                </Button>
-              </span>
-            </Tooltip>
+              {isMobile ? 'Save Default' : 'Save as Default'}
+            </Button>
           ) : (
             <>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => {
-                  window.location.href = '/auth/login';
-                }}
+                onClick={() => { window.location.href = '/auth/login'; }}
                 size="small"
                 sx={{
-                  px: 2,
-                  py: 0.75,
-                  fontSize: '0.875rem',
+                  px: isMobile ? 1.5 : 2,
+                  py: 0.5,
+                  fontSize: isMobile ? '0.7rem' : '0.875rem',
                   fontWeight: 500,
-                  minWidth: '100px'
+                  minWidth: isMobile ? 'auto' : '100px'
                 }}
               >
                 Log In
@@ -851,16 +862,14 @@ const MapCenterModal = ({
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => {
-                  window.location.href = '/auth/signup';
-                }}
+                onClick={() => { window.location.href = '/auth/signup'; }}
                 size="small"
                 sx={{
-                  px: 2,
-                  py: 0.75,
-                  fontSize: '0.875rem',
+                  px: isMobile ? 1.5 : 2,
+                  py: 0.5,
+                  fontSize: isMobile ? '0.7rem' : '0.875rem',
                   fontWeight: 500,
-                  minWidth: '100px'
+                  minWidth: isMobile ? 'auto' : '100px'
                 }}
               >
                 Sign Up
@@ -869,13 +878,13 @@ const MapCenterModal = ({
           )}
         </Box>
         
-        {/* Sliders Row - Search Range and Time Range side by side */}
-        <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
-          {/* Search Range Slider (miles - for user's calendar center) */}
+        {/* Sliders Row - Compact on mobile */}
+        <Box sx={{ display: 'flex', gap: isMobile ? 1 : 3, mb: 1 }}>
+          {/* Search Range Slider */}
           <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <MyLocationIcon sx={{ fontSize: 16 }} />
-              Search Range: {zoomRange} miles
+            <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <MyLocationIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
+              {isMobile ? `${zoomRange}mi` : `Search Range: ${zoomRange} miles`}
             </Typography>
             <Slider
               value={zoomRange}
@@ -883,7 +892,11 @@ const MapCenterModal = ({
               min={5}
               max={200}
               step={5}
-              marks={[
+              marks={isMobile ? [
+                { value: 5, label: '5' },
+                { value: 100, label: '100' },
+                { value: 200, label: '200' }
+              ] : [
                 { value: 5, label: '5mi' },
                 { value: 50, label: '50mi' },
                 { value: 100, label: '100mi' },
@@ -891,14 +904,18 @@ const MapCenterModal = ({
               ]}
               valueLabelDisplay="auto"
               size="small"
+              sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
             />
           </Box>
 
           {/* TIEMPO-360: Time Range Slider (days - for event discovery) */}
           <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <CalendarMonthIcon sx={{ fontSize: 16 }} />
-              Time Range: {timeRangeDays <= 30 ? `${timeRangeDays} days` : `${Math.round(timeRangeDays / 30)} months`}
+            <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <CalendarMonthIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
+              {isMobile
+                ? (timeRangeDays <= 30 ? `${timeRangeDays}d` : `${Math.round(timeRangeDays / 30)}mo`)
+                : `Time Range: ${timeRangeDays <= 30 ? `${timeRangeDays} days` : `${Math.round(timeRangeDays / 30)} months`}`
+              }
             </Typography>
             <Slider
               value={timeRangeDays}
@@ -906,10 +923,15 @@ const MapCenterModal = ({
               min={TIME_RANGE_MIN}
               max={TIME_RANGE_MAX}
               step={null}
-              marks={TIME_RANGE_MARKS}
+              marks={isMobile ? [
+                { value: 7, label: '1w' },
+                { value: 120, label: '4m' },
+                { value: 365, label: '1y' }
+              ] : TIME_RANGE_MARKS}
               valueLabelDisplay="auto"
               valueLabelFormat={(value) => value <= 30 ? `${value}d` : `${Math.round(value / 30)}mo`}
               size="small"
+              sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
             />
           </Box>
         </Box>
