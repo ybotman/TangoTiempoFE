@@ -295,7 +295,29 @@ const MapCenterModal = ({
 
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
-  
+
+  // TIEMPO-360: Pre-fetch density data when modal opens (before map init)
+  // This reduces perceived delay on mobile by starting fetch immediately
+  useEffect(() => {
+    if (!open) return;
+
+    // Pre-fetch with initial location or US-centric default bounds
+    const lat = initialLocation?.lat || 39.8;
+    const lng = initialLocation?.lng || -98.5;
+    const prefetchBounds = {
+      north: lat + 15,
+      south: lat - 15,
+      east: lng + 25,
+      west: lng - 25,
+    };
+
+    fetchDensity({
+      bounds: prefetchBounds,
+      zoom: 5, // Region level for initial view
+      timeRangeDays,
+    });
+  }, [open]); // Only on modal open
+
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
     if (!open || mapInitialized) return;
