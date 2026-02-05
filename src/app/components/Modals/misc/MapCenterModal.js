@@ -20,11 +20,54 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import axios from 'axios';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { AuthContext } from '@/contexts/AuthContext';
-import { getApiBaseUrl } from '@/utils/apiUrlResolver';
-import { createDensityClusterIcon } from '@/components/EventDiscovery/clusterIcon';
+import {
+  useEventDensity,
+  PILL_COLORS,
+  TIME_RANGE_MARKS,
+  TIME_RANGE_DEFAULT,
+  TIME_RANGE_MIN,
+  TIME_RANGE_MAX,
+  getAggregationLevel,
+} from '@/components/EventDensity';
 import 'leaflet/dist/leaflet.css';
+
+// TIEMPO-360: Helper to create pill marker HTML with level + name header
+function createPillMarkerHtml(item, zoom) {
+  const { socialCount = 0, eventCount = 0, discoveredCount = 0, level = '', name = '' } = item;
+
+  // Build pills HTML
+  const pills = [];
+
+  if (socialCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.social};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${socialCount}</span>`);
+  }
+  if (eventCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.events};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${eventCount}</span>`);
+  }
+  if (discoveredCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.discovered};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${discoveredCount}</span>`);
+  }
+
+  // If no counts, show placeholder
+  if (pills.length === 0) {
+    return '<div style="display:none;"></div>';
+  }
+
+  // Level label (uppercase, abbreviated)
+  const levelLabel = level ? level.toUpperCase().slice(0, 4) : '';
+
+  // Truncate name if too long
+  const displayName = name.length > 15 ? name.slice(0, 14) + '…' : name;
+
+  // Header with level:name
+  const header = levelLabel && displayName
+    ? `<div style="font-size:9px;font-weight:600;color:#555;text-align:center;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${levelLabel}: ${displayName}</div>`
+    : '';
+
+  return `<div style="display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.95);padding:4px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;">${header}<div style="display:flex;align-items:center;gap:2px;">${pills.join('')}</div></div>`;
+}
 
 const MapCenterModal = ({
   open,
@@ -49,10 +92,13 @@ const MapCenterModal = ({
   const [centerLat, setCenterLat] = useState(initialLocation?.lat || '');
   const [centerLng, setCenterLng] = useState(initialLocation?.lng || '');
   const [zoomRange, setZoomRange] = useState(initialLocation?.zoomRange || 50);
+  const [timeRangeDays, setTimeRangeDays] = useState(TIME_RANGE_DEFAULT); // TIEMPO-360: Time range slider
+  const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
-  const [clusterLoading, setClusterLoading] = useState(false);
-  const [clusterMeta, setClusterMeta] = useState(null);
   const [message, setMessage] = useState(null);
+
+  // TIEMPO-360: Use new density pill system
+  const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
   
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -109,10 +155,10 @@ const MapCenterModal = ({
           }
         ).addTo(map);
       
-        // TIEMPO-360: Create cluster layer for event density overlay
+        // TIEMPO-360: Create layer for density pill markers
         clusterLayerRef.current = L.layerGroup().addTo(map);
 
-        // Handle map click — only set center if not clicking a cluster marker
+        // Handle map click — only set center if not clicking a density marker
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
           updateMarker(lat, lng);
@@ -120,16 +166,28 @@ const MapCenterModal = ({
           setCenterLng(lng.toFixed(6));
         });
 
-        // TIEMPO-360: Fetch clusters on zoom/pan
-        const fetchClustersForBounds = () => {
+        // TIEMPO-360: Fetch density pills on zoom/pan (debounced)
+        const fetchDensityForBounds = () => {
           if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
           fetchTimerRef.current = setTimeout(() => {
-            fetchEventClusters(map);
+            const bounds = map.getBounds();
+            const zoom = map.getZoom();
+            setCurrentZoom(zoom);
+            fetchDensity({
+              bounds: {
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest(),
+              },
+              zoom,
+              timeRangeDays,
+            });
           }, 500);
         };
 
-        map.on('moveend', fetchClustersForBounds);
-        map.on('zoomend', fetchClustersForBounds);
+        map.on('moveend', fetchDensityForBounds);
+        map.on('zoomend', fetchDensityForBounds);
 
         // Force map to recalculate size after a delay
         setTimeout(() => {
@@ -139,11 +197,23 @@ const MapCenterModal = ({
         mapInstanceRef.current = map;
         setMapInitialized(true);
 
-        // Force resize after initialization, then fetch initial clusters
+        // Force resize after initialization, then fetch initial density pills
         setTimeout(() => {
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
-            fetchEventClusters(mapInstanceRef.current);
+            const bounds = mapInstanceRef.current.getBounds();
+            const zoom = mapInstanceRef.current.getZoom();
+            setCurrentZoom(zoom);
+            fetchDensity({
+              bounds: {
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest(),
+              },
+              zoom,
+              timeRangeDays,
+            });
           }
         }, 300);
         
@@ -229,99 +299,91 @@ const MapCenterModal = ({
     mapInstanceRef.current.setView([lat, lng], targetZoom, { animate: true });
   };
   
-  // TIEMPO-360: Fetch event density clusters from /api/events/summary
-  const fetchEventClusters = async (map) => {
-    if (!map || !clusterLayerRef.current) return;
+  // TIEMPO-360: Render density pill markers when data changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !clusterLayerRef.current || !densityData.length) return;
 
-    const bounds = map.getBounds();
-    const zoom = map.getZoom();
-    const boundsObj = {
-      north: bounds.getNorth(),
-      south: bounds.getSouth(),
-      east: bounds.getEast(),
-      west: bounds.getWest()
-    };
-
-    // Build date range: current month + 2 months forward
-    const now = new Date();
-    const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const endMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);
-    const endDate = `${endMonth.getFullYear()}-${String(endMonth.getMonth() + 1).padStart(2, '0')}`;
-
-    setClusterLoading(true);
-    try {
-      const response = await axios.get(`${getApiBaseUrl()}/api/events/summary`, {
-        params: {
-          appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
-          format: 'clusters',
-          zoom,
-          bounds: JSON.stringify(boundsObj),
-          startDate,
-          endDate
-        },
-        timeout: 10000
-      });
-
-      const clusters = response.data?.clusters || [];
-      setClusterMeta(response.data?.metadata || null);
-
-      // Clear existing cluster markers
-      clusterLayerRef.current.clearLayers();
-
+    const renderPills = async () => {
       const L = (await import('leaflet')).default;
 
-      // Determine aggregation level from zoom so we can infer drill-down
-      // even before BEAF adds canDrillDown (region=1-5, division=6-10, city=11-14, venue=15+)
-      const aggregationLevel = zoom <= 5 ? 'region' : zoom <= 10 ? 'division' : zoom <= 14 ? 'city' : 'venue';
-      const canDrill = aggregationLevel !== 'venue';
+      // Clear existing markers
+      clusterLayerRef.current.clearLayers();
 
-      // Add cluster markers (read-only — clicking does NOT set map center)
-      clusters.forEach(cluster => {
-        const lat = typeof cluster.center?.lat === 'number' ? cluster.center.lat : null;
-        const lng = typeof cluster.center?.lng === 'number' ? cluster.center.lng : null;
-        if (lat === null || lng === null) return;
+      const level = getAggregationLevel(currentZoom);
+      const canDrill = level !== 'venue';
 
-        const icon = createDensityClusterIcon(
-          L,
-          cluster.eventCount,
-          cluster.discoveredCount || 0
-        );
-        if (!icon) return;
+      densityData.forEach((item) => {
+        if (!item.center?.lat || !item.center?.lng) return;
 
-        const marker = L.marker([lat, lng], {
+        // Skip or flag "Unknown" items (data quality issue)
+        const isUnknown = item.name?.toLowerCase().includes('unknown');
+        if (isUnknown && level === 'venue') {
+          // At venue level, skip unknown venues entirely
+          // These are events with missing venue data - flag for Fulton
+          console.warn(`[Density] Skipping Unknown venue with ${item.totalCount} events - data quality issue`);
+          return;
+        }
+
+        // Create HTML for the pill group
+        const pillHtml = createPillMarkerHtml(item, currentZoom);
+
+        const icon = L.divIcon({
+          className: 'density-pill-marker',
+          html: pillHtml,
+          iconSize: [130, 50],
+          iconAnchor: [65, 25],
+        });
+
+        const marker = L.marker([item.center.lat, item.center.lng], {
           icon,
           interactive: true,
-          bubblingMouseEvents: false // Prevent click from reaching the map
+          bubblingMouseEvents: false,
         });
 
-        // Tooltip on hover with detail
-        const tooltipContent = `<strong>${cluster.name || 'Events'}</strong><br/>${cluster.eventCount} event${cluster.eventCount !== 1 ? 's' : ''}${canDrill ? '<br/><em>Click to explore</em>' : ''}`;
+        // Tooltip with location name and pill breakdown
+        const totalCount = item.socialCount + item.eventCount;
+        const tooltipContent = `<strong>${item.name}</strong><br/>${item.socialCount} Mil/Pra | ${item.eventCount} Festival+${item.discoveredCount ? ` | ${item.discoveredCount} AI-Dscv` : ''}${canDrill ? '<br/><em>Click to explore</em>' : ''}`;
         marker.bindTooltip(tooltipContent, {
           direction: 'top',
-          offset: [0, -10],
-          className: 'density-cluster-tooltip'
+          offset: [0, -15],
+          className: 'density-pill-tooltip',
         });
 
-        // Click cluster to fly in closer (use canDrillDown from BEAF if available, else infer)
-        const drillable = cluster.canDrillDown !== undefined ? cluster.canDrillDown : canDrill;
-        marker.on('click', (e) => {
-          L.DomEvent.stopPropagation(e);
-          if (drillable) {
-            map.flyTo([lat, lng], zoom + 3, {
+        // Click to drill down
+        if (canDrill) {
+          marker.on('click', (e) => {
+            L.DomEvent.stopPropagation(e);
+            mapInstanceRef.current.flyTo([item.center.lat, item.center.lng], currentZoom + 3, {
               animate: true,
-              duration: 0.8
+              duration: 0.8,
             });
-          }
-        });
+          });
+        }
 
         clusterLayerRef.current.addLayer(marker);
       });
-    } catch (error) {
-      console.warn('[MapCenterModal] Failed to fetch event clusters:', error.message);
-    } finally {
-      setClusterLoading(false);
-    }
-  };
+    };
+
+    renderPills();
+  }, [densityData, currentZoom]);
+
+  // TIEMPO-360: Refetch when time range changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !mapInitialized) return;
+
+    const bounds = mapInstanceRef.current.getBounds();
+    const zoom = mapInstanceRef.current.getZoom();
+    fetchDensity({
+      bounds: {
+        north: bounds.getNorth(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        west: bounds.getWest(),
+      },
+      zoom,
+      timeRangeDays,
+    });
+  }, [timeRangeDays, mapInitialized]);
 
   // Update circle when zoom range changes
   useEffect(() => {
@@ -560,25 +622,49 @@ const MapCenterModal = ({
           )}
         </Box>
         
-        {/* Zoom Range Slider */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" gutterBottom>
-            Search Range: {zoomRange} miles
-          </Typography>
-          <Slider
-            value={zoomRange}
-            onChange={(e, newValue) => setZoomRange(newValue)}
-            min={5}
-            max={200}
-            step={5}
-            marks={[
-              { value: 5, label: '5mi' },
-              { value: 50, label: '50mi' },
-              { value: 100, label: '100mi' },
-              { value: 200, label: '200mi' }
-            ]}
-            valueLabelDisplay="auto"
-          />
+        {/* Sliders Row - Search Range and Time Range side by side */}
+        <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
+          {/* Search Range Slider (miles - for user's calendar center) */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="body2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <MyLocationIcon sx={{ fontSize: 16 }} />
+              Search Range: {zoomRange} miles
+            </Typography>
+            <Slider
+              value={zoomRange}
+              onChange={(e, newValue) => setZoomRange(newValue)}
+              min={5}
+              max={200}
+              step={5}
+              marks={[
+                { value: 5, label: '5mi' },
+                { value: 50, label: '50mi' },
+                { value: 100, label: '100mi' },
+                { value: 200, label: '200mi' }
+              ]}
+              valueLabelDisplay="auto"
+              size="small"
+            />
+          </Box>
+
+          {/* TIEMPO-360: Time Range Slider (days - for event discovery) */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="body2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <CalendarMonthIcon sx={{ fontSize: 16 }} />
+              Time Range: {timeRangeDays <= 30 ? `${timeRangeDays} days` : `${Math.round(timeRangeDays / 30)} months`}
+            </Typography>
+            <Slider
+              value={timeRangeDays}
+              onChange={(e, newValue) => setTimeRangeDays(newValue)}
+              min={TIME_RANGE_MIN}
+              max={TIME_RANGE_MAX}
+              step={null}
+              marks={TIME_RANGE_MARKS}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => value <= 30 ? `${value}d` : `${Math.round(value / 30)}mo`}
+              size="small"
+            />
+          </Box>
         </Box>
         
         {/* Map Container with density overlay */}
@@ -613,13 +699,13 @@ const MapCenterModal = ({
             )}
           </Box>
 
-          {/* TIEMPO-360: Event density legend + loading */}
+          {/* TIEMPO-360: Event density pill legend + loading */}
           {mapInitialized && (
             <Box sx={{
               position: 'absolute',
               bottom: 8,
               right: 8,
-              bgcolor: 'rgba(255,255,255,0.92)',
+              bgcolor: 'rgba(255,255,255,0.95)',
               borderRadius: 1,
               px: 1.5,
               py: 0.75,
@@ -630,18 +716,22 @@ const MapCenterModal = ({
               zIndex: 1000,
               pointerEvents: 'none'
             }}>
-              {clusterLoading && <CircularProgress size={14} />}
+              {densityLoading && <CircularProgress size={14} />}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#1976d2' }} />
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>Events</Typography>
+                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.social }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Mil/Pra</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#7B1FA2' }} />
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>AI Discovered</Typography>
+                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.events }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Festival+</Typography>
               </Box>
-              {clusterMeta && (
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', lineHeight: 1 }}>
-                  {clusterMeta.totalEvents || 0} total
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.discovered }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>AI-Dscv</Typography>
+              </Box>
+              {densityMeta && (
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
+                  {densityMeta.totalEvents || 0} events
                 </Typography>
               )}
             </Box>
