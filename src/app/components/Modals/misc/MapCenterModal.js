@@ -20,11 +20,250 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { AuthContext } from '@/contexts/AuthContext';
+import {
+  useEventDensity,
+  PILL_COLORS,
+  CATEGORY_COLORS,
+  TIME_RANGE_MARKS,
+  TIME_RANGE_DEFAULT,
+  TIME_RANGE_MIN,
+  TIME_RANGE_MAX,
+  getAggregationLevel,
+} from '@/components/EventDensity';
 import 'leaflet/dist/leaflet.css';
 
-// Dynamic import for avoiding SSR issues
-// Note: Using Leaflet directly; no MapContainer used in this implementation
+// TIEMPO-360: Helper to create pill marker HTML with level + name header
+function createPillMarkerHtml(item, zoom) {
+  const {
+    socialCount = 0,
+    eventCount = 0,
+    discoveredCount = 0,
+    classCount = 0,
+    otherCount = 0,
+    level = '',
+    name = ''
+  } = item;
+
+  const isVenue = level === 'venue';
+
+  // Build pills HTML
+  const pills = [];
+
+  if (socialCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.social};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${socialCount}</span>`);
+  }
+  if (eventCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.events};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${eventCount}</span>`);
+  }
+  if (discoveredCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.discovered};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${discoveredCount}</span>`);
+  }
+
+  // Venue level: show Class (yellow) and Other (grey) pills
+  if (isVenue) {
+    if (classCount > 0) {
+      pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:#FFFF00;color:#333;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${classCount}</span>`);
+    }
+    if (otherCount > 0) {
+      pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:#999;color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${otherCount}</span>`);
+    }
+  }
+
+  // If no counts, show placeholder
+  if (pills.length === 0) {
+    return '<div style="display:none;"></div>';
+  }
+
+  // Truncate name if too long (no level prefix - just the name)
+  const displayName = name.length > 18 ? name.slice(0, 17) + '…' : name;
+
+  // Header with just name (no level prefix)
+  const header = displayName
+    ? `<div style="font-size:9px;font-weight:600;color:#555;text-align:center;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${displayName}</div>`
+    : '';
+
+  return `<div style="display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.95);padding:4px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;">${header}<div style="display:flex;align-items:center;gap:2px;">${pills.join('')}</div></div>`;
+}
+
+/**
+ * Create HTML for venue popup with event list (date-ordered by category)
+ */
+/**
+ * Create HTML for city popup - uses shared day-swipe format
+ */
+function createCityPopupHtml(cityName, events) {
+  return createDaySwipePopupHtml(cityName, events, 'city');
+}
+
+/**
+ * Create HTML for venue popup with day-grouped events (same format as city)
+ */
+function createVenuePopupHtml(venueName, events) {
+  // Reuse city popup format for consistency - same 7-day swipe UI
+  return createDaySwipePopupHtml(venueName, events, 'venue');
+}
+
+/**
+ * Shared popup builder for both city and venue with day tabs
+ */
+function createDaySwipePopupHtml(locationName, events, type = 'city') {
+  if (!events || events.length === 0) {
+    return `<div style="padding:8px;"><strong>${locationName}</strong><br/><em>No events</em></div>`;
+  }
+
+  const popupId = `${type}-${locationName.replace(/\s+/g, '-').toLowerCase()}`;
+
+  // Group events by day (next 7 days) using LOCAL dates (not UTC)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = [];
+  const dayEvents = {};
+
+  // Helper to format date as YYYY-MM-DD in local timezone
+  const toLocalDateKey = (d) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    const key = toLocalDateKey(d);
+    days.push({ key, date: d });
+    dayEvents[key] = [];
+  }
+
+  // Helper: get day of week (0=Sun, 1=Mon, etc) from BYDAY code
+  const dayCodeToNum = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+
+  // Helper: find next occurrence for weekly recurring events
+  const getOccurrenceInWindow = (event, windowStart, windowDays) => {
+    if (!event.isRepeating || !event.recurrenceRule) {
+      // Not recurring - use original date
+      return event.venueStartDisplay || event.startDate;
+    }
+
+    // Parse BYDAY from rule (e.g., "FREQ=WEEKLY;BYDAY=TU" -> Tuesday)
+    const match = event.recurrenceRule.match(/BYDAY=([A-Z]{2})/);
+    if (!match) return event.venueStartDisplay || event.startDate;
+
+    const targetDay = dayCodeToNum[match[1]];
+    if (targetDay === undefined) return event.venueStartDisplay || event.startDate;
+
+    // Find occurrence within window
+    for (let i = 0; i < windowDays.length; i++) {
+      const d = windowDays[i].date;
+      if (d.getDay() === targetDay) {
+        // Found matching day - construct datetime with original time
+        const origTime = (event.venueStartDisplay || event.startDate).split('T')[1] || '19:00:00';
+        return toLocalDateKey(d) + 'T' + origTime;
+      }
+    }
+    return null; // No occurrence in window
+  };
+
+  // Sort events into days using venue local time (with recurring event handling)
+  events.forEach((event) => {
+    const displayTime = getOccurrenceInWindow(event, today, days);
+    if (!displayTime) return; // No occurrence in window
+
+    const key = displayTime.split('T')[0];
+    if (dayEvents[key]) {
+      // Store with calculated occurrence time
+      dayEvents[key].push({ ...event, occurrenceDisplay: displayTime });
+    }
+  });
+
+  // Sort each day's events by time (using occurrence time for recurring)
+  Object.keys(dayEvents).forEach((key) => {
+    dayEvents[key].sort((a, b) => {
+      const timeA = (a.occurrenceDisplay || a.venueStartDisplay || a.startDate).split('T')[1] || '00:00';
+      const timeB = (b.occurrenceDisplay || b.venueStartDisplay || b.startDate).split('T')[1] || '00:00';
+      return timeA.localeCompare(timeB);
+    });
+  });
+
+  // Format time helper - extract time from occurrence/venue display
+  const formatTime = (event) => {
+    const displayTime = event.occurrenceDisplay || event.venueStartDisplay || event.startDate;
+    const timePart = displayTime.split('T')[1];
+    if (!timePart) return '';
+
+    // Parse HH:MM from the time part
+    const [hours, minutes] = timePart.split(':');
+    const h = parseInt(hours, 10);
+    const m = minutes || '00';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${m} ${ampm}`;
+  };
+
+  // Format day tab label
+  const formatDayTab = (date, index) => {
+    if (index === 0) return 'Today';
+    if (index === 1) return 'Tmrw';
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  };
+
+  // Build day tabs
+  const tabs = days.map((d, i) => {
+    const count = dayEvents[d.key].length;
+    const hasEvents = count > 0;
+    return `<button onclick="document.querySelectorAll('.${popupId}-panel').forEach(p=>p.style.display='none');document.getElementById('${popupId}-${d.key}').style.display='block';document.querySelectorAll('.${popupId}-tab').forEach(t=>{t.style.background='#f5f5f5';t.style.color='#333';});this.style.background='#1976d2';this.style.color='white';" class="${popupId}-tab" style="flex:1;padding:3px 1px;font-size:8px;border:none;background:${i===0?'#1976d2':'#f5f5f5'};color:${i===0?'white':'#333'};cursor:pointer;border-radius:3px;opacity:${hasEvents?1:0.4};">${formatDayTab(d.date, i)}${hasEvents ? `<br/><span style="font-weight:600;">${count}</span>` : ''}</button>`;
+  }).join('');
+
+  // Build day panels
+  const panels = days.map((d, i) => {
+    const evts = dayEvents[d.key];
+    const dateLabel = d.date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+    if (evts.length === 0) {
+      return `<div id="${popupId}-${d.key}" class="${popupId}-panel" style="display:${i===0?'block':'none'};padding:6px 0;">
+        <div style="font-size:9px;color:#666;margin-bottom:4px;">${dateLabel}</div>
+        <div style="color:#999;font-style:italic;font-size:10px;">No events</div>
+      </div>`;
+    }
+
+    const rows = evts.slice(0, 8).map((event) => {
+      const color = CATEGORY_COLORS[event.categoryFirst] || '#999';
+      const time = formatTime(event);
+      const title = event.title.length > 24 ? event.title.slice(0, 23) + '…' : event.title;
+      const aiBadge = event.isDiscovered ? `<span style="background:#2E7D32;color:#fff;font-size:6px;padding:0 2px;border-radius:2px;margin-left:2px;">AI</span>` : '';
+
+      return `<div style="display:flex;align-items:center;gap:4px;padding:2px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="width:5px;height:5px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+        <span style="font-size:8px;color:#666;min-width:50px;">${time}</span>
+        <span style="font-size:9px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${title}${aiBadge}</span>
+      </div>`;
+    }).join('');
+
+    const moreText = evts.length > 8 ? `<div style="font-size:8px;color:#666;text-align:center;margin-top:2px;">+${evts.length - 8} more</div>` : '';
+
+    return `<div id="${popupId}-${d.key}" class="${popupId}-panel" style="display:${i===0?'block':'none'};padding:4px 0;">
+      <div style="font-size:9px;color:#666;margin-bottom:3px;">${dateLabel}</div>
+      <div style="max-height:120px;overflow-y:auto;">${rows}</div>
+      ${moreText}
+    </div>`;
+  }).join('');
+
+  // "View in Calendar" link - pass location filter
+  const calendarLink = type === 'city'
+    ? `/calendar?city=${encodeURIComponent(locationName)}`
+    : `/calendar?venue=${encodeURIComponent(locationName)}`;
+
+  return `<div style="min-width:240px;max-width:300px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid #1976d2;">
+      <span style="font-weight:600;font-size:11px;">${locationName}</span>
+      <a href="${calendarLink}" style="font-size:9px;color:#1976d2;text-decoration:none;" onclick="event.stopPropagation();">View Calendar →</a>
+    </div>
+    <div style="display:flex;gap:2px;margin-bottom:4px;">${tabs}</div>
+    ${panels}
+  </div>`;
+}
 
 const MapCenterModal = ({
   open,
@@ -42,15 +281,43 @@ const MapCenterModal = ({
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const circleRef = useRef(null);
+  const clusterLayerRef = useRef(null);
+  const fetchTimerRef = useRef(null);
 
   const [mapInitialized, setMapInitialized] = useState(false);
   const [centerLat, setCenterLat] = useState(initialLocation?.lat || '');
   const [centerLng, setCenterLng] = useState(initialLocation?.lng || '');
   const [zoomRange, setZoomRange] = useState(initialLocation?.zoomRange || 50);
-  // Removed scale text - not needed
+  const [timeRangeDays, setTimeRangeDays] = useState(TIME_RANGE_DEFAULT); // TIEMPO-360: Time range slider
+  const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  
+
+  // TIEMPO-360: Use new density pill system
+  const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
+
+  // TIEMPO-360: Pre-fetch density data when modal opens (before map init)
+  // This reduces perceived delay on mobile by starting fetch immediately
+  useEffect(() => {
+    if (!open) return;
+
+    // Pre-fetch with initial location or US-centric default bounds
+    const lat = initialLocation?.lat || 39.8;
+    const lng = initialLocation?.lng || -98.5;
+    const prefetchBounds = {
+      north: lat + 15,
+      south: lat - 15,
+      east: lng + 25,
+      west: lng - 25,
+    };
+
+    fetchDensity({
+      bounds: prefetchBounds,
+      zoom: 5, // Region level for initial view
+      timeRangeDays,
+    });
+  }, [open]); // Only on modal open
+
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
     if (!open || mapInitialized) return;
@@ -106,26 +373,65 @@ const MapCenterModal = ({
           }
         ).addTo(map);
       
-        // Handle map click
+        // TIEMPO-360: Create layer for density pill markers
+        clusterLayerRef.current = L.layerGroup().addTo(map);
+
+        // Handle map click — only set center if not clicking a density marker
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
           updateMarker(lat, lng);
           setCenterLat(lat.toFixed(6));
           setCenterLng(lng.toFixed(6));
         });
-      
-      // Force map to recalculate size after a delay
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
-      
+
+        // TIEMPO-360: Fetch density pills on zoom/pan (debounced)
+        const fetchDensityForBounds = () => {
+          if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
+          fetchTimerRef.current = setTimeout(() => {
+            const bounds = map.getBounds();
+            const zoom = map.getZoom();
+            setCurrentZoom(zoom);
+            fetchDensity({
+              bounds: {
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest(),
+              },
+              zoom,
+              timeRangeDays,
+            });
+          }, 500);
+        };
+
+        map.on('moveend', fetchDensityForBounds);
+        map.on('zoomend', fetchDensityForBounds);
+
+        // Force map to recalculate size after a delay
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 100);
+
         mapInstanceRef.current = map;
         setMapInitialized(true);
-        
-        // Force resize after initialization
+
+        // Force resize after initialization, then fetch initial density pills
         setTimeout(() => {
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
+            const bounds = mapInstanceRef.current.getBounds();
+            const zoom = mapInstanceRef.current.getZoom();
+            setCurrentZoom(zoom);
+            fetchDensity({
+              bounds: {
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest(),
+              },
+              zoom,
+              timeRangeDays,
+            });
           }
         }, 300);
         
@@ -139,6 +445,8 @@ const MapCenterModal = ({
     checkAndInit();
     
     return () => {
+      if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
+      if (clusterLayerRef.current) clusterLayerRef.current = null;
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
@@ -209,6 +517,121 @@ const MapCenterModal = ({
     mapInstanceRef.current.setView([lat, lng], targetZoom, { animate: true });
   };
   
+  // TIEMPO-360: Render density pill markers when data changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !clusterLayerRef.current || !densityData.length) return;
+
+    const renderPills = async () => {
+      const L = (await import('leaflet')).default;
+
+      // Clear existing markers
+      clusterLayerRef.current.clearLayers();
+
+      const level = getAggregationLevel(currentZoom);
+      const canDrill = level !== 'venue';
+
+      densityData.forEach((item) => {
+        if (!item.center?.lat || !item.center?.lng) return;
+
+        // Skip or flag "Unknown" items (data quality issue)
+        const isUnknown = item.name?.toLowerCase().includes('unknown');
+        if (isUnknown && level === 'venue') {
+          // At venue level, skip unknown venues entirely
+          // These are events with missing venue data - flag for Fulton
+          console.warn(`[Density] Skipping Unknown venue with ${item.totalCount} events - data quality issue`);
+          return;
+        }
+
+        // Create HTML for the pill group
+        const pillHtml = createPillMarkerHtml(item, currentZoom);
+
+        const icon = L.divIcon({
+          className: 'density-pill-marker',
+          html: pillHtml,
+          iconSize: [130, 50],
+          iconAnchor: [65, 25],
+        });
+
+        const marker = L.marker([item.center.lat, item.center.lng], {
+          icon,
+          interactive: true,
+          bubblingMouseEvents: false,
+        });
+
+        // Tooltip with location name and pill breakdown
+        const totalCount = item.socialCount + item.eventCount;
+        // Build tooltip - include Class/Other at venue level
+        const isVenueLevel = level === 'venue';
+        let tooltipParts = [`${item.socialCount} Mil/Pra`, `${item.eventCount} Festival+`];
+        if (item.discoveredCount) tooltipParts.push(`${item.discoveredCount} AI-Dscv`);
+        if (isVenueLevel && item.classCount) tooltipParts.push(`${item.classCount} Class`);
+        if (isVenueLevel && item.otherCount) tooltipParts.push(`${item.otherCount} Other`);
+        const tooltipContent = `<strong>${item.name}</strong><br/>${tooltipParts.join(' | ')}${canDrill ? '<br/><em>Click to explore</em>' : ''}`;
+        marker.bindTooltip(tooltipContent, {
+          direction: 'top',
+          offset: [0, -15],
+          className: 'density-pill-tooltip',
+        });
+
+        // Click behavior based on level
+        const isCity = level === 'city';
+        const isVenue = level === 'venue';
+
+        if (canDrill && !isCity) {
+          // Drill down for region/division/country
+          marker.on('click', (e) => {
+            L.DomEvent.stopPropagation(e);
+            mapInstanceRef.current.flyTo([item.center.lat, item.center.lng], currentZoom + 3, {
+              animate: true,
+              duration: 0.8,
+            });
+          });
+        } else if ((isCity || isVenue) && item.events && item.events.length > 0) {
+          // City or Venue level - show popup with event list
+          const popupHtml = isCity
+            ? createCityPopupHtml(item.name, item.events)
+            : createVenuePopupHtml(item.name, item.events);
+          marker.bindPopup(popupHtml, {
+            maxWidth: isCity ? 320 : 280,
+            maxHeight: isCity ? 280 : 200,
+            className: isCity ? 'city-events-popup' : 'venue-events-popup',
+          });
+        } else if (canDrill) {
+          // Fallback drill for city without events
+          marker.on('click', (e) => {
+            L.DomEvent.stopPropagation(e);
+            mapInstanceRef.current.flyTo([item.center.lat, item.center.lng], currentZoom + 2, {
+              animate: true,
+              duration: 0.8,
+            });
+          });
+        }
+
+        clusterLayerRef.current.addLayer(marker);
+      });
+    };
+
+    renderPills();
+  }, [densityData, currentZoom]);
+
+  // TIEMPO-360: Refetch when time range changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !mapInitialized) return;
+
+    const bounds = mapInstanceRef.current.getBounds();
+    const zoom = mapInstanceRef.current.getZoom();
+    fetchDensity({
+      bounds: {
+        north: bounds.getNorth(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        west: bounds.getWest(),
+      },
+      zoom,
+      timeRangeDays,
+    });
+  }, [timeRangeDays, mapInitialized]);
+
   // Update circle when zoom range changes
   useEffect(() => {
     if (circleRef.current && centerLat && centerLng) {
@@ -320,29 +743,48 @@ const MapCenterModal = ({
         </IconButton>
       </DialogTitle>
       
-      <DialogContent sx={{ p: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Click anywhere on the map to set your center point
-        </Typography>
+      <DialogContent sx={{ p: isMobile ? 1 : 2 }}>
+        {/* Compact instruction - hidden on mobile */}
+        {!isMobile && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Click anywhere on the map to set your center point
+          </Typography>
+        )}
 
-        {/* Phase 1 & 2: Alert messages explaining Session vs Cloud Default */}
+        {/* Alert - compact on mobile */}
         {user ? (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-              Welcome {user.displayName || user.email}!
-            </Typography>
-            <Typography variant="body2">
-              You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent across devices).
-            </Typography>
+          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
+            {isMobile ? (
+              <Typography variant="caption">
+                Save for <strong>Session</strong> or <strong>Cloud Default</strong>
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                  Welcome {user.displayName || user.email}!
+                </Typography>
+                <Typography variant="body2">
+                  You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent across devices).
+                </Typography>
+              </>
+            )}
           </Alert>
         ) : (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 0.5 }}>
-              Set your map center for this <strong>Session</strong> (temporary only).
-            </Typography>
-            <Typography variant="body2">
-              <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
-            </Typography>
+          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
+            {isMobile ? (
+              <Typography variant="caption">
+                Set center for <strong>Session</strong>. Sign up to save permanently!
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  Set your map center for this <strong>Session</strong> (temporary only).
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
+                </Typography>
+              </>
+            )}
           </Alert>
         )}
 
@@ -356,71 +798,63 @@ const MapCenterModal = ({
           </Alert>
         )}
         
-        {/* Action Buttons - Phase 1: Auth-aware layout */}
+        {/* Action Buttons - Compact on mobile */}
         <Box sx={{
           display: 'flex',
-          gap: 1.5,
-          mb: 2,
-          justifyContent: 'center'
+          gap: isMobile ? 0.5 : 1.5,
+          mb: 1,
+          justifyContent: 'center',
+          flexWrap: 'wrap'
         }}>
           {/* Button 1: Set Map Center (Session) - Always visible */}
           <Button
             variant="outlined"
             onClick={handleSetTemp}
             disabled={loading || !centerLat || !centerLng}
-            startIcon={<MyLocationIcon sx={{ fontSize: 18 }} />}
+            startIcon={!isMobile && <MyLocationIcon sx={{ fontSize: 16 }} />}
             size="small"
             sx={{
-              px: 2,
-              py: 0.75,
-              fontSize: '0.875rem',
+              px: isMobile ? 1 : 2,
+              py: 0.5,
+              fontSize: isMobile ? '0.7rem' : '0.875rem',
               fontWeight: 500,
-              minWidth: '160px'
+              minWidth: isMobile ? 'auto' : '160px'
             }}
           >
-            Set Map Center (Session)
+            {isMobile ? 'Session' : 'Set Map Center (Session)'}
           </Button>
 
           {/* Button 2: Auth users see "Save as Default", Anonymous see "Sign Up" */}
           {user ? (
-            <Tooltip
-              title="Save to your Cloud Default (permanent across devices)"
-              arrow
+            <Button
+              variant="contained"
+              onClick={handleSavePerm}
+              disabled={loading || !centerLat || !centerLng}
+              startIcon={!isMobile && <LocationOnIcon sx={{ fontSize: 16 }} />}
+              size="small"
+              sx={{
+                px: isMobile ? 1 : 2,
+                py: 0.5,
+                fontSize: isMobile ? '0.7rem' : '0.875rem',
+                fontWeight: 500,
+                minWidth: isMobile ? 'auto' : '180px'
+              }}
             >
-              <span>
-                <Button
-                  variant="contained"
-                  onClick={handleSavePerm}
-                  disabled={loading || !centerLat || !centerLng}
-                  startIcon={<LocationOnIcon sx={{ fontSize: 18 }} />}
-                  size="small"
-                  sx={{
-                    px: 2,
-                    py: 0.75,
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    minWidth: '180px'
-                  }}
-                >
-                  Save as Default
-                </Button>
-              </span>
-            </Tooltip>
+              {isMobile ? 'Save Default' : 'Save as Default'}
+            </Button>
           ) : (
             <>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => {
-                  window.location.href = '/auth/login';
-                }}
+                onClick={() => { window.location.href = '/auth/login'; }}
                 size="small"
                 sx={{
-                  px: 2,
-                  py: 0.75,
-                  fontSize: '0.875rem',
+                  px: isMobile ? 1.5 : 2,
+                  py: 0.5,
+                  fontSize: isMobile ? '0.7rem' : '0.875rem',
                   fontWeight: 500,
-                  minWidth: '100px'
+                  minWidth: isMobile ? 'auto' : '100px'
                 }}
               >
                 Log In
@@ -428,16 +862,14 @@ const MapCenterModal = ({
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => {
-                  window.location.href = '/auth/signup';
-                }}
+                onClick={() => { window.location.href = '/auth/signup'; }}
                 size="small"
                 sx={{
-                  px: 2,
-                  py: 0.75,
-                  fontSize: '0.875rem',
+                  px: isMobile ? 1.5 : 2,
+                  py: 0.5,
+                  fontSize: isMobile ? '0.7rem' : '0.875rem',
                   fontWeight: 500,
-                  minWidth: '100px'
+                  minWidth: isMobile ? 'auto' : '100px'
                 }}
               >
                 Sign Up
@@ -446,54 +878,131 @@ const MapCenterModal = ({
           )}
         </Box>
         
-        {/* Zoom Range Slider */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" gutterBottom>
-            Search Range: {zoomRange} miles
-          </Typography>
-          <Slider
-            value={zoomRange}
-            onChange={(e, newValue) => setZoomRange(newValue)}
-            min={5}
-            max={200}
-            step={5}
-            marks={[
-              { value: 5, label: '5mi' },
-              { value: 50, label: '50mi' },
-              { value: 100, label: '100mi' },
-              { value: 200, label: '200mi' }
-            ]}
-            valueLabelDisplay="auto"
-          />
+        {/* Sliders Row - Compact on mobile */}
+        <Box sx={{ display: 'flex', gap: isMobile ? 1 : 3, mb: 1 }}>
+          {/* Search Range Slider */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <MyLocationIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
+              {isMobile ? `${zoomRange}mi` : `Search Range: ${zoomRange} miles`}
+            </Typography>
+            <Slider
+              value={zoomRange}
+              onChange={(e, newValue) => setZoomRange(newValue)}
+              min={5}
+              max={200}
+              step={5}
+              marks={isMobile ? [
+                { value: 5, label: '5' },
+                { value: 100, label: '100' },
+                { value: 200, label: '200' }
+              ] : [
+                { value: 5, label: '5mi' },
+                { value: 50, label: '50mi' },
+                { value: 100, label: '100mi' },
+                { value: 200, label: '200mi' }
+              ]}
+              valueLabelDisplay="auto"
+              size="small"
+              sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
+            />
+          </Box>
+
+          {/* TIEMPO-360: Time Range Slider (days - for event discovery) */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <CalendarMonthIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
+              {isMobile
+                ? (timeRangeDays <= 30 ? `${timeRangeDays}d` : `${Math.round(timeRangeDays / 30)}mo`)
+                : `Time Range: ${timeRangeDays <= 30 ? `${timeRangeDays} days` : `${Math.round(timeRangeDays / 30)} months`}`
+              }
+            </Typography>
+            <Slider
+              value={timeRangeDays}
+              onChange={(e, newValue) => setTimeRangeDays(newValue)}
+              min={TIME_RANGE_MIN}
+              max={TIME_RANGE_MAX}
+              step={null}
+              marks={isMobile ? [
+                { value: 7, label: '1w' },
+                { value: 120, label: '4m' },
+                { value: 365, label: '1y' }
+              ] : TIME_RANGE_MARKS}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => value <= 30 ? `${value}d` : `${Math.round(value / 30)}mo`}
+              size="small"
+              sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
+            />
+          </Box>
         </Box>
         
-        {/* Map Container */}
-        <Box
-          ref={mapRef}
-          sx={{
-            width: '100%',
-            height: isMobile ? '350px' : '400px',
-            borderRadius: 1,
-            border: '2px solid',
-            borderColor: 'primary.main',
-            cursor: 'crosshair',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#f5f5f5',
-            '& .leaflet-container': {
-              height: '100% !important',
-              width: '100% !important',
-            }
-          }}
-        >
-          {!mapInitialized && (
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              height: '100%'
+        {/* Map Container with density overlay */}
+        <Box sx={{ position: 'relative' }}>
+          <Box
+            ref={mapRef}
+            sx={{
+              width: '100%',
+              height: isMobile ? '350px' : '400px',
+              borderRadius: 1,
+              border: '2px solid',
+              borderColor: 'primary.main',
+              cursor: 'crosshair',
+              position: 'relative',
+              overflow: 'hidden',
+              backgroundColor: '#f5f5f5',
+              '& .leaflet-container': {
+                height: '100% !important',
+                width: '100% !important',
+              }
+            }}
+          >
+            {!mapInitialized && (
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%'
+              }}>
+                <CircularProgress />
+              </Box>
+            )}
+          </Box>
+
+          {/* TIEMPO-360: Event density pill legend + loading */}
+          {mapInitialized && (
+            <Box sx={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              bgcolor: 'rgba(255,255,255,0.95)',
+              borderRadius: 1,
+              px: 1.5,
+              py: 0.75,
+              boxShadow: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              zIndex: 1000,
+              pointerEvents: 'none'
             }}>
-              <CircularProgress />
+              {densityLoading && <CircularProgress size={14} />}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.social }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Mil/Pra</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.events }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Festival+</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.discovered }} />
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>AI-Dscv</Typography>
+              </Box>
+              {densityMeta && (
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
+                  {densityMeta.totalEvents || 0} events
+                </Typography>
+              )}
             </Box>
           )}
         </Box>
