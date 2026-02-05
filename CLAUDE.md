@@ -95,13 +95,14 @@ You are part of the AI-GUILD team working on the Master Calendar system.
 - **Role**: TangoTiempo Frontend Agent
 - **Repository**: tangotiempo.com
 - **appId**: 1
-- **Inbox**: inbox/sarah/
+- **Inbox**: `/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/inbox/sarah/` (CENTRAL - always use this path, NOT local project inbox)
 
 ## Your Team
 - **El Gotan**: Human partner, visionary, provides direction
 - **Chord**: HarmonyJunction (appId=2) frontend agent
 - **Fulton**: Azure Functions (calendar-be-af) backend agent
-- **Ben**: calendar-be backend agent
+- **Ben**: calendar-be backend agent (DEPRECATED - Express BE no longer running)
+- **Quinn**: MasterCalendar operations / migration specialist
 
 ## Your Responsibilities
 1. Gatekeeper for TangoTiempo (appId=1) - protect production
@@ -702,7 +703,7 @@ START OF FILE: YBOTBOT-TRACKING.md
 
 This is an Important TRACKING terminology definition. Tracking is a generic term and needs to be defined. Here is where we define it.
 
-All references to TRACKING, now mean "JIRA MCP" All rules and guidance for generic TRACKING are to be understood as the "JIRA MCP" tool.
+All references to TRACKING mean "JIRA via direct curl/REST API". **MCP has been removed and must NOT be used.**
 
 ## What TRACKING Means
 
@@ -714,28 +715,32 @@ When any playbook, role, or instruction mentions:
 - "TRACKING documentation"
 
 It specifically refers to:
-- **"JIRA MCP"**
-- Using the functions documented.
-- The project key will be replaced from user configuration
+- **JIRA via direct curl with macOS keychain authentication**
+- The project key is TIEMPO
+- Cloud URL: https://hdtsllc.atlassian.net
 
 ## TRACKING Requirements
 
 All TRACKING operations must:
-1. Use the appropriate "JIRA MCP" function
-2. Include the cloudId parameter
-3. Reference the configured project key
-
-
-
-
+1. Use direct curl with macOS keychain auth
+2. Use `--data-urlencode` for JQL queries
+3. Reference project key TIEMPO
 
 ## Tracking Implementation
 
-See JIRA-MCP-STRATEGY section for detailed JIRA integration instructions.
+**Use direct curl with macOS keychain auth. Do NOT use MCP (removed).**
+```bash
+JIRA_EMAIL="toby.balsley@gmail.com"
+JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
+curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
+  --data-urlencode "jql=project=TIEMPO ORDER BY updated DESC" \
+  --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
+  "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
+```
 
 ## Important Note
 
-This definition centralizes all TRACKING references to use "JIRA MCP", ensuring consistency across all playbooks and roles.
+MCP for JIRA has been fully removed. All JIRA access uses direct curl with macOS keychain credentials.
 
 ================================================================================
 END OF FILE: YBOTBOT-TRACKING.md
@@ -754,54 +759,44 @@ END OF FILE: GIT-Strategy.md
 
 
 ================================================================================
-START OF FILE: JIRA-MCP-STRATEGY.md
+START OF FILE: JIRA-STRATEGY.md
 ================================================================================
 
-# IMPORTANT JIRA
-You are to UTILIZE jira via MCP for all TRACKING and JIRA commands.
+# JIRA Access - Direct curl with macOS Keychain
 
-## 3 Examples
+**MCP has been fully removed. Do NOT use MCP for JIRA.**
 
-### Example 1: Search Issues
-```javascript
-// Using site URL - MCP automatically converts to cloud ID
-mcp__atlassian__searchJiraIssuesUsingJql({
-  cloudId: "https://hdtsllc.atlassian.net",
-  jql: "project = TIEMPO AND status = 'In Progress'",
-  fields: ["summary", "status", "assignee"],
-  maxResults: 10
-})
+## Method: Direct curl with macOS Keychain Auth
+
+```bash
+JIRA_EMAIL="toby.balsley@gmail.com"
+JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
 ```
 
-### Example 2: Create a New Issue
-```javascript
-// Using site URL from a JIRA link - MCP extracts and converts
-mcp__atlassian__createJiraIssue({
-  cloudId: "https://hdtsllc.atlassian.net",
-  projectKey: "TIEMPO",
-  issueTypeName: "Story",
-  summary: "Implement user authentication",
-  description: "Add login functionality with JWT tokens"
-})
+### Search Issues
+```bash
+curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
+  --data-urlencode "jql=project=TIEMPO AND status not in (Done,Closed) ORDER BY updated DESC" \
+  --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
+  "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
 ```
 
-### Example 3: Get Issue Details
-```javascript
-// Even from a full issue URL - MCP is smart enough to extract the site
-mcp__atlassian__getJiraIssue({
-  cloudId: "https://hdtsllc.atlassian.net",
-  issueIdOrKey: "TIEMPO-123",
-  fields: ["description", "status", "comments"]
-})
+### Get Issue Details
+```bash
+curl -s -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
+  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-123?fields=summary,status,description"
 ```
 
-## Configuration
-Both values are found in `./.ybotbot/user-config.ini`:
-- Cloud URL: `jira-url` in [JIRA] section
-- Project Key: `jira-project_key` in [JIRA] section
+### Add Comment
+```bash
+curl -s -X POST -u "$JIRA_EMAIL:$JIRA_TOKEN" \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  -d '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Your comment here"}]}]}}' \
+  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-123/comment"
+```
 
 ================================================================================
-END OF FILE: JIRA-MCP-STRATEGY.md
+END OF FILE: JIRA-STRATEGY.md
 ================================================================================
 
 
@@ -874,7 +869,7 @@ git push origin main
 ### 4. Your Common Recipients
 - **chord**: HarmonyJunction frontend (appId=2 coordination)
 - **fulton**: Azure Functions backend
-- **ben**: calendar-be backend
+- **ben**: calendar-be backend (DEPRECATED)
 - **broadcast**: All agents
 
 ### 5. Message-Aware Mode (Background Polling)
@@ -973,11 +968,8 @@ git push origin main
 - fulton (Azure Functions)
 - broadcast (All agents)
 
-**Ben (Backend):**
-- sarah (Frontend)
-- donna (Backend Architect)
-- fulton (Azure Functions)
-- broadcast (All agents)
+**Ben (Backend - DEPRECATED):**
+- No longer active. All backend work is handled by Fulton (Azure Functions).
 
 **Fulton (Azure Functions):**
 - sarah (Frontend)
@@ -1006,11 +998,11 @@ START OF FILE: MASTER-CALENDAR-SYNC.md
 ## Architecture Overview
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    SHARED BACKEND (calendar-be)                 │
-│  - Express.js + MongoDB                                         │
+│               SHARED BACKEND (calendar-be-af)                   │
+│  - Azure Functions + MongoDB                                     │
 │  - ALL changes here affect BOTH apps                            │
 │  - Use appId to differentiate data (appId=1: Tango, appId=2: HJ)│
-│  - Models, routes, and logic must support BOTH apps             │
+│  - Express BE (calendar-be) is DEPRECATED and no longer running │
 └─────────────────────────────────────────────────────────────────┘
                     ▲                           ▲
                     │ appId=1                   │ appId=2
@@ -1022,11 +1014,12 @@ START OF FILE: MASTER-CALENDAR-SYNC.md
         └───────────────────────┘   └───────────────────────┘
 ```
 
-## Rules for Backend Changes (calendar-be)
+## Rules for Backend Changes (calendar-be-af / Azure Functions)
 1. **NEVER break appId=2** - All backend changes must work for both apps
 2. **Use appId filtering** - All queries must include appId parameter
 3. **Extend, don't replace** - Add new fields/types alongside existing ones
 4. **Example: organizerTypes** includes both tango types AND barbershop types
+5. **Express BE (calendar-be) is DEPRECATED** - All backend work is in calendar-be-af
 
 ## Rules for Frontend Changes (this repo)
 1. **OK to diverge** - This repo can have different UI/content than harmonyjunction

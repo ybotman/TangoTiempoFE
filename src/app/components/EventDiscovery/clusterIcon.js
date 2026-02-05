@@ -1,12 +1,12 @@
 'use client';
 
-export const createClusterIcon = (count) => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  // eslint-disable-next-line no-undef
-  const L = require('leaflet');
+/**
+ * Creates a simple blue cluster icon with event count.
+ * @param {object} L - Leaflet instance (passed by caller to avoid require)
+ * @param {number} count - Event count to display
+ */
+export const createClusterIcon = (L, count) => {
+  if (!L) return null;
 
   return L.divIcon({
     className: 'custom-cluster-icon',
@@ -34,76 +34,45 @@ export const createClusterIcon = (count) => {
 };
 
 /**
- * TIEMPO-360: Dual-color density cluster icon for MapCenterModal overlay.
- * Blue = regular events, purple = AI-discovered events.
- * Size scales with total count. Ready for discoveredCount when BEAF adds it (CALBEAF-76).
+ * TIEMPO-360: Kayak Explore-style density cluster icon.
+ * Colored dot with event count inside + location name label below.
+ * Blue = regular events, purple ring accent = AI-discovered events.
+ * @param {object} L - Leaflet instance (passed by caller to avoid require)
+ * @param {number} totalCount - Total event count
+ * @param {number} discoveredCount - AI-discovered event count
+ * @param {string} name - Location name to display below the dot
  */
-export const createDensityClusterIcon = (totalCount, discoveredCount = 0) => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
+export const createDensityClusterIcon = (L, totalCount, discoveredCount = 0, name = '') => {
+  if (!L) return null;
 
-  // eslint-disable-next-line no-undef
-  const L = require('leaflet');
-
-  // Scale size by count
-  let size, fontSize;
+  // Scale dot size by count
+  let dotSize, fontSize;
   if (totalCount < 10) {
-    size = 32;
-    fontSize = 12;
+    dotSize = 28;
+    fontSize = 11;
   } else if (totalCount < 50) {
-    size = 40;
-    fontSize = 13;
+    dotSize = 34;
+    fontSize = 12;
   } else if (totalCount < 200) {
-    size = 52;
-    fontSize = 14;
+    dotSize = 42;
+    fontSize = 13;
   } else {
-    size = 60;
-    fontSize = 15;
+    dotSize = 50;
+    fontSize = 14;
   }
 
-  const half = size / 2;
+  const half = dotSize / 2;
   const hasDiscovered = discoveredCount > 0;
 
-  // Build SVG with proportional blue/purple segments
-  let svgContent;
-  if (!hasDiscovered) {
-    // All regular — solid blue circle
-    svgContent = `<circle cx="${half}" cy="${half}" r="${half - 2}" fill="#1976d2" stroke="white" stroke-width="2"/>`;
-  } else {
-    // Proportional arc: blue for regular, purple for discovered
-    const discoveredRatio = discoveredCount / totalCount;
-    const regularAngle = (1 - discoveredRatio) * 360;
-    const startAngle = -90; // Start from top
-    const regularEnd = startAngle + regularAngle;
+  // Dot fill: solid blue or blue with purple ring for AI-discovered
+  const ringStroke = hasDiscovered
+    ? `<circle cx="${half}" cy="${half}" r="${half - 1}" fill="none" stroke="#7B1FA2" stroke-width="3"/>`
+    : '';
 
-    const toRad = (deg) => (deg * Math.PI) / 180;
-    const r = half - 2;
-
-    // Blue (regular) arc
-    const x1 = half + r * Math.cos(toRad(startAngle));
-    const y1 = half + r * Math.sin(toRad(startAngle));
-    const x2 = half + r * Math.cos(toRad(regularEnd));
-    const y2 = half + r * Math.sin(toRad(regularEnd));
-    const largeArc1 = regularAngle > 180 ? 1 : 0;
-
-    // Purple (discovered) arc
-    const x3 = half + r * Math.cos(toRad(regularEnd));
-    const y3 = half + r * Math.sin(toRad(regularEnd));
-    const x4 = half + r * Math.cos(toRad(startAngle + 360));
-    const y4 = half + r * Math.sin(toRad(startAngle + 360));
-    const largeArc2 = (360 - regularAngle) > 180 ? 1 : 0;
-
-    svgContent = `
-      <path d="M${half},${half} L${x1},${y1} A${r},${r} 0 ${largeArc1},1 ${x2},${y2} Z" fill="#1976d2"/>
-      <path d="M${half},${half} L${x3},${y3} A${r},${r} 0 ${largeArc2},1 ${x4},${y4} Z" fill="#7B1FA2"/>
-      <circle cx="${half}" cy="${half}" r="${half - 2}" fill="none" stroke="white" stroke-width="2"/>
-    `;
-  }
-
-  const svg = `
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      ${svgContent}
+  const dotSvg = `
+    <svg width="${dotSize}" height="${dotSize}" viewBox="0 0 ${dotSize} ${dotSize}" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${half}" cy="${half}" r="${half - 2}" fill="#1976d2" stroke="white" stroke-width="2"/>
+      ${ringStroke}
       <text x="${half}" y="${half}" text-anchor="middle" dominant-baseline="central"
         fill="white" font-size="${fontSize}" font-weight="bold"
         style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
@@ -112,10 +81,36 @@ export const createDensityClusterIcon = (totalCount, discoveredCount = 0) => {
     </svg>
   `;
 
+  // Truncate long names for the label
+  const label = name.length > 18 ? name.substring(0, 16) + '...' : name;
+  const labelFontSize = 10;
+  const labelHeight = label ? 16 : 0;
+  const totalHeight = dotSize + labelHeight;
+
+  // Combine dot + name label
+  const html = `
+    <div style="display:flex; flex-direction:column; align-items:center; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3)); cursor:pointer;">
+      ${dotSvg}
+      ${label ? `<div style="
+        background: rgba(255,255,255,0.9);
+        color: #333;
+        font-size: ${labelFontSize}px;
+        font-weight: 600;
+        padding: 1px 5px;
+        border-radius: 3px;
+        white-space: nowrap;
+        margin-top: -2px;
+        line-height: 1.3;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      ">${label}</div>` : ''}
+    </div>
+  `;
+
+  // iconAnchor: center of the dot (label hangs below)
   return L.divIcon({
     className: 'density-cluster-icon',
-    html: `<div style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));">${svg}</div>`,
-    iconSize: [size, size],
-    iconAnchor: [half, half]
+    html,
+    iconSize: [Math.max(dotSize, label.length * 6 + 10), totalHeight],
+    iconAnchor: [Math.max(dotSize, label.length * 6 + 10) / 2, half]
   });
 };

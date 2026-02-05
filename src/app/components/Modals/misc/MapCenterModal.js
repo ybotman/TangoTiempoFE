@@ -242,10 +242,10 @@ const MapCenterModal = ({
       west: bounds.getWest()
     };
 
-    // Build date range: current month + 6 months
+    // Build date range: current month + 2 months forward
     const now = new Date();
     const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const endMonth = new Date(now.getFullYear(), now.getMonth() + 6, 1);
+    const endMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);
     const endDate = `${endMonth.getFullYear()}-${String(endMonth.getMonth() + 1).padStart(2, '0')}`;
 
     setClusterLoading(true);
@@ -270,35 +270,48 @@ const MapCenterModal = ({
 
       const L = (await import('leaflet')).default;
 
+      // Determine aggregation level from zoom so we can infer drill-down
+      // even before BEAF adds canDrillDown (region=1-5, division=6-10, city=11-14, venue=15+)
+      const aggregationLevel = zoom <= 5 ? 'region' : zoom <= 10 ? 'division' : zoom <= 14 ? 'city' : 'venue';
+      const canDrill = aggregationLevel !== 'venue';
+
       // Add cluster markers (read-only — clicking does NOT set map center)
       clusters.forEach(cluster => {
-        if (!cluster.center?.lat || !cluster.center?.lng) return;
+        const lat = typeof cluster.center?.lat === 'number' ? cluster.center.lat : null;
+        const lng = typeof cluster.center?.lng === 'number' ? cluster.center.lng : null;
+        if (lat === null || lng === null) return;
 
         const icon = createDensityClusterIcon(
+          L,
           cluster.eventCount,
-          cluster.discoveredCount || 0
+          cluster.discoveredCount || 0,
+          cluster.name || ''
         );
         if (!icon) return;
 
-        const marker = L.marker([cluster.center.lat, cluster.center.lng], {
+        const marker = L.marker([lat, lng], {
           icon,
           interactive: true,
           bubblingMouseEvents: false // Prevent click from reaching the map
         });
 
-        // Tooltip on hover showing name + count
-        const tooltipContent = `<strong>${cluster.name || 'Events'}</strong><br/>${cluster.eventCount} event${cluster.eventCount !== 1 ? 's' : ''}`;
+        // Tooltip on hover with detail
+        const tooltipContent = `<strong>${cluster.name || 'Events'}</strong><br/>${cluster.eventCount} event${cluster.eventCount !== 1 ? 's' : ''}${canDrill ? '<br/><em>Click to explore</em>' : ''}`;
         marker.bindTooltip(tooltipContent, {
           direction: 'top',
           offset: [0, -10],
           className: 'density-cluster-tooltip'
         });
 
-        // Click cluster to zoom in (not set center)
+        // Click cluster to fly in closer (use canDrillDown from BEAF if available, else infer)
+        const drillable = cluster.canDrillDown !== undefined ? cluster.canDrillDown : canDrill;
         marker.on('click', (e) => {
           L.DomEvent.stopPropagation(e);
-          if (cluster.canDrillDown) {
-            map.setView([cluster.center.lat, cluster.center.lng], zoom + 3, { animate: true });
+          if (drillable) {
+            map.flyTo([lat, lng], zoom + 3, {
+              animate: true,
+              duration: 0.8
+            });
           }
         });
 
