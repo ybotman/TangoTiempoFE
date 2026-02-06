@@ -538,6 +538,11 @@ export function useEventOperations() {
           venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
+          // Include image fields for RA image upload
+          imageFile: cleanedEventData.imageFile,
+          imagePreviewUrl: cleanedEventData.imagePreviewUrl,
+          eventImage: cleanedEventData.eventImage,
+          fallbackImageUrl: cleanedEventData.fallbackImageUrl,
           // Include recurring event fields if present
           recurrenceRule: cleanedEventData.recurrenceRule || undefined,
           excludedDates: cleanedEventData.excludedDates || undefined
@@ -760,9 +765,14 @@ export function useEventOperations() {
           venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
+          // Include image fields for RA image upload/delete
+          imageFile: cleanedEventData.imageFile,
+          imagePreviewUrl: cleanedEventData.imagePreviewUrl,
+          eventImage: cleanedEventData.eventImage,
+          fallbackImageUrl: cleanedEventData.fallbackImageUrl,
           // Include auth fields for RA validation
           selectedRole: 'RegionalAdmin',
-          allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+          allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
                                       user?.backendInfo?.localAdminInfo?.adminCities
         };
       } else {
