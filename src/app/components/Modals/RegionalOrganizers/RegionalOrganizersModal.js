@@ -73,15 +73,15 @@ const RegionalOrganizersModal = ({ open, onClose }) => {
     setIsSaving(true);
     setSaveMessage('');
 
-    try {
-      // Merge all unsaved changes into a single update object
-      const allChanges = {};
-      Object.values(unsavedChanges).forEach(tabChanges => {
-        Object.assign(allChanges, tabChanges);
-      });
+    // Merge all unsaved changes into a single update object
+    const allChanges = {};
+    Object.values(unsavedChanges).forEach(tabChanges => {
+      Object.assign(allChanges, tabChanges);
+    });
 
+    try {
       // Update the organizer with all changes
-      const updatedOrganizer = await updateOrganizer(organizer._id, allChanges);
+      await updateOrganizer(organizer._id, allChanges);
 
       // Clear unsaved changes and show success
       setUnsavedChanges({});

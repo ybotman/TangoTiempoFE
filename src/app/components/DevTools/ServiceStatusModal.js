@@ -28,6 +28,7 @@ import GeoComparisonDashboard from './GeoComparisonDashboard';
  *
  * TEMPORARY: Password protected with hardcoded "gotanman" - will be removed before production
  */
+// eslint-disable-next-line react/prop-types
 const ServiceStatusModal = ({ open, onClose }) => {
   const services = useServiceHealth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);

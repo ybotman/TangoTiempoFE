@@ -56,7 +56,6 @@ import { listOfAllRoles } from '@/utils/masterData';
 import VenueModal from '@/components/Modals/Venues/VenueModal';
 import VenueSelectionModal from '@/components/Modals/Venues/VenueSelectionModal';
 import MapIcon from '@mui/icons-material/Map';
-import PublicIcon from '@mui/icons-material/Public';
 // Removed LocationContextModal import - using map center mode only
 // MapCenterModal moved to Providers for centralized rendering
 import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU

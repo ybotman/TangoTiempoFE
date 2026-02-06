@@ -78,7 +78,7 @@ export default function EventPageClient({ eventId, eventData }) {
           text: shareText,
           url: shareUrl,
         });
-      } catch (err) {
+      } catch {
         // User cancelled or error - fallback to clipboard
         copyToClipboard(shareUrl);
       }

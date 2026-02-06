@@ -61,6 +61,7 @@ if (typeof window !== 'undefined') {
 const GeoComparisonDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
 
   const afUrl = typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_AF_URL : '';
@@ -463,7 +464,7 @@ const GeoComparisonDashboard = () => {
                 borderRadius: 1
               }}>
                 <Typography variant="body2" color="text.secondary">
-                  No location data available yet. Click "Refresh All" to test services.
+                  No location data available yet. Click &quot;Refresh All&quot; to test services.
                 </Typography>
               </Box>
             )}

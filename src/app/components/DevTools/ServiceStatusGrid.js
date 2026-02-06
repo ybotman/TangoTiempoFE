@@ -117,6 +117,7 @@ const ServiceStatusGrid = () => {
   return (
     <>
       {/* Hide on mobile - only show on desktop/laptop */}
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         .service-status-grid {
           display: flex;

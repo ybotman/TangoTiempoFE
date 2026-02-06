@@ -125,8 +125,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const hasVenueTimezone = eventDetails?.extendedProps?.hasVenueTimezone;
   const venueStartDisplay = eventDetails?.extendedProps?.venueStartDisplay;
   const venueEndDisplay = eventDetails?.extendedProps?.venueEndDisplay;
-  const displayStartTime = venueStartDisplay || eventDetails?.extendedProps?.displayStartTime;
-  const displayEndTime = venueEndDisplay || eventDetails?.extendedProps?.displayEndTime;
   const timezoneAbbr = eventDetails?.extendedProps?.timezoneAbbr || '';
 
   // Use display times if available, otherwise fallback to event dates
@@ -229,15 +227,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       }
       
       await deleteEvent(eventDetails.extendedProps._id);
-      
-      // Close both dialog and modal
-      setDeleteDialogOpen(false);
-      onClose();
-      
-      // Refresh the events list if callback provided
+
+      // Refresh the events list BEFORE closing modal
+      // (onClose unmounts this component, so refresh must fire first)
       if (onEventUpdated) {
         onEventUpdated();
       }
+
+      // Close both dialog and modal
+      setDeleteDialogOpen(false);
+      onClose();
     } catch (error) {
       console.error('Failed to delete event:', error);
       alert('Failed to delete event: ' + error.message);
@@ -293,7 +292,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     try {
       await navigator.clipboard.writeText(shareUrl);
       setShareSnackbarOpen(true);
-    } catch (err) {
+    } catch {
       // Final fallback - show URL in alert
       alert(`Share this link:\n${shareUrl}`);
     }

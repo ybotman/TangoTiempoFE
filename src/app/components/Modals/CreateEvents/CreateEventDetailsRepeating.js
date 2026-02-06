@@ -7,10 +7,8 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Alert,
   Chip,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 
 // Parse RRULE string back to UI fields for editing

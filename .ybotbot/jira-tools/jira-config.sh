@@ -84,18 +84,17 @@ jira_request() {
     fi
     
     local url="${JIRA_BASE_URL}/rest/api/${JIRA_API_VERSION}${endpoint}"
-    local auth_header="Authorization: Basic $(echo -n "$JIRA_AUTH" | base64)"
-    
+
     if [ -n "$data" ]; then
         curl -s -X "$method" \
-            -H "$auth_header" \
+            -u "$JIRA_AUTH" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
             -d "$data" \
             "$url"
     else
         curl -s -X "$method" \
-            -H "$auth_header" \
+            -u "$JIRA_AUTH" \
             -H "Accept: application/json" \
             "$url"
     fi

@@ -34,7 +34,7 @@ const NotFoundPage = () => {
 
       {/* Subtext */}
       <Typography variant="h6" style={{ margin: '20px 0 40px 0', color: 'text.secondary' }}>
-        The page you're looking for doesn't exist. Let us help you get back on track!
+        The page you&apos;re looking for doesn&apos;t exist. Let us help you get back on track!
       </Typography>
 
       {/* Links Section */}
@@ -48,7 +48,7 @@ const NotFoundPage = () => {
               TangoTiempo.com
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-              The United States' premiere Argentine Tango calendar. Discover milongas, festivals, and workshops across the country.
+              The United States&apos; premiere Argentine Tango calendar. Discover milongas, festivals, and workshops across the country.
             </Typography>
             <Link href="https://tangotiempo.com" passHref>
               <Button variant="contained" color="primary" fullWidth>

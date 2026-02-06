@@ -160,6 +160,7 @@ const CalendarPage = () => {
   };
 
   // TIEMPO-252: Format venue time for calendar display WITH timezone
+  // eslint-disable-next-line no-unused-vars
   const formatVenueTimeForCalendar = (startStr, endStr, abbr) => {
     // Parse venue time string (format: "2025-07-07T19:00:00")
     const formatVenueTime = (timeStr) => {

@@ -29,6 +29,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
  * @param {Function} props.onSignup - Callback when user clicks "Sign Up"
  * @param {Function} props.onLogin - Callback when user clicks "Login" link
  */
+// eslint-disable-next-line react/prop-types
 const FirstTimeVisitorContent = ({ onSelectLocation, onSignup, onLogin }) => {
   return (
     <>
@@ -46,7 +47,7 @@ const FirstTimeVisitorContent = ({ onSelectLocation, onSignup, onLogin }) => {
         {/* Mission Statement */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="body1" paragraph>
-            We're building the most comprehensive Argentine Tango calendar in the US,
+            We&apos;re building the most comprehensive Argentine Tango calendar in the US,
             and we need your help!
           </Typography>
           <Typography variant="body1" paragraph>
