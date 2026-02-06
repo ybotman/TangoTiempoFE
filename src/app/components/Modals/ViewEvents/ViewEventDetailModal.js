@@ -202,7 +202,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   
   // Debug logging for RA permissions
   if (selectedRole === 'RegionalAdmin') {
-    // TIEMPO-276: Security cleanup - removed logging
+    console.log('[RA DEBUG] eventCityId:', eventCityId, 'type:', typeof eventCityId);
+    console.log('[RA DEBUG] raAllowedCities:', raAllowedCities);
+    console.log('[RA DEBUG] isRegionalAdmin result:', isRegionalAdmin);
   }
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
