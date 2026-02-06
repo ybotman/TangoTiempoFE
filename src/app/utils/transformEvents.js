@@ -91,6 +91,10 @@ export function transformEvents(events) {
         discoverySource: event.discoverySource || null,
         discoveryDate: event.discoveredFirstDate || null,
         eventDescription: event.description || null,
+        // AI discovered hosts and venue geolocation for map display
+        discoveredHosts: event.discoveredHosts || null,
+        venueGeolocation: event.venueGeolocation || null,
+        venueCityName: event.venueCityName || null,
         // Add isRepeating flag
         isRepeating: event.isRepeating || false,
         // Add excludedDates for edit mode

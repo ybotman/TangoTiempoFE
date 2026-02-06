@@ -40,11 +40,12 @@ const CreateEventDetailsImage = ({ eventData, setEventData }) => {
     if (eventData.imagePreviewUrl) {
       URL.revokeObjectURL(eventData.imagePreviewUrl);
     }
-    
+
     setEventData({
       ...eventData,
       imageFile: null,
-      imagePreviewUrl: null
+      imagePreviewUrl: null,
+      eventImage: null,  // Clear existing image URL so it's removed on save
     });
   };
 
@@ -60,7 +61,7 @@ const CreateEventDetailsImage = ({ eventData, setEventData }) => {
         </Alert>
       )}
       
-      {eventData.imagePreviewUrl ? (
+      {(eventData.imagePreviewUrl || eventData.eventImage) ? (
         <Box sx={{ textAlign: 'center', mb: 2 }}>
           <Box
             sx={{
@@ -73,18 +74,20 @@ const CreateEventDetailsImage = ({ eventData, setEventData }) => {
             }}
           >
             <Image
-              src={eventData.imagePreviewUrl}
+              src={eventData.imagePreviewUrl || eventData.eventImage}
               alt="Event preview"
               fill
               style={{ objectFit: 'cover' }}
             />
           </Box>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            Selected: {eventData.imageFile?.name}
+            {eventData.imageFile?.name
+              ? `New image: ${eventData.imageFile.name}`
+              : 'Current image'}
           </Typography>
-          <Button 
-            variant="outlined" 
-            color="error" 
+          <Button
+            variant="outlined"
+            color="error"
             onClick={handleClearImage}
             size="small"
           >

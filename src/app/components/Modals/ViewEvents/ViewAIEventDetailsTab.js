@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, Link, Divider } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CategoryIcon from '@mui/icons-material/Category';
+import PeopleIcon from '@mui/icons-material/People';
+import FacebookIcon from '@mui/icons-material/Facebook';
 
 const ViewAIEventDetailsTab = ({ eventDetails }) => {
+  const [imageError, setImageError] = useState(false);
+
   if (!eventDetails) return null;
 
   const formatDateRange = (start, end) => {
@@ -46,6 +50,17 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
   const actualCity = ext.venueCityName || ext.city;
   if (actualCity && actualCity !== ext.masteredCityName) {
     locationParts.push(`City: ${actualCity}`);
+  }
+
+  // Get venue coordinates for map
+  const venueCoords = ext.venueGeolocation?.coordinates;
+  const hasValidCoords = venueCoords && venueCoords.length === 2 &&
+    typeof venueCoords[0] === 'number' && typeof venueCoords[1] === 'number';
+
+  // Parse hosts (may be array or need parsing)
+  let hosts = ext.discoveredHosts || [];
+  if (typeof hosts === 'string') {
+    try { hosts = JSON.parse(hosts); } catch { hosts = []; }
   }
 
   return (
@@ -123,12 +138,48 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
         </Box>
       )}
 
-      {/* Venue Name */}
+      {/* Venue Name + Mini Map */}
       {ext.venueName && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="body1" sx={{ ml: 3.5, fontWeight: 'medium' }}>
             Venue: {ext.venueName}
           </Typography>
+          {ext.venueCityName && (
+            <Typography variant="body2" sx={{ ml: 3.5, color: '#666' }}>
+              {ext.venueCityName}{ext.masteredDivisionName ? `, ${ext.masteredDivisionName}` : ''}
+            </Typography>
+          )}
+          <Typography variant="caption" sx={{ ml: 3.5, color: '#d32f2f', fontStyle: 'italic', display: 'block', mt: 0.5 }}>
+            ⚠️ Location researched by AI - verify before visiting
+          </Typography>
+
+          {/* Mini Map - Using MapBox Static Images (free tier) */}
+          {hasValidCoords && process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN && (
+            <Box sx={{ ml: 3.5, mt: 1 }}>
+              <Link
+                href={`https://www.google.com/maps/search/?api=1&query=${venueCoords[1]},${venueCoords[0]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ display: 'block' }}
+              >
+                <Box
+                  component="img"
+                  src={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+e74c3c(${venueCoords[0]},${venueCoords[1]})/${venueCoords[0]},${venueCoords[1]},12,0/280x150@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`}
+                  alt={`Map of ${ext.venueName}`}
+                  sx={{
+                    borderRadius: 1,
+                    border: '1px solid #ddd',
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </Link>
+              <Typography variant="caption" sx={{ color: '#666', display: 'block', mt: 0.5 }}>
+                Click map to open in Google Maps
+              </Typography>
+            </Box>
+          )}
         </Box>
       )}
 
@@ -152,8 +203,8 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Event Image */}
-      {ext.eventImage && (
+      {/* Event Image - with error handling for broken images */}
+      {ext.eventImage && !imageError && (
         <Box sx={{ mb: 3, textAlign: 'center' }}>
           <Box
             component="img"
@@ -165,6 +216,7 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
               borderRadius: 1,
               objectFit: 'contain',
             }}
+            onError={() => setImageError(true)}
           />
         </Box>
       )}
@@ -187,29 +239,119 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
         </Box>
       )}
 
+      {/* Meet the Hosts Section */}
+      {hosts.length > 0 && (
+        <>
+          <Divider sx={{ mb: 2 }} />
+          <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <PeopleIcon sx={{ color: '#1976d2', fontSize: 20 }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#666' }}>
+                Meet the Hosts
+              </Typography>
+            </Box>
+            <Box sx={{ ml: 3.5 }}>
+              {hosts.map((host, idx) => (
+                <Box key={idx} sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <FacebookIcon sx={{ color: '#1877f2', fontSize: 18, mt: 0.3 }} />
+                  <Box>
+                    {host.fbUrl ? (
+                      <Link
+                        href={host.fbUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          color: '#1877f2',
+                          textDecoration: 'none',
+                          fontWeight: 'medium',
+                          '&:hover': { textDecoration: 'underline' },
+                        }}
+                      >
+                        {host.name || 'Host'}
+                      </Link>
+                    ) : (
+                      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                        {host.name || 'Host'}
+                      </Typography>
+                    )}
+                    {host.pageType && (
+                      <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                        {host.pageType}
+                      </Typography>
+                    )}
+                    {host.description && (
+                      <Typography variant="caption" sx={{ color: '#888', display: 'block' }}>
+                        {host.description.slice(0, 100)}{host.description.length > 100 ? '...' : ''}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </>
+      )}
+
       <Divider sx={{ mb: 2 }} />
 
-      {/* Source Link */}
-      {ext.sourceLink && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LinkIcon sx={{ color: '#1976d2', fontSize: 18 }} />
-          <Link
-            href={ext.sourceLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              color: '#1976d2',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          >
-            View original source
-          </Link>
-        </Box>
-      )}
+      {/* Links Section: Source + Host Links */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {/* Source Link */}
+        {ext.sourceLink && (
+          <Box>
+            <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+              For accurate details, check the official source:
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LinkIcon sx={{ color: '#1976d2', fontSize: 18 }} />
+              <Link
+                href={ext.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: '#1976d2',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  fontWeight: 'medium',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                🔗 Go to Live Event Page
+              </Link>
+            </Box>
+          </Box>
+        )}
+
+        {/* Host Links (compact, near source) */}
+        {hosts.length > 0 && hosts.filter(h => h.fbUrl).length > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <FacebookIcon sx={{ color: '#1877f2', fontSize: 18 }} />
+            <Typography variant="body2" sx={{ color: '#666', mr: 0.5 }}>
+              Hosts:
+            </Typography>
+            {hosts.filter(h => h.fbUrl).map((host, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && <Typography variant="body2" sx={{ color: '#666' }}>,</Typography>}
+                <Link
+                  href={host.fbUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: '#1877f2',
+                    textDecoration: 'none',
+                    fontSize: '0.875rem',
+                    '&:hover': { textDecoration: 'underline' },
+                  }}
+                >
+                  {host.name || 'Host'}
+                </Link>
+              </React.Fragment>
+            ))}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
@@ -233,6 +375,18 @@ ViewAIEventDetailsTab.propTypes = {
       masteredDivisionName: PropTypes.string,
       eventImage: PropTypes.string,
       isExtrapolated: PropTypes.bool,
+      venueGeolocation: PropTypes.shape({
+        coordinates: PropTypes.arrayOf(PropTypes.number),
+      }),
+      discoveredHosts: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.shape({
+          name: PropTypes.string,
+          fbUrl: PropTypes.string,
+          pageType: PropTypes.string,
+          description: PropTypes.string,
+        })),
+      ]),
     }),
   }),
 };
