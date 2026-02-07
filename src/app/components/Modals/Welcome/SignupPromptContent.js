@@ -38,6 +38,7 @@ import StarIcon from '@mui/icons-material/Star';
  * @param {Function} props.onLogin - Callback when user clicks "Login" link
  * @param {Function} props.onClose - Callback when user clicks "Maybe Later"
  */
+// eslint-disable-next-line react/prop-types
 const SignupPromptContent = ({ onSignup, onLogin, onClose }) => {
 
   return (
@@ -45,10 +46,11 @@ const SignupPromptContent = ({ onSignup, onLogin, onClose }) => {
       <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
         <StarIcon sx={{ fontSize: 60, color: '#f59e0b', mb: 1 }} />
         <Typography variant="h4" component="div" gutterBottom>
-          You're a regular!
+          You&apos;re a regular!
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
           Create a free account to unlock more features
+          and get rid of these annoying messages
         </Typography>
       </DialogTitle>
 
@@ -93,6 +95,15 @@ const SignupPromptContent = ({ onSignup, onLogin, onClose }) => {
               <ListItemText
                 primary="Event notifications"
                 secondary="Get alerts for new events near you"
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <LocationOnIcon color="secondary" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Follow out-of-default map events and organizers"
+                secondary="Stay connected to events beyond your home area"
               />
             </ListItem>
           </List>

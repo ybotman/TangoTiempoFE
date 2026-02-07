@@ -77,30 +77,46 @@ const DensityPillGroup = ({
 
 /**
  * High-level 3-pill display: Social (Blue), Events (Purple), Discovered (Green)
+ * Shows labels instead of counts
  */
 const HighLevelPills = ({ data, size }) => {
   const { socialCount = 0, eventCount = 0, discoveredCount = 0 } = data;
 
   return (
     <>
-      <DensityPill
-        count={socialCount}
-        color={PILL_COLORS.social}
-        tooltip={`${socialCount} Mil/Pra (Milongas & Practicas)`}
-        size={size}
-      />
-      <DensityPill
-        count={eventCount}
-        color={PILL_COLORS.events}
-        tooltip={`${eventCount} Festival+ (Encuentros, Festivals, Marathons & Workshops)`}
-        size={size}
-      />
-      <DensityPill
-        count={discoveredCount}
-        color={PILL_COLORS.discovered}
-        tooltip={`${discoveredCount} AI-Dscv (AI Discovered Events)`}
-        size={size}
-      />
+      {socialCount > 0 && (
+        <DensityPill
+          count={1}
+          label="Mil/Pra"
+          color={PILL_COLORS.social}
+          tooltip={`${socialCount} Milongas & Practicas`}
+          size={size}
+          showLabel={true}
+          hideCount={true}
+        />
+      )}
+      {eventCount > 0 && (
+        <DensityPill
+          count={1}
+          label="Festival+"
+          color={PILL_COLORS.events}
+          tooltip={`${eventCount} Encuentros, Festivals, Marathons & Workshops`}
+          size={size}
+          showLabel={true}
+          hideCount={true}
+        />
+      )}
+      {discoveredCount > 0 && (
+        <DensityPill
+          count={1}
+          label="AiDiscv"
+          color={PILL_COLORS.discovered}
+          tooltip={`${discoveredCount} AI Discovered Events`}
+          size={size}
+          showLabel={true}
+          hideCount={true}
+        />
+      )}
     </>
   );
 };

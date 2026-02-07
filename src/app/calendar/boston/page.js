@@ -52,6 +52,7 @@ const formatTime = (dateStr) => {
   return hours + (minutes !== 0 ? ':' + minutesStr : '') + ampm;
 };
 
+// eslint-disable-next-line no-unused-vars
 const formatVenueTimeForCalendar = (venueStartDisplay, venueEndDisplay, venueAbbr) => {
   if (!venueStartDisplay) return { startTime: '', endTime: '' };
 

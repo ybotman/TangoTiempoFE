@@ -19,10 +19,8 @@ import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import {
-  isFirstTimeVisitor,
   wasWelcomeShown,
   setWelcomeShown,
-  getVisitCount,
   incrementVisitCount,
   getLastMapCenter
 } from '@/utils/visitorTracking';
@@ -81,7 +79,8 @@ const determineUserState = (user) => {
  * @param {boolean} props.open - Control modal visibility from parent
  * @param {Function} props.onClose - Callback when modal closes
  */
-const WelcomeModal = ({ open, onClose }) => {
+// eslint-disable-next-line react/prop-types
+const WelcomeModal = ({ onClose }) => {
   const router = useRouter();
   const { user } = useContext(AuthContext);
   const { openMapCenterModal, setSessionLocation } = useGeoLocation();

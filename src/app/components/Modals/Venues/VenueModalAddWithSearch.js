@@ -37,6 +37,7 @@ import { searchVenues } from '@/utils/geoLocations';
 import debounce from 'lodash/debounce';
 
 const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation = null, nearbyVenues = [] }) => {
+  // eslint-disable-next-line no-unused-vars
   const { user } = useContext(AuthContext);
 
   // Entry mode: 'search' or 'manual'
@@ -73,6 +74,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
   const [error, setError] = useState(null);
   const [proximityWarning, setProximityWarning] = useState(false);
   const [stage, setStage] = useState(1); // 1 = address, 2 = details
+  // eslint-disable-next-line no-unused-vars
   const [isOverriding, setIsOverriding] = useState(false);
   const [, setOverrideType] = useState(null); // 'no-city' or 'proximity'
 
@@ -262,7 +264,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
           // No nearby venues, proceed to stage 2
           setStage(2);
         }
-      } catch (err) {
+      } catch {
         // Proximity check is optional - proceed if endpoint not available
         setStage(2);
       } finally {
@@ -324,7 +326,7 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
             // No issues, proceed to stage 2
             setStage(2);
           }
-        } catch (proximityErr) {
+        } catch {
           // Proximity check is optional - proceed if endpoint not available
           setStage(2);
         }

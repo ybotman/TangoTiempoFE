@@ -183,7 +183,7 @@ export const useServiceHealth = () => {
           accuracy: null
         }
       }));
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         expressBackend: {
@@ -219,7 +219,7 @@ export const useServiceHealth = () => {
       } else {
         throw new Error('Not configured');
       }
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         firebase: {
@@ -262,7 +262,7 @@ export const useServiceHealth = () => {
           accuracy: null
         }
       }));
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         mapbox: {
@@ -314,7 +314,7 @@ export const useServiceHealth = () => {
       } else {
         throw new Error('Health check failed');
       }
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         mongodb: {
@@ -342,7 +342,7 @@ export const useServiceHealth = () => {
           accuracy: null
         }
       }));
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         googleAnalytics: {
@@ -350,66 +350,6 @@ export const useServiceHealth = () => {
           status: 'error',
           detail: 'Check failed',
           accuracy: null
-        }
-      }));
-    }
-  };
-
-  const checkGeoAPI = async () => {
-    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
-    try {
-      const response = await fetch(`${afUrl}/api/geo/ipapico/ip`, {
-        signal: AbortSignal.timeout(5000)
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Extract actual location coordinates (not fallback)
-        const latitude = data.latitude;
-        const longitude = data.longitude;
-
-        // Only process if we have actual coordinates (not fallback)
-        if (latitude && longitude) {
-          // Calculate accuracy from response (ipapi.co doesn't provide accuracy, default to 5km for city-level)
-          const accuracy = 5000; // meters - city level approximation
-
-          setServices(prev => ({
-            ...prev,
-            geoAPI: {
-              name: 'Geo API',
-              status: 'healthy',
-              detail: `ipapi.co (±${(accuracy / 1000).toFixed(1)}km)`,
-              accuracy: accuracy, // meters
-              latitude: latitude,
-              longitude: longitude,
-              city: data.city || null,
-              region: data.region || null,
-              region_code: data.region_code || null,
-              postal: data.postal || null,
-              country: data.country || null,
-              country_name: data.country_name || null,
-              country_code: data.country_code || null,
-              timezone: data.timezone || null,
-              ip: data.ip || null
-            }
-          }));
-        } else {
-          throw new Error('No actual coordinates returned');
-        }
-      } else {
-        throw new Error('Geo API failed');
-      }
-    } catch (error) {
-      setServices(prev => ({
-        ...prev,
-        geoAPI: {
-          name: 'Geo API',
-          status: 'error',
-          detail: 'Unavailable',
-          accuracy: null,
-          latitude: null,
-          longitude: null
         }
       }));
     }
@@ -501,7 +441,7 @@ export const useServiceHealth = () => {
       const duration = Date.now() - start;
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         setServices(prev => ({
           ...prev,
           azureFunctions: {
@@ -516,7 +456,7 @@ export const useServiceHealth = () => {
       } else {
         throw new Error('AF health check failed');
       }
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         azureFunctions: {
@@ -561,7 +501,7 @@ export const useServiceHealth = () => {
       } else {
         throw new Error('Cloudflare API failed');
       }
-    } catch (error) {
+    } catch {
       setServices(prev => ({
         ...prev,
         cloudflare: {

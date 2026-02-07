@@ -14,6 +14,7 @@ const DensityPill = ({
   tooltip,
   size = 'medium',
   showLabel = false,
+  hideCount = false,
 }) => {
   if (count === 0) return null;
 
@@ -47,23 +48,25 @@ const DensityPill = ({
         },
       }}
     >
-      <Typography
-        component="span"
-        sx={{
-          fontSize: 'inherit',
-          fontWeight: 'inherit',
-          lineHeight: 1,
-        }}
-      >
-        {formatCount(count)}
-      </Typography>
+      {!hideCount && (
+        <Typography
+          component="span"
+          sx={{
+            fontSize: 'inherit',
+            fontWeight: 'inherit',
+            lineHeight: 1,
+          }}
+        >
+          {formatCount(count)}
+        </Typography>
+      )}
       {showLabel && label && (
         <Typography
           component="span"
           sx={{
-            fontSize: '0.6rem',
-            fontWeight: 500,
-            ml: 0.5,
+            fontSize: hideCount ? 'inherit' : '0.6rem',
+            fontWeight: hideCount ? 'inherit' : 500,
+            ml: hideCount ? 0 : 0.5,
             opacity: 0.9,
           }}
         >
@@ -117,6 +120,7 @@ DensityPill.propTypes = {
   tooltip: PropTypes.string,
   size: PropTypes.oneOf(['small', 'medium', 'large']),
   showLabel: PropTypes.bool,
+  hideCount: PropTypes.bool,
 };
 
 export default DensityPill;

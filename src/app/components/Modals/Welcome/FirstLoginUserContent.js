@@ -39,6 +39,7 @@ import { AuthContext } from '@/contexts/AuthContext';
  * @param {Function} props.onGetStarted - Callback when user clicks "Complete Now"
  * @param {Function} props.onSkip - Callback when user clicks "Remind Me Later"
  */
+// eslint-disable-next-line react/prop-types
 const FirstLoginUserContent = ({ onGetStarted, onSkip }) => {
   const { user } = useContext(AuthContext);
   const [checklist, setChecklist] = useState([
@@ -119,7 +120,7 @@ const FirstLoginUserContent = ({ onGetStarted, onSkip }) => {
           Welcome, {userName}!
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
-          Let's set up your profile
+          Let&apos;s set up your profile
         </Typography>
       </DialogTitle>
 
@@ -194,7 +195,7 @@ const FirstLoginUserContent = ({ onGetStarted, onSkip }) => {
         {completionPercentage === 100 ? (
           <Box sx={{ textAlign: 'center', mt: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
             <Typography variant="body1" color="primary" fontWeight="bold">
-              🎉 All set! You're ready to explore events!
+              🎉 All set! You&apos;re ready to explore events!
             </Typography>
           </Box>
         ) : (

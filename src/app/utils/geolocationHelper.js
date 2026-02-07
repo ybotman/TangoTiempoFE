@@ -34,7 +34,7 @@ export const getBrowserGeolocation = async () => {
       long: position.coords.longitude,
       accuracy: position.coords.accuracy // meters
     };
-  } catch (error) {
+  } catch {
     // User denied permission, timeout, or position unavailable
     return null;
   }

@@ -31,6 +31,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
  * @param {Object} props
  * @param {Function} props.onClose - Callback when user closes banner
  */
+// eslint-disable-next-line react/prop-types
 const ReturningVisitorContent = ({ onClose }) => {
   const { openMapCenterModal } = useGeoLocation();
   const [lastCenter, setLastCenter] = useState(null);
@@ -73,7 +74,7 @@ const ReturningVisitorContent = ({ onClose }) => {
             sx={{ mb: 2 }}
           >
             <Typography variant="body1">
-              We've restored your location preferences
+              We&apos;ve restored your location preferences
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
               Viewing events near: <strong>

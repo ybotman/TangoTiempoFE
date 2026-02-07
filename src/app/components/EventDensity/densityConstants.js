@@ -45,23 +45,17 @@ export const CATEGORY_COLORS = {
 };
 
 // ============================================================================
-// ZOOM LEVEL THRESHOLDS
+// ZOOM LEVEL THRESHOLDS (Simplified: COUNTRY -> CITY -> VENUE)
 // ============================================================================
 
 export const ZOOM_LEVELS = {
-  CONTINENT: { min: 1, max: 2 },
-  COUNTRY: { min: 3, max: 3 },    // Only very zoomed out
-  REGION: { min: 4, max: 6 },     // USA-level view shows regions
-  DIVISION: { min: 7, max: 9 },
-  CITY: { min: 10, max: 11 },
-  VENUE: { min: 12, max: 22 },    // Venues at zoom 12 (~1hr drive view)
+  COUNTRY: { min: 1, max: 5 },    // WAY zoomed out only (~1000+ miles view)
+  CITY: { min: 6, max: 11 },      // Most views - show cities early
+  VENUE: { min: 12, max: 22 },    // Zoomed in - show individual venues
 };
 
 export const getAggregationLevel = (zoom) => {
-  if (zoom <= ZOOM_LEVELS.CONTINENT.max) return 'continent';
   if (zoom <= ZOOM_LEVELS.COUNTRY.max) return 'country';
-  if (zoom <= ZOOM_LEVELS.REGION.max) return 'region';
-  if (zoom <= ZOOM_LEVELS.DIVISION.max) return 'division';
   if (zoom <= ZOOM_LEVELS.CITY.max) return 'city';
   return 'venue';
 };

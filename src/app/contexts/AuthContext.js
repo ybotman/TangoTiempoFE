@@ -10,10 +10,8 @@ import {
   signInWithPopup,
   signOut,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   OAuthProvider,
   linkWithCredential,
-  EmailAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -150,8 +148,9 @@ export const AuthProvider = ({ children }) => {
 // TIEMPO-276: Security cleanup - removed logging
 
       const backendInfo = response.data;
-      
-// TIEMPO-276: Security cleanup - removed logging
+
+      // Temporary debug for RA permissions
+      console.log('[AUTH DEBUG] backendInfo.localAdminInfo:', backendInfo.localAdminInfo);
       
       // Check if regionalOrganizerInfo is properly populated
       if (backendInfo.regionalOrganizerInfo && backendInfo.regionalOrganizerInfo.organizerId) {

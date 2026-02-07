@@ -41,7 +41,7 @@ export const useBackendHealth = () => {
           failureCount++;
         }
         setIsHealthy(response.ok);
-      } catch (error) {
+      } catch {
         failureCount++;
         setIsHealthy(false);
       } finally {
@@ -98,7 +98,7 @@ export const useMapboxHealth = () => {
           failureCount++;
         }
         setIsHealthy(response.ok);
-      } catch (error) {
+      } catch {
         failureCount++;
         setIsHealthy(false);
       } finally {
@@ -144,7 +144,7 @@ export const useFirebaseHealth = () => {
         } else {
           setIsHealthy(false);
         }
-      } catch (error) {
+      } catch {
         // Invalid Base64 or JSON
         setIsHealthy(false);
       } finally {
