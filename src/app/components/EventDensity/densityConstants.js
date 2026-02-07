@@ -49,8 +49,8 @@ export const CATEGORY_COLORS = {
 // ============================================================================
 
 export const ZOOM_LEVELS = {
-  COUNTRY: { min: 1, max: 9 },    // Zoomed out - show country aggregation
-  CITY: { min: 10, max: 11 },     // Medium zoom - show city level
+  COUNTRY: { min: 1, max: 5 },    // WAY zoomed out only (~1000+ miles view)
+  CITY: { min: 6, max: 11 },      // Most views - show cities early
   VENUE: { min: 12, max: 22 },    // Zoomed in - show individual venues
 };
 
