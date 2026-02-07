@@ -45,17 +45,17 @@ export const CATEGORY_COLORS = {
 };
 
 // ============================================================================
-// ZOOM LEVEL THRESHOLDS (Simplified: COUNTY -> CITY -> VENUE)
+// ZOOM LEVEL THRESHOLDS (Simplified: COUNTRY -> CITY -> VENUE)
 // ============================================================================
 
 export const ZOOM_LEVELS = {
-  COUNTY: { min: 1, max: 9 },     // Zoomed out - show county aggregation
+  COUNTRY: { min: 1, max: 9 },    // Zoomed out - show country aggregation
   CITY: { min: 10, max: 11 },     // Medium zoom - show city level
   VENUE: { min: 12, max: 22 },    // Zoomed in - show individual venues
 };
 
 export const getAggregationLevel = (zoom) => {
-  if (zoom <= ZOOM_LEVELS.COUNTY.max) return 'county';
+  if (zoom <= ZOOM_LEVELS.COUNTRY.max) return 'country';
   if (zoom <= ZOOM_LEVELS.CITY.max) return 'city';
   return 'venue';
 };

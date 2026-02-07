@@ -193,17 +193,17 @@ function getCoords(geo) {
 
 /**
  * Get grouping key based on aggregation level
- * Simplified to: COUNTY -> CITY -> VENUE
+ * Simplified to: COUNTRY -> CITY -> VENUE
  */
 function getGroupKey(event, level) {
   switch (level) {
-    case 'county': {
-      // County level - group by division (closest to county concept)
-      const divisionName = event.masteredDivisionName || event.masteredRegionName || 'Unknown';
+    case 'country': {
+      // Country level - group by country name
+      const countryName = event.masteredCountryName || 'United States';
       const coords = getCoords(event.masteredCityGeolocation);
       return {
-        id: `county-${divisionName}`,
-        name: divisionName,
+        id: `country-${countryName}`,
+        name: countryName,
         center: coords ? { lat: coords[1], lng: coords[0] } : null,
       };
     }
