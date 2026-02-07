@@ -6,9 +6,7 @@ import axios from 'axios';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import {
   getAggregationLevel,
-  getContinent,
   categorizeEvent,
-  CONTINENT_CENTROIDS,
 } from './densityConstants';
 
 /**
@@ -195,46 +193,16 @@ function getCoords(geo) {
 
 /**
  * Get grouping key based on aggregation level
+ * Simplified to: COUNTY -> CITY -> VENUE
  */
 function getGroupKey(event, level) {
   switch (level) {
-    case 'continent': {
-      const countryName = event.masteredCountryName || 'Unknown';
-      const continent = getContinent(countryName);
-      const centroid = CONTINENT_CENTROIDS[continent] || { lat: 0, lng: 0 };
-      return {
-        id: `continent-${continent}`,
-        name: continent,
-        center: centroid,
-      };
-    }
-
-    case 'country': {
-      const countryName = event.masteredCountryName || 'Unknown';
-      // Use city centroid as approximation for country center
+    case 'county': {
+      // County level - group by division (closest to county concept)
+      const divisionName = event.masteredDivisionName || event.masteredRegionName || 'Unknown';
       const coords = getCoords(event.masteredCityGeolocation);
       return {
-        id: `country-${countryName}`,
-        name: countryName,
-        center: coords ? { lat: coords[1], lng: coords[0] } : null,
-      };
-    }
-
-    case 'region': {
-      const regionName = event.masteredRegionName || 'Unknown';
-      const coords = getCoords(event.masteredCityGeolocation);
-      return {
-        id: `region-${regionName}`,
-        name: regionName,
-        center: coords ? { lat: coords[1], lng: coords[0] } : null,
-      };
-    }
-
-    case 'division': {
-      const divisionName = event.masteredDivisionName || 'Unknown';
-      const coords = getCoords(event.masteredCityGeolocation);
-      return {
-        id: `division-${divisionName}`,
+        id: `county-${divisionName}`,
         name: divisionName,
         center: coords ? { lat: coords[1], lng: coords[0] } : null,
       };

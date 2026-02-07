@@ -200,14 +200,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
                             return false;
                           });
   
-  // Debug logging for RA permissions
-  if (selectedRole === 'RegionalAdmin') {
-    console.log('[RA DEBUG] eventCityId:', eventCityId, 'type:', typeof eventCityId);
-    console.log('[RA DEBUG] raAllowedCities:', raAllowedCities);
-    console.log('[RA DEBUG] user.backendInfo:', user?.backendInfo);
-    console.log('[RA DEBUG] localAdminInfo:', user?.backendInfo?.localAdminInfo);
-    console.log('[RA DEBUG] isRegionalAdmin result:', isRegionalAdmin);
-  }
+  // RA permission logging removed - was too noisy
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
   
