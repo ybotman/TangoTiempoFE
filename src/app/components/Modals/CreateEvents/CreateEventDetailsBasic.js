@@ -136,10 +136,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, title }));
   };
 
-  // TIEMPO-325: Handle organizer selection from Autocomplete
+  // Handle organizer selection from Autocomplete (for RegionalAdmin)
   const handleOrganizerChange = (event, newValue) => {
     if (!newValue) {
-      // Clear organizer selection
       setEventData(prevData => ({
         ...prevData,
         ownerOrganizerID: '',
@@ -148,8 +147,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       }));
       return;
     }
-
-    // Store the ID, name, and shortName (use fullName as fallback for shortName)
     setEventData(prevData => ({
       ...prevData,
       ownerOrganizerID: newValue._id,
@@ -489,11 +486,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           />
         </Grid>
         
-        {/* Owner Organizer - TIEMPO-325: Selection for RA and RO, Display only for other roles */}
+        {/* Owner Organizer - RA gets dropdown to assign, RO gets display-only */}
         <Grid item xs={12} md={6}>
-          {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') ? (
-            // TIEMPO-325: RegionalAdmin and RegionalOrganizer get Autocomplete type-ahead
-            // Shows ALL organizers (no filtering), type-ahead for usability with large lists
+          {selectedRole === 'RegionalAdmin' ? (
+            // RegionalAdmin can assign events to any organizer
             <Autocomplete
               options={organizers}
               loading={loadingOrganizers}
@@ -506,7 +502,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                 return short ? `${name} (${short})` : name;
               }}
               isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              // TIEMPO-325: Case-insensitive search on fullName and shortName
               filterOptions={(options, { inputValue }) => {
                 const searchTerm = inputValue.toLowerCase();
                 return options.filter(option => {
@@ -518,10 +513,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Event Organizer (type to search)"
+                  label="Event Owner (type to search)"
                   required
                   error={!eventData.ownerOrganizerID}
-                  helperText={!eventData.ownerOrganizerID ? 'Organizer is required' : `${organizers.length} organizers available`}
+                  helperText={!eventData.ownerOrganizerID ? 'Owner organizer is required' : 'Select the organizer who owns this event'}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -539,25 +534,22 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               loadingText="Loading organizers..."
             />
           ) : (
-            // Other roles (SystemAdmin, etc.): Show display only
+            // RO and other roles: Display-only (auto-set to creator)
             <FormControl fullWidth>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
-                    {editMode ? 'Created by:' : 'Creating as:'}
+                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '100px' }}>
+                    {editMode ? 'Event Owner:' : 'Creating as:'}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {user?.displayName || user?.email || 'User'}
+                    {eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || organizer?.fullName || 'Loading...'}
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
-                    Organizer:
+                {!editMode && selectedRole === 'RegionalOrganizer' && (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    To grant access to another organizer, use &quot;Alternate Organizer&quot; in the Other tab
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {editMode ? eventData.ownerOrganizerShortName : organizer?.shortName || 'Loading...'}
-                  </Typography>
-                </Box>
+                )}
               </Box>
             </FormControl>
           )}
