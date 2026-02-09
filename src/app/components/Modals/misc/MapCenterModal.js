@@ -20,16 +20,12 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { AuthContext } from '@/contexts/AuthContext';
 import {
   useEventDensity,
   PILL_COLORS,
   CATEGORY_COLORS,
-  TIME_RANGE_MARKS,
   TIME_RANGE_DEFAULT,
-  TIME_RANGE_MIN,
-  TIME_RANGE_MAX,
   getAggregationLevel,
 } from '@/components/EventDensity';
 import 'leaflet/dist/leaflet.css';
@@ -563,7 +559,7 @@ const MapCenterModal = ({
         // Build tooltip - include Class/Other at venue level
         const isVenueLevel = level === 'venue';
         let tooltipParts = [`${item.socialCount} Mil/Pra`, `${item.eventCount} Festival+`];
-        if (item.discoveredCount) tooltipParts.push(`${item.discoveredCount} AI-Dscv`);
+        if (item.discoveredCount) tooltipParts.push(`${item.discoveredCount} BOT`);
         if (isVenueLevel && item.classCount) tooltipParts.push(`${item.classCount} Class`);
         if (isVenueLevel && item.otherCount) tooltipParts.push(`${item.otherCount} Other`);
         const tooltipContent = `<strong>${item.name}</strong><br/>${tooltipParts.join(' | ')}${canDrill ? '<br/><em>Click to explore</em>' : ''}`;
@@ -878,62 +874,32 @@ const MapCenterModal = ({
           )}
         </Box>
         
-        {/* Sliders Row - Compact on mobile */}
-        <Box sx={{ display: 'flex', gap: isMobile ? 1 : 3, mb: 1 }}>
-          {/* Search Range Slider */}
-          <Box sx={{ flex: 1 }}>
-            <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <MyLocationIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
-              {isMobile ? `${zoomRange}mi` : `Search Range: ${zoomRange} miles`}
-            </Typography>
-            <Slider
-              value={zoomRange}
-              onChange={(e, newValue) => setZoomRange(newValue)}
-              min={5}
-              max={200}
-              step={5}
-              marks={isMobile ? [
-                { value: 5, label: '5' },
-                { value: 100, label: '100' },
-                { value: 200, label: '200' }
-              ] : [
-                { value: 5, label: '5mi' },
-                { value: 50, label: '50mi' },
-                { value: 100, label: '100mi' },
-                { value: 200, label: '200mi' }
-              ]}
-              valueLabelDisplay="auto"
-              size="small"
-              sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
-            />
-          </Box>
-
-          {/* TIEMPO-360: Time Range Slider (days - for event discovery) */}
-          <Box sx={{ flex: 1 }}>
-            <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <CalendarMonthIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
-              {isMobile
-                ? (timeRangeDays <= 30 ? `${timeRangeDays}d` : `${Math.round(timeRangeDays / 30)}mo`)
-                : `Time Range: ${timeRangeDays <= 30 ? `${timeRangeDays} days` : `${Math.round(timeRangeDays / 30)} months`}`
-              }
-            </Typography>
-            <Slider
-              value={timeRangeDays}
-              onChange={(e, newValue) => setTimeRangeDays(newValue)}
-              min={TIME_RANGE_MIN}
-              max={TIME_RANGE_MAX}
-              step={null}
-              marks={isMobile ? [
-                { value: 7, label: '1w' },
-                { value: 120, label: '4m' },
-                { value: 365, label: '1y' }
-              ] : TIME_RANGE_MARKS}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value) => value <= 30 ? `${value}d` : `${Math.round(value / 30)}mo`}
-              size="small"
-              sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
-            />
-          </Box>
+        {/* Search Range Slider */}
+        <Box sx={{ mb: 1, px: isMobile ? 0 : 2 }}>
+          <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <MyLocationIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
+            {isMobile ? `${zoomRange}mi` : `Search Range: ${zoomRange} miles`}
+          </Typography>
+          <Slider
+            value={zoomRange}
+            onChange={(e, newValue) => setZoomRange(newValue)}
+            min={5}
+            max={200}
+            step={5}
+            marks={isMobile ? [
+              { value: 5, label: '5' },
+              { value: 100, label: '100' },
+              { value: 200, label: '200' }
+            ] : [
+              { value: 5, label: '5mi' },
+              { value: 50, label: '50mi' },
+              { value: 100, label: '100mi' },
+              { value: 200, label: '200mi' }
+            ]}
+            valueLabelDisplay="auto"
+            size="small"
+            sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
+          />
         </Box>
         
         {/* Map Container with density overlay */}
@@ -996,7 +962,7 @@ const MapCenterModal = ({
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.discovered }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>AI-Dscv</Typography>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>BOT</Typography>
               </Box>
               {densityMeta && (
                 <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>

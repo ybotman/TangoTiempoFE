@@ -81,7 +81,7 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
             textAlign: 'center'
           }}
         >
-          This event was discovered from public information, analyzed, and loaded periodically by AI. Details may be inaccurate.
+          This event was discovered from public information, analyzed, and curated periodically by a Bot or hand entry. Details may be inaccurate.
         </Typography>
       </Box>
 

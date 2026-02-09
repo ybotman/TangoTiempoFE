@@ -49,15 +49,15 @@ export const CATEGORY_COLORS = {
 // ============================================================================
 
 export const ZOOM_LEVELS = {
-  COUNTRY: { min: 1, max: 5 },    // WAY zoomed out only (~1000+ miles view)
-  CITY: { min: 6, max: 11 },      // Most views - show cities early
+  COUNTRY: { min: 1, max: 4 },    // WAY zoomed out only
+  CITY: { min: 5, max: 11 },      // Show cities earlier (zoom 5+)
   VENUE: { min: 12, max: 22 },    // Zoomed in - show individual venues
 };
 
 export const getAggregationLevel = (zoom) => {
-  if (zoom <= ZOOM_LEVELS.COUNTRY.max) return 'country';
-  if (zoom <= ZOOM_LEVELS.CITY.max) return 'city';
-  return 'venue';
+  if (zoom <= ZOOM_LEVELS.COUNTRY.max) return 'country';  // zoom 1-4
+  if (zoom <= ZOOM_LEVELS.CITY.max) return 'city';        // zoom 5-11
+  return 'venue';                                          // zoom 12+
 };
 
 // ============================================================================
@@ -175,7 +175,7 @@ export const TIME_RANGE_MARKS = [
   { value: 365, label: '1yr' },
 ];
 
-export const TIME_RANGE_DEFAULT = 120; // 4 months
+export const TIME_RANGE_DEFAULT = 180; // 6 months
 export const TIME_RANGE_MIN = 7;       // 1 week
 export const TIME_RANGE_MAX = 365;     // 1 year
 

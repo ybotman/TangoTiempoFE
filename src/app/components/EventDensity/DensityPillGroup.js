@@ -109,9 +109,9 @@ const HighLevelPills = ({ data, size }) => {
       {discoveredCount > 0 && (
         <DensityPill
           count={1}
-          label="AiDiscv"
+          label="BOT"
           color={PILL_COLORS.discovered}
-          tooltip={`${discoveredCount} AI Discovered Events`}
+          tooltip={`${discoveredCount} BOT-Curated Events`}
           size={size}
           showLabel={true}
           hideCount={true}
