@@ -13,9 +13,7 @@ import { usePostFilter } from '@/hooks/usePostFilter';
 import { transformEvents } from '@/utils/transformEvents';
 import { categoryColors } from '@/utils/categoryColors';
 import useCategories from '@/hooks/useCategories';
-// No longer needed - using saved user preferences instead
-// import { useMasteredLocation } from '@/contexts/MasteredLocationContext';
-// import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { trackEvent } from '@/hooks/useGoogleAnalytics';
 import useMenuItems from '@/hooks/useMenuItems';
 import { RoleContext } from '@/contexts/RoleContext';
@@ -51,6 +49,9 @@ export const useCalendarPage = () => {
   const [includeAIEvents, setIncludeAIEvents] = useState(false);
   const calendarRef = useRef(null);
 
+  // Track if we've already auto-expanded search (to prevent infinite loops)
+  const hasAutoExpandedRef = useRef(false);
+
   // Add selectedOrganizers state for Feature_3003_RegionalOrganizerSelection
   const [selectedOrganizers, setSelectedOrganizers] = useState(() => {
     // Initialize from localStorage if available
@@ -68,8 +69,10 @@ export const useCalendarPage = () => {
     }
   }, [selectedOrganizers]);
 
-  // No longer using GeoLocationContext - using saved user preferences instead
-  // These are kept for backward compatibility but will be empty
+  // Get GeoLocation context for auto-expand feature
+  const { currentLocation, setSessionLocation } = useGeoLocation();
+
+  // Location names for backward compatibility
   const regionName = '';
   const divisionName = '';
   const cityName = '';
@@ -227,6 +230,68 @@ export const useCalendarPage = () => {
       originalCategoryColor: categoryColor,
     };
   });
+
+  // Auto-expand search when no events found:
+  // 1. Enable AI Discovered events toggle
+  // 2. Zoom out (increase search radius)
+  useEffect(() => {
+    // Only run when:
+    // - Events have finished loading
+    // - No events were found
+    // - We haven't already auto-expanded this session
+    // - AI events aren't already enabled (to avoid loop)
+    // - We have a valid location set
+    if (
+      !eventsLoading &&
+      datesSet && // Ensure we've actually searched
+      coloredFilteredEvents.length === 0 &&
+      !hasAutoExpandedRef.current &&
+      !includeAIEvents &&
+      currentLocation?.lat &&
+      currentLocation?.lng
+    ) {
+      hasAutoExpandedRef.current = true;
+
+      // 1. Enable AI Discovered events
+      setIncludeAIEvents(true);
+
+      // 2. Zoom out - increase search radius (max 200 miles)
+      const currentZoomRange = currentLocation.zoomRange || 50;
+      const newZoomRange = Math.min(currentZoomRange * 2, 200); // Double the range, cap at 200
+
+      if (newZoomRange > currentZoomRange) {
+        setSessionLocation({
+          lat: currentLocation.lat,
+          lng: currentLocation.lng,
+          zoomRange: newZoomRange
+        });
+      }
+
+      // Track this auto-expand action
+      trackEvent({
+        action: 'auto_expand_search',
+        category: 'Calendar Discovery',
+        label: `AI enabled, zoom ${currentZoomRange} -> ${newZoomRange}`,
+      });
+    }
+  }, [eventsLoading, coloredFilteredEvents.length, includeAIEvents, currentLocation, datesSet, setSessionLocation]);
+
+  // Reset auto-expand flag when location changes significantly (user manually changes location)
+  useEffect(() => {
+    // Reset if user manually changes their location
+    const handleLocationChange = () => {
+      hasAutoExpandedRef.current = false;
+    };
+
+    // Listen for manual location changes via session storage
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'currentLocation') {
+          handleLocationChange();
+        }
+      });
+    }
+  }, []);
 
   // Tracking-integrated handlers
   // Handle event update actions (create, edit, delete)

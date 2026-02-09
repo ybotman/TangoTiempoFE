@@ -109,7 +109,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Tooltip title={showDiscovered ? "Hide AI-Discovered events" : "Show AI-Discovered events"} arrow>
+        <Tooltip title={showDiscovered ? "Hide BOT-Curated events" : "Show BOT-Curated events"} arrow>
           <IconButton
             onClick={onDiscoveredToggle}
             sx={{

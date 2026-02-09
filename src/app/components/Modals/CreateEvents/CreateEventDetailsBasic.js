@@ -136,10 +136,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, title }));
   };
 
-  // TIEMPO-325: Handle organizer selection from Autocomplete
+  // Handle organizer selection from Autocomplete (for RegionalAdmin)
   const handleOrganizerChange = (event, newValue) => {
     if (!newValue) {
-      // Clear organizer selection
       setEventData(prevData => ({
         ...prevData,
         ownerOrganizerID: '',
@@ -148,13 +147,28 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       }));
       return;
     }
-
-    // Store the ID, name, and shortName (use fullName as fallback for shortName)
     setEventData(prevData => ({
       ...prevData,
       ownerOrganizerID: newValue._id,
       ownerOrganizerName: newValue.fullName || '',
       ownerOrganizerShortName: newValue.shortName || newValue.fullName || ''
+    }));
+  };
+
+  // Handle alternate organizer selection from Autocomplete (for RO and RA)
+  const handleAlternateOrganizerChange = (event, newValue) => {
+    if (!newValue) {
+      setEventData(prevData => ({
+        ...prevData,
+        alternateOrganizerID: '',
+        alternateOrganizerName: ''
+      }));
+      return;
+    }
+    setEventData(prevData => ({
+      ...prevData,
+      alternateOrganizerID: newValue._id,
+      alternateOrganizerName: newValue.fullName || newValue.shortName || ''
     }));
   };
 
@@ -274,6 +288,12 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     if (!eventData.ownerOrganizerID) return null;
     return organizers.find(org => org._id === eventData.ownerOrganizerID) || null;
   }, [eventData.ownerOrganizerID, organizers]);
+
+  // Memoize selected alternate organizer for Autocomplete
+  const selectedAlternateOrganizer = useMemo(() => {
+    if (!eventData.alternateOrganizerID) return null;
+    return organizers.find(org => org._id === eventData.alternateOrganizerID) || null;
+  }, [eventData.alternateOrganizerID, organizers]);
 
   // Memoize the selected category to prevent re-computation during render
   const selectedCategory = useMemo(() => {
@@ -489,11 +509,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           />
         </Grid>
         
-        {/* Owner Organizer - TIEMPO-325: Selection for RA and RO, Display only for other roles */}
+        {/* Owner Organizer - RA gets dropdown to assign, RO gets display-only */}
         <Grid item xs={12} md={6}>
-          {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') ? (
-            // TIEMPO-325: RegionalAdmin and RegionalOrganizer get Autocomplete type-ahead
-            // Shows ALL organizers (no filtering), type-ahead for usability with large lists
+          {selectedRole === 'RegionalAdmin' ? (
+            // RegionalAdmin can assign events to any organizer
             <Autocomplete
               options={organizers}
               loading={loadingOrganizers}
@@ -506,7 +525,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                 return short ? `${name} (${short})` : name;
               }}
               isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              // TIEMPO-325: Case-insensitive search on fullName and shortName
               filterOptions={(options, { inputValue }) => {
                 const searchTerm = inputValue.toLowerCase();
                 return options.filter(option => {
@@ -518,10 +536,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Event Organizer (type to search)"
+                  label="Event Owner (type to search)"
                   required
                   error={!eventData.ownerOrganizerID}
-                  helperText={!eventData.ownerOrganizerID ? 'Organizer is required' : `${organizers.length} organizers available`}
+                  helperText={!eventData.ownerOrganizerID ? 'Owner organizer is required' : 'Select the organizer who owns this event'}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -539,29 +557,68 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               loadingText="Loading organizers..."
             />
           ) : (
-            // Other roles (SystemAdmin, etc.): Show display only
+            // RO and other roles: Display-only (auto-set to creator)
             <FormControl fullWidth>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
-                    {editMode ? 'Created by:' : 'Creating as:'}
+                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '100px' }}>
+                    {editMode ? 'Event Owner:' : 'Creating as:'}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {user?.displayName || user?.email || 'User'}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '80px' }}>
-                    Organizer:
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {editMode ? eventData.ownerOrganizerShortName : organizer?.shortName || 'Loading...'}
+                    {eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || organizer?.fullName || 'Loading...'}
                   </Typography>
                 </Box>
               </Box>
             </FormControl>
           )}
         </Grid>
+
+        {/* Alternate Organizer - Dropdown for RO and RA to grant access to another organizer */}
+        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
+          <Grid item xs={12} md={6}>
+            <Autocomplete
+              options={organizers}
+              loading={loadingOrganizers}
+              value={selectedAlternateOrganizer}
+              onChange={handleAlternateOrganizerChange}
+              getOptionLabel={(option) => {
+                if (!option || typeof option !== 'object') return '';
+                const name = option.fullName || option.organizerName || option.name || '';
+                const short = option.shortName || option.organizerShortName || '';
+                return short ? `${name} (${short})` : name;
+              }}
+              isOptionEqualToValue={(option, value) => option?._id === value?._id}
+              filterOptions={(options, { inputValue }) => {
+                const searchTerm = inputValue.toLowerCase();
+                return options.filter(option => {
+                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Alternate Organizer (optional)"
+                  helperText="Grant another organizer access to view/edit this event"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              fullWidth
+              disablePortal
+              noOptionsText="No organizers found"
+              loadingText="Loading organizers..."
+            />
+          </Grid>
+        )}
 
         {/* Venue Selection - Searchable Autocomplete */}
         <Grid item xs={12}>

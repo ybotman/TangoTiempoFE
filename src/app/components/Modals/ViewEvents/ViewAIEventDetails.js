@@ -33,8 +33,8 @@ const ViewAIEventDetails = ({ open, onClose, eventDetails }) => {
           backgroundColor: '#f5f5f5',
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-          AI-Discovered Event Details
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B0000' }}>
+          BOT-Curated Event Details
         </Typography>
         <IconButton
           onClick={onClose}

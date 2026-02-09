@@ -294,14 +294,14 @@ const CalendarPage = () => {
           }}>
             {isAIDiscovered ? (
               <>
-                {/* AI Events: Show "AI-Discovered", first category only, and shortTitle */}
-                <div style={{ 
+                {/* BOT-Curated Events: Show label, first category only, and shortTitle */}
+                <div style={{
                   fontSize: '0.75rem',
                   fontWeight: 'bold',
-                  color: '#1976d2',
+                  color: '#8B0000',
                   flexShrink: 0
                 }}>
-                  AI-Discovered
+                  BOT-Curated
                 </div>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 {eventShortTitle && (
@@ -432,14 +432,14 @@ const CalendarPage = () => {
           }}>
             {isAIDiscovered ? (
               <>
-                {/* AI Events: Show "AI-Discovered", first category only, and shortTitle */}
-                <div style={{ 
+                {/* BOT-Curated Events: Show label, first category only, and shortTitle */}
+                <div style={{
                   fontSize: '0.85rem',
                   fontWeight: 'bold',
-                  color: '#1976d2',
+                  color: '#8B0000',
                   flexShrink: 0
                 }}>
-                  AI-Discovered
+                  BOT-Curated
                 </div>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 {eventShortTitle && (
