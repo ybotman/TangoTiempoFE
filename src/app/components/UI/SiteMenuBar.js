@@ -65,23 +65,33 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         </IconButton>
       </Box>
 
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-        <PostFilter
-          activeCategories={activeCategories}
-          handleCategoryChange={handleCategoryChange}
-          categories={categories}
-        />
-        
+      {/* Center: Search field when open */}
+      <Box sx={{
+        flexGrow: 1,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
         {showSearchField && (
           <TextField
             size="small"
             placeholder="Search events..."
             value={searchTerm || ''}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            sx={{ 
-              width: '200px',
+            autoFocus
+            sx={{
+              flex: 1,
+              maxWidth: '400px',
+              mx: 1,
+              transition: 'all 0.2s ease',
               '& .MuiOutlinedInput-root': {
-                borderRadius: '20px',
+                borderRadius: '16px',
+                height: '32px',
+                fontSize: '0.85rem',
+              },
+              '& .MuiOutlinedInput-input': {
+                padding: '6px 0',
+                fontSize: '0.85rem',
               }
             }}
             InputProps={{
@@ -90,7 +100,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
                   <SearchIcon fontSize="small" />
                 </InputAdornment>
               ),
-              endAdornment: searchTerm && (
+              endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     size="small"
@@ -108,7 +118,22 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         )}
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      {/* Right: Search, Filter, AI, User */}
+      <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        {!showSearchField && (
+          <Tooltip title="Search events" arrow>
+            <IconButton onClick={() => setShowSearchField(true)}>
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        <PostFilter
+          activeCategories={activeCategories}
+          handleCategoryChange={handleCategoryChange}
+          categories={categories}
+        />
+
         <Tooltip title={showDiscovered ? "Hide BOT-Curated events" : "Show BOT-Curated events"} arrow>
           <IconButton
             onClick={onDiscoveredToggle}
@@ -119,13 +144,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             <AutoAwesomeIcon />
           </IconButton>
         </Tooltip>
-        {!showSearchField && (
-          <Tooltip title="Search events" arrow>
-            <IconButton onClick={() => setShowSearchField(true)}>
-              <SearchIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+
         <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>

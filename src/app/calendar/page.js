@@ -285,45 +285,56 @@ const CalendarPage = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start'
         }}>
-          {/* Row 1: Time, categories, organizer, shortTitle - LARGER */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '3px',
-            marginBottom: '1px'
-          }}>
-            {isAIDiscovered ? (
-              <>
-                {/* BOT-Curated Events: Show label, first category only, and shortTitle */}
+          {isAIDiscovered ? (
+            <>
+              {/* BOT-Curated Row 1: Robot + Category bubble + Title (bold) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                marginBottom: '1px'
+              }}>
+                <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
                   fontSize: '0.75rem',
                   fontWeight: 'bold',
-                  color: '#8B0000',
-                  flexShrink: 0
+                  color: '#333',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  flex: 1
                 }}>
-                  BOT-Curated
+                  {event.title}
                 </div>
-                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
-                {eventShortTitle && (
-                  <div style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold',
-                    color: '#333',
-                    overflow: 'visible',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 1,
-                    lineHeight: '1.0'
-                  }}>
-                    {eventShortTitle}
-                  </div>
+              </div>
+              {/* BOT-Curated Row 2: AI label + time + venue */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '0.65rem',
+                color: '#555'
+              }}>
+                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
+                {startTime && <span>· {startTime}</span>}
+                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
+                  <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
-              </>
-            ) : (
-              <>
-                {/* Regular Events: Show time, all categories, organizer, and shortTitle */}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Regular Events Row 1: Time, categories, organizer, shortTitle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                marginBottom: '1px'
+              }}>
                 {startTime && (
-                  <div style={{ 
-                    fontSize: '0.8rem', 
+                  <div style={{
+                    fontSize: '0.8rem',
                     lineHeight: '1.0',
                     flexShrink: 0
                   }}>
@@ -365,26 +376,25 @@ const CalendarPage = () => {
                     )}
                   </>
                 )}
-              </>
-            )}
-          </div>
-          
-          {/* Row 2: Event title with recurring indicator - SMALLER */}
-          <div style={{
-            fontSize: '0.65rem',
-            fontWeight: 'normal',
-            lineHeight: '1.1',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            flex: 1,
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
+              </div>
+              {/* Regular Events Row 2: Full title */}
+              <div style={{
+                fontSize: '0.65rem',
+                fontWeight: 'normal',
+                lineHeight: '1.1',
+                wordWrap: 'break-word',
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                overflowWrap: 'break-word',
+                hyphens: 'auto',
+                flex: 1,
+                color: '#555',
+                textDecoration: isCanceled ? 'line-through' : 'none'
+              }}>
+                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+              </div>
+            </>
+          )}
 
           {/* Row 3: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
@@ -424,44 +434,53 @@ const CalendarPage = () => {
           flexDirection: 'column',
           gap: '2px'
         }}>
-          {/* Row 1: Time range, category circles, organizer, shortTitle - LARGER */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            {isAIDiscovered ? (
-              <>
-                {/* BOT-Curated Events: Show label, first category only, and shortTitle */}
+          {isAIDiscovered ? (
+            <>
+              {/* BOT-Curated Row 1: Robot + Category bubble + Title (bold) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span style={{ color: '#C00', fontSize: '1rem' }}>🤖</span>
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
                   fontSize: '0.85rem',
                   fontWeight: 'bold',
-                  color: '#8B0000',
-                  flexShrink: 0
+                  color: '#333',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  flex: 1
                 }}>
-                  BOT-Curated
+                  {event.title}
                 </div>
-                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
-                {eventShortTitle && (
-                  <div style={{
-                    fontSize: '0.85rem',
-                    fontWeight: 'bold',
-                    color: '#333',
-                    overflow: 'visible',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 1,
-                    lineHeight: '1.2'
-                  }}>
-                    {eventShortTitle}
-                  </div>
+              </div>
+              {/* BOT-Curated Row 2: AI label + time + venue */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.75rem',
+                color: '#555'
+              }}>
+                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
+                {startTime && <span>· {startTime}</span>}
+                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
+                  <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
-              </>
-            ) : (
-              <>
-                {/* Regular Events: Show time, all categories, organizer, and shortTitle */}
-                {/* Time range */}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Regular Events Row 1: Time, categories, organizer, shortTitle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
                 {startTime && (
-                  <div style={{ 
+                  <div style={{
                     fontSize: '0.9rem',
                     lineHeight: '1.2',
                     flexShrink: 0
@@ -475,7 +494,6 @@ const CalendarPage = () => {
                     )}
                   </div>
                 )}
-                {/* Category circles */}
                 <CategoryCircles eventProps={event.extendedProps} />
                 {eventShortTitle && (
                   <>
@@ -510,25 +528,24 @@ const CalendarPage = () => {
                     )}
                   </>
                 )}
-              </>
-            )}
-          </div>
-          
-          {/* Row 2: Event title with recurring indicator - SMALLER */}
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 'normal',
-            lineHeight: '1.2',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
+              </div>
+              {/* Regular Events Row 2: Full title */}
+              <div style={{
+                fontSize: '0.7rem',
+                fontWeight: 'normal',
+                lineHeight: '1.2',
+                wordWrap: 'break-word',
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                overflowWrap: 'break-word',
+                hyphens: 'auto',
+                color: '#555',
+                textDecoration: isCanceled ? 'line-through' : 'none'
+              }}>
+                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+              </div>
+            </>
+          )}
 
           {/* Row 3: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (

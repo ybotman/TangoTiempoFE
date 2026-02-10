@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { 
-  Button, 
-  Popper, 
-  Paper, 
-  ClickAwayListener, 
+import {
+  IconButton,
+  Popper,
+  Paper,
+  ClickAwayListener,
   Box,
   Typography,
-  Grow
+  Grow,
+  Tooltip
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { categoryColors } from '@/utils/categoryColors';
 
 const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
@@ -83,35 +83,24 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
 
   return (
     <Box sx={{ position: 'relative' }}>
-      <Button
-        ref={anchorRef}
-        onClick={handleToggle}
-        endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        variant="outlined"
-        sx={{
-          borderColor: 'primary.main',
-          color: 'primary.main',
-          textTransform: 'none',
-          fontWeight: 500,
-          px: 2,
-          py: 0.5,
-          borderRadius: 2,
-          '&:hover': {
-            backgroundColor: 'primary.light',
-            borderColor: 'primary.dark',
-          }
-        }}
-      >
-        CATEGORIES
-      </Button>
+      <Tooltip title="Filter categories" arrow>
+        <IconButton
+          ref={anchorRef}
+          onClick={handleToggle}
+          sx={{
+            color: activeCategories.length > 0 ? 'primary.main' : 'action.active',
+          }}
+        >
+          <FilterListIcon />
+        </IconButton>
+      </Tooltip>
       
       <Popper
         open={open}
         anchorEl={anchorRef.current}
-        placement="bottom-start"
+        placement="bottom"
         transition
-        disablePortal
-        sx={{ zIndex: 1300 }}
+        sx={{ zIndex: 1400 }}
       >
         {({ TransitionProps }) => (
           <Grow {...TransitionProps} timeout={200}>

@@ -696,164 +696,40 @@ END OF FILE: YBOTBOT-SUCCESS-CRITERIA.md
 
 
 ================================================================================
-START OF FILE: YBOTBOT-TRACKING.md
+START OF FILE: JIRA-AND-TRACKING.md
 ================================================================================
 
-# TRACKING Definition
+# TRACKING = JIRA (via curl)
 
-This is an Important TRACKING terminology definition. Tracking is a generic term and needs to be defined. Here is where we define it.
+All references to "TRACKING" mean **JIRA via direct curl with macOS keychain auth**.
+- Project: TIEMPO
+- URL: https://hdtsllc.atlassian.net
+- **MCP removed** - use curl only
 
-All references to TRACKING mean "JIRA via direct curl/REST API". **MCP has been removed and must NOT be used.**
-
-## What TRACKING Means
-
-When any playbook, role, or instruction mentions:
-- "TRACKING"
-- "Track in TRACKING"
-- "TRACKING Integration"
-- "TRACKING tickets"
-- "TRACKING documentation"
-
-It specifically refers to:
-- **JIRA via direct curl with macOS keychain authentication**
-- The project key is TIEMPO
-- Cloud URL: https://hdtsllc.atlassian.net
-
-## TRACKING Requirements
-
-All TRACKING operations must:
-1. Use direct curl with macOS keychain auth
-2. Use `--data-urlencode` for JQL queries
-3. Reference project key TIEMPO
-
-## Tracking Implementation
-
-**Use direct curl with macOS keychain auth. Do NOT use MCP (removed).**
+## Quick Reference
 ```bash
 JIRA_EMAIL="toby.balsley@gmail.com"
 JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
-curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
-  --data-urlencode "jql=project=TIEMPO ORDER BY updated DESC" \
-  --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
-  "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
-```
 
-## Important Note
-
-MCP for JIRA has been fully removed. All JIRA access uses direct curl with macOS keychain credentials.
-
-================================================================================
-END OF FILE: YBOTBOT-TRACKING.md
-================================================================================
-
-
-================================================================================
-START OF FILE: JIRA-STRATEGY.md
-================================================================================
-
-# JIRA Access - Direct curl with macOS Keychain
-
-**MCP has been fully removed. Do NOT use MCP for JIRA.**
-
-## Method: Direct curl with macOS Keychain Auth
-
-```bash
-JIRA_EMAIL="toby.balsley@gmail.com"
-JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
-```
-
-### Search Issues
-```bash
+# Search
 curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
   --data-urlencode "jql=project=TIEMPO AND status not in (Done,Closed) ORDER BY updated DESC" \
   --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
   "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
-```
 
-### Get Issue Details
-```bash
+# Get issue
 curl -s -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
-  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-123?fields=summary,status,description"
-```
+  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-XXX?fields=summary,status,description"
 
-### Add Comment
-```bash
+# Add comment
 curl -s -X POST -u "$JIRA_EMAIL:$JIRA_TOKEN" \
   -H "Content-Type: application/json" -H "Accept: application/json" \
-  -d '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Your comment here"}]}]}}' \
-  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-123/comment"
+  -d '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Comment here"}]}]}}' \
+  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-XXX/comment"
 ```
 
 ================================================================================
-END OF FILE: JIRA-STRATEGY.md
-================================================================================
-
-
-================================================================================
-START OF FILE: SESSION-HANDOFF-PROTOCOL.md
-================================================================================
-
-# Session Startup Protocol (DO THIS FIRST)
-
-**On every session start, before doing anything else:**
-
-```bash
-# 1. Read your latest self-handoff
-LATEST_HANDOFF=$(ls -t /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/handoffs/sarah/*.md 2>/dev/null | head -1)
-[ -n "$LATEST_HANDOFF" ] && cat "$LATEST_HANDOFF"
-
-# 2. Check inbox for messages
-ls -lt /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/inbox/sarah/*.json 2>/dev/null | head -5
-
-# 3. Check broadcasts
-ls -lt /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/inbox/broadcast/*.json 2>/dev/null | head -3
-```
-
-**Then report to user**: What you were working on, any pending messages, recommended next steps.
-
----
-
-# /handoff Command (SESSION END)
-
-**When user says "done", "handoff", "goodbye", or session is ending:**
-
-Write a self-handoff file for your future self:
-
-```bash
-cat > /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/handoffs/sarah/session_$(date +%Y-%m-%dT%H-%M).md <<'HANDOFF'
-# Session Handoff: Sarah @ $(date +%Y-%m-%dT%H:%M)
-
-## Current Status
-{ONE_LINE_STATUS}
-
-## Active Ticket
-- **Ticket**: {JIRA_KEY or "None"}
-- **Status**: {in_progress|blocked|completed}
-
-## What I Did This Session
-- {BULLET_POINTS}
-
-## Next Session Should
-1. Check inbox for messages
-2. {NEXT_STEP}
-
-## Key Decisions Made
-- {DECISION}: {WHY}
-
-## Context for Future Me
-{IMPORTANT_CONTEXT_THAT_WOULD_BE_LOST}
-HANDOFF
-
-cd /Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages
-git add handoffs/
-git commit -m "Handoff: sarah @ $(date +%Y-%m-%d)"
-git push origin main
-```
-
-**Tell user**: "Handoff saved. Next session will pick up where we left off."
-
-================================================================================
-END OF FILE: SESSION-HANDOFF-PROTOCOL.md
+END OF FILE: JIRA-AND-TRACKING.md
 ================================================================================
 
 
