@@ -294,29 +294,30 @@ const CalendarPage = () => {
           }}>
             {isAIDiscovered ? (
               <>
-                {/* BOT-Curated Events: Show label, first category only, and shortTitle */}
-                <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#8B0000',
-                  flexShrink: 0
-                }}>
-                  BOT-Curated
-                </div>
-                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
-                {eventShortTitle && (
+                {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
+                {startTime ? (
                   <div style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold',
-                    color: '#333',
-                    overflow: 'visible',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 1,
-                    lineHeight: '1.0'
+                    fontSize: '0.8rem',
+                    lineHeight: '1.0',
+                    flexShrink: 0
                   }}>
-                    {eventShortTitle}
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                    <span style={{ marginLeft: '2px' }}>🤖</span>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '0.85rem' }}>🤖</span>
+                )}
+                {event.extendedProps?.venueCity && (
+                  <div style={{
+                    fontSize: '0.7rem',
+                    color: '#555',
+                    flexShrink: 0,
+                    marginLeft: '3px'
+                  }}>
+                    {event.extendedProps.venueCity}
                   </div>
                 )}
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
               </>
             ) : (
               <>
