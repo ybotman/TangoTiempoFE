@@ -696,107 +696,40 @@ END OF FILE: YBOTBOT-SUCCESS-CRITERIA.md
 
 
 ================================================================================
-START OF FILE: YBOTBOT-TRACKING.md
+START OF FILE: JIRA-AND-TRACKING.md
 ================================================================================
 
-# TRACKING Definition
+# TRACKING = JIRA (via curl)
 
-This is an Important TRACKING terminology definition. Tracking is a generic term and needs to be defined. Here is where we define it.
+All references to "TRACKING" mean **JIRA via direct curl with macOS keychain auth**.
+- Project: TIEMPO
+- URL: https://hdtsllc.atlassian.net
+- **MCP removed** - use curl only
 
-All references to TRACKING mean "JIRA via direct curl/REST API". **MCP has been removed and must NOT be used.**
-
-## What TRACKING Means
-
-When any playbook, role, or instruction mentions:
-- "TRACKING"
-- "Track in TRACKING"
-- "TRACKING Integration"
-- "TRACKING tickets"
-- "TRACKING documentation"
-
-It specifically refers to:
-- **JIRA via direct curl with macOS keychain authentication**
-- The project key is TIEMPO
-- Cloud URL: https://hdtsllc.atlassian.net
-
-## TRACKING Requirements
-
-All TRACKING operations must:
-1. Use direct curl with macOS keychain auth
-2. Use `--data-urlencode` for JQL queries
-3. Reference project key TIEMPO
-
-## Tracking Implementation
-
-**Use direct curl with macOS keychain auth. Do NOT use MCP (removed).**
+## Quick Reference
 ```bash
 JIRA_EMAIL="toby.balsley@gmail.com"
 JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
-curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
-  --data-urlencode "jql=project=TIEMPO ORDER BY updated DESC" \
-  --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
-  "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
-```
 
-## Important Note
-
-MCP for JIRA has been fully removed. All JIRA access uses direct curl with macOS keychain credentials.
-
-================================================================================
-END OF FILE: YBOTBOT-TRACKING.md
-================================================================================
-
-
-================================================================================
-START OF FILE: GIT-Strategy.md
-================================================================================
-
-[FILE NOT FOUND: ./playbooks/external/github/GIT-Strategy.md]
-
-================================================================================
-END OF FILE: GIT-Strategy.md
-================================================================================
-
-
-================================================================================
-START OF FILE: JIRA-STRATEGY.md
-================================================================================
-
-# JIRA Access - Direct curl with macOS Keychain
-
-**MCP has been fully removed. Do NOT use MCP for JIRA.**
-
-## Method: Direct curl with macOS Keychain Auth
-
-```bash
-JIRA_EMAIL="toby.balsley@gmail.com"
-JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
-```
-
-### Search Issues
-```bash
+# Search
 curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
   --data-urlencode "jql=project=TIEMPO AND status not in (Done,Closed) ORDER BY updated DESC" \
   --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
   "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
-```
 
-### Get Issue Details
-```bash
+# Get issue
 curl -s -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
-  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-123?fields=summary,status,description"
-```
+  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-XXX?fields=summary,status,description"
 
-### Add Comment
-```bash
+# Add comment
 curl -s -X POST -u "$JIRA_EMAIL:$JIRA_TOKEN" \
   -H "Content-Type: application/json" -H "Accept: application/json" \
-  -d '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Your comment here"}]}]}}' \
-  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-123/comment"
+  -d '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Comment here"}]}]}}' \
+  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-XXX/comment"
 ```
 
 ================================================================================
-END OF FILE: JIRA-STRATEGY.md
+END OF FILE: JIRA-AND-TRACKING.md
 ================================================================================
 
 

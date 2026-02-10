@@ -1,5 +1,6 @@
 // app/contexts/AuthContext.js
 // Migration: Quinn - 2026-01-22 - Now uses apiUrlResolver for BE/AF switching
+// TIEMPO-368: Added version check on login to prevent stale client code issues
 
 'use client';
 
@@ -28,6 +29,48 @@ import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 // Create Auth Context
 export const AuthContext = createContext();
 
+// TIEMPO-368: Version check to prevent stale client code issues
+// Store the version loaded when the page first rendered
+let clientLoadedVersion = null;
+
+const checkVersionAndReloadIfStale = async () => {
+  try {
+    // Fetch the current server version (cache-busted)
+    const response = await fetch(`/version.json?t=${Date.now()}`);
+    if (!response.ok) {
+      console.warn('[TIEMPO-368] Could not fetch version.json, skipping version check');
+      return;
+    }
+
+    const serverVersion = await response.json();
+    console.log('[TIEMPO-368] Server version:', serverVersion.version, 'built at', serverVersion.buildTime);
+
+    // If this is the first check, store the version
+    if (!clientLoadedVersion) {
+      clientLoadedVersion = serverVersion;
+      console.log('[TIEMPO-368] Client version initialized:', clientLoadedVersion.version);
+      return;
+    }
+
+    // Compare versions
+    if (serverVersion.version !== clientLoadedVersion.version ||
+        serverVersion.buildTimestamp !== clientLoadedVersion.buildTimestamp) {
+      console.log('[TIEMPO-368] ⚠️ VERSION MISMATCH DETECTED!');
+      console.log('[TIEMPO-368] Client has:', clientLoadedVersion.version, '(built', clientLoadedVersion.buildTime, ')');
+      console.log('[TIEMPO-368] Server has:', serverVersion.version, '(built', serverVersion.buildTime, ')');
+      console.log('[TIEMPO-368] 🔄 FORCING PAGE REFRESH to get latest code...');
+
+      // Force reload to get fresh code
+      window.location.reload();
+    } else {
+      console.log('[TIEMPO-368] ✅ Version check passed - client is up to date');
+    }
+  } catch (error) {
+    console.warn('[TIEMPO-368] Version check failed:', error.message);
+    // Don't block login if version check fails
+  }
+};
+
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Unified user state
@@ -37,6 +80,9 @@ export const AuthProvider = ({ children }) => {
   const signUpOngoing = useRef(false);
 
   useEffect(() => {
+    // TIEMPO-368: Initialize version on app load
+    checkVersionAndReloadIfStale();
+
 // TIEMPO-276: Security cleanup - removed logging
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
 // TIEMPO-276: Security cleanup - removed logging
@@ -149,8 +195,6 @@ export const AuthProvider = ({ children }) => {
 
       const backendInfo = response.data;
 
-      // Temporary debug for RA permissions
-      console.log('[AUTH DEBUG] backendInfo.localAdminInfo:', backendInfo.localAdminInfo);
       
       // Check if regionalOrganizerInfo is properly populated
       if (backendInfo.regionalOrganizerInfo && backendInfo.regionalOrganizerInfo.organizerId) {
@@ -193,7 +237,12 @@ export const AuthProvider = ({ children }) => {
 // TIEMPO-276: Security cleanup - removed logging
         setSelectedRole(mergedUser.roles[0] || '');
       }
-      
+
+      // TIEMPO-368: Check version after successful login
+      // If client code is stale, this will force a refresh
+      console.log('[TIEMPO-368] Login successful, checking for stale client code...');
+      await checkVersionAndReloadIfStale();
+
 // TIEMPO-276: Security cleanup - removed logging
     } catch (err) {
       console.error('Error fetching combined user data:', err);
