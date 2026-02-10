@@ -81,11 +81,16 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             autoFocus
             sx={{
               width: '100%',
-              maxWidth: '300px',
+              maxWidth: '280px',
               transition: 'all 0.2s ease',
               '& .MuiOutlinedInput-root': {
-                borderRadius: '20px',
-                height: '36px',
+                borderRadius: '16px',
+                height: '32px',
+                fontSize: '0.85rem',
+              },
+              '& .MuiOutlinedInput-input': {
+                padding: '6px 0',
+                fontSize: '0.85rem',
               }
             }}
             InputProps={{
