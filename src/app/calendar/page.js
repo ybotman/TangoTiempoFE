@@ -295,17 +295,16 @@ const CalendarPage = () => {
             {isAIDiscovered ? (
               <>
                 {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
-                {startTime ? (
+                <span style={{ fontSize: '0.85rem', color: '#C00' }}>🤖</span>
+                {startTime && (
                   <div style={{
                     fontSize: '0.8rem',
                     lineHeight: '1.0',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    color: '#C00'
                   }}>
                     <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                    <span style={{ marginLeft: '2px' }}>🤖</span>
                   </div>
-                ) : (
-                  <span style={{ fontSize: '0.85rem' }}>🤖</span>
                 )}
                 {event.extendedProps?.venueCity && (
                   <div style={{
@@ -434,17 +433,16 @@ const CalendarPage = () => {
             {isAIDiscovered ? (
               <>
                 {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
-                {startTime ? (
+                <span style={{ fontSize: '1rem', color: '#C00' }}>🤖</span>
+                {startTime && (
                   <div style={{
                     fontSize: '0.9rem',
                     lineHeight: '1.2',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    color: '#C00'
                   }}>
                     <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                    <span style={{ marginLeft: '3px' }}>🤖</span>
                   </div>
-                ) : (
-                  <span style={{ fontSize: '1rem' }}>🤖</span>
                 )}
                 {event.extendedProps?.venueCity && (
                   <div style={{

@@ -170,9 +170,12 @@ const BostonCalendarPage = () => {
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
-    
+
     // Check for canceled events
     const isCanceled = event.extendedProps?.eventStatus === 'canceled';
+
+    // Check if this is an AI-discovered event
+    const isAIDiscovered = event.extendedProps?.isDiscovered === true;
     
     // Get organizer short name (normal text) - check both Boston and Main calendar fields
     const organizerShort = event.extendedProps?.organizerShort ||
@@ -209,51 +212,81 @@ const BostonCalendarPage = () => {
             gap: '3px',
             marginBottom: '1px'
           }}>
-            {/* Time display */}
-            {startTime && (
-              <div style={{
-                fontSize: '0.8rem',
-                lineHeight: '1.0',
-                flexShrink: 0,
-                whiteSpace: 'nowrap',
-                color: '#000'  // Explicitly set black color for time text
-              }}>
-                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
-              </div>
-            )}
-            {/* Category bubbles */}
-            <CategoryCircles eventProps={event.extendedProps} />
-            {/* ShortTitle and Organizer - matching main calendar exactly */}
-            {eventShortTitle && (
+            {isAIDiscovered ? (
               <>
-                <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#333',
-                  overflow: 'visible',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 1,
-                  lineHeight: '1.0',
-                  textDecoration: isCanceled ? 'line-through' : 'none'
-                }}>
-                  {eventShortTitle}
-                </div>
-                {organizerShort && (
+                {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
+                <span style={{ fontSize: '0.85rem', color: '#C00' }}>🤖</span>
+                {startTime && (
+                  <div style={{
+                    fontSize: '0.8rem',
+                    lineHeight: '1.0',
+                    flexShrink: 0,
+                    color: '#C00'
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                  </div>
+                )}
+                {event.extendedProps?.venueCity && (
+                  <div style={{
+                    fontSize: '0.7rem',
+                    color: '#555',
+                    flexShrink: 0,
+                    marginLeft: '3px'
+                  }}>
+                    {event.extendedProps.venueCity}
+                  </div>
+                )}
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
+              </>
+            ) : (
+              <>
+                {/* Regular Events: Time display */}
+                {startTime && (
+                  <div style={{
+                    fontSize: '0.8rem',
+                    lineHeight: '1.0',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    color: '#000'
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                    {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
+                  </div>
+                )}
+                {/* Category bubbles */}
+                <CategoryCircles eventProps={event.extendedProps} />
+                {/* ShortTitle and Organizer */}
+                {eventShortTitle && (
                   <>
-                    <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
                     <div style={{
                       fontSize: '0.75rem',
-                      fontWeight: 'normal',
-                      color: '#666',
+                      fontWeight: 'bold',
+                      color: '#333',
                       overflow: 'visible',
                       whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.0',
                       textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {organizerShort}
+                      {eventShortTitle}
                     </div>
+                    {organizerShort && (
+                      <>
+                        <span style={{ fontSize: '0.75rem', color: '#666' }}> | </span>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 'normal',
+                          color: '#666',
+                          overflow: 'visible',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 1,
+                          lineHeight: '1.0',
+                          textDecoration: isCanceled ? 'line-through' : 'none'
+                        }}>
+                          {organizerShort}
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </>
@@ -322,55 +355,84 @@ const BostonCalendarPage = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            flexWrap: isMobile ? 'wrap' : 'nowrap'  // Enable wrapping on mobile
+            flexWrap: isMobile ? 'wrap' : 'nowrap'
           }}>
-            {/* Time range - matching main calendar */}
-            {startTime && (
-              <div style={{
-                fontSize: '0.9rem',
-                lineHeight: '1.2',
-                flexShrink: 0
-              }}>
-                <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                {endTime && (
-                  <>
-                    <span> - </span>
-                    <span style={{ fontWeight: 'normal' }}>{endTime}</span>
-                  </>
-                )}
-              </div>
-            )}
-            {/* Category circles */}
-            <CategoryCircles eventProps={event.extendedProps} />
-            {eventShortTitle && (
+            {isAIDiscovered ? (
               <>
-                <div style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: '#333',
-                  overflow: 'visible',
-                  whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
-                  flexShrink: 1,
-                  lineHeight: '1.2',
-                  textDecoration: isCanceled ? 'line-through' : 'none'
-                }}>
-                  {eventShortTitle}
-                </div>
-                {organizerShort && (
+                {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
+                <span style={{ fontSize: '1rem', color: '#C00' }}>🤖</span>
+                {startTime && (
+                  <div style={{
+                    fontSize: '0.9rem',
+                    lineHeight: '1.2',
+                    flexShrink: 0,
+                    color: '#C00'
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                  </div>
+                )}
+                {event.extendedProps?.venueCity && (
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: '#555',
+                    flexShrink: 0
+                  }}>
+                    {event.extendedProps.venueCity}
+                  </div>
+                )}
+                <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
+              </>
+            ) : (
+              <>
+                {/* Regular Events: Time range */}
+                {startTime && (
+                  <div style={{
+                    fontSize: '0.9rem',
+                    lineHeight: '1.2',
+                    flexShrink: 0
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
+                    {endTime && (
+                      <>
+                        <span> - </span>
+                        <span style={{ fontWeight: 'normal' }}>{endTime}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                {/* Category circles */}
+                <CategoryCircles eventProps={event.extendedProps} />
+                {eventShortTitle && (
                   <>
-                    <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
                     <div style={{
                       fontSize: '0.85rem',
-                      fontWeight: 'normal',
-                      color: '#666',
+                      fontWeight: 'bold',
+                      color: '#333',
                       overflow: 'visible',
-                      whiteSpace: isMobile ? 'normal' : 'nowrap',  // Allow wrapping on mobile
+                      whiteSpace: isMobile ? 'normal' : 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
                     }}>
-                      {organizerShort}
+                      {eventShortTitle}
                     </div>
+                    {organizerShort && (
+                      <>
+                        <span style={{ fontSize: '0.85rem', color: '#666' }}> | </span>
+                        <div style={{
+                          fontSize: '0.85rem',
+                          fontWeight: 'normal',
+                          color: '#666',
+                          overflow: 'visible',
+                          whiteSpace: isMobile ? 'normal' : 'nowrap',
+                          flexShrink: 1,
+                          lineHeight: '1.2',
+                          textDecoration: isCanceled ? 'line-through' : 'none'
+                        }}>
+                          {organizerShort}
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </>
