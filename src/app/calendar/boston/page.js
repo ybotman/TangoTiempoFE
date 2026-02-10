@@ -228,7 +228,7 @@ const BostonCalendarPage = () => {
                   {event.title}
                 </div>
               </div>
-              {/* BOT-Curated Row 2: time + venue */}
+              {/* BOT-Curated Row 2: AI label + time + venue */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -236,7 +236,8 @@ const BostonCalendarPage = () => {
                 fontSize: '0.65rem',
                 color: '#555'
               }}>
-                {startTime && <span>{startTime}</span>}
+                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
+                {startTime && <span>· {startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
@@ -379,7 +380,7 @@ const BostonCalendarPage = () => {
                   {event.title}
                 </div>
               </div>
-              {/* BOT-Curated Row 2: time + venue */}
+              {/* BOT-Curated Row 2: AI label + time + venue */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -387,7 +388,8 @@ const BostonCalendarPage = () => {
                 fontSize: '0.75rem',
                 color: '#555'
               }}>
-                {startTime && <span>{startTime}</span>}
+                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
+                {startTime && <span>· {startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
