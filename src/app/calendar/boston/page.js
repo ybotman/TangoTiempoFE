@@ -205,42 +205,52 @@ const BostonCalendarPage = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start'
         }}>
-          {/* Row 1: Time | Categories | Organizer (normal) | Venue (bold) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '3px',
-            marginBottom: '1px'
-          }}>
-            {isAIDiscovered ? (
-              <>
-                {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
-                <span style={{ fontSize: '0.85rem', color: '#C00' }}>🤖</span>
-                {startTime && (
-                  <div style={{
-                    fontSize: '0.8rem',
-                    lineHeight: '1.0',
-                    flexShrink: 0,
-                    color: '#C00'
-                  }}>
-                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                  </div>
-                )}
-                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
-                  <div style={{
-                    fontSize: '0.7rem',
-                    color: '#555',
-                    flexShrink: 0,
-                    marginLeft: '3px'
-                  }}>
-                    {event.extendedProps.venueName || event.extendedProps.venueCityName}
-                  </div>
-                )}
+          {isAIDiscovered ? (
+            <>
+              {/* BOT-Curated Row 1: Category bubble + Title (bold) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                marginBottom: '1px'
+              }}>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
-              </>
-            ) : (
-              <>
-                {/* Regular Events: Time display */}
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  color: '#333',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  flex: 1
+                }}>
+                  {event.title}
+                </div>
+              </div>
+              {/* BOT-Curated Row 2: Robot (red) + time + venue */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '0.65rem',
+                color: '#555'
+              }}>
+                <span style={{ color: '#C00' }}>🤖</span>
+                {startTime && <span>{startTime}</span>}
+                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
+                  <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Regular Events Row 1 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                marginBottom: '1px'
+              }}>
                 {startTime && (
                   <div style={{
                     fontSize: '0.8rem',
@@ -253,9 +263,7 @@ const BostonCalendarPage = () => {
                     {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
                   </div>
                 )}
-                {/* Category bubbles */}
                 <CategoryCircles eventProps={event.extendedProps} />
-                {/* ShortTitle and Organizer */}
                 {eventShortTitle && (
                   <>
                     <div style={{
@@ -289,26 +297,25 @@ const BostonCalendarPage = () => {
                     )}
                   </>
                 )}
-              </>
-            )}
-          </div>
-          
-          {/* Row 2: Event title - with wrapping */}
-          <div style={{
-            fontSize: '0.65rem',
-            fontWeight: 'normal',
-            lineHeight: '1.1',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            flex: 1,
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
+              </div>
+              {/* Regular Events Row 2 */}
+              <div style={{
+                fontSize: '0.65rem',
+                fontWeight: 'normal',
+                lineHeight: '1.1',
+                wordWrap: 'break-word',
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                overflowWrap: 'break-word',
+                hyphens: 'auto',
+                flex: 1,
+                color: '#555',
+                textDecoration: isCanceled ? 'line-through' : 'none'
+              }}>
+                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+              </div>
+            </>
+          )}
 
           {/* Row 3: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
@@ -350,41 +357,51 @@ const BostonCalendarPage = () => {
           flexDirection: 'column',
           gap: '2px'
         }}>
-          {/* Row 1: Time range, category circles, organizer, shortTitle - LARGER */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            flexWrap: isMobile ? 'wrap' : 'nowrap'
-          }}>
-            {isAIDiscovered ? (
-              <>
-                {/* BOT-Curated Events: Time+Robot, City, Category bubble */}
-                <span style={{ fontSize: '1rem', color: '#C00' }}>🤖</span>
-                {startTime && (
-                  <div style={{
-                    fontSize: '0.9rem',
-                    lineHeight: '1.2',
-                    flexShrink: 0,
-                    color: '#C00'
-                  }}>
-                    <span style={{ fontWeight: 'bold' }}>{startTime}</span>
-                  </div>
-                )}
-                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
-                  <div style={{
-                    fontSize: '0.8rem',
-                    color: '#555',
-                    flexShrink: 0
-                  }}>
-                    {event.extendedProps.venueName || event.extendedProps.venueCityName}
-                  </div>
-                )}
+          {isAIDiscovered ? (
+            <>
+              {/* BOT-Curated Row 1: Category bubble + Title (bold) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
-              </>
-            ) : (
-              <>
-                {/* Regular Events: Time range */}
+                <div style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  color: '#333',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  flex: 1
+                }}>
+                  {event.title}
+                </div>
+              </div>
+              {/* BOT-Curated Row 2: Robot (red) + time + venue */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.75rem',
+                color: '#555'
+              }}>
+                <span style={{ color: '#C00' }}>🤖</span>
+                {startTime && <span>{startTime}</span>}
+                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
+                  <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Regular Events Row 1 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: isMobile ? 'wrap' : 'nowrap'
+              }}>
                 {startTime && (
                   <div style={{
                     fontSize: '0.9rem',
@@ -400,7 +417,6 @@ const BostonCalendarPage = () => {
                     )}
                   </div>
                 )}
-                {/* Category circles */}
                 <CategoryCircles eventProps={event.extendedProps} />
                 {eventShortTitle && (
                   <>
@@ -435,25 +451,24 @@ const BostonCalendarPage = () => {
                     )}
                   </>
                 )}
-              </>
-            )}
-          </div>
-
-          {/* Row 2: Event title with recurring indicator - SMALLER */}
-          <div style={{
-            fontSize: '0.7rem',
-            fontWeight: 'normal',
-            lineHeight: '1.2',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            whiteSpace: 'normal',
-            overflowWrap: 'break-word',
-            hyphens: 'auto',
-            color: '#555',
-            textDecoration: isCanceled ? 'line-through' : 'none'
-          }}>
-            {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-          </div>
+              </div>
+              {/* Regular Events Row 2 */}
+              <div style={{
+                fontSize: '0.7rem',
+                fontWeight: 'normal',
+                lineHeight: '1.2',
+                wordWrap: 'break-word',
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                overflowWrap: 'break-word',
+                hyphens: 'auto',
+                color: '#555',
+                textDecoration: isCanceled ? 'line-through' : 'none'
+              }}>
+                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
+              </div>
+            </>
+          )}
 
           {/* Row 3: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
