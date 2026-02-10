@@ -195,8 +195,6 @@ export const AuthProvider = ({ children }) => {
 
       const backendInfo = response.data;
 
-      // Temporary debug for RA permissions
-      console.log('[AUTH DEBUG] backendInfo.localAdminInfo:', backendInfo.localAdminInfo);
       
       // Check if regionalOrganizerInfo is properly populated
       if (backendInfo.regionalOrganizerInfo && backendInfo.regionalOrganizerInfo.organizerId) {

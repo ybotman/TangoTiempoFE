@@ -56,7 +56,6 @@ export const useServiceHealth = () => {
     // Check if health checks are disabled via .env.local flag
     // Set NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS=true to disable (reduces CORS/localhost noise)
     if (process.env.NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS === 'true') {
-      console.log('[ServiceHealth] Health checks disabled via NEXT_PUBLIC_DISABLE_SERVICE_HEALTH_CHECKS flag');
       // Set all services to disabled status
       setServices(prev => ({
         expressBackend: { ...prev.expressBackend, status: 'disabled', detail: 'Disabled by flag' },
@@ -90,7 +89,6 @@ export const useServiceHealth = () => {
       checkGoogleGeoAPI();
       checkAzureFunctions();
     } else {
-      console.log('[ServiceHealth] Skipping Azure Functions checks on localhost');
       setServices(prev => ({
         ...prev,
         googleGeoAPI: {
