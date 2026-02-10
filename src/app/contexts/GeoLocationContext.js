@@ -425,8 +425,6 @@ export const GeoLocationProvider = ({ children }) => {
   const saveToCloudDefault = useCallback(async (locationData, firebaseToken) => {
     // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      console.log('[GeoLocationContext] Skipping Cloud Default save on localhost - Azure Functions not running');
-
       // Still update local state and sessionStorage for localhost testing
       const location = {
         lat: locationData.lat,
@@ -516,8 +514,6 @@ export const GeoLocationProvider = ({ children }) => {
   const fetchMapCenter = useCallback(async (firebaseToken) => {
     // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      console.log('[GeoLocationContext] Skipping Cloud Default fetch on localhost - Azure Functions not running');
-
       // Check sessionStorage for locally saved location
       const savedLocal = sessionStorage.getItem('currentLocation');
       if (savedLocal) {
@@ -568,7 +564,6 @@ export const GeoLocationProvider = ({ children }) => {
         return location;
       } else if (result.success && !result.data) {
         // User has no saved location - use defaults
-        console.log('[GeoLocationContext] No saved map center found, using defaults');
         return null;
       } else {
         // Error response
