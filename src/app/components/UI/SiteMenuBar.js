@@ -71,7 +71,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden',
         minWidth: 0,
       }}>
         {!showSearchField && (

@@ -98,10 +98,9 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
       <Popper
         open={open}
         anchorEl={anchorRef.current}
-        placement="bottom-start"
+        placement="bottom"
         transition
-        disablePortal
-        sx={{ zIndex: 1300 }}
+        sx={{ zIndex: 1400 }}
       >
         {({ TransitionProps }) => (
           <Grow {...TransitionProps} timeout={200}>
