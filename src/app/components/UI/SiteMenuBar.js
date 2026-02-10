@@ -119,16 +119,13 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
 
       {/* Right: Search, Filter, AI, User */}
       <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-        <Tooltip title={showSearchField ? "Close search" : "Search events"} arrow>
-          <IconButton onClick={() => {
-            if (showSearchField) {
-              onSearchChange?.('');
-            }
-            setShowSearchField(!showSearchField);
-          }}>
-            {showSearchField ? <CloseIcon /> : <SearchIcon />}
-          </IconButton>
-        </Tooltip>
+        {!showSearchField && (
+          <Tooltip title="Search events" arrow>
+            <IconButton onClick={() => setShowSearchField(true)}>
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
+        )}
 
         <PostFilter
           activeCategories={activeCategories}
