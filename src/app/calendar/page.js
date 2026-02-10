@@ -306,14 +306,14 @@ const CalendarPage = () => {
                     <span style={{ fontWeight: 'bold' }}>{startTime}</span>
                   </div>
                 )}
-                {event.extendedProps?.venueCity && (
+                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <div style={{
                     fontSize: '0.7rem',
                     color: '#555',
                     flexShrink: 0,
                     marginLeft: '3px'
                   }}>
-                    {event.extendedProps.venueCity}
+                    {event.extendedProps.venueName || event.extendedProps.venueCityName}
                   </div>
                 )}
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
@@ -444,13 +444,13 @@ const CalendarPage = () => {
                     <span style={{ fontWeight: 'bold' }}>{startTime}</span>
                   </div>
                 )}
-                {event.extendedProps?.venueCity && (
+                {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <div style={{
                     fontSize: '0.8rem',
                     color: '#555',
                     flexShrink: 0
                   }}>
-                    {event.extendedProps.venueCity}
+                    {event.extendedProps.venueName || event.extendedProps.venueCityName}
                   </div>
                 )}
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
