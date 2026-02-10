@@ -80,8 +80,9 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             onChange={(e) => onSearchChange?.(e.target.value)}
             autoFocus
             sx={{
-              width: '100%',
-              maxWidth: '280px',
+              flex: 1,
+              maxWidth: '400px',
+              mx: 1,
               transition: 'all 0.2s ease',
               '& .MuiOutlinedInput-root': {
                 borderRadius: '16px',
