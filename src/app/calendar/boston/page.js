@@ -207,13 +207,14 @@ const BostonCalendarPage = () => {
         }}>
           {isAIDiscovered ? (
             <>
-              {/* BOT-Curated Row 1: Category bubble + Title (bold) */}
+              {/* BOT-Curated Row 1: Robot + Category bubble + Title (bold) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '3px',
                 marginBottom: '1px'
               }}>
+                <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
                   fontSize: '0.75rem',
@@ -227,7 +228,7 @@ const BostonCalendarPage = () => {
                   {event.title}
                 </div>
               </div>
-              {/* BOT-Curated Row 2: Robot (red) + time + venue */}
+              {/* BOT-Curated Row 2: time + venue */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -235,7 +236,6 @@ const BostonCalendarPage = () => {
                 fontSize: '0.65rem',
                 color: '#555'
               }}>
-                <span style={{ color: '#C00' }}>🤖</span>
                 {startTime && <span>{startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
@@ -359,12 +359,13 @@ const BostonCalendarPage = () => {
         }}>
           {isAIDiscovered ? (
             <>
-              {/* BOT-Curated Row 1: Category bubble + Title (bold) */}
+              {/* BOT-Curated Row 1: Robot + Category bubble + Title (bold) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px'
               }}>
+                <span style={{ color: '#C00', fontSize: '1rem' }}>🤖</span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
                   fontSize: '0.85rem',
@@ -378,7 +379,7 @@ const BostonCalendarPage = () => {
                   {event.title}
                 </div>
               </div>
-              {/* BOT-Curated Row 2: Robot (red) + time + venue */}
+              {/* BOT-Curated Row 2: time + venue */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -386,7 +387,6 @@ const BostonCalendarPage = () => {
                 fontSize: '0.75rem',
                 color: '#555'
               }}>
-                <span style={{ color: '#C00' }}>🤖</span>
                 {startTime && <span>{startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
