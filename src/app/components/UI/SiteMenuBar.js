@@ -65,23 +65,13 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         </IconButton>
       </Box>
 
-      {/* Center: Categories (shrinks when search open) */}
+      {/* Center: Search field when open */}
       <Box sx={{
         flexGrow: 1,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minWidth: 0,
       }}>
-        {!showSearchField && (
-          <PostFilter
-            activeCategories={activeCategories}
-            handleCategoryChange={handleCategoryChange}
-            categories={categories}
-          />
-        )}
-
-        {/* Search field expands into center area */}
         {showSearchField && (
           <TextField
             size="small"
@@ -91,7 +81,8 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             autoFocus
             sx={{
               width: '100%',
-              maxWidth: '280px',
+              maxWidth: '300px',
+              transition: 'all 0.2s ease',
               '& .MuiOutlinedInput-root': {
                 borderRadius: '20px',
                 height: '36px',
@@ -121,8 +112,14 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         )}
       </Box>
 
-      {/* Right: AI, Search toggle, User */}
+      {/* Right: Filter, AI, Search toggle, User */}
       <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <PostFilter
+          activeCategories={activeCategories}
+          handleCategoryChange={handleCategoryChange}
+          categories={categories}
+        />
+
         <Tooltip title={showDiscovered ? "Hide BOT-Curated events" : "Show BOT-Curated events"} arrow>
           <IconButton
             onClick={onDiscoveredToggle}
