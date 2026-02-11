@@ -9,6 +9,7 @@ import { dedupeFetch } from '@/utils/dedupeFetch';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 export function useVenues(options = {}) {
+  // skipLocationFilter: true = fetch ALL venues but still sort by distance from map center
   const { skipLocationFilter = false } = options;
   const [venues, setVenues] = useState([]);
   const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ export function useVenues(options = {}) {
   // TIEMPO-276: Get savedLocation/currentLocation for coordinate-based filtering
   const { savedLocation, currentLocation } = useGeoLocation();
 
-  // Fetch venues based on current location (or all if skipLocationFilter)
+  // Fetch venues based on current location
   const fetchVenues = useCallback(async (isActive = null, location = null) => {
     setLoading(true);
     setError(null);
@@ -26,27 +27,28 @@ export function useVenues(options = {}) {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const params = { appId };
 
-      // Skip location filtering if requested (fetch ALL venues)
-      if (!skipLocationFilter) {
-        // TIEMPO-276: Always use user's location and range from context
-        // Use passed location first, then currentLocation or savedLocation for coordinates
-        const coordLocation = location || currentLocation || savedLocation;
+      // TIEMPO-276: Always use user's location for sorting
+      const coordLocation = location || currentLocation || savedLocation;
 
-        // Add distance-based parameters if location available
-        if (coordLocation) {
-          // Handle both coordinate formats (lat/lng and latitude/longitude)
-          const lat = coordLocation.lat || coordLocation.latitude;
-          const lng = coordLocation.lng || coordLocation.longitude;
+      // Add location parameters if available
+      if (coordLocation) {
+        // Handle both coordinate formats (lat/lng and latitude/longitude)
+        const lat = coordLocation.lat || coordLocation.latitude;
+        const lng = coordLocation.lng || coordLocation.longitude;
 
-          if (lat && lng) {
-            params.lat = lat;
-            params.lng = lng;
+        if (lat && lng) {
+          params.lat = lat;
+          params.lng = lng;
+          params.sortByDistance = true; // Sort by closest first
+
+          // Only add radius filter if NOT skipping location filter
+          if (!skipLocationFilter) {
             // Use zoomRange from context (user's saved preference) or radius from location
             // Defensive fallback to 50 miles if undefined (prevents "undefinedmi" bug)
             const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
             params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
-            params.sortByDistance = true; // Sort by closest first
           }
+          // When skipLocationFilter=true: no radius = ALL venues, but sorted by distance
         }
       }
       

@@ -23,8 +23,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
     ),
     [allCategories]
   );
-  // Fetch ALL venues for event creation (no location filter) - use type-ahead for usability
-  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues({ skipLocationFilter: true });
+  // Fetch venues within user's map center range - same as calendar view
+  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues();
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   // TIEMPO-325: Fetch ALL organizers for dropdown (no filtering) - use type-ahead for usability
@@ -633,7 +633,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
                   variant="outlined"
                   required
                   error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
-                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `${venues.length} venues available`}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `${venues.length} venues within your map range`}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
