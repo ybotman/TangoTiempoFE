@@ -30,6 +30,7 @@ export default [
       ...pluginReact.configs.recommended.rules, // Load recommended React rules directly
       ...pluginReactHooks.configs.recommended.rules, // Load recommended React Hooks rules
       'react/react-in-jsx-scope': 'off', // Override JSX scope rule
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }], // Allow underscore-prefixed unused vars
     },
   },
   
