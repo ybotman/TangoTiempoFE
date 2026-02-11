@@ -77,6 +77,7 @@ const VenueMap = ({ latitude, longitude, venueName, address }) => {
         setMounted(true);
       }, 100);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latitude, longitude]);
 
   // Validate coordinates

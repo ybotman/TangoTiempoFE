@@ -52,7 +52,7 @@ export const useUserLogins = () => {
         prev.map((u) => (u.firebaseUserId === user.firebaseUserId ? { ...u, roleIds: updatedRoleIds } : u))
       );
     },
-    [userLogins]
+    []
   );
 
   const handleFieldChange = useCallback(
@@ -63,7 +63,7 @@ export const useUserLogins = () => {
         )
       );
     },
-    [userLogins]
+    []
   );
 
   const handleOrganizerChange = useCallback(
@@ -82,7 +82,7 @@ export const useUserLogins = () => {
         )
       );
     },
-    [userLogins]
+    []
   );
 
   const handleApprovalChange = useCallback(
@@ -101,7 +101,7 @@ export const useUserLogins = () => {
         )
       );
     },
-    [userLogins]
+    []
   );
 
   const handleAccordionChange = useCallback((userId) => {

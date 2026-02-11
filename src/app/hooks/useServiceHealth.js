@@ -112,6 +112,7 @@ export const useServiceHealth = () => {
   }, []);
 
   // Calculate distance between Geo API and Google Geo API when both have coordinates
+   
   useEffect(() => {
     const geoAPICoords = services.geoAPI;
     const googleGeoCoords = services.googleGeoAPI;
@@ -145,6 +146,7 @@ export const useServiceHealth = () => {
         }
       }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services.geoAPI.latitude, services.geoAPI.longitude, services.googleGeoAPI.latitude, services.googleGeoAPI.longitude, services.geoAPI.distanceToGoogle, services.googleGeoAPI.distanceToIpapi]);
 
   const checkExpressBackend = async () => {
