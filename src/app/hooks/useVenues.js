@@ -85,7 +85,7 @@ export function useVenues() {
     } finally {
       setLoading(false);
     }
-  }, [masteredCityId, masteredDivisionId, masteredRegionId, currentLocation, savedLocation]);
+  }, [currentLocation, savedLocation]);
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {
