@@ -666,16 +666,68 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
           </FormControl>
         </Grid>
 
-        {/* Organizers Section - Compact 2x2 grid */}
-        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
-          <Grid item xs={12}>
-            <Box sx={{ mt: 1, p: 1.5, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                Organizers
-              </Typography>
+        {/* Cost Input */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <TextField 
+              label="Cost" 
+              value={eventData.cost || ''} 
+              onChange={(e) => setEventData(prevData => ({ ...prevData, cost: e.target.value }))}
+              placeholder="e.g., Free, $20, Donation"
+              helperText="Enter the cost or pricing information for the event"
+              fullWidth
+            />
+          </FormControl>
+        </Grid>
+      </Grid>
+
+      {/* Description Input */}
+      <FormControl fullWidth sx={{ mt: 2 }}>
+        <TextField
+          label="Event Description"
+          multiline
+          rows={4}
+          value={eventData.description}
+          onChange={(e) => setEventData(prevData => ({ ...prevData, description: e.target.value }))}
+          required
+          error={!eventData.description}
+          helperText={!eventData.description ? "Description is required" : ""}
+          fullWidth
+        />
+      </FormControl>
+
+      {/* Organizers Section - 2 columns: Left (Author/Owner) | Right (Alternate/Granted) */}
+      {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
+        <Box sx={{ mt: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            Organizers
+          </Typography>
+          <Grid container spacing={1}>
+            {/* Column 1: Author (grey) then Owner */}
+            <Grid item xs={12} sm={6}>
               <Grid container spacing={1}>
-                {/* Row 1: Owner | Alternate */}
-                <Grid item xs={12} sm={6}>
+                {/* Author - read-only, grey */}
+                <Grid item xs={12}>
+                  <TextField
+                    size="small"
+                    label="Author (original creator)"
+                    value={
+                      eventData.authorOrganizerShortName ||
+                      eventData.authorOrganizerName ||
+                      organizer?.shortName ||
+                      organizer?.fullName ||
+                      user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
+                      user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
+                      user?.displayName ||
+                      'You'
+                    }
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                    sx={{ bgcolor: 'grey.200', '& .MuiInputBase-input': { color: 'text.secondary', fontStyle: 'italic' } }}
+                  />
+                </Grid>
+                {/* Owner - dropdown for RA, read-only for RO */}
+                <Grid item xs={12}>
                   {selectedRole === 'RegionalAdmin' ? (
                     <Autocomplete
                       size="small"
@@ -730,7 +782,14 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
                     />
                   )}
                 </Grid>
-                <Grid item xs={12} sm={6}>
+              </Grid>
+            </Grid>
+
+            {/* Column 2: Alternate then Granted */}
+            <Grid item xs={12} sm={6}>
+              <Grid container spacing={1}>
+                {/* Alternate - shown on calendar */}
+                <Grid item xs={12}>
                   <Autocomplete
                     size="small"
                     options={organizers}
@@ -755,7 +814,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Alternate (shown)"
+                        label="Alternate (shown on calendar)"
                         size="small"
                         InputProps={{
                           ...params.InputProps,
@@ -772,9 +831,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
                     disablePortal
                   />
                 </Grid>
-
-                {/* Row 2: Granted | Author */}
-                <Grid item xs={12} sm={6}>
+                {/* Granted - not shown, can edit */}
+                <Grid item xs={12}>
                   <Autocomplete
                     size="small"
                     options={organizers}
@@ -799,7 +857,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Granted (hidden)"
+                        label="Granted (not shown, can edit)"
                         size="small"
                         InputProps={{
                           ...params.InputProps,
@@ -816,63 +874,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
                     disablePortal
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    size="small"
-                    label="Author (original)"
-                    value={
-                      // For edit mode: show saved author, fallback to logged-in user
-                      // For new events: always show logged-in user (will be set on create)
-                      eventData.authorOrganizerShortName ||
-                      eventData.authorOrganizerName ||
-                      eventData.ownerOrganizerShortName ||
-                      eventData.ownerOrganizerName ||
-                      organizer?.shortName ||
-                      organizer?.fullName ||
-                      user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
-                      user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
-                      user?.displayName ||
-                      'You'
-                    }
-                    InputProps={{ readOnly: true }}
-                    fullWidth
-                    sx={{ bgcolor: 'grey.100', '& .MuiInputBase-input': { color: 'text.secondary', fontStyle: 'italic' } }}
-                  />
-                </Grid>
               </Grid>
-            </Box>
+            </Grid>
           </Grid>
-        )}
-
-        {/* Cost Input */}
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <TextField 
-              label="Cost" 
-              value={eventData.cost || ''} 
-              onChange={(e) => setEventData(prevData => ({ ...prevData, cost: e.target.value }))}
-              placeholder="e.g., Free, $20, Donation"
-              helperText="Enter the cost or pricing information for the event"
-              fullWidth
-            />
-          </FormControl>
-        </Grid>
-      </Grid>
-
-      {/* Description Input */}
-      <FormControl fullWidth sx={{ mt: 2 }}>
-        <TextField
-          label="Event Description"
-          multiline
-          rows={4}
-          value={eventData.description}
-          onChange={(e) => setEventData(prevData => ({ ...prevData, description: e.target.value }))}
-          required
-          error={!eventData.description}
-          helperText={!eventData.description ? "Description is required" : ""}
-          fullWidth
-        />
-      </FormControl>
+        </Box>
+      )}
     </Box>
 
     {/* TIEMPO-290: Venue Modal with Map/Add/Edit tabs */}
