@@ -429,27 +429,6 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         Mandatory Event Details (Basic)
       </Typography>
 
-      {/* Author Organizer - Read-only display at top (only in edit mode) */}
-      {editMode && (eventData.authorOrganizerName || eventData.authorOrganizerID) && (
-        <Box sx={{
-          mt: 1,
-          mb: 1,
-          p: 1,
-          bgcolor: 'grey.100',
-          borderRadius: 1,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1
-        }}>
-          <Typography variant="caption" color="text.secondary">
-            Original Author:
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-            {eventData.authorOrganizerShortName || eventData.authorOrganizerName || 'Unknown'}
-          </Typography>
-        </Box>
-      )}
-
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {/* Start Date/Time Picker */}
         <Grid item xs={12} md={6}>
@@ -533,10 +512,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             getOptionLabel={(option) => option.categoryName || ''}
             value={selectedCategory}
             onChange={(event, newValue) => {
-              setEventData(prevData => ({ 
-                ...prevData, 
+              setEventData(prevData => ({
+                ...prevData,
                 categoryFirstId: newValue ? newValue._id : '',
-                categoryFirst: newValue ? newValue.categoryName : '' 
+                categoryFirst: newValue ? newValue.categoryName : ''
               }));
             }}
             renderInput={(params) => (
@@ -553,167 +532,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             isOptionEqualToValue={(option, value) => option._id === value?._id}
           />
         </Grid>
-        
-        {/* Owner Organizer - RA gets dropdown to assign, RO gets display-only */}
+
+        {/* Venue Selection - Next to Category */}
         <Grid item xs={12} md={6}>
-          {selectedRole === 'RegionalAdmin' ? (
-            // RegionalAdmin can assign events to any organizer
-            <Autocomplete
-              options={organizers}
-              loading={loadingOrganizers}
-              value={selectedOrganizer}
-              onChange={handleOrganizerChange}
-              getOptionLabel={(option) => {
-                if (!option || typeof option !== 'object') return '';
-                const name = option.fullName || option.organizerName || option.name || '';
-                const short = option.shortName || option.organizerShortName || '';
-                return short ? `${name} (${short})` : name;
-              }}
-              isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              filterOptions={(options, { inputValue }) => {
-                const searchTerm = inputValue.toLowerCase();
-                return options.filter(option => {
-                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Event Owner (type to search)"
-                  required
-                  error={!eventData.ownerOrganizerID}
-                  helperText={!eventData.ownerOrganizerID ? 'Owner organizer is required' : 'Select the organizer who owns this event'}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              fullWidth
-              disablePortal
-              noOptionsText="No organizers found"
-              loadingText="Loading organizers..."
-            />
-          ) : (
-            // RO and other roles: Display-only (auto-set to creator)
-            <FormControl fullWidth>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '100px' }}>
-                    {editMode ? 'Event Owner:' : 'Creating as:'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || organizer?.fullName || 'Loading...'}
-                  </Typography>
-                </Box>
-              </Box>
-            </FormControl>
-          )}
-        </Grid>
-
-        {/* Alternate Organizer - SHOWN on event, can also edit */}
-        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={organizers}
-              loading={loadingOrganizers}
-              value={selectedAlternateOrganizer}
-              onChange={handleAlternateOrganizerChange}
-              getOptionLabel={(option) => {
-                if (!option || typeof option !== 'object') return '';
-                const name = option.fullName || option.organizerName || option.name || '';
-                const short = option.shortName || option.organizerShortName || '';
-                return short ? `${name} (${short})` : name;
-              }}
-              isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              filterOptions={(options, { inputValue }) => {
-                const searchTerm = inputValue.toLowerCase();
-                return options.filter(option => {
-                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Alternate Organizer (optional)"
-                  helperText="SHOWN on event. Can also view/edit this event."
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              fullWidth
-              disablePortal
-              noOptionsText="No organizers found"
-              loadingText="Loading organizers..."
-            />
-          </Grid>
-        )}
-
-        {/* Granted Organizer - NOT shown on event, but can edit (hidden collaborator) */}
-        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={organizers}
-              loading={loadingOrganizers}
-              value={selectedGrantedOrganizer}
-              onChange={handleGrantedOrganizerChange}
-              getOptionLabel={(option) => {
-                if (!option || typeof option !== 'object') return '';
-                const name = option.fullName || option.organizerName || option.name || '';
-                const short = option.shortName || option.organizerShortName || '';
-                return short ? `${name} (${short})` : name;
-              }}
-              isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              filterOptions={(options, { inputValue }) => {
-                const searchTerm = inputValue.toLowerCase();
-                return options.filter(option => {
-                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Granted Organizer (optional)"
-                  helperText="NOT shown on event. Can edit (hidden collaborator)."
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              fullWidth
-              disablePortal
-              noOptionsText="No organizers found"
-              loadingText="Loading organizers..."
-            />
-          </Grid>
-        )}
-
-        {/* Venue Selection - Searchable Autocomplete */}
-        <Grid item xs={12}>
           <FormControl fullWidth>
             {isVenueReady ? (
             <Autocomplete
@@ -843,6 +664,173 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             )}
           </FormControl>
         </Grid>
+
+        {/* Organizers Section - Compact 2x2 grid */}
+        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
+          <Grid item xs={12}>
+            <Box sx={{ mt: 1, p: 1.5, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Organizers
+              </Typography>
+              <Grid container spacing={1}>
+                {/* Row 1: Owner | Alternate */}
+                <Grid item xs={12} sm={6}>
+                  {selectedRole === 'RegionalAdmin' ? (
+                    <Autocomplete
+                      size="small"
+                      options={organizers}
+                      loading={loadingOrganizers}
+                      value={selectedOrganizer}
+                      onChange={handleOrganizerChange}
+                      getOptionLabel={(option) => {
+                        if (!option || typeof option !== 'object') return '';
+                        const name = option.fullName || option.organizerName || option.name || '';
+                        const short = option.shortName || option.organizerShortName || '';
+                        return short ? `${name} (${short})` : name;
+                      }}
+                      isOptionEqualToValue={(option, value) => option?._id === value?._id}
+                      filterOptions={(options, { inputValue }) => {
+                        const searchTerm = inputValue.toLowerCase();
+                        return options.filter(option => {
+                          const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                          const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                          return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                        });
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Owner *"
+                          size="small"
+                          required
+                          error={!eventData.ownerOrganizerID}
+                          InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                              <>
+                                {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
+                                {params.InputProps.endAdornment}
+                              </>
+                            ),
+                          }}
+                        />
+                      )}
+                      fullWidth
+                      disablePortal
+                    />
+                  ) : (
+                    <TextField
+                      size="small"
+                      label="Owner"
+                      value={eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || 'Loading...'}
+                      InputProps={{ readOnly: true }}
+                      fullWidth
+                      sx={{ bgcolor: 'action.hover' }}
+                    />
+                  )}
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Autocomplete
+                    size="small"
+                    options={organizers}
+                    loading={loadingOrganizers}
+                    value={selectedAlternateOrganizer}
+                    onChange={handleAlternateOrganizerChange}
+                    getOptionLabel={(option) => {
+                      if (!option || typeof option !== 'object') return '';
+                      const name = option.fullName || option.organizerName || option.name || '';
+                      const short = option.shortName || option.organizerShortName || '';
+                      return short ? `${name} (${short})` : name;
+                    }}
+                    isOptionEqualToValue={(option, value) => option?._id === value?._id}
+                    filterOptions={(options, { inputValue }) => {
+                      const searchTerm = inputValue.toLowerCase();
+                      return options.filter(option => {
+                        const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                        const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                        return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Alternate (shown)"
+                        size="small"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
+                    fullWidth
+                    disablePortal
+                  />
+                </Grid>
+
+                {/* Row 2: Granted | Author */}
+                <Grid item xs={12} sm={6}>
+                  <Autocomplete
+                    size="small"
+                    options={organizers}
+                    loading={loadingOrganizers}
+                    value={selectedGrantedOrganizer}
+                    onChange={handleGrantedOrganizerChange}
+                    getOptionLabel={(option) => {
+                      if (!option || typeof option !== 'object') return '';
+                      const name = option.fullName || option.organizerName || option.name || '';
+                      const short = option.shortName || option.organizerShortName || '';
+                      return short ? `${name} (${short})` : name;
+                    }}
+                    isOptionEqualToValue={(option, value) => option?._id === value?._id}
+                    filterOptions={(options, { inputValue }) => {
+                      const searchTerm = inputValue.toLowerCase();
+                      return options.filter(option => {
+                        const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                        const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                        return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Granted (hidden)"
+                        size="small"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
+                    fullWidth
+                    disablePortal
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    size="small"
+                    label="Author (original)"
+                    value={editMode
+                      ? (eventData.authorOrganizerShortName || eventData.authorOrganizerName || 'Not set')
+                      : (organizer?.shortName || organizer?.fullName || user?.displayName || 'You')}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                    sx={{ bgcolor: 'grey.100', '& .MuiInputBase-input': { color: 'text.secondary', fontStyle: 'italic' } }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </Grid>
+        )}
 
         {/* Cost Input */}
         <Grid item xs={12} md={6}>
