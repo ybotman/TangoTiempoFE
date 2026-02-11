@@ -26,6 +26,9 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
 // TIEMPO-319: Removed fetchAllGeolocationData import - no longer needed for logout
 
+// Define the standard role display order for consistency (static constant)
+const ROLE_DISPLAY_ORDER = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
+
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
   const router = useRouter();
   const { user, logOut } = useContext(AuthContext);
@@ -45,8 +48,6 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
     'SystemOwner': 'SystemOwner'
   };
 
-  // Define the standard role display order for consistency
-  const roleDisplayOrder = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
 
 
   // Helper function to get conditional message for Regional Organizer
@@ -69,8 +70,8 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
       
       // Sort the roles based on display order, any roles not in the standard list will be at the end
       userRoles.sort((a, b) => {
-        const indexA = roleDisplayOrder.indexOf(a);
-        const indexB = roleDisplayOrder.indexOf(b);
+        const indexA = ROLE_DISPLAY_ORDER.indexOf(a);
+        const indexB = ROLE_DISPLAY_ORDER.indexOf(b);
         
         // If both roles are in the order list, sort by the order
         if (indexA !== -1 && indexB !== -1) {

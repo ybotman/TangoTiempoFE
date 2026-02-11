@@ -1,29 +1,29 @@
 // src/components/Modals/UserSettings/UserSettingsNotifications.js
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { 
-  Box, 
-  Typography, 
-  Switch, 
-  FormControlLabel, 
-  Button, 
-  Alert, 
-  Snackbar 
+import {
+  Box,
+  Typography,
+  Switch,
+  FormControlLabel,
+  Button,
+  Alert,
+  Snackbar
 } from '@mui/material';
 
 const UserSettingsNotifications = ({ userData, updateUserData }) => {
   // Determine current notification preference from userData
-  const getCurrentNotificationPreference = () => {
+  const getCurrentNotificationPreference = useCallback(() => {
     const preference = userData?.localUserInfo?.notificationPreference;
     if (preference === 'Email') return 'email';
     if (preference === 'SMS') return 'sms';
     if (preference === 'Both') return 'both';
     return 'none';
-  };
+  }, [userData]);
 
-  const [notificationPreference, setNotificationPreference] = useState(getCurrentNotificationPreference());
+  const [notificationPreference, setNotificationPreference] = useState(() => getCurrentNotificationPreference());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -37,13 +37,13 @@ const UserSettingsNotifications = ({ userData, updateUserData }) => {
   useEffect(() => {
     setNotificationPreference(getCurrentNotificationPreference());
     setIsModified(false);
-  }, [userData]);
+  }, [getCurrentNotificationPreference]);
 
   // Check for modifications
   useEffect(() => {
     const currentPreference = getCurrentNotificationPreference();
     setIsModified(notificationPreference !== currentPreference);
-  }, [notificationPreference, userData]);
+  }, [notificationPreference, getCurrentNotificationPreference]);
 
   // Update preference based on toggle states
   const updatePreference = (emailState, smsState) => {

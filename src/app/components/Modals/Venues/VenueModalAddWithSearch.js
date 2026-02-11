@@ -78,7 +78,8 @@ const VenueModalAddWithSearch = ({ onAdd, refreshList, onDone, proximityLocation
   const [isOverriding, setIsOverriding] = useState(false);
   const [, setOverrideType] = useState(null); // 'no-city' or 'proximity'
 
-  // Debounced search function
+  // Debounced search function - debounce returns a function, deps checked at call time
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce(async (query) => {
       if (!query || query.length < 3) {

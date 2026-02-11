@@ -307,7 +307,7 @@ export const GeoLocationProvider = ({ children }) => {
       setErrorState(prev => ({ ...prev, userLocation: error.message }));
       setLoadingState(prev => ({ ...prev, userLocation: false }));
     }
-  }, [fetchNearestCity]);
+  }, []);
 
   // Load user's saved map preferences from userData
   const loadUserMapPreferences = useCallback((userData) => {

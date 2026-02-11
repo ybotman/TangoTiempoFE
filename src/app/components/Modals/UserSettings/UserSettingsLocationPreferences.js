@@ -271,6 +271,7 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
     // Cleanup function
     return () => {
       // Copy ref to local variable to avoid stale closure
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const mapElement = mapRef.current;
       if (mapElement?._resizeObserver) {
         mapElement._resizeObserver.disconnect();
@@ -283,7 +284,9 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         setMapInitialized(false);
       }
     };
-  }, []); // Only initialize once - intentionally not including zoomRange to avoid re-initialization
+    // Map initialization runs once - zoomRange used for initial view but not re-triggering init
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle loading saved coordinates after map is initialized
   useEffect(() => {
@@ -359,14 +362,16 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
         }, 100);
       });
     }
+    // isValidLatLng is inline function reading centerLat/centerLng which are in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapInitialized, coordinatesLoaded, centerLat, centerLng, zoomRange]);
 
-  // Separate effect to handle radius changes
+  // Separate effect to handle radius changes only
   useEffect(() => {
     if (mapInstanceRef.current && circleRef.current && centerLat && centerLng && isValidLatLng()) {
       // Update the circle radius
       circleRef.current.setRadius(zoomRange * 1609.34);
-      
+
       // Recenter and zoom to show the updated radius
       let targetZoom;
       if (zoomRange <= 10) targetZoom = 10;
@@ -375,13 +380,15 @@ const UserSettingsLocationPreferences = ({ userData, updateUserData, onSaveSucce
       else if (zoomRange <= 100) targetZoom = 7;
       else if (zoomRange <= 150) targetZoom = 6;
       else targetZoom = 5; // For 250 miles
-      
+
       mapInstanceRef.current.setView(
-        [parseFloat(centerLat), parseFloat(centerLng)], 
-        targetZoom, 
+        [parseFloat(centerLat), parseFloat(centerLng)],
+        targetZoom,
         { animate: true, duration: 0.3 }
       );
     }
+    // Only trigger on radius changes - coordinate changes handled by previous effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoomRange]);
 
   const handleSave = async () => {

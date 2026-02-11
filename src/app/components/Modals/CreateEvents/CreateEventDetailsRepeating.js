@@ -286,7 +286,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
     if (eventData.useEndDate !== undefined) {
       setUseEndDate(eventData.useEndDate);
     }
-  }, [eventData._id]); // Only re-run when editing a different event
+    // Intentionally sync only when switching to a different event (by _id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventData._id]);
 
   // Pre-check day checkbox based on event start date (only for new events)
   useEffect(() => {
@@ -542,7 +544,9 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
         // Don't send excludeDatesString to backend - it's only for UI state
       }));
     }
-  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, validatedExcludeDates]); // Use validatedExcludeDates instead
+    // generateRRule/validateRRule are inline functions that read latest state; setEventData is stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recurrenceType, recurrenceDays, monthlyDays, monthlyWeeks, endDate, occurrences, useEndDate, validatedExcludeDates]);
 
   return (
     <Box>

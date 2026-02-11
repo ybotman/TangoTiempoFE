@@ -41,7 +41,7 @@ const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
 
   // Reset dismissed state when events change (new search/filter)
   useEffect(() => {
-    if (events && events.length > 0) {
+    if (events?.length > 0) {
       setDismissed(false);
       sessionStorage.removeItem('noEventsAlertDismissed');
     }

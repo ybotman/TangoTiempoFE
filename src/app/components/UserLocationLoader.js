@@ -63,7 +63,7 @@ const UserLocationLoader = () => {
     };
 
     loadMapCenter();
-  }, [user?.uid, getIdToken, fetchMapCenter]);
+  }, [user, getIdToken, fetchMapCenter]);
 
   return null; // This is a logic-only component
 };
