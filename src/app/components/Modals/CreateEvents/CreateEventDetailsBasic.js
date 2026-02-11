@@ -429,6 +429,27 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         Mandatory Event Details (Basic)
       </Typography>
 
+      {/* Author Organizer - Read-only display at top (only in edit mode) */}
+      {editMode && (eventData.authorOrganizerName || eventData.authorOrganizerID) && (
+        <Box sx={{
+          mt: 1,
+          mb: 1,
+          p: 1,
+          bgcolor: 'grey.100',
+          borderRadius: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <Typography variant="caption" color="text.secondary">
+            Original Author:
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+            {eventData.authorOrganizerShortName || eventData.authorOrganizerName || 'Unknown'}
+          </Typography>
+        </Box>
+      )}
+
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {/* Start Date/Time Picker */}
         <Grid item xs={12} md={6}>
@@ -889,6 +910,9 @@ CreateEventDetailsBasic.propTypes = {
     alternateOrganizerName: PropTypes.string,
     grantedOrganizerID: PropTypes.string,
     grantedOrganizerName: PropTypes.string,
+    authorOrganizerID: PropTypes.string,
+    authorOrganizerName: PropTypes.string,
+    authorOrganizerShortName: PropTypes.string,
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
