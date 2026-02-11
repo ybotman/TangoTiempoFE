@@ -14,15 +14,10 @@ export function useVenues() {
   const [loading, setLoading] = useState(false);
   
   // Use GeoLocationContext for location-based filtering
-  // TIEMPO-276: Get both selectedLocation (for IDs) and savedLocation/currentLocation (for coordinates)
-  const { selectedLocation, savedLocation, currentLocation } = useGeoLocation();
-  
-  // Get location IDs for filtering
-  const masteredRegionId = selectedLocation?.region?.id || null;
-  const masteredDivisionId = selectedLocation?.division?.id || null;
-  const masteredCityId = selectedLocation?.city?.id || null;
+  // TIEMPO-276: Get savedLocation/currentLocation for coordinate-based filtering
+  const { savedLocation, currentLocation } = useGeoLocation();
 
-  // Fetch venues based on selected location
+  // Fetch venues based on current location
   const fetchVenues = useCallback(async (isActive = null, location = null) => {
     setLoading(true);
     setError(null);

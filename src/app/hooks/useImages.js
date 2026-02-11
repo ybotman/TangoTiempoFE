@@ -13,11 +13,11 @@ export const useImages = (organizerId) => {
 
   const accountName = 'tangotiempoimages';
   const containerName = 'organizer-images';
+  const organizerFolder = `${organizerId}/`;
 
   // Fetch images from the container using SAS token
   const fetchImages = useCallback(async () => {
     if (!organizerId) return;
-    const organizerFolder = `${organizerId}/`;
 
     setLoading(true);
     try {
