@@ -172,6 +172,24 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     }));
   };
 
+  // Handle granted organizer selection from Autocomplete (for RO and RA)
+  // Granted organizer can edit the event but is NOT shown on event display
+  const handleGrantedOrganizerChange = (event, newValue) => {
+    if (!newValue) {
+      setEventData(prevData => ({
+        ...prevData,
+        grantedOrganizerID: '',
+        grantedOrganizerName: ''
+      }));
+      return;
+    }
+    setEventData(prevData => ({
+      ...prevData,
+      grantedOrganizerID: newValue._id,
+      grantedOrganizerName: newValue.fullName || newValue.shortName || ''
+    }));
+  };
+
   // Handle venue change from autocomplete
   const handleVenueChange = (event, newValue) => {
     if (!newValue) {
@@ -294,6 +312,12 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     if (!eventData.alternateOrganizerID) return null;
     return organizers.find(org => org._id === eventData.alternateOrganizerID) || null;
   }, [eventData.alternateOrganizerID, organizers]);
+
+  // Memoize selected granted organizer for Autocomplete
+  const selectedGrantedOrganizer = useMemo(() => {
+    if (!eventData.grantedOrganizerID) return null;
+    return organizers.find(org => org._id === eventData.grantedOrganizerID) || null;
+  }, [eventData.grantedOrganizerID, organizers]);
 
   // Memoize the selected category to prevent re-computation during render
   const selectedCategory = useMemo(() => {
@@ -573,7 +597,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           )}
         </Grid>
 
-        {/* Alternate Organizer - Dropdown for RO and RA to grant access to another organizer */}
+        {/* Alternate Organizer - SHOWN on event, can also edit */}
         {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
           <Grid item xs={12} md={6}>
             <Autocomplete
@@ -600,7 +624,54 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                 <TextField
                   {...params}
                   label="Alternate Organizer (optional)"
-                  helperText="Grant another organizer access to view/edit this event"
+                  helperText="SHOWN on event. Can also view/edit this event."
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              fullWidth
+              disablePortal
+              noOptionsText="No organizers found"
+              loadingText="Loading organizers..."
+            />
+          </Grid>
+        )}
+
+        {/* Granted Organizer - NOT shown on event, but can edit (hidden collaborator) */}
+        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
+          <Grid item xs={12} md={6}>
+            <Autocomplete
+              options={organizers}
+              loading={loadingOrganizers}
+              value={selectedGrantedOrganizer}
+              onChange={handleGrantedOrganizerChange}
+              getOptionLabel={(option) => {
+                if (!option || typeof option !== 'object') return '';
+                const name = option.fullName || option.organizerName || option.name || '';
+                const short = option.shortName || option.organizerShortName || '';
+                return short ? `${name} (${short})` : name;
+              }}
+              isOptionEqualToValue={(option, value) => option?._id === value?._id}
+              filterOptions={(options, { inputValue }) => {
+                const searchTerm = inputValue.toLowerCase();
+                return options.filter(option => {
+                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Granted Organizer (optional)"
+                  helperText="NOT shown on event. Can edit (hidden collaborator)."
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -815,6 +886,9 @@ CreateEventDetailsBasic.propTypes = {
     ownerOrganizerName: PropTypes.string,
     ownerOrganizerShortName: PropTypes.string,
     alternateOrganizerID: PropTypes.string,
+    alternateOrganizerName: PropTypes.string,
+    grantedOrganizerID: PropTypes.string,
+    grantedOrganizerName: PropTypes.string,
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
