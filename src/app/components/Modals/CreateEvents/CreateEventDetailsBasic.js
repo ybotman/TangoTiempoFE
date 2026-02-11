@@ -12,7 +12,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: I
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
 import PropTypes from 'prop-types';
 
-const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null, onTimeModified = null }) => {
+const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode = false, organizer = null, onTimeModified = null }) => {
   const allCategories = useCategories(); // Fetch categories
   // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
   const categories = useMemo(() =>
@@ -23,7 +23,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     ),
     [allCategories]
   );
-  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  // Fetch ALL venues for event creation (no location filter) - use type-ahead for usability
+  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues({ skipLocationFilter: true });
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   // TIEMPO-325: Fetch ALL organizers for dropdown (no filtering) - use type-ahead for usability
@@ -632,7 +633,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                   variant="outlined"
                   required
                   error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
-                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `Showing ${venues.length} venues from your map center`}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `${venues.length} venues available`}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -819,9 +820,20 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                   <TextField
                     size="small"
                     label="Author (original)"
-                    value={editMode
-                      ? (eventData.authorOrganizerShortName || eventData.authorOrganizerName || 'Not set')
-                      : (organizer?.shortName || organizer?.fullName || user?.displayName || 'You')}
+                    value={
+                      // For edit mode: show saved author, fallback to logged-in user
+                      // For new events: always show logged-in user (will be set on create)
+                      eventData.authorOrganizerShortName ||
+                      eventData.authorOrganizerName ||
+                      eventData.ownerOrganizerShortName ||
+                      eventData.ownerOrganizerName ||
+                      organizer?.shortName ||
+                      organizer?.fullName ||
+                      user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
+                      user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
+                      user?.displayName ||
+                      'You'
+                    }
                     InputProps={{ readOnly: true }}
                     fullWidth
                     sx={{ bgcolor: 'grey.100', '& .MuiInputBase-input': { color: 'text.secondary', fontStyle: 'italic' } }}
