@@ -12,6 +12,13 @@ import UserSettingsBookmarks from '@/components/Modals/UserSettings/UserSettings
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 
+// Map tab names to actual tab values (static constant)
+const TAB_MAPPING = {
+  'general': 'name',
+  'bookmarks': 'bookmarks',
+  'apply': 'apply'
+};
+
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -33,13 +40,6 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   const { userData, loading, error, updateUserData, refreshUserData } = useUsers();
   const [currentTab, setCurrentTab] = useState('name');
 
-  // Map tab names to actual tab values
-  const tabMapping = {
-    'general': 'name',
-    'bookmarks': 'bookmarks',
-    'apply': 'apply'
-  };
-
   useEffect(() => {
     if (!user) {
 // TIEMPO-276: Security cleanup - removed logging
@@ -49,7 +49,7 @@ const UserSettingsModal = ({ open, onClose, defaultTab }) => {
   // Update current tab when defaultTab changes
   useEffect(() => {
     if (defaultTab && open) {
-      const mappedTab = tabMapping[defaultTab] || defaultTab;
+      const mappedTab = TAB_MAPPING[defaultTab] || defaultTab;
 // TIEMPO-276: Security cleanup - removed logging
       setCurrentTab(mappedTab);
     }

@@ -12,7 +12,6 @@ import {
   IconButton,
   Alert,
   Slider,
-  Tooltip,
   useTheme,
   useMediaQuery,
   CircularProgress
@@ -31,7 +30,7 @@ import {
 import 'leaflet/dist/leaflet.css';
 
 // TIEMPO-360: Helper to create pill marker HTML with level + name header
-function createPillMarkerHtml(item, zoom) {
+function createPillMarkerHtml(item, _zoom) {
   const {
     socialCount = 0,
     eventCount = 0,
@@ -284,7 +283,7 @@ const MapCenterModal = ({
   const [centerLat, setCenterLat] = useState(initialLocation?.lat || '');
   const [centerLng, setCenterLng] = useState(initialLocation?.lng || '');
   const [zoomRange, setZoomRange] = useState(initialLocation?.zoomRange || 50);
-  const [timeRangeDays, setTimeRangeDays] = useState(TIME_RANGE_DEFAULT); // TIEMPO-360: Time range slider
+  const [timeRangeDays] = useState(TIME_RANGE_DEFAULT); // TIEMPO-360: Time range for density fetch
   const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -312,7 +311,9 @@ const MapCenterModal = ({
       zoom: 5, // Region level for initial view
       timeRangeDays,
     });
-  }, [open]); // Only on modal open
+    // Prefetch only on modal open - other values read at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -453,6 +454,8 @@ const MapCenterModal = ({
         setMapInitialized(false);
       }
     };
+    // Map init only on modal open - functions/values read at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   
   // Force map resize when modal fully opens
@@ -555,7 +558,6 @@ const MapCenterModal = ({
         });
 
         // Tooltip with location name and pill breakdown
-        const totalCount = item.socialCount + item.eventCount;
         // Build tooltip - include Class/Other at venue level
         const isVenueLevel = level === 'venue';
         let tooltipParts = [`${item.socialCount} Mil/Pra`, `${item.eventCount} Festival+`];
@@ -626,20 +628,26 @@ const MapCenterModal = ({
       zoom,
       timeRangeDays,
     });
+    // fetchDensity is inline function, reads current map state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRangeDays, mapInitialized]);
 
-  // Update circle when zoom range changes
+  // Update circle when zoom range changes only
   useEffect(() => {
     if (circleRef.current && centerLat && centerLng) {
       circleRef.current.setRadius(zoomRange * 1609.34);
     }
+    // Only trigger on radius changes - coordinates read at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoomRange]);
-  
+
   // Update marker when location is set
   useEffect(() => {
     if (mapInitialized && centerLat && centerLng) {
       updateMarker(parseFloat(centerLat), parseFloat(centerLng));
     }
+    // updateMarker is inline function
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapInitialized, centerLat, centerLng]);
   
   const handleSetTemp = () => {

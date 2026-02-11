@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -18,6 +18,20 @@ const RestartRequiredModal = ({ open, onClose, reason, onRestart }) => {
   const [countdown, setCountdown] = useState(5);
   const [isRestarting, setIsRestarting] = useState(false);
 
+  const handleRestart = useCallback(() => {
+    setIsRestarting(true);
+    // Store any necessary state before restart
+    sessionStorage.setItem('restartReason', reason || 'App configuration updated');
+
+    // Call parent handler which will reload
+    if (onRestart) {
+      onRestart();
+    } else {
+      // Fallback reload
+      window.location.reload();
+    }
+  }, [reason, onRestart]);
+
   useEffect(() => {
     if (open && countdown > 0) {
       const timer = setTimeout(() => {
@@ -27,21 +41,7 @@ const RestartRequiredModal = ({ open, onClose, reason, onRestart }) => {
     } else if (open && countdown === 0 && !isRestarting) {
       handleRestart();
     }
-  }, [open, countdown, isRestarting]);
-
-  const handleRestart = () => {
-    setIsRestarting(true);
-    // Store any necessary state before restart
-    sessionStorage.setItem('restartReason', reason || 'App configuration updated');
-    
-    // Call parent handler which will reload
-    if (onRestart) {
-      onRestart();
-    } else {
-      // Fallback reload
-      window.location.reload();
-    }
-  };
+  }, [open, countdown, isRestarting, handleRestart]);
 
   const handleCancel = () => {
     setCountdown(5); // Reset countdown

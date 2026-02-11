@@ -79,6 +79,7 @@ const RootLayout = ({ children }) => {
     };
 
     trackVisitor();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only fire once on mount
 
   // TIEMPO-323: MapCenter tracking for all users (logged-in and anonymous)

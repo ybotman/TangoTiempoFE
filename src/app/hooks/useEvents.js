@@ -370,23 +370,14 @@ export function useEvents({
     effectiveLng,
     effectiveCityIds,
     effectiveZoomRange,
-    region,
-    division,
-    city,
-    lat,
-    lng,
-    useGeoLocationContext,
-    useLocationPreferences,
-    userDefaults,
     // Use stable primitive values instead of user object to prevent infinite loops
     userId,
     userOrganizerId,
     userRoles,
     selectedRole,
-    isInitialized,
     includeAiGenerated,
     currentLocation
-    // Removed setState functions to prevent infinite loops
+    // Removed config options and setState functions to prevent infinite loops
   ]);
 
   // Fetch events when parameters change

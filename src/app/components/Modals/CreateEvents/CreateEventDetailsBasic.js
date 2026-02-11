@@ -814,6 +814,7 @@ CreateEventDetailsBasic.propTypes = {
     ownerOrganizerID: PropTypes.string,
     ownerOrganizerName: PropTypes.string,
     ownerOrganizerShortName: PropTypes.string,
+    alternateOrganizerID: PropTypes.string,
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,

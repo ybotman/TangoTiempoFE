@@ -1,7 +1,7 @@
 // @/components/Modals/RegionalOrganizers/RegionalOrganizersDelegated.js
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, Button, CircularProgress, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
 import Select from '@mui/material/Select';
@@ -9,8 +9,11 @@ import axios from 'axios';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const RegionalOrganizersDelegated = ({ organizerId = '', delegatedOrganizerIds = [], organizers = [], updateOrganizer }) => {
-  // Ensure delegatedOrganizerIds is always a valid array
-  const safeOrganizerIds = Array.isArray(delegatedOrganizerIds) ? delegatedOrganizerIds : [];
+  // Ensure delegatedOrganizerIds is always a valid array (memoized for stable reference)
+  const safeOrganizerIds = useMemo(
+    () => Array.isArray(delegatedOrganizerIds) ? delegatedOrganizerIds : [],
+    [delegatedOrganizerIds]
+  );
 
   // Log for debugging
   // TIEMPO-276: Security cleanup - removed logging

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useContext, useState } from 'react';
+import React, { useRef, useEffect, useContext, useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -16,13 +16,14 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, onVenueDeleted, i
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
-  // Check if user can delete venues (Admin or RegionalAdmin only)
-  const canDeleteVenue = user?.roles?.some(role =>
-    role === 'Admin' || role === 'RegionalAdmin'
-  ) || false;
+  // Check if user can delete venues (Admin or RegionalAdmin only) - memoized for stable reference
+  const canDeleteVenue = useMemo(() =>
+    user?.roles?.some(role => role === 'Admin' || role === 'RegionalAdmin') || false,
+    [user?.roles]
+  );
 
   // Handle delete button click
-  const handleDeleteClick = (venueId) => {
+  const handleDeleteClick = useCallback((venueId) => {
     const venue = venues.find(v => v._id === venueId);
     if (!venue) return;
 
@@ -35,7 +36,7 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, onVenueDeleted, i
     // User has permission - show confirmation dialog
     setVenueToDelete(venue);
     setDeleteDialogOpen(true);
-  };
+  }, [venues, canDeleteVenue]);
 
   // Confirm and execute delete
   const confirmDelete = async () => {
@@ -254,7 +255,7 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, onVenueDeleted, i
         mapInstanceRef.current = null;
       }
     };
-  }, [venues, selectedVenueId, initialCenter]);
+  }, [venues, selectedVenueId, initialCenter, canDeleteVenue]);
 
   // Add event listeners for edit and delete button clicks
   useEffect(() => {
@@ -278,7 +279,7 @@ const VenueModalMap = ({ venues, selectedVenueId, onEditVenue, onVenueDeleted, i
       window.removeEventListener('venue-edit', handleEditClick);
       window.removeEventListener('venue-delete', handleDeleteButtonClick);
     };
-  }, [venues, onEditVenue, canDeleteVenue]);
+  }, [venues, onEditVenue, handleDeleteClick]);
 
   const selectedVenue = venues.find(v => v._id === selectedVenueId);
 

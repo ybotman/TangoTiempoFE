@@ -24,7 +24,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
-import { format, addMonths } from 'date-fns';
+import dayjs from 'dayjs';
 import 'leaflet/dist/leaflet.css';
 import { createClusterIcon } from '@/components/EventDiscovery/clusterIcon';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -89,8 +89,8 @@ const ExplorerPage = () => {
   
   // Filters
   const [dateRange, setDateRange] = useState({
-    start: format(new Date(), 'yyyy-MM'),
-    end: format(addMonths(new Date(), 12), 'yyyy-MM')
+    start: dayjs().format('YYYY-MM'),
+    end: dayjs().add(12, 'month').format('YYYY-MM')
   });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(null);
@@ -387,7 +387,7 @@ const ExplorerPage = () => {
                     <Typography variant="subtitle2">{event.title}</Typography>
                     <Typography variant="body2">{event.categoryFirst}</Typography>
                     <Typography variant="caption">
-                      {format(new Date(event.startDate), 'MMM dd, yyyy')}
+                      {dayjs(event.startDate).format('MMM DD, YYYY')}
                     </Typography>
                     {event.venue?.name && (
                       <Typography variant="caption" display="block">
