@@ -383,14 +383,21 @@ export function useEvents({
   // Fetch events when parameters change
   useEffect(() => {
     // Skip if using location preferences but user data not loaded yet
+    // UNLESS GeoLocationContext has valid currentLocation (from Azure Functions mapCenter)
     if (useLocationPreferences && !userDefaults && user) {
-      if (!hasLoggedWaiting.current.userPrefs) {
+      // Check if GeoLocationContext has valid location from mapCenter
+      const hasValidCurrentLocation = currentLocation?.lat && currentLocation?.lng &&
+                                      !(currentLocation.lat === 0 && currentLocation.lng === 0);
+      if (!hasValidCurrentLocation) {
+        if (!hasLoggedWaiting.current.userPrefs) {
 // TIEMPO-276: Security cleanup - removed logging
-        hasLoggedWaiting.current.userPrefs = true;
+          hasLoggedWaiting.current.userPrefs = true;
+        }
+        return;
       }
-      return;
+      // Fall through - use GeoLocationContext's currentLocation instead
     }
-    
+
     // Skip if explicitly using GeoLocationContext but it's not initialized yet
     // This should only apply when we're actually using the context as our location source
     if (useGeoLocationContext && !useLocationPreferences && !isInitialized) {
