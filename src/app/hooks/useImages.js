@@ -13,12 +13,12 @@ export const useImages = (organizerId) => {
 
   const accountName = 'tangotiempoimages';
   const containerName = 'organizer-images';
-  const organizerFolder = `${organizerId}/`;
 
   // Fetch images from the container using SAS token
   const fetchImages = useCallback(async () => {
     if (!organizerId) return;
 
+    const organizerFolder = `${organizerId}/`;
     setLoading(true);
     try {
       // Request SAS token from backend
@@ -73,7 +73,7 @@ export const useImages = (organizerId) => {
 
       const containerClient = blobServiceClient.getContainerClient(containerName);
 
-      const blobName = `${organizerFolder}${uuidv4()}-${file.name}`;
+      const blobName = `${organizerId}/${uuidv4()}-${file.name}`;
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
       await blockBlobClient.uploadData(file, {

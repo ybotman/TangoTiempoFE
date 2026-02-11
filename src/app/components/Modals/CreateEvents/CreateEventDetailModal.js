@@ -265,6 +265,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Log current location for debugging
       // TIEMPO-276: Security cleanup - removed logging
     }
+    // getInitialEventData is defined inline but its deps (selectedDate, selectedLocation) are in this array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, selectedLocation, selectedDate, editMode, eventToEdit, selectedRole, user]);
 
   // Fetch organizer data when modal is open in create mode and user is RO
@@ -327,6 +329,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const [dateValidationErrors, setDateValidationErrors] = useState([]); // Date validation errors
 
   // TIEMPO-291: Validate category rules whenever dates or categories change
+  // Only re-run when specific eventData fields change, not the whole object (avoids infinite loop)
   useEffect(() => {
     if (eventData.startDate && eventData.endDate && eventData.categoryFirst) {
       const validation = validateEventCategoryRules(eventData, selectedRole);
@@ -334,6 +337,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
     } else {
       setCategoryValidationErrors([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventData.startDate, eventData.endDate, eventData.categoryFirst, eventData.categorySecond, eventData.categoryThird, selectedRole]);
 
   // Validate dates whenever they change

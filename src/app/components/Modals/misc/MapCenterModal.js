@@ -311,7 +311,9 @@ const MapCenterModal = ({
       zoom: 5, // Region level for initial view
       timeRangeDays,
     });
-  }, [open]); // Only on modal open
+    // Prefetch only on modal open - other values read at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -452,6 +454,8 @@ const MapCenterModal = ({
         setMapInitialized(false);
       }
     };
+    // Map init only on modal open - functions/values read at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   
   // Force map resize when modal fully opens
@@ -624,20 +628,26 @@ const MapCenterModal = ({
       zoom,
       timeRangeDays,
     });
+    // fetchDensity is inline function, reads current map state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRangeDays, mapInitialized]);
 
-  // Update circle when zoom range changes
+  // Update circle when zoom range changes only
   useEffect(() => {
     if (circleRef.current && centerLat && centerLng) {
       circleRef.current.setRadius(zoomRange * 1609.34);
     }
+    // Only trigger on radius changes - coordinates read at call time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoomRange]);
-  
+
   // Update marker when location is set
   useEffect(() => {
     if (mapInitialized && centerLat && centerLng) {
       updateMarker(parseFloat(centerLat), parseFloat(centerLng));
     }
+    // updateMarker is inline function
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapInitialized, centerLat, centerLng]);
   
   const handleSetTemp = () => {
