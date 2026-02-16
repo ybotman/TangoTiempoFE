@@ -110,26 +110,6 @@ const SiteHeader = () => {
         className="site-header-image"
         priority
       />
-      <a
-        href="https://www.buymeacoffee.com/ybotman"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          backgroundColor: 'rgba(0, 255, 255, 0.7)',
-          color: '#000',
-          padding: '5px 10px',
-          borderRadius: '3px',
-          textDecoration: 'none',
-          fontWeight: 'normal',
-          fontSize: '12px',
-        }}
-      >
-        Gift an Empanada
-      </a>
-
       {/* Service Status Icon - Opens modal with service health details */}
       <ServiceStatusIcon />
 
@@ -147,42 +127,42 @@ const SiteHeader = () => {
         {appVersion}
       </div>
 
-      {/* TIEMPO-381: Location indicator in bottom-center */}
+      {/* TIEMPO-381: Location indicator pill - top-left, compact for mobile */}
       {locationDisplay && (
         <button
           onClick={openMapCenterModal}
           style={{
             position: 'absolute',
-            bottom: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            color: '#333',
-            padding: '6px 14px',
-            borderRadius: '16px',
-            border: '1px solid #ccc',
-            fontSize: '12px',
+            top: '8px',
+            left: '8px',
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            color: '#fff',
+            padding: '4px 10px',
+            borderRadius: '12px',
+            border: 'none',
+            fontSize: '11px',
             fontWeight: '500',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            gap: '4px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
             transition: 'all 0.2s ease',
+            maxWidth: '60%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-            e.currentTarget.style.boxShadow = '0 3px 6px rgba(0,0,0,0.3)';
+            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
           }}
           title="Click to change your location"
         >
-          <span style={{ fontSize: '14px' }}>📍</span>
+          <span style={{ fontSize: '12px' }}>📍</span>
           <span>{locationDisplay}</span>
-          <span style={{ fontSize: '10px', color: '#666' }}>✎</span>
         </button>
       )}
 
