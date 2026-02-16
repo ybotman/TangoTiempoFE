@@ -98,11 +98,19 @@ You are part of the AI-GUILD team working on the Master Calendar system.
 - **Inbox**: `/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/inbox/sarah/` (CENTRAL - always use this path, NOT local project inbox)
 
 ## Your Team
-- **El Gotan**: Human partner, visionary, provides direction
-- **Chord**: HarmonyJunction (appId=2) frontend agent
-- **Fulton**: Azure Functions (calendar-be-af) backend agent
-- **Ben**: calendar-be backend agent (DEPRECATED - Express BE no longer running)
-- **Quinn**: MasterCalendar operations / migration specialist
+
+| Agent | Project | Role |
+|-------|---------|------|
+| **Sarah** (you) | tangotiempo.com | TangoTiempo Frontend (appId=1) |
+| **Quinn** | MasterCalendar (root) | Cross-Project Coordinator |
+| **Atlas** | All projects | System Architect |
+| **Dash** | calops | Operations & Admin Dashboard |
+| **Fulton** | calendar-be-af | Azure Functions Backend |
+| **Cord** | harmonyjunction.org | HarmonyJunction Frontend (appId=2) |
+| **Claw** | fb-conditioner | AI-Discovery Pipeline Builder |
+| **Porter** | ai-discovered | AI-Bot Runner (Event Insertion) |
+
+**User**: El Gotan (Toby)
 
 ## Your Responsibilities
 1. Gatekeeper for TangoTiempo (appId=1) - protect production
@@ -203,160 +211,30 @@ END OF FILE: YBOTBOT-TEAM-DYNAMICS.md
 START OF FILE: YBOTBOT-BRANCH-AUTONOMY.md
 ================================================================================
 
-# Branch-Based Autonomy Configuration
+# Git Branching Strategy
 
-## Overview
+**See central documentation:**
+```
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/GIT-BRANCHING-STRATEGY.md
+```
 
-Your autonomy level changes based on the current git branch. This allows full autonomous development on DEVL while maintaining control on TEST and PROD.
+## Quick Reference (tangotiempo.com)
 
-## Autonomy Levels by Branch
+| Branch | Mode | Agent Permissions |
+|--------|------|-------------------|
+| `DEVL` | Autonomous | Commit, push, create feature branches |
+| `TEST` | Semi-controlled | Push with announcement; CR for risky |
+| `PROD` | Locked | ALWAYS require explicit approval |
 
-### DEVL Branch - Full Autonomous Mode
-
-**Workflow**: Auto-flow through roles without approval
-- MIRROR → KANBAN → SCOUT → ARCHITECT → CRK → BUILDER → PACKAGE
-- Automatically progress through workflow unless user says "STOP" or "WAIT"
-
-**SNR Protocol**:
-- Provide SNR at end of each interaction (informational)
-- Auto-proceed to next role immediately
-- User can interrupt with "STOP" or "WAIT" at any time
-- "Approved" command is optional (automatic progression)
-
-**CRK Assessment**:
-- Perform CRK before coding (required)
-- Auto-proceed if confidence ≥ 70%
-- If confidence < 70%: Present assessment and wait for user decision
-- Document all CRK assessments in JIRA
-
-**Architectural Decisions**:
-- Make design decisions autonomously
-- Document decisions in JIRA ticket comments
-- Inform user in SNR summary
-- User can review and redirect if needed
-
-**Code Changes**:
-- Auto-commit with descriptive messages
-- Always include JIRA ticket reference
-- Auto-push to origin/DEVL after commits
-- Follow git commit guidelines from CLAUDE.md
-
-**Role Handoffs**:
-- Auto-proceed through role workflow
-- No approval needed for role switches
-- Announce role changes clearly
-
-**Constraints**:
-- NEVER merge DEVL to TEST without explicit approval
-- NEVER push to TEST or PROD branches
-- ALWAYS stay within current ticket scope
-- **ALWAYS work in a feature branch** (not directly on DEVL)
-- Feature branch naming: `feature/TIEMPO-XXX-brief-description`
-- Auto-create feature branch if not already in one
-- Only merge feature branch to DEVL with explicit approval
-
-### TEST Branch - Approval Required Mode
-
-**Workflow**: Request approval at each major step
-- Present plan and wait for "Approved" before proceeding
-
-**SNR Protocol**:
-- Provide SNR at end of each interaction
-- WAIT for "Approved" command before proceeding
-- "Denied" returns to KANBAN for reassessment
-
-**CRK Assessment**:
-- Perform CRK before coding (required)
-- Present full assessment regardless of confidence %
-- WAIT for explicit approval before entering BUILDER mode
-
-**Architectural Decisions**:
-- Present options with pros/cons
-- WAIT for user decision
-- Document approved decision in JIRA
-
-**Code Changes**:
-- Request approval before committing
-- Show git diff summary before commit
-- WAIT for approval before pushing to origin/TEST
-
-**Role Handoffs**:
-- Request approval for role switches
-- Present next role recommendation in SNR
-- WAIT for "Approved" or alternative instruction
-
-**Merging**:
-- DEVL → TEST: Requires explicit user approval
-- Show summary of changes before merge
-- NEVER merge without approval
-
-### PROD Branch - Maximum Control Mode
-
-**Workflow**: Explicit approval required for every operation
-
-**All Operations**:
-- Request approval before ANY action
-- Show detailed plan before execution
-- No autonomous decisions
-
-**Code Changes**:
-- Full review required before any commit
-- User must verify all changes
-- Manual merge only
-
-**Merging**:
-- TEST → PROD: Requires explicit user approval
-- Full change summary required
-- Tag releases appropriately
-- NEVER merge without approval
-
-## Branch Detection and Auto-Creation
-
-Check current branch at session start:
+## Session Start
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
 ```
 
-Announce autonomy mode:
-- DEVL: "🚀 Full Autonomous Mode (DEVL branch)"
-- TEST: "✋ Approval Required Mode (TEST branch)"
-- PROD: "🔒 Maximum Control Mode (PROD branch)"
-
-**Autonomous Mode Branch Safety**:
-When starting work in autonomous mode (DEVL):
-1. Check if currently on DEVL branch directly
-2. If on DEVL and about to make code changes:
-   - Ask user for JIRA ticket number if not known
-   - Auto-create feature branch: `feature/TIEMPO-XXX-brief-description`
-   - Announce: "Creating feature branch feature/TIEMPO-XXX-description"
-   - Checkout new branch automatically
-3. If already on a feature branch, continue working
-4. All commits go to feature branch
-5. When work complete, inform user and ask about merging to DEVL
-
-**Feature Branch Workflow** (Autonomous Mode):
-```
-On DEVL → Detect ticket → Create feature/TIEMPO-XXX → Work → Commit → Push
-                                                                        ↓
-                                                            SNR: "Ready to merge to DEVL?"
-                                                            Wait for approval to merge
-```
-
-## Mode Switching
-
-When switching branches during session:
-1. Detect branch change
-2. Announce new autonomy mode
-3. Adjust behavior immediately
-4. Update SNR protocol accordingly
-
 ## Emergency Override
-
-User can always:
-- Say "STOP" to halt autonomous progression
-- Say "WAIT" to pause and discuss
-- Say "MANUAL MODE" to disable autonomy on DEVL
-- Say "AUTO MODE" to re-enable autonomy on DEVL
+- "STOP" - halt autonomous progression
+- "WAIT" - pause and discuss
+- "MANUAL MODE" - disable autonomy
 
 ================================================================================
 END OF FILE: YBOTBOT-BRANCH-AUTONOMY.md
@@ -699,33 +577,22 @@ END OF FILE: YBOTBOT-SUCCESS-CRITERIA.md
 START OF FILE: JIRA-AND-TRACKING.md
 ================================================================================
 
-# TRACKING = JIRA (via curl)
+# JIRA Workflow Strategy
 
-All references to "TRACKING" mean **JIRA via direct curl with macOS keychain auth**.
-- Project: TIEMPO
-- URL: https://hdtsllc.atlassian.net
-- **MCP removed** - use curl only
+**See central documentation:**
+```
+/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/JIRA-WORKFLOW-STRATEGY.md
+```
 
-## Quick Reference
+## Quick Reference (tangotiempo.com)
+
+- **Project Key**: TIEMPO
+- **Auth**: macOS keychain (toby.balsley@gmail.com)
+- **Do NOT use MCP** - use curl only
+
 ```bash
 JIRA_EMAIL="toby.balsley@gmail.com"
 JIRA_TOKEN=$(security find-generic-password -a "toby.balsley@gmail.com" -s "jira-api-token" -w 2>/dev/null)
-
-# Search
-curl -s -G -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
-  --data-urlencode "jql=project=TIEMPO AND status not in (Done,Closed) ORDER BY updated DESC" \
-  --data-urlencode "maxResults=10" --data-urlencode "fields=key,summary,status" \
-  "https://hdtsllc.atlassian.net/rest/api/3/search/jql"
-
-# Get issue
-curl -s -u "$JIRA_EMAIL:$JIRA_TOKEN" -H "Accept: application/json" \
-  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-XXX?fields=summary,status,description"
-
-# Add comment
-curl -s -X POST -u "$JIRA_EMAIL:$JIRA_TOKEN" \
-  -H "Content-Type: application/json" -H "Accept: application/json" \
-  -d '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Comment here"}]}]}}' \
-  "https://hdtsllc.atlassian.net/rest/api/3/issue/TIEMPO-XXX/comment"
 ```
 
 ================================================================================
@@ -800,9 +667,11 @@ git push origin main
 ```
 
 ### 4. Your Common Recipients
-- **chord**: HarmonyJunction frontend (appId=2 coordination)
+- **quinn**: Cross-project coordinator
+- **atlas**: System architect (escalations)
+- **cord**: HarmonyJunction frontend (appId=2)
 - **fulton**: Azure Functions backend
-- **ben**: calendar-be backend (DEPRECATED)
+- **dash**: CalOps dashboard
 - **broadcast**: All agents
 
 ### 5. Message-Aware Mode (Background Polling)
@@ -843,13 +712,14 @@ pkill -f "sarah-message-poller.sh"
 
 ## Agent Inbox Locations
 
-- **sarah**: inbox/sarah/
-- **fred**: inbox/fred/
-- **ben**: inbox/ben/
-- **donna**: inbox/donna/
+- **sarah**: inbox/sarah/ (you)
+- **quinn**: inbox/quinn/
+- **atlas**: inbox/atlas/
+- **dash**: inbox/dash/
 - **fulton**: inbox/fulton/
-- **azule**: inbox/azule/
-- **gotan**: inbox/gotan/
+- **cord**: inbox/cord/
+- **claw**: inbox/claw/
+- **porter**: inbox/porter/
 - **broadcast**: inbox/broadcast/ (all agents check this)
 
 ## Message Format
@@ -895,14 +765,13 @@ git push origin main
 
 ## Common Recipients by Agent
 
-**Sarah (Frontend):**
-- ben (Backend)
-- fred (Frontend Architect)
-- fulton (Azure Functions)
+**Sarah (TangoTiempo Frontend):**
+- quinn (Coordinator)
+- atlas (Architect - escalations)
+- fulton (Azure Functions backend)
+- cord (HarmonyJunction frontend)
+- dash (CalOps dashboard)
 - broadcast (All agents)
-
-**Ben (Backend - DEPRECATED):**
-- No longer active. All backend work is handled by Fulton (Azure Functions).
 
 **Fulton (Azure Functions):**
 - sarah (Frontend)

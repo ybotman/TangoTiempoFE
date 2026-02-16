@@ -59,6 +59,8 @@ import MapIcon from '@mui/icons-material/Map';
 // Removed LocationContextModal import - using map center mode only
 // MapCenterModal moved to Providers for centralized rendering
 import DebugMenu from '@/components/Modals/Debug/DebugMenu'; // NEW DEBUG MENU
+import ServiceStatusModal from '@/components/DevTools/ServiceStatusModal'; // Service Status Dashboard
+import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import RegionalOrganizerSelection from '@/components/Modals/RegionalOrganizers/RegionalOrganizerSelection'; // ORGANIZER SELECTION
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
@@ -81,6 +83,9 @@ const SidebarDrawer = ({ open, onClose }) => {
 
   // NEW STATE FOR DEBUG MENU
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
+
+  // State for Service Status Modal
+  const [serviceStatusOpen, setServiceStatusOpen] = useState(false);
 
   const { selectedRole = 'None' } = useContext(RoleContext) || {};
   const { user } = useContext(AuthContext) || {};
@@ -482,6 +487,18 @@ const SidebarDrawer = ({ open, onClose }) => {
                   </ListItemIcon>
                   <ListItemText primary="Privacy Policy" />
                 </ListItem>
+                <ListItem
+                  button="true"
+                  onClick={() => {
+                    setServiceStatusOpen(true);
+                    onClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <CloudQueueIcon sx={{ color: 'royalBlue' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Service Status" />
+                </ListItem>
               </List>
             </AccordionDetails>
           </Accordion>
@@ -548,6 +565,7 @@ const SidebarDrawer = ({ open, onClose }) => {
         }}
       />
       <DebugMenu open={debugMenuOpen} onClose={() => setDebugMenuOpen(false)} /> {/* DEBUG MENU */}
+      <ServiceStatusModal open={serviceStatusOpen} onClose={() => setServiceStatusOpen(false)} />
     </>
   );
 };

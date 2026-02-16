@@ -29,7 +29,7 @@ import { useActivityLogger } from '@/hooks/useActivityLogger';
 // Define the standard role display order for consistency (static constant)
 const ROLE_DISPLAY_ORDER = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
 
-const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage }) => {
+const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage, readOnly = false }) => {
   const router = useRouter();
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
@@ -177,24 +177,45 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
             </Stack>
 
 
-            <Box sx={{ marginTop: 2 }}>
-              <Typography variant="subtitle1">Settings</Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Choose your active role
-              </Typography>
-              <FormControl component="fieldset">
-                <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
-                  {orderedUserRoles.map((role) => (
-                    <FormControlLabel 
-                      key={role} 
-                      value={role} 
-                      control={<Radio />} 
-                      label={roleDisplayMap[role] || role} 
-                    />
-                  ))}
-                </RadioGroup>
-              </FormControl>
-            </Box>
+            {readOnly ? (
+              <Box sx={{ marginTop: 2, padding: 2, backgroundColor: 'info.light', borderRadius: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 'medium', mb: 1 }}>
+                  👋 Welcome to Boston Tango Calendar!
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  This calendar shows events in the Boston area.
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Want to explore other regions or add your own events? Visit{' '}
+                  <a
+                    href="https://www.tangotiempo.com/calendar"
+                    style={{ color: '#1976d2', fontWeight: 'bold' }}
+                  >
+                    tangotiempo.com
+                  </a>
+                  {' '}to set your location and access full features.
+                </Typography>
+              </Box>
+            ) : (
+              <Box sx={{ marginTop: 2 }}>
+                <Typography variant="subtitle1">Settings</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                  Choose your active role
+                </Typography>
+                <FormControl component="fieldset">
+                  <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
+                    {orderedUserRoles.map((role) => (
+                      <FormControlLabel
+                        key={role}
+                        value={role}
+                        control={<Radio />}
+                        label={roleDisplayMap[role] || role}
+                      />
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              </Box>
+            )}
 
             <Button
               variant="contained"
@@ -278,6 +299,7 @@ SiteMenuBarUserDrawer.propTypes = {
   userDrawerOpen: PropTypes.bool.isRequired,
   handleUserDrawerClose: PropTypes.func.isRequired,
   showRoleMessage: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool,
 };
 
 export default SiteMenuBarUserDrawer;

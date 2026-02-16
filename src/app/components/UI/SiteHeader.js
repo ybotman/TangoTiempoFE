@@ -6,7 +6,6 @@ import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
-import ServiceStatusIcon from '@/components/DevTools/ServiceStatusIcon';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
@@ -19,6 +18,32 @@ const SiteHeader = () => {
   // TIEMPO-381: State for nearest city name
   const [nearestCityName, setNearestCityName] = useState(null);
   const lastFetchedCoords = useRef(null);
+
+  // Pulse animation state - triggers on mount and location changes
+  const [isPulsing, setIsPulsing] = useState(true);
+  const pulseTimeoutRef = useRef(null);
+
+  // Trigger pulse animation on mount and location changes
+  useEffect(() => {
+    // Start pulsing
+    setIsPulsing(true);
+
+    // Clear any existing timeout
+    if (pulseTimeoutRef.current) {
+      clearTimeout(pulseTimeoutRef.current);
+    }
+
+    // Stop pulsing after 5 seconds
+    pulseTimeoutRef.current = setTimeout(() => {
+      setIsPulsing(false);
+    }, 5000);
+
+    return () => {
+      if (pulseTimeoutRef.current) {
+        clearTimeout(pulseTimeoutRef.current);
+      }
+    };
+  }, [currentLocation?.lat, currentLocation?.lng, currentLocation?.zoomRange]);
 
   // TIEMPO-381: Fetch nearest city when currentLocation changes
   useEffect(() => {
@@ -111,8 +136,6 @@ const SiteHeader = () => {
         className="site-header-image"
         priority
       />
-      {/* Service Status Icon - Opens modal with service health details */}
-      <ServiceStatusIcon />
 
       {/* Version in top-right */}
       <div
@@ -136,23 +159,24 @@ const SiteHeader = () => {
             position: 'absolute',
             top: '8px',
             left: '8px',
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backgroundColor: isPulsing ? 'rgba(25, 118, 210, 0.9)' : 'rgba(0, 0, 0, 0.75)',
             color: '#fff',
             padding: '4px 10px',
             borderRadius: '12px',
-            border: 'none',
+            border: isPulsing ? '2px solid #fff' : 'none',
             fontSize: '11px',
             fontWeight: '500',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+            boxShadow: isPulsing ? '0 0 10px rgba(25, 118, 210, 0.8)' : '0 1px 3px rgba(0,0,0,0.3)',
             transition: 'all 0.2s ease',
             maxWidth: '60%',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            animation: isPulsing ? 'pulse 1s ease-in-out infinite' : 'none',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';

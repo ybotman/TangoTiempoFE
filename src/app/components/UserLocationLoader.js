@@ -39,11 +39,15 @@ const UserLocationLoader = () => {
         hasFetched.current = true;
         lastUserId.current = currentUserId;
 
-        // Clear old sessionStorage to force fresh fetch from Cloud Default
-        sessionStorage.removeItem('currentLocation');
-
         // Get fresh Firebase token using AuthContext method
         const token = await getIdToken();
+
+        // Only clear sessionStorage on production where we fetch from Azure
+        // On localhost, sessionStorage IS the storage, so don't clear it
+        const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+        if (!isLocalhost) {
+          sessionStorage.removeItem('currentLocation');
+        }
 
         // Skip if no valid token (401 would break mobile rendering)
         if (!token) {
@@ -56,7 +60,9 @@ const UserLocationLoader = () => {
         const mapCenter = await fetchMapCenter(token);
 
         // TIEMPO-381: If no mapCenter exists, trigger onboarding modal
-        if (!mapCenter) {
+        // Skip on Boston route - Boston has forced coordinates
+        const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
+        if (!mapCenter && !isBostonRoute) {
           setNeedsOnboarding(true);
         }
       } catch (error) {
