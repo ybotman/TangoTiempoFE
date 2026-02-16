@@ -264,7 +264,7 @@ const MapCenterOnboardingModal = ({
         color: 'white'
       }}>
         <LocationOnIcon />
-        <Typography variant="h6">Welcome! Set Your Location</Typography>
+        <Box component="span">Welcome! Set Your Location</Box>
       </DialogTitle>
 
       <DialogContent sx={{ p: isMobile ? 1.5 : 2 }}>

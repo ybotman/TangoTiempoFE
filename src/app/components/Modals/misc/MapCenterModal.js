@@ -295,9 +295,9 @@ const MapCenterModal = ({
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
 
   // TIEMPO-360: Pre-fetch density data when modal opens (before map init)
-  // This reduces perceived delay on mobile by starting fetch immediately
+  // TIEMPO-381: Only fetch if showDensityPills is enabled
   useEffect(() => {
-    if (!open) return;
+    if (!open || !showDensityPills) return;
 
     // Pre-fetch with initial location or US-centric default bounds
     const lat = initialLocation?.lat || 39.8;
@@ -316,7 +316,7 @@ const MapCenterModal = ({
     });
     // Prefetch only on modal open - other values read at call time
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, showDensityPills]);
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
