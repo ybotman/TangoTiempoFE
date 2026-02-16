@@ -12,6 +12,8 @@ import {
   IconButton,
   Alert,
   Slider,
+  Switch,
+  FormControlLabel,
   useTheme,
   useMediaQuery,
   CircularProgress
@@ -287,14 +289,15 @@ const MapCenterModal = ({
   const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
 
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
 
   // TIEMPO-360: Pre-fetch density data when modal opens (before map init)
-  // This reduces perceived delay on mobile by starting fetch immediately
+  // TIEMPO-381: Only fetch if showDensityPills is enabled
   useEffect(() => {
-    if (!open) return;
+    if (!open || !showDensityPills) return;
 
     // Pre-fetch with initial location or US-centric default bounds
     const lat = initialLocation?.lat || 39.8;
@@ -313,7 +316,7 @@ const MapCenterModal = ({
     });
     // Prefetch only on modal open - other values read at call time
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, showDensityPills]);
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -518,7 +521,15 @@ const MapCenterModal = ({
   
   // TIEMPO-360: Render density pill markers when data changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !clusterLayerRef.current || !densityData.length) return;
+    if (!mapInstanceRef.current || !clusterLayerRef.current) return;
+
+    // TIEMPO-381: Clear markers if toggle is off
+    if (!showDensityPills) {
+      clusterLayerRef.current.clearLayers();
+      return;
+    }
+
+    if (!densityData.length) return;
 
     const renderPills = async () => {
       const L = (await import('leaflet')).default;
@@ -610,7 +621,7 @@ const MapCenterModal = ({
     };
 
     renderPills();
-  }, [densityData, currentZoom]);
+  }, [densityData, currentZoom, showDensityPills]);
 
   // TIEMPO-360: Refetch when time range changes
   useEffect(() => {
@@ -880,6 +891,23 @@ const MapCenterModal = ({
               </Button>
             </>
           )}
+
+          {/* TIEMPO-381: Event counts toggle */}
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={showDensityPills}
+                onChange={(e) => setShowDensityPills(e.target.checked)}
+              />
+            }
+            label={
+              <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
+                {isMobile ? 'Events' : 'Show Events'}
+              </Typography>
+            }
+            sx={{ m: 0, ml: 1 }}
+          />
         </Box>
         
         {/* Search Range Slider */}
@@ -942,38 +970,38 @@ const MapCenterModal = ({
             )}
           </Box>
 
-          {/* TIEMPO-360: Event density pill legend + loading */}
-          {mapInitialized && (
+          {/* TIEMPO-381: Legend for event density pills - only show when enabled */}
+          {mapInitialized && showDensityPills && (
             <Box sx={{
               position: 'absolute',
               bottom: 8,
               right: 8,
               bgcolor: 'rgba(255,255,255,0.95)',
               borderRadius: 1,
-              px: 1.5,
-              py: 0.75,
+              px: 1,
+              py: 0.5,
               boxShadow: 1,
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
+              gap: 1,
               zIndex: 1000,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
             }}>
-              {densityLoading && <CircularProgress size={14} />}
+              {densityLoading && <CircularProgress size={12} />}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.social }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Mil/Pra</Typography>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.social }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Mil/Pra</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.events }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Festival+</Typography>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.events }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Festival+</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.discovered }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>BOT</Typography>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.discovered }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>BOT</Typography>
               </Box>
               {densityMeta && (
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1 }}>
                   {densityMeta.totalEvents || 0} events
                 </Typography>
               )}

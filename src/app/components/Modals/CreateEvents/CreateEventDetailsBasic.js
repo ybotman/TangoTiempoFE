@@ -12,7 +12,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: I
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
 import PropTypes from 'prop-types';
 
-const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null, onTimeModified = null }) => {
+const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode = false, organizer = null, onTimeModified = null }) => {
   const allCategories = useCategories(); // Fetch categories
   // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
   const categories = useMemo(() =>
@@ -23,7 +23,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     ),
     [allCategories]
   );
-  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues(); // Fetch venues with the updated hook
+  // Fetch venues within user's map center range - same as calendar view
+  const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues();
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
   // TIEMPO-325: Fetch ALL organizers for dropdown (no filtering) - use type-ahead for usability
@@ -512,10 +513,10 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             getOptionLabel={(option) => option.categoryName || ''}
             value={selectedCategory}
             onChange={(event, newValue) => {
-              setEventData(prevData => ({ 
-                ...prevData, 
+              setEventData(prevData => ({
+                ...prevData,
                 categoryFirstId: newValue ? newValue._id : '',
-                categoryFirst: newValue ? newValue.categoryName : '' 
+                categoryFirst: newValue ? newValue.categoryName : ''
               }));
             }}
             renderInput={(params) => (
@@ -532,167 +533,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             isOptionEqualToValue={(option, value) => option._id === value?._id}
           />
         </Grid>
-        
-        {/* Owner Organizer - RA gets dropdown to assign, RO gets display-only */}
+
+        {/* Venue Selection - Next to Category */}
         <Grid item xs={12} md={6}>
-          {selectedRole === 'RegionalAdmin' ? (
-            // RegionalAdmin can assign events to any organizer
-            <Autocomplete
-              options={organizers}
-              loading={loadingOrganizers}
-              value={selectedOrganizer}
-              onChange={handleOrganizerChange}
-              getOptionLabel={(option) => {
-                if (!option || typeof option !== 'object') return '';
-                const name = option.fullName || option.organizerName || option.name || '';
-                const short = option.shortName || option.organizerShortName || '';
-                return short ? `${name} (${short})` : name;
-              }}
-              isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              filterOptions={(options, { inputValue }) => {
-                const searchTerm = inputValue.toLowerCase();
-                return options.filter(option => {
-                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Event Owner (type to search)"
-                  required
-                  error={!eventData.ownerOrganizerID}
-                  helperText={!eventData.ownerOrganizerID ? 'Owner organizer is required' : 'Select the organizer who owns this event'}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              fullWidth
-              disablePortal
-              noOptionsText="No organizers found"
-              loadingText="Loading organizers..."
-            />
-          ) : (
-            // RO and other roles: Display-only (auto-set to creator)
-            <FormControl fullWidth>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ minWidth: '100px' }}>
-                    {editMode ? 'Event Owner:' : 'Creating as:'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                    {eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || organizer?.fullName || 'Loading...'}
-                  </Typography>
-                </Box>
-              </Box>
-            </FormControl>
-          )}
-        </Grid>
-
-        {/* Alternate Organizer - SHOWN on event, can also edit */}
-        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={organizers}
-              loading={loadingOrganizers}
-              value={selectedAlternateOrganizer}
-              onChange={handleAlternateOrganizerChange}
-              getOptionLabel={(option) => {
-                if (!option || typeof option !== 'object') return '';
-                const name = option.fullName || option.organizerName || option.name || '';
-                const short = option.shortName || option.organizerShortName || '';
-                return short ? `${name} (${short})` : name;
-              }}
-              isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              filterOptions={(options, { inputValue }) => {
-                const searchTerm = inputValue.toLowerCase();
-                return options.filter(option => {
-                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Alternate Organizer (optional)"
-                  helperText="SHOWN on event. Can also view/edit this event."
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              fullWidth
-              disablePortal
-              noOptionsText="No organizers found"
-              loadingText="Loading organizers..."
-            />
-          </Grid>
-        )}
-
-        {/* Granted Organizer - NOT shown on event, but can edit (hidden collaborator) */}
-        {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={organizers}
-              loading={loadingOrganizers}
-              value={selectedGrantedOrganizer}
-              onChange={handleGrantedOrganizerChange}
-              getOptionLabel={(option) => {
-                if (!option || typeof option !== 'object') return '';
-                const name = option.fullName || option.organizerName || option.name || '';
-                const short = option.shortName || option.organizerShortName || '';
-                return short ? `${name} (${short})` : name;
-              }}
-              isOptionEqualToValue={(option, value) => option?._id === value?._id}
-              filterOptions={(options, { inputValue }) => {
-                const searchTerm = inputValue.toLowerCase();
-                return options.filter(option => {
-                  const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                  const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                  return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Granted Organizer (optional)"
-                  helperText="NOT shown on event. Can edit (hidden collaborator)."
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loadingOrganizers ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              fullWidth
-              disablePortal
-              noOptionsText="No organizers found"
-              loadingText="Loading organizers..."
-            />
-          </Grid>
-        )}
-
-        {/* Venue Selection - Searchable Autocomplete */}
-        <Grid item xs={12}>
           <FormControl fullWidth>
             {isVenueReady ? (
             <Autocomplete
@@ -790,7 +633,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                   variant="outlined"
                   required
                   error={Boolean(errorVenues) || !(eventData.venueId || eventData.locationID)}
-                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `Showing ${venues.length} venues from your map center`}
+                  helperText={errorVenues ? "Error loading venues" : !(eventData.venueId || eventData.locationID) ? "Venue is required" : `${venues.length} venues within your map range`}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -852,6 +695,190 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           fullWidth
         />
       </FormControl>
+
+      {/* Organizers Section - 2 columns: Left (Author/Owner) | Right (Alternate/Granted) */}
+      {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
+        <Box sx={{ mt: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            Organizers
+          </Typography>
+          <Grid container spacing={1}>
+            {/* Column 1: Author (grey) then Owner */}
+            <Grid item xs={12} sm={6}>
+              <Grid container spacing={1}>
+                {/* Author - read-only, grey */}
+                <Grid item xs={12}>
+                  <TextField
+                    size="small"
+                    label="Author (original creator)"
+                    value={
+                      eventData.authorOrganizerShortName ||
+                      eventData.authorOrganizerName ||
+                      organizer?.shortName ||
+                      organizer?.fullName ||
+                      user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
+                      user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
+                      user?.displayName ||
+                      'You'
+                    }
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                    sx={{ bgcolor: 'grey.200', '& .MuiInputBase-input': { color: 'text.secondary', fontStyle: 'italic' } }}
+                  />
+                </Grid>
+                {/* Owner - dropdown for RA, read-only for RO */}
+                <Grid item xs={12}>
+                  {selectedRole === 'RegionalAdmin' ? (
+                    <Autocomplete
+                      size="small"
+                      options={organizers}
+                      loading={loadingOrganizers}
+                      value={selectedOrganizer}
+                      onChange={handleOrganizerChange}
+                      getOptionLabel={(option) => {
+                        if (!option || typeof option !== 'object') return '';
+                        const name = option.fullName || option.organizerName || option.name || '';
+                        const short = option.shortName || option.organizerShortName || '';
+                        return short ? `${name} (${short})` : name;
+                      }}
+                      isOptionEqualToValue={(option, value) => option?._id === value?._id}
+                      filterOptions={(options, { inputValue }) => {
+                        const searchTerm = inputValue.toLowerCase();
+                        return options.filter(option => {
+                          const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                          const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                          return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                        });
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Owner *"
+                          size="small"
+                          required
+                          error={!eventData.ownerOrganizerID}
+                          InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                              <>
+                                {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
+                                {params.InputProps.endAdornment}
+                              </>
+                            ),
+                          }}
+                        />
+                      )}
+                      fullWidth
+                      disablePortal
+                    />
+                  ) : (
+                    <TextField
+                      size="small"
+                      label="Owner"
+                      value={eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || 'Loading...'}
+                      InputProps={{ readOnly: true }}
+                      fullWidth
+                      sx={{ bgcolor: 'action.hover' }}
+                    />
+                  )}
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Column 2: Alternate then Granted */}
+            <Grid item xs={12} sm={6}>
+              <Grid container spacing={1}>
+                {/* Alternate - shown on calendar */}
+                <Grid item xs={12}>
+                  <Autocomplete
+                    size="small"
+                    options={organizers}
+                    loading={loadingOrganizers}
+                    value={selectedAlternateOrganizer}
+                    onChange={handleAlternateOrganizerChange}
+                    getOptionLabel={(option) => {
+                      if (!option || typeof option !== 'object') return '';
+                      const name = option.fullName || option.organizerName || option.name || '';
+                      const short = option.shortName || option.organizerShortName || '';
+                      return short ? `${name} (${short})` : name;
+                    }}
+                    isOptionEqualToValue={(option, value) => option?._id === value?._id}
+                    filterOptions={(options, { inputValue }) => {
+                      const searchTerm = inputValue.toLowerCase();
+                      return options.filter(option => {
+                        const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                        const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                        return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Alternate (shown on calendar)"
+                        size="small"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
+                    fullWidth
+                    disablePortal
+                  />
+                </Grid>
+                {/* Granted - not shown, can edit */}
+                <Grid item xs={12}>
+                  <Autocomplete
+                    size="small"
+                    options={organizers}
+                    loading={loadingOrganizers}
+                    value={selectedGrantedOrganizer}
+                    onChange={handleGrantedOrganizerChange}
+                    getOptionLabel={(option) => {
+                      if (!option || typeof option !== 'object') return '';
+                      const name = option.fullName || option.organizerName || option.name || '';
+                      const short = option.shortName || option.organizerShortName || '';
+                      return short ? `${name} (${short})` : name;
+                    }}
+                    isOptionEqualToValue={(option, value) => option?._id === value?._id}
+                    filterOptions={(options, { inputValue }) => {
+                      const searchTerm = inputValue.toLowerCase();
+                      return options.filter(option => {
+                        const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
+                        const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
+                        return fullName.includes(searchTerm) || shortName.includes(searchTerm);
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Granted (not shown, can edit)"
+                        size="small"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
+                    fullWidth
+                    disablePortal
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
     </Box>
 
     {/* TIEMPO-290: Venue Modal with Map/Add/Edit tabs */}
@@ -889,6 +916,9 @@ CreateEventDetailsBasic.propTypes = {
     alternateOrganizerName: PropTypes.string,
     grantedOrganizerID: PropTypes.string,
     grantedOrganizerName: PropTypes.string,
+    authorOrganizerID: PropTypes.string,
+    authorOrganizerName: PropTypes.string,
+    authorOrganizerShortName: PropTypes.string,
     cost: PropTypes.string,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,

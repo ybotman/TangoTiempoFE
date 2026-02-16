@@ -88,6 +88,9 @@ export const GeoLocationProvider = ({ children }) => {
   // State for MapCenterModal
   const [mapCenterModalOpen, setMapCenterModalOpen] = useState(false);
 
+  // TIEMPO-381: State for onboarding modal (new users without mapCenter)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
   // Subscribe to location events on mount
   useEffect(() => {
     // TIEMPO-276: Security cleanup - removed setup logging
@@ -616,8 +619,10 @@ export const GeoLocationProvider = ({ children }) => {
     savedLocation,
     currentLocation,
     mapCenterModalOpen,
+    needsOnboarding,
 
     // Functions
+    setNeedsOnboarding,
     selectLocation,
     clearLocation,
     fetchNearestCity,
