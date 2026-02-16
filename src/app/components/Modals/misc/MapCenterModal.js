@@ -289,7 +289,7 @@ const MapCenterModal = ({
   const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [showDensityPills, setShowDensityPills] = useState(true); // TIEMPO-381: Toggle for event density pills
+  const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
 
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
@@ -891,6 +891,23 @@ const MapCenterModal = ({
               </Button>
             </>
           )}
+
+          {/* TIEMPO-381: Event counts toggle */}
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={showDensityPills}
+                onChange={(e) => setShowDensityPills(e.target.checked)}
+              />
+            }
+            label={
+              <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
+                {isMobile ? 'Events' : 'Show Events'}
+              </Typography>
+            }
+            sx={{ m: 0, ml: 1 }}
+          />
         </Box>
         
         {/* Search Range Slider */}
@@ -953,8 +970,8 @@ const MapCenterModal = ({
             )}
           </Box>
 
-          {/* TIEMPO-381: Toggle + Legend for event density pills */}
-          {mapInitialized && (
+          {/* TIEMPO-381: Legend for event density pills - only show when enabled */}
+          {mapInitialized && showDensityPills && (
             <Box sx={{
               position: 'absolute',
               bottom: 8,
@@ -968,46 +985,25 @@ const MapCenterModal = ({
               alignItems: 'center',
               gap: 1,
               zIndex: 1000,
+              pointerEvents: 'none',
             }}>
-              {/* Toggle switch */}
-              <FormControlLabel
-                control={
-                  <Switch
-                    size="small"
-                    checked={showDensityPills}
-                    onChange={(e) => setShowDensityPills(e.target.checked)}
-                    sx={{ transform: 'scale(0.75)', mr: -0.5 }}
-                  />
-                }
-                label={
-                  <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>
-                    Events
-                  </Typography>
-                }
-                sx={{ m: 0, mr: 0.5 }}
-              />
-              {/* Legend - only show when pills are visible */}
-              {showDensityPills && (
-                <>
-                  {densityLoading && <CircularProgress size={12} />}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.social }} />
-                    <Typography variant="caption" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>Mil</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.events }} />
-                    <Typography variant="caption" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>Fest</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.discovered }} />
-                    <Typography variant="caption" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>AI</Typography>
-                  </Box>
-                  {densityMeta && (
-                    <Typography variant="caption" sx={{ fontSize: '0.5rem', color: 'text.secondary', lineHeight: 1 }}>
-                      {densityMeta.totalEvents || 0}
-                    </Typography>
-                  )}
-                </>
+              {densityLoading && <CircularProgress size={12} />}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.social }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Mil/Pra</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.events }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Festival+</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.discovered }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>BOT</Typography>
+              </Box>
+              {densityMeta && (
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1 }}>
+                  {densityMeta.totalEvents || 0} events
+                </Typography>
               )}
             </Box>
           )}
