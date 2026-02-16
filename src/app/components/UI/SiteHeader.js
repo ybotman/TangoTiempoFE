@@ -15,9 +15,22 @@ const SiteHeader = () => {
   useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
 
-  // TIEMPO-381: State for nearest city name
+  // TIEMPO-381: State for nearest city name and distance
   const [nearestCityName, setNearestCityName] = useState(null);
+  const [cityDistanceMiles, setCityDistanceMiles] = useState(null);
   const lastFetchedCoords = useRef(null);
+
+  // Helper: Calculate distance between two points in miles (Haversine formula)
+  const calculateDistanceMiles = (lat1, lng1, lat2, lng2) => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   // Pulse animation state - triggers on mount and location changes
   const [isPulsing, setIsPulsing] = useState(true);
@@ -67,12 +80,21 @@ const SiteHeader = () => {
         const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
         if (cityData?.cityName) {
           setNearestCityName(cityData.cityName);
+          // Calculate distance if city has coordinates
+          if (cityData.latitude && cityData.longitude) {
+            const distance = calculateDistanceMiles(lat, lng, cityData.latitude, cityData.longitude);
+            setCityDistanceMiles(Math.round(distance));
+          } else {
+            setCityDistanceMiles(null);
+          }
         } else {
           setNearestCityName(null);
+          setCityDistanceMiles(null);
         }
       } catch {
         // If no city found, fall back to coordinates
         setNearestCityName(null);
+        setCityDistanceMiles(null);
       }
     };
 
@@ -89,7 +111,9 @@ const SiteHeader = () => {
 
     // Use city name if available, otherwise coordinates
     if (nearestCityName) {
-      return `${nearestCityName} ± ${radius}mi`;
+      // If city is more than 100 miles away, show "Near-ish:"
+      const prefix = cityDistanceMiles && cityDistanceMiles > 100 ? 'Near-ish: ' : '';
+      return `${prefix}${nearestCityName} ± ${radius}mi`;
     }
 
     // Fallback to coordinates
