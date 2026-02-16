@@ -3,14 +3,30 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
 import { RoleContext } from '@/contexts/RoleContext';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import ServiceStatusIcon from '@/components/DevTools/ServiceStatusIcon';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
+  const { currentLocation, openMapCenterModal } = useGeoLocation();
   useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
+
+  // TIEMPO-381: Format location display text
+  const getLocationDisplay = () => {
+    if (!currentLocation?.lat || !currentLocation?.lng) {
+      return null;
+    }
+    const radius = currentLocation.zoomRange || 50;
+    // Show coordinates rounded to 1 decimal for brevity
+    const lat = parseFloat(currentLocation.lat).toFixed(1);
+    const lng = parseFloat(currentLocation.lng).toFixed(1);
+    return `${lat}°, ${lng}° ± ${radius}mi`;
+  };
+
+  const locationDisplay = getLocationDisplay();
 
   // Determine which image to use based on role
   let headerImage = '/images/TangoTiempo3.jpg'; // Default image
@@ -84,6 +100,45 @@ const SiteHeader = () => {
       >
         {appVersion}
       </div>
+
+      {/* TIEMPO-381: Location indicator in bottom-center */}
+      {locationDisplay && (
+        <button
+          onClick={openMapCenterModal}
+          style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            color: '#333',
+            padding: '6px 14px',
+            borderRadius: '16px',
+            border: '1px solid #ccc',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+            e.currentTarget.style.boxShadow = '0 3px 6px rgba(0,0,0,0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+          }}
+          title="Click to change your location"
+        >
+          <span style={{ fontSize: '14px' }}>📍</span>
+          <span>{locationDisplay}</span>
+          <span style={{ fontSize: '10px', color: '#666' }}>✎</span>
+        </button>
+      )}
 
       </div>
     </>

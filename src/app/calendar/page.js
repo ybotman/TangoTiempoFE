@@ -30,6 +30,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import WelcomeModal from '@/components/Modals/Welcome/WelcomeModal'; // TIEMPO-329: Welcome modal
+import MapCenterOnboardingModal from '@/components/Modals/misc/MapCenterOnboardingModal'; // TIEMPO-381: Onboarding modal
 import { wasWelcomeShown } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor tracking
 
 const CalendarPage = () => {
@@ -53,8 +54,14 @@ const CalendarPage = () => {
   // TIEMPO-329: Welcome modal state
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
-  // Get GeoLocation context for auto-opening map
-  const { openLocationSettings, openMapCenterModal } = useGeoLocation();
+  // Get GeoLocation context for auto-opening map and onboarding
+  const {
+    openLocationSettings,
+    openMapCenterModal,
+    needsOnboarding,
+    setNeedsOnboarding,
+    saveToCloudDefault
+  } = useGeoLocation();
 
   // Get auth context to check if user is logged in
   const { user } = useContext(AuthContext);
@@ -255,12 +262,19 @@ const CalendarPage = () => {
     // Check if this event is canceled
     const isCanceled = event.extendedProps?.isCanceled === true;
     
-    // Get organizer short name and event short title with fallbacks
-    const organizerShort = event.extendedProps?.ownerOrganizerShortName || 
-                          event.extendedProps?.ownerOrganizerName?.substring(0, 8) || 
-                          '';
-    const eventShortTitle = event.extendedProps?.shortTitle || 
-                           event.title?.substring(0, 15) || 
+    // Get organizer short names (owner + alternate if exists)
+    const ownerShort = event.extendedProps?.ownerOrganizerShortName ||
+                       event.extendedProps?.ownerOrganizerName?.substring(0, 8) ||
+                       '';
+    const alternateShort = event.extendedProps?.alternateOrganizerShortName ||
+                           event.extendedProps?.alternateOrganizerName?.substring(0, 8) ||
+                           '';
+    // Format as "OWNER|ALTER" if alternate exists, otherwise just "OWNER"
+    const organizerShort = alternateShort
+                          ? `${ownerShort}|${alternateShort}`
+                          : ownerShort;
+    const eventShortTitle = event.extendedProps?.shortTitle ||
+                           event.title?.substring(0, 15) ||
                            '';
     
     if (isMonthlyView) {
@@ -1121,6 +1135,15 @@ const CalendarPage = () => {
       <WelcomeModal
         open={showWelcomeModal}
         onClose={() => setShowWelcomeModal(false)}
+      />
+
+      {/* TIEMPO-381: MapCenter Onboarding Modal - Shows for logged-in users without mapCenter */}
+      <MapCenterOnboardingModal
+        open={needsOnboarding && !!user}
+        onSaveLocation={async (locationData, firebaseToken) => {
+          await saveToCloudDefault(locationData, firebaseToken);
+          setNeedsOnboarding(false);
+        }}
       />
 
       {/* TIEMPO-311: Floating map icon button - shows when no modals are open */}

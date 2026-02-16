@@ -11,7 +11,7 @@ import { AuthContext } from '@/contexts/AuthContext';
  * Loads user's saved map center from Azure Functions Cloud Default on login
  */
 const UserLocationLoader = () => {
-  const { fetchMapCenter } = useGeoLocation();
+  const { fetchMapCenter, setNeedsOnboarding } = useGeoLocation();
   const { user, getIdToken } = useContext(AuthContext) || {};
   const hasFetched = useRef(false);
   const lastUserId = useRef(null);
@@ -53,7 +53,12 @@ const UserLocationLoader = () => {
         }
 
         // Fetch saved map center from Azure Functions
-        await fetchMapCenter(token);
+        const mapCenter = await fetchMapCenter(token);
+
+        // TIEMPO-381: If no mapCenter exists, trigger onboarding modal
+        if (!mapCenter) {
+          setNeedsOnboarding(true);
+        }
       } catch (error) {
         console.error('[UserLocationLoader] Failed to load map center:', error);
         // Reset flag on error to allow retry
@@ -63,7 +68,7 @@ const UserLocationLoader = () => {
     };
 
     loadMapCenter();
-  }, [user, getIdToken, fetchMapCenter]);
+  }, [user, getIdToken, fetchMapCenter, setNeedsOnboarding]);
 
   return null; // This is a logic-only component
 };
