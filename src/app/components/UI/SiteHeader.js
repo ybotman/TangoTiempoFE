@@ -52,7 +52,8 @@ const SiteHeader = () => {
     };
 
     fetchCity();
-  }, [currentLocation?.lat, currentLocation?.lng, fetchNearestCity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLocation?.lat, currentLocation?.lng]); // fetchNearestCity excluded - stable context function
 
   // TIEMPO-381: Format location display text
   const getLocationDisplay = () => {
