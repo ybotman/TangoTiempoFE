@@ -11,6 +11,8 @@ import {
   Typography,
   Alert,
   Slider,
+  Switch,
+  FormControlLabel,
   useTheme,
   useMediaQuery,
   CircularProgress
@@ -18,6 +20,12 @@ import {
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { AuthContext } from '@/contexts/AuthContext';
+import {
+  useEventDensity,
+  PILL_COLORS,
+  TIME_RANGE_DEFAULT,
+  getAggregationLevel,
+} from '@/components/EventDensity';
 import 'leaflet/dist/leaflet.css';
 
 /**
@@ -38,6 +46,8 @@ const MapCenterOnboardingModal = ({
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const circleRef = useRef(null);
+  const clusterLayerRef = useRef(null);
+  const fetchTimerRef = useRef(null);
 
   const [mapInitialized, setMapInitialized] = useState(false);
   const [centerLat, setCenterLat] = useState('');
@@ -46,15 +56,25 @@ const MapCenterOnboardingModal = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [showDensityPills, setShowDensityPills] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(4);
+
+  // Event density hook
+  const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
 
   // Initialize map
   useEffect(() => {
-    if (!open || mapInitialized) return;
+    if (!open) return;
+
+    // Already initialized with a valid map instance
+    if (mapInitialized && mapInstanceRef.current) return;
 
     let retryCount = 0;
     const maxRetries = 10;
+    let isMounted = true;
 
     const checkAndInit = () => {
+      if (!isMounted) return;
       retryCount++;
 
       if (mapRef.current) {
@@ -67,8 +87,37 @@ const MapCenterOnboardingModal = ({
     };
 
     const initializeMap = async () => {
+      if (!isMounted) return;
+
       try {
         const L = (await import('leaflet')).default;
+
+        // Clean up any existing Leaflet instance on this container
+        if (mapRef.current && mapRef.current._leaflet_id) {
+          // Container already has a map - remove it first
+          const existingMap = mapRef.current._leaflet;
+          if (existingMap) {
+            try {
+              existingMap.remove();
+            } catch {
+              // Ignore
+            }
+          }
+          // Clear Leaflet's internal marker
+          delete mapRef.current._leaflet_id;
+        }
+
+        // Also clean up our ref if it has a stale instance
+        if (mapInstanceRef.current) {
+          try {
+            mapInstanceRef.current.remove();
+          } catch {
+            // Ignore
+          }
+          mapInstanceRef.current = null;
+        }
+
+        if (!isMounted || !mapRef.current) return;
 
         delete L.Icon.Default.prototype._getIconUrl;
         L.Icon.Default.mergeOptions({
@@ -95,6 +144,9 @@ const MapCenterOnboardingModal = ({
           }
         ).addTo(map);
 
+        // Create layer for density pill markers
+        clusterLayerRef.current = L.layerGroup().addTo(map);
+
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
           updateMarker(lat, lng);
@@ -102,22 +154,56 @@ const MapCenterOnboardingModal = ({
           setCenterLng(lng.toFixed(6));
         });
 
+        // Fetch density pills on zoom/pan (debounced)
+        const fetchDensityForBounds = () => {
+          if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
+          fetchTimerRef.current = setTimeout(() => {
+            const bounds = map.getBounds();
+            const zoom = map.getZoom();
+            setCurrentZoom(zoom);
+            fetchDensity({
+              bounds: {
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest(),
+              },
+              zoom,
+              timeRangeDays: TIME_RANGE_DEFAULT,
+            });
+          }, 500);
+        };
+
+        map.on('moveend', fetchDensityForBounds);
+        map.on('zoomend', fetchDensityForBounds);
+
         setTimeout(() => {
-          map.invalidateSize();
+          if (map && map._container) {
+            map.invalidateSize();
+            // Fetch initial density data
+            fetchDensityForBounds();
+          }
         }, 100);
 
         mapInstanceRef.current = map;
-        setMapInitialized(true);
+        if (isMounted) {
+          setMapInitialized(true);
+        }
 
       } catch (error) {
         console.error('[MapCenterOnboardingModal] Error initializing map:', error);
-        setMessage({ type: 'error', text: 'Failed to initialize map' });
+        if (isMounted) {
+          setMessage({ type: 'error', text: 'Failed to initialize map' });
+        }
       }
     };
 
     checkAndInit();
 
     return () => {
+      isMounted = false;
+      if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
+      if (clusterLayerRef.current) clusterLayerRef.current = null;
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
@@ -125,10 +211,89 @@ const MapCenterOnboardingModal = ({
           // Ignore cleanup errors
         }
         mapInstanceRef.current = null;
-        setMapInitialized(false);
       }
+      // Clear the ref's Leaflet marker too
+      if (mapRef.current && mapRef.current._leaflet_id) {
+        delete mapRef.current._leaflet_id;
+      }
+      setMapInitialized(false);
     };
   }, [open, mapInitialized]);
+
+  // Render density pill markers when data changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !clusterLayerRef.current) return;
+
+    // Clear markers if toggle is off
+    if (!showDensityPills) {
+      clusterLayerRef.current.clearLayers();
+      return;
+    }
+
+    if (!densityData.length) return;
+
+    const renderPills = async () => {
+      const L = (await import('leaflet')).default;
+
+      // Clear existing markers
+      clusterLayerRef.current.clearLayers();
+
+      const level = getAggregationLevel(currentZoom);
+
+      densityData.forEach((item) => {
+        if (!item.center?.lat || !item.center?.lng) return;
+
+        // Skip unknown venues
+        const isUnknown = item.name?.toLowerCase().includes('unknown');
+        if (isUnknown && level === 'venue') return;
+
+        // Build pills HTML
+        const { socialCount = 0, eventCount = 0, discoveredCount = 0 } = item;
+        const pills = [];
+
+        if (socialCount > 0) {
+          pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.social};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${socialCount}</span>`);
+        }
+        if (eventCount > 0) {
+          pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.events};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${eventCount}</span>`);
+        }
+        if (discoveredCount > 0) {
+          pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.discovered};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${discoveredCount}</span>`);
+        }
+
+        if (pills.length === 0) return;
+
+        const displayName = item.name.length > 18 ? item.name.slice(0, 17) + '…' : item.name;
+        const header = `<div style="font-size:9px;font-weight:600;color:#555;text-align:center;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${displayName}</div>`;
+        const pillHtml = `<div style="display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.95);padding:4px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;">${header}<div style="display:flex;align-items:center;gap:2px;">${pills.join('')}</div></div>`;
+
+        const icon = L.divIcon({
+          className: 'density-pill-marker',
+          html: pillHtml,
+          iconSize: [130, 50],
+          iconAnchor: [65, 25],
+        });
+
+        const marker = L.marker([item.center.lat, item.center.lng], {
+          icon,
+          interactive: true,
+          bubblingMouseEvents: false,
+        });
+
+        // Tooltip
+        const tooltipContent = `<strong>${item.name}</strong><br/>${socialCount} Mil/Pra | ${eventCount} Festival+${discoveredCount ? ` | ${discoveredCount} BOT` : ''}`;
+        marker.bindTooltip(tooltipContent, {
+          direction: 'top',
+          offset: [0, -15],
+          className: 'density-pill-tooltip',
+        });
+
+        clusterLayerRef.current.addLayer(marker);
+      });
+    };
+
+    renderPills();
+  }, [densityData, currentZoom, showDensityPills]);
 
   const updateMarker = async (lat, lng) => {
     if (!mapInstanceRef.current) return;
@@ -193,7 +358,6 @@ const MapCenterOnboardingModal = ({
         setCenterLng(longitude.toFixed(6));
         updateMarker(latitude, longitude);
         setGettingLocation(false);
-        setMessage({ type: 'success', text: 'Location detected! Adjust if needed, then save.' });
       },
       (error) => {
         setGettingLocation(false);
@@ -254,47 +418,62 @@ const MapCenterOnboardingModal = ({
         }
       }}
     >
-      <DialogTitle sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        borderBottom: 1,
-        borderColor: 'divider',
-        bgcolor: 'primary.main',
-        color: 'white'
-      }}>
+      <DialogTitle
+        component="div"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'primary.main',
+          color: 'white',
+          fontSize: '1.25rem',
+          fontWeight: 500
+        }}
+      >
         <LocationOnIcon />
         <Box component="span">Welcome! Set Your Location</Box>
       </DialogTitle>
 
       <DialogContent sx={{ p: isMobile ? 1.5 : 2 }}>
-        <Alert severity="info" sx={{ mb: 2, mt: 1 }}>
-          <Typography variant="body2">
-            <strong>Where do you dance tango?</strong> Click on the map or use &quot;My Location&quot; to set your home base.
-            We&apos;ll show you events within your selected radius.
-          </Typography>
-        </Alert>
-
         {message && (
           <Alert
             severity={message.type}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, mt: 1 }}
             onClose={() => setMessage(null)}
           >
             {message.text}
           </Alert>
         )}
 
-        {/* Use My Location Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        {/* Action buttons row */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 2, mt: 1, flexWrap: 'wrap', alignItems: 'center' }}>
           <Button
             variant="outlined"
             onClick={handleUseMyLocation}
             disabled={gettingLocation}
-            startIcon={gettingLocation ? <CircularProgress size={16} /> : <MyLocationIcon />}
+            size="small"
+            startIcon={gettingLocation ? <CircularProgress size={14} /> : <MyLocationIcon />}
           >
-            {gettingLocation ? 'Getting Location...' : 'Use My Location'}
+            {gettingLocation ? 'Getting...' : 'Use My Location'}
           </Button>
+
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={showDensityPills}
+                onChange={(e) => setShowDensityPills(e.target.checked)}
+              />
+            }
+            label={
+              <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                Show Events
+              </Typography>
+            }
+            sx={{ m: 0, ml: 1 }}
+          />
         </Box>
 
         {/* Search Range Slider */}
@@ -320,34 +499,73 @@ const MapCenterOnboardingModal = ({
           />
         </Box>
 
-        {/* Map Container */}
-        <Box
-          ref={mapRef}
-          sx={{
-            width: '100%',
-            height: isMobile ? '280px' : '320px',
-            borderRadius: 1,
-            border: '2px solid',
-            borderColor: 'primary.main',
-            cursor: 'crosshair',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#f5f5f5',
-            mb: 2,
-            '& .leaflet-container': {
-              height: '100% !important',
-              width: '100% !important',
-            }
-          }}
-        >
-          {!mapInitialized && (
+        {/* Map Container with density overlay */}
+        <Box sx={{ position: 'relative', mb: 2 }}>
+          <Box
+            ref={mapRef}
+            sx={{
+              width: '100%',
+              height: isMobile ? '280px' : '320px',
+              borderRadius: 1,
+              border: '2px solid',
+              borderColor: 'primary.main',
+              cursor: 'crosshair',
+              position: 'relative',
+              overflow: 'hidden',
+              backgroundColor: '#f5f5f5',
+              '& .leaflet-container': {
+                height: '100% !important',
+                width: '100% !important',
+              }
+            }}
+          >
+            {!mapInitialized && (
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%'
+              }}>
+                <CircularProgress />
+              </Box>
+            )}
+          </Box>
+
+          {/* Legend for event density pills - only show when enabled */}
+          {mapInitialized && showDensityPills && (
             <Box sx={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              bgcolor: 'rgba(255,255,255,0.95)',
+              borderRadius: 1,
+              px: 1,
+              py: 0.5,
+              boxShadow: 1,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%'
+              gap: 1,
+              zIndex: 1000,
+              pointerEvents: 'none',
             }}>
-              <CircularProgress />
+              {densityLoading && <CircularProgress size={12} />}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.social }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Mil/Pra</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.events }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Festival+</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.discovered }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>BOT</Typography>
+              </Box>
+              {densityMeta && (
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1 }}>
+                  {densityMeta.totalEvents || 0} events
+                </Typography>
+              )}
             </Box>
           )}
         </Box>
