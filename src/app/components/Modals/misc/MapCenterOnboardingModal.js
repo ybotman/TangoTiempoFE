@@ -447,7 +447,7 @@ const MapCenterOnboardingModal = ({
           </Alert>
         )}
 
-        {/* Action buttons row */}
+        {/* Action buttons row - Use My Location, Show Events toggle, and Save */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 2, mt: 1, flexWrap: 'wrap', alignItems: 'center' }}>
           <Button
             variant="outlined"
@@ -472,8 +472,18 @@ const MapCenterOnboardingModal = ({
                 Show Events
               </Typography>
             }
-            sx={{ m: 0, ml: 1 }}
+            sx={{ m: 0 }}
           />
+
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={loading || !centerLat || !centerLng}
+            size="small"
+            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </Button>
         </Box>
 
         {/* Search Range Slider */}
@@ -573,7 +583,6 @@ const MapCenterOnboardingModal = ({
         {/* Selected Location Display */}
         {centerLat && centerLng && (
           <Box sx={{
-            mb: 2,
             p: 1.5,
             bgcolor: 'success.light',
             borderRadius: 1,
@@ -584,20 +593,6 @@ const MapCenterOnboardingModal = ({
             </Typography>
           </Box>
         )}
-
-        {/* Save Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleSave}
-            disabled={loading || !centerLat || !centerLng}
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <LocationOnIcon />}
-            sx={{ minWidth: 200, py: 1.5 }}
-          >
-            {loading ? 'Saving...' : 'Save & Continue'}
-          </Button>
-        </Box>
       </DialogContent>
     </Dialog>
   );

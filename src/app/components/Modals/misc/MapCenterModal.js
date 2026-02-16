@@ -290,6 +290,7 @@ const MapCenterModal = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
+  const [gettingLocation, setGettingLocation] = useState(false); // For "Use My Location" button
 
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
@@ -661,36 +662,34 @@ const MapCenterModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapInitialized, centerLat, centerLng]);
   
-  const handleSetTemp = () => {
-    if (!centerLat || !centerLng) {
-      setMessage({ type: 'error', text: 'Please click on the map to set a location' });
+  // "Use My Location" button handler - uses browser geolocation
+  const handleUseMyLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setMessage({ type: 'error', text: 'Geolocation not supported by your browser' });
       return;
     }
 
-    setLoading(true);
-    const locationData = {
-      lat: parseFloat(centerLat),
-      lng: parseFloat(centerLng),
-      zoomRange: zoomRange
-    };
-
-    onSetLocation(locationData);
-    setMessage({ type: 'success', text: 'Map Center set for Session (temporary)!' });
-    setLoading(false);
-
-    setTimeout(() => {
-      onClose();
-    }, 500);
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCenterLat(latitude.toFixed(6));
+        setCenterLng(longitude.toFixed(6));
+        updateMarker(latitude, longitude);
+        setGettingLocation(false);
+      },
+      (error) => {
+        setGettingLocation(false);
+        setMessage({ type: 'error', text: `Could not get location: ${error.message}` });
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
   };
-  
-  const handleSavePerm = async () => {
-    if (!centerLat || !centerLng) {
-      setMessage({ type: 'error', text: 'Please click on the map to set a location' });
-      return;
-    }
 
-    if (!user) {
-      setMessage({ type: 'error', text: 'Please log in to save Cloud Default' });
+  // Unified save handler - saves to cloud (logged in) or session (anonymous)
+  const handleSave = async () => {
+    if (!centerLat || !centerLng) {
+      setMessage({ type: 'error', text: 'Please click on the map or use "My Location"' });
       return;
     }
 
@@ -701,32 +700,32 @@ const MapCenterModal = ({
       zoomRange: zoomRange
     };
 
-    try {
-      // Get FRESH Firebase auth token (force refresh to avoid expired tokens)
-      // Import firebase auth to get fresh token
-      const { getAuth } = await import('firebase/auth');
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
+    if (user) {
+      // Logged in - save to cloud
+      try {
+        const { getAuth } = await import('firebase/auth');
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
 
-      if (!currentUser) {
-        throw new Error('User not logged in');
-      }
+        if (!currentUser) {
+          throw new Error('User not logged in');
+        }
 
-      // Force refresh token to ensure it's not expired
-      const firebaseToken = await currentUser.getIdToken(true);
-
-      // Call saveToCloudDefault with Firebase token
-      await onSaveLocation(locationData, firebaseToken);
-      setMessage({ type: 'success', text: 'Location saved as Cloud Default!' });
-
-      setTimeout(() => {
+        const firebaseToken = await currentUser.getIdToken(true);
+        await onSaveLocation(locationData, firebaseToken);
+        setLoading(false);
         onClose();
-      }, 1000);
-    } catch (error) {
-      console.error('[MapCenterModal] Error saving Cloud Default:', error);
-      setMessage({ type: 'error', text: `Failed to save: ${error.message}` });
+      } catch (error) {
+        console.error('[MapCenterModal] Error saving:', error);
+        setMessage({ type: 'error', text: `Failed to save: ${error.message}` });
+        setLoading(false);
+      }
+    } else {
+      // Anonymous - save to session
+      onSetLocation(locationData);
+      setLoading(false);
+      onClose();
     }
-    setLoading(false);
   };
   
   return (
@@ -816,83 +815,29 @@ const MapCenterModal = ({
         {/* Action Buttons - Compact on mobile */}
         <Box sx={{
           display: 'flex',
-          gap: isMobile ? 0.5 : 1.5,
+          gap: isMobile ? 0.5 : 1,
           mb: 1,
           justifyContent: 'center',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          alignItems: 'center'
         }}>
-          {/* Button 1: Set Map Center (Session) - Always visible */}
+          {/* Use My Location - browser geolocation */}
           <Button
             variant="outlined"
-            onClick={handleSetTemp}
-            disabled={loading || !centerLat || !centerLng}
-            startIcon={!isMobile && <MyLocationIcon sx={{ fontSize: 16 }} />}
+            onClick={handleUseMyLocation}
+            disabled={gettingLocation}
             size="small"
+            startIcon={gettingLocation ? <CircularProgress size={14} /> : <MyLocationIcon />}
             sx={{
               px: isMobile ? 1 : 2,
               py: 0.5,
-              fontSize: isMobile ? '0.7rem' : '0.875rem',
-              fontWeight: 500,
-              minWidth: isMobile ? 'auto' : '160px'
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}
           >
-            {isMobile ? 'Session' : 'Set Map Center (Session)'}
+            {gettingLocation ? 'Getting...' : (isMobile ? 'My Location' : 'Use My Location')}
           </Button>
 
-          {/* Button 2: Auth users see "Save as Default", Anonymous see "Sign Up" */}
-          {user ? (
-            <Button
-              variant="contained"
-              onClick={handleSavePerm}
-              disabled={loading || !centerLat || !centerLng}
-              startIcon={!isMobile && <LocationOnIcon sx={{ fontSize: 16 }} />}
-              size="small"
-              sx={{
-                px: isMobile ? 1 : 2,
-                py: 0.5,
-                fontSize: isMobile ? '0.7rem' : '0.875rem',
-                fontWeight: 500,
-                minWidth: isMobile ? 'auto' : '180px'
-              }}
-            >
-              {isMobile ? 'Save Default' : 'Save as Default'}
-            </Button>
-          ) : (
-            <>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => { window.location.href = '/auth/login'; }}
-                size="small"
-                sx={{
-                  px: isMobile ? 1.5 : 2,
-                  py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 'auto' : '100px'
-                }}
-              >
-                Log In
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => { window.location.href = '/auth/signup'; }}
-                size="small"
-                sx={{
-                  px: isMobile ? 1.5 : 2,
-                  py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 'auto' : '100px'
-                }}
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
-
-          {/* TIEMPO-381: Event counts toggle */}
+          {/* Show Events toggle */}
           <FormControlLabel
             control={
               <Switch
@@ -906,8 +851,52 @@ const MapCenterModal = ({
                 {isMobile ? 'Events' : 'Show Events'}
               </Typography>
             }
-            sx={{ m: 0, ml: 1 }}
+            sx={{ m: 0 }}
           />
+
+          {/* Save - saves to cloud (logged in) or session (anonymous) */}
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={loading || !centerLat || !centerLng}
+            size="small"
+            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </Button>
+
+          {/* Login/Signup for anonymous users */}
+          {!user && (
+            <>
+              {/* For anonymous users: Login and Signup */}
+              <Button
+                variant="outlined"
+                onClick={() => { window.location.href = '/auth/login'; }}
+                size="small"
+                sx={{
+                  px: isMobile ? 1 : 2,
+                  py: 0.5,
+                  fontSize: isMobile ? '0.7rem' : '0.875rem'
+                }}
+              >
+                Log In
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => { window.location.href = '/auth/signup'; }}
+                size="small"
+                sx={{
+                  px: isMobile ? 1 : 2,
+                  py: 0.5,
+                  fontSize: isMobile ? '0.7rem' : '0.875rem'
+                }}
+              >
+                Sign Up
+              </Button>
+            </>
+          )}
+
         </Box>
         
         {/* Search Range Slider */}

@@ -12,7 +12,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: I
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
 import PropTypes from 'prop-types';
 
-const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode = false, organizer = null, onTimeModified = null }) => {
+const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null, onTimeModified = null }) => {
   const allCategories = useCategories(); // Fetch categories
   // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
   const categories = useMemo(() =>
@@ -707,19 +707,24 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode: _editMode 
             <Grid item xs={12} sm={6}>
               <Grid container spacing={1}>
                 {/* Author - read-only, grey */}
+                {/* For NEW events: default to logged-in user. For EXISTING events: show event's author */}
                 <Grid item xs={12}>
                   <TextField
                     size="small"
                     label="Author (original creator)"
                     value={
+                      // First check if event has author data
                       eventData.authorOrganizerShortName ||
                       eventData.authorOrganizerName ||
-                      organizer?.shortName ||
-                      organizer?.fullName ||
-                      user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
-                      user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
-                      user?.displayName ||
-                      'You'
+                      // For NEW events only: fall back to logged-in user's organizer
+                      (!editMode ? (
+                        organizer?.shortName ||
+                        organizer?.fullName ||
+                        user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
+                        user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
+                        user?.displayName ||
+                        'You'
+                      ) : '(Not recorded)')
                     }
                     InputProps={{ readOnly: true }}
                     fullWidth

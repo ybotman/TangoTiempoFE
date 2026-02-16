@@ -123,9 +123,8 @@ const BostonCalendarPage = () => {
     openMapCenterModal
   } = useGeoLocation();
 
-  // Auth context - user not used in read-only Boston calendar
-  useContext(AuthContext);
-  // Role context not used in Boston calendar
+  // Auth context - used to show read-only message for logged-in users
+  const { user } = useContext(AuthContext);
 
   // Local state for view type (not provided by hook)
   // Start with 8-week view for desktop, list for mobile
@@ -177,17 +176,24 @@ const BostonCalendarPage = () => {
     // Check if this is an AI-discovered event
     const isAIDiscovered = event.extendedProps?.isDiscovered === true;
     
-    // Get organizer short name (normal text) - check both Boston and Main calendar fields
-    const organizerShort = event.extendedProps?.organizerShort ||
-                          event.extendedProps?.ownerOrganizer?.organizerShort ||
-                          event.extendedProps?.ownerOrganizerShort ||
-                          event.extendedProps?.ownerOrganizerShortName ||  // Main calendar field
-                          event.extendedProps?.ownerOrganizerName?.substring(0, 8) || // Main calendar fallback
-                          '';
-    
+    // Get organizer short names (owner + alternate if exists)
+    const ownerShort = event.extendedProps?.organizerShort ||
+                       event.extendedProps?.ownerOrganizer?.organizerShort ||
+                       event.extendedProps?.ownerOrganizerShort ||
+                       event.extendedProps?.ownerOrganizerShortName ||
+                       event.extendedProps?.ownerOrganizerName?.substring(0, 8) ||
+                       '';
+    const alternateShort = event.extendedProps?.alternateOrganizerShortName ||
+                           event.extendedProps?.alternateOrganizerName?.substring(0, 8) ||
+                           '';
+    // Format as "OWNER|ALTER" if alternate exists, otherwise just "OWNER"
+    const organizerShort = alternateShort
+                          ? `${ownerShort}|${alternateShort}`
+                          : ownerShort;
+
     // Get venue short title (BOLD text) - uses shortTitle field like main calendar
-    const eventShortTitle = event.extendedProps?.shortTitle || 
-                           event.title?.substring(0, 15) || 
+    const eventShortTitle = event.extendedProps?.shortTitle ||
+                           event.title?.substring(0, 15) ||
                            '';
 
     if (isMonthlyView) {
@@ -611,7 +617,35 @@ const BostonCalendarPage = () => {
         onSearchChange={setSearchTerm}
         showDiscovered={includeAIEvents}
         onDiscoveredToggle={() => setIncludeAIEvents(!includeAIEvents)}
+        readOnly={true}
       />
+
+      {/* Welcome notice for logged-in users */}
+      {user && (
+        <div
+          style={{
+            margin: '10px 20px 0 20px',
+            padding: '12px 16px',
+            backgroundColor: '#e3f2fd',
+            borderLeft: '4px solid #1976d2',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <span style={{ fontSize: '1.2rem' }}>👋</span>
+          <span style={{ fontSize: '0.9rem', color: '#333' }}>
+            Welcome! Explore other regions or add events at{' '}
+            <a
+              href="https://www.tangotiempo.com/calendar"
+              style={{ color: '#1976d2', fontWeight: 'bold' }}
+            >
+              tangotiempo.com
+            </a>
+          </span>
+        </div>
+      )}
 
       <div
         style={{

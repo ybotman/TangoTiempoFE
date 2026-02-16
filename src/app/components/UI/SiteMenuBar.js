@@ -11,7 +11,7 @@ import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 
-const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle }) => {
+const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle, readOnly = false }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
@@ -159,7 +159,8 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         selectedRole={selectedRole}
         handleRoleChange={handleRoleChange}
         logOut={logOut}
-        showRoleMessage={showRoleMessage} // Pass showRoleMessage callback
+        showRoleMessage={showRoleMessage}
+        readOnly={readOnly}
       />
 
       <Snackbar
@@ -189,6 +190,7 @@ SiteMenuBar.propTypes = {
   onSearchChange: PropTypes.func,
   showDiscovered: PropTypes.bool,
   onDiscoveredToggle: PropTypes.func,
+  readOnly: PropTypes.bool,
 };
 
 export default SiteMenuBar;
