@@ -1,9 +1,10 @@
 // app/components/UI/SiteHeader.js
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
+import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import ServiceStatusIcon from '@/components/DevTools/ServiceStatusIcon';
 import packageJson from '../../../../package.json';
@@ -11,8 +12,47 @@ import packageJson from '../../../../package.json';
 const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
   const { currentLocation, openMapCenterModal } = useGeoLocation();
+  const { fetchNearestCity } = useLocationAPI();
   useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
+
+  // TIEMPO-381: State for nearest city name
+  const [nearestCityName, setNearestCityName] = useState(null);
+  const lastFetchedCoords = useRef(null);
+
+  // TIEMPO-381: Fetch nearest city when currentLocation changes
+  useEffect(() => {
+    if (!currentLocation?.lat || !currentLocation?.lng || !fetchNearestCity) {
+      setNearestCityName(null);
+      return;
+    }
+
+    const lat = parseFloat(currentLocation.lat);
+    const lng = parseFloat(currentLocation.lng);
+
+    // Skip if we already fetched for these coordinates
+    const coordKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+    if (lastFetchedCoords.current === coordKey) {
+      return;
+    }
+
+    const fetchCity = async () => {
+      try {
+        lastFetchedCoords.current = coordKey;
+        const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
+        if (cityData?.cityName) {
+          setNearestCityName(cityData.cityName);
+        } else {
+          setNearestCityName(null);
+        }
+      } catch {
+        // If no city found, fall back to coordinates
+        setNearestCityName(null);
+      }
+    };
+
+    fetchCity();
+  }, [currentLocation?.lat, currentLocation?.lng, fetchNearestCity]);
 
   // TIEMPO-381: Format location display text
   const getLocationDisplay = () => {
@@ -20,7 +60,13 @@ const SiteHeader = () => {
       return null;
     }
     const radius = currentLocation.zoomRange || 50;
-    // Show coordinates rounded to 1 decimal for brevity
+
+    // Use city name if available, otherwise coordinates
+    if (nearestCityName) {
+      return `${nearestCityName} ± ${radius}mi`;
+    }
+
+    // Fallback to coordinates
     const lat = parseFloat(currentLocation.lat).toFixed(1);
     const lng = parseFloat(currentLocation.lng).toFixed(1);
     return `${lat}°, ${lng}° ± ${radius}mi`;
