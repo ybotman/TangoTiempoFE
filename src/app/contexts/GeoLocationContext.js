@@ -567,15 +567,27 @@ export const GeoLocationProvider = ({ children }) => {
           // result.data.zoom also available if needed for map display
         };
 
-        // Update both saved and current location
+        // Update saved location (always safe to update)
         setSavedLocation(location);
-        setCurrentLocationState(location);
 
-        // Save to sessionStorage
-        sessionStorage.setItem('currentLocation', JSON.stringify(location));
+        // TIEMPO-381: Only update current location if it's not locked (e.g., Boston route)
+        setCurrentLocationState(prev => {
+          if (prev?.locked) {
+            console.log('[fetchMapCenter] Skipping update - location is locked');
+            return prev;
+          }
+          return location;
+        });
 
-        // Emit event to trigger refresh
-        locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+        // TIEMPO-381: Only save to sessionStorage if not locked
+        // Check current sessionStorage to see if it has locked flag
+        const currentSaved = sessionStorage.getItem('currentLocation');
+        const currentParsed = currentSaved ? JSON.parse(currentSaved) : null;
+        if (!currentParsed?.locked) {
+          sessionStorage.setItem('currentLocation', JSON.stringify(location));
+          // Emit event to trigger refresh only if we actually updated
+          locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+        }
 
         return location;
       } else if (result.success && !result.data) {

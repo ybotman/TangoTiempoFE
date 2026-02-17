@@ -38,6 +38,13 @@ const UserLocationLoader = () => {
     hasFetched.current = true;
     lastUserId.current = currentUserId;
 
+    // TIEMPO-381: Skip fetching mapCenter on Boston route - it has hardcoded coordinates
+    const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
+    if (isBostonRoute) {
+      console.log('[UserLocationLoader] Skipping mapCenter fetch on Boston route');
+      return;
+    }
+
     const loadMapCenter = async () => {
       try {
 
