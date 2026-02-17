@@ -515,6 +515,8 @@ export const GeoLocationProvider = ({ children }) => {
 
   // Fetch user's saved map center from Azure Functions Cloud Default (TIEMPO-312 Phase 2)
   const fetchMapCenter = useCallback(async (firebaseToken) => {
+    console.log('[fetchMapCenter] Starting fetch...');
+
     // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       // Check sessionStorage for locally saved location
@@ -543,14 +545,18 @@ export const GeoLocationProvider = ({ children }) => {
         }
       });
 
+      console.log('[fetchMapCenter] Response status:', response.status);
+
       // TIEMPO-381 fix: Check response status before parsing
       // 401/403 errors should throw, not return null (which triggers onboarding)
       if (!response.ok) {
         const errorText = await response.text();
+        console.log('[fetchMapCenter] API error, throwing:', response.status, errorText);
         throw new Error(`API error ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('[fetchMapCenter] API result:', JSON.stringify(result));
 
       // Check for successful response with data
       if (result.success && result.data) {
