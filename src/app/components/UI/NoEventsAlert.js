@@ -27,6 +27,9 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
   const [dismissed, setDismissed] = useState(false);
 
+  // TIEMPO-381: Check if on Boston route
+  const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
+
   // Check sessionStorage for dismissed state on mount
   useEffect(() => {
     const isDismissed = sessionStorage.getItem('noEventsAlertDismissed') === 'true';
@@ -77,18 +80,32 @@ const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
       >
         <AlertTitle>No Events Found</AlertTitle>
         <Box sx={{ mb: 1 }}>
-          No events found in this area and date range. Try adjusting your Map Center location to see more events.
-          Local organizers are invited to add their tango events to this free calendar!
+          {isBostonRoute
+            ? 'No events found in Boston area for this date range. Check back soon or explore more regions!'
+            : 'No events found in this area and date range. Try adjusting your Map Center location to see more events. Local organizers are invited to add their tango events to this free calendar!'
+          }
         </Box>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<LocationOnIcon />}
-          onClick={onOpenMapCenter}
-          sx={{ mt: 1 }}
-        >
-          Adjust Map Center
-        </Button>
+        {isBostonRoute ? (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LocationOnIcon />}
+            href="https://www.tangotiempo.com/calendar"
+            sx={{ mt: 1 }}
+          >
+            Explore All Regions
+          </Button>
+        ) : (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LocationOnIcon />}
+            onClick={onOpenMapCenter}
+            sx={{ mt: 1 }}
+          >
+            Adjust Map Center
+          </Button>
+        )}
       </Alert>
     </Box>
   );
