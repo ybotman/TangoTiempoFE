@@ -115,6 +115,9 @@ const EmergencyAlertModal = () => {
         <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
           We are currently experiencing a <strong>data issue</strong> that we are working to resolve soon.
         </p>
+        <p style={{ fontSize: '13px', color: '#388e3c', marginBottom: '16px', fontWeight: '500' }}>
+          No data has been lost.
+        </p>
         <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
           If you are missing events, please:
         </p>
@@ -124,6 +127,9 @@ const EmergencyAlertModal = () => {
         </ul>
         <p style={{ fontSize: '14px', color: '#666', marginTop: '20px', fontStyle: 'italic' }}>
           We apologize for the inconvenience and appreciate your patience.
+        </p>
+        <p style={{ fontSize: '13px', color: '#555', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '12px' }}>
+          <strong>Organizers:</strong> Contact Toby with questions. Expect 24hr turnaround.
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
