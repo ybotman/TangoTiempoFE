@@ -60,7 +60,8 @@ const CalendarPage = () => {
     openMapCenterModal,
     needsOnboarding,
     setNeedsOnboarding,
-    saveToCloudDefault
+    saveToCloudDefault,
+    isInitialized: geoInitialized
   } = useGeoLocation();
 
   // Get auth context to check if user is logged in
@@ -710,8 +711,9 @@ const CalendarPage = () => {
   }, []);
 
   // Auto-open map if no location is selected (only if welcome wasn't shown)
+  // TIEMPO-381: Wait for geoInitialized before making decision - prevents race condition
   useEffect(() => {
-    if (noLocationSelected && !hasAutoOpenedMap && wasWelcomeShown()) {
+    if (geoInitialized && noLocationSelected && !hasAutoOpenedMap && wasWelcomeShown()) {
       // Small delay to ensure page is loaded
       const timer = setTimeout(() => {
         if (!user) {
@@ -726,7 +728,7 @@ const CalendarPage = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [noLocationSelected, hasAutoOpenedMap, openLocationSettings, openMapCenterModal, user]);
+  }, [geoInitialized, noLocationSelected, hasAutoOpenedMap, openLocationSettings, openMapCenterModal, user]);
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
