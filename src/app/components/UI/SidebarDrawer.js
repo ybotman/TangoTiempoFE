@@ -306,22 +306,41 @@ const SidebarDrawer = ({ open, onClose }) => {
                 </>
               )}
 
-              {/* TIEMPO-259: Map Center Menu Item */}
-              <ListItem
-                button="true"
-                onClick={() => {
-                  openMapCenterModal();
-                  onClose();
-                }}
-              >
-                <ListItemIcon>
-                  <MapIcon sx={{ color: 'primary.main' }} />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Set Map Center" 
-                  secondary="Filter events by location"
-                />
-              </ListItem>
+              {/* TIEMPO-259: Map Center Menu Item - TIEMPO-381: Show different content for Boston */}
+              {typeof window !== 'undefined' && window.location.pathname.includes('/boston') ? (
+                // Boston route: Link to main site instead of Map Center
+                <Link href="https://www.tangotiempo.com/calendar" passHref>
+                  <ListItem
+                    button="true"
+                    onClick={() => onClose()}
+                  >
+                    <ListItemIcon>
+                      <MapIcon sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Want more events?"
+                      secondary="Explore all regions at TangoTiempo.com"
+                    />
+                  </ListItem>
+                </Link>
+              ) : (
+                // Normal routes: Show Map Center
+                <ListItem
+                  button="true"
+                  onClick={() => {
+                    openMapCenterModal();
+                    onClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <MapIcon sx={{ color: 'primary.main' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Set Map Center"
+                    secondary="Filter events by location"
+                  />
+                </ListItem>
+              )}
               <Divider />
               
               {/* Only show Apply as Organizer if user is not already an approved and enabled organizer */}
