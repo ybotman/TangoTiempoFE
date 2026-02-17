@@ -122,6 +122,7 @@ const EmergencyAlertModal = () => {
           If you don't see an event you're looking for:
         </p>
         <ul style={{ fontSize: '15px', lineHeight: '1.8', paddingLeft: '20px', color: '#444' }}>
+          <li>Try <a href="https://www.tangotiempo.com/calendar" style={{ color: '#1976d2', fontWeight: '500' }}>TangoTiempo.com</a> — may show better results</li>
           <li>Check <strong>Facebook</strong> for the latest postings</li>
           <li>Contact the <strong>organizer directly</strong></li>
         </ul>
