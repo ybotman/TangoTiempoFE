@@ -27,8 +27,12 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
   const [dismissed, setDismissed] = useState(false);
 
-  // TIEMPO-381: Check if on Boston route
-  const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
+  // TIEMPO-381: Track Boston route for conditional rendering
+  const [isBostonRoute, setIsBostonRoute] = useState(false);
+
+  useEffect(() => {
+    setIsBostonRoute(window.location.pathname.includes('/boston'));
+  }, []);
 
   // Check sessionStorage for dismissed state on mount
   useEffect(() => {
