@@ -97,39 +97,39 @@ const EmergencyAlertModal = () => {
       PaperProps={{
         style: {
           borderRadius: '12px',
-          border: '3px solid #d32f2f'
+          border: '2px solid #1976d2'
         }
       }}
     >
       <DialogTitle style={{
-        backgroundColor: '#d32f2f',
+        backgroundColor: '#1976d2',
         color: 'white',
         display: 'flex',
         alignItems: 'center',
         gap: '8px'
       }}>
-        <span style={{ fontSize: '24px' }}>⚠️</span>
-        Data Issue Notice
+        <span style={{ fontSize: '24px' }}>ℹ️</span>
+        Quick Note
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
-        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
-          We are currently experiencing a <strong>data issue</strong> that we are working to resolve soon.
+        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '12px' }}>
+          We're working on a small data hiccup — should be resolved soon.
         </p>
-        <p style={{ fontSize: '13px', color: '#388e3c', marginBottom: '16px', fontWeight: '500' }}>
-          No data has been lost.
+        <p style={{ fontSize: '14px', color: '#388e3c', marginBottom: '16px' }}>
+          Don't worry, no data has been lost.
         </p>
-        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
-          If you are missing events, please:
+        <p style={{ fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
+          If you don't see an event you're looking for:
         </p>
-        <ul style={{ fontSize: '16px', lineHeight: '1.8', paddingLeft: '20px' }}>
-          <li>Check <strong>Facebook</strong> for the latest event postings</li>
-          <li>Contact the <strong>event organizer directly</strong></li>
+        <ul style={{ fontSize: '15px', lineHeight: '1.8', paddingLeft: '20px', color: '#444' }}>
+          <li>Check <strong>Facebook</strong> for the latest postings</li>
+          <li>Contact the <strong>organizer directly</strong></li>
         </ul>
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '20px', fontStyle: 'italic' }}>
-          We apologize for the inconvenience and appreciate your patience.
+        <p style={{ fontSize: '13px', color: '#666', marginTop: '16px' }}>
+          Thanks for your patience!
         </p>
-        <p style={{ fontSize: '13px', color: '#555', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '12px' }}>
-          <strong>Organizers:</strong> Contact Toby with questions. Expect 24hr turnaround.
+        <p style={{ fontSize: '12px', color: '#888', marginTop: '12px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+          Organizers: Contact Toby with questions — expect 24hr turnaround.
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
@@ -138,9 +138,9 @@ const EmergencyAlertModal = () => {
           variant="contained"
           color="primary"
           size="large"
-          style={{ minWidth: '150px' }}
+          style={{ minWidth: '120px' }}
         >
-          I Understand
+          Got It
         </Button>
       </DialogActions>
     </Dialog>
