@@ -8,6 +8,8 @@
 // Cache for geolocation data to prevent excessive API calls
 let geolocationCache = null;
 let cacheTimestamp = null;
+// TIEMPO-381: In-progress promise to prevent parallel fetches (React StrictMode)
+let fetchInProgress = null;
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -68,11 +70,21 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
     }
   }
 
-  console.log('[Tracking] Fetching fresh geolocation data...');
-  const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+  // TIEMPO-381: If fetch already in progress, wait for it instead of starting another
+  // This prevents React StrictMode from causing duplicate API calls
+  if (fetchInProgress) {
+    console.log('[Tracking] Fetch already in progress, waiting...');
+    return fetchInProgress;
+  }
 
-  // Fetch Cloudflare and Google in parallel using Promise.allSettled for graceful failures
-  const [cloudflareResult, googleResult] = await Promise.allSettled([
+  console.log('[Tracking] Fetching fresh geolocation data...');
+
+  // TIEMPO-381: Create promise and store it so parallel callers can await it
+  const doFetch = async () => {
+    const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
+
+    // Fetch Cloudflare and Google in parallel using Promise.allSettled for graceful failures
+    const [cloudflareResult, googleResult] = await Promise.allSettled([
     // 1. Cloudflare API
     fetch(`${afUrl}/api/cloudflare/info`, {
       signal: AbortSignal.timeout(2000)
@@ -151,11 +163,19 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
     distance: null // No longer calculating distance between two different sources
   };
 
-  // Cache the result
-  geolocationCache = result;
-  cacheTimestamp = Date.now();
+    // Cache the result
+    geolocationCache = result;
+    cacheTimestamp = Date.now();
 
-  return result;
+    return result;
+  };
+
+  // TIEMPO-381: Store promise so parallel callers await the same fetch
+  fetchInProgress = doFetch().finally(() => {
+    fetchInProgress = null; // Clear when done (success or error)
+  });
+
+  return fetchInProgress;
 };
 
 /**

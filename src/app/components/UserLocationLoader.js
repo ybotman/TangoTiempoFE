@@ -33,11 +33,13 @@ const UserLocationLoader = () => {
       return; // Already loaded for this user
     }
 
+    // TIEMPO-381 fix: Set flags BEFORE async call to prevent race condition
+    // React StrictMode can trigger useEffect twice rapidly
+    hasFetched.current = true;
+    lastUserId.current = currentUserId;
+
     const loadMapCenter = async () => {
       try {
-        // Mark as fetching to prevent duplicates
-        hasFetched.current = true;
-        lastUserId.current = currentUserId;
 
         // Get fresh Firebase token using AuthContext method
         const token = await getIdToken();
@@ -59,11 +61,17 @@ const UserLocationLoader = () => {
         // Fetch saved map center from Azure Functions
         const mapCenter = await fetchMapCenter(token);
 
+        // TIEMPO-381 debug: Log what we got back
+        console.log('[UserLocationLoader] fetchMapCenter returned:', mapCenter);
+
         // TIEMPO-381: If no mapCenter exists, trigger onboarding modal
         // Skip on Boston route - Boston has forced coordinates
         const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
         if (!mapCenter && !isBostonRoute) {
+          console.log('[UserLocationLoader] No mapCenter, setting needsOnboarding=true');
           setNeedsOnboarding(true);
+        } else if (mapCenter) {
+          console.log('[UserLocationLoader] Has mapCenter, NOT showing onboarding');
         }
       } catch (error) {
         console.error('[UserLocationLoader] Failed to load map center:', error);
