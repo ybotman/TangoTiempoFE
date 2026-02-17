@@ -11,7 +11,7 @@ import { AuthContext } from '@/contexts/AuthContext';
  * Loads user's saved map center from Azure Functions Cloud Default on login
  */
 const UserLocationLoader = () => {
-  const { fetchMapCenter } = useGeoLocation();
+  const { fetchMapCenter, setNeedsOnboarding } = useGeoLocation();
   const { user, getIdToken } = useContext(AuthContext) || {};
   const hasFetched = useRef(false);
   const lastUserId = useRef(null);
@@ -39,11 +39,15 @@ const UserLocationLoader = () => {
         hasFetched.current = true;
         lastUserId.current = currentUserId;
 
-        // Clear old sessionStorage to force fresh fetch from Cloud Default
-        sessionStorage.removeItem('currentLocation');
-
         // Get fresh Firebase token using AuthContext method
         const token = await getIdToken();
+
+        // Only clear sessionStorage on production where we fetch from Azure
+        // On localhost, sessionStorage IS the storage, so don't clear it
+        const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+        if (!isLocalhost) {
+          sessionStorage.removeItem('currentLocation');
+        }
 
         // Skip if no valid token (401 would break mobile rendering)
         if (!token) {
@@ -53,7 +57,14 @@ const UserLocationLoader = () => {
         }
 
         // Fetch saved map center from Azure Functions
-        await fetchMapCenter(token);
+        const mapCenter = await fetchMapCenter(token);
+
+        // TIEMPO-381: If no mapCenter exists, trigger onboarding modal
+        // Skip on Boston route - Boston has forced coordinates
+        const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
+        if (!mapCenter && !isBostonRoute) {
+          setNeedsOnboarding(true);
+        }
       } catch (error) {
         console.error('[UserLocationLoader] Failed to load map center:', error);
         // Reset flag on error to allow retry
@@ -63,7 +74,7 @@ const UserLocationLoader = () => {
     };
 
     loadMapCenter();
-  }, [user, getIdToken, fetchMapCenter]);
+  }, [user, getIdToken, fetchMapCenter, setNeedsOnboarding]);
 
   return null; // This is a logic-only component
 };

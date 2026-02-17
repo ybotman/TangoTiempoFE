@@ -8,11 +8,13 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { dedupeFetch } from '@/utils/dedupeFetch';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
-export function useVenues() {
+export function useVenues(options = {}) {
+  // skipLocationFilter: true = fetch ALL venues but still sort by distance from map center
+  const { skipLocationFilter = false } = options;
   const [venues, setVenues] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+
   // Use GeoLocationContext for location-based filtering
   // TIEMPO-276: Get savedLocation/currentLocation for coordinate-based filtering
   const { savedLocation, currentLocation } = useGeoLocation();
@@ -24,12 +26,11 @@ export function useVenues() {
     try {
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID;
       const params = { appId };
-      
-      // TIEMPO-276: Always use user's location and range from context
-      // Use passed location first, then currentLocation or savedLocation for coordinates
+
+      // TIEMPO-276: Always use user's location for sorting
       const coordLocation = location || currentLocation || savedLocation;
-      
-      // Add distance-based parameters if location available
+
+      // Add location parameters if available
       if (coordLocation) {
         // Handle both coordinate formats (lat/lng and latitude/longitude)
         const lat = coordLocation.lat || coordLocation.latitude;
@@ -38,11 +39,16 @@ export function useVenues() {
         if (lat && lng) {
           params.lat = lat;
           params.lng = lng;
-          // Use zoomRange from context (user's saved preference) or radius from location
-          // Defensive fallback to 50 miles if undefined (prevents "undefinedmi" bug)
-          const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
-          params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
           params.sortByDistance = true; // Sort by closest first
+
+          // Only add radius filter if NOT skipping location filter
+          if (!skipLocationFilter) {
+            // Use zoomRange from context (user's saved preference) or radius from location
+            // Defensive fallback to 50 miles if undefined (prevents "undefinedmi" bug)
+            const radiusValue = coordLocation.radius || coordLocation.zoomRange || 50;
+            params.radius = `${radiusValue}mi`; // TIEMPO-276: Explicitly specify miles unit
+          }
+          // When skipLocationFilter=true: no radius = ALL venues, but sorted by distance
         }
       }
       
@@ -80,7 +86,7 @@ export function useVenues() {
     } finally {
       setLoading(false);
     }
-  }, [currentLocation, savedLocation]);
+  }, [currentLocation, savedLocation, skipLocationFilter]);
 
   // Add effect to fetch venues on component mount or when location changes
   useEffect(() => {

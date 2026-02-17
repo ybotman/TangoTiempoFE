@@ -12,6 +12,8 @@ import {
   IconButton,
   Alert,
   Slider,
+  Switch,
+  FormControlLabel,
   useTheme,
   useMediaQuery,
   CircularProgress
@@ -287,14 +289,16 @@ const MapCenterModal = ({
   const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
+  const [gettingLocation, setGettingLocation] = useState(false); // For "Use My Location" button
 
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
 
   // TIEMPO-360: Pre-fetch density data when modal opens (before map init)
-  // This reduces perceived delay on mobile by starting fetch immediately
+  // TIEMPO-381: Only fetch if showDensityPills is enabled
   useEffect(() => {
-    if (!open) return;
+    if (!open || !showDensityPills) return;
 
     // Pre-fetch with initial location or US-centric default bounds
     const lat = initialLocation?.lat || 39.8;
@@ -313,7 +317,7 @@ const MapCenterModal = ({
     });
     // Prefetch only on modal open - other values read at call time
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, showDensityPills]);
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -518,7 +522,15 @@ const MapCenterModal = ({
   
   // TIEMPO-360: Render density pill markers when data changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !clusterLayerRef.current || !densityData.length) return;
+    if (!mapInstanceRef.current || !clusterLayerRef.current) return;
+
+    // TIEMPO-381: Clear markers if toggle is off
+    if (!showDensityPills) {
+      clusterLayerRef.current.clearLayers();
+      return;
+    }
+
+    if (!densityData.length) return;
 
     const renderPills = async () => {
       const L = (await import('leaflet')).default;
@@ -610,7 +622,7 @@ const MapCenterModal = ({
     };
 
     renderPills();
-  }, [densityData, currentZoom]);
+  }, [densityData, currentZoom, showDensityPills]);
 
   // TIEMPO-360: Refetch when time range changes
   useEffect(() => {
@@ -650,36 +662,34 @@ const MapCenterModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapInitialized, centerLat, centerLng]);
   
-  const handleSetTemp = () => {
-    if (!centerLat || !centerLng) {
-      setMessage({ type: 'error', text: 'Please click on the map to set a location' });
+  // "Use My Location" button handler - uses browser geolocation
+  const handleUseMyLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setMessage({ type: 'error', text: 'Geolocation not supported by your browser' });
       return;
     }
 
-    setLoading(true);
-    const locationData = {
-      lat: parseFloat(centerLat),
-      lng: parseFloat(centerLng),
-      zoomRange: zoomRange
-    };
-
-    onSetLocation(locationData);
-    setMessage({ type: 'success', text: 'Map Center set for Session (temporary)!' });
-    setLoading(false);
-
-    setTimeout(() => {
-      onClose();
-    }, 500);
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCenterLat(latitude.toFixed(6));
+        setCenterLng(longitude.toFixed(6));
+        updateMarker(latitude, longitude);
+        setGettingLocation(false);
+      },
+      (error) => {
+        setGettingLocation(false);
+        setMessage({ type: 'error', text: `Could not get location: ${error.message}` });
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
   };
-  
-  const handleSavePerm = async () => {
-    if (!centerLat || !centerLng) {
-      setMessage({ type: 'error', text: 'Please click on the map to set a location' });
-      return;
-    }
 
-    if (!user) {
-      setMessage({ type: 'error', text: 'Please log in to save Cloud Default' });
+  // Unified save handler - saves to cloud (logged in) or session (anonymous)
+  const handleSave = async () => {
+    if (!centerLat || !centerLng) {
+      setMessage({ type: 'error', text: 'Please click on the map or use "My Location"' });
       return;
     }
 
@@ -690,32 +700,32 @@ const MapCenterModal = ({
       zoomRange: zoomRange
     };
 
-    try {
-      // Get FRESH Firebase auth token (force refresh to avoid expired tokens)
-      // Import firebase auth to get fresh token
-      const { getAuth } = await import('firebase/auth');
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
+    if (user) {
+      // Logged in - save to cloud
+      try {
+        const { getAuth } = await import('firebase/auth');
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
 
-      if (!currentUser) {
-        throw new Error('User not logged in');
-      }
+        if (!currentUser) {
+          throw new Error('User not logged in');
+        }
 
-      // Force refresh token to ensure it's not expired
-      const firebaseToken = await currentUser.getIdToken(true);
-
-      // Call saveToCloudDefault with Firebase token
-      await onSaveLocation(locationData, firebaseToken);
-      setMessage({ type: 'success', text: 'Location saved as Cloud Default!' });
-
-      setTimeout(() => {
+        const firebaseToken = await currentUser.getIdToken(true);
+        await onSaveLocation(locationData, firebaseToken);
+        setLoading(false);
         onClose();
-      }, 1000);
-    } catch (error) {
-      console.error('[MapCenterModal] Error saving Cloud Default:', error);
-      setMessage({ type: 'error', text: `Failed to save: ${error.message}` });
+      } catch (error) {
+        console.error('[MapCenterModal] Error saving:', error);
+        setMessage({ type: 'error', text: `Failed to save: ${error.message}` });
+        setLoading(false);
+      }
+    } else {
+      // Anonymous - save to session
+      onSetLocation(locationData);
+      setLoading(false);
+      onClose();
     }
-    setLoading(false);
   };
   
   return (
@@ -805,81 +815,88 @@ const MapCenterModal = ({
         {/* Action Buttons - Compact on mobile */}
         <Box sx={{
           display: 'flex',
-          gap: isMobile ? 0.5 : 1.5,
+          gap: isMobile ? 0.5 : 1,
           mb: 1,
           justifyContent: 'center',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          alignItems: 'center'
         }}>
-          {/* Button 1: Set Map Center (Session) - Always visible */}
+          {/* Use My Location - browser geolocation */}
           <Button
             variant="outlined"
-            onClick={handleSetTemp}
-            disabled={loading || !centerLat || !centerLng}
-            startIcon={!isMobile && <MyLocationIcon sx={{ fontSize: 16 }} />}
+            onClick={handleUseMyLocation}
+            disabled={gettingLocation}
             size="small"
+            startIcon={gettingLocation ? <CircularProgress size={14} /> : <MyLocationIcon />}
             sx={{
               px: isMobile ? 1 : 2,
               py: 0.5,
-              fontSize: isMobile ? '0.7rem' : '0.875rem',
-              fontWeight: 500,
-              minWidth: isMobile ? 'auto' : '160px'
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}
           >
-            {isMobile ? 'Session' : 'Set Map Center (Session)'}
+            {gettingLocation ? 'Getting...' : (isMobile ? 'My Location' : 'Use My Location')}
           </Button>
 
-          {/* Button 2: Auth users see "Save as Default", Anonymous see "Sign Up" */}
-          {user ? (
-            <Button
-              variant="contained"
-              onClick={handleSavePerm}
-              disabled={loading || !centerLat || !centerLng}
-              startIcon={!isMobile && <LocationOnIcon sx={{ fontSize: 16 }} />}
-              size="small"
-              sx={{
-                px: isMobile ? 1 : 2,
-                py: 0.5,
-                fontSize: isMobile ? '0.7rem' : '0.875rem',
-                fontWeight: 500,
-                minWidth: isMobile ? 'auto' : '180px'
-              }}
-            >
-              {isMobile ? 'Save Default' : 'Save as Default'}
-            </Button>
-          ) : (
+          {/* Show Events toggle */}
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={showDensityPills}
+                onChange={(e) => setShowDensityPills(e.target.checked)}
+              />
+            }
+            label={
+              <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
+                {isMobile ? 'Events' : 'Show Events'}
+              </Typography>
+            }
+            sx={{ m: 0 }}
+          />
+
+          {/* Save - saves to cloud (logged in) or session (anonymous) */}
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={loading || !centerLat || !centerLng}
+            size="small"
+            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </Button>
+
+          {/* Login/Signup for anonymous users */}
+          {!user && (
             <>
+              {/* For anonymous users: Login and Signup */}
               <Button
-                variant="contained"
-                color="primary"
+                variant="outlined"
                 onClick={() => { window.location.href = '/auth/login'; }}
                 size="small"
                 sx={{
-                  px: isMobile ? 1.5 : 2,
+                  px: isMobile ? 1 : 2,
                   py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 'auto' : '100px'
+                  fontSize: isMobile ? '0.7rem' : '0.875rem'
                 }}
               >
                 Log In
               </Button>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="secondary"
                 onClick={() => { window.location.href = '/auth/signup'; }}
                 size="small"
                 sx={{
-                  px: isMobile ? 1.5 : 2,
+                  px: isMobile ? 1 : 2,
                   py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 'auto' : '100px'
+                  fontSize: isMobile ? '0.7rem' : '0.875rem'
                 }}
               >
                 Sign Up
               </Button>
             </>
           )}
+
         </Box>
         
         {/* Search Range Slider */}
@@ -942,38 +959,38 @@ const MapCenterModal = ({
             )}
           </Box>
 
-          {/* TIEMPO-360: Event density pill legend + loading */}
-          {mapInitialized && (
+          {/* TIEMPO-381: Legend for event density pills - only show when enabled */}
+          {mapInitialized && showDensityPills && (
             <Box sx={{
               position: 'absolute',
               bottom: 8,
               right: 8,
               bgcolor: 'rgba(255,255,255,0.95)',
               borderRadius: 1,
-              px: 1.5,
-              py: 0.75,
+              px: 1,
+              py: 0.5,
               boxShadow: 1,
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
+              gap: 1,
               zIndex: 1000,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
             }}>
-              {densityLoading && <CircularProgress size={14} />}
+              {densityLoading && <CircularProgress size={12} />}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.social }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Mil/Pra</Typography>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.social }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Mil/Pra</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.events }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>Festival+</Typography>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.events }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Festival+</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: 5, bgcolor: PILL_COLORS.discovered }} />
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1 }}>BOT</Typography>
+                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.discovered }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>BOT</Typography>
               </Box>
               {densityMeta && (
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1 }}>
                   {densityMeta.totalEvents || 0} events
                 </Typography>
               )}
