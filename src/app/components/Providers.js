@@ -1,7 +1,7 @@
 // @/components/Providers.js
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RoleProvider } from '@/contexts/RoleContext';
@@ -14,6 +14,7 @@ import UserLocationLoader from '@/components/UserLocationLoader';
 import { getCachedGeolocation } from '@/utils/trackingHelper';
 import { getCountryMapLocation } from '@/utils/countryCenter';
 import dynamic from 'next/dynamic';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 
 // Dynamic import to avoid SSR issues with Leaflet
 const MapCenterModal = dynamic(
@@ -79,6 +80,67 @@ const MapCenterModalWrapper = () => {
   );
 };
 
+// Emergency Alert Component - set SHOW_EMERGENCY_ALERT to false to disable
+const SHOW_EMERGENCY_ALERT = true;
+
+const EmergencyAlertModal = () => {
+  const [showAlert, setShowAlert] = useState(SHOW_EMERGENCY_ALERT);
+
+  if (!showAlert) return null;
+
+  return (
+    <Dialog
+      open={showAlert}
+      onClose={() => setShowAlert(false)}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        style: {
+          borderRadius: '12px',
+          border: '3px solid #d32f2f'
+        }
+      }}
+    >
+      <DialogTitle style={{
+        backgroundColor: '#d32f2f',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        <span style={{ fontSize: '24px' }}>⚠️</span>
+        Data Issue Notice
+      </DialogTitle>
+      <DialogContent style={{ paddingTop: '20px' }}>
+        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
+          We are currently experiencing a <strong>data issue</strong> that we are working to resolve soon.
+        </p>
+        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
+          If you are missing events, please:
+        </p>
+        <ul style={{ fontSize: '16px', lineHeight: '1.8', paddingLeft: '20px' }}>
+          <li>Check <strong>Facebook</strong> for the latest event postings</li>
+          <li>Contact the <strong>event organizer directly</strong></li>
+        </ul>
+        <p style={{ fontSize: '14px', color: '#666', marginTop: '20px', fontStyle: 'italic' }}>
+          We apologize for the inconvenience and appreciate your patience.
+        </p>
+      </DialogContent>
+      <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
+        <Button
+          onClick={() => setShowAlert(false)}
+          variant="contained"
+          color="primary"
+          size="large"
+          style={{ minWidth: '150px' }}
+        >
+          I Understand
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 const Providers = ({ children }) => {
   return (
     <AuthProvider>
@@ -92,6 +154,7 @@ const Providers = ({ children }) => {
           <LocationAPIProvider>
             <GeoLocationProvider>
               <EventDiscoveryProvider>
+                <EmergencyAlertModal />
                 <UserLocationLoader />
                 <MapCenterModalWrapper />
                 {children}
