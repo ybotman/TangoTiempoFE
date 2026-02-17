@@ -543,6 +543,13 @@ export const GeoLocationProvider = ({ children }) => {
         }
       });
 
+      // TIEMPO-381 fix: Check response status before parsing
+      // 401/403 errors should throw, not return null (which triggers onboarding)
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API error ${response.status}: ${errorText}`);
+      }
+
       const result = await response.json();
 
       // Check for successful response with data
