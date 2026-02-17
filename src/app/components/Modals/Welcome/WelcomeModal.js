@@ -63,7 +63,14 @@ const WelcomeModal = () => {
     // Increment visit count for analytics
     incrementVisitCount();
 
-    // Check if location setup is needed
+    // TIEMPO-381: Skip for logged-in users - UserLocationLoader handles their location
+    // UserLocationLoader fetches from cloud and sets needsOnboarding if needed
+    if (user) {
+      setHasChecked(true);
+      return;
+    }
+
+    // Check if location setup is needed (anonymous users only)
     if (needsLocationSetup()) {
       // Small delay to let page render first
       setTimeout(() => {
