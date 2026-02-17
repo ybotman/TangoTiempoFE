@@ -620,32 +620,7 @@ const BostonCalendarPage = () => {
         readOnly={true}
       />
 
-      {/* Welcome notice for logged-in users */}
-      {user && (
-        <div
-          style={{
-            margin: '10px 20px 0 20px',
-            padding: '12px 16px',
-            backgroundColor: '#e3f2fd',
-            borderLeft: '4px solid #1976d2',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <span style={{ fontSize: '1.2rem' }}>👋</span>
-          <span style={{ fontSize: '0.9rem', color: '#333' }}>
-            Welcome! Explore other regions or add events at{' '}
-            <a
-              href="https://www.tangotiempo.com/calendar"
-              style={{ color: '#1976d2', fontWeight: 'bold' }}
-            >
-              tangotiempo.com
-            </a>
-          </span>
-        </div>
-      )}
+      {/* TIEMPO-381: Welcome notice removed from main screen - Boston is minimal/embedded */}
 
       <div
         style={{
