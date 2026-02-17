@@ -306,7 +306,16 @@ export function useEvents({
         params.includeAiGenerated = true;
       }
 
-// TIEMPO-276: Security cleanup - removed logging
+      // DEBUG: Log params being sent to API (TIEMPO-381 reconciliation debug)
+      console.log('[useEvents] Fetching with params:', {
+        lat: params.lat,
+        lng: params.lng,
+        radius: params.radius,
+        useGeoSearch: params.useGeoSearch,
+        start: params.start,
+        end: params.end,
+        currentLocationSource: currentLocation?.source || 'unknown'
+      });
 
 
       // Add user role and organizerId if user is a RegionalOrganizer
