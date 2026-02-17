@@ -113,7 +113,7 @@ const EmergencyAlertModal = () => {
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
         <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '12px' }}>
-          We're working on a small data hiccup — should be resolved soon.
+          A few events may not be showing up, and recent updates may be delayed. We're working on it — should be resolved soon.
         </p>
         <p style={{ fontSize: '14px', color: '#388e3c', marginBottom: '16px' }}>
           Don't worry, no data has been lost.
