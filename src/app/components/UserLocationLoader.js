@@ -33,11 +33,13 @@ const UserLocationLoader = () => {
       return; // Already loaded for this user
     }
 
+    // TIEMPO-381 fix: Set flags BEFORE async call to prevent race condition
+    // React StrictMode can trigger useEffect twice rapidly
+    hasFetched.current = true;
+    lastUserId.current = currentUserId;
+
     const loadMapCenter = async () => {
       try {
-        // Mark as fetching to prevent duplicates
-        hasFetched.current = true;
-        lastUserId.current = currentUserId;
 
         // Get fresh Firebase token using AuthContext method
         const token = await getIdToken();
