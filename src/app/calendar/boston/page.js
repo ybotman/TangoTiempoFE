@@ -9,7 +9,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
-import { ButtonGroup, IconButton } from '@mui/material';
+import { ButtonGroup, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import TodayIcon from '@mui/icons-material/Today';
@@ -132,6 +132,9 @@ const BostonCalendarPage = () => {
     return typeof window !== 'undefined' && window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
   };
   const [currentViewType, setCurrentViewType] = useState(getInitialView());
+
+  // Emergency alert state - set to true to show on load
+  const [showEmergencyAlert, setShowEmergencyAlert] = useState(true);
 
   // Force Boston location on mount
   useEffect(() => {
@@ -577,6 +580,57 @@ const BostonCalendarPage = () => {
 
   return (
     <div data-testid="boston-calendar-page" style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Emergency Alert Modal */}
+      <Dialog
+        open={showEmergencyAlert}
+        onClose={() => setShowEmergencyAlert(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          style: {
+            borderRadius: '12px',
+            border: '3px solid #d32f2f'
+          }
+        }}
+      >
+        <DialogTitle style={{
+          backgroundColor: '#d32f2f',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ fontSize: '24px' }}>⚠️</span>
+          Data Issue Notice
+        </DialogTitle>
+        <DialogContent style={{ paddingTop: '20px' }}>
+          <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
+            We are currently experiencing a <strong>data issue</strong> that we are working to resolve soon.
+          </p>
+          <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
+            If you are missing events, please:
+          </p>
+          <ul style={{ fontSize: '16px', lineHeight: '1.8', paddingLeft: '20px' }}>
+            <li>Check <strong>Facebook</strong> for the latest event postings</li>
+            <li>Contact the <strong>event organizer directly</strong></li>
+          </ul>
+          <p style={{ fontSize: '14px', color: '#666', marginTop: '20px', fontStyle: 'italic' }}>
+            We apologize for the inconvenience and appreciate your patience.
+          </p>
+        </DialogContent>
+        <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
+          <Button
+            onClick={() => setShowEmergencyAlert(false)}
+            variant="contained"
+            color="primary"
+            size="large"
+            style={{ minWidth: '150px' }}
+          >
+            I Understand
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Hide FullCalendar's default time and dot columns in list view */}
       <style dangerouslySetInnerHTML={{ __html: `
         .fc-list-event-time {
