@@ -60,7 +60,18 @@ const SiteHeader = () => {
 
   // TIEMPO-381: Fetch nearest city when currentLocation changes
   useEffect(() => {
+    console.log('[SiteHeader] useEffect triggered', {
+      lat: currentLocation?.lat,
+      lng: currentLocation?.lng,
+      hasFetchNearestCity: !!fetchNearestCity
+    });
+
     if (!currentLocation?.lat || !currentLocation?.lng || !fetchNearestCity) {
+      console.log('[SiteHeader] Early return - missing data', {
+        hasLat: !!currentLocation?.lat,
+        hasLng: !!currentLocation?.lng,
+        hasFetchFn: !!fetchNearestCity
+      });
       setNearestCityName(null);
       return;
     }
@@ -71,13 +82,16 @@ const SiteHeader = () => {
     // Skip if we already fetched for these coordinates
     const coordKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
     if (lastFetchedCoords.current === coordKey) {
+      console.log('[SiteHeader] Skipping - already fetched for coords:', coordKey);
       return;
     }
 
     const fetchCity = async () => {
       try {
+        console.log('[SiteHeader] Fetching nearest city for:', { lat, lng });
         lastFetchedCoords.current = coordKey;
         const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
+        console.log('[SiteHeader] fetchNearestCity returned:', cityData);
         if (cityData?.cityName) {
           setNearestCityName(cityData.cityName);
           // Calculate distance if city has coordinates
@@ -88,11 +102,13 @@ const SiteHeader = () => {
             setCityDistanceMiles(null);
           }
         } else {
+          console.log('[SiteHeader] No cityName in response');
           setNearestCityName(null);
           setCityDistanceMiles(null);
         }
-      } catch {
+      } catch (error) {
         // If no city found, fall back to coordinates
+        console.error('[SiteHeader] fetchNearestCity error:', error?.message || error);
         setNearestCityName(null);
         setCityDistanceMiles(null);
       }
