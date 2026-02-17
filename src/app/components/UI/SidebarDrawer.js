@@ -81,6 +81,13 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [organizerSelectionModalOpen, setOrganizerSelectionModalOpen] = useState(false);
   const [requestedTab, setRequestedTab] = useState(null);
 
+  // TIEMPO-381: Track Boston route for conditional rendering
+  const [isBostonRoute, setIsBostonRoute] = useState(false);
+
+  useEffect(() => {
+    setIsBostonRoute(window.location.pathname.includes('/boston'));
+  }, []);
+
   // NEW STATE FOR DEBUG MENU
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
@@ -307,7 +314,7 @@ const SidebarDrawer = ({ open, onClose }) => {
               )}
 
               {/* TIEMPO-259: Map Center Menu Item - TIEMPO-381: Show different content for Boston */}
-              {typeof window !== 'undefined' && window.location.pathname.includes('/boston') ? (
+              {isBostonRoute ? (
                 // Boston route: Link to main site instead of Map Center
                 <Link href="https://www.tangotiempo.com/calendar" passHref>
                   <ListItem
