@@ -591,22 +591,44 @@ const BostonCalendarPage = () => {
       `}} />
 
       {/* Boston Header Image */}
-      <div style={{ 
-        position: 'relative', 
-        width: '100%', 
+      <div style={{
+        position: 'relative',
+        width: '100%',
         height: 'auto',
         maxHeight: '200px',
         overflow: 'hidden'
       }}>
-        <img 
-          src="/defaults/BTCHeader2.jpeg" 
+        <img
+          src="/defaults/BTCHeader2.jpeg"
           alt="Boston Tango Calendar"
-          style={{ 
-            width: '100%', 
+          style={{
+            width: '100%',
             height: 'auto',
             display: 'block'
           }}
         />
+
+        {/* TIEMPO-381: Location pill - fixed Boston location indicator */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            color: '#fff',
+            padding: '4px 10px',
+            borderRadius: '12px',
+            fontSize: '11px',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+          }}
+        >
+          <span style={{ fontSize: '12px' }}>📍</span>
+          <span>Boston ± 200mi</span>
+        </div>
       </div>
 
       <SiteMenuBar
