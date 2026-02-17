@@ -608,8 +608,9 @@ const BostonCalendarPage = () => {
           }}
         />
 
-        {/* TIEMPO-381: Location pill - fixed Boston location indicator */}
-        <div
+        {/* TIEMPO-381: Location pill - links to main site for other regions */}
+        <a
+          href="https://www.tangotiempo.com/calendar"
           style={{
             position: 'absolute',
             top: '8px',
@@ -624,11 +625,15 @@ const BostonCalendarPage = () => {
             alignItems: 'center',
             gap: '4px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease',
           }}
+          title="Click to explore other regions at TangoTiempo.com"
         >
           <span style={{ fontSize: '12px' }}>📍</span>
           <span>Boston ± 200mi</span>
-        </div>
+        </a>
       </div>
 
       <SiteMenuBar
