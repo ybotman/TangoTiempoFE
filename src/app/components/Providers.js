@@ -116,10 +116,10 @@ const DataRecoveryAlertModal = () => {
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
         <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
-          Some of the newest data (last 10 days) is being recovered.
+          Some of the newest data (last 10 days) is being recovered. You can go to TangoTiempo.com for some more recent events.
         </p>
         <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500 }}>
-          Thank you for your patience! 💃
+          Thank you for your patience! 💃 Another few hours to finalize the missing rows.
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
