@@ -102,27 +102,21 @@ const EmergencyAlertModal = () => {
       }}
     >
       <DialogTitle style={{
-        backgroundColor: '#d32f2f',
+        backgroundColor: '#f57c00',
         color: 'white',
         display: 'flex',
         alignItems: 'center',
         gap: '8px'
       }}>
         <span style={{ fontSize: '24px' }}>🔧</span>
-        TEST Environment - Maintenance
+        Site Being Fixed
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
-        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '12px' }}>
-          <strong>The database is currently down for data maintenance.</strong>
+        <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
+          Thank you for your patience.
         </p>
-        <p style={{ fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
-          Events may not load or display correctly. This is expected while we resolve data issues.
-        </p>
-        <p style={{ fontSize: '14px', color: '#388e3c', marginBottom: '16px' }}>
-          No data has been lost — we are cleaning things up.
-        </p>
-        <p style={{ fontSize: '13px', color: '#666', marginTop: '16px' }}>
-          For live events, please use <a href="https://www.tangotiempo.com/calendar" style={{ color: '#1976d2', fontWeight: '500' }}>TangoTiempo.com (PROD)</a>
+        <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500 }}>
+          All data will be back very soon.
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
