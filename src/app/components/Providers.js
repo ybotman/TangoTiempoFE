@@ -109,14 +109,14 @@ const EmergencyAlertModal = () => {
         gap: '8px'
       }}>
         <span style={{ fontSize: '24px' }}>🔧</span>
-        Site Being Fixed
+        Site Being Repaired
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
         <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
-          Thank you for your patience.
+          Thank you for your patience!
         </p>
         <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500 }}>
-          All data will be back very soon.
+          All your tango will be back soon! 💃
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
@@ -135,6 +135,35 @@ const EmergencyAlertModal = () => {
 };
 
 const Providers = ({ children }) => {
+  // MAINTENANCE MODE: Block entire app, no API calls
+  if (SHOW_EMERGENCY_ALERT) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#1a1a2e',
+        color: 'white',
+        fontFamily: 'system-ui, sans-serif',
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔧💃</div>
+        <h1 style={{ fontSize: '2rem', marginBottom: '16px', color: '#f57c00' }}>
+          Site Being Repaired
+        </h1>
+        <p style={{ fontSize: '1.25rem', marginBottom: '12px', maxWidth: '400px' }}>
+          Thank you for your patience!
+        </p>
+        <p style={{ fontSize: '1.1rem', color: '#4caf50' }}>
+          All your tango will be back soon!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <AuthProvider>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
