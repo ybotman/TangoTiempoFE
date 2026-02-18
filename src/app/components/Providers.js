@@ -102,35 +102,27 @@ const EmergencyAlertModal = () => {
       }}
     >
       <DialogTitle style={{
-        backgroundColor: '#1976d2',
+        backgroundColor: '#d32f2f',
         color: 'white',
         display: 'flex',
         alignItems: 'center',
         gap: '8px'
       }}>
-        <span style={{ fontSize: '24px' }}>ℹ️</span>
-        Quick Note
+        <span style={{ fontSize: '24px' }}>🔧</span>
+        TEST Environment - Maintenance
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
         <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '12px' }}>
-          A few events may not be showing up, and recent updates may be delayed. We're working on it — should be resolved soon.
-        </p>
-        <p style={{ fontSize: '14px', color: '#388e3c', marginBottom: '16px' }}>
-          Don't worry, no data has been lost.
+          <strong>The database is currently down for data maintenance.</strong>
         </p>
         <p style={{ fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
-          If you don't see an event you're looking for:
+          Events may not load or display correctly. This is expected while we resolve data issues.
         </p>
-        <ul style={{ fontSize: '15px', lineHeight: '1.8', paddingLeft: '20px', color: '#444' }}>
-          <li>Try <a href="https://www.tangotiempo.com/calendar" style={{ color: '#1976d2', fontWeight: '500' }}>TangoTiempo.com</a> — may show better results</li>
-          <li>Check <strong>Facebook</strong> for the latest postings</li>
-          <li>Contact the <strong>organizer directly</strong></li>
-        </ul>
+        <p style={{ fontSize: '14px', color: '#388e3c', marginBottom: '16px' }}>
+          No data has been lost — we are cleaning things up.
+        </p>
         <p style={{ fontSize: '13px', color: '#666', marginTop: '16px' }}>
-          Thanks for your patience!
-        </p>
-        <p style={{ fontSize: '12px', color: '#888', marginTop: '12px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-          Organizers: Contact Toby with questions — expect 24hr turnaround.
+          For live events, please use <a href="https://www.tangotiempo.com/calendar" style={{ color: '#1976d2', fontWeight: '500' }}>TangoTiempo.com (PROD)</a>
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
