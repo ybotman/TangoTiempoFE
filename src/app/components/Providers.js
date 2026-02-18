@@ -88,6 +88,7 @@ const SHOW_DATA_RECOVERY_ALERT = true;
 
 const DataRecoveryAlertModal = () => {
   const [showAlert, setShowAlert] = useState(SHOW_DATA_RECOVERY_ALERT);
+  const [showDetails, setShowDetails] = useState(false);
 
   if (!showAlert) return null;
 
@@ -121,9 +122,56 @@ const DataRecoveryAlertModal = () => {
         <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
           <strong>BostonTangoCalendar</strong> and <strong>TangoTiempo</strong> are up and running! 💃🕺
         </p>
-        <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500 }}>
+        <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500, marginBottom: '16px' }}>
           Thank you for your patience. Ping Toby with any questions.
         </p>
+
+        {/* What Happened? expandable section */}
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#1976d2',
+            cursor: 'pointer',
+            fontSize: '14px',
+            padding: '4px 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}
+        >
+          <span style={{ transform: showDetails ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▶</span>
+          What happened?
+        </button>
+
+        {showDetails && (
+          <div style={{
+            marginTop: '12px',
+            padding: '12px',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '8px',
+            fontSize: '13px',
+            lineHeight: '1.6',
+            color: '#555'
+          }}>
+            <p style={{ marginBottom: '8px' }}>
+              <strong>Issue 1 - Database Routing:</strong> A new backend function used a reserved keyword in Azure,
+              which triggered our failover system to redirect some database connections to the backup.
+              However, it didn&apos;t redirect ALL connections consistently - so some data reads/writes went to
+              the production database while others went to the backup. This caused data to appear out of sync.
+            </p>
+            <p style={{ marginBottom: '8px' }}>
+              <strong>Issue 2 - Event Limit:</strong> Our calendar query had a limit of 400 events per request.
+              As our community grew, some regions exceeded this limit, causing events to silently not appear.
+              We&apos;ve increased this to 1000 and added alerts to notify us before this happens again.
+            </p>
+            <p style={{ marginBottom: '0' }}>
+              <strong>Resolution:</strong> All connections are now properly routed to the production database,
+              and we&apos;ve implemented better monitoring to catch these issues earlier.
+            </p>
+          </div>
+        )}
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
         <Button
