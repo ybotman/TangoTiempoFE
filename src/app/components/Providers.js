@@ -80,11 +80,14 @@ const MapCenterModalWrapper = () => {
   );
 };
 
-// Emergency Alert Component - set SHOW_EMERGENCY_ALERT to false to disable
-const SHOW_EMERGENCY_ALERT = true;
+// MAINTENANCE MODE - blocks entire app when true
+const SHOW_EMERGENCY_ALERT = false;
 
-const EmergencyAlertModal = () => {
-  const [showAlert, setShowAlert] = useState(SHOW_EMERGENCY_ALERT);
+// DATA RECOVERY ALERT - shows dismissible modal when true
+const SHOW_DATA_RECOVERY_ALERT = true;
+
+const DataRecoveryAlertModal = () => {
+  const [showAlert, setShowAlert] = useState(SHOW_DATA_RECOVERY_ALERT);
 
   if (!showAlert) return null;
 
@@ -102,21 +105,21 @@ const EmergencyAlertModal = () => {
       }}
     >
       <DialogTitle style={{
-        backgroundColor: '#f57c00',
+        backgroundColor: '#2196f3',
         color: 'white',
         display: 'flex',
         alignItems: 'center',
         gap: '8px'
       }}>
-        <span style={{ fontSize: '24px' }}>🔧</span>
-        Site Being Repaired
+        <span style={{ fontSize: '24px' }}>📋</span>
+        Data Recovery In Progress
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
         <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
-          Thank you for your patience!
+          Some of the newest data (last 10 days) is being recovered.
         </p>
         <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500 }}>
-          All your tango will be back soon! 💃
+          Thank you for your patience! 💃
         </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
@@ -176,7 +179,7 @@ const Providers = ({ children }) => {
           <LocationAPIProvider>
             <GeoLocationProvider>
               <EventDiscoveryProvider>
-                <EmergencyAlertModal />
+                <DataRecoveryAlertModal />
                 <UserLocationLoader />
                 <MapCenterModalWrapper />
                 {children}
