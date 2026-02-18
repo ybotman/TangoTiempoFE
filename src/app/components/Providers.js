@@ -130,7 +130,7 @@ const DataRecoveryAlertModal = () => {
             </tr>
           </thead>
           <tbody>
-            <tr><td style={{ padding: '6px 8px' }}>ACADEMY</td><td style={{ padding: '6px 8px' }}>LA SOCIAL</td><td style={{ padding: '6px 8px' }}>Feb 18</td></tr>
+            <tr style={{ color: '#d32f2f' }}><td style={{ padding: '6px 8px' }}>ACADEMY</td><td style={{ padding: '6px 8px' }}>LA SOCIAL</td><td style={{ padding: '6px 8px' }}>CANCELED</td></tr>
             <tr><td style={{ padding: '6px 8px' }}>AFFAIR</td><td style={{ padding: '6px 8px' }}>INT/ADV classes, TangoAffair</td><td style={{ padding: '6px 8px' }}>Feb 24</td></tr>
             <tr><td style={{ padding: '6px 8px' }}>MILT-CORI</td><td style={{ padding: '6px 8px' }}>Milonga NUEVA!</td><td style={{ padding: '6px 8px' }}>Mar 7</td></tr>
             <tr><td style={{ padding: '6px 8px' }}>MILT-CORI</td><td style={{ padding: '6px 8px' }}>Milonga NUEVA!</td><td style={{ padding: '6px 8px' }}>Apr 4</td></tr>
