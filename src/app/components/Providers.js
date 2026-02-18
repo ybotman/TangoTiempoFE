@@ -100,55 +100,39 @@ const DataRecoveryAlertModal = () => {
       PaperProps={{
         style: {
           borderRadius: '12px',
-          border: '2px solid #1976d2'
+          border: '2px solid #4caf50'
         }
       }}
     >
       <DialogTitle style={{
-        backgroundColor: '#2196f3',
+        backgroundColor: '#4caf50',
         color: 'white',
         display: 'flex',
         alignItems: 'center',
         gap: '8px'
       }}>
-        <span style={{ fontSize: '24px' }}>📋</span>
-        Data Recovery In Progress
+        <span style={{ fontSize: '24px' }}>✅</span>
+        We Are Back!
       </DialogTitle>
       <DialogContent style={{ paddingTop: '20px' }}>
         <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
-          Some of the newest data (last 10 days) is being recovered.
+          All the data is retrieved from the backups. The bug is gone.
         </p>
-        <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500, marginBottom: '16px' }}>
-          Thank you for your patience! 💃
+        <p style={{ fontSize: '18px', lineHeight: '1.6', marginBottom: '16px' }}>
+          <strong>BostonTangoCalendar</strong> and <strong>TangoTiempo</strong> are up and running! 💃🕺
         </p>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', marginBottom: '12px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Organizer</th>
-              <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Title</th>
-              <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ color: '#d32f2f' }}><td style={{ padding: '6px 8px' }}>ACADEMY</td><td style={{ padding: '6px 8px' }}>LA SOCIAL</td><td style={{ padding: '6px 8px' }}>CANCELED</td></tr>
-            <tr><td style={{ padding: '6px 8px' }}>AFFAIR</td><td style={{ padding: '6px 8px' }}>INT/ADV classes, TangoAffair</td><td style={{ padding: '6px 8px' }}>Feb 24</td></tr>
-            <tr><td style={{ padding: '6px 8px' }}>MILT-CORI</td><td style={{ padding: '6px 8px' }}>Milonga NUEVA!</td><td style={{ padding: '6px 8px' }}>Mar 7</td></tr>
-            <tr><td style={{ padding: '6px 8px' }}>MILT-CORI</td><td style={{ padding: '6px 8px' }}>Milonga NUEVA!</td><td style={{ padding: '6px 8px' }}>Apr 4</td></tr>
-            <tr><td style={{ padding: '6px 8px' }}>MILT-CORI</td><td style={{ padding: '6px 8px' }}>Milonga NUEVA!</td><td style={{ padding: '6px 8px' }}>May 2</td></tr>
-            <tr><td style={{ padding: '6px 8px' }}>ROGER</td><td style={{ padding: '6px 8px' }}>Foundry Festival Milonga Demo</td><td style={{ padding: '6px 8px' }}>Feb 21</td></tr>
-            <tr><td style={{ padding: '6px 8px' }}>SOCIETY</td><td style={{ padding: '6px 8px' }}>VICKY&apos;s 70th BIRTHDAY PARTY</td><td style={{ padding: '6px 8px' }}>Mar 28</td></tr>
-          </tbody>
-        </table>
+        <p style={{ fontSize: '16px', color: '#388e3c', fontWeight: 500 }}>
+          Thank you for your patience. Ping Toby with any questions.
+        </p>
       </DialogContent>
       <DialogActions style={{ padding: '16px', justifyContent: 'center' }}>
         <Button
           onClick={() => setShowAlert(false)}
           variant="contained"
-          color="primary"
+          style={{ minWidth: '120px', backgroundColor: '#4caf50' }}
           size="large"
-          style={{ minWidth: '120px' }}
         >
-          Got It
+          Got It!
         </Button>
       </DialogActions>
     </Dialog>
