@@ -89,11 +89,12 @@ const SiteHeader = () => {
     const fetchCity = async () => {
       try {
         console.log('[SiteHeader] Fetching nearest city for:', { lat, lng });
-        lastFetchedCoords.current = coordKey;
         const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
         console.log('[SiteHeader] fetchNearestCity returned:', cityData);
         if (cityData?.cityName) {
           setNearestCityName(cityData.cityName);
+          // Only cache coords on SUCCESS - allows retry if fetch fails
+          lastFetchedCoords.current = coordKey;
           // Calculate distance if city has coordinates
           if (cityData.latitude && cityData.longitude) {
             const distance = calculateDistanceMiles(lat, lng, cityData.latitude, cityData.longitude);
@@ -105,9 +106,11 @@ const SiteHeader = () => {
           console.log('[SiteHeader] No cityName in response');
           setNearestCityName(null);
           setCityDistanceMiles(null);
+          // Don't cache coords - allow retry next render
         }
       } catch (error) {
         // If no city found, fall back to coordinates
+        // Don't cache coords on error - allow retry
         console.error('[SiteHeader] fetchNearestCity error:', error?.message || error);
         setNearestCityName(null);
         setCityDistanceMiles(null);
