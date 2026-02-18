@@ -26,14 +26,18 @@ export default function EventNotFound() {
           borderRadius: 2,
         }}
       >
-        <EventBusyIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+        <EventBusyIcon sx={{ fontSize: 80, color: '#f57c00', mb: 2 }} />
 
         <Typography variant="h4" component="h1" gutterBottom>
-          Event Not Found
+          Site Being Fixed
         </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          This event may have been removed, cancelled, or the link may be incorrect.
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+          Thank you for your patience.
+        </Typography>
+
+        <Typography variant="body1" sx={{ mb: 3, fontWeight: 500, color: '#388e3c' }}>
+          All data will be back very soon.
         </Typography>
 
         <Button
@@ -43,18 +47,8 @@ export default function EventNotFound() {
           startIcon={<CalendarMonthIcon />}
           size="large"
         >
-          Browse All Events
+          Browse Calendar
         </Button>
-
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="body2" color="text.secondary">
-            Looking for something specific? Check out{' '}
-            <Link href="https://tangotiempo.com" style={{ color: '#1976d2' }}>
-              TangoTiempo.com
-            </Link>
-            {' '}for all upcoming tango events.
-          </Typography>
-        </Box>
       </Paper>
     </Box>
   );
