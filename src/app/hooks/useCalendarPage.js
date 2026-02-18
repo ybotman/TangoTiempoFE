@@ -82,7 +82,7 @@ export const useCalendarPage = () => {
   const { events, loading: eventsLoading, error: eventsError, noLocationSelected, refreshEvents } = useEvents({
     startDate: datesSet?.start, 
     endDate: datesSet?.end,
-    limit: 200, // Increase the limit to ensure we get all events
+    limit: 500, // Increase the limit to ensure we get all events
     useGeoLocationContext: true, // Enable GeoLocationContext to get temporaryLocation
     useLocationPreferences: true // Enable saved user preferences
   });

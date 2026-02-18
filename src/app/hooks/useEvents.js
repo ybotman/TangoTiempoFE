@@ -347,6 +347,19 @@ export function useEvents({
 
       // Store the response which includes events array and pagination info
       setEventsData(response.data);
+
+      // TIEMPO-382: Log event count and warn if approaching/hitting limit
+      const returnedCount = response.data?.events?.length || 0;
+      const requestedLimit = params.limit;
+      const totalAvailable = response.data?.pagination?.total || returnedCount;
+
+      if (returnedCount === requestedLimit && totalAvailable > requestedLimit) {
+        console.error(`🚨 EVENT LIMIT HIT: Returned ${returnedCount}/${totalAvailable} events. Limit of ${requestedLimit} is truncating results!`);
+      } else if (returnedCount >= requestedLimit * 0.9) {
+        console.warn(`⚠️ EVENT LIMIT WARNING: Returned ${returnedCount}/${totalAvailable} events (${Math.round(returnedCount/requestedLimit*100)}% of ${requestedLimit} limit)`);
+      } else {
+        console.log(`[useEvents] Returned ${returnedCount} events (limit: ${requestedLimit}, total available: ${totalAvailable})`);
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
 

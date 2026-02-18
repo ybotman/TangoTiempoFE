@@ -33,7 +33,10 @@
       "Bash(./.ybotbot/jira-tools/jira-transition.sh:*)",
       "Bash(./.ybotbot/jira-tools/jira-search.sh:*)",
       "Bash(./.ybotbot/jira-tools/jira-create.sh:*)",
-      "Bash(GIT_DIR=/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/.git GIT_WORK_TREE=/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages git status:*)"
+      "Bash(GIT_DIR=/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/.git GIT_WORK_TREE=/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages git status:*)",
+      "Bash(xargs:*)",
+      "WebFetch(domain:www.tangotiempo.com)",
+      "WebFetch(domain:tangotiempo-test.azurewebsites.net)"
     ],
     "deny": [],
     "ask": []
