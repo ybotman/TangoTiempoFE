@@ -84,7 +84,8 @@ const MapCenterModalWrapper = () => {
 const SHOW_EMERGENCY_ALERT = false;
 
 // DATA RECOVERY ALERT - shows dismissible modal when true
-const SHOW_DATA_RECOVERY_ALERT = true;
+// DISABLED: Recovery complete. Future: Replace with configurable messaging system (TIEMPO-385)
+const SHOW_DATA_RECOVERY_ALERT = false;
 
 const DataRecoveryAlertModal = () => {
   const [showAlert, setShowAlert] = useState(SHOW_DATA_RECOVERY_ALERT);

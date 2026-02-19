@@ -297,7 +297,7 @@ export default function ReleaseNotesPage() {
                           variant="outlined"
                           clickable
                           component="a"
-                          href={`https://tobybalsley.atlassian.net/browse/${item.ticket}`}
+                          href={`https://hdtsllc.atlassian.net/browse/${item.ticket}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           sx={{ fontSize: '0.7rem', height: 24 }}
