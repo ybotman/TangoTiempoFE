@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Buffer } from 'buffer';
 
 // UPDATE THESE:
-const JIRA_URL = 'https://tobybalsley.atlassian.net';  // Your Jira URL
+const JIRA_URL = 'https://hdtsllc.atlassian.net';  // Your Jira URL
 const EMAIL = 'toby.balsley@gmail.com';                 // Your email  
 const API_TOKEN = 'ATATT3xFfGF0Y3Qh48P6WKxPPQjdhH8w1W0A3y0NM_Vlz1XA-Xk6Aueg8kqGRCLBcoQ5WP2lgTQcKrfuHKOad4VAd4TG4rlGQG_lWzS_tSeG1avoKD397LHdIFEbMjNJiBceNQEtz5sAjFvTNthL92HiLg9NmWtbKsEMvnPaT-nWBq6YyXBbaSY';  // Working Anthropic token (no = at end)
 const PROJECT_KEY = 'TIEMPO';                              // Your project key

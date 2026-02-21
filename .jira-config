@@ -1,7 +1,7 @@
 # JIRA Configuration
 # Personal configuration for toby.balsley@gmail.com
 
-JIRA_URL="https://tobybalsley.atlassian.net"
+JIRA_URL="https://hdtsllc.atlassian.net"
 JIRA_EMAIL="toby.balsley@gmail.com"
 PROJECT="TIEMPO"
 PROJECTGUILD="AIGUILD"
