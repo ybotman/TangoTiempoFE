@@ -655,11 +655,22 @@ const CalendarPage = () => {
         const endStr = viewDateRange.end instanceof Date ? viewDateRange.end.toISOString() : viewDateRange.end;
         const placeholders = generatePlaceholderEvents(startStr, endStr);
 
-        // TIEMPO-246: Filter dates using string comparison, not Date objects
+        // TIEMPO-386: Filter dates using string comparison, not Date objects
+        // Handle both regular events (event.start) and recurring events (event.rrule.dtstart)
         const eventDates = new Set(
-          coloredFilteredEvents.map(event => {
-            // Extract date part from ISO string (YYYY-MM-DD)
-            return (event.start || '').split('T')[0];
+          coloredFilteredEvents.flatMap(event => {
+            // For recurring events, get dtstart from rrule
+            if (event.rrule?.dtstart) {
+              const dtstart = event.rrule.dtstart;
+              // dtstart could be a Date object or ISO string
+              const dateStr = dtstart instanceof Date
+                ? dtstart.toISOString().split('T')[0]
+                : (typeof dtstart === 'string' ? dtstart.split('T')[0] : '');
+              return dateStr ? [dateStr] : [];
+            }
+            // For regular events, extract date from start
+            const startStr = (event.start || '').split('T')[0];
+            return startStr ? [startStr] : [];
           })
         );
 
@@ -986,6 +997,28 @@ const CalendarPage = () => {
           if (eventInfo.event.extendedProps.isPlaceholder) {
             // Style placeholder events to look like clickable day entries
             if (eventInfo.view.type === 'listMonth' || eventInfo.view.type === 'list' || eventInfo.view.type === 'list21Days') {
+              // TIEMPO-386: Hide placeholder if this day has real events
+              // FullCalendar list view structure: .fc-list-day has .fc-list-day-frame with events
+              // Each event row is in tbody, grouped by day
+              const row = eventInfo.el.closest('tr');
+              if (row) {
+                // Find all event rows in the same day section
+                const tbody = row.closest('tbody');
+                if (tbody) {
+                  const allEvents = tbody.querySelectorAll('.fc-list-event');
+                  const realEventsCount = Array.from(allEvents).filter(
+                    el => !el.classList.contains('fc-placeholder-event') &&
+                          !el.querySelector('.fc-placeholder-event')
+                  ).length;
+
+                  // If there are real events, hide this placeholder
+                  if (realEventsCount > 0) {
+                    eventInfo.el.style.display = 'none';
+                    return; // Don't apply other styles
+                  }
+                }
+              }
+
               // Style the placeholder to look like an empty day entry
               eventInfo.el.style.backgroundColor = '#f8f9fa';
               eventInfo.el.style.cursor = 'pointer';
