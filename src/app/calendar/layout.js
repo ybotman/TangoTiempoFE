@@ -54,6 +54,7 @@ const RootLayout = ({ children }) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            appId: parseInt(process.env.NEXT_PUBLIC_APPLICATION_ID, 10) || 1,
             visitor_id: visitorId,
             pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
