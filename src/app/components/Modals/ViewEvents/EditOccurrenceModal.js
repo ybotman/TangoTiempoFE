@@ -2,18 +2,12 @@
  * EditOccurrenceModal.js
  * TIEMPO-362: Modal for editing a single occurrence of a recurring event
  *
- * WHAT CAN CHANGE for a single occurrence:
- * - Special note (appended description for this date)
- * - Guest DJ / Orchestra (alternate performer)
- * - Time adjustment (earlier/later start)
- * - Title suffix (e.g., "Weekly Milonga - LIVE ORCHESTRA")
+ * SIMPLIFIED MODEL - Additive attributes only:
+ * - Tonight's Feature: DJ, Orchestra, Instructor, Performer, or Canceled
+ * - Feature Name: Free text for the name/details
+ * - Special Note: Time changes, announcements, etc.
  *
- * WHAT CANNOT CHANGE:
- * - Base title (use "Edit All" for that)
- * - Venue (too complex, use "Edit All")
- * - Categories (use "Edit All")
- *
- * Only changed fields are sent as "patch" to backend
+ * Core attributes (venue, category, base title) use "Edit All"
  */
 
 import React, { useState, useEffect } from 'react';
@@ -28,22 +22,34 @@ import {
   Typography,
   Box,
   Alert,
-  Divider,
   Chip,
   FormControl,
   InputLabel,
   Select,
   MenuItem as MuiMenuItem
 } from '@mui/material';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import EditIcon from '@mui/icons-material/Edit';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import NotesIcon from '@mui/icons-material/Notes';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LabelIcon from '@mui/icons-material/Label';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { format } from 'date-fns';
+
+// Feature types for "Tonight's" dropdown
+const FEATURE_TYPES = [
+  { value: '', label: 'No special feature' },
+  { value: 'dj', label: "Tonight's DJ" },
+  { value: 'orchestra', label: "Tonight's Orchestra" },
+  { value: 'instructor', label: "Tonight's Instructor" },
+  { value: 'performer', label: "Tonight's Performer" },
+  { value: 'canceled', label: 'Canceled Tonight' }
+];
+
+// Labels for the name field based on feature type
+const FEATURE_NAME_LABELS = {
+  dj: 'DJ Name',
+  orchestra: 'Orchestra Name',
+  instructor: 'Instructor Name',
+  performer: 'Performer Name',
+  canceled: 'Cancellation Reason'
+};
 
 const EditOccurrenceModal = ({
   open,
@@ -54,107 +60,76 @@ const EditOccurrenceModal = ({
   currentValues = {},
   isLoading = false
 }) => {
-  // Override values - only fields that CAN change for single occurrence
-  const [titleSuffix, setTitleSuffix] = useState('');
-  const [notes, setNotes] = useState('');
-  const [djOrOrchestra, setDjOrOrchestra] = useState('');
-  const [timeAdjustment, setTimeAdjustment] = useState('none'); // 'none', 'earlier', 'later', 'custom'
-  const [customStartTime, setCustomStartTime] = useState(null);
-  const [customEndTime, setCustomEndTime] = useState(null);
+  const [featureType, setFeatureType] = useState('');
+  const [featureName, setFeatureName] = useState('');
+  const [specialNote, setSpecialNote] = useState('');
 
   // Reset form when modal opens with new data
   useEffect(() => {
     if (open) {
-      // Check if there are existing overrides
-      const hasExistingOverrides = currentValues._hasOverride;
-
-      if (hasExistingOverrides && currentValues.patch) {
+      if (currentValues._hasOverride && currentValues._overridePatch) {
         // Pre-populate with existing override values
-        setTitleSuffix(currentValues.patch.titleSuffix || '');
-        setNotes(currentValues.patch.notes || '');
-        setDjOrOrchestra(currentValues.patch.djName || '');
-
-        if (currentValues.patch.startDate) {
-          setTimeAdjustment('custom');
-          setCustomStartTime(new Date(currentValues.patch.startDate));
-          setCustomEndTime(currentValues.patch.endDate ? new Date(currentValues.patch.endDate) : null);
-        } else {
-          setTimeAdjustment('none');
-        }
+        setFeatureType(currentValues._overridePatch.featureType || '');
+        setFeatureName(currentValues._overridePatch.featureName || '');
+        setSpecialNote(currentValues._overridePatch.specialNote || '');
       } else {
         // Reset to defaults
-        setTitleSuffix('');
-        setNotes('');
-        setDjOrOrchestra('');
-        setTimeAdjustment('none');
-        setCustomStartTime(null);
-        setCustomEndTime(null);
-      }
-
-      // Initialize time pickers from current event times
-      if (!currentValues._hasOverride && currentValues.startDate) {
-        setCustomStartTime(new Date(currentValues.startDate));
-      }
-      if (!currentValues._hasOverride && currentValues.endDate) {
-        setCustomEndTime(new Date(currentValues.endDate));
+        setFeatureType('');
+        setFeatureName('');
+        setSpecialNote('');
       }
     }
   }, [open, currentValues]);
 
   const handleSave = () => {
-    // Build patch object with only filled-in fields
+    // Build patch object
     const patch = {};
 
-    if (titleSuffix.trim()) {
-      patch.titleSuffix = titleSuffix.trim();
-    }
-
-    if (notes.trim()) {
-      patch.notes = notes.trim();
-    }
-
-    if (djOrOrchestra.trim()) {
-      patch.djName = djOrOrchestra.trim();
-    }
-
-    if (timeAdjustment === 'custom' && customStartTime) {
-      patch.startDate = customStartTime.toISOString();
-      if (customEndTime) {
-        patch.endDate = customEndTime.toISOString();
+    if (featureType) {
+      patch.featureType = featureType;
+      if (featureName.trim()) {
+        patch.featureName = featureName.trim();
       }
     }
 
+    if (specialNote.trim()) {
+      patch.specialNote = specialNote.trim();
+    }
+
+    // Determine override type
+    const overrideType = featureType === 'canceled' ? 'cancel' : 'modify';
+
     // Only save if there are actual changes
     if (Object.keys(patch).length === 0) {
-      alert('Please fill in at least one field to modify this date');
+      alert('Please select a feature type or add a special note');
       return;
     }
 
     onSave({
       instanceKey: occurrenceDate,
-      overrideType: 'modify',
+      overrideType,
       patch
     });
   };
 
-  // Check if any field has been filled
-  const hasChanges = titleSuffix.trim() || notes.trim() || djOrOrchestra.trim() || timeAdjustment === 'custom';
-
   const handleClose = () => {
-    // Reset state
-    setTitleSuffix('');
-    setNotes('');
-    setDjOrOrchestra('');
-    setTimeAdjustment('none');
-    setCustomStartTime(null);
-    setCustomEndTime(null);
+    setFeatureType('');
+    setFeatureName('');
+    setSpecialNote('');
     onClose();
   };
+
+  // Check if any field has been filled
+  const hasChanges = featureType || specialNote.trim();
 
   // Format the date for display
   const formattedDate = occurrenceDate
     ? format(new Date(occurrenceDate), 'EEEE, MMMM d, yyyy')
     : 'this date';
+
+  // Get the appropriate label for the name field
+  const nameFieldLabel = FEATURE_NAME_LABELS[featureType] || 'Name / Details';
+  const isCanceled = featureType === 'canceled';
 
   return (
     <Dialog
@@ -163,24 +138,27 @@ const EditOccurrenceModal = ({
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: { borderTop: '4px solid', borderColor: 'primary.main' }
+        sx: {
+          borderTop: '4px solid',
+          borderColor: isCanceled ? 'error.main' : 'primary.main'
+        }
       }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <EditIcon color="primary" />
-        Edit This Occurrence
+        {isCanceled ? <CancelIcon color="error" /> : <EditIcon color="primary" />}
+        {isCanceled ? 'Cancel This Date' : 'Edit This Date'}
       </DialogTitle>
 
       <DialogContent>
         {/* Event context */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, mt: 1 }}>
           <Box
             sx={{
-              bgcolor: 'primary.50',
+              bgcolor: isCanceled ? 'error.50' : 'primary.50',
               p: 2,
               borderRadius: 1,
               border: '1px solid',
-              borderColor: 'primary.200'
+              borderColor: isCanceled ? 'error.200' : 'primary.200'
             }}
           >
             <Typography variant="subtitle1" fontWeight="bold">
@@ -200,124 +178,67 @@ const EditOccurrenceModal = ({
           </Box>
         </Box>
 
-        <Alert severity="info" sx={{ mb: 3 }}>
-          Changes apply <strong>only to {formattedDate}</strong>.
-          Other dates in the series remain unchanged.
+        <Alert severity={isCanceled ? 'warning' : 'info'} sx={{ mb: 3 }}>
+          {isCanceled
+            ? `This will mark ${formattedDate} as CANCELED.`
+            : `Changes apply only to ${formattedDate}. Other dates unchanged.`
+          }
         </Alert>
 
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-          Fill in only what&apos;s different for this date:
-        </Typography>
-
-        {/* Special Note for this date */}
+        {/* Tonight's Feature Type */}
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <NotesIcon fontSize="small" color="action" />
-            <Typography variant="body2" fontWeight="medium">
-              Special Note
-            </Typography>
+          <FormControl fullWidth size="small">
+            <InputLabel>Tonight&apos;s Feature</InputLabel>
+            <Select
+              value={featureType}
+              onChange={(e) => {
+                setFeatureType(e.target.value);
+                // Clear name if switching away from a type
+                if (!e.target.value) setFeatureName('');
+              }}
+              label="Tonight's Feature"
+            >
+              {FEATURE_TYPES.map((type) => (
+                <MuiMenuItem key={type.value} value={type.value}>
+                  {type.label}
+                </MuiMenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* Feature Name - only show if a type is selected */}
+        {featureType && (
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              value={featureName}
+              onChange={(e) => setFeatureName(e.target.value)}
+              label={nameFieldLabel}
+              placeholder={
+                isCanceled
+                  ? 'e.g., Venue closed, Weather, Holiday'
+                  : 'e.g., DJ Carlos, Sexteto Milonguero'
+              }
+              fullWidth
+              size="small"
+              helperText={isCanceled ? 'Optional reason for cancellation' : 'Type the name or leave empty'}
+            />
           </Box>
+        )}
+
+        {/* Special Note - always visible */}
+        <Box sx={{ mb: 2 }}>
           <TextField
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g., Live orchestra tonight! Birthday celebration for Juan."
+            value={specialNote}
+            onChange={(e) => setSpecialNote(e.target.value)}
+            label="Special Note"
+            placeholder="e.g., Starts 30 min early! Birthday celebration for Juan."
             fullWidth
             multiline
             rows={2}
             size="small"
-            helperText="Shown to users viewing this specific date"
+            helperText="Time changes, announcements, or any other info for this date"
           />
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Guest DJ / Orchestra */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <MusicNoteIcon fontSize="small" color="action" />
-            <Typography variant="body2" fontWeight="medium">
-              Guest DJ / Orchestra
-            </Typography>
-          </Box>
-          <TextField
-            value={djOrOrchestra}
-            onChange={(e) => setDjOrOrchestra(e.target.value)}
-            placeholder="e.g., DJ Carlos, Sexteto Milonguero"
-            fullWidth
-            size="small"
-            helperText={
-              currentValues.regularDjName
-                ? `Regular: ${currentValues.regularDjName}`
-                : 'Leave empty to use regular DJ'
-            }
-          />
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Title Suffix (optional) */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <LabelIcon fontSize="small" color="action" />
-            <Box component="span" sx={{ typography: 'body2', fontWeight: 'medium' }}>
-              Title Addition
-            </Box>
-            <Chip label="Optional" size="small" />
-          </Box>
-          <TextField
-            value={titleSuffix}
-            onChange={(e) => setTitleSuffix(e.target.value)}
-            placeholder="e.g., - LIVE ORCHESTRA, - NYE Special"
-            fullWidth
-            size="small"
-            helperText={`Will show as: "${eventTitle}${titleSuffix ? ' ' + titleSuffix : ''}"`}
-          />
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Time Adjustment */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <AccessTimeIcon fontSize="small" color="action" />
-            <Typography variant="body2" fontWeight="medium">
-              Time Change
-            </Typography>
-          </Box>
-          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel>Adjust time?</InputLabel>
-            <Select
-              value={timeAdjustment}
-              onChange={(e) => setTimeAdjustment(e.target.value)}
-              label="Adjust time?"
-            >
-              <MuiMenuItem value="none">No change - same time as usual</MuiMenuItem>
-              <MuiMenuItem value="custom">Different time this date</MuiMenuItem>
-            </Select>
-          </FormControl>
-
-          {timeAdjustment === 'custom' && (
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <TimePicker
-                  label="Start Time"
-                  value={customStartTime}
-                  onChange={setCustomStartTime}
-                  slotProps={{
-                    textField: { size: 'small', fullWidth: true }
-                  }}
-                />
-                <TimePicker
-                  label="End Time"
-                  value={customEndTime}
-                  onChange={setCustomEndTime}
-                  slotProps={{
-                    textField: { size: 'small', fullWidth: true }
-                  }}
-                />
-              </Box>
-            </LocalizationProvider>
-          )}
         </Box>
       </DialogContent>
 
@@ -328,11 +249,16 @@ const EditOccurrenceModal = ({
         <Button
           onClick={handleSave}
           variant="contained"
-          color="primary"
+          color={isCanceled ? 'error' : 'primary'}
           disabled={isLoading || !hasChanges}
-          startIcon={<EditIcon />}
+          startIcon={isCanceled ? <CancelIcon /> : <EditIcon />}
         >
-          {isLoading ? 'Saving...' : 'Save This Date'}
+          {isLoading
+            ? 'Saving...'
+            : isCanceled
+              ? 'Cancel This Date'
+              : 'Save This Date'
+          }
         </Button>
       </DialogActions>
     </Dialog>
@@ -350,10 +276,11 @@ EditOccurrenceModal.propTypes = {
   ]),
   currentValues: PropTypes.shape({
     _hasOverride: PropTypes.bool,
-    patch: PropTypes.object,
-    startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    regularDjName: PropTypes.string
+    _overridePatch: PropTypes.shape({
+      featureType: PropTypes.string,
+      featureName: PropTypes.string,
+      specialNote: PropTypes.string
+    })
   }),
   isLoading: PropTypes.bool
 };
