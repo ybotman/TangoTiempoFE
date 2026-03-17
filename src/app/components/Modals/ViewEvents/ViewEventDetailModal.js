@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { Modal, Box, Typography, Tabs, Tab, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip, useTheme, useMediaQuery, Snackbar, IconButton } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -24,7 +24,8 @@ import { cancelOccurrence, modifyOccurrence } from '@/services/eventOverrides';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
 import ModalHeader from '@/components/UI/ModalHeader';
-import { format } from 'date-fns';
+import { format, addMonths, startOfDay } from 'date-fns';
+import { RRule } from 'rrule';
 
 const getModalStyle = (isMobile) => ({
   position: isMobile ? 'fixed' : 'absolute',
@@ -65,6 +66,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   const [isOverrideLoading, setIsOverrideLoading] = useState(false);
   // Track if we've handled the initial action to prevent re-triggering
   const [initialActionHandled, setInitialActionHandled] = useState(false);
+  // Track current date index for navigation arrows
+  const [currentDateIndex, setCurrentDateIndex] = useState(0);
   
   // Mobile detection
   const theme = useTheme();
@@ -74,6 +77,29 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   const { user, getIdToken } = useContext(AuthContext);
   const { selectedRole } = useContext(RoleContext);
   const { deleteEvent } = useEventOperations();
+
+  // TIEMPO-362: Extract recurrence info for navigation (must be before early return)
+  const recurrenceRule = eventDetails?.extendedProps?.recurrenceRule;
+  const eventStartDate = eventDetails?.extendedProps?.originalStartDate || eventDetails?.start;
+
+  // Calculate all upcoming occurrence dates for navigation (must be before early return)
+  const occurrenceDates = useMemo(() => {
+    if (!recurrenceRule || !eventStartDate) return [];
+
+    try {
+      const dtstart = new Date(eventStartDate);
+      const rruleStr = `DTSTART:${format(dtstart, "yyyyMMdd'T'HHmmss")}\nRRULE:${recurrenceRule}`;
+      const rule = RRule.fromString(rruleStr);
+
+      // Get occurrences for next 6 months
+      const now = new Date();
+      const endRange = addMonths(now, 6);
+
+      return rule.between(startOfDay(now), endRange, true).slice(0, 52); // Max 52 weeks
+    } catch {
+      return [];
+    }
+  }, [recurrenceRule, eventStartDate]);
 
   useEffect(() => {
     if (open) {
@@ -96,6 +122,17 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       }
     }
   }, [open, initialAction, initialActionHandled, eventDetails]);
+
+  // TIEMPO-362: Set current date index when modal opens with occurrence dates
+  useEffect(() => {
+    if (occurrenceDates.length > 0 && occurrenceDate) {
+      const clickedDateStr = format(new Date(occurrenceDate), 'yyyy-MM-dd');
+      const index = occurrenceDates.findIndex(d =>
+        format(d, 'yyyy-MM-dd') === clickedDateStr
+      );
+      setCurrentDateIndex(index >= 0 ? index : 0);
+    }
+  }, [occurrenceDates, occurrenceDate]);
 
   useEffect(() => {
     // TIEMPO-264: Clear image state when event changes to prevent carryover
@@ -238,7 +275,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   // TIEMPO-362: Detect recurring event and capture occurrence date
   const isRecurringEvent = eventDetails?.extendedProps?.isRecurring ||
                           eventDetails?.extendedProps?.recurrenceRule;
-  const recurrenceRule = eventDetails?.extendedProps?.recurrenceRule;
 
   // Get the specific occurrence date from FullCalendar's instance data
   // This tells us which date the user clicked on
@@ -306,6 +342,26 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     setDatePickerOpen(false);
     // After selecting a date, user can choose action from menu
   };
+
+  // TIEMPO-362: Navigation handlers for EditOccurrenceModal arrows
+  const handlePrevDate = () => {
+    if (currentDateIndex > 0) {
+      const newIndex = currentDateIndex - 1;
+      setCurrentDateIndex(newIndex);
+      setSelectedOccurrenceDate(occurrenceDates[newIndex]);
+    }
+  };
+
+  const handleNextDate = () => {
+    if (currentDateIndex < occurrenceDates.length - 1) {
+      const newIndex = currentDateIndex + 1;
+      setCurrentDateIndex(newIndex);
+      setSelectedOccurrenceDate(occurrenceDates[newIndex]);
+    }
+  };
+
+  // Get the current navigated date (for EditOccurrenceModal)
+  const currentNavigatedDate = occurrenceDates[currentDateIndex] || occurrenceDate;
 
   const handleConfirmCancel = async (reason) => {
     if (!eventDetails?.extendedProps?._id || !occurrenceDate) return;
@@ -741,15 +797,17 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         onClose={() => setEditOccurrenceOpen(false)}
         onSave={handleSaveOccurrenceEdit}
         eventTitle={eventTitle}
-        occurrenceDate={occurrenceDate}
+        occurrenceDate={currentNavigatedDate}
         currentValues={{
           _hasOverride: eventDetails?.extendedProps?._hasOverride,
-          patch: eventDetails?.extendedProps?._overridePatch,
-          startDate: eventDetails?.start,
-          endDate: eventDetails?.end,
-          regularDjName: eventDetails?.extendedProps?.djName
+          _overridePatch: eventDetails?.extendedProps?._overridePatch
         }}
         isLoading={isOverrideLoading}
+        // Date navigation props
+        onPrevDate={handlePrevDate}
+        onNextDate={handleNextDate}
+        hasPrevDate={currentDateIndex > 0}
+        hasNextDate={currentDateIndex < occurrenceDates.length - 1}
       />
 
       {/* TIEMPO-362: Date Picker for "See All Dates" */}
