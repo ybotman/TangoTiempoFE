@@ -16,8 +16,7 @@ import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizer from './ViewEventDetailsOrganizer';
 import ViewEventDetailsVenue from './ViewEventDetailsVenue';
-// TIEMPO-362: Instance override components
-import OccurrenceActionMenu from './OccurrenceActionMenu';
+// TIEMPO-362: Instance override components (OccurrenceActionMenu removed - now in calendar submenu)
 import CancelOccurrenceDialog from './CancelOccurrenceDialog';
 import EditOccurrenceModal from './EditOccurrenceModal';
 import OccurrenceDatePicker from './OccurrenceDatePicker';
@@ -301,19 +300,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     // Note: We no longer use the internal edit mode since we open the proper edit modal
   };
 
-  // TIEMPO-362: Handle occurrence-specific actions
-  const handleEditOccurrence = () => {
-    setEditOccurrenceOpen(true);
-  };
-
-  const handleCancelOccurrence = () => {
-    setCancelDialogOpen(true);
-  };
-
-  const handleShowAllDates = () => {
-    setDatePickerOpen(true);
-  };
-
+  // TIEMPO-362: Handle date selection from picker (occurrence handlers removed - now triggered via initialAction)
   const handleDateSelected = (date) => {
     setSelectedOccurrenceDate(date);
     setDatePickerOpen(false);
@@ -428,20 +415,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         Share
       </Button>
 
-      {/* TIEMPO-362: For recurring events, show occurrence action menu */}
-      {canEditEvent && isRecurringEvent && (
-        <OccurrenceActionMenu
-          occurrenceDate={occurrenceDate}
-          onEditOccurrence={handleEditOccurrence}
-          onEditSeries={handleEditClick}
-          onCancelOccurrence={handleCancelOccurrence}
-          onDeleteSeries={handleDeleteClick}
-          onShowAllDates={handleShowAllDates}
-        />
-      )}
-
-      {/* For non-recurring events, show simple Edit/Delete buttons */}
-      {canEditEvent && !isRecurringEvent && (
+      {/* TIEMPO-362: Actions removed from modal - now in calendar submenu */}
+      {/* Edit/Delete buttons for users with permissions (non-recurring only) */}
+      {canEditEvent && (
         <>
           <Button
             onClick={handleEditClick}
