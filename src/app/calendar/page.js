@@ -104,6 +104,8 @@ const CalendarPage = () => {
     selectedAIEventDetails,
     noLocationSelected,
     eventsLoading,
+    // TIEMPO-362: Pending occurrence action from submenu
+    pendingOccurrenceAction,
   } = useCalendarPage();
 
   // Get selected role from context
@@ -1158,6 +1160,7 @@ const CalendarPage = () => {
         selectedDate={clickedDate}
         eventDetails={selectedEventDetails}
         onEventUpdated={handleEventUpdated}
+        initialAction={pendingOccurrenceAction}
       />
 
       <ViewAIEventDetails

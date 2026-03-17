@@ -32,6 +32,8 @@ export const useCalendarPage = () => {
   const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
+  // TIEMPO-362: Track pending action for ViewEventDetailModal (editOccurrence, cancelOccurrence, seeAllDates)
+  const [pendingOccurrenceAction, setPendingOccurrenceAction] = useState(null);
   const [isAIDetailModalOpen, setAIDetailModalOpen] = useState(false);
   const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
   const categories = useCategories();
@@ -455,14 +457,15 @@ export const useCalendarPage = () => {
     } else {
       // Regular event handling
       setSelectedEventDetails(arg.event);
-      
+
       // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
       // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
       if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
         setViewDetailModalOpen(true);
       } else {
         // For other roles, show the submenu
-        const items = getMenuItems('eventClick');
+        // TIEMPO-362: Pass event details for recurring event menu options
+        const items = getMenuItems('eventClick', arg.event);
         setMenuItems(items);
         setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
       }
@@ -503,6 +506,14 @@ export const useCalendarPage = () => {
       // Use the regional organizer event emitter to open the modal
       regionalOrganizerEvent.openModal();
     }
+
+    // TIEMPO-362: Handle recurring event occurrence actions
+    // These open ViewEventDetailModal which has the occurrence-specific UI
+    if (action === 'editOccurrence' || action === 'cancelOccurrence' || action === 'seeAllDates') {
+      // Store the action for ViewEventDetailModal to handle on open
+      setPendingOccurrenceAction(action);
+      setViewDetailModalOpen(true);
+    }
   };
 
   const handleMenuClose = () => {
@@ -533,7 +544,15 @@ export const useCalendarPage = () => {
       setCreateModalOpen(isOpen);
     },
     isViewDetailModalOpen,
-    setViewDetailModalOpen,
+    // TIEMPO-362: Enhanced modal control to clear pending action on close
+    setViewDetailModalOpen: (isOpen) => {
+      if (!isOpen) {
+        setPendingOccurrenceAction(null);
+      }
+      setViewDetailModalOpen(isOpen);
+    },
+    // TIEMPO-362: Pending occurrence action for ViewEventDetailModal
+    pendingOccurrenceAction,
     handleEventUpdated,
     handlePrev,
     handleNext,

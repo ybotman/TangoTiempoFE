@@ -49,7 +49,7 @@ const getModalStyle = (isMobile) => ({
   }),
 });
 
-const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) => {
+const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, initialAction }) => {
   const [currentTab, setCurrentTab] = useState('basic');
   const [imageSrc, setImageSrc] = useState(null);
   const [showImageTab, setShowImageTab] = useState(false);
@@ -64,6 +64,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [selectedOccurrenceDate, setSelectedOccurrenceDate] = useState(null);
   const [isOverrideLoading, setIsOverrideLoading] = useState(false);
+  // Track if we've handled the initial action to prevent re-triggering
+  const [initialActionHandled, setInitialActionHandled] = useState(false);
   
   // Mobile detection
   const theme = useTheme();
@@ -77,8 +79,24 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
+      setInitialActionHandled(false); // Reset when modal opens
     }
   }, [open]);
+
+  // TIEMPO-362: Handle initial action from calendar submenu
+  useEffect(() => {
+    if (open && initialAction && !initialActionHandled && eventDetails) {
+      setInitialActionHandled(true);
+      // Trigger the appropriate action based on what was selected in the submenu
+      if (initialAction === 'editOccurrence') {
+        setEditOccurrenceOpen(true);
+      } else if (initialAction === 'cancelOccurrence') {
+        setCancelDialogOpen(true);
+      } else if (initialAction === 'seeAllDates') {
+        setDatePickerOpen(true);
+      }
+    }
+  }, [open, initialAction, initialActionHandled, eventDetails]);
 
   useEffect(() => {
     // TIEMPO-264: Clear image state when event changes to prevent carryover
@@ -771,6 +789,8 @@ ViewEventDetailModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onEventUpdated: PropTypes.func,
+  // TIEMPO-362: Initial action from calendar submenu (editOccurrence, cancelOccurrence, seeAllDates)
+  initialAction: PropTypes.oneOf(['editOccurrence', 'cancelOccurrence', 'seeAllDates', null]),
   eventDetails: PropTypes.shape({
     title: PropTypes.string,
     allDay: PropTypes.bool,
