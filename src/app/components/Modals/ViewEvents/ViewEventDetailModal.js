@@ -197,25 +197,20 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     // TIEMPO-264: Clear image state when event changes to prevent carryover
     setImageSrc(null);
     setShowImageTab(false);
-    
-    // TIEMPO-362: Check for override image first (instance-specific image)
-    const overrideImage = currentOverrideValues?._overridePatch?.overrideImage;
-    const primaryImage = overrideImage || eventDetails?.extendedProps?.eventImage;
 
-    // Try to use the override image or event image if available
-    if (primaryImage) {
+    // Try to use the event image if available
+    if (eventDetails?.extendedProps?.eventImage) {
       const img = new Image();
-      img.src = primaryImage;
+      img.src = eventDetails.extendedProps.eventImage;
 
       img.onload = function () {
-        setImageSrc(primaryImage);
+        setImageSrc(eventDetails.extendedProps.eventImage);
         setShowImageTab(true);
       };
 
-      // Handle image load error - try fallback image if available
       img.onerror = function() {
-        // Try event-specific fallback if available (only if not already using override)
-        if (!overrideImage && eventDetails?.extendedProps?.fallbackImageUrl) {
+        // Try fallback if available
+        if (eventDetails?.extendedProps?.fallbackImageUrl) {
           const fallbackImg = new Image();
           fallbackImg.src = eventDetails.extendedProps.fallbackImageUrl;
 
@@ -225,22 +220,19 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
           };
 
           fallbackImg.onerror = function() {
-            // TIEMPO-264: If both primary and fallback fail, show no image
             setImageSrc(null);
             setShowImageTab(false);
           };
         } else {
-          // No fallback provided or override image failed, show no image
           setImageSrc(null);
           setShowImageTab(false);
         }
       };
     } else {
-      // TIEMPO-264: No image provided at all, show no image
       setImageSrc(null);
       setShowImageTab(false);
     }
-  }, [eventDetails, currentOverrideValues]);
+  }, [eventDetails]);
 
   if (!eventDetails) {
     return null;
@@ -739,25 +731,31 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
             </Box>
           )}
 
-          {/* Image */}
-          {imageSrc && showImageTab && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: '20px',
-              }}
-            >
-              <NextImage
-                src={imageSrc}
-                alt="Event"
-                height={300}
-                width={500} // Adjust as needed
-                style={{ objectFit: 'contain' }}
-              />
-            </Box>
-          )}
+          {/* Image - TIEMPO-362: Override image takes priority over event image */}
+          {(() => {
+            const overrideImg = currentOverrideValues?._overridePatch?.overrideImage;
+            const displayImage = overrideImg || imageSrc;
+            const shouldShow = displayImage && (overrideImg || showImageTab);
+
+            return shouldShow ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                <NextImage
+                  src={displayImage}
+                  alt="Event"
+                  height={300}
+                  width={500}
+                  style={{ objectFit: 'contain' }}
+                />
+              </Box>
+            ) : null;
+          })()}
 
           {/* Tabs */}
           <Tabs 
