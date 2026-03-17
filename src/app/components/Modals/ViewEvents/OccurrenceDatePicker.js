@@ -20,20 +20,15 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  ListItemIcon,
   Typography,
   Box,
   Chip,
-  Divider,
-  IconButton,
-  Tooltip
+  Divider
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import EventIcon from '@mui/icons-material/Event';
 import EditIcon from '@mui/icons-material/Edit';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { format, addMonths, isBefore, isAfter, startOfDay } from 'date-fns';
+import { format, addMonths, startOfDay } from 'date-fns';
 import { RRule } from 'rrule';
 
 const OccurrenceDatePicker = ({
@@ -96,7 +91,7 @@ const OccurrenceDatePicker = ({
           isExcluded,
           isCanceled: isExcluded || override?.overrideType === 'cancel',
           isModified: override?.overrideType === 'modify',
-          overrideNotes: override?.patch?.notes
+          override: override || null // Full override object for display
         };
       });
     } catch {
@@ -169,44 +164,74 @@ const OccurrenceDatePicker = ({
             No upcoming occurrences found
           </Typography>
         ) : (
-          <List sx={{ pt: 0 }}>
-            {upcomingDates.map((occurrence, index) => (
-              <React.Fragment key={occurrence.dateStr}>
-                <ListItem
-                  disablePadding
-                  secondaryAction={getStatusChip(occurrence)}
-                >
-                  <ListItemButton
-                    selected={selectedDate?.toISOString() === occurrence.date.toISOString()}
-                    onClick={() => handleSelectDate(occurrence)}
-                    disabled={occurrence.isCanceled}
-                    sx={{
-                      opacity: occurrence.isCanceled ? 0.5 : 1,
-                      textDecoration: occurrence.isCanceled ? 'line-through' : 'none'
-                    }}
+          <List sx={{ pt: 0 }} dense>
+            {upcomingDates.map((occurrence, index) => {
+              // Build compact override info for row 2
+              const overrideInfo = [];
+              if (occurrence.override?.patch?.featureType) {
+                const typeLabels = { dj: 'DJ', orchestra: 'Orch', instructor: 'Inst', performer: 'Perf' };
+                const label = typeLabels[occurrence.override.patch.featureType] || occurrence.override.patch.featureType;
+                overrideInfo.push(`${label}: ${occurrence.override.patch.featureName || ''}`);
+              }
+              if (occurrence.override?.patch?.specialNote) {
+                const note = occurrence.override.patch.specialNote;
+                overrideInfo.push(note.length > 30 ? note.substring(0, 30) + '...' : note);
+              }
+              const secondaryText = occurrence.isCanceled
+                ? 'CANCELED'
+                : overrideInfo.length > 0
+                  ? overrideInfo.join(' • ')
+                  : format(occurrence.date, 'h:mm a');
+
+              return (
+                <React.Fragment key={occurrence.dateStr}>
+                  <ListItem
+                    disablePadding
+                    secondaryAction={getStatusChip(occurrence)}
+                    sx={{ py: 0.5 }}
                   >
-                    <ListItemIcon>
-                      {occurrence.isModified ? (
-                        <EditIcon color="info" />
-                      ) : occurrence.isCanceled ? (
-                        <EventBusyIcon color="error" />
-                      ) : (
-                        <EventIcon color="action" />
-                      )}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={format(occurrence.date, 'EEEE, MMMM d, yyyy')}
-                      secondary={
-                        occurrence.overrideNotes
-                          ? occurrence.overrideNotes.substring(0, 50) + (occurrence.overrideNotes.length > 50 ? '...' : '')
-                          : format(occurrence.date, 'h:mm a')
-                      }
-                    />
-                  </ListItemButton>
-                </ListItem>
-                {index < upcomingDates.length - 1 && <Divider component="li" />}
-              </React.Fragment>
-            ))}
+                    <ListItemButton
+                      selected={selectedDate?.toISOString() === occurrence.date.toISOString()}
+                      onClick={() => handleSelectDate(occurrence)}
+                      disabled={occurrence.isCanceled}
+                      sx={{
+                        py: 0.5,
+                        opacity: occurrence.isCanceled ? 0.5 : 1
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              fontWeight="medium"
+                              sx={{ textDecoration: occurrence.isCanceled ? 'line-through' : 'none' }}
+                            >
+                              {format(occurrence.date, 'EEE, MMM d')}
+                            </Typography>
+                            <Typography component="span" variant="body2" color="text.secondary">
+                              — {eventTitle}
+                            </Typography>
+                          </Box>
+                        }
+                        secondary={
+                          <Typography
+                            component="span"
+                            variant="caption"
+                            color={occurrence.isCanceled ? 'error.main' : 'text.secondary'}
+                          >
+                            {secondaryText}
+                          </Typography>
+                        }
+                        sx={{ my: 0 }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                  {index < upcomingDates.length - 1 && <Divider component="li" />}
+                </React.Fragment>
+              );
+            })}
           </List>
         )}
 

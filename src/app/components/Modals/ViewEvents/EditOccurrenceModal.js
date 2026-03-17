@@ -7,7 +7,10 @@
  * - Feature Name: Free text for the name/details
  * - Special Note: Time changes, announcements, etc.
  *
- * Core attributes (venue, category, base title) use "Edit All"
+ * Features:
+ * - Date navigation with <-- --> arrows
+ * - Cancel option built into feature dropdown
+ * - Core attributes (venue, category, base title) use "Edit All"
  */
 
 import React, { useState, useEffect } from 'react';
@@ -26,10 +29,13 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem as MuiMenuItem
+  MenuItem as MuiMenuItem,
+  IconButton
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { format } from 'date-fns';
 
 // Feature types for "Tonight's" dropdown
@@ -58,7 +64,12 @@ const EditOccurrenceModal = ({
   eventTitle,
   occurrenceDate,
   currentValues = {},
-  isLoading = false
+  isLoading = false,
+  // Date navigation props
+  onPrevDate,
+  onNextDate,
+  hasPrevDate = false,
+  hasNextDate = false
 }) => {
   const [featureType, setFeatureType] = useState('');
   const [featureName, setFeatureName] = useState('');
@@ -150,7 +161,7 @@ const EditOccurrenceModal = ({
       </DialogTitle>
 
       <DialogContent>
-        {/* Event context */}
+        {/* Event context with date navigation */}
         <Box sx={{ mb: 3, mt: 1 }}>
           <Box
             sx={{
@@ -164,16 +175,44 @@ const EditOccurrenceModal = ({
             <Typography variant="subtitle1" fontWeight="bold">
               {eventTitle}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {formattedDate}
-            </Typography>
-            {currentValues._hasOverride && (
-              <Chip
-                label="Already modified"
+
+            {/* Date navigation row */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
+              <IconButton
+                onClick={onPrevDate}
+                disabled={!hasPrevDate || isLoading}
                 size="small"
-                color="info"
-                sx={{ mt: 1 }}
-              />
+                sx={{ color: 'primary.main' }}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+
+              <Typography
+                variant="body1"
+                fontWeight="medium"
+                sx={{ mx: 2, minWidth: 200, textAlign: 'center' }}
+              >
+                {formattedDate}
+              </Typography>
+
+              <IconButton
+                onClick={onNextDate}
+                disabled={!hasNextDate || isLoading}
+                size="small"
+                sx={{ color: 'primary.main' }}
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+
+            {currentValues._hasOverride && (
+              <Box sx={{ textAlign: 'center', mt: 1 }}>
+                <Chip
+                  label="Already modified"
+                  size="small"
+                  color="info"
+                />
+              </Box>
             )}
           </Box>
         </Box>
@@ -282,7 +321,12 @@ EditOccurrenceModal.propTypes = {
       specialNote: PropTypes.string
     })
   }),
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
+  // Date navigation
+  onPrevDate: PropTypes.func,
+  onNextDate: PropTypes.func,
+  hasPrevDate: PropTypes.bool,
+  hasNextDate: PropTypes.bool
 };
 
 export default EditOccurrenceModal;

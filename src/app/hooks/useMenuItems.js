@@ -77,7 +77,6 @@ const useMenuItems = () => {
               ...menuOptions,
               { label: `Edit This Date (${formattedDate})`, action: 'editOccurrence' },
               { label: 'Edit All Dates', action: 'editEvent' },
-              { label: `Cancel This Date (${formattedDate})`, action: 'cancelOccurrence' },
               { label: 'Delete Entire Series', action: 'deleteEvent' },
               { label: 'See All Dates', action: 'seeAllDates' },
             ];
@@ -104,7 +103,6 @@ const useMenuItems = () => {
             ...menuOptions,
             { label: `Edit This Date (${formattedDate})`, action: 'editOccurrence' },
             { label: 'Edit All Dates', action: 'editEvent' },
-            { label: `Cancel This Date (${formattedDate})`, action: 'cancelOccurrence' },
             { label: 'Delete Entire Series', action: 'deleteEvent' },
             { label: 'See All Dates', action: 'seeAllDates' },
           ];
