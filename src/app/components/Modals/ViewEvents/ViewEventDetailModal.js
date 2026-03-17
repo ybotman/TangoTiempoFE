@@ -70,8 +70,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  // Get user context to check permissions
-  const { user } = useContext(AuthContext);
+  // Get user context to check permissions and get auth token
+  const { user, getIdToken } = useContext(AuthContext);
   const { selectedRole } = useContext(RoleContext);
   const { deleteEvent } = useEventOperations();
 
@@ -312,9 +312,12 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
 
     try {
       setIsOverrideLoading(true);
+      // Get Firebase auth token
+      const token = await getIdToken(true);
       await cancelOccurrence(
         eventDetails.extendedProps._id,
         occurrenceDate,
+        token,
         reason
       );
 
@@ -337,10 +340,13 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
 
     try {
       setIsOverrideLoading(true);
+      // Get Firebase auth token
+      const token = await getIdToken(true);
       await modifyOccurrence(
         eventDetails.extendedProps._id,
         overrideData.instanceKey,
-        overrideData.patch
+        overrideData.patch,
+        token
       );
 
       // Refresh events and close

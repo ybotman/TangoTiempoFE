@@ -28,8 +28,6 @@ import {
   Typography,
   Box,
   Alert,
-  FormControlLabel,
-  Checkbox,
   Divider,
   Chip,
   FormControl,
@@ -144,11 +142,12 @@ const EditOccurrenceModal = ({
 
   const handleClose = () => {
     // Reset state
-    setOverrideNotes(false);
-    setOverrideTime(false);
-    setOverrideDJ(false);
+    setTitleSuffix('');
     setNotes('');
-    setDjName('');
+    setDjOrOrchestra('');
+    setTimeAdjustment('none');
+    setCustomStartTime(null);
+    setCustomEndTime(null);
     onClose();
   };
 
@@ -260,9 +259,10 @@ const EditOccurrenceModal = ({
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <LabelIcon fontSize="small" color="action" />
-            <Typography variant="body2" fontWeight="medium">
-              Title Addition <Chip label="Optional" size="small" sx={{ ml: 1 }} />
-            </Typography>
+            <Box component="span" sx={{ typography: 'body2', fontWeight: 'medium' }}>
+              Title Addition
+            </Box>
+            <Chip label="Optional" size="small" />
           </Box>
           <TextField
             value={titleSuffix}

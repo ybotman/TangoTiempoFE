@@ -20,15 +20,21 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7071/a
  * @param {string|Date} override.instanceKey - Occurrence datetime (venue TZ)
  * @param {string} override.overrideType - "modify" | "cancel"
  * @param {object} override.patch - Fields to override (notes, djName, startDate, etc.)
+ * @param {string} firebaseToken - Firebase auth token (required)
  * @returns {Promise<object>} Updated event
  */
-export async function createOverride(eventId, override) {
+export async function createOverride(eventId, override, firebaseToken) {
+  if (!firebaseToken) {
+    throw new Error('Firebase auth token required for override operations');
+  }
+
   const response = await axios.post(
     `${API_BASE_URL}/events/${eventId}/override`,
     override,
     {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${firebaseToken}`
       }
     }
   );
@@ -41,10 +47,11 @@ export async function createOverride(eventId, override) {
  *
  * @param {string} eventId - The master event ID
  * @param {string|Date} instanceKey - Occurrence datetime (venue TZ)
+ * @param {string} firebaseToken - Firebase auth token (required)
  * @param {string} [reason] - Optional cancellation reason
  * @returns {Promise<object>} Updated event
  */
-export async function cancelOccurrence(eventId, instanceKey, reason = null) {
+export async function cancelOccurrence(eventId, instanceKey, firebaseToken, reason = null) {
   const patch = { isCanceled: true };
   if (reason) {
     patch.notes = reason;
@@ -54,7 +61,7 @@ export async function cancelOccurrence(eventId, instanceKey, reason = null) {
     instanceKey,
     overrideType: 'cancel',
     patch
-  });
+  }, firebaseToken);
 }
 
 /**
@@ -64,14 +71,15 @@ export async function cancelOccurrence(eventId, instanceKey, reason = null) {
  * @param {string} eventId - The master event ID
  * @param {string|Date} instanceKey - Occurrence datetime (venue TZ)
  * @param {object} patch - Fields to modify
+ * @param {string} firebaseToken - Firebase auth token (required)
  * @returns {Promise<object>} Updated event
  */
-export async function modifyOccurrence(eventId, instanceKey, patch) {
+export async function modifyOccurrence(eventId, instanceKey, patch, firebaseToken) {
   return createOverride(eventId, {
     instanceKey,
     overrideType: 'modify',
     patch
-  });
+  }, firebaseToken);
 }
 
 /**
@@ -79,16 +87,26 @@ export async function modifyOccurrence(eventId, instanceKey, patch) {
  *
  * @param {string} eventId - The master event ID
  * @param {string|Date} instanceKey - Occurrence datetime (venue TZ)
+ * @param {string} firebaseToken - Firebase auth token (required)
  * @returns {Promise<object>} Updated event
  */
-export async function deleteOverride(eventId, instanceKey) {
+export async function deleteOverride(eventId, instanceKey, firebaseToken) {
+  if (!firebaseToken) {
+    throw new Error('Firebase auth token required for override operations');
+  }
+
   // Encode the instanceKey for URL safety
   const encodedKey = encodeURIComponent(
     typeof instanceKey === 'string' ? instanceKey : instanceKey.toISOString()
   );
 
   const response = await axios.delete(
-    `${API_BASE_URL}/events/${eventId}/override/${encodedKey}`
+    `${API_BASE_URL}/events/${eventId}/override/${encodedKey}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${firebaseToken}`
+      }
+    }
   );
   return response.data;
 }
