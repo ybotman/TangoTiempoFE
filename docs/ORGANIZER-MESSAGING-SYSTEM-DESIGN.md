@@ -215,9 +215,11 @@ service cloud.firestore {
 
 ---
 
-## 9. JIRA Tickets (TBD)
+## 9. JIRA Tickets
 
-- [ ] TIEMPO-XXX: Organizer Messaging - Firestore Schema
+**Epic:** [TIEMPO-387](https://hdtsllc.atlassian.net/browse/TIEMPO-387) - Organizer Messaging System
+
+- [ ] TIEMPO-387: Organizer Messaging - Firestore Schema
 - [ ] TIEMPO-XXX: Organizer Messaging - UnreadMessagesModal
 - [ ] TIEMPO-XXX: Organizer Messaging - OrganizerMessagesDrawer
 - [ ] TIEMPO-XXX: Organizer Messaging - Admin Creation UI
