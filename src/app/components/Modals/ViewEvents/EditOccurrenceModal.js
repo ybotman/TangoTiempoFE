@@ -109,8 +109,10 @@ const EditOccurrenceModal = ({
           }
         }
 
-        // Convert legacy isCanceled to a feature (if not already in features)
-        if (patch.isCanceled && !loadedFeatures.some(f => f.type === 'canceled')) {
+        // Convert legacy isCanceled OR overrideType='cancel' to a feature
+        // When overrideType is 'cancel', the patch may be empty but the occurrence is still canceled
+        const isCanceledOverride = patch.isCanceled || currentValues._overrideType === 'cancel';
+        if (isCanceledOverride && !loadedFeatures.some(f => f.type === 'canceled')) {
           loadedFeatures.push({ type: 'canceled', name: patch.cancelReason || '' });
         }
 

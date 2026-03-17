@@ -21,6 +21,7 @@ import CancelOccurrenceDialog from './CancelOccurrenceDialog';
 import EditOccurrenceModal from './EditOccurrenceModal';
 import OccurrenceDatePicker from './OccurrenceDatePicker';
 import { cancelOccurrence, createOverride, addExcludedDate } from '@/services/eventOverrides';
+import { uploadEventImage } from '@/utils/uploadEventImages';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
 import ModalHeader from '@/components/UI/ModalHeader';
@@ -197,38 +198,39 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     setImageSrc(null);
     setShowImageTab(false);
     
-    // Try to use the event image if available
-    if (eventDetails?.extendedProps?.eventImage) {
+    // TIEMPO-362: Check for override image first (instance-specific image)
+    const overrideImage = currentOverrideValues?._overridePatch?.overrideImage;
+    const primaryImage = overrideImage || eventDetails?.extendedProps?.eventImage;
+
+    // Try to use the override image or event image if available
+    if (primaryImage) {
       const img = new Image();
-      img.src = eventDetails.extendedProps.eventImage;
+      img.src = primaryImage;
 
       img.onload = function () {
-        setImageSrc(eventDetails.extendedProps.eventImage);
+        setImageSrc(primaryImage);
         setShowImageTab(true);
       };
 
       // Handle image load error - try fallback image if available
       img.onerror = function() {
-// TIEMPO-276: Security cleanup - removed logging
-        
-        // Try event-specific fallback if available
-        if (eventDetails?.extendedProps?.fallbackImageUrl) {
+        // Try event-specific fallback if available (only if not already using override)
+        if (!overrideImage && eventDetails?.extendedProps?.fallbackImageUrl) {
           const fallbackImg = new Image();
           fallbackImg.src = eventDetails.extendedProps.fallbackImageUrl;
-          
+
           fallbackImg.onload = function() {
             setImageSrc(eventDetails.extendedProps.fallbackImageUrl);
             setShowImageTab(true);
           };
-          
+
           fallbackImg.onerror = function() {
             // TIEMPO-264: If both primary and fallback fail, show no image
-// TIEMPO-276: Security cleanup - removed logging
             setImageSrc(null);
             setShowImageTab(false);
           };
         } else {
-          // TIEMPO-264: No fallback provided, show no image
+          // No fallback provided or override image failed, show no image
           setImageSrc(null);
           setShowImageTab(false);
         }
@@ -238,7 +240,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       setImageSrc(null);
       setShowImageTab(false);
     }
-  }, [eventDetails]);
+  }, [eventDetails, currentOverrideValues]);
 
   if (!eventDetails) {
     return null;
@@ -467,13 +469,21 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
           token
         );
       } else {
+        // TIEMPO-362: Upload override image first if present (two-step KISS flow)
+        let patchToSave = { ...overrideData.patch };
+        if (patchToSave.overrideImageFile) {
+          const { imageUrl } = await uploadEventImage(patchToSave.overrideImageFile, token);
+          patchToSave.overrideImage = imageUrl;
+          delete patchToSave.overrideImageFile;
+        }
+
         // Use createOverride for modify/cancel types
         await createOverride(
           eventDetails.extendedProps._id,
           {
             instanceKey: overrideData.instanceKey,
             overrideType: overrideData.overrideType,
-            patch: overrideData.patch
+            patch: patchToSave
           },
           token
         );
