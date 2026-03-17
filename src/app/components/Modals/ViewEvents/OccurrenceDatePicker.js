@@ -90,7 +90,7 @@ const OccurrenceDatePicker = ({
           overrideType: override?.overrideType || null,
           isExcluded,
           isCanceled: override?.overrideType === 'cancel',
-          isRemoved: isExcluded || override?.overrideType === 'remove',
+          isRemoved: isExcluded || override?.overrideType === 'exclude',
           isModified: override?.overrideType === 'modify',
           override: override || null // Full override object for display
         };
@@ -116,7 +116,7 @@ const OccurrenceDatePicker = ({
     if (occurrence.isRemoved) {
       return (
         <Chip
-          label="Removed"
+          label="Excluded"
           size="small"
           color="default"
           variant="outlined"
@@ -178,24 +178,54 @@ const OccurrenceDatePicker = ({
         ) : (
           <List sx={{ pt: 0 }} dense>
             {upcomingDates.map((occurrence, index) => {
-              // Build compact override info for row 2
-              const overrideInfo = [];
-              if (occurrence.override?.patch?.featureType) {
-                const typeLabels = { dj: 'DJ', orchestra: 'Orch', instructor: 'Inst', performer: 'Perf' };
-                const label = typeLabels[occurrence.override.patch.featureType] || occurrence.override.patch.featureType;
-                overrideInfo.push(`${label}: ${occurrence.override.patch.featureName || ''}`);
+              // Build override info from new array format
+              const patch = occurrence.override?.patch;
+              const featureLabels = { dj: 'DJ', orchestra: 'Orchestra', instructor: 'Instructor', performer: 'Performer', live: 'LIVE' };
+
+              // Build feature display (excluding LIVE which goes on its own)
+              let featuresText = '';
+              let hasLive = false;
+
+              if (patch?.features && Array.isArray(patch.features)) {
+                // New array format
+                const nonLiveFeatures = patch.features
+                  .filter(f => f.type !== 'live')
+                  .map(f => `${featureLabels[f.type] || f.type}: ${f.name}`);
+                featuresText = nonLiveFeatures.join(' | ');
+                hasLive = patch.features.some(f => f.type === 'live');
+              } else if (patch) {
+                // Legacy formats
+                const overrideInfo = [];
+                if (patch.djName) overrideInfo.push(`DJ: ${patch.djName}`);
+                if (patch.orchestraName) overrideInfo.push(`Orchestra: ${patch.orchestraName}`);
+                if (patch.instructorName) overrideInfo.push(`Instructor: ${patch.instructorName}`);
+                if (patch.performerName) overrideInfo.push(`Performer: ${patch.performerName}`);
+                if (patch.featureType && patch.featureName) {
+                  const label = featureLabels[patch.featureType] || patch.featureType;
+                  overrideInfo.push(`${label}: ${patch.featureName}`);
+                }
+                featuresText = overrideInfo.join(' | ');
+                hasLive = patch.isLive;
               }
-              if (occurrence.override?.patch?.specialNote) {
-                const note = occurrence.override.patch.specialNote;
-                overrideInfo.push(note.length > 30 ? note.substring(0, 30) + '...' : note);
+
+              // Build secondary text based on state
+              let secondaryText = null;
+              if (occurrence.isRemoved) {
+                secondaryText = 'Excluded from calendar';
+              } else if (occurrence.isCanceled || patch?.isCanceled) {
+                // Canceled shows ONLY canceled + reason (no features)
+                secondaryText = `CANCELED${patch?.cancelReason ? `: ${patch.cancelReason}` : ''}`;
+              } else {
+                // Build display: features on line 2, LIVE on line 3
+                const parts = [];
+                if (featuresText) parts.push(featuresText);
+                if (hasLive) parts.push('🎵 LIVE');
+                if (patch?.specialNote) {
+                  const note = patch.specialNote;
+                  parts.push(note.length > 30 ? note.substring(0, 30) + '...' : note);
+                }
+                secondaryText = parts.length > 0 ? parts.join(' | ') : null;
               }
-              const secondaryText = occurrence.isRemoved
-                ? 'Removed from calendar'
-                : occurrence.isCanceled
-                  ? 'Tonight: Canceled'
-                  : overrideInfo.length > 0
-                    ? overrideInfo.join(' • ')
-                    : format(occurrence.date, 'h:mm a');
 
               return (
                 <React.Fragment key={occurrence.dateStr}>
@@ -215,21 +245,19 @@ const OccurrenceDatePicker = ({
                     >
                       <ListItemText
                         primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography
-                              component="span"
-                              variant="body2"
-                              fontWeight="medium"
-                              sx={{ textDecoration: occurrence.isRemoved ? 'line-through' : 'none' }}
-                            >
-                              {format(occurrence.date, 'EEE, MMM d')}
-                            </Typography>
-                            <Typography component="span" variant="body2" color="text.secondary">
-                              — {eventTitle}
-                            </Typography>
-                          </Box>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            fontWeight="medium"
+                            sx={{
+                              textDecoration: (occurrence.isRemoved || occurrence.isCanceled) ? 'line-through' : 'none',
+                              color: occurrence.isCanceled ? 'error.main' : 'inherit'
+                            }}
+                          >
+                            {format(occurrence.date, 'EEE, MMM d')} | {format(occurrence.date, 'h:mm a')} | {eventTitle}
+                          </Typography>
                         }
-                        secondary={
+                        secondary={secondaryText ? (
                           <Typography
                             component="span"
                             variant="caption"
@@ -237,7 +265,7 @@ const OccurrenceDatePicker = ({
                           >
                             {secondaryText}
                           </Typography>
-                        }
+                        ) : null}
                         sx={{ my: 0 }}
                       />
                     </ListItemButton>

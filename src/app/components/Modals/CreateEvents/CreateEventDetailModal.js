@@ -4,6 +4,7 @@ import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
+import CreateEventDetailsOverrideImages from './CreateEventDetailsOverrideImages';
 import ValidationDialog from './ValidationDialog';
 // import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
@@ -137,10 +138,20 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       
       // Handle edit mode - populate form with existing event data
       if (editMode && eventToEdit) {
-        
+
         // Convert dates to dayjs objects for form compatibility
         const startDate = eventToEdit.startDate ? dayjs(eventToEdit.startDate) : dayjs();
         const endDate = eventToEdit.endDate ? dayjs(eventToEdit.endDate) : dayjs().add(2, 'hour');
+
+        // TIEMPO-362: Check if this is a multi-day event (festival, marathon)
+        // Multi-day events cannot be repeating - force isRepeating=false and reset tab
+        // NOTE: Events crossing midnight (8pm-1am) are NOT multi-day, just single evening events
+        const durationHours = endDate.diff(startDate, 'hour');
+        const isMultiDay = durationHours > 24;
+        if (isMultiDay && eventToEdit.isRepeating) {
+          // Reset tab to basic if it was on repeating
+          setCurrentTab('basic');
+        }
         
         // Map API event data to form state
         setEventData({
@@ -196,8 +207,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           selectedRegionID: eventToEdit.selectedRegionID || selectedLocation.region.id || '',
           
           // Repeating event settings
-          isRepeating: eventToEdit.isRepeating || false,
-          recurrenceRule: eventToEdit.recurrenceRule || '',
+          // TIEMPO-362: Force isRepeating=false for multi-day events (festivals, marathons)
+          isRepeating: isMultiDay ? false : (eventToEdit.isRepeating || false),
+          recurrenceRule: isMultiDay ? '' : (eventToEdit.recurrenceRule || ''),
           
           // Cancellation status
           isCanceled: eventToEdit.isCanceled || false,
@@ -277,11 +289,15 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   }, [open, editMode, user, fetchOrganizerById]);
 
   // Check if event is multi-day (long event like marathon/encuentro)
+  // NOTE: Events that cross midnight (8pm-1am) are NOT multi-day — they're single evening events
+  // A true multi-day event spans 24+ hours (e.g., Friday 7pm to Sunday 10pm)
   const isMultiDayEvent = (() => {
     if (!eventData.startDate || !eventData.endDate) return false;
-    const start = eventData.startDate.format ? eventData.startDate.format('YYYY-MM-DD') : eventData.startDate.split('T')[0];
-    const end = eventData.endDate.format ? eventData.endDate.format('YYYY-MM-DD') : eventData.endDate.split('T')[0];
-    return start !== end;
+    const startMs = eventData.startDate.valueOf ? eventData.startDate.valueOf() : new Date(eventData.startDate).getTime();
+    const endMs = eventData.endDate.valueOf ? eventData.endDate.valueOf() : new Date(eventData.endDate).getTime();
+    const durationHours = (endMs - startMs) / (1000 * 60 * 60);
+    // Multi-day = more than 24 hours (festivals, marathons spanning multiple days)
+    return durationHours > 24;
   })();
 
   // Validate current tab when isRepeating changes
@@ -717,10 +733,25 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       }
       }
       
+      // TIEMPO-362: Check if event is multi-day (marathon/festival spanning multiple days)
+      // Multi-day events should NOT be repeating - they're single events with long duration
+      // NOTE: Events crossing midnight (8pm-1am) are NOT multi-day, just single evening events
+      const isMultiDay = (() => {
+        if (!eventData.startDate || !eventData.endDate) return false;
+        const startMs = eventData.startDate.valueOf ? eventData.startDate.valueOf() : new Date(eventData.startDate).getTime();
+        const endMs = eventData.endDate.valueOf ? eventData.endDate.valueOf() : new Date(eventData.endDate).getTime();
+        const durationHours = (endMs - startMs) / (1000 * 60 * 60);
+        // Multi-day = more than 24 hours (festivals, marathons spanning multiple days)
+        return durationHours > 24;
+      })();
+
       // Apply defaults for optional fields
       const eventDataWithDefaults = {
         ...eventData,
-        masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'), 
+        // TIEMPO-362: Force isRepeating=false for multi-day events (festivals, marathons)
+        isRepeating: isMultiDay ? false : eventData.isRepeating,
+        recurrenceRule: isMultiDay ? null : eventData.recurrenceRule,
+        masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'),
         categoryFirst: eventData.categoryFirst || 'Other',
         selectedRole: selectedRole, // Add selectedRole for backend validation
         adminCities: isRegionalAdmin ? user.backendInfo.localAdminInfo.allowedAdminMasteredCityIds : undefined,
@@ -944,8 +975,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         ) : (
         <>
         {/* Tabs for different sections */}
-        <Tabs 
-          value={currentTab} 
+        {/* TIEMPO-362: Use computed tab value to prevent MUI error when Repeating tab doesn't exist */}
+        <Tabs
+          value={(currentTab === 'repeating' && !eventData.isRepeating) ? 'basic' : currentTab}
           onChange={handleTabChange} 
           aria-label="event details tabs" 
           variant="scrollable"
@@ -985,6 +1017,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             />
           )}
           <Tab label="Image" value="image" />
+          {eventData.isRepeating && editMode && (
+            <Tab label="Override Images" value="overrideImages" />
+          )}
           <Tab label="Other" value="other" />
         </Tabs>
 
@@ -994,6 +1029,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
+        {currentTab === 'overrideImages' && eventData.isRepeating && (
+          <CreateEventDetailsOverrideImages eventData={eventData} setEventData={updateEventData} />
+        )}
         {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
         </>
         )}

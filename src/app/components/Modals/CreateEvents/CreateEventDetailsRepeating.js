@@ -731,7 +731,7 @@ const RepeatingEventDetails = ({ eventData = {}, setEventData }) => {
             setValidatedExcludeDates(parsedDates);
           }}
           onBlur={handleExcludeDatesBlur}
-          helperText="Optional: Enter dates to skip (e.g., 2024-12-25, 2024-12-31)"
+          helperText="These event dates are skipped and not shown on the calendar (e.g., 2024-12-25, 2024-12-31)"
         />
       </Box>
 

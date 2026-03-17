@@ -227,6 +227,124 @@ const CalendarPage = () => {
     return { startTime, endTime };
   };
 
+  // TIEMPO-362: Helper to find occurrence override for current date/time
+  const getOccurrenceOverride = (event) => {
+    const instanceOverrides = event.extendedProps?.instanceOverrides;
+
+    if (!instanceOverrides || instanceOverrides.length === 0) return null;
+
+    // Get the occurrence datetime from event.start
+    const occurrenceDate = event.start;
+    if (!occurrenceDate) return null;
+
+    // Convert to ISO string for comparison (full timestamp)
+    const occurrenceISO = occurrenceDate.toISOString();
+
+    // Also get local date/time components for fallback matching
+    // This handles timezone mismatches between how instanceKey was saved vs how FullCalendar renders
+    const localYear = occurrenceDate.getFullYear();
+    const localMonth = String(occurrenceDate.getMonth() + 1).padStart(2, '0');
+    const localDay = String(occurrenceDate.getDate()).padStart(2, '0');
+    const localHours = String(occurrenceDate.getHours()).padStart(2, '0');
+    const localMinutes = String(occurrenceDate.getMinutes()).padStart(2, '0');
+    const localDateStr = `${localYear}-${localMonth}-${localDay}`;
+    const localTimeStr = `${localHours}:${localMinutes}`;
+
+    // Try exact ISO match first
+    let override = instanceOverrides.find(ov => ov.instanceKey === occurrenceISO);
+
+    // Fallback: match by local date and time (handles timezone storage issues)
+    if (!override) {
+      override = instanceOverrides.find(ov => {
+        if (!ov.instanceKey) return false;
+        const ovDate = new Date(ov.instanceKey);
+        // Compare using LOCAL date and time (same timezone as browser)
+        const ovLocalYear = ovDate.getFullYear();
+        const ovLocalMonth = String(ovDate.getMonth() + 1).padStart(2, '0');
+        const ovLocalDay = String(ovDate.getDate()).padStart(2, '0');
+        const ovLocalHours = String(ovDate.getHours()).padStart(2, '0');
+        const ovLocalMinutes = String(ovDate.getMinutes()).padStart(2, '0');
+        const ovLocalDateStr = `${ovLocalYear}-${ovLocalMonth}-${ovLocalDay}`;
+        const ovLocalTimeStr = `${ovLocalHours}:${ovLocalMinutes}`;
+        return ovLocalDateStr === localDateStr && ovLocalTimeStr === localTimeStr;
+      });
+    }
+
+    // Last fallback: match by date only (for single daily occurrences)
+    if (!override) {
+      override = instanceOverrides.find(ov => {
+        if (!ov.instanceKey) return false;
+        const ovDate = new Date(ov.instanceKey);
+        const ovLocalYear = ovDate.getFullYear();
+        const ovLocalMonth = String(ovDate.getMonth() + 1).padStart(2, '0');
+        const ovLocalDay = String(ovDate.getDate()).padStart(2, '0');
+        const ovLocalDateStr = `${ovLocalYear}-${ovLocalMonth}-${ovLocalDay}`;
+        return ovLocalDateStr === localDateStr;
+      });
+    }
+
+    // DEBUG: Log for specific event
+    if (event.extendedProps?._id === '69b999acb3da410bb67c9f6c') {
+      console.log('[DEBUG] Event 69b999acb3da410bb67c9f6c:');
+      console.log('  - occurrenceISO:', occurrenceISO);
+      console.log('  - localDate/Time:', localDateStr, localTimeStr);
+      console.log('  - instanceKeys:', instanceOverrides.map(o => o.instanceKey));
+      console.log('  - matched override:', override ? JSON.stringify(override, null, 2) : 'NONE');
+    }
+
+    return override || null;
+  };
+
+  // TIEMPO-362: Helper to extract display data from override patch (handles both legacy and new formats)
+  const getOverrideDisplayData = (override) => {
+    if (!override?.patch) return null;
+    const patch = override.patch;
+
+    // Check for canceled status (new or legacy format)
+    const isCanceled = patch.isCanceled || override.overrideType === 'cancel';
+    const cancelReason = patch.cancelReason || '';
+
+    // Build features array from new format or legacy format
+    let features = [];
+
+    // New array format: patch.features = [{ type: 'dj', name: 'DJ Carlos' }, ...]
+    if (patch.features && Array.isArray(patch.features)) {
+      features = patch.features;
+    } else {
+      // Legacy single-feature format: patch.featureType, patch.featureName
+      if (patch.featureType && patch.featureName) {
+        features.push({ type: patch.featureType, name: patch.featureName });
+      }
+      // Legacy individual fields
+      if (patch.djName) features.push({ type: 'dj', name: patch.djName });
+      if (patch.orchestraName) features.push({ type: 'orchestra', name: patch.orchestraName });
+      if (patch.instructorName) features.push({ type: 'instructor', name: patch.instructorName });
+      if (patch.performerName) features.push({ type: 'performer', name: patch.performerName });
+      if (patch.isLive) features.push({ type: 'live', name: 'LIVE' });
+    }
+
+    // Extract by type for easy access
+    const dj = features.find(f => f.type === 'dj');
+    const orchestra = features.find(f => f.type === 'orchestra');
+    const instructor = features.find(f => f.type === 'instructor');
+    const performer = features.find(f => f.type === 'performer');
+    const live = features.find(f => f.type === 'live');
+    const notes = features.filter(f => f.type === 'note');
+
+    return {
+      isCanceled,
+      cancelReason,
+      features,
+      dj,
+      orchestra,
+      instructor,
+      performer,
+      live,
+      notes,
+      hasAnyFeature: features.length > 0 || isCanceled
+    };
+  };
+
   // Custom event content renderer with category circles
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
@@ -394,26 +512,120 @@ const CalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2: Full title */}
-              <div style={{
-                fontSize: '0.65rem',
-                fontWeight: 'normal',
-                lineHeight: '1.1',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                overflowWrap: 'break-word',
-                hyphens: 'auto',
-                flex: 1,
-                color: '#555',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-              </div>
+              {/* Regular Events Row 2: Full title + appended override badges */}
+              {(() => {
+                const override = getOccurrenceOverride(event);
+                const overrideData = getOverrideDisplayData(override);
+
+                // Build override badges for all features
+                const badges = [];
+
+                if (overrideData?.isCanceled) {
+                  badges.push(
+                    <span key="canceled" style={{
+                      fontSize: '0.6rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#d32f2f',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      marginLeft: '4px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      TONIGHT: CANCELED{overrideData.cancelReason ? ` - ${overrideData.cancelReason}` : ''}
+                    </span>
+                  );
+                }
+
+                // Add badges for non-orchestra features (orchestra gets its own row)
+                if (overrideData && !overrideData.isCanceled) {
+                  const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
+                  const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
+
+                  overrideData.features
+                    .filter(f => f.type !== 'orchestra' && f.type !== 'live' && f.type !== 'note' && f.type !== 'description')
+                    .forEach((feature, idx) => {
+                      const label = typeLabels[feature.type] || feature.type;
+                      const bgColor = typeColors[feature.type] || '#1976d2';
+                      badges.push(
+                        <span key={`${feature.type}-${idx}`} style={{
+                          fontSize: '0.6rem',
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          backgroundColor: bgColor,
+                          padding: '1px 4px',
+                          borderRadius: '2px',
+                          marginLeft: '4px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {label}: {feature.name}
+                        </span>
+                      );
+                    });
+
+                  // Add LIVE badge
+                  if (overrideData.live) {
+                    badges.push(
+                      <span key="live" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        backgroundColor: '#ff9800',
+                        padding: '1px 4px',
+                        borderRadius: '2px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        🎵 LIVE
+                      </span>
+                    );
+                  }
+                }
+
+                const hasOrchestra = overrideData?.orchestra && !overrideData?.isCanceled;
+                // Check if both orchestra AND live features are present
+                const isLiveOrchestra = hasOrchestra && overrideData?.live;
+
+                return (
+                  <>
+                    {/* Row 2: Title + override badges */}
+                    <div style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'normal',
+                      lineHeight: '1.1',
+                      flex: hasOrchestra ? 0 : 1,
+                      color: '#555',
+                      textDecoration: isCanceled ? 'line-through' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '2px'
+                    }}>
+                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {badges}
+                    </div>
+                    {/* Row 3: ORCHESTRA - show "LIVE ORCHESTRA" only if both orchestra AND live features */}
+                    {hasOrchestra && (
+                      <div style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        lineHeight: '1.1',
+                        color: '#fff',
+                        backgroundColor: '#2e7d32',
+                        padding: '1px 4px',
+                        borderRadius: '2px',
+                        marginTop: '1px'
+                      }}>
+                        🎻 {isLiveOrchestra ? 'LIVE ORCHESTRA' : 'ORCHESTRA'}: {overrideData.orchestra.name}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 3/4: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '2px',
@@ -546,25 +758,117 @@ const CalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2: Full title */}
-              <div style={{
-                fontSize: '0.7rem',
-                fontWeight: 'normal',
-                lineHeight: '1.2',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                overflowWrap: 'break-word',
-                hyphens: 'auto',
-                color: '#555',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-              </div>
+              {/* Regular Events Row 2: Full title + appended override badges */}
+              {(() => {
+                const override = getOccurrenceOverride(event);
+                const overrideData = getOverrideDisplayData(override);
+
+                // Build override badges for all features
+                const badges = [];
+
+                if (overrideData?.isCanceled) {
+                  badges.push(
+                    <span key="canceled" style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#d32f2f',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      marginLeft: '6px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      TONIGHT: CANCELED{overrideData.cancelReason ? ` - ${overrideData.cancelReason}` : ''}
+                    </span>
+                  );
+                }
+
+                // Add badges for non-orchestra features (orchestra gets its own row)
+                if (overrideData && !overrideData.isCanceled) {
+                  const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
+                  const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
+
+                  overrideData.features
+                    .filter(f => f.type !== 'orchestra' && f.type !== 'live' && f.type !== 'note' && f.type !== 'description')
+                    .forEach((feature, idx) => {
+                      const label = typeLabels[feature.type] || feature.type;
+                      const bgColor = typeColors[feature.type] || '#1976d2';
+                      badges.push(
+                        <span key={`${feature.type}-${idx}`} style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          backgroundColor: bgColor,
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          marginLeft: '6px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {label}: {feature.name}
+                        </span>
+                      );
+                    });
+
+                  // Add LIVE badge
+                  if (overrideData.live) {
+                    badges.push(
+                      <span key="live" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        backgroundColor: '#ff9800',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        🎵 LIVE
+                      </span>
+                    );
+                  }
+                }
+
+                const hasOrchestra = overrideData?.orchestra && !overrideData?.isCanceled;
+
+                return (
+                  <>
+                    {/* Row 2: Title + override badges */}
+                    <div style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 'normal',
+                      lineHeight: '1.2',
+                      color: '#555',
+                      textDecoration: isCanceled ? 'line-through' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '2px'
+                    }}>
+                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {badges}
+                    </div>
+                    {/* Row 3: LIVE ORCHESTRA - inverted white on green */}
+                    {hasOrchestra && (
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        lineHeight: '1.2',
+                        color: '#fff',
+                        backgroundColor: '#2e7d32',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        marginTop: '2px'
+                      }}>
+                        🎻 LIVE ORCHESTRA: {overrideData.orchestra.name}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 3/4: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '4px',

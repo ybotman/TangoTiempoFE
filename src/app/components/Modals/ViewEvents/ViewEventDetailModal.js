@@ -20,7 +20,7 @@ import ViewEventDetailsVenue from './ViewEventDetailsVenue';
 import CancelOccurrenceDialog from './CancelOccurrenceDialog';
 import EditOccurrenceModal from './EditOccurrenceModal';
 import OccurrenceDatePicker from './OccurrenceDatePicker';
-import { cancelOccurrence, modifyOccurrence } from '@/services/eventOverrides';
+import { cancelOccurrence, createOverride, addExcludedDate } from '@/services/eventOverrides';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
 import ModalHeader from '@/components/UI/ModalHeader';
@@ -68,6 +68,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   const [initialActionHandled, setInitialActionHandled] = useState(false);
   // Track current date index for navigation arrows
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  // Track if user has navigated via arrows (to know when to use index vs clicked date)
+  const [hasNavigatedDates, setHasNavigatedDates] = useState(false);
   
   // Mobile detection
   const theme = useTheme();
@@ -80,15 +82,32 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
 
   // TIEMPO-362: Extract recurrence info for navigation (must be before early return)
   const recurrenceRule = eventDetails?.extendedProps?.recurrenceRule;
+  // Use displayStartTime (venue local time, no Z) to match how FullCalendar renders events
+  // This ensures instanceKeys match between save and display
+  const venueDisplayStartTime = eventDetails?.extendedProps?.displayStartTime;
   const eventStartDate = eventDetails?.extendedProps?.originalStartDate || eventDetails?.start;
 
   // Calculate all upcoming occurrence dates for navigation (must be before early return)
   const occurrenceDates = useMemo(() => {
-    if (!recurrenceRule || !eventStartDate) return [];
+    if (!recurrenceRule) return [];
+    // Prefer venue display time (same format FullCalendar uses), fallback to eventStartDate
+    const dtstartSource = venueDisplayStartTime || eventStartDate;
+    if (!dtstartSource) return [];
 
     try {
-      const dtstart = new Date(eventStartDate);
-      const rruleStr = `DTSTART:${format(dtstart, "yyyyMMdd'T'HHmmss")}\nRRULE:${recurrenceRule}`;
+      // TIEMPO-362: Use the same DTSTART format as transformEvents.js
+      // If venueDisplayStartTime is available, it's already in "YYYY-MM-DDTHH:mm:ss" format (no Z)
+      // This matches how FullCalendar's rrule plugin generates occurrences
+      let rruleStr;
+      if (venueDisplayStartTime && typeof venueDisplayStartTime === 'string' && !venueDisplayStartTime.endsWith('Z')) {
+        // Use venue time directly - already in correct format
+        const dtStartFormatted = venueDisplayStartTime.replace(/[-:]/g, '').replace('T', 'T').substring(0, 15);
+        rruleStr = `DTSTART:${dtStartFormatted}\nRRULE:${recurrenceRule}`;
+      } else {
+        // Fallback: parse as Date and format
+        const dtstart = new Date(dtstartSource);
+        rruleStr = `DTSTART:${format(dtstart, "yyyyMMdd'T'HHmmss")}\nRRULE:${recurrenceRule}`;
+      }
       const rule = RRule.fromString(rruleStr);
 
       // Get occurrences for next 6 months
@@ -99,7 +118,45 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     } catch {
       return [];
     }
-  }, [recurrenceRule, eventStartDate]);
+  }, [recurrenceRule, venueDisplayStartTime, eventStartDate]);
+
+  // TIEMPO-362: Look up override for the currently navigated date
+  // Must be before early return to satisfy Rules of Hooks
+  const currentOverrideValues = useMemo(() => {
+    // When user hasn't navigated via arrows, use clicked date; otherwise use index
+    const navDate = hasNavigatedDates
+      ? (occurrenceDates[currentDateIndex] || selectedOccurrenceDate || eventDetails?._instance?.range?.start || eventDetails?.start)
+      : (selectedOccurrenceDate || eventDetails?._instance?.range?.start || eventDetails?.start);
+
+    if (!navDate) return { _hasOverride: false, _overridePatch: null };
+
+    const overrides = eventDetails?.extendedProps?.instanceOverrides || [];
+    if (overrides.length === 0) return { _hasOverride: false, _overridePatch: null };
+
+    // Find override matching the current navigated date
+    const navDateStr = format(new Date(navDate), 'yyyy-MM-dd');
+    const matchingOverride = overrides.find(ov => {
+      if (!ov.instanceKey) return false;
+      const ovDateStr = format(new Date(ov.instanceKey), 'yyyy-MM-dd');
+      return ovDateStr === navDateStr;
+    });
+
+    if (matchingOverride) {
+      return {
+        _hasOverride: true,
+        _overrideType: matchingOverride.overrideType,
+        _overridePatch: matchingOverride.patch || {}
+      };
+    }
+
+    return { _hasOverride: false, _overridePatch: null };
+  }, [hasNavigatedDates, currentDateIndex, occurrenceDates, selectedOccurrenceDate, eventDetails]);
+
+  // TIEMPO-362: Define occurrenceDate early (before useEffects that depend on it)
+  // Get the specific occurrence date from FullCalendar's instance data or selected date
+  const occurrenceDate = selectedOccurrenceDate ||
+                        eventDetails?._instance?.range?.start ||
+                        eventDetails?.start;
 
   useEffect(() => {
     if (open) {
@@ -112,6 +169,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   useEffect(() => {
     if (open && initialAction && !initialActionHandled && eventDetails) {
       setInitialActionHandled(true);
+      setHasNavigatedDates(false); // Reset navigation state
       // Trigger the appropriate action based on what was selected in the submenu
       if (initialAction === 'editOccurrence') {
         setEditOccurrenceOpen(true);
@@ -276,11 +334,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   const isRecurringEvent = eventDetails?.extendedProps?.isRecurring ||
                           eventDetails?.extendedProps?.recurrenceRule;
 
-  // Get the specific occurrence date from FullCalendar's instance data
-  // This tells us which date the user clicked on
-  const occurrenceDate = selectedOccurrenceDate ||
-                        eventDetails?._instance?.range?.start ||
-                        eventDetails?.start;
+  // Note: occurrenceDate is defined earlier (before useEffects that depend on it)
 
   // Format occurrence date for display
   const formattedOccurrenceDate = occurrenceDate
@@ -349,6 +403,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       const newIndex = currentDateIndex - 1;
       setCurrentDateIndex(newIndex);
       setSelectedOccurrenceDate(occurrenceDates[newIndex]);
+      setHasNavigatedDates(true);
     }
   };
 
@@ -357,11 +412,16 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       const newIndex = currentDateIndex + 1;
       setCurrentDateIndex(newIndex);
       setSelectedOccurrenceDate(occurrenceDates[newIndex]);
+      setHasNavigatedDates(true);
     }
   };
 
   // Get the current navigated date (for EditOccurrenceModal)
-  const currentNavigatedDate = occurrenceDates[currentDateIndex] || occurrenceDate;
+  // When user hasn't navigated via arrows, use the clicked date directly
+  // This fixes the issue where the first render shows wrong date
+  const currentNavigatedDate = hasNavigatedDates
+    ? (occurrenceDates[currentDateIndex] || occurrenceDate)
+    : (selectedOccurrenceDate || occurrenceDate);
 
   const handleConfirmCancel = async (reason) => {
     if (!eventDetails?.extendedProps?._id || !occurrenceDate) return;
@@ -398,19 +458,37 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       setIsOverrideLoading(true);
       // Get Firebase auth token
       const token = await getIdToken(true);
-      await modifyOccurrence(
-        eventDetails.extendedProps._id,
-        overrideData.instanceKey,
-        overrideData.patch,
-        token
-      );
 
-      // Refresh events and close
-      if (onEventUpdated) {
-        onEventUpdated('refresh');
+      // TIEMPO-362: Handle 'exclude' differently - add to excludedDates (RRULE EXDATE)
+      if (overrideData.overrideType === 'exclude') {
+        await addExcludedDate(
+          eventDetails.extendedProps._id,
+          overrideData.instanceKey,
+          token
+        );
+      } else {
+        // Use createOverride for modify/cancel types
+        await createOverride(
+          eventDetails.extendedProps._id,
+          {
+            instanceKey: overrideData.instanceKey,
+            overrideType: overrideData.overrideType,
+            patch: overrideData.patch
+          },
+          token
+        );
       }
+
+      // Close edit modal first, then trigger refresh
       setEditOccurrenceOpen(false);
-      onClose();
+
+      // Refresh events - slight delay to ensure backend has committed
+      setTimeout(() => {
+        if (onEventUpdated) {
+          onEventUpdated('refresh');
+        }
+        onClose();
+      }, 300);
     } catch (error) {
       console.error('Failed to save occurrence edit:', error);
       alert('Failed to save changes: ' + (error.response?.data?.message || error.message));
@@ -704,7 +782,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
           </Tabs>
 
           {/* Tab Content */}
-          {currentTab === 'Basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
+          {currentTab === 'Basic' && <ViewEventDetailsBasic eventDetails={eventDetails} overrideData={currentOverrideValues} />}
           {currentTab === 'Images' && <ViewEventDetailsImage eventDetails={eventDetails} />}
           {currentTab === 'Organizer' && <ViewEventDetailsOrganizer eventDetails={eventDetails} />}
           {currentTab === 'Venue' && <ViewEventDetailsVenue eventDetails={eventDetails} />}
@@ -717,22 +795,45 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>
+          {isRecurringEvent ? 'Delete Entire Series?' : 'Confirm Delete'}
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            You are about to delete the following event:
-            <br /><br />
-            <strong>Title:</strong> {eventTitle}
-            <br />
-            <strong>Date:</strong> {startDate && (hasVenueTimezone 
-              ? formatVenueDate(startDate)
-              : (typeof startDate === 'string' ? startDate : startDate?.toISOString?.() || '').split('T')[0])}
-            <br />
-            <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
-            <br />
-            <strong>Description:</strong> {truncatedDescription}
-            <br /><br />
-            This action cannot be undone. Are you sure you want to delete this event?
+          <DialogContentText component="div">
+            {isRecurringEvent ? (
+              <>
+                <strong style={{ color: '#d32f2f' }}>
+                  You are about to permanently delete this ENTIRE RECURRING SERIES.
+                </strong>
+                <br /><br />
+                <strong>Title:</strong> {eventTitle}
+                <br />
+                <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
+                <br /><br />
+                <strong style={{ color: '#d32f2f' }}>
+                  This will delete ALL past and future dates in this series.
+                  You cannot bring it back &mdash; it will be like it never existed.
+                </strong>
+                <br /><br />
+                <em>Tip: To cancel just one date, use &quot;Edit This Date&quot; and select &quot;Tonight: Canceled&quot; instead.</em>
+              </>
+            ) : (
+              <>
+                You are about to delete the following event:
+                <br /><br />
+                <strong>Title:</strong> {eventTitle}
+                <br />
+                <strong>Date:</strong> {startDate && (hasVenueTimezone
+                  ? formatVenueDate(startDate)
+                  : (typeof startDate === 'string' ? startDate : startDate?.toISOString?.() || '').split('T')[0])}
+                <br />
+                <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
+                <br />
+                <strong>Description:</strong> {truncatedDescription}
+                <br /><br />
+                This action cannot be undone. Are you sure you want to delete this event?
+              </>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -740,7 +841,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
             Cancel
           </Button>
           <Button onClick={handleConfirmDelete} color="error" disabled={isDeleting} autoFocus>
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : (isRecurringEvent ? 'Delete Entire Series' : 'Delete')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -798,10 +899,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         onSave={handleSaveOccurrenceEdit}
         eventTitle={eventTitle}
         occurrenceDate={currentNavigatedDate}
-        currentValues={{
-          _hasOverride: eventDetails?.extendedProps?._hasOverride,
-          _overridePatch: eventDetails?.extendedProps?._overridePatch
-        }}
+        currentValues={currentOverrideValues}
         isLoading={isOverrideLoading}
         // Date navigation props
         onPrevDate={handlePrevDate}
@@ -813,7 +911,13 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       {/* TIEMPO-362: Date Picker for "See All Dates" */}
       <OccurrenceDatePicker
         open={datePickerOpen}
-        onClose={() => setDatePickerOpen(false)}
+        onClose={() => {
+          setDatePickerOpen(false);
+          // If opened via "See All Dates" from calendar submenu, close entire modal
+          if (initialAction === 'seeAllDates') {
+            onClose();
+          }
+        }}
         onSelectDate={handleDateSelected}
         eventTitle={eventTitle}
         recurrenceRule={recurrenceRule}

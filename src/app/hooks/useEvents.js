@@ -306,18 +306,6 @@ export function useEvents({
         params.includeAiGenerated = true;
       }
 
-      // DEBUG: Log params being sent to API (TIEMPO-381 reconciliation debug)
-      console.log('[useEvents] Fetching with params:', {
-        lat: params.lat,
-        lng: params.lng,
-        radius: params.radius,
-        useGeoSearch: params.useGeoSearch,
-        start: params.start,
-        end: params.end,
-        currentLocationSource: currentLocation?.source || 'unknown'
-      });
-
-
       // Add user role and organizerId if user is a RegionalOrganizer
       if (userId && selectedRole === 'RegionalOrganizer' && userOrganizerId) {
         params.organizerId = userOrganizerId;
@@ -348,7 +336,7 @@ export function useEvents({
       // Store the response which includes events array and pagination info
       setEventsData(response.data);
 
-      // TIEMPO-382: Log event count and warn if approaching/hitting limit
+      // TIEMPO-382: Only warn if approaching/hitting limit (avoid noise)
       const returnedCount = response.data?.events?.length || 0;
       const requestedLimit = params.limit;
       const totalAvailable = response.data?.pagination?.total || returnedCount;
@@ -357,9 +345,8 @@ export function useEvents({
         console.error(`🚨 EVENT LIMIT HIT: Returned ${returnedCount}/${totalAvailable} events. Limit of ${requestedLimit} is truncating results!`);
       } else if (returnedCount >= requestedLimit * 0.9) {
         console.warn(`⚠️ EVENT LIMIT WARNING: Returned ${returnedCount}/${totalAvailable} events (${Math.round(returnedCount/requestedLimit*100)}% of ${requestedLimit} limit)`);
-      } else {
-        console.log(`[useEvents] Returned ${returnedCount} events (limit: ${requestedLimit}, total available: ${totalAvailable})`);
       }
+      // Normal fetches don't log to reduce console noise
     } catch (error) {
       console.error('Error fetching events:', error);
 

@@ -165,6 +165,28 @@ const BostonCalendarPage = () => {
     // Create event modal not used - Boston is read-only
   } = useCalendarPage();
 
+  // TIEMPO-362: Helper to find occurrence override for current date
+  const getOccurrenceOverride = (event) => {
+    const instanceOverrides = event.extendedProps?.instanceOverrides;
+    if (!instanceOverrides || instanceOverrides.length === 0) return null;
+
+    // Get the occurrence date from event.start
+    const occurrenceDate = event.start;
+    if (!occurrenceDate) return null;
+
+    // Format as YYYY-MM-DD for comparison
+    const occurrenceDateStr = occurrenceDate.toISOString().split('T')[0];
+
+    // Find matching override
+    const override = instanceOverrides.find(ov => {
+      const ovDate = new Date(ov.instanceKey);
+      const ovDateStr = ovDate.toISOString().split('T')[0];
+      return ovDateStr === occurrenceDateStr;
+    });
+
+    return override || null;
+  };
+
   // Custom event content renderer (match main calendar exactly)
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
@@ -305,26 +327,90 @@ const BostonCalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2 */}
-              <div style={{
-                fontSize: '0.65rem',
-                fontWeight: 'normal',
-                lineHeight: '1.1',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                overflowWrap: 'break-word',
-                hyphens: 'auto',
-                flex: 1,
-                color: '#555',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-              </div>
+              {/* Regular Events Row 2: Full title + appended override badge */}
+              {(() => {
+                const override = getOccurrenceOverride(event);
+                const patch = override?.patch;
+                const isCanceledOverride = override?.overrideType === 'cancel' || patch?.featureType === 'canceled';
+                const hasOrchestra = patch?.featureType === 'orchestra' && patch?.featureName;
+
+                // Build override badge (excluding orchestra which gets its own row)
+                let overrideBadge = null;
+                if (isCanceledOverride) {
+                  const reason = patch?.featureName || '';
+                  overrideBadge = (
+                    <span style={{
+                      fontSize: '0.6rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#d32f2f',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      marginLeft: '4px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      TONIGHT: CANCELED{reason ? ` - ${reason}` : ''}
+                    </span>
+                  );
+                } else if (patch?.featureType && patch?.featureName && !hasOrchestra) {
+                  const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
+                  const label = typeLabels[patch.featureType] || patch.featureType;
+                  overrideBadge = (
+                    <span style={{
+                      fontSize: '0.6rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#1976d2',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      marginLeft: '4px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {label}: {patch.featureName}
+                    </span>
+                  );
+                }
+
+                return (
+                  <>
+                    {/* Row 2: Title + override badge */}
+                    <div style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'normal',
+                      lineHeight: '1.1',
+                      flex: hasOrchestra ? 0 : 1,
+                      color: '#555',
+                      textDecoration: isCanceled ? 'line-through' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '2px'
+                    }}>
+                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {overrideBadge}
+                    </div>
+                    {/* Row 3: LIVE ORCHESTRA - inverted white on green */}
+                    {hasOrchestra && (
+                      <div style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        lineHeight: '1.1',
+                        color: '#fff',
+                        backgroundColor: '#2e7d32',
+                        padding: '1px 4px',
+                        borderRadius: '2px',
+                        marginTop: '1px'
+                      }}>
+                        🎻 LIVE ORCHESTRA: {patch.featureName}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 3/4: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '2px',
@@ -460,25 +546,89 @@ const BostonCalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2 */}
-              <div style={{
-                fontSize: '0.7rem',
-                fontWeight: 'normal',
-                lineHeight: '1.2',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                overflowWrap: 'break-word',
-                hyphens: 'auto',
-                color: '#555',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-              </div>
+              {/* Regular Events Row 2: Full title + appended override badge */}
+              {(() => {
+                const override = getOccurrenceOverride(event);
+                const patch = override?.patch;
+                const isCanceledOverride = override?.overrideType === 'cancel' || patch?.featureType === 'canceled';
+                const hasOrchestra = patch?.featureType === 'orchestra' && patch?.featureName;
+
+                // Build override badge (excluding orchestra which gets its own row)
+                let overrideBadge = null;
+                if (isCanceledOverride) {
+                  const reason = patch?.featureName || '';
+                  overrideBadge = (
+                    <span style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#d32f2f',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      marginLeft: '6px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      TONIGHT: CANCELED{reason ? ` - ${reason}` : ''}
+                    </span>
+                  );
+                } else if (patch?.featureType && patch?.featureName && !hasOrchestra) {
+                  const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
+                  const label = typeLabels[patch.featureType] || patch.featureType;
+                  overrideBadge = (
+                    <span style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#1976d2',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      marginLeft: '6px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {label}: {patch.featureName}
+                    </span>
+                  );
+                }
+
+                return (
+                  <>
+                    {/* Row 2: Title + override badge */}
+                    <div style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 'normal',
+                      lineHeight: '1.2',
+                      color: '#555',
+                      textDecoration: isCanceled ? 'line-through' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '2px'
+                    }}>
+                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {overrideBadge}
+                    </div>
+                    {/* Row 3: LIVE ORCHESTRA - inverted white on green */}
+                    {hasOrchestra && (
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        lineHeight: '1.2',
+                        color: '#fff',
+                        backgroundColor: '#2e7d32',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        marginTop: '2px'
+                      }}>
+                        🎻 LIVE ORCHESTRA: {patch.featureName}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 3/4: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '4px',

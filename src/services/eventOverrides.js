@@ -156,11 +156,60 @@ export async function getOccurrenceOverride(eventId, instanceKey) {
   }
 }
 
+/**
+ * Add a date to the excludedDates array (RRULE EXDATE)
+ * This permanently removes an occurrence from the series.
+ *
+ * @param {string} eventId - The master event ID
+ * @param {string|Date} dateToExclude - The date to exclude (venue TZ)
+ * @param {string} firebaseToken - Firebase auth token (required)
+ * @returns {Promise<object>} Updated event
+ */
+export async function addExcludedDate(eventId, dateToExclude, firebaseToken) {
+  if (!firebaseToken) {
+    throw new Error('Firebase auth token required for exclude operations');
+  }
+
+  // Convert to ISO string if Date object
+  const excludeDateStr = typeof dateToExclude === 'string'
+    ? dateToExclude
+    : dateToExclude.toISOString();
+
+  // Step 1: Fetch current event to get existing excludedDates
+  const getResponse = await axios.get(
+    `${API_BASE_URL}/events/${eventId}`
+  );
+  const currentEvent = getResponse.data;
+  const existingExcludedDates = currentEvent.excludedDates || [];
+
+  // Step 2: Add new date if not already excluded
+  const newExcludedDates = [...existingExcludedDates];
+  if (!newExcludedDates.includes(excludeDateStr)) {
+    newExcludedDates.push(excludeDateStr);
+  }
+
+  // Step 3: PATCH the event with updated excludedDates
+  const response = await axios.patch(
+    `${API_BASE_URL}/events/${eventId}`,
+    {
+      excludedDates: newExcludedDates
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${firebaseToken}`
+      }
+    }
+  );
+  return response.data;
+}
+
 export default {
   createOverride,
   cancelOccurrence,
   modifyOccurrence,
   deleteOverride,
   getOverrides,
-  getOccurrenceOverride
+  getOccurrenceOverride,
+  addExcludedDate
 };

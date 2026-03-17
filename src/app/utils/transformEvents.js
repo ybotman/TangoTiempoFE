@@ -99,6 +99,8 @@ export function transformEvents(events) {
         isRepeating: event.isRepeating || false,
         // Add excludedDates for edit mode
         excludedDates: event.excludedDates || [],
+        // TIEMPO-362: Add instanceOverrides for recurring event modifications
+        instanceOverrides: event.instanceOverrides || [],
         // TIEMPO-239: Add venue timezone display information
         display: event.display || null,
         displayStartTime: displayTimes.startTime,
@@ -171,23 +173,29 @@ export function transformEvents(events) {
             isRecurring: true,
             recurrenceRule: cleanedRRule,
             excludedDates: event.excludedDates || [],
+            // TIEMPO-362: Ensure instanceOverrides is included
+            instanceOverrides: event.instanceOverrides || [],
           }
         };
         
         // Add exdate if there are excluded dates
-        // FullCalendar's RRule plugin expects exdate as ISO strings (parseMarker parses them)
-        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0 && event.startDate) {
-          // Extract time from the event's start date
-          const startDateStr = typeof event.startDate === 'string' ? event.startDate : '';
-          const eventStartTime = startDateStr.includes('T') ? startDateStr.split('T')[1] : '00:00:00.000Z';
+        // TIEMPO-362: exdate must use SAME format as dtstart (venue local time, no Z suffix)
+        // rrule.js compares dtstart and exdate as strings - they must match format exactly
+        if (event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0 && startForRRule) {
+          // Extract time from dtstart (which is already in venue local time format)
+          // dtstart format: "2026-05-06T19:00:00" (no Z suffix = venue local time)
+          const dtstartStr = typeof startForRRule === 'string' ? startForRRule : '';
+          const timePart = dtstartStr.includes('T') ? dtstartStr.split('T')[1] : '19:00:00';
+          // Remove any Z suffix or timezone offset from the time part
+          const eventStartTime = timePart.replace('Z', '').split('+')[0].split('-')[0];
 
-          // Transform each excluded date to match the event's start time
-          // FullCalendar rrule plugin calls parseMarker() on exdate values,
-          // which expects ISO strings, not Date objects
+          // Transform each excluded date to match dtstart format exactly
           const validExdates = event.excludedDates
             .filter(excludedDate => excludedDate && typeof excludedDate === 'string')
             .map(excludedDate => {
+              // Get just the date part (YYYY-MM-DD)
               const excludedDateOnly = excludedDate.includes('T') ? excludedDate.split('T')[0] : excludedDate;
+              // Combine with event start time (no Z suffix = venue local time)
               const exdateWithTime = `${excludedDateOnly}T${eventStartTime}`;
               // Validate the date is parseable
               const dateObj = new Date(exdateWithTime);

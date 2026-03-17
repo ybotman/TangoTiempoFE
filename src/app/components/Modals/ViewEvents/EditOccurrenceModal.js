@@ -2,18 +2,14 @@
  * EditOccurrenceModal.js
  * TIEMPO-362: Modal for editing a single occurrence of a recurring event
  *
- * SIMPLIFIED MODEL - Additive attributes only:
- * - Tonight's Feature: DJ, Orchestra, Instructor, Performer, or Canceled
- * - Feature Name: Free text for the name/details
- * - Special Note: Time changes, announcements, etc.
+ * TABS:
+ * - Features: DJ, Orchestra, Instructor, Performer, LIVE, Special Note, Tonight: Canceled
+ * - Image: Override image for this specific date
  *
- * Features:
- * - Date navigation with <-- --> arrows
- * - Cancel option built into feature dropdown
- * - Core attributes (venue, category, base title) use "Edit All"
+ * NOTE: Exclude (RRULE EXDATE) is handled separately via "Edit Series"
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -26,38 +22,35 @@ import {
   Box,
   Alert,
   Chip,
+  IconButton,
   FormControl,
   InputLabel,
   Select,
-  MenuItem as MuiMenuItem,
-  IconButton
+  MenuItem,
+  Tabs,
+  Tab
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
+import AddIcon from '@mui/icons-material/Add';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ImageIcon from '@mui/icons-material/Image';
 import { format } from 'date-fns';
+import { useDropzone } from 'react-dropzone';
+import Image from 'next/image';
 
-// Feature types for "Tonight's" dropdown
-const FEATURE_TYPES = [
-  { value: '', label: 'No special feature' },
-  { value: 'dj', label: "Tonight's DJ" },
-  { value: 'orchestra', label: "Tonight's Orchestra" },
-  { value: 'instructor', label: "Tonight's Instructor" },
-  { value: 'performer', label: "Tonight's Performer" },
-  { value: 'canceled', label: 'Tonight: Canceled' },    // Shows but marked canceled
-  { value: 'removed', label: 'Remove This Date' }       // Completely hidden
+// Available feature types
+const FEATURE_OPTIONS = [
+  { value: 'dj', label: 'DJ', color: 'primary', maxLength: 19 },
+  { value: 'orchestra', label: 'Orchestra', color: 'success', maxLength: 19 },
+  { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19 },
+  { value: 'performer', label: 'Performer', color: 'info', maxLength: 19 },
+  { value: 'live', label: 'LIVE Music', color: 'warning', maxLength: 0 },
+  { value: 'note', label: 'Special Note', color: 'default', maxLength: 19 },
+  { value: 'description', label: "Tonight's Description", color: 'default', maxLength: 200 },
+  { value: 'canceled', label: 'Tonight: Canceled', color: 'error', maxLength: 19 }
 ];
-
-// Labels for the name field based on feature type
-const FEATURE_NAME_LABELS = {
-  dj: 'DJ Name',
-  orchestra: 'Orchestra Name',
-  instructor: 'Instructor Name',
-  performer: 'Performer Name',
-  canceled: 'Cancellation Reason',
-  removed: 'Removal Reason'
-};
 
 const EditOccurrenceModal = ({
   open,
@@ -67,58 +60,212 @@ const EditOccurrenceModal = ({
   occurrenceDate,
   currentValues = {},
   isLoading = false,
-  // Date navigation props
   onPrevDate,
   onNextDate,
   hasPrevDate = false,
   hasNextDate = false
 }) => {
-  const [featureType, setFeatureType] = useState('');
-  const [featureName, setFeatureName] = useState('');
-  const [specialNote, setSpecialNote] = useState('');
+  // Tab state
+  const [currentTab, setCurrentTab] = useState('features');
 
-  // Reset form when modal opens with new data
+  // Features array (includes DJ, Orchestra, Instructor, Performer, LIVE, Special Note)
+  const [features, setFeatures] = useState([]);
+
+  // For adding new features
+  const [newFeatureType, setNewFeatureType] = useState('');
+  const [newFeatureName, setNewFeatureName] = useState('');
+
+  // Cancel state (derived from features - no longer in accordion)
+
+  // Image state
+  const [overrideImageFile, setOverrideImageFile] = useState(null);
+  const [overrideImagePreview, setOverrideImagePreview] = useState(null);
+  const [existingOverrideImage, setExistingOverrideImage] = useState(null);
+
+  // Load existing values when modal opens or date changes
   useEffect(() => {
-    if (open) {
-      if (currentValues._hasOverride && currentValues._overridePatch) {
-        // Pre-populate with existing override values
-        setFeatureType(currentValues._overridePatch.featureType || '');
-        setFeatureName(currentValues._overridePatch.featureName || '');
-        setSpecialNote(currentValues._overridePatch.specialNote || '');
+    if (open && occurrenceDate) {
+      const patch = currentValues._overridePatch;
+      const hasOverride = currentValues._hasOverride;
+
+      if (hasOverride && patch) {
+        // Load features from patch
+        const loadedFeatures = [];
+
+        // New array format
+        if (patch.features && Array.isArray(patch.features)) {
+          loadedFeatures.push(...patch.features);
+        } else {
+          // Legacy individual fields
+          if (patch.djName) loadedFeatures.push({ type: 'dj', name: patch.djName });
+          if (patch.orchestraName) loadedFeatures.push({ type: 'orchestra', name: patch.orchestraName });
+          if (patch.instructorName) loadedFeatures.push({ type: 'instructor', name: patch.instructorName });
+          if (patch.performerName) loadedFeatures.push({ type: 'performer', name: patch.performerName });
+          if (patch.isLive) loadedFeatures.push({ type: 'live', name: 'LIVE' });
+          if (patch.specialNote) loadedFeatures.push({ type: 'note', name: patch.specialNote });
+          // Legacy single feature format
+          if (patch.featureType && patch.featureName) {
+            loadedFeatures.push({ type: patch.featureType, name: patch.featureName });
+          }
+        }
+
+        // Convert legacy isCanceled to a feature (if not already in features)
+        if (patch.isCanceled && !loadedFeatures.some(f => f.type === 'canceled')) {
+          loadedFeatures.push({ type: 'canceled', name: patch.cancelReason || '' });
+        }
+
+        setFeatures(loadedFeatures);
+        setExistingOverrideImage(patch.overrideImage || null);
       } else {
         // Reset to defaults
-        setFeatureType('');
-        setFeatureName('');
-        setSpecialNote('');
+        setFeatures([]);
+        setExistingOverrideImage(null);
       }
+
+      // Always reset these
+      setNewFeatureType('');
+      setNewFeatureName('');
+      setOverrideImageFile(null);
+      setOverrideImagePreview(null);
+      setCurrentTab('features');
     }
-  }, [open, currentValues]);
+  }, [open, occurrenceDate, currentValues]);
+
+  // Image drop handler
+  const onDrop = useCallback((acceptedFiles) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      setOverrideImageFile(file);
+      setOverrideImagePreview(URL.createObjectURL(file));
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp'] },
+    maxSize: 5 * 1024 * 1024,
+    multiple: false
+  });
+
+  const handleClearImage = () => {
+    if (overrideImagePreview) {
+      URL.revokeObjectURL(overrideImagePreview);
+    }
+    setOverrideImageFile(null);
+    setOverrideImagePreview(null);
+    setExistingOverrideImage(null);
+  };
+
+  const handleAddFeature = () => {
+    if (!newFeatureType) return;
+
+    // Get the feature option for max length
+    const featureOption = FEATURE_OPTIONS.find(f => f.value === newFeatureType);
+    const maxLength = featureOption?.maxLength || 19;
+
+    // 'live' doesn't require a name
+    let name = newFeatureType === 'live' ? 'LIVE' : newFeatureName.trim();
+
+    // Enforce max length
+    if (maxLength > 0 && name.length > maxLength) {
+      name = name.substring(0, maxLength);
+    }
+
+    if (!name && newFeatureType !== 'live' && newFeatureType !== 'canceled') {
+      alert('Please enter a name for the feature');
+      return;
+    }
+
+    // Prevent duplicate canceled entries
+    if (newFeatureType === 'canceled' && features.some(f => f.type === 'canceled')) {
+      alert('This date is already marked as canceled');
+      return;
+    }
+
+    // Prevent duplicate description entries
+    if (newFeatureType === 'description' && features.some(f => f.type === 'description')) {
+      alert('Only one description allowed per date');
+      return;
+    }
+
+    setFeatures([...features, { type: newFeatureType, name }]);
+    setNewFeatureType('');
+    setNewFeatureName('');
+  };
+
+  const handleRemoveFeature = (index) => {
+    setFeatures(features.filter((_, i) => i !== index));
+  };
 
   const handleSave = () => {
-    // Build patch object
-    const patch = {};
-
-    if (featureType) {
-      patch.featureType = featureType;
-      if (featureName.trim()) {
-        patch.featureName = featureName.trim();
+    // Auto-add feature if there's content in text field (force "+" on save)
+    let featuresToSave = [...features];
+    if (newFeatureType && newFeatureName.trim()) {
+      const featureOption = FEATURE_OPTIONS.find(f => f.value === newFeatureType);
+      const maxLength = featureOption?.maxLength || 19;
+      let name = newFeatureName.trim();
+      if (maxLength > 0 && name.length > maxLength) {
+        name = name.substring(0, maxLength);
+      }
+      // Add if not a duplicate
+      const isDuplicate = (newFeatureType === 'canceled' && featuresToSave.some(f => f.type === 'canceled')) ||
+                          (newFeatureType === 'description' && featuresToSave.some(f => f.type === 'description'));
+      if (!isDuplicate) {
+        featuresToSave.push({ type: newFeatureType, name });
       }
     }
 
-    if (specialNote.trim()) {
-      patch.specialNote = specialNote.trim();
+    const patch = {};
+
+    // Check if canceled is in features
+    const canceledFeature = featuresToSave.find(f => f.type === 'canceled');
+    const isCanceled = !!canceledFeature;
+
+    // Features (exclude 'canceled' from the features array - it's stored separately)
+    const nonCanceledFeatures = featuresToSave.filter(f => f.type !== 'canceled');
+    if (nonCanceledFeatures.length > 0) {
+      patch.features = nonCanceledFeatures;
+      // Also extract special notes for backward compatibility
+      const notes = nonCanceledFeatures.filter(f => f.type === 'note').map(f => f.name);
+      if (notes.length > 0) {
+        patch.specialNote = notes.join(' | ');
+      }
+      // Extract description for easy access
+      const description = nonCanceledFeatures.find(f => f.type === 'description');
+      if (description) {
+        patch.tonightsDescription = description.name;
+      }
+    }
+
+    // Cancel (derived from canceled feature)
+    if (isCanceled) {
+      patch.isCanceled = true;
+      if (canceledFeature.name?.trim()) {
+        patch.cancelReason = canceledFeature.name.trim();
+      }
+    }
+
+    // Override image
+    if (overrideImageFile) {
+      // File will be uploaded by parent, pass the file
+      patch.overrideImageFile = overrideImageFile;
+    } else if (existingOverrideImage) {
+      patch.overrideImage = existingOverrideImage;
+    } else if (overrideImagePreview === null && existingOverrideImage === null) {
+      // Explicitly removed
+      patch.overrideImage = null;
     }
 
     // Determine override type
-    // - 'cancel' = show as canceled (Tonight: Canceled)
-    // - 'remove' = completely hide from calendar
-    // - 'modify' = show with modifications
-    const overrideType = featureType === 'removed' ? 'remove' :
-                         featureType === 'canceled' ? 'cancel' : 'modify';
+    const overrideType = isCanceled ? 'cancel' : 'modify';
 
     // Only save if there are actual changes
-    if (Object.keys(patch).length === 0) {
-      alert('Please select a feature type or add a special note');
+    const hasFeatures = nonCanceledFeatures.length > 0;
+    const hasImage = overrideImageFile || existingOverrideImage;
+    const hasChanges = hasFeatures || isCanceled || hasImage;
+
+    if (!hasChanges) {
+      alert('Please add at least one feature, image, or mark as canceled');
       return;
     }
 
@@ -130,25 +277,30 @@ const EditOccurrenceModal = ({
   };
 
   const handleClose = () => {
-    setFeatureType('');
-    setFeatureName('');
-    setSpecialNote('');
+    if (overrideImagePreview) {
+      URL.revokeObjectURL(overrideImagePreview);
+    }
+    setFeatures([]);
+    setNewFeatureType('');
+    setNewFeatureName('');
+    setOverrideImageFile(null);
+    setOverrideImagePreview(null);
+    setExistingOverrideImage(null);
+    setCurrentTab('features');
     onClose();
   };
 
-  // Check if any field has been filled
-  const hasChanges = featureType || specialNote.trim();
+  // Derive isCanceled from features for UI display
+  const isCanceled = features.some(f => f.type === 'canceled');
+  const hasChanges = features.length > 0 || overrideImageFile || existingOverrideImage;
 
-  // Format the date for display
   const formattedDate = occurrenceDate
     ? format(new Date(occurrenceDate), 'EEEE, MMMM d, yyyy')
     : 'this date';
 
-  // Get the appropriate label for the name field
-  const nameFieldLabel = FEATURE_NAME_LABELS[featureType] || 'Name / Details';
-  const isCanceled = featureType === 'canceled';
-  const isRemoved = featureType === 'removed';
-  const isNegativeAction = isCanceled || isRemoved;
+  const getFeatureOption = (type) => FEATURE_OPTIONS.find(f => f.value === type) || { label: type, color: 'default' };
+
+  const currentImageSrc = overrideImagePreview || existingOverrideImage;
 
   return (
     <Dialog
@@ -159,32 +311,32 @@ const EditOccurrenceModal = ({
       PaperProps={{
         sx: {
           borderTop: '4px solid',
-          borderColor: isNegativeAction ? 'error.main' : 'primary.main'
+          borderColor: isCanceled ? 'error.main' : 'primary.main'
         }
       }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {isNegativeAction ? <CancelIcon color="error" /> : <EditIcon color="primary" />}
-        {isRemoved ? 'Remove This Date' : isCanceled ? 'Cancel This Date' : 'Edit This Date'}
+        {isCanceled ? <CancelIcon color="error" /> : <EditIcon color="primary" />}
+        Edit This Date
       </DialogTitle>
 
       <DialogContent>
         {/* Event context with date navigation */}
-        <Box sx={{ mb: 3, mt: 1 }}>
+        <Box sx={{ mb: 2, mt: 1 }}>
           <Box
             sx={{
-              bgcolor: isNegativeAction ? 'error.50' : 'primary.50',
+              bgcolor: isCanceled ? 'error.50' : 'primary.50',
               p: 2,
               borderRadius: 1,
               border: '1px solid',
-              borderColor: isNegativeAction ? 'error.200' : 'primary.200'
+              borderColor: isCanceled ? 'error.200' : 'primary.200'
             }}
           >
             <Typography variant="subtitle1" fontWeight="bold">
               {eventTitle}
             </Typography>
 
-            {/* Date navigation row */}
+            {/* Date navigation */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
               <IconButton
                 onClick={onPrevDate}
@@ -212,83 +364,221 @@ const EditOccurrenceModal = ({
                 <ChevronRightIcon />
               </IconButton>
             </Box>
+          </Box>
+        </Box>
 
-            {currentValues._hasOverride && (
-              <Box sx={{ textAlign: 'center', mt: 1 }}>
-                <Chip
-                  label="Already modified"
+        {/* Show current override info if exists */}
+        {currentValues._hasOverride && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            This date has existing overrides. Edit below to update.
+          </Alert>
+        )}
+
+        {/* Canceled warning */}
+        {isCanceled && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            This date will show as CANCELED on the calendar.
+          </Alert>
+        )}
+
+        {/* Tabs */}
+        <Tabs
+          value={currentTab}
+          onChange={(_, v) => setCurrentTab(v)}
+          sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+        >
+          <Tab label="Features" value="features" />
+          <Tab
+            label="Image"
+            value="image"
+            icon={currentImageSrc ? <ImageIcon fontSize="small" color="success" /> : null}
+            iconPosition="end"
+          />
+        </Tabs>
+
+        {/* Features Tab */}
+        {currentTab === 'features' && (
+          <>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+              Tonight&apos;s Features
+            </Typography>
+
+            {/* Current Features Display */}
+            {features.length > 0 && (
+              <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {features.map((feature, index) => {
+                  const option = getFeatureOption(feature.type);
+                  return (
+                    <Chip
+                      key={index}
+                      label={
+                        feature.type === 'live' ? '🎵 LIVE' :
+                        feature.type === 'canceled' ? (feature.name ? `❌ CANCELED: ${feature.name}` : '❌ CANCELED') :
+                        feature.type === 'note' ? `📝 ${feature.name}` :
+                        feature.type === 'description' ? `📄 ${feature.name.length > 30 ? feature.name.substring(0, 30) + '...' : feature.name}` :
+                        `${option.label}: ${feature.name}`
+                      }
+                      color={option.color}
+                      onDelete={() => handleRemoveFeature(index)}
+                      size="small"
+                    />
+                  );
+                })}
+              </Box>
+            )}
+
+            {features.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: 'italic' }}>
+                No features set for this date. Add one below.
+              </Typography>
+            )}
+
+            {/* Add Feature */}
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'flex-start' }}>
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>Add Feature</InputLabel>
+                <Select
+                  value={newFeatureType}
+                  onChange={(e) => {
+                    setNewFeatureType(e.target.value);
+                    if (e.target.value === 'live' || e.target.value === 'canceled') {
+                      setNewFeatureName('');
+                    }
+                  }}
+                  label="Add Feature"
+                >
+                  {FEATURE_OPTIONS.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {newFeatureType && newFeatureType !== 'live' && (() => {
+                const featureOption = FEATURE_OPTIONS.find(f => f.value === newFeatureType);
+                const maxLength = featureOption?.maxLength || 19;
+                const isDescription = newFeatureType === 'description';
+                return (
+                  <TextField
+                    value={newFeatureName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Enforce max length on input
+                      if (maxLength > 0 && value.length <= maxLength) {
+                        setNewFeatureName(value);
+                      } else if (maxLength > 0) {
+                        setNewFeatureName(value.substring(0, maxLength));
+                      } else {
+                        setNewFeatureName(value);
+                      }
+                    }}
+                    label={
+                      isDescription ? "Tonight's Description" :
+                      newFeatureType === 'note' ? 'Note text' :
+                      newFeatureType === 'canceled' ? 'Reason (optional)' :
+                      'Name'
+                    }
+                    placeholder={
+                      isDescription ? 'Special info about tonight...' :
+                      newFeatureType === 'note' ? 'e.g., Starts 30 min early!' :
+                      newFeatureType === 'canceled' ? 'e.g., Venue closed, Weather' :
+                      'e.g., DJ Carlos'
+                    }
+                    size="small"
+                    multiline={isDescription}
+                    rows={isDescription ? 3 : 1}
+                    sx={{ flex: 1 }}
+                    helperText={maxLength > 0 ? `${newFeatureName.length}/${maxLength}` : ''}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !isDescription) {
+                        e.preventDefault();
+                        handleAddFeature();
+                      }
+                    }}
+                  />
+                );
+              })()}
+
+              <Button
+                variant="outlined"
+                onClick={handleAddFeature}
+                disabled={!newFeatureType || (newFeatureType !== 'live' && newFeatureType !== 'canceled' && !newFeatureName.trim())}
+                sx={{ height: 40, minWidth: 'auto', px: 2 }}
+              >
+                <AddIcon />
+              </Button>
+            </Box>
+          </>
+        )}
+
+        {/* Image Tab */}
+        {currentTab === 'image' && (
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+              Override Image for This Date
+            </Typography>
+
+            {currentImageSrc ? (
+              <Box sx={{ textAlign: 'center', mb: 2 }}>
+                <Box
+                  sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '200px',
+                    mb: 2,
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
+                  <Image
+                    src={currentImageSrc}
+                    alt="Override image preview"
+                    fill
+                    style={{ objectFit: 'contain' }}
+                  />
+                </Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  {overrideImageFile?.name || 'Current override image'}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleClearImage}
                   size="small"
-                  color="info"
-                />
+                >
+                  Remove Image
+                </Button>
+              </Box>
+            ) : (
+              <Box
+                {...getRootProps()}
+                sx={{
+                  border: '2px dashed',
+                  borderColor: isDragActive ? 'primary.main' : 'grey.400',
+                  borderRadius: 1,
+                  p: 3,
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  bgcolor: isDragActive ? 'primary.50' : 'grey.50',
+                  '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.50' }
+                }}
+              >
+                <input {...getInputProps()} />
+                <ImageIcon sx={{ fontSize: 40, color: 'grey.500', mb: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  {isDragActive ? 'Drop image here...' : 'Drag & drop or click to select image'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Max 5MB (JPEG, PNG, GIF, WebP)
+                </Typography>
               </Box>
             )}
           </Box>
-        </Box>
-
-        <Alert severity={isNegativeAction ? 'warning' : 'info'} sx={{ mb: 3 }}>
-          {isRemoved
-            ? `This will REMOVE ${formattedDate} from the calendar (no display).`
-            : isCanceled
-              ? `This will mark ${formattedDate} as CANCELED (still visible).`
-              : `Changes apply only to ${formattedDate}. Other dates unchanged.`
-          }
-        </Alert>
-
-        {/* Tonight's Feature Type */}
-        <Box sx={{ mb: 3 }}>
-          <FormControl fullWidth size="small">
-            <InputLabel>Tonight&apos;s Feature</InputLabel>
-            <Select
-              value={featureType}
-              onChange={(e) => {
-                setFeatureType(e.target.value);
-                // Clear name if switching away from a type
-                if (!e.target.value) setFeatureName('');
-              }}
-              label="Tonight's Feature"
-            >
-              {FEATURE_TYPES.map((type) => (
-                <MuiMenuItem key={type.value} value={type.value}>
-                  {type.label}
-                </MuiMenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-
-        {/* Feature Name - only show if a type is selected */}
-        {featureType && (
-          <Box sx={{ mb: 3 }}>
-            <TextField
-              value={featureName}
-              onChange={(e) => setFeatureName(e.target.value)}
-              label={nameFieldLabel}
-              placeholder={
-                isCanceled
-                  ? 'e.g., Venue closed, Weather, Holiday'
-                  : 'e.g., DJ Carlos, Sexteto Milonguero'
-              }
-              fullWidth
-              size="small"
-              helperText={isCanceled ? 'Optional reason for cancellation' : 'Type the name or leave empty'}
-            />
-          </Box>
         )}
 
-        {/* Special Note - always visible */}
-        <Box sx={{ mb: 2 }}>
-          <TextField
-            value={specialNote}
-            onChange={(e) => setSpecialNote(e.target.value)}
-            label="Special Note"
-            placeholder="e.g., Starts 30 min early! Birthday celebration for Juan."
-            fullWidth
-            multiline
-            rows={2}
-            size="small"
-            helperText="Time changes, announcements, or any other info for this date"
-          />
-        </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -298,18 +588,11 @@ const EditOccurrenceModal = ({
         <Button
           onClick={handleSave}
           variant="contained"
-          color={isNegativeAction ? 'error' : 'primary'}
+          color={isCanceled ? 'error' : 'primary'}
           disabled={isLoading || !hasChanges}
-          startIcon={isNegativeAction ? <CancelIcon /> : <EditIcon />}
+          startIcon={isCanceled ? <CancelIcon /> : <EditIcon />}
         >
-          {isLoading
-            ? 'Saving...'
-            : isRemoved
-              ? 'Remove This Date'
-              : isCanceled
-                ? 'Cancel This Date'
-                : 'Save This Date'
-          }
+          {isLoading ? 'Saving...' : isCanceled ? 'Mark Canceled' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -321,20 +604,12 @@ EditOccurrenceModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   eventTitle: PropTypes.string.isRequired,
-  occurrenceDate: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.instanceOf(Date)
-  ]),
+  occurrenceDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   currentValues: PropTypes.shape({
     _hasOverride: PropTypes.bool,
-    _overridePatch: PropTypes.shape({
-      featureType: PropTypes.string,
-      featureName: PropTypes.string,
-      specialNote: PropTypes.string
-    })
+    _overridePatch: PropTypes.object
   }),
   isLoading: PropTypes.bool,
-  // Date navigation
   onPrevDate: PropTypes.func,
   onNextDate: PropTypes.func,
   hasPrevDate: PropTypes.bool,

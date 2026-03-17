@@ -75,8 +75,8 @@ const useMenuItems = () => {
           if (isRecurring && formattedDate) {
             menuOptions = [
               ...menuOptions,
+              { label: 'Edit Series', action: 'editEvent' },
               { label: `Edit This Date (${formattedDate})`, action: 'editOccurrence' },
-              { label: 'Edit All Dates', action: 'editEvent' },
               { label: 'Delete Entire Series', action: 'deleteEvent' },
               { label: 'See All Dates', action: 'seeAllDates' },
             ];
@@ -101,8 +101,8 @@ const useMenuItems = () => {
         if (isRecurring && formattedDate) {
           menuOptions = [
             ...menuOptions,
+            { label: 'Edit Series', action: 'editEvent' },
             { label: `Edit This Date (${formattedDate})`, action: 'editOccurrence' },
-            { label: 'Edit All Dates', action: 'editEvent' },
             { label: 'Delete Entire Series', action: 'deleteEvent' },
             { label: 'See All Dates', action: 'seeAllDates' },
           ];
