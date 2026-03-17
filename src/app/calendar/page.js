@@ -283,15 +283,6 @@ const CalendarPage = () => {
       });
     }
 
-    // DEBUG: Log for specific event
-    if (event.extendedProps?._id === '69b999acb3da410bb67c9f6c') {
-      console.log('[DEBUG] Event 69b999acb3da410bb67c9f6c:');
-      console.log('  - occurrenceISO:', occurrenceISO);
-      console.log('  - localDate/Time:', localDateStr, localTimeStr);
-      console.log('  - instanceKeys:', instanceOverrides.map(o => o.instanceKey));
-      console.log('  - matched override:', override ? JSON.stringify(override, null, 2) : 'NONE');
-    }
-
     return override || null;
   };
 
