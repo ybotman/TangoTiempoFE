@@ -388,12 +388,17 @@ export const useCalendarPage = () => {
   };
 
   const handleDateClick = (arg) => {
-    // Check if clicked date is in the past
-    const clickedDate = new Date(arg.dateStr);
+    // TIEMPO-362: Fix timezone bug - compare dates as strings to avoid UTC conversion issues
+    // new Date("2026-03-17") interprets as UTC midnight, causing "today" to appear as "yesterday"
+    // in timezones behind UTC (e.g., EST, PST)
+    const clickedDateStr = arg.dateStr; // Format: "YYYY-MM-DD"
+
+    // Get today's date in LOCAL timezone as YYYY-MM-DD string
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (clickedDate < today) {
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // Compare as strings - this correctly handles "today" regardless of timezone/DST
+    if (clickedDateStr < todayStr) {
       // Don't allow creating events in the past
       return;
     }
