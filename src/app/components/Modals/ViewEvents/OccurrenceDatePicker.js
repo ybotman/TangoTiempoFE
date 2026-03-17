@@ -89,7 +89,8 @@ const OccurrenceDatePicker = ({
           hasOverride: !!override,
           overrideType: override?.overrideType || null,
           isExcluded,
-          isCanceled: isExcluded || override?.overrideType === 'cancel',
+          isCanceled: override?.overrideType === 'cancel',
+          isRemoved: isExcluded || override?.overrideType === 'remove',
           isModified: override?.overrideType === 'modify',
           override: override || null // Full override object for display
         };
@@ -112,10 +113,21 @@ const OccurrenceDatePicker = ({
   };
 
   const getStatusChip = (occurrence) => {
+    if (occurrence.isRemoved) {
+      return (
+        <Chip
+          label="Removed"
+          size="small"
+          color="default"
+          variant="outlined"
+          icon={<EventBusyIcon />}
+        />
+      );
+    }
     if (occurrence.isCanceled) {
       return (
         <Chip
-          label="Canceled"
+          label="Tonight: Canceled"
           size="small"
           color="error"
           variant="outlined"
@@ -177,11 +189,13 @@ const OccurrenceDatePicker = ({
                 const note = occurrence.override.patch.specialNote;
                 overrideInfo.push(note.length > 30 ? note.substring(0, 30) + '...' : note);
               }
-              const secondaryText = occurrence.isCanceled
-                ? 'CANCELED'
-                : overrideInfo.length > 0
-                  ? overrideInfo.join(' • ')
-                  : format(occurrence.date, 'h:mm a');
+              const secondaryText = occurrence.isRemoved
+                ? 'Removed from calendar'
+                : occurrence.isCanceled
+                  ? 'Tonight: Canceled'
+                  : overrideInfo.length > 0
+                    ? overrideInfo.join(' • ')
+                    : format(occurrence.date, 'h:mm a');
 
               return (
                 <React.Fragment key={occurrence.dateStr}>
@@ -193,10 +207,10 @@ const OccurrenceDatePicker = ({
                     <ListItemButton
                       selected={selectedDate?.toISOString() === occurrence.date.toISOString()}
                       onClick={() => handleSelectDate(occurrence)}
-                      disabled={occurrence.isCanceled}
+                      disabled={occurrence.isRemoved}
                       sx={{
                         py: 0.5,
-                        opacity: occurrence.isCanceled ? 0.5 : 1
+                        opacity: occurrence.isRemoved ? 0.4 : occurrence.isCanceled ? 0.7 : 1
                       }}
                     >
                       <ListItemText
@@ -206,7 +220,7 @@ const OccurrenceDatePicker = ({
                               component="span"
                               variant="body2"
                               fontWeight="medium"
-                              sx={{ textDecoration: occurrence.isCanceled ? 'line-through' : 'none' }}
+                              sx={{ textDecoration: occurrence.isRemoved ? 'line-through' : 'none' }}
                             >
                               {format(occurrence.date, 'EEE, MMM d')}
                             </Typography>
@@ -219,7 +233,7 @@ const OccurrenceDatePicker = ({
                           <Typography
                             component="span"
                             variant="caption"
-                            color={occurrence.isCanceled ? 'error.main' : 'text.secondary'}
+                            color={occurrence.isRemoved ? 'text.disabled' : occurrence.isCanceled ? 'error.main' : 'text.secondary'}
                           >
                             {secondaryText}
                           </Typography>

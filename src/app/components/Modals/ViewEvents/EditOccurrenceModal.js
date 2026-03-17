@@ -45,7 +45,8 @@ const FEATURE_TYPES = [
   { value: 'orchestra', label: "Tonight's Orchestra" },
   { value: 'instructor', label: "Tonight's Instructor" },
   { value: 'performer', label: "Tonight's Performer" },
-  { value: 'canceled', label: 'Canceled Tonight' }
+  { value: 'canceled', label: 'Tonight: Canceled' },    // Shows but marked canceled
+  { value: 'removed', label: 'Remove This Date' }       // Completely hidden
 ];
 
 // Labels for the name field based on feature type
@@ -54,7 +55,8 @@ const FEATURE_NAME_LABELS = {
   orchestra: 'Orchestra Name',
   instructor: 'Instructor Name',
   performer: 'Performer Name',
-  canceled: 'Cancellation Reason'
+  canceled: 'Cancellation Reason',
+  removed: 'Removal Reason'
 };
 
 const EditOccurrenceModal = ({
@@ -108,7 +110,11 @@ const EditOccurrenceModal = ({
     }
 
     // Determine override type
-    const overrideType = featureType === 'canceled' ? 'cancel' : 'modify';
+    // - 'cancel' = show as canceled (Tonight: Canceled)
+    // - 'remove' = completely hide from calendar
+    // - 'modify' = show with modifications
+    const overrideType = featureType === 'removed' ? 'remove' :
+                         featureType === 'canceled' ? 'cancel' : 'modify';
 
     // Only save if there are actual changes
     if (Object.keys(patch).length === 0) {
@@ -141,6 +147,8 @@ const EditOccurrenceModal = ({
   // Get the appropriate label for the name field
   const nameFieldLabel = FEATURE_NAME_LABELS[featureType] || 'Name / Details';
   const isCanceled = featureType === 'canceled';
+  const isRemoved = featureType === 'removed';
+  const isNegativeAction = isCanceled || isRemoved;
 
   return (
     <Dialog
@@ -151,13 +159,13 @@ const EditOccurrenceModal = ({
       PaperProps={{
         sx: {
           borderTop: '4px solid',
-          borderColor: isCanceled ? 'error.main' : 'primary.main'
+          borderColor: isNegativeAction ? 'error.main' : 'primary.main'
         }
       }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {isCanceled ? <CancelIcon color="error" /> : <EditIcon color="primary" />}
-        {isCanceled ? 'Cancel This Date' : 'Edit This Date'}
+        {isNegativeAction ? <CancelIcon color="error" /> : <EditIcon color="primary" />}
+        {isRemoved ? 'Remove This Date' : isCanceled ? 'Cancel This Date' : 'Edit This Date'}
       </DialogTitle>
 
       <DialogContent>
@@ -165,11 +173,11 @@ const EditOccurrenceModal = ({
         <Box sx={{ mb: 3, mt: 1 }}>
           <Box
             sx={{
-              bgcolor: isCanceled ? 'error.50' : 'primary.50',
+              bgcolor: isNegativeAction ? 'error.50' : 'primary.50',
               p: 2,
               borderRadius: 1,
               border: '1px solid',
-              borderColor: isCanceled ? 'error.200' : 'primary.200'
+              borderColor: isNegativeAction ? 'error.200' : 'primary.200'
             }}
           >
             <Typography variant="subtitle1" fontWeight="bold">
@@ -217,10 +225,12 @@ const EditOccurrenceModal = ({
           </Box>
         </Box>
 
-        <Alert severity={isCanceled ? 'warning' : 'info'} sx={{ mb: 3 }}>
-          {isCanceled
-            ? `This will mark ${formattedDate} as CANCELED.`
-            : `Changes apply only to ${formattedDate}. Other dates unchanged.`
+        <Alert severity={isNegativeAction ? 'warning' : 'info'} sx={{ mb: 3 }}>
+          {isRemoved
+            ? `This will REMOVE ${formattedDate} from the calendar (no display).`
+            : isCanceled
+              ? `This will mark ${formattedDate} as CANCELED (still visible).`
+              : `Changes apply only to ${formattedDate}. Other dates unchanged.`
           }
         </Alert>
 
@@ -288,15 +298,17 @@ const EditOccurrenceModal = ({
         <Button
           onClick={handleSave}
           variant="contained"
-          color={isCanceled ? 'error' : 'primary'}
+          color={isNegativeAction ? 'error' : 'primary'}
           disabled={isLoading || !hasChanges}
-          startIcon={isCanceled ? <CancelIcon /> : <EditIcon />}
+          startIcon={isNegativeAction ? <CancelIcon /> : <EditIcon />}
         >
           {isLoading
             ? 'Saving...'
-            : isCanceled
-              ? 'Cancel This Date'
-              : 'Save This Date'
+            : isRemoved
+              ? 'Remove This Date'
+              : isCanceled
+                ? 'Cancel This Date'
+                : 'Save This Date'
           }
         </Button>
       </DialogActions>
