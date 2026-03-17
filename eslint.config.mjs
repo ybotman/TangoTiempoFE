@@ -93,6 +93,7 @@ export default [
     ignores: [
       'node_modules/',
       '.next/',
+      '.vercel/',
       'dist/',
       'logs/',
       '*.log',

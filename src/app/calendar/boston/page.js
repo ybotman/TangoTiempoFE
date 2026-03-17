@@ -123,8 +123,8 @@ const BostonCalendarPage = () => {
     openMapCenterModal
   } = useGeoLocation();
 
-  // Auth context - used to show read-only message for logged-in users
-  const { user } = useContext(AuthContext);
+  // Auth context - reserved for future use (read-only message for logged-in users)
+  const { user: _user } = useContext(AuthContext);
 
   // Local state for view type (not provided by hook)
   // Start with 8-week view for desktop, list for mobile
