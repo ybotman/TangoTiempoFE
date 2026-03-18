@@ -1,5 +1,73 @@
 # Application Playbook
 
+## Git Branches & Deployment Strategy
+
+### Branch → Deployment Mapping
+
+| Git Branch | Purpose | Vercel Project | Live URL |
+|------------|---------|----------------|----------|
+| **DEVL** | Local development, sharing between users | NOT deployed | N/A |
+| **TEST** | QA/Staging environment | `tangotiempo-test.com` | test.tangotiempo.com |
+| **PROD** | Production | `tangotiempo-com` | tangotiempo.com |
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Git Branches (GitHub)                                              │
+│                                                                     │
+│  DEVL ──────────────────────────────────────────────────────────    │
+│    │   (local dev, user sharing, NO auto-deploy)                    │
+│    │                                                                │
+│    └──► TEST ──────► Vercel: tangotiempo-test.com                   │
+│           │          URL: test.tangotiempo.com                      │
+│           │                                                         │
+│           └──► PROD ──────► Vercel: tangotiempo-com                 │
+│                             URL: tangotiempo.com                    │
+│                             + Cloudflare CDN                        │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Vercel Ignored Build Step
+
+Each Vercel project has an "Ignored Build Step" command to control which branches trigger builds:
+
+**tangotiempo-test.com** (TEST environment):
+```bash
+# Only build TEST branch
+[ "$VERCEL_GIT_COMMIT_REF" != "TEST" ]
+```
+
+**tangotiempo-com** (PROD environment):
+```bash
+# Only build PROD branch
+[ "$VERCEL_GIT_COMMIT_REF" != "PROD" ]
+```
+
+Exit codes: `0` = skip build, `1` = proceed with build
+
+### Deployment Workflow
+
+1. **Develop on DEVL** → commit, push to share with other users/machines
+2. **Merge to TEST** → auto-deploys to test.tangotiempo.com
+3. **Verify on TEST** → check test.tangotiempo.com/version.json
+4. **Merge to PROD** → requires approval, auto-deploys to tangotiempo.com
+
+### Vercel CLI Commands
+
+```bash
+# List recent deployments
+vercel ls
+
+# Check deployment status
+curl -s https://test.tangotiempo.com/version.json
+
+# Trigger redeploy (if needed)
+vercel --prod --yes  # for prod project
+```
+
+---
+
 ## Team & Environment
 
 **User**: GotanMan (switches between laptop and desktop)
