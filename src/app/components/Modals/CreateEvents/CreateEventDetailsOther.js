@@ -8,10 +8,7 @@ import {
   InputLabel,
   MenuItem,
   Grid,
-  CircularProgress,
-  Switch,
-  FormControlLabel,
-  Tooltip
+  CircularProgress
 } from '@mui/material';
 import Select from '@mui/material/Select';
 import PropTypes from 'prop-types';
@@ -210,42 +207,6 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
           </FormControl>
         </Grid>
 
-        {/* Event Canceled Switch */}
-        <Grid item xs={12}>
-          <Tooltip 
-            title={eventData.isRepeating || !!eventData.recurrenceRule ? "Repeating events cannot be canceled from the edit screen" : ""}
-            placement="top"
-          >
-            <span>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={eventData.isCanceled || false}
-                    onChange={(e) => setEventData(prevData => ({ ...prevData, isCanceled: e.target.checked }))}
-                    color="error"
-                    disabled={eventData.isRepeating || !!eventData.recurrenceRule}
-                  />
-                }
-                label={
-                  <Typography sx={{ color: eventData.isCanceled ? 'error.main' : 'inherit' }}>
-                    Event Canceled
-                  </Typography>
-                }
-                sx={{ mt: 2 }}
-              />
-            </span>
-          </Tooltip>
-          {eventData.isCanceled && (
-            <Typography variant="caption" color="error" display="block" sx={{ ml: 2 }}>
-              This event will be marked as Canceled but still shown
-            </Typography>
-          )}
-          {(eventData.isRepeating || !!eventData.recurrenceRule) && (
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ ml: 2 }}>
-              Repeating events cannot be canceled from the edit screen
-            </Typography>
-          )}
-        </Grid>
       </Grid>
     </Box>
   );
