@@ -13,14 +13,21 @@ const ViewEventDetailsBasic = ({ eventDetails, overrideData }) => {
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
   const eventTitle = eventDetails?.title || '';
 
-  // TIEMPO-362/388: Extract features - check override first, then event-level (non-repeating)
-  // For recurring events: features come from overrideData._overridePatch.features
-  // For non-repeating events: features come from eventDetails.extendedProps.features/spotlights
+  // TIEMPO-362/388: Merge series spotlights with override spotlights
+  // Rules:
+  // 1. Override of same type WINS over series
+  // 2. Series spotlights: DJ, Instructor, Performer, Canceled only
+  // 3. Override spotlights: All types (Orchestra, Note, Description, etc.)
   const overrideFeatures = overrideData?._overridePatch?.features || [];
-  const eventFeatures = eventDetails?.extendedProps?.features ||
-                        eventDetails?.extendedProps?.spotlights || [];
-  // Use override features if present, otherwise use event-level features
-  const displayFeatures = overrideFeatures.length > 0 ? overrideFeatures : eventFeatures;
+  const seriesFeatures = eventDetails?.extendedProps?.features ||
+                         eventDetails?.extendedProps?.spotlights || [];
+
+  // Merge: start with override features, add series features that don't have an override
+  const overrideTypes = new Set(overrideFeatures.map(f => f.type));
+  const displayFeatures = [
+    ...overrideFeatures,
+    ...seriesFeatures.filter(f => !overrideTypes.has(f.type))
+  ];
 
   const tonightsDescription = overrideData?._overridePatch?.tonightsDescription ||
                               displayFeatures.find(f => f.type === 'description')?.name || null;

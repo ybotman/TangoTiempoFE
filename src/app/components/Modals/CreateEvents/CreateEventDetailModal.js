@@ -1029,10 +1029,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           {eventData.isRepeating && editMode && (
             <Tab label="Override Images" value="overrideImages" />
           )}
-          {/* TIEMPO-388: Spotlights tab for non-repeating events */}
-          {!eventData.isRepeating && (
-            <Tab label="Spotlights" value="spotlights" />
-          )}
+          {/* TIEMPO-388: Spotlights tab - always show (filtered options for repeating) */}
+          <Tab label="Spotlights" value="spotlights" />
           {/* TIEMPO-388: Grants tab (organizers) - always show */}
           <Tab label="Grants" value="grants" />
           <Tab label="Other" value="other" />
@@ -1047,9 +1045,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         {currentTab === 'overrideImages' && eventData.isRepeating && (
           <CreateEventDetailsOverrideImages eventData={eventData} setEventData={updateEventData} />
         )}
-        {/* TIEMPO-388: Spotlights tab content */}
-        {currentTab === 'spotlights' && !eventData.isRepeating && (
-          <CreateEventDetailsSpotlights eventData={eventData} setEventData={updateEventData} isMultiDay={isMultiDayEvent} />
+        {/* TIEMPO-388: Spotlights tab content - works for both repeating and non-repeating */}
+        {currentTab === 'spotlights' && (
+          <CreateEventDetailsSpotlights
+            eventData={eventData}
+            setEventData={updateEventData}
+            isMultiDay={isMultiDayEvent}
+            isRepeating={eventData.isRepeating}
+          />
         )}
         {/* TIEMPO-388: Grants tab content */}
         {currentTab === 'grants' && (

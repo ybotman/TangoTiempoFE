@@ -2,14 +2,17 @@
  * CreateEventDetailsSpotlights.js
  * TIEMPO-388: Spotlights tab for Edit Event Modal
  *
- * Allows setting DJ, Orchestra, Instructor, Performer, Special Note,
- * Tonight's Description for non-repeating events (same as EditOccurrenceModal
- * but for the event itself rather than a specific occurrence).
+ * For NON-REPEATING events: All spotlight types available
+ *   - DJ, Orchestra, Instructor, Performer, Note, Description, Canceled
+ *
+ * For REPEATING events (series-level): Limited types only
+ *   - DJ, Instructor, Performer, Canceled
+ *   - NO Orchestra, NO Note, NO Description (those are per-occurrence only)
  *
  * For multi-day events (>24hr), spotlights apply to ALL days.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -27,18 +30,25 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import InfoIcon from '@mui/icons-material/Info';
 
-// Available spotlight types - same as EditOccurrenceModal
-const SPOTLIGHT_OPTIONS = [
-  { value: 'dj', label: 'DJ', color: 'primary', maxLength: 19 },
-  { value: 'orchestra', label: 'Orchestra', color: 'success', maxLength: 19 },
-  { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19 },
-  { value: 'performer', label: 'Performer', color: 'info', maxLength: 19 },
-  { value: 'note', label: 'Special Note', color: 'default', maxLength: 19 },
-  { value: 'description', label: "Tonight's Description", color: 'default', maxLength: 200 },
-  { value: 'canceled', label: 'Event Canceled', color: 'error', maxLength: 19 }
+// All available spotlight types
+const ALL_SPOTLIGHT_OPTIONS = [
+  { value: 'dj', label: 'DJ', color: 'primary', maxLength: 19, allowedInSeries: true },
+  { value: 'orchestra', label: 'Orchestra', color: 'success', maxLength: 19, allowedInSeries: false },
+  { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19, allowedInSeries: true },
+  { value: 'performer', label: 'Performer', color: 'info', maxLength: 19, allowedInSeries: true },
+  { value: 'note', label: 'Special Note', color: 'default', maxLength: 19, allowedInSeries: false },
+  { value: 'description', label: "Tonight's Description", color: 'default', maxLength: 200, allowedInSeries: false },
+  { value: 'canceled', label: 'Series Canceled', color: 'error', maxLength: 19, allowedInSeries: true }
 ];
 
-const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = false }) => {
+const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = false, isRepeating = false }) => {
+  // Filter options based on whether this is a repeating series or single event
+  const SPOTLIGHT_OPTIONS = useMemo(() => {
+    if (isRepeating) {
+      return ALL_SPOTLIGHT_OPTIONS.filter(opt => opt.allowedInSeries);
+    }
+    return ALL_SPOTLIGHT_OPTIONS;
+  }, [isRepeating]);
   // Local state for adding new spotlights
   const [newSpotlightType, setNewSpotlightType] = useState('');
   const [newSpotlightName, setNewSpotlightName] = useState('');
@@ -132,10 +142,12 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
       )}
 
       <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-        Event Spotlights
+        {isRepeating ? 'Series Spotlights' : 'Event Spotlights'}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Add spotlights like DJ, Orchestra, or special notes that will display on the calendar.
+        {isRepeating
+          ? 'Add DJ, Instructor, or Performer that apply to ALL dates. Use "Edit This Date" for per-date overrides.'
+          : 'Add spotlights like DJ, Orchestra, or special notes that will display on the calendar.'}
       </Typography>
 
       {/* Current Spotlights Display */}
@@ -268,7 +280,8 @@ CreateEventDetailsSpotlights.propTypes = {
     }))
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
-  isMultiDay: PropTypes.bool
+  isMultiDay: PropTypes.bool,
+  isRepeating: PropTypes.bool
 };
 
 export default CreateEventDetailsSpotlights;
