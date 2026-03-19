@@ -102,6 +102,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Other fields
       isRepeating: false,
       isCanceled: false,
+      // TIEMPO-388: Spotlights for non-repeating events
+      spotlights: [],
+      features: [],
       imageFile: null,
       imagePreviewUrl: null,
       eventImage: null,
@@ -215,7 +218,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           
           // Cancellation status
           isCanceled: eventToEdit.isCanceled || false,
-          
+
+          // TIEMPO-388: Spotlights (features) for non-repeating events
+          spotlights: eventToEdit.spotlights || eventToEdit.features || [],
+          features: eventToEdit.features || eventToEdit.spotlights || [],
+
           // Maintain the original ID for updates
           _id: eventToEdit._id || null
         });
