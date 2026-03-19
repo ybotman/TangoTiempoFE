@@ -7,6 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ShareIcon from '@mui/icons-material/Share';
 import CloseIcon from '@mui/icons-material/Close';
 import RepeatIcon from '@mui/icons-material/Repeat';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
@@ -669,32 +671,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
               )}
             </Typography>
 
-            {/* TIEMPO-362: Recurring event indicator */}
-            {isRecurringEvent && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  bgcolor: 'info.50',
-                  border: '1px solid',
-                  borderColor: 'info.200',
-                  borderRadius: 1,
-                  px: 1.5,
-                  py: 0.75,
-                  mb: 1
-                }}
-              >
-                <RepeatIcon fontSize="small" color="info" />
-                <Typography variant="body2" color="info.dark">
-                  Repeating Event
-                  {formattedOccurrenceDate && (
-                    <> &mdash; viewing <strong>{formattedOccurrenceDate}</strong></>
-                  )}
-                </Typography>
-              </Box>
-            )}
-
           {/* Category Display */}
           {renderCategoryChips()}
 
@@ -756,6 +732,77 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
               </Box>
             ) : null;
           })()}
+
+          {/* TIEMPO-362: Recurring event indicator - below image, above tabs */}
+          {isRecurringEvent && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                bgcolor: 'info.50',
+                border: '1px solid',
+                borderColor: 'info.200',
+                borderRadius: 1,
+                px: { xs: 0.5, sm: 1.5 },
+                py: 0.75,
+                mb: 1
+              }}
+            >
+              {/* Prev arrow */}
+              <IconButton
+                onClick={handlePrevDate}
+                disabled={currentDateIndex <= 0}
+                size="small"
+                sx={{
+                  color: 'info.main',
+                  '&.Mui-disabled': { color: 'grey.300' }
+                }}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+
+              {/* Center content */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, justifyContent: 'center', minWidth: 0 }}>
+                <RepeatIcon fontSize="small" color="info" sx={{ display: { xs: 'none', sm: 'block' } }} />
+                <Typography
+                  variant="body2"
+                  color="info.dark"
+                  sx={{
+                    textAlign: 'center',
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {isMobile ? (
+                    formattedOccurrenceDate ? format(new Date(currentNavigatedDate), 'EEE, MMM d') : 'Repeating'
+                  ) : (
+                    <>
+                      Repeating Event
+                      {formattedOccurrenceDate && (
+                        <> &mdash; <strong>{format(new Date(currentNavigatedDate), 'EEE, MMM d, yyyy')}</strong></>
+                      )}
+                    </>
+                  )}
+                </Typography>
+              </Box>
+
+              {/* Next arrow */}
+              <IconButton
+                onClick={handleNextDate}
+                disabled={currentDateIndex >= occurrenceDates.length - 1}
+                size="small"
+                sx={{
+                  color: 'info.main',
+                  '&.Mui-disabled': { color: 'grey.300' }
+                }}
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+          )}
 
           {/* Tabs */}
           <Tabs 
