@@ -366,7 +366,7 @@ const BostonCalendarPage = () => {
                       marginLeft: '4px',
                       whiteSpace: 'nowrap'
                     }}>
-                      {label}: {patch.featureName}
+                      TONIGHTS {label}: {patch.featureName}
                     </span>
                   );
                 }
@@ -389,7 +389,7 @@ const BostonCalendarPage = () => {
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                       {overrideBadge}
                     </div>
-                    {/* Row 3: LIVE ORCHESTRA - inverted white on green */}
+                    {/* Row 3: TONIGHTS ORCHESTRA */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.65rem',
@@ -401,7 +401,7 @@ const BostonCalendarPage = () => {
                         borderRadius: '2px',
                         marginTop: '1px'
                       }}>
-                        🎻 LIVE ORCHESTRA: {patch.featureName}
+                        🎻 TONIGHTS ORCHESTRA: {patch.featureName}
                       </div>
                     )}
                   </>
@@ -585,7 +585,7 @@ const BostonCalendarPage = () => {
                       marginLeft: '6px',
                       whiteSpace: 'nowrap'
                     }}>
-                      {label}: {patch.featureName}
+                      TONIGHTS {label}: {patch.featureName}
                     </span>
                   );
                 }
@@ -607,7 +607,7 @@ const BostonCalendarPage = () => {
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                       {overrideBadge}
                     </div>
-                    {/* Row 3: LIVE ORCHESTRA - inverted white on green */}
+                    {/* Row 3: TONIGHTS ORCHESTRA */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.75rem',
@@ -619,7 +619,7 @@ const BostonCalendarPage = () => {
                         borderRadius: '3px',
                         marginTop: '2px'
                       }}>
-                        🎻 LIVE ORCHESTRA: {patch.featureName}
+                        🎻 TONIGHTS ORCHESTRA: {patch.featureName}
                       </div>
                     )}
                   </>

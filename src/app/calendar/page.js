@@ -549,33 +549,13 @@ const CalendarPage = () => {
                           marginLeft: '4px',
                           whiteSpace: 'nowrap'
                         }}>
-                          {label}: {feature.name}
+                          TONIGHTS {label}: {feature.name}
                         </span>
                       );
                     });
-
-                  // Add LIVE badge
-                  if (overrideData.live) {
-                    badges.push(
-                      <span key="live" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#fff',
-                        backgroundColor: '#ff9800',
-                        padding: '1px 4px',
-                        borderRadius: '2px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        🎵 LIVE
-                      </span>
-                    );
-                  }
                 }
 
                 const hasOrchestra = overrideData?.orchestra && !overrideData?.isCanceled;
-                // Check if both orchestra AND live features are present
-                const isLiveOrchestra = hasOrchestra && overrideData?.live;
 
                 return (
                   <>
@@ -595,7 +575,7 @@ const CalendarPage = () => {
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                       {badges}
                     </div>
-                    {/* Row 3: ORCHESTRA - show "LIVE ORCHESTRA" only if both orchestra AND live features */}
+                    {/* Row 3: TONIGHTS ORCHESTRA */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.65rem',
@@ -607,7 +587,7 @@ const CalendarPage = () => {
                         borderRadius: '2px',
                         marginTop: '1px'
                       }}>
-                        🎻 {isLiveOrchestra ? 'LIVE ORCHESTRA' : 'ORCHESTRA'}: {overrideData.orchestra.name}
+                        🎻 TONIGHTS ORCHESTRA: {overrideData.orchestra.name}
                       </div>
                     )}
                   </>
@@ -795,28 +775,10 @@ const CalendarPage = () => {
                           marginLeft: '6px',
                           whiteSpace: 'nowrap'
                         }}>
-                          {label}: {feature.name}
+                          TONIGHTS {label}: {feature.name}
                         </span>
                       );
                     });
-
-                  // Add LIVE badge
-                  if (overrideData.live) {
-                    badges.push(
-                      <span key="live" style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 'bold',
-                        color: '#fff',
-                        backgroundColor: '#ff9800',
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        marginLeft: '6px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        🎵 LIVE
-                      </span>
-                    );
-                  }
                 }
 
                 const hasOrchestra = overrideData?.orchestra && !overrideData?.isCanceled;
@@ -838,7 +800,7 @@ const CalendarPage = () => {
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                       {badges}
                     </div>
-                    {/* Row 3: LIVE ORCHESTRA - inverted white on green */}
+                    {/* Row 3: TONIGHTS ORCHESTRA */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.75rem',
@@ -850,7 +812,7 @@ const CalendarPage = () => {
                         borderRadius: '3px',
                         marginTop: '2px'
                       }}>
-                        🎻 LIVE ORCHESTRA: {overrideData.orchestra.name}
+                        🎻 TONIGHTS ORCHESTRA: {overrideData.orchestra.name}
                       </div>
                     )}
                   </>

@@ -46,7 +46,6 @@ const FEATURE_OPTIONS = [
   { value: 'orchestra', label: 'Orchestra', color: 'success', maxLength: 19 },
   { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19 },
   { value: 'performer', label: 'Performer', color: 'info', maxLength: 19 },
-  { value: 'live', label: 'LIVE Music', color: 'warning', maxLength: 0 },
   { value: 'note', label: 'Special Note', color: 'default', maxLength: 19 },
   { value: 'description', label: "Tonight's Description", color: 'default', maxLength: 200 },
   { value: 'canceled', label: 'Tonight: Canceled', color: 'error', maxLength: 19 }
