@@ -280,7 +280,10 @@ const BostonCalendarPage = () => {
                 gap: '3px',
                 marginBottom: '1px'
               }}>
-                {startTime && (
+                {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
+                {isCanceled ? (
+                  <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>⚠️</span>
+                ) : startTime && (
                   <div style={{
                     fontSize: '0.8rem',
                     lineHeight: '1.0',
@@ -500,7 +503,10 @@ const BostonCalendarPage = () => {
                 gap: '8px',
                 flexWrap: isMobile ? 'wrap' : 'nowrap'
               }}>
-                {startTime && (
+                {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
+                {isCanceled ? (
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
+                ) : startTime && (
                   <div style={{
                     fontSize: '0.9rem',
                     lineHeight: '1.2',

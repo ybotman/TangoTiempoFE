@@ -496,14 +496,17 @@ const CalendarPage = () => {
             </>
           ) : (
             <>
-              {/* Regular Events Row 1: Time, categories, organizer, shortTitle */}
+              {/* Regular Events Row 1: Time (or ⚠️ if canceled), categories, organizer, shortTitle */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '3px',
                 marginBottom: '1px'
               }}>
-                {startTime && (
+                {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
+                {isCanceled || getFeatureData(event)?.isCanceled ? (
+                  <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>⚠️</span>
+                ) : startTime && (
                   <div style={{
                     fontSize: '0.8rem',
                     lineHeight: '1.0',
@@ -604,21 +607,22 @@ const CalendarPage = () => {
 
                 return (
                   <>
-                    {/* Row 2: Title + feature badges */}
+                    {/* Row 2: Feature badges first (CANCELED), then title */}
                     <div style={{
                       fontSize: '0.65rem',
                       fontWeight: 'normal',
                       lineHeight: '1.1',
                       flex: hasOrchestra ? 0 : 1,
                       color: '#555',
-                      textDecoration: isCanceled ? 'line-through' : 'none',
+                      textDecoration: (isCanceled || featureData?.isCanceled) ? 'line-through' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       flexWrap: 'wrap',
                       gap: '2px'
                     }}>
-                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {/* TIEMPO-388: Show badges first, then title */}
                       {badges}
+                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                     </div>
                     {/* Row 3: Orchestra - inverted style, no "TONIGHTS" prefix */}
                     {hasOrchestra && (
@@ -718,13 +722,16 @@ const CalendarPage = () => {
             </>
           ) : (
             <>
-              {/* Regular Events Row 1: Time, categories, organizer, shortTitle */}
+              {/* Regular Events Row 1: Time (or ⚠️ if canceled), categories, organizer, shortTitle */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                {startTime && (
+                {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
+                {isCanceled || getFeatureData(event)?.isCanceled ? (
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
+                ) : startTime && (
                   <div style={{
                     fontSize: '0.9rem',
                     lineHeight: '1.2',
