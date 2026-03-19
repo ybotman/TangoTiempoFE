@@ -13,12 +13,22 @@ const ViewEventDetailsBasic = ({ eventDetails, overrideData }) => {
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
   const eventTitle = eventDetails?.title || '';
 
-  // TIEMPO-362: Extract override features and tonight's description
+  // TIEMPO-362/388: Extract features - check override first, then event-level (non-repeating)
+  // For recurring events: features come from overrideData._overridePatch.features
+  // For non-repeating events: features come from eventDetails.extendedProps.features/spotlights
   const overrideFeatures = overrideData?._overridePatch?.features || [];
+  const eventFeatures = eventDetails?.extendedProps?.features ||
+                        eventDetails?.extendedProps?.spotlights || [];
+  // Use override features if present, otherwise use event-level features
+  const displayFeatures = overrideFeatures.length > 0 ? overrideFeatures : eventFeatures;
+
   const tonightsDescription = overrideData?._overridePatch?.tonightsDescription ||
-                              overrideFeatures.find(f => f.type === 'description')?.name || null;
-  const isCanceled = overrideData?._overrideType === 'cancel' || overrideData?._overridePatch?.isCanceled;
-  const cancelReason = overrideData?._overridePatch?.cancelReason || '';
+                              displayFeatures.find(f => f.type === 'description')?.name || null;
+  const isCanceled = overrideData?._overrideType === 'cancel' ||
+                     overrideData?._overridePatch?.isCanceled ||
+                     displayFeatures.some(f => f.type === 'canceled');
+  const cancelReason = overrideData?._overridePatch?.cancelReason ||
+                       displayFeatures.find(f => f.type === 'canceled')?.name || '';
 
   // Feature type labels and colors
   const featureStyles = {
@@ -97,15 +107,15 @@ const ViewEventDetailsBasic = ({ eventDetails, overrideData }) => {
         </Box>
       )}
 
-      {/* TIEMPO-362: Tonight's Features (if not canceled) */}
-      {!isCanceled && overrideFeatures.length > 0 && (
+      {/* TIEMPO-362/388: Spotlights - works for both recurring (override) and non-repeating (event-level) */}
+      {!isCanceled && displayFeatures.length > 0 && displayFeatures.some(f => f.type !== 'description' && f.type !== 'canceled') && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Tonight&apos;s Features
+            Spotlights
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {overrideFeatures
-              .filter(f => f.type !== 'description')
+            {displayFeatures
+              .filter(f => f.type !== 'description' && f.type !== 'canceled')
               .map((feature, idx) => {
                 const style = featureStyles[feature.type] || { label: feature.type, bg: '#757575' };
                 return (
@@ -218,6 +228,15 @@ ViewEventDetailsBasic.propTypes = {
       locationName: PropTypes.string, // Legacy field for backward compatibility
       venueID: PropTypes.string,
       locationID: PropTypes.string, // Legacy field for backward compatibility
+      // TIEMPO-388: Spotlights for non-repeating events
+      features: PropTypes.arrayOf(PropTypes.shape({
+        type: PropTypes.string,
+        name: PropTypes.string,
+      })),
+      spotlights: PropTypes.arrayOf(PropTypes.shape({
+        type: PropTypes.string,
+        name: PropTypes.string,
+      })),
     }),
   }),
   overrideData: PropTypes.shape({
