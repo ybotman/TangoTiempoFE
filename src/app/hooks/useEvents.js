@@ -587,9 +587,20 @@ export function useEventOperations() {
         venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
         locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
         locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
+        // TIEMPO-388: Explicitly include spotlights/features for non-repeating events
+        features: cleanedEventData.features || cleanedEventData.spotlights || [],
+        spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       }
-      
+
+      // TIEMPO-388: Debug logging for spotlights
+      if (preparedData.features?.length > 0 || preparedData.spotlights?.length > 0) {
+        console.log('🎯 TIEMPO-388: Creating event with spotlights:', {
+          features: preparedData.features,
+          spotlights: preparedData.spotlights
+        });
+      }
+
       // If venue has coordinates, include them in venueGeolocation
       if (eventData.venueLatitude && eventData.venueLongitude) {
         preparedData.venueGeolocation = {
@@ -811,9 +822,20 @@ export function useEventOperations() {
           shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           // Set expiresAt to 1 year after endDate
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+          // TIEMPO-388: Explicitly include spotlights/features for non-repeating events
+          features: cleanedEventData.features || cleanedEventData.spotlights || [],
+          spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       }
-      
+
+      // TIEMPO-388: Debug logging for spotlights
+      if (preparedData.features?.length > 0 || preparedData.spotlights?.length > 0) {
+        console.log('🎯 TIEMPO-388: Sending spotlights to backend:', {
+          features: preparedData.features,
+          spotlights: preparedData.spotlights
+        });
+      }
+
       // Clean up fields that shouldn't be sent to backend
       delete preparedData.excludeDates; // Remove the typo field (without 'd')
       delete preparedData.excludeDatesString; // Remove the UI-only string field
