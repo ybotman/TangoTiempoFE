@@ -6,7 +6,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import useCategories from '@/hooks/useCategories'; // Import the categories hook
 import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hook
-import { useOrganizers } from '@/hooks/useOrganizers'; // TIEMPO-325: Import organizers hook for type-ahead dropdown
+// TIEMPO-388: useOrganizers moved to CreateEventDetailsGrants.js
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
@@ -27,8 +27,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
   const { venues, loading: loadingVenues, error: errorVenues, fetchVenues } = useVenues();
   const { savedLocation, currentLocation } = useGeoLocation(); // TIEMPO-276: Get location for venue context
   const { user, selectedRole } = useContext(AuthContext); // Get current user info and selected role
-  // TIEMPO-325: Fetch ALL organizers for dropdown (no filtering) - use type-ahead for usability
-  const { organizers, loading: loadingOrganizers } = useOrganizers({ skipLocationFilter: true });
+  // TIEMPO-388: organizers moved to CreateEventDetailsGrants.js
   const [filteredVenues, setFilteredVenues] = useState([]); // State for filtered venues
   const [venueInputValue, setVenueInputValue] = useState(''); // Track input for search ahead
   const [isVenueReady, setIsVenueReady] = useState(false); // Track if venue select is ready
@@ -137,59 +136,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, title }));
   };
 
-  // Handle organizer selection from Autocomplete (for RegionalAdmin)
-  const handleOrganizerChange = (event, newValue) => {
-    if (!newValue) {
-      setEventData(prevData => ({
-        ...prevData,
-        ownerOrganizerID: '',
-        ownerOrganizerName: '',
-        ownerOrganizerShortName: ''
-      }));
-      return;
-    }
-    setEventData(prevData => ({
-      ...prevData,
-      ownerOrganizerID: newValue._id,
-      ownerOrganizerName: newValue.fullName || '',
-      ownerOrganizerShortName: newValue.shortName || newValue.fullName || ''
-    }));
-  };
-
-  // Handle alternate organizer selection from Autocomplete (for RO and RA)
-  const handleAlternateOrganizerChange = (event, newValue) => {
-    if (!newValue) {
-      setEventData(prevData => ({
-        ...prevData,
-        alternateOrganizerID: '',
-        alternateOrganizerName: ''
-      }));
-      return;
-    }
-    setEventData(prevData => ({
-      ...prevData,
-      alternateOrganizerID: newValue._id,
-      alternateOrganizerName: newValue.fullName || newValue.shortName || ''
-    }));
-  };
-
-  // Handle granted organizer selection from Autocomplete (for RO and RA)
-  // Granted organizer can edit the event but is NOT shown on event display
-  const handleGrantedOrganizerChange = (event, newValue) => {
-    if (!newValue) {
-      setEventData(prevData => ({
-        ...prevData,
-        grantedOrganizerID: '',
-        grantedOrganizerName: ''
-      }));
-      return;
-    }
-    setEventData(prevData => ({
-      ...prevData,
-      grantedOrganizerID: newValue._id,
-      grantedOrganizerName: newValue.fullName || newValue.shortName || ''
-    }));
-  };
+  // TIEMPO-388: Organizer handlers moved to CreateEventDetailsGrants.js
 
   // Handle venue change from autocomplete
   const handleVenueChange = (event, newValue) => {
@@ -302,23 +249,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
     setEventData(prevData => ({ ...prevData, endDate: newDate }));
   };
 
-  // TIEMPO-325: Memoize selected organizer object for Autocomplete
-  const selectedOrganizer = useMemo(() => {
-    if (!eventData.ownerOrganizerID) return null;
-    return organizers.find(org => org._id === eventData.ownerOrganizerID) || null;
-  }, [eventData.ownerOrganizerID, organizers]);
-
-  // Memoize selected alternate organizer for Autocomplete
-  const selectedAlternateOrganizer = useMemo(() => {
-    if (!eventData.alternateOrganizerID) return null;
-    return organizers.find(org => org._id === eventData.alternateOrganizerID) || null;
-  }, [eventData.alternateOrganizerID, organizers]);
-
-  // Memoize selected granted organizer for Autocomplete
-  const selectedGrantedOrganizer = useMemo(() => {
-    if (!eventData.grantedOrganizerID) return null;
-    return organizers.find(org => org._id === eventData.grantedOrganizerID) || null;
-  }, [eventData.grantedOrganizerID, organizers]);
+  // TIEMPO-388: Organizer memoizations moved to CreateEventDetailsGrants.js
 
   // Memoize the selected category to prevent re-computation during render
   const selectedCategory = useMemo(() => {
@@ -696,194 +627,7 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         />
       </FormControl>
 
-      {/* Organizers Section - 2 columns: Left (Author/Owner) | Right (Alternate/Granted) */}
-      {(selectedRole === 'RegionalAdmin' || selectedRole === 'RegionalOrganizer') && (
-        <Box sx={{ mt: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-            Organizers
-          </Typography>
-          <Grid container spacing={1}>
-            {/* Column 1: Author (grey) then Owner */}
-            <Grid item xs={12} sm={6}>
-              <Grid container spacing={1}>
-                {/* Author - read-only, grey */}
-                {/* For NEW events: default to logged-in user. For EXISTING events: show event's author */}
-                <Grid item xs={12}>
-                  <TextField
-                    size="small"
-                    label="Author (original creator)"
-                    value={
-                      // First check if event has author data
-                      eventData.authorOrganizerShortName ||
-                      eventData.authorOrganizerName ||
-                      // For NEW events only: fall back to logged-in user's organizer
-                      (!editMode ? (
-                        organizer?.shortName ||
-                        organizer?.fullName ||
-                        user?.backendInfo?.regionalOrganizerInfo?.organizerShortName ||
-                        user?.backendInfo?.regionalOrganizerInfo?.organizerName ||
-                        user?.displayName ||
-                        'You'
-                      ) : '(Not recorded)')
-                    }
-                    InputProps={{ readOnly: true }}
-                    fullWidth
-                    sx={{ bgcolor: 'grey.200', '& .MuiInputBase-input': { color: 'text.secondary', fontStyle: 'italic' } }}
-                  />
-                </Grid>
-                {/* Owner - dropdown for RA, read-only for RO */}
-                <Grid item xs={12}>
-                  {selectedRole === 'RegionalAdmin' ? (
-                    <Autocomplete
-                      size="small"
-                      options={organizers}
-                      loading={loadingOrganizers}
-                      value={selectedOrganizer}
-                      onChange={handleOrganizerChange}
-                      getOptionLabel={(option) => {
-                        if (!option || typeof option !== 'object') return '';
-                        const name = option.fullName || option.organizerName || option.name || '';
-                        const short = option.shortName || option.organizerShortName || '';
-                        return short ? `${name} (${short})` : name;
-                      }}
-                      isOptionEqualToValue={(option, value) => option?._id === value?._id}
-                      filterOptions={(options, { inputValue }) => {
-                        const searchTerm = inputValue.toLowerCase();
-                        return options.filter(option => {
-                          const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                          const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                          return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                        });
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Owner *"
-                          size="small"
-                          required
-                          error={!eventData.ownerOrganizerID}
-                          InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                              <>
-                                {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
-                                {params.InputProps.endAdornment}
-                              </>
-                            ),
-                          }}
-                        />
-                      )}
-                      fullWidth
-                      disablePortal
-                    />
-                  ) : (
-                    <TextField
-                      size="small"
-                      label="Owner"
-                      value={eventData.ownerOrganizerShortName || eventData.ownerOrganizerName || organizer?.shortName || 'Loading...'}
-                      InputProps={{ readOnly: true }}
-                      fullWidth
-                      sx={{ bgcolor: 'action.hover' }}
-                    />
-                  )}
-                </Grid>
-              </Grid>
-            </Grid>
-
-            {/* Column 2: Alternate then Granted */}
-            <Grid item xs={12} sm={6}>
-              <Grid container spacing={1}>
-                {/* Alternate - shown on calendar */}
-                <Grid item xs={12}>
-                  <Autocomplete
-                    size="small"
-                    options={organizers}
-                    loading={loadingOrganizers}
-                    value={selectedAlternateOrganizer}
-                    onChange={handleAlternateOrganizerChange}
-                    getOptionLabel={(option) => {
-                      if (!option || typeof option !== 'object') return '';
-                      const name = option.fullName || option.organizerName || option.name || '';
-                      const short = option.shortName || option.organizerShortName || '';
-                      return short ? `${name} (${short})` : name;
-                    }}
-                    isOptionEqualToValue={(option, value) => option?._id === value?._id}
-                    filterOptions={(options, { inputValue }) => {
-                      const searchTerm = inputValue.toLowerCase();
-                      return options.filter(option => {
-                        const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                        const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                        return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                      });
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Alternate (shown on calendar)"
-                        size="small"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          ),
-                        }}
-                      />
-                    )}
-                    fullWidth
-                    disablePortal
-                  />
-                </Grid>
-                {/* Granted - not shown, can edit */}
-                <Grid item xs={12}>
-                  <Autocomplete
-                    size="small"
-                    options={organizers}
-                    loading={loadingOrganizers}
-                    value={selectedGrantedOrganizer}
-                    onChange={handleGrantedOrganizerChange}
-                    getOptionLabel={(option) => {
-                      if (!option || typeof option !== 'object') return '';
-                      const name = option.fullName || option.organizerName || option.name || '';
-                      const short = option.shortName || option.organizerShortName || '';
-                      return short ? `${name} (${short})` : name;
-                    }}
-                    isOptionEqualToValue={(option, value) => option?._id === value?._id}
-                    filterOptions={(options, { inputValue }) => {
-                      const searchTerm = inputValue.toLowerCase();
-                      return options.filter(option => {
-                        const fullName = (option.fullName || option.organizerName || option.name || '').toLowerCase();
-                        const shortName = (option.shortName || option.organizerShortName || '').toLowerCase();
-                        return fullName.includes(searchTerm) || shortName.includes(searchTerm);
-                      });
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Granted (not shown, can edit)"
-                        size="small"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {loadingOrganizers ? <CircularProgress color="inherit" size={16} /> : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          ),
-                        }}
-                      />
-                    )}
-                    fullWidth
-                    disablePortal
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Box>
-      )}
+      {/* TIEMPO-388: Organizers section moved to GRANTS tab */}
     </Box>
 
     {/* TIEMPO-290: Venue Modal with Map/Add/Edit tabs */}

@@ -327,18 +327,20 @@ const BostonCalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2: Full title + appended override badge */}
+              {/* Regular Events Row 2: Full title + appended feature badge */}
+              {/* TIEMPO-388: Updated styling - non-inverted text for features, inverted for canceled/orchestra */}
               {(() => {
                 const override = getOccurrenceOverride(event);
                 const patch = override?.patch;
                 const isCanceledOverride = override?.overrideType === 'cancel' || patch?.featureType === 'canceled';
                 const hasOrchestra = patch?.featureType === 'orchestra' && patch?.featureName;
 
-                // Build override badge (excluding orchestra which gets its own row)
-                let overrideBadge = null;
+                // Build feature badge (excluding orchestra which gets its own row)
+                let featureBadge = null;
                 if (isCanceledOverride) {
+                  // TIEMPO-388: Canceled - inverted style, "TODAY:" prefix
                   const reason = patch?.featureName || '';
-                  overrideBadge = (
+                  featureBadge = (
                     <span style={{
                       fontSize: '0.6rem',
                       fontWeight: 'bold',
@@ -349,31 +351,33 @@ const BostonCalendarPage = () => {
                       marginLeft: '4px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TONIGHT: CANCELED{reason ? ` - ${reason}` : ''}
+                      TODAY: CANCELED{reason ? ` - ${reason}` : ''}
                     </span>
                   );
                 } else if (patch?.featureType && patch?.featureName && !hasOrchestra) {
+                  // TIEMPO-388: Non-inverted style (colored text on clear), no prefix
                   const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
+                  const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
                   const label = typeLabels[patch.featureType] || patch.featureType;
-                  overrideBadge = (
+                  const textColor = typeColors[patch.featureType] || '#1976d2';
+                  featureBadge = (
                     <span style={{
                       fontSize: '0.6rem',
                       fontWeight: 'bold',
-                      color: '#fff',
-                      backgroundColor: '#1976d2',
+                      color: textColor,
+                      backgroundColor: 'transparent',
                       padding: '1px 4px',
-                      borderRadius: '2px',
                       marginLeft: '4px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TONIGHTS {label}: {patch.featureName}
+                      {label}: {patch.featureName}
                     </span>
                   );
                 }
 
                 return (
                   <>
-                    {/* Row 2: Title + override badge */}
+                    {/* Row 2: Title + feature badge */}
                     <div style={{
                       fontSize: '0.65rem',
                       fontWeight: 'normal',
@@ -387,9 +391,9 @@ const BostonCalendarPage = () => {
                       gap: '2px'
                     }}>
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
-                      {overrideBadge}
+                      {featureBadge}
                     </div>
-                    {/* Row 3: TONIGHTS ORCHESTRA */}
+                    {/* Row 3: Orchestra - inverted style, no prefix */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.65rem',
@@ -401,7 +405,7 @@ const BostonCalendarPage = () => {
                         borderRadius: '2px',
                         marginTop: '1px'
                       }}>
-                        🎻 TONIGHTS ORCHESTRA: {patch.featureName}
+                        🎻 Orchestra: {patch.featureName}
                       </div>
                     )}
                   </>
@@ -546,18 +550,20 @@ const BostonCalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2: Full title + appended override badge */}
+              {/* Regular Events Row 2: Full title + appended feature badge */}
+              {/* TIEMPO-388: Updated styling - non-inverted text for features, inverted for canceled/orchestra */}
               {(() => {
                 const override = getOccurrenceOverride(event);
                 const patch = override?.patch;
                 const isCanceledOverride = override?.overrideType === 'cancel' || patch?.featureType === 'canceled';
                 const hasOrchestra = patch?.featureType === 'orchestra' && patch?.featureName;
 
-                // Build override badge (excluding orchestra which gets its own row)
-                let overrideBadge = null;
+                // Build feature badge (excluding orchestra which gets its own row)
+                let featureBadge = null;
                 if (isCanceledOverride) {
+                  // TIEMPO-388: Canceled - inverted style, "TODAY:" prefix
                   const reason = patch?.featureName || '';
-                  overrideBadge = (
+                  featureBadge = (
                     <span style={{
                       fontSize: '0.65rem',
                       fontWeight: 'bold',
@@ -568,31 +574,33 @@ const BostonCalendarPage = () => {
                       marginLeft: '6px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TONIGHT: CANCELED{reason ? ` - ${reason}` : ''}
+                      TODAY: CANCELED{reason ? ` - ${reason}` : ''}
                     </span>
                   );
                 } else if (patch?.featureType && patch?.featureName && !hasOrchestra) {
+                  // TIEMPO-388: Non-inverted style (colored text on clear), no prefix
                   const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
+                  const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
                   const label = typeLabels[patch.featureType] || patch.featureType;
-                  overrideBadge = (
+                  const textColor = typeColors[patch.featureType] || '#1976d2';
+                  featureBadge = (
                     <span style={{
                       fontSize: '0.65rem',
                       fontWeight: 'bold',
-                      color: '#fff',
-                      backgroundColor: '#1976d2',
+                      color: textColor,
+                      backgroundColor: 'transparent',
                       padding: '2px 6px',
-                      borderRadius: '3px',
                       marginLeft: '6px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TONIGHTS {label}: {patch.featureName}
+                      {label}: {patch.featureName}
                     </span>
                   );
                 }
 
                 return (
                   <>
-                    {/* Row 2: Title + override badge */}
+                    {/* Row 2: Title + feature badge */}
                     <div style={{
                       fontSize: '0.7rem',
                       fontWeight: 'normal',
@@ -605,9 +613,9 @@ const BostonCalendarPage = () => {
                       gap: '2px'
                     }}>
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
-                      {overrideBadge}
+                      {featureBadge}
                     </div>
-                    {/* Row 3: TONIGHTS ORCHESTRA */}
+                    {/* Row 3: Orchestra - inverted style, no prefix */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.75rem',
@@ -619,7 +627,7 @@ const BostonCalendarPage = () => {
                         borderRadius: '3px',
                         marginTop: '2px'
                       }}>
-                        🎻 TONIGHTS ORCHESTRA: {patch.featureName}
+                        🎻 Orchestra: {patch.featureName}
                       </div>
                     )}
                   </>

@@ -5,6 +5,8 @@ import CreateEventDetailsImage from './CreateEventDetailsImage';
 import CreateEventDetailsOther from './CreateEventDetailsOther';
 import CreateEventDetailsRepeating, { parseRRuleToUIFields } from './CreateEventDetailsRepeating';
 import CreateEventDetailsOverrideImages from './CreateEventDetailsOverrideImages';
+import CreateEventDetailsSpotlights from './CreateEventDetailsSpotlights'; // TIEMPO-388
+import CreateEventDetailsGrants from './CreateEventDetailsGrants'; // TIEMPO-388
 import ValidationDialog from './ValidationDialog';
 // import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
@@ -1005,10 +1007,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         >
           <Tab label="Basic" value="basic" />
           {eventData.isRepeating && (
-            <Tab 
-              label="Repeating" 
-              value="repeating" 
-              sx={{ 
+            <Tab
+              label="Repeating"
+              value="repeating"
+              sx={{
                 color: eventData.isRepeating ? 'error.main' : 'inherit',
                 '&.Mui-selected': {
                   color: 'error.main'
@@ -1020,6 +1022,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           {eventData.isRepeating && editMode && (
             <Tab label="Override Images" value="overrideImages" />
           )}
+          {/* TIEMPO-388: Spotlights tab for non-repeating events */}
+          {!eventData.isRepeating && (
+            <Tab label="Spotlights" value="spotlights" />
+          )}
+          {/* TIEMPO-388: Grants tab (organizers) - always show */}
+          <Tab label="Grants" value="grants" />
           <Tab label="Other" value="other" />
         </Tabs>
 
@@ -1031,6 +1039,14 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
         {currentTab === 'overrideImages' && eventData.isRepeating && (
           <CreateEventDetailsOverrideImages eventData={eventData} setEventData={updateEventData} />
+        )}
+        {/* TIEMPO-388: Spotlights tab content */}
+        {currentTab === 'spotlights' && !eventData.isRepeating && (
+          <CreateEventDetailsSpotlights eventData={eventData} setEventData={updateEventData} isMultiDay={isMultiDayEvent} />
+        )}
+        {/* TIEMPO-388: Grants tab content */}
+        {currentTab === 'grants' && (
+          <CreateEventDetailsGrants eventData={eventData} setEventData={updateEventData} editMode={editMode} organizer={organizer} />
         )}
         {currentTab === 'other' && <CreateEventDetailsOther eventData={eventData} setEventData={updateEventData} />}
         </>

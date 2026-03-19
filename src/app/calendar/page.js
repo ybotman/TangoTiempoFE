@@ -287,6 +287,7 @@ const CalendarPage = () => {
   };
 
   // TIEMPO-362: Helper to extract display data from override patch (handles both legacy and new formats)
+  // TIEMPO-388: Also supports direct event.features for non-repeating events
   const getOverrideDisplayData = (override) => {
     if (!override?.patch) return null;
     const patch = override.patch;
@@ -334,6 +335,50 @@ const CalendarPage = () => {
       notes,
       hasAnyFeature: features.length > 0 || isCanceled
     };
+  };
+
+  // TIEMPO-388: Helper to get features for non-repeating events (direct event.features array)
+  const getEventFeatureData = (event) => {
+    // Check for direct features on the event (for non-repeating events)
+    const features = event.extendedProps?.features;
+    if (!features || !Array.isArray(features) || features.length === 0) return null;
+
+    // Check for canceled in features
+    const canceledFeature = features.find(f => f.type === 'canceled');
+    const isCanceled = !!canceledFeature;
+    const cancelReason = canceledFeature?.name || '';
+
+    // Extract by type for easy access
+    const dj = features.find(f => f.type === 'dj');
+    const orchestra = features.find(f => f.type === 'orchestra');
+    const instructor = features.find(f => f.type === 'instructor');
+    const performer = features.find(f => f.type === 'performer');
+    const live = features.find(f => f.type === 'live');
+    const notes = features.filter(f => f.type === 'note');
+
+    return {
+      isCanceled,
+      cancelReason,
+      features: features.filter(f => f.type !== 'canceled'), // Exclude canceled from display features
+      dj,
+      orchestra,
+      instructor,
+      performer,
+      live,
+      notes,
+      hasAnyFeature: features.length > 0
+    };
+  };
+
+  // TIEMPO-388: Unified helper to get feature data from either source
+  const getFeatureData = (event) => {
+    // First try occurrence override (for repeating events)
+    const override = getOccurrenceOverride(event);
+    if (override?.patch) {
+      return getOverrideDisplayData(override);
+    }
+    // Then try direct event features (for non-repeating events)
+    return getEventFeatureData(event);
   };
 
   // Custom event content renderer with category circles
@@ -503,15 +548,16 @@ const CalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2: Full title + appended override badges */}
+              {/* Regular Events Row 2: Full title + appended feature badges */}
+              {/* TIEMPO-388: Now supports both override features (repeating) and direct features (non-repeating) */}
               {(() => {
-                const override = getOccurrenceOverride(event);
-                const overrideData = getOverrideDisplayData(override);
+                const featureData = getFeatureData(event);
 
-                // Build override badges for all features
+                // Build feature badges
                 const badges = [];
 
-                if (overrideData?.isCanceled) {
+                // TIEMPO-388: Canceled badge - inverted style, "TODAY:" prefix
+                if (featureData?.isCanceled) {
                   badges.push(
                     <span key="canceled" style={{
                       fontSize: '0.6rem',
@@ -523,43 +569,42 @@ const CalendarPage = () => {
                       marginLeft: '4px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TONIGHT: CANCELED{overrideData.cancelReason ? ` - ${overrideData.cancelReason}` : ''}
+                      TODAY: CANCELED{featureData.cancelReason ? ` - ${featureData.cancelReason}` : ''}
                     </span>
                   );
                 }
 
-                // Add badges for non-orchestra features (orchestra gets its own row)
-                if (overrideData && !overrideData.isCanceled) {
+                // TIEMPO-388: Feature badges - non-inverted style (colored text on clear), no "TONIGHTS" prefix
+                if (featureData && !featureData.isCanceled) {
                   const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
                   const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
 
-                  overrideData.features
+                  featureData.features
                     .filter(f => f.type !== 'orchestra' && f.type !== 'live' && f.type !== 'note' && f.type !== 'description')
                     .forEach((feature, idx) => {
                       const label = typeLabels[feature.type] || feature.type;
-                      const bgColor = typeColors[feature.type] || '#1976d2';
+                      const textColor = typeColors[feature.type] || '#1976d2';
                       badges.push(
                         <span key={`${feature.type}-${idx}`} style={{
                           fontSize: '0.6rem',
                           fontWeight: 'bold',
-                          color: '#fff',
-                          backgroundColor: bgColor,
+                          color: textColor,
+                          backgroundColor: 'transparent',
                           padding: '1px 4px',
-                          borderRadius: '2px',
                           marginLeft: '4px',
                           whiteSpace: 'nowrap'
                         }}>
-                          TONIGHTS {label}: {feature.name}
+                          {label}: {feature.name}
                         </span>
                       );
                     });
                 }
 
-                const hasOrchestra = overrideData?.orchestra && !overrideData?.isCanceled;
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
 
                 return (
                   <>
-                    {/* Row 2: Title + override badges */}
+                    {/* Row 2: Title + feature badges */}
                     <div style={{
                       fontSize: '0.65rem',
                       fontWeight: 'normal',
@@ -575,7 +620,7 @@ const CalendarPage = () => {
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                       {badges}
                     </div>
-                    {/* Row 3: TONIGHTS ORCHESTRA */}
+                    {/* Row 3: Orchestra - inverted style, no "TONIGHTS" prefix */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.65rem',
@@ -587,7 +632,7 @@ const CalendarPage = () => {
                         borderRadius: '2px',
                         marginTop: '1px'
                       }}>
-                        🎻 TONIGHTS ORCHESTRA: {overrideData.orchestra.name}
+                        🎻 Orchestra: {featureData.orchestra.name}
                       </div>
                     )}
                   </>
@@ -729,15 +774,16 @@ const CalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2: Full title + appended override badges */}
+              {/* Regular Events Row 2: Full title + appended feature badges */}
+              {/* TIEMPO-388: Now supports both override features (repeating) and direct features (non-repeating) */}
               {(() => {
-                const override = getOccurrenceOverride(event);
-                const overrideData = getOverrideDisplayData(override);
+                const featureData = getFeatureData(event);
 
-                // Build override badges for all features
+                // Build feature badges
                 const badges = [];
 
-                if (overrideData?.isCanceled) {
+                // TIEMPO-388: Canceled badge - inverted style, "TODAY:" prefix
+                if (featureData?.isCanceled) {
                   badges.push(
                     <span key="canceled" style={{
                       fontSize: '0.65rem',
@@ -749,43 +795,42 @@ const CalendarPage = () => {
                       marginLeft: '6px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TONIGHT: CANCELED{overrideData.cancelReason ? ` - ${overrideData.cancelReason}` : ''}
+                      TODAY: CANCELED{featureData.cancelReason ? ` - ${featureData.cancelReason}` : ''}
                     </span>
                   );
                 }
 
-                // Add badges for non-orchestra features (orchestra gets its own row)
-                if (overrideData && !overrideData.isCanceled) {
+                // TIEMPO-388: Feature badges - non-inverted style (colored text on clear), no prefix
+                if (featureData && !featureData.isCanceled) {
                   const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
                   const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
 
-                  overrideData.features
+                  featureData.features
                     .filter(f => f.type !== 'orchestra' && f.type !== 'live' && f.type !== 'note' && f.type !== 'description')
                     .forEach((feature, idx) => {
                       const label = typeLabels[feature.type] || feature.type;
-                      const bgColor = typeColors[feature.type] || '#1976d2';
+                      const textColor = typeColors[feature.type] || '#1976d2';
                       badges.push(
                         <span key={`${feature.type}-${idx}`} style={{
                           fontSize: '0.65rem',
                           fontWeight: 'bold',
-                          color: '#fff',
-                          backgroundColor: bgColor,
+                          color: textColor,
+                          backgroundColor: 'transparent',
                           padding: '2px 6px',
-                          borderRadius: '3px',
                           marginLeft: '6px',
                           whiteSpace: 'nowrap'
                         }}>
-                          TONIGHTS {label}: {feature.name}
+                          {label}: {feature.name}
                         </span>
                       );
                     });
                 }
 
-                const hasOrchestra = overrideData?.orchestra && !overrideData?.isCanceled;
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
 
                 return (
                   <>
-                    {/* Row 2: Title + override badges */}
+                    {/* Row 2: Title + feature badges */}
                     <div style={{
                       fontSize: '0.7rem',
                       fontWeight: 'normal',
@@ -800,7 +845,7 @@ const CalendarPage = () => {
                       <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
                       {badges}
                     </div>
-                    {/* Row 3: TONIGHTS ORCHESTRA */}
+                    {/* Row 3: Orchestra - inverted style, no prefix */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.75rem',
@@ -812,7 +857,7 @@ const CalendarPage = () => {
                         borderRadius: '3px',
                         marginTop: '2px'
                       }}>
-                        🎻 TONIGHTS ORCHESTRA: {overrideData.orchestra.name}
+                        🎻 Orchestra: {featureData.orchestra.name}
                       </div>
                     )}
                   </>

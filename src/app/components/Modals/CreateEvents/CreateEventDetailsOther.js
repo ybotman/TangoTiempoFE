@@ -1,4 +1,5 @@
 // src/components/OtherEventDetails.js
+// TIEMPO-388: Removed Granted/Alternate Organizer - moved to GRANTS tab
 
 import React, { useMemo } from 'react';
 import {
@@ -7,13 +8,11 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Grid,
-  CircularProgress
+  Grid
 } from '@mui/material';
 import Select from '@mui/material/Select';
 import PropTypes from 'prop-types';
 import useCategories from '@/hooks/useCategories';
-import { useOrganizers } from '@/hooks/useOrganizers';
 
 const CreateEventDetailsOther = ({ eventData, setEventData }) => {
   const allCategories = useCategories(); // Fetch categories
@@ -26,65 +25,34 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
     ),
     [allCategories]
   );
-  const { organizers, fetchLoading: loadingOrganizers, error: errorOrganizers } = useOrganizers({ skipLocationFilter: true }); // Fetch ALL organizers for dropdown
 
   // Handle secondary category change
   const handleSecondCategoryChange = (event) => {
     const selectedCategoryId = event.target.value;
-    
+
     // Find the selected category to get its name
     const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
-    
+
     // Store both the ID and the name
-    setEventData(prevData => ({ 
-      ...prevData, 
+    setEventData(prevData => ({
+      ...prevData,
       categorySecondId: selectedCategoryId,
-      categorySecond: selectedCategory ? selectedCategory.categoryName : '' 
+      categorySecond: selectedCategory ? selectedCategory.categoryName : ''
     }));
   };
 
   // Handle third category change
   const handleThirdCategoryChange = (event) => {
     const selectedCategoryId = event.target.value;
-    
+
     // Find the selected category to get its name
     const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
-    
+
     // Store both the ID and the name
-    setEventData(prevData => ({ 
-      ...prevData, 
+    setEventData(prevData => ({
+      ...prevData,
       categoryThirdId: selectedCategoryId,
-      categoryThird: selectedCategory ? selectedCategory.categoryName : '' 
-    }));
-  };
-
-  // Handle granted organizer change
-  const handleGrantedOrganizerChange = (event) => {
-    const selectedOrganizerId = event.target.value;
-    
-    // Find the selected organizer to get its name
-    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
-    
-    // Store both the ID and the name
-    setEventData(prevData => ({ 
-      ...prevData, 
-      grantedOrganizerID: selectedOrganizerId,
-      grantedOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : '' 
-    }));
-  };
-
-  // Handle alternate organizer change
-  const handleAlternateOrganizerChange = (event) => {
-    const selectedOrganizerId = event.target.value;
-    
-    // Find the selected organizer to get its name
-    const selectedOrganizer = organizers.find(org => org._id === selectedOrganizerId);
-    
-    // Store both the ID and the name
-    setEventData(prevData => ({ 
-      ...prevData, 
-      alternateOrganizerID: selectedOrganizerId,
-      alternateOrganizerName: selectedOrganizer ? (selectedOrganizer.name || selectedOrganizer.fullName) : '' 
+      categoryThird: selectedCategory ? selectedCategory.categoryName : ''
     }));
   };
 
@@ -138,75 +106,6 @@ const CreateEventDetailsOther = ({ eventData, setEventData }) => {
             </Select>
           </FormControl>
         </Grid>
-
-        {/* Granted Organizer Selection */}
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id="granted-organizer-label">Granted Organizer</InputLabel>
-            <Select
-              labelId="granted-organizer-label"
-              value={eventData.grantedOrganizerID || ''}
-              onChange={handleGrantedOrganizerChange}
-              label="Granted Organizer"
-              disabled={loadingOrganizers}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {loadingOrganizers ? (
-                <MenuItem disabled>
-                  <Box display="flex" alignItems="center">
-                    <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Loading organizers...
-                  </Box>
-                </MenuItem>
-              ) : errorOrganizers ? (
-                <MenuItem disabled>Error loading organizers</MenuItem>
-              ) : (
-                organizers.map((organizer) => (
-                  <MenuItem key={organizer._id} value={organizer._id}>
-                    {organizer.name || organizer.fullName}
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
-        </Grid>
-
-        {/* Alternate Organizer Selection */}
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id="alternate-organizer-label">Alternate Organizer</InputLabel>
-            <Select
-              labelId="alternate-organizer-label"
-              value={eventData.alternateOrganizerID || ''}
-              onChange={handleAlternateOrganizerChange}
-              label="Alternate Organizer"
-              disabled={loadingOrganizers}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {loadingOrganizers ? (
-                <MenuItem disabled>
-                  <Box display="flex" alignItems="center">
-                    <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Loading organizers...
-                  </Box>
-                </MenuItem>
-              ) : errorOrganizers ? (
-                <MenuItem disabled>Error loading organizers</MenuItem>
-              ) : (
-                organizers.map((organizer) => (
-                  <MenuItem key={organizer._id} value={organizer._id}>
-                    {organizer.name || organizer.fullName}
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
-        </Grid>
-
       </Grid>
     </Box>
   );
