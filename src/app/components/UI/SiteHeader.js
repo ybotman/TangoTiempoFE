@@ -18,6 +18,7 @@ const SiteHeader = () => {
   // TIEMPO-381: State for nearest city name and distance
   const [nearestCityName, setNearestCityName] = useState(null);
   const [cityDistanceMiles, setCityDistanceMiles] = useState(null);
+  const [cityLoading, setCityLoading] = useState(false);
   const lastFetchedCoords = useRef(null);
 
   // Helper: Calculate distance between two points in miles (Haversine formula)
@@ -62,6 +63,7 @@ const SiteHeader = () => {
   useEffect(() => {
     if (!currentLocation?.lat || !currentLocation?.lng || !fetchNearestCity) {
       setNearestCityName(null);
+      setCityLoading(false);
       return;
     }
 
@@ -75,15 +77,14 @@ const SiteHeader = () => {
     }
 
     const fetchCity = async () => {
+      setCityLoading(true);
       try {
         console.log('[SiteHeader] Fetching nearest city for:', { lat, lng });
         const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
         console.log('[SiteHeader] Got city data:', cityData);
         if (cityData?.cityName) {
           setNearestCityName(cityData.cityName);
-          // Only cache coords on SUCCESS - allows retry if fetch fails
           lastFetchedCoords.current = coordKey;
-          // Calculate distance if city has coordinates
           if (cityData.latitude && cityData.longitude) {
             const distance = calculateDistanceMiles(lat, lng, cityData.latitude, cityData.longitude);
             setCityDistanceMiles(Math.round(distance));
@@ -94,14 +95,13 @@ const SiteHeader = () => {
           console.log('[SiteHeader] No cityName in response');
           setNearestCityName(null);
           setCityDistanceMiles(null);
-          // Don't cache coords - allow retry next render
         }
       } catch (error) {
-        // If no city found, fall back to coordinates
-        // Don't cache coords on error - allow retry
         console.error('[SiteHeader] fetchNearestCity error:', error?.message || error);
         setNearestCityName(null);
         setCityDistanceMiles(null);
+      } finally {
+        setCityLoading(false);
       }
     };
 
@@ -115,14 +115,18 @@ const SiteHeader = () => {
     }
     const radius = currentLocation.zoomRange || 50;
 
-    // Use city name if available, otherwise coordinates
+    // Show loading state while fetching city name
+    if (cityLoading) {
+      return `Loading... ± ${radius}mi`;
+    }
+
+    // Use city name if available
     if (nearestCityName) {
-      // If city is more than 100 miles away, show "Near-ish:"
       const prefix = cityDistanceMiles && cityDistanceMiles > 100 ? 'Near-ish: ' : '';
       return `${prefix}${nearestCityName} ± ${radius}mi`;
     }
 
-    // Fallback to coordinates
+    // Only show coordinates if fetch completed but no city found
     const lat = parseFloat(currentLocation.lat).toFixed(1);
     const lng = parseFloat(currentLocation.lng).toFixed(1);
     return `${lat}°, ${lng}° ± ${radius}mi`;
