@@ -76,7 +76,9 @@ const SiteHeader = () => {
 
     const fetchCity = async () => {
       try {
+        console.log('[SiteHeader] Fetching nearest city for:', { lat, lng });
         const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
+        console.log('[SiteHeader] Got city data:', cityData);
         if (cityData?.cityName) {
           setNearestCityName(cityData.cityName);
           // Only cache coords on SUCCESS - allows retry if fetch fails

@@ -2,8 +2,8 @@
   "git": {
     "deploymentEnabled": {
       "DEVL": false,
-      "TEST": true,
-      "PROD": true
+      "TEST": false,
+      "PROD": false
     }
   },
   "headers": [

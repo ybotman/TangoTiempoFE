@@ -9,6 +9,67 @@ Generated on: 2025-07-23T13:56:09.826Z
 
 ---
 
+## PROD Deploy Protection (MANDATORY)
+
+**STOP before ANY operation affecting PROD branch.**
+
+### Protected Operations
+- `git push` to PROD (any form)
+- `git merge` into PROD
+- Creating PR targeting PROD
+- `vercel` commands affecting production
+- Any deployment script targeting PROD
+
+### Required Confirmation Flow
+
+1. **ANNOUNCE** the operation:
+   ```
+   ⚠️  PROD DEPLOYMENT CHECKPOINT
+
+   Operation: [describe what will happen]
+   Target: PROD branch → Vercel production (tangotiempo.com)
+
+   Type DEPLOY-PROD to confirm, or CANCEL to abort.
+   ```
+
+2. **WAIT** for user response:
+   - `DEPLOY-PROD` → Proceed with operation
+   - `CANCEL` or anything else → Abort immediately
+
+3. **VERIFY** before executing:
+   - Confirm you're on correct branch
+   - Confirm target is intended
+   - Execute the approved operation only
+
+### NO EXCEPTIONS
+
+- Do not assume approval from similar phrases
+- Do not batch PROD operations without individual confirmation
+- Do not proceed if response is ambiguous
+- "Yes", "sure", "go ahead" are NOT valid - must be exact phrase `DEPLOY-PROD`
+
+### Technical Enforcement
+
+**GitHub branch protection:**
+- Direct pushes blocked (requires PR)
+- Force pushes disabled
+- Deletions disabled
+
+**Vercel auto-deploy disabled:**
+- Git pushes do NOT trigger builds
+- Must run `vercel --prod` after PR merge to deploy
+
+### Deployment Flow
+
+1. User confirms `DEPLOY-PROD`
+2. Create PR from TEST → PROD
+3. User merges PR in GitHub
+4. Run `vercel --prod` to deploy to tangotiempo.com
+
+**Reference**: `/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/PROD-DEPLOY-PROTECTION.md`
+
+---
+
 
 ================================================================================
 START OF FILE: STARTUP-DEF.md

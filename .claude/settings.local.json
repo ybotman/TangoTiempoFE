@@ -36,7 +36,13 @@
       "Bash(GIT_DIR=/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/.git GIT_WORK_TREE=/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages git status:*)",
       "Bash(xargs:*)",
       "WebFetch(domain:www.tangotiempo.com)",
-      "WebFetch(domain:tangotiempo-test.azurewebsites.net)"
+      "WebFetch(domain:tangotiempo-test.azurewebsites.net)",
+      "Bash(vercel inspect:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel project ls:*)",
+      "WebFetch(domain:calendarbeaf-test.azurewebsites.net)",
+      "mcp__claude_ai_Atlassian__addCommentToJiraIssue",
+      "Bash(vercel:*)"
     ],
     "deny": [],
     "ask": []
