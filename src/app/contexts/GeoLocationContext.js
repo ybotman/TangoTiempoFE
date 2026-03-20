@@ -69,20 +69,32 @@ export const GeoLocationProvider = ({ children }) => {
   });
 
   // State for current active location (single source of truth)
+  // TIEMPO-388: Added cityName, cityNameLoading, cityNameFetched to prevent recurring pill bug
   const [currentLocation, setCurrentLocationState] = useState(() => {
     // Load from sessionStorage if available
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('currentLocation');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          // Ensure new fields exist (backwards compatible)
+          return {
+            lat: parsed.lat ?? null,
+            lng: parsed.lng ?? null,
+            zoomRange: parsed.zoomRange ?? 50,
+            cityName: parsed.cityName ?? null,
+            cityNameLoading: false,
+            cityNameFetched: parsed.cityNameFetched ?? false,
+            source: parsed.source,
+            locked: parsed.locked
+          };
         } catch {
           // TIEMPO-276: Security cleanup - removed error logging
-          return { lat: null, lng: null, zoomRange: 50 };
+          return { lat: null, lng: null, zoomRange: 50, cityName: null, cityNameLoading: false, cityNameFetched: false };
         }
       }
     }
-    return { lat: null, lng: null, zoomRange: 50 };
+    return { lat: null, lng: null, zoomRange: 50, cityName: null, cityNameLoading: false, cityNameFetched: false };
   });
 
   // State for MapCenterModal
@@ -212,6 +224,62 @@ export const GeoLocationProvider = ({ children }) => {
       unsubscribeLoadingCompleted();
     };
   }, []); // Empty deps array - only run on mount
+
+  // TIEMPO-388: Auto-fetch nearest city when currentLocation coords change
+  // This centralizes the city name fetch in context instead of SiteHeader local state
+  const lastFetchedCoordsRef = useRef(null);
+  useEffect(() => {
+    const lat = currentLocation?.lat;
+    const lng = currentLocation?.lng;
+
+    // Skip if no coords or already fetched for these coords
+    if (!lat || !lng || !locationAPI?.fetchNearestCity) {
+      return;
+    }
+
+    const coordKey = `${parseFloat(lat).toFixed(4)},${parseFloat(lng).toFixed(4)}`;
+    if (lastFetchedCoordsRef.current === coordKey && currentLocation.cityNameFetched) {
+      return; // Already fetched for these coords
+    }
+
+    const fetchCity = async () => {
+      // Set loading state
+      setCurrentLocationState(prev => ({ ...prev, cityNameLoading: true }));
+
+      try {
+        const cityData = await locationAPI.fetchNearestCity(lat, lng, 500000);
+
+        if (cityData?.cityName) {
+          lastFetchedCoordsRef.current = coordKey;
+          setCurrentLocationState(prev => {
+            const updated = {
+              ...prev,
+              cityName: cityData.cityName,
+              cityNameLoading: false,
+              cityNameFetched: true
+            };
+            // Persist to sessionStorage
+            sessionStorage.setItem('currentLocation', JSON.stringify(updated));
+            return updated;
+          });
+        } else {
+          // No city found - mark as fetched to prevent retry loop
+          setCurrentLocationState(prev => {
+            const updated = { ...prev, cityName: null, cityNameLoading: false, cityNameFetched: true };
+            sessionStorage.setItem('currentLocation', JSON.stringify(updated));
+            return updated;
+          });
+          console.warn('[GeoLocationContext] No city found for coords, pill will show coordinates');
+        }
+      } catch (error) {
+        console.error('[GeoLocationContext] Error fetching nearest city:', error);
+        // Don't mark as fetched on error - allow retry
+        setCurrentLocationState(prev => ({ ...prev, cityNameLoading: false }));
+      }
+    };
+
+    fetchCity();
+  }, [currentLocation?.lat, currentLocation?.lng, locationAPI]);
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {
@@ -366,22 +434,26 @@ export const GeoLocationProvider = ({ children }) => {
   // Set location for current session (used by MapCenterModal)
   const setSessionLocation = useCallback((locationData) => {
     // TIEMPO-276: Security cleanup - removed session logging
-    
+
     const location = {
       lat: locationData.centerLocation?.lat || locationData.lat,
       lng: locationData.centerLocation?.lng || locationData.lng,
-      zoomRange: locationData.zoomRange || 50
+      zoomRange: locationData.zoomRange || 50,
+      // TIEMPO-388: Reset city name state to trigger refetch for new coords
+      cityName: null,
+      cityNameLoading: false,
+      cityNameFetched: false
     };
-    
+
     // Only add source and locked if they exist (for Boston route)
     if (locationData.source) location.source = locationData.source;
     if (locationData.locked !== undefined) location.locked = locationData.locked;
-    
+
     setCurrentLocationState(location);
-    
+
     // Save to sessionStorage
     sessionStorage.setItem('currentLocation', JSON.stringify(location));
-    
+
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
   }, []);
@@ -441,16 +513,23 @@ export const GeoLocationProvider = ({ children }) => {
         zoomRange: location.radiusMiles
       });
 
+      // TIEMPO-388: Reset city name state to trigger refetch for new coords
       setCurrentLocationState({
         lat: location.lat,
         lng: location.lng,
-        zoomRange: location.radiusMiles
+        zoomRange: location.radiusMiles,
+        cityName: null,
+        cityNameLoading: false,
+        cityNameFetched: false
       });
 
       sessionStorage.setItem('currentLocation', JSON.stringify({
         lat: location.lat,
         lng: location.lng,
-        zoomRange: location.radiusMiles
+        zoomRange: location.radiusMiles,
+        cityName: null,
+        cityNameLoading: false,
+        cityNameFetched: false
       }));
 
       locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
@@ -493,18 +572,24 @@ export const GeoLocationProvider = ({ children }) => {
       zoomRange: location.radiusMiles
     });
 
-    // Also set as current location
+    // TIEMPO-388: Reset city name state to trigger refetch for new coords
     setCurrentLocationState({
       lat: location.lat,
       lng: location.lng,
-      zoomRange: location.radiusMiles
+      zoomRange: location.radiusMiles,
+      cityName: null,
+      cityNameLoading: false,
+      cityNameFetched: false
     });
 
     // Save to sessionStorage
     sessionStorage.setItem('currentLocation', JSON.stringify({
       lat: location.lat,
       lng: location.lng,
-      zoomRange: location.radiusMiles
+      zoomRange: location.radiusMiles,
+      cityName: null,
+      cityNameLoading: false,
+      cityNameFetched: false
     }));
 
     // Emit event to trigger refresh
@@ -560,15 +645,19 @@ export const GeoLocationProvider = ({ children }) => {
 
       // Check for successful response with data
       if (result.success && result.data) {
+        // TIEMPO-388: Include city name fields, reset to trigger refetch
         const location = {
           lat: result.data.lat,
           lng: result.data.lng,
-          zoomRange: result.data.radiusMiles  // Map backend radiusMiles to FE zoomRange
+          zoomRange: result.data.radiusMiles,  // Map backend radiusMiles to FE zoomRange
+          cityName: null,
+          cityNameLoading: false,
+          cityNameFetched: false
           // result.data.zoom also available if needed for map display
         };
 
         // Update saved location (always safe to update)
-        setSavedLocation(location);
+        setSavedLocation({ lat: location.lat, lng: location.lng, zoomRange: location.zoomRange });
 
         // TIEMPO-381: Only update current location if it's not locked (e.g., Boston route)
         setCurrentLocationState(prev => {

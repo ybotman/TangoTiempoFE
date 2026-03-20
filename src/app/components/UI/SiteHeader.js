@@ -4,34 +4,15 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
+  // TIEMPO-388: Read cityName from context instead of local state
   const { currentLocation, openMapCenterModal } = useGeoLocation();
-  const { fetchNearestCity } = useLocationAPI();
   useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
-
-  // TIEMPO-381: State for nearest city name and distance
-  const [nearestCityName, setNearestCityName] = useState(null);
-  const [cityDistanceMiles, setCityDistanceMiles] = useState(null);
-  const [cityLoading, setCityLoading] = useState(false);
-  const lastFetchedCoords = useRef(null);
-
-  // Helper: Calculate distance between two points in miles (Haversine formula)
-  const calculateDistanceMiles = (lat1, lng1, lat2, lng2) => {
-    const R = 3959; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
 
   // Pulse animation state - triggers on mount and location changes
   const [isPulsing, setIsPulsing] = useState(true);
@@ -59,56 +40,10 @@ const SiteHeader = () => {
     };
   }, [currentLocation?.lat, currentLocation?.lng, currentLocation?.zoomRange]);
 
-  // TIEMPO-381: Fetch nearest city when currentLocation changes
-  useEffect(() => {
-    if (!currentLocation?.lat || !currentLocation?.lng || !fetchNearestCity) {
-      setNearestCityName(null);
-      setCityLoading(false);
-      return;
-    }
+  // TIEMPO-388: City name now managed by GeoLocationContext, not local state
+  // This prevents the recurring bug where city name was lost on component remount
 
-    const lat = parseFloat(currentLocation.lat);
-    const lng = parseFloat(currentLocation.lng);
-
-    // Skip if we already fetched for these coordinates
-    const coordKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
-    if (lastFetchedCoords.current === coordKey) {
-      return;
-    }
-
-    const fetchCity = async () => {
-      setCityLoading(true);
-      try {
-        console.log('[SiteHeader] Fetching nearest city for:', { lat, lng });
-        const cityData = await fetchNearestCity(lat, lng, 500000); // 500km radius
-        console.log('[SiteHeader] Got city data:', cityData);
-        if (cityData?.cityName) {
-          setNearestCityName(cityData.cityName);
-          lastFetchedCoords.current = coordKey;
-          if (cityData.latitude && cityData.longitude) {
-            const distance = calculateDistanceMiles(lat, lng, cityData.latitude, cityData.longitude);
-            setCityDistanceMiles(Math.round(distance));
-          } else {
-            setCityDistanceMiles(null);
-          }
-        } else {
-          console.log('[SiteHeader] No cityName in response');
-          setNearestCityName(null);
-          setCityDistanceMiles(null);
-        }
-      } catch (error) {
-        console.error('[SiteHeader] fetchNearestCity error:', error?.message || error);
-        setNearestCityName(null);
-        setCityDistanceMiles(null);
-      } finally {
-        setCityLoading(false);
-      }
-    };
-
-    fetchCity();
-  }, [currentLocation?.lat, currentLocation?.lng, fetchNearestCity]);
-
-  // TIEMPO-381: Format location display text
+  // TIEMPO-388: Format location display text - reads from context instead of local state
   const getLocationDisplay = () => {
     if (!currentLocation?.lat || !currentLocation?.lng) {
       return null;
@@ -116,17 +51,20 @@ const SiteHeader = () => {
     const radius = currentLocation.zoomRange || 50;
 
     // Show loading state while fetching city name
-    if (cityLoading) {
+    if (currentLocation.cityNameLoading) {
       return `Loading... ± ${radius}mi`;
     }
 
-    // Use city name if available
-    if (nearestCityName) {
-      const prefix = cityDistanceMiles && cityDistanceMiles > 100 ? 'Near-ish: ' : '';
-      return `${prefix}${nearestCityName} ± ${radius}mi`;
+    // Use city name if available (now from context, survives remount)
+    if (currentLocation.cityName) {
+      return `${currentLocation.cityName} ± ${radius}mi`;
     }
 
-    // Only show coordinates if fetch completed but no city found
+    // Show coordinates only if fetch completed but no city found
+    // Log warning to help debug if this keeps happening
+    if (currentLocation.cityNameFetched) {
+      console.warn('[SiteHeader] No city name found, showing coordinates');
+    }
     const lat = parseFloat(currentLocation.lat).toFixed(1);
     const lng = parseFloat(currentLocation.lng).toFixed(1);
     return `${lat}°, ${lng}° ± ${radius}mi`;
