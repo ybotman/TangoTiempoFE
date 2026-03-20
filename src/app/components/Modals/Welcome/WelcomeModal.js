@@ -1,14 +1,15 @@
 /**
- * WelcomeModal - Simplified Location Flow
+ * WelcomeModal - Browser Geolocation First Flow
  *
  * Part of TIEMPO-329: Managed User Entry Flow
+ * Updated TIEMPO-388: Try browser geolocation before showing modal
  *
- * Simplified flow:
- * - If user has saved/session location → use it silently
- * - If on /boston route → use Boston coordinates (handled elsewhere)
- * - Otherwise → open MapCenterModal directly
- *
- * No welcome banners - just handle location.
+ * Flow for anonymous users:
+ * 1. If user has saved/session location → use it silently
+ * 2. If on /boston route → use Boston coordinates (handled elsewhere)
+ * 3. Otherwise → TRY browser geolocation first
+ *    a. If granted → use it, show toast, DON'T show modal
+ *    b. If denied/timeout → show MapCenterModal
  *
  * @module WelcomeModal
  */
@@ -16,6 +17,7 @@
 'use client';
 
 import { useState, useEffect, useContext } from 'react';
+import { Snackbar, Alert } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import {
@@ -24,65 +26,103 @@ import {
 } from '@/utils/visitorTracking';
 
 /**
- * Determine if user needs to set location
- *
- * @returns {boolean} true if user needs to set location
+ * Determine if user needs location setup
+ * @returns {boolean} true if no stored location
  */
 const needsLocationSetup = () => {
-  // Check if user has a stored location (either from cloud or session)
   const storedLocation = getLastMapCenter();
-
-  // Check if on Boston route (Boston has forced coordinates)
   const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
 
-  if (isBostonRoute) {
-    return false;  // Boston uses forced coordinates
-  }
-
-  if (storedLocation) {
-    return false;  // Has location, no setup needed
-  }
-
-  return true;  // No location - need MapCenter modal
+  if (isBostonRoute) return false;
+  if (storedLocation) return false;
+  return true;
 };
 
 /**
  * WelcomeModal Component
- *
- * Handles location flow on page load - opens MapCenterModal if no location saved
+ * Tries browser geolocation first, only shows modal if denied/failed
  */
 const WelcomeModal = () => {
   const { user } = useContext(AuthContext);
-  const { openMapCenterModal } = useGeoLocation();
+  const { openMapCenterModal, setSessionLocation } = useGeoLocation();
   const [hasChecked, setHasChecked] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
 
-  // Check location state and open MapCenterModal if needed
   useEffect(() => {
     if (hasChecked) return;
 
-    // Increment visit count for analytics
     incrementVisitCount();
 
-    // TIEMPO-381: Skip for logged-in users - UserLocationLoader handles their location
-    // UserLocationLoader fetches from cloud and sets needsOnboarding if needed
+    // Skip for logged-in users - UserLocationLoader handles their location
     if (user) {
       setHasChecked(true);
       return;
     }
 
-    // Check if location setup is needed (anonymous users only)
-    if (needsLocationSetup()) {
-      // Small delay to let page render first
-      setTimeout(() => {
-        openMapCenterModal();
-      }, 500);
+    // Skip if already have location
+    if (!needsLocationSetup()) {
+      setHasChecked(true);
+      return;
     }
 
-    setHasChecked(true);
-  }, [hasChecked, openMapCenterModal, user]);
+    // TIEMPO-388: Try browser geolocation first for anonymous users
+    const tryBrowserGeolocation = () => {
+      if (!('geolocation' in navigator)) {
+        // No geolocation support - fall back to modal
+        openMapCenterModal();
+        return;
+      }
 
-  // No UI - just handles location flow
-  return null;
+      // Try to get browser location with timeout
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Success! Use browser location
+          const { latitude, longitude } = position.coords;
+
+          setSessionLocation({
+            lat: latitude,
+            lng: longitude,
+            zoomRange: 50
+          });
+
+          // Show friendly toast instead of modal
+          setToastOpen(true);
+        },
+        (error) => {
+          // Geolocation denied or failed - show modal
+          console.log('[WelcomeModal] Geolocation denied/failed:', error.message);
+          openMapCenterModal();
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 5000,  // 5 second timeout
+          maximumAge: 300000  // Accept cached position up to 5 min old
+        }
+      );
+    };
+
+    // Small delay to let page render, then try geolocation
+    setTimeout(tryBrowserGeolocation, 500);
+
+    setHasChecked(true);
+  }, [hasChecked, openMapCenterModal, setSessionLocation, user]);
+
+  return (
+    <Snackbar
+      open={toastOpen}
+      onClose={() => setToastOpen(false)}
+      autoHideDuration={4000}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+    >
+      <Alert
+        onClose={() => setToastOpen(false)}
+        severity="info"
+        sx={{ backgroundColor: '#1976d2', color: 'white' }}
+      >
+        Using your location. Tap the pill to change.
+      </Alert>
+    </Snackbar>
+  );
 };
 
 export default WelcomeModal;
