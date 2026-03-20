@@ -24,7 +24,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
  * @param {Function} props.onOpenMapCenter - Callback to open Map Center modal
  * @param {Object} [props.sx] - Optional MUI sx prop for custom styling
  */
-const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
+const NoEventsAlert = ({ events, eventsLoading, noLocationSelected, onOpenMapCenter, sx = {} }) => {
   const [dismissed, setDismissed] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -72,11 +72,12 @@ const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
   }, [eventsLoading, events, dismissed]);
 
   // Don't show if:
+  // - No location selected yet (user hasn't set map center)
   // - Still loading
   // - Events exist
   // - User dismissed the alert
   // - Delay hasn't passed yet
-  if (eventsLoading || !events || events.length > 0 || dismissed || !showAlert) {
+  if (noLocationSelected || eventsLoading || !events || events.length > 0 || dismissed || !showAlert) {
     return null;
   }
 
@@ -136,6 +137,7 @@ const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
 NoEventsAlert.propTypes = {
   events: PropTypes.array.isRequired,
   eventsLoading: PropTypes.bool.isRequired,
+  noLocationSelected: PropTypes.bool,
   onOpenMapCenter: PropTypes.func.isRequired,
   sx: PropTypes.object
 };

@@ -106,8 +106,7 @@ const SiteHeader = () => {
     };
 
     fetchCity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLocation?.lat, currentLocation?.lng]); // fetchNearestCity excluded - stable context function
+  }, [currentLocation?.lat, currentLocation?.lng, fetchNearestCity]);
 
   // TIEMPO-381: Format location display text
   const getLocationDisplay = () => {

@@ -1207,6 +1207,7 @@ const CalendarPage = () => {
           <NoEventsAlert
             events={coloredFilteredEvents}
             eventsLoading={eventsLoading}
+            noLocationSelected={noLocationSelected}
             onOpenMapCenter={openMapCenterModal}
             sx={{ mx: 2 }}
           />
