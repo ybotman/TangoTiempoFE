@@ -26,6 +26,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
  */
 const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
   const [dismissed, setDismissed] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   // TIEMPO-381: Track Boston route for conditional rendering
   const [isBostonRoute, setIsBostonRoute] = useState(false);
@@ -50,15 +51,32 @@ const NoEventsAlert = ({ events, eventsLoading, onOpenMapCenter, sx = {} }) => {
   useEffect(() => {
     if (events?.length > 0) {
       setDismissed(false);
+      setShowAlert(false);
       sessionStorage.removeItem('noEventsAlertDismissed');
     }
   }, [events?.length]);
+
+  // TIEMPO-388: Delay showing "No events" to avoid flash during initial load
+  // Only show after 1 second of no events (after loading completes)
+  useEffect(() => {
+    let timer;
+    if (!eventsLoading && events && events.length === 0 && !dismissed) {
+      // Wait 1 second before showing the alert
+      timer = setTimeout(() => {
+        setShowAlert(true);
+      }, 1000);
+    } else {
+      setShowAlert(false);
+    }
+    return () => clearTimeout(timer);
+  }, [eventsLoading, events, dismissed]);
 
   // Don't show if:
   // - Still loading
   // - Events exist
   // - User dismissed the alert
-  if (eventsLoading || !events || events.length > 0 || dismissed) {
+  // - Delay hasn't passed yet
+  if (eventsLoading || !events || events.length > 0 || dismissed || !showAlert) {
     return null;
   }
 
