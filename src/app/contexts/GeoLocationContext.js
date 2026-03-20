@@ -229,29 +229,50 @@ export const GeoLocationProvider = ({ children }) => {
   // TIEMPO-388: Auto-fetch nearest city when currentLocation coords change
   // This centralizes the city name fetch in context instead of SiteHeader local state
   const lastFetchedCoordsRef = useRef(null);
+  const fetchNearestCityRef = useRef(null);
+
+  // Keep ref updated with latest fetchNearestCity function
+  useEffect(() => {
+    fetchNearestCityRef.current = locationAPI?.fetchNearestCity;
+  }, [locationAPI?.fetchNearestCity]);
+
   useEffect(() => {
     const lat = currentLocation?.lat;
     const lng = currentLocation?.lng;
 
-    // Skip if no coords or already fetched for these coords
-    if (!lat || !lng || !locationAPI?.fetchNearestCity) {
+    // Skip if no coords or API not ready
+    if (!lat || !lng) {
+      return;
+    }
+
+    // Skip if already fetched for these coords
+    if (currentLocation.cityNameFetched) {
       return;
     }
 
     const coordKey = `${parseFloat(lat).toFixed(4)},${parseFloat(lng).toFixed(4)}`;
-    if (lastFetchedCoordsRef.current === coordKey && currentLocation.cityNameFetched) {
-      return; // Already fetched for these coords
+    if (lastFetchedCoordsRef.current === coordKey) {
+      return; // Already fetching/fetched for these coords
     }
 
+    // Mark as in-progress to prevent duplicate fetches
+    lastFetchedCoordsRef.current = coordKey;
+
     const fetchCity = async () => {
+      // Wait for API to be ready
+      if (!fetchNearestCityRef.current) {
+        // Reset coord key so we can retry when API is ready
+        lastFetchedCoordsRef.current = null;
+        return;
+      }
+
       // Set loading state
       setCurrentLocationState(prev => ({ ...prev, cityNameLoading: true }));
 
       try {
-        const cityData = await locationAPI.fetchNearestCity(lat, lng, 500000);
+        const cityData = await fetchNearestCityRef.current(lat, lng, 500000);
 
         if (cityData?.cityName) {
-          lastFetchedCoordsRef.current = coordKey;
           setCurrentLocationState(prev => {
             const updated = {
               ...prev,
@@ -274,13 +295,14 @@ export const GeoLocationProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('[GeoLocationContext] Error fetching nearest city:', error);
-        // Don't mark as fetched on error - allow retry
+        // Reset coord key on error to allow retry
+        lastFetchedCoordsRef.current = null;
         setCurrentLocationState(prev => ({ ...prev, cityNameLoading: false }));
       }
     };
 
     fetchCity();
-  }, [currentLocation?.lat, currentLocation?.lng, locationAPI]);
+  }, [currentLocation?.lat, currentLocation?.lng, currentLocation?.cityNameFetched]);
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {
