@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { useLocationAPI } from '@/contexts/LocationAPIContext';
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
 import { userSettingsEvent } from '@/utils/UserSettingsEvent';
+import { saveLastMapCenter } from '@/utils/visitorTracking';
 
 // Create the GeoLocationContext
 const GeoLocationContext = createContext();
@@ -454,6 +455,14 @@ export const GeoLocationProvider = ({ children }) => {
     // Save to sessionStorage
     sessionStorage.setItem('currentLocation', JSON.stringify(location));
 
+    // TIEMPO-388: Also save to localStorage for WelcomeModal check on next visit
+    // This prevents the modal from showing again when user already has location
+    saveLastMapCenter({
+      lat: location.lat,
+      lng: location.lng,
+      zoomRange: location.zoomRange
+    });
+
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
   }, []);
@@ -532,6 +541,13 @@ export const GeoLocationProvider = ({ children }) => {
         cityNameFetched: false
       }));
 
+      // TIEMPO-388: Also save to localStorage for WelcomeModal check
+      saveLastMapCenter({
+        lat: location.lat,
+        lng: location.lng,
+        zoomRange: location.radiusMiles
+      });
+
       locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
 
       return { success: true, message: 'Saved locally (localhost mode)' };
@@ -591,6 +607,13 @@ export const GeoLocationProvider = ({ children }) => {
       cityNameLoading: false,
       cityNameFetched: false
     }));
+
+    // TIEMPO-388: Also save to localStorage for WelcomeModal check
+    saveLastMapCenter({
+      lat: location.lat,
+      lng: location.lng,
+      zoomRange: location.radiusMiles
+    });
 
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
@@ -674,6 +697,14 @@ export const GeoLocationProvider = ({ children }) => {
         const currentParsed = currentSaved ? JSON.parse(currentSaved) : null;
         if (!currentParsed?.locked) {
           sessionStorage.setItem('currentLocation', JSON.stringify(location));
+
+          // TIEMPO-388: Also save to localStorage for WelcomeModal check on logout
+          saveLastMapCenter({
+            lat: location.lat,
+            lng: location.lng,
+            zoomRange: location.zoomRange
+          });
+
           // Emit event to trigger refresh only if we actually updated
           locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
         }
