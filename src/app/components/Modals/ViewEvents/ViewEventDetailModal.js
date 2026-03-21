@@ -651,25 +651,27 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
               </Typography>
             )}
             
-            {/* Date Display */}
-            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && (hasVenueTimezone
-                ? formatVenueDate(startDate)
-                : (() => {
-                    // TIEMPO-246: String-based fallback without Date() conversion
-                    // TIEMPO-239: Handle both Date objects and strings
-                    const dateString = typeof startDate === 'string'
-                      ? startDate
-                      : startDate?.toISOString?.() || '';
-                    const [datePart] = dateString.split('T');
-                    if (!datePart) return '';
-                    const [year, month, day] = datePart.split('-');
-                    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                                  'July', 'August', 'September', 'October', 'November', 'December'];
-                    return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
-                  })()
-              )}
-            </Typography>
+            {/* Date Display - only for non-recurring events (recurring shows date in the repeating bar) */}
+            {!isRecurringEvent && (
+              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                {startDate && (hasVenueTimezone
+                  ? formatVenueDate(startDate)
+                  : (() => {
+                      // TIEMPO-246: String-based fallback without Date() conversion
+                      // TIEMPO-239: Handle both Date objects and strings
+                      const dateString = typeof startDate === 'string'
+                        ? startDate
+                        : startDate?.toISOString?.() || '';
+                      const [datePart] = dateString.split('T');
+                      if (!datePart) return '';
+                      const [year, month, day] = datePart.split('-');
+                      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                    'July', 'August', 'September', 'October', 'November', 'December'];
+                      return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                    })()
+                )}
+              </Typography>
+            )}
 
           {/* Category Display */}
           {renderCategoryChips()}
