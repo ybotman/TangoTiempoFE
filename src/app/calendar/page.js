@@ -1033,25 +1033,21 @@ const CalendarPage = () => {
     }
   }, []);
 
-  // Auto-open map if no location is selected (only if welcome wasn't shown)
+  // Auto-open location settings for LOGGED-IN users only if no location selected
   // TIEMPO-381: Wait for geoInitialized before making decision - prevents race condition
+  // TIEMPO-388: Anonymous users are handled by WelcomeModal (tries browser geolocation first)
   useEffect(() => {
-    if (geoInitialized && noLocationSelected && !hasAutoOpenedMap && wasWelcomeShown()) {
+    if (geoInitialized && noLocationSelected && !hasAutoOpenedMap && wasWelcomeShown() && user) {
       // Small delay to ensure page is loaded
       const timer = setTimeout(() => {
-        if (!user) {
-          // Non-logged user: Open MapCenterModal
-          openMapCenterModal();
-        } else {
-          // Logged-in user: Open UserSettings to location preferences
-          openLocationSettings('locationPrefs');
-        }
+        // Logged-in user: Open UserSettings to location preferences
+        openLocationSettings('locationPrefs');
         setHasAutoOpenedMap(true);
       }, 500);
 
       return () => clearTimeout(timer);
     }
-  }, [geoInitialized, noLocationSelected, hasAutoOpenedMap, openLocationSettings, openMapCenterModal, user]);
+  }, [geoInitialized, noLocationSelected, hasAutoOpenedMap, openLocationSettings, user]);
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
