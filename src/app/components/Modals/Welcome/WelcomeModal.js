@@ -100,7 +100,7 @@ const WelcomeModal = () => {
         },
         {
           enableHighAccuracy: false,
-          timeout: 5000,  // 5 second timeout
+          timeout: 10000,  // 10 second timeout (VPN can slow geolocation)
           maximumAge: 300000  // Accept cached position up to 5 min old
         }
       );
