@@ -15,13 +15,15 @@ Generated on: 2025-07-23T13:56:09.826Z
 |------|-------|
 | Repo | ybotman/tangotiempo.com |
 | Branches | feature/* → DEVL → TEST → PROD |
-| Vercel TEST | tangotiempo-test |
-| Vercel PROD | tangotiempo-com (tangotiempo.com) |
+| Vercel TEST | `tangotiempo-test` |
+| Vercel PROD | `tangotiempo-com` (tangotiempo.com) |
 | Auto-Deploy | DEVL ✅ TEST ✅ PROD ❌ |
 | PROD Protection | `DEPLOY-PROD` required |
 | Deploy Command | `vercel --prod` |
 | Backend TEST | calendarbeaf-test.azurewebsites.net |
 | Backend PROD | calendarbeaf-prod.azurewebsites.net |
+
+**⚠️ NEVER run `vercel link` with unknown project names - Vercel creates new projects automatically.**
 
 **Full details:** `/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/DEPLOYMENT-MATRIX.md`
 

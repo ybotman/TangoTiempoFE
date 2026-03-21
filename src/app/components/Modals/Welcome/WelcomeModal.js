@@ -33,6 +33,8 @@ const needsLocationSetup = () => {
   const storedLocation = getLastMapCenter();
   const isBostonRoute = typeof window !== 'undefined' && window.location.pathname.includes('/boston');
 
+  console.log('[WelcomeModal] needsLocationSetup check:', { storedLocation, isBostonRoute });
+
   if (isBostonRoute) return false;
   if (storedLocation) return false;
   return true;
@@ -78,19 +80,22 @@ const WelcomeModal = () => {
         (position) => {
           // Success! Use browser location
           const { latitude, longitude } = position.coords;
+          console.log('[WelcomeModal] Geolocation success:', { latitude, longitude });
 
           setSessionLocation({
             lat: latitude,
             lng: longitude,
             zoomRange: 50
           });
+          console.log('[WelcomeModal] setSessionLocation called');
 
           // Show friendly toast instead of modal
           setToastOpen(true);
         },
         (error) => {
           // Geolocation denied or failed - show modal
-          console.log('[WelcomeModal] Geolocation denied/failed:', error.message);
+          console.log('[WelcomeModal] Geolocation denied/failed:', error.code, error.message);
+          console.log('[WelcomeModal] Opening MapCenterModal due to geolocation error');
           openMapCenterModal();
         },
         {
