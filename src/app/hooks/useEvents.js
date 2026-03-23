@@ -552,7 +552,10 @@ export function useEventOperations() {
           fallbackImageUrl: cleanedEventData.fallbackImageUrl,
           // Include recurring event fields if present
           recurrenceRule: cleanedEventData.recurrenceRule || undefined,
-          excludedDates: cleanedEventData.excludedDates || undefined
+          excludedDates: cleanedEventData.excludedDates || undefined,
+          // TIEMPO-388: Include spotlights/features for RA
+          features: cleanedEventData.features || cleanedEventData.spotlights || [],
+          spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       } else {
         // RO endpoint uses existing logic
@@ -791,7 +794,10 @@ export function useEventOperations() {
           // Include auth fields for RA validation
           selectedRole: 'RegionalAdmin',
           allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
-                                      user?.backendInfo?.localAdminInfo?.adminCities
+                                      user?.backendInfo?.localAdminInfo?.adminCities,
+          // TIEMPO-388: Include spotlights/features for RA
+          features: cleanedEventData.features || cleanedEventData.spotlights || [],
+          spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       } else {
         // RO endpoint uses full data structure
