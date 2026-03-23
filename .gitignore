@@ -50,6 +50,7 @@ TangoTiempo.data
 sitemap-*.xml
 archive/
 public/organizersList.json
+public/version.json
 
 
 # Coverage directories used by tools like istanbul, nyc, etc.
