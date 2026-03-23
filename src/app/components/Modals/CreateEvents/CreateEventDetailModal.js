@@ -1026,11 +1026,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             />
           )}
           <Tab label="Image" value="image" />
+          {/* Spotlights tab - always show (filtered options for repeating) */}
+          <Tab label="Spotlights" value="spotlights" />
           {eventData.isRepeating && editMode && (
             <Tab label="Override Images" value="overrideImages" />
           )}
-          {/* TIEMPO-388: Spotlights tab - always show (filtered options for repeating) */}
-          <Tab label="Spotlights" value="spotlights" />
           {/* TIEMPO-388: Grants tab (organizers) - always show */}
           <Tab label="Grants" value="grants" />
           <Tab label="Other" value="other" />
@@ -1042,10 +1042,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           <CreateEventDetailsRepeating eventData={eventData} setEventData={updateEventData} />
         )}
         {currentTab === 'image' && <CreateEventDetailsImage eventData={eventData} setEventData={updateEventData} />}
-        {currentTab === 'overrideImages' && eventData.isRepeating && (
-          <CreateEventDetailsOverrideImages eventData={eventData} setEventData={updateEventData} />
-        )}
-        {/* TIEMPO-388: Spotlights tab content - works for both repeating and non-repeating */}
+        {/* Spotlights tab content - works for both repeating and non-repeating */}
         {currentTab === 'spotlights' && (
           <CreateEventDetailsSpotlights
             eventData={eventData}
@@ -1053,6 +1050,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
             isMultiDay={isMultiDayEvent}
             isRepeating={eventData.isRepeating}
           />
+        )}
+        {currentTab === 'overrideImages' && eventData.isRepeating && (
+          <CreateEventDetailsOverrideImages eventData={eventData} setEventData={updateEventData} />
         )}
         {/* TIEMPO-388: Grants tab content */}
         {currentTab === 'grants' && (

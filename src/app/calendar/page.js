@@ -578,33 +578,31 @@ const CalendarPage = () => {
                   );
                 }
 
-                // TIEMPO-388: Feature badges - non-inverted style (colored text on clear), no "TONIGHTS" prefix
+                // Spotlight badges on calendar view: Only show DJ for Practica events
+                // All other spotlights (orchestra, instructor, performer, etc.) only shown in detail view
                 if (featureData && !featureData.isCanceled) {
-                  const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
-                  const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
+                  const isPractica = event.extendedProps?.categoryFirst === 'Practica';
 
-                  featureData.features
-                    .filter(f => f.type !== 'orchestra' && f.type !== 'live' && f.type !== 'note' && f.type !== 'description')
-                    .forEach((feature, idx) => {
-                      const label = typeLabels[feature.type] || feature.type;
-                      const textColor = typeColors[feature.type] || '#1976d2';
-                      badges.push(
-                        <span key={`${feature.type}-${idx}`} style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 'bold',
-                          color: textColor,
-                          backgroundColor: 'transparent',
-                          padding: '1px 4px',
-                          marginLeft: '4px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {label}: {feature.name}
-                        </span>
-                      );
-                    });
+                  // Only show DJ badge, and only for Practica events
+                  if (isPractica && featureData.dj) {
+                    badges.push(
+                      <span key="dj" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#1976d2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        DJ: {featureData.dj.name}
+                      </span>
+                    );
+                  }
                 }
 
-                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
+                // Orchestra NOT shown on calendar views - only in detail view
+                const hasOrchestra = false;
 
                 return (
                   <>
@@ -808,33 +806,31 @@ const CalendarPage = () => {
                   );
                 }
 
-                // TIEMPO-388: Feature badges - non-inverted style (colored text on clear), no prefix
+                // Spotlight badges on calendar view: Only show DJ for Practica events
+                // All other spotlights (orchestra, instructor, performer, etc.) only shown in detail view
                 if (featureData && !featureData.isCanceled) {
-                  const typeLabels = { dj: 'DJ', performer: 'Performer', instructor: 'Instructor' };
-                  const typeColors = { dj: '#1976d2', performer: '#9c27b0', instructor: '#ed6c02' };
+                  const isPractica = event.extendedProps?.categoryFirst === 'Practica';
 
-                  featureData.features
-                    .filter(f => f.type !== 'orchestra' && f.type !== 'live' && f.type !== 'note' && f.type !== 'description')
-                    .forEach((feature, idx) => {
-                      const label = typeLabels[feature.type] || feature.type;
-                      const textColor = typeColors[feature.type] || '#1976d2';
-                      badges.push(
-                        <span key={`${feature.type}-${idx}`} style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          color: textColor,
-                          backgroundColor: 'transparent',
-                          padding: '2px 6px',
-                          marginLeft: '6px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {label}: {feature.name}
-                        </span>
-                      );
-                    });
+                  // Only show DJ badge, and only for Practica events
+                  if (isPractica && featureData.dj) {
+                    badges.push(
+                      <span key="dj" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#1976d2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        DJ: {featureData.dj.name}
+                      </span>
+                    );
+                  }
                 }
 
-                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
+                // Orchestra NOT shown on calendar views - only in detail view
+                const hasOrchestra = false;
 
                 return (
                   <>

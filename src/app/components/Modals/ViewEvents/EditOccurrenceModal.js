@@ -3,7 +3,7 @@
  * TIEMPO-362: Modal for editing a single occurrence of a recurring event
  *
  * TABS:
- * - Features: DJ, Orchestra, Instructor, Performer, LIVE, Special Note, Tonight: Canceled
+ * - Spotlights: DJ, Orchestra, Instructor, Performer, LIVE, Special Note, Tonight: Canceled
  * - Image: Override image for this specific date
  *
  * NOTE: Exclude (RRULE EXDATE) is handled separately via "Edit Series"
@@ -40,8 +40,8 @@ import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
 import Image from 'next/image';
 
-// Available feature types
-const FEATURE_OPTIONS = [
+// Available spotlight types
+const SPOTLIGHT_OPTIONS = [
   { value: 'dj', label: 'DJ', color: 'primary', maxLength: 19 },
   { value: 'orchestra', label: 'Orchestra', color: 'success', maxLength: 19 },
   { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19 },
@@ -65,7 +65,7 @@ const EditOccurrenceModal = ({
   hasNextDate = false
 }) => {
   // Tab state
-  const [currentTab, setCurrentTab] = useState('features');
+  const [currentTab, setCurrentTab] = useState('spotlights');
 
   // Features array (includes DJ, Orchestra, Instructor, Performer, LIVE, Special Note)
   const [features, setFeatures] = useState([]);
@@ -128,7 +128,7 @@ const EditOccurrenceModal = ({
       setNewFeatureName('');
       setOverrideImageFile(null);
       setOverrideImagePreview(null);
-      setCurrentTab('features');
+      setCurrentTab('spotlights');
     }
   }, [open, occurrenceDate, currentValues]);
 
@@ -161,7 +161,7 @@ const EditOccurrenceModal = ({
     if (!newFeatureType) return;
 
     // Get the feature option for max length
-    const featureOption = FEATURE_OPTIONS.find(f => f.value === newFeatureType);
+    const featureOption = SPOTLIGHT_OPTIONS.find(f => f.value === newFeatureType);
     const maxLength = featureOption?.maxLength || 19;
 
     // 'live' doesn't require a name
@@ -173,7 +173,7 @@ const EditOccurrenceModal = ({
     }
 
     if (!name && newFeatureType !== 'live' && newFeatureType !== 'canceled') {
-      alert('Please enter a name for the feature');
+      alert('Please enter a name for the spotlight');
       return;
     }
 
@@ -202,7 +202,7 @@ const EditOccurrenceModal = ({
     // Auto-add feature if there's content in text field (force "+" on save)
     let featuresToSave = [...features];
     if (newFeatureType && newFeatureName.trim()) {
-      const featureOption = FEATURE_OPTIONS.find(f => f.value === newFeatureType);
+      const featureOption = SPOTLIGHT_OPTIONS.find(f => f.value === newFeatureType);
       const maxLength = featureOption?.maxLength || 19;
       let name = newFeatureName.trim();
       if (maxLength > 0 && name.length > maxLength) {
@@ -266,7 +266,7 @@ const EditOccurrenceModal = ({
     const hasChanges = hasFeatures || isCanceled || hasImage;
 
     if (!hasChanges) {
-      alert('Please add at least one feature, image, or mark as canceled');
+      alert('Please add at least one spotlight, image, or mark as canceled');
       return;
     }
 
@@ -287,7 +287,7 @@ const EditOccurrenceModal = ({
     setOverrideImageFile(null);
     setOverrideImagePreview(null);
     setExistingOverrideImage(null);
-    setCurrentTab('features');
+    setCurrentTab('spotlights');
     onClose();
   };
 
@@ -299,7 +299,7 @@ const EditOccurrenceModal = ({
     ? format(new Date(occurrenceDate), 'EEEE, MMMM d, yyyy')
     : 'this date';
 
-  const getFeatureOption = (type) => FEATURE_OPTIONS.find(f => f.value === type) || { label: type, color: 'default' };
+  const getFeatureOption = (type) => SPOTLIGHT_OPTIONS.find(f => f.value === type) || { label: type, color: 'default' };
 
   const currentImageSrc = overrideImagePreview || existingOverrideImage;
 
@@ -388,7 +388,7 @@ const EditOccurrenceModal = ({
           onChange={(_, v) => setCurrentTab(v)}
           sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
         >
-          <Tab label="Features" value="features" />
+          <Tab label="Spotlights" value="spotlights" />
           <Tab
             label="Image"
             value="image"
@@ -397,11 +397,11 @@ const EditOccurrenceModal = ({
           />
         </Tabs>
 
-        {/* Features Tab */}
-        {currentTab === 'features' && (
+        {/* Spotlights Tab */}
+        {currentTab === 'spotlights' && (
           <>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-              Tonight&apos;s Features
+              Tonight&apos;s Spotlights
             </Typography>
 
             {/* Current Features Display */}
@@ -430,14 +430,14 @@ const EditOccurrenceModal = ({
 
             {features.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: 'italic' }}>
-                No features set for this date. Add one below.
+                No spotlights set for this date. Add one below.
               </Typography>
             )}
 
-            {/* Add Feature */}
+            {/* Add Spotlight */}
             <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'flex-start' }}>
               <FormControl size="small" sx={{ minWidth: 160 }}>
-                <InputLabel>Add Feature</InputLabel>
+                <InputLabel>Add Spotlight</InputLabel>
                 <Select
                   value={newFeatureType}
                   onChange={(e) => {
@@ -446,9 +446,9 @@ const EditOccurrenceModal = ({
                       setNewFeatureName('');
                     }
                   }}
-                  label="Add Feature"
+                  label="Add Spotlight"
                 >
-                  {FEATURE_OPTIONS.map((opt) => (
+                  {SPOTLIGHT_OPTIONS.map((opt) => (
                     <MenuItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </MenuItem>
@@ -457,7 +457,7 @@ const EditOccurrenceModal = ({
               </FormControl>
 
               {newFeatureType && newFeatureType !== 'live' && (() => {
-                const featureOption = FEATURE_OPTIONS.find(f => f.value === newFeatureType);
+                const featureOption = SPOTLIGHT_OPTIONS.find(f => f.value === newFeatureType);
                 const maxLength = featureOption?.maxLength || 19;
                 const isDescription = newFeatureType === 'description';
                 return (
