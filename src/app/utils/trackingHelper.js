@@ -4,6 +4,7 @@
  *
  * TIEMPO-319: Added caching to prevent 429 rate limiting errors
  * 2026-03-24: Added sessionStorage caching for cloudflare + rate-limit tracking
+ * 2026-03-24: Added shared cache with geolocationHelper.js to prevent duplicate Google API calls
  */
 
 // Cache for geolocation data to prevent excessive API calls
@@ -12,10 +13,12 @@ let cacheTimestamp = null;
 // TIEMPO-381: In-progress promise to prevent parallel fetches (React StrictMode)
 let fetchInProgress = null;
 
-// Session storage keys for rate limiting
+// Session storage keys for rate limiting and shared caching
 const CF_CACHE_KEY = 'cloudflare_info_cache';
 const CF_RATE_LIMIT_KEY = 'cloudflare_info_rate_limited';
 const GOOGLE_RATE_LIMIT_KEY = 'google_geo_rate_limited';
+// SHARED with geolocationHelper.js - prevents duplicate Google API calls
+const GOOGLE_GEO_CACHE_KEY = 'google_geo_cache';
 const SESSION_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -151,8 +154,16 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
       return data;
     })(),
 
-    // 2. Google Geolocation API (with rate limit tracking - shares key with geolocationHelper.js)
+    // 2. Google Geolocation API (with shared cache + rate limit tracking)
+    // SHARED CACHE: Check geolocationHelper.js cache first to prevent duplicate API calls
     (async () => {
+      // Check shared sessionStorage cache from geolocationHelper.js
+      const sharedCached = getSessionCache(GOOGLE_GEO_CACHE_KEY);
+      if (sharedCached) {
+        console.log('[Tracking] Using shared Google Geo cache from geolocationHelper');
+        // Convert from geolocationHelper format { lat, long } to expected format { location: { lat, lng } }
+        return { location: { lat: sharedCached.lat, lng: sharedCached.long } };
+      }
       // Check rate limit (shared with geolocationHelper.js)
       if (isRateLimited(GOOGLE_RATE_LIMIT_KEY)) {
         console.warn('[Tracking] Google Geo rate limited, skipping');
@@ -162,7 +173,7 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ considerIp: true }),
-        signal: AbortSignal.timeout(3000) // Increased from 2s to 3s
+        signal: AbortSignal.timeout(3000)
       });
       if (res.status === 429) {
         markRateLimited(GOOGLE_RATE_LIMIT_KEY);
@@ -170,7 +181,12 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
       }
       if (!res.ok) return null;
       const result = await res.json();
-      return result.data || result;
+      const data = result.data || result;
+      // Also populate shared cache so geolocationHelper.js benefits
+      if (data?.location?.lat && data?.location?.lng) {
+        setSessionCache(GOOGLE_GEO_CACHE_KEY, { lat: data.location.lat, long: data.location.lng });
+      }
+      return data;
     })()
   ]);
 
