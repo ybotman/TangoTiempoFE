@@ -573,7 +573,7 @@ const CalendarPage = () => {
                       marginLeft: '4px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TODAY: CANCELED{featureData.cancelReason ? ` - ${featureData.cancelReason}` : ''}
+                      TODAY Canceled{featureData.cancelReason ? ` ${featureData.cancelReason}` : ''}
                     </span>
                   );
                 }
@@ -661,24 +661,28 @@ const CalendarPage = () => {
 
                 return (
                   <>
-                    {/* Row 2: Feature badges first (CANCELED), then title */}
+                    {/* Row 2: For canceled - just badge (no title, no strikethrough). Otherwise badges + title */}
                     <div style={{
                       fontSize: '0.65rem',
                       fontWeight: 'normal',
                       lineHeight: '1.1',
                       flex: hasOrchestra ? 0 : 1,
                       color: '#555',
-                      textDecoration: (isCanceled || featureData?.isCanceled) ? 'line-through' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       flexWrap: 'wrap',
                       gap: '2px'
                     }}>
-                      {/* TIEMPO-388: Show badges first, then title */}
+                      {/* Repeating icon FIRST */}
+                      {event.extendedProps?.isRecurring && <span>🔄 </span>}
+                      {/* Then spotlight badges */}
                       {badges}
-                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {/* Then full title (only if NOT canceled) */}
+                      {!(isCanceled || featureData?.isCanceled) && (
+                        <span>{event.title}</span>
+                      )}
                     </div>
-                    {/* Row 3: Orchestra - inverted style, no "TONIGHTS" prefix */}
+                    {/* Row 3: Orchestra - inverted style */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.65rem',
@@ -690,7 +694,7 @@ const CalendarPage = () => {
                         borderRadius: '2px',
                         marginTop: '1px'
                       }}>
-                        Orch: {featureData.orchestra.name}
+                        LIVE! Orch: {featureData.orchestra.name}
                       </div>
                     )}
                   </>
@@ -856,7 +860,7 @@ const CalendarPage = () => {
                       marginLeft: '6px',
                       whiteSpace: 'nowrap'
                     }}>
-                      TODAY: CANCELED{featureData.cancelReason ? ` - ${featureData.cancelReason}` : ''}
+                      TODAY Canceled{featureData.cancelReason ? ` ${featureData.cancelReason}` : ''}
                     </span>
                   );
                 }
@@ -924,22 +928,27 @@ const CalendarPage = () => {
 
                 return (
                   <>
-                    {/* Row 2: Title + feature badges */}
+                    {/* Row 2: For canceled - just badge (no title, no strikethrough). Otherwise title + badges */}
                     <div style={{
                       fontSize: '0.7rem',
                       fontWeight: 'normal',
                       lineHeight: '1.2',
                       color: '#555',
-                      textDecoration: isCanceled ? 'line-through' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       flexWrap: 'wrap',
                       gap: '2px'
                     }}>
-                      <span>{event.extendedProps?.isRecurring && '🔄 '}{event.title}</span>
+                      {/* Repeating icon FIRST */}
+                      {event.extendedProps?.isRecurring && <span>🔄 </span>}
+                      {/* Then spotlight badges */}
                       {badges}
+                      {/* Then full title (only if NOT canceled) */}
+                      {!(isCanceled || featureData?.isCanceled) && (
+                        <span>{event.title}</span>
+                      )}
                     </div>
-                    {/* Row 3: Orchestra - inverted style, no prefix */}
+                    {/* Row 3: Orchestra - inverted style */}
                     {hasOrchestra && (
                       <div style={{
                         fontSize: '0.75rem',
@@ -951,7 +960,7 @@ const CalendarPage = () => {
                         borderRadius: '3px',
                         marginTop: '2px'
                       }}>
-                        Orch: {featureData.orchestra.name}
+                        LIVE! Orch: {featureData.orchestra.name}
                       </div>
                     )}
                   </>

@@ -29,6 +29,43 @@ Generated on: 2025-07-23T13:56:09.826Z
 
 ---
 
+## CRITICAL: Calendar View Sync Rule
+
+**All 4 calendar views MUST stay in sync for logic, filters, and display changes.**
+
+### The 4 Views
+| Route | File | Views |
+|-------|------|-------|
+| `/calendar` | `src/app/calendar/page.js` | Monthly + List |
+| `/calendar/boston` | `src/app/calendar/boston/page.js` | Monthly + List |
+
+### Sync Requirements
+
+**MUST BE IDENTICAL across all 4 views:**
+- Spotlight/feature badge logic (`getFeatureData`, `badges[]` array)
+- Canceled event display (badge text, strikethrough rules)
+- Orchestra display (`LIVE! Orch:` row)
+- Row order (🔄 → badges → title)
+- Helper functions (`getOverrideDisplayData`, `getEventFeatureData`, `getFeatureData`)
+- Filter logic and category rules
+- Any new spotlight types or display changes
+
+**ALLOWED TO DIFFER (by design):**
+- `/boston` has a hardcoded date range (intentional)
+- Monthly vs List views have different layouts (conceptual difference)
+- Font sizes may vary between monthly/list (space constraints)
+
+### Rule for Changes
+
+**When making ANY change to calendar display logic:**
+1. **ASK** if change should apply to all 4 views (if unclear)
+2. **APPLY** the change to ALL 4 views (2 routes × 2 view types)
+3. **VERIFY** all 4 have identical logic using Grep
+
+**A change to ONE is a change to ALL — unless explicitly designed to differ.**
+
+---
+
 
 ================================================================================
 START OF FILE: STARTUP-DEF.md
@@ -232,6 +269,25 @@ START OF FILE: YBOTBOT-BRANCH-AUTONOMY.md
 ================================================================================
 
 # Git Branching Strategy
+
+## MANDATORY READS
+
+**Before ANY git operation (commit, push, merge, branch create), you MUST:**
+1. READ `/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/GIT-BRANCHING-STRATEGY.md`
+2. Identify the Feature Tier (T1/T2/T3) of your changes
+3. Apply appropriate CR rules based on tier
+
+**Before ANY deploy operation (vercel, deployment scripts), you MUST:**
+1. READ `/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/DEPLOYMENT-MATRIX.md`
+2. Verify correct project name (`tangotiempo-test` or `tangotiempo-com`)
+3. Check env var status for target project
+
+**Before ANY PROD operation (PROD branch, production deploy), you MUST:**
+1. READ `/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/PROD-DEPLOY-PROTECTION.md`
+2. Follow DEPLOY-PROD confirmation protocol
+3. No exceptions - "yes" and "sure" are NOT valid confirmations
+
+**These reads are NOT optional.** Operations without reading the relevant documents first are prohibited.
 
 **See central documentation:**
 ```
