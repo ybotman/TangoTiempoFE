@@ -594,7 +594,7 @@ const CalendarPage = () => {
                 const isFestivalOrSpecial = ['Festival', 'Special', 'Marathon', 'Weekend'].some(
                   cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
                 );
-                const isPracticaOrClass = ['Practica', 'Class', 'Workshop', 'Lesson'].some(
+                const isPracticaOrClass = ['Practica', 'Class', 'Other'].some(
                   cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
                 );
 
@@ -863,7 +863,7 @@ const CalendarPage = () => {
 
                 // Spotlight badges on calendar view
                 const categoryFirst = event.extendedProps?.categoryFirst || '';
-                const isPracticaOrClass = ['Practica', 'Class', 'Workshop', 'Lesson'].some(
+                const isPracticaOrClass = ['Practica', 'Class', 'Other'].some(
                   cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
                 );
 
