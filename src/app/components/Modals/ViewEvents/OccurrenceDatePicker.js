@@ -59,7 +59,7 @@ const OccurrenceDatePicker = ({
     }
   }, [open]);
 
-  // Parse RRULE and generate occurrences (past + future)
+  // Parse RRULE and generate occurrences (from event start to future)
   const allDates = useMemo(() => {
     if (!recurrenceRule || !startDate) return [];
 
@@ -70,9 +70,10 @@ const OccurrenceDatePicker = ({
 
       const rule = RRule.fromString(rruleStr);
 
-      // Get occurrences: 1 week back to 6 months forward
+      // Get occurrences: from event's original start date to 6 months from now
+      // This allows seeing ALL past occurrences, not just recent ones
       const now = new Date();
-      const startRange = subWeeks(startOfDay(now), 1); // 1 week prior
+      const startRange = dtstart; // Start from event's original start date
       const endRange = addMonths(now, 6);
 
       const occurrences = rule.between(
@@ -145,68 +146,89 @@ const OccurrenceDatePicker = ({
     return isSameDay(occurrence.date, new Date(initialSelectedDate));
   };
 
-  // Get status chips - can return multiple
-  const getStatusChips = (occurrence) => {
-    const chips = [];
+  // Get spotlight summary text for display
+  const getSpotlightSummary = (occurrence) => {
+    if (!occurrence.hasSpotlight || !occurrence.override?.patch) return null;
 
+    const patch = occurrence.override.patch;
+    const parts = [];
+
+    // New array format
+    if (patch.features && Array.isArray(patch.features)) {
+      patch.features.forEach(f => {
+        if (f.type === 'dj') parts.push(`DJ: ${f.name?.substring(0, 12) || '?'}`);
+        else if (f.type === 'orchestra') parts.push(`Orch: ${f.name?.substring(0, 12) || '?'}`);
+        else if (f.type === 'instructor') parts.push(`Inst: ${f.name?.substring(0, 12) || '?'}`);
+        else if (f.type === 'performer') parts.push(`Perf: ${f.name?.substring(0, 12) || '?'}`);
+        else if (f.type === 'live') parts.push('🎵 LIVE');
+      });
+    } else {
+      // Legacy format
+      if (patch.djName) parts.push(`DJ: ${patch.djName.substring(0, 12)}`);
+      if (patch.orchestraName) parts.push(`Orch: ${patch.orchestraName.substring(0, 12)}`);
+      if (patch.instructorName) parts.push(`Inst: ${patch.instructorName.substring(0, 12)}`);
+      if (patch.performerName) parts.push(`Perf: ${patch.performerName.substring(0, 12)}`);
+      if (patch.isLive) parts.push('🎵 LIVE');
+    }
+
+    return parts.length > 0 ? parts.join(' | ') : null;
+  };
+
+  // Get status chip (just one for the type)
+  const getStatusChip = (occurrence) => {
     if (occurrence.isRemoved) {
-      chips.push(
+      return (
         <Chip
           key="excluded"
           label="Excluded"
           size="small"
           color="default"
           variant="outlined"
-          sx={{ height: 20, fontSize: '0.7rem' }}
+          sx={{ height: 20, fontSize: '0.65rem' }}
         />
       );
-      return chips;
     }
 
     if (occurrence.isCanceled) {
-      chips.push(
+      return (
         <Chip
           key="canceled"
           label="Canceled"
           size="small"
           color="error"
           variant="outlined"
-          sx={{ height: 20, fontSize: '0.7rem' }}
+          sx={{ height: 20, fontSize: '0.65rem' }}
         />
       );
-      return chips;
     }
 
-    // Show specific modification types
     if (occurrence.hasSpotlight) {
-      chips.push(
+      return (
         <Chip
           key="spotlight"
-          label="Spotlight"
+          label="★"
           size="small"
           color="info"
-          variant="outlined"
-          icon={<StarIcon sx={{ fontSize: 14 }} />}
-          sx={{ height: 20, fontSize: '0.7rem', '& .MuiChip-icon': { ml: 0.5 } }}
+          variant="filled"
+          sx={{ height: 18, minWidth: 18, fontSize: '0.7rem', '& .MuiChip-label': { px: 0.5 } }}
         />
       );
     }
 
     if (occurrence.hasImageChange) {
-      chips.push(
+      return (
         <Chip
           key="image"
-          label="Image"
+          label="📷"
           size="small"
           color="secondary"
           variant="outlined"
-          icon={<ImageIcon sx={{ fontSize: 14 }} />}
-          sx={{ height: 20, fontSize: '0.7rem', '& .MuiChip-icon': { ml: 0.5 } }}
+          sx={{ height: 18, minWidth: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.5 } }}
         />
       );
     }
 
-    return chips;
+    return null;
   };
 
   // Find the index where "now" starts (for the visual divider)
@@ -240,7 +262,8 @@ const OccurrenceDatePicker = ({
             {allDates.map((occurrence, index) => {
               const isSelected = selectedDate?.toISOString() === occurrence.date.toISOString();
               const isInitial = isInitialDate(occurrence);
-              const statusChips = getStatusChips(occurrence);
+              const statusChip = getStatusChip(occurrence);
+              const spotlightSummary = getSpotlightSummary(occurrence);
 
               // Show "Today & Upcoming" divider
               const showNowDivider = index === nowIndex && nowIndex > 0;
@@ -257,13 +280,7 @@ const OccurrenceDatePicker = ({
                   <ListItem
                     ref={isInitial ? selectedRowRef : null}
                     disablePadding
-                    secondaryAction={
-                      statusChips.length > 0 ? (
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          {statusChips}
-                        </Box>
-                      ) : null
-                    }
+                    secondaryAction={statusChip}
                     sx={{
                       bgcolor: isInitial ? 'action.selected' : 'transparent',
                       borderLeft: isInitial ? '3px solid' : 'none',
@@ -275,7 +292,7 @@ const OccurrenceDatePicker = ({
                       onClick={() => handleSelectDate(occurrence)}
                       disabled={occurrence.isRemoved}
                       sx={{
-                        py: 0.75,
+                        py: 0.5,
                         opacity: occurrence.isRemoved ? 0.4 : occurrence.isPast ? 0.6 : occurrence.isCanceled ? 0.7 : 1
                       }}
                     >
@@ -293,6 +310,20 @@ const OccurrenceDatePicker = ({
                             {format(occurrence.date, 'EEE, MMM d')} • {format(occurrence.date, 'h:mm a')}
                           </Typography>
                         }
+                        secondary={spotlightSummary && (
+                          <Typography
+                            component="span"
+                            variant="caption"
+                            sx={{
+                              color: 'info.main',
+                              fontWeight: 'medium',
+                              display: 'block',
+                              mt: 0.25
+                            }}
+                          >
+                            {spotlightSummary}
+                          </Typography>
+                        )}
                         sx={{ my: 0 }}
                       />
                     </ListItemButton>
