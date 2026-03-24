@@ -8,7 +8,7 @@
  * - See which dates already have modifications or cancellations
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -23,12 +23,15 @@ import {
   Typography,
   Box,
   Chip,
-  Divider
+  IconButton
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import EditIcon from '@mui/icons-material/Edit';
+import StarIcon from '@mui/icons-material/Star';
+import ImageIcon from '@mui/icons-material/Image';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
-import { format, addMonths, startOfDay } from 'date-fns';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { format, addMonths, subWeeks, startOfDay, isSameDay } from 'date-fns';
 import { RRule } from 'rrule';
 
 const OccurrenceDatePicker = ({
@@ -40,12 +43,24 @@ const OccurrenceDatePicker = ({
   startDate,
   instanceOverrides = [],
   excludedDates = [],
-  maxOccurrences = 20
+  maxOccurrences = 25,
+  initialSelectedDate = null // The date user clicked on calendar
 }) => {
   const [selectedDate, setSelectedDate] = useState(null);
+  const selectedRowRef = useRef(null);
 
-  // Parse RRULE and generate upcoming occurrences
-  const upcomingDates = useMemo(() => {
+  // Scroll to selected date when modal opens
+  useEffect(() => {
+    if (open && selectedRowRef.current) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        selectedRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [open]);
+
+  // Parse RRULE and generate occurrences (past + future)
+  const allDates = useMemo(() => {
     if (!recurrenceRule || !startDate) return [];
 
     try {
@@ -55,12 +70,13 @@ const OccurrenceDatePicker = ({
 
       const rule = RRule.fromString(rruleStr);
 
-      // Get occurrences for next 6 months
+      // Get occurrences: 1 week back to 6 months forward
       const now = new Date();
+      const startRange = subWeeks(startOfDay(now), 1); // 1 week prior
       const endRange = addMonths(now, 6);
 
       const occurrences = rule.between(
-        startOfDay(now),
+        startRange,
         endRange,
         true // inclusive
       ).slice(0, maxOccurrences);
@@ -69,6 +85,7 @@ const OccurrenceDatePicker = ({
       return occurrences.map(date => {
         const dateStr = format(date, 'yyyy-MM-dd');
         const dateKey = date.toISOString();
+        const isPast = date < startOfDay(now);
 
         // Check if this date has an override
         const override = instanceOverrides.find(ov => {
@@ -82,17 +99,27 @@ const OccurrenceDatePicker = ({
           return exDateStr === dateStr;
         });
 
+        // Determine what type of modification this is
+        const patch = override?.patch;
+        const hasSpotlight = patch?.features?.length > 0 || patch?.djName || patch?.orchestraName || patch?.instructorName || patch?.performerName || patch?.isLive;
+        const hasImageChange = !!patch?.eventImage;
+        const hasSpecialNote = !!patch?.specialNote;
+
         return {
           date,
           dateStr,
           dateKey,
+          isPast,
           hasOverride: !!override,
           overrideType: override?.overrideType || null,
           isExcluded,
           isCanceled: override?.overrideType === 'cancel',
           isRemoved: isExcluded || override?.overrideType === 'exclude',
           isModified: override?.overrideType === 'modify',
-          override: override || null // Full override object for display
+          hasSpotlight,
+          hasImageChange,
+          hasSpecialNote,
+          override: override || null
         };
       });
     } catch {
@@ -112,135 +139,144 @@ const OccurrenceDatePicker = ({
     }
   };
 
-  const getStatusChip = (occurrence) => {
+  // Check if this is the initially selected date (from calendar click)
+  const isInitialDate = (occurrence) => {
+    if (!initialSelectedDate) return false;
+    return isSameDay(occurrence.date, new Date(initialSelectedDate));
+  };
+
+  // Get status chips - can return multiple
+  const getStatusChips = (occurrence) => {
+    const chips = [];
+
     if (occurrence.isRemoved) {
-      return (
+      chips.push(
         <Chip
+          key="excluded"
           label="Excluded"
           size="small"
           color="default"
           variant="outlined"
-          icon={<EventBusyIcon />}
+          sx={{ height: 20, fontSize: '0.7rem' }}
         />
       );
+      return chips;
     }
+
     if (occurrence.isCanceled) {
-      return (
+      chips.push(
         <Chip
-          label="Tonight: Canceled"
+          key="canceled"
+          label="Canceled"
           size="small"
           color="error"
           variant="outlined"
-          icon={<EventBusyIcon />}
+          sx={{ height: 20, fontSize: '0.7rem' }}
         />
       );
+      return chips;
     }
-    if (occurrence.isModified) {
-      return (
+
+    // Show specific modification types
+    if (occurrence.hasSpotlight) {
+      chips.push(
         <Chip
-          label="Modified"
+          key="spotlight"
+          label="Spotlight"
           size="small"
           color="info"
           variant="outlined"
-          icon={<EditIcon />}
+          icon={<StarIcon sx={{ fontSize: 14 }} />}
+          sx={{ height: 20, fontSize: '0.7rem', '& .MuiChip-icon': { ml: 0.5 } }}
         />
       );
     }
-    return null;
+
+    if (occurrence.hasImageChange) {
+      chips.push(
+        <Chip
+          key="image"
+          label="Image"
+          size="small"
+          color="secondary"
+          variant="outlined"
+          icon={<ImageIcon sx={{ fontSize: 14 }} />}
+          sx={{ height: 20, fontSize: '0.7rem', '& .MuiChip-icon': { ml: 0.5 } }}
+        />
+      );
+    }
+
+    return chips;
   };
+
+  // Find the index where "now" starts (for the visual divider)
+  const nowIndex = allDates.findIndex(o => !o.isPast);
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
+      PaperProps={{ sx: { maxHeight: '70vh' } }}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <CalendarMonthIcon color="primary" />
-        Upcoming Dates
-      </DialogTitle>
-
-      <DialogContent dividers>
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary">
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
+        <CalendarMonthIcon color="primary" fontSize="small" />
+        <Box>
+          <Typography variant="subtitle1" fontWeight="medium">All Dates</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
             {eventTitle}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Select a date to edit or cancel that specific occurrence
-          </Typography>
         </Box>
+      </DialogTitle>
 
-        {upcomingDates.length === 0 ? (
+      <DialogContent dividers sx={{ p: 0 }}>
+        {allDates.length === 0 ? (
           <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-            No upcoming occurrences found
+            No occurrences found
           </Typography>
         ) : (
-          <List sx={{ pt: 0 }} dense>
-            {upcomingDates.map((occurrence, index) => {
-              // Build override info from new array format
-              const patch = occurrence.override?.patch;
-              const featureLabels = { dj: 'DJ', orchestra: 'Orchestra', instructor: 'Instructor', performer: 'Performer', live: 'LIVE' };
+          <List sx={{ pt: 0, pb: 0 }} dense>
+            {allDates.map((occurrence, index) => {
+              const isSelected = selectedDate?.toISOString() === occurrence.date.toISOString();
+              const isInitial = isInitialDate(occurrence);
+              const statusChips = getStatusChips(occurrence);
 
-              // Build feature display (excluding LIVE which goes on its own)
-              let featuresText = '';
-              let hasLive = false;
-
-              if (patch?.features && Array.isArray(patch.features)) {
-                // New array format
-                const nonLiveFeatures = patch.features
-                  .filter(f => f.type !== 'live')
-                  .map(f => `${featureLabels[f.type] || f.type}: ${f.name}`);
-                featuresText = nonLiveFeatures.join(' | ');
-                hasLive = patch.features.some(f => f.type === 'live');
-              } else if (patch) {
-                // Legacy formats
-                const overrideInfo = [];
-                if (patch.djName) overrideInfo.push(`DJ: ${patch.djName}`);
-                if (patch.orchestraName) overrideInfo.push(`Orchestra: ${patch.orchestraName}`);
-                if (patch.instructorName) overrideInfo.push(`Instructor: ${patch.instructorName}`);
-                if (patch.performerName) overrideInfo.push(`Performer: ${patch.performerName}`);
-                if (patch.featureType && patch.featureName) {
-                  const label = featureLabels[patch.featureType] || patch.featureType;
-                  overrideInfo.push(`${label}: ${patch.featureName}`);
-                }
-                featuresText = overrideInfo.join(' | ');
-                hasLive = patch.isLive;
-              }
-
-              // Build secondary text based on state
-              let secondaryText = null;
-              if (occurrence.isRemoved) {
-                secondaryText = 'Excluded from calendar';
-              } else if (occurrence.isCanceled || patch?.isCanceled) {
-                // Canceled shows ONLY canceled + reason (no features)
-                secondaryText = `CANCELED${patch?.cancelReason ? `: ${patch.cancelReason}` : ''}`;
-              } else {
-                // Build display: features on line 2, LIVE on line 3
-                const parts = [];
-                if (featuresText) parts.push(featuresText);
-                if (hasLive) parts.push('🎵 LIVE');
-                if (patch?.specialNote) {
-                  const note = patch.specialNote;
-                  parts.push(note.length > 30 ? note.substring(0, 30) + '...' : note);
-                }
-                secondaryText = parts.length > 0 ? parts.join(' | ') : null;
-              }
+              // Show "Today & Upcoming" divider
+              const showNowDivider = index === nowIndex && nowIndex > 0;
 
               return (
                 <React.Fragment key={occurrence.dateStr}>
+                  {showNowDivider && (
+                    <Box sx={{ px: 2, py: 0.5, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+                      <Typography variant="caption" fontWeight="bold">
+                        ↓ Today & Upcoming
+                      </Typography>
+                    </Box>
+                  )}
                   <ListItem
+                    ref={isInitial ? selectedRowRef : null}
                     disablePadding
-                    secondaryAction={getStatusChip(occurrence)}
-                    sx={{ py: 0.5 }}
+                    secondaryAction={
+                      statusChips.length > 0 ? (
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          {statusChips}
+                        </Box>
+                      ) : null
+                    }
+                    sx={{
+                      bgcolor: isInitial ? 'action.selected' : 'transparent',
+                      borderLeft: isInitial ? '3px solid' : 'none',
+                      borderLeftColor: 'primary.main'
+                    }}
                   >
                     <ListItemButton
-                      selected={selectedDate?.toISOString() === occurrence.date.toISOString()}
+                      selected={isSelected}
                       onClick={() => handleSelectDate(occurrence)}
                       disabled={occurrence.isRemoved}
                       sx={{
-                        py: 0.5,
-                        opacity: occurrence.isRemoved ? 0.4 : occurrence.isCanceled ? 0.7 : 1
+                        py: 0.75,
+                        opacity: occurrence.isRemoved ? 0.4 : occurrence.isPast ? 0.6 : occurrence.isCanceled ? 0.7 : 1
                       }}
                     >
                       <ListItemText
@@ -248,53 +284,43 @@ const OccurrenceDatePicker = ({
                           <Typography
                             component="span"
                             variant="body2"
-                            fontWeight="medium"
+                            fontWeight={isInitial ? 'bold' : 'medium'}
                             sx={{
                               textDecoration: (occurrence.isRemoved || occurrence.isCanceled) ? 'line-through' : 'none',
-                              color: occurrence.isCanceled ? 'error.main' : 'inherit'
+                              color: occurrence.isCanceled ? 'error.main' : occurrence.isPast ? 'text.secondary' : 'inherit'
                             }}
                           >
-                            {format(occurrence.date, 'EEE, MMM d')} | {format(occurrence.date, 'h:mm a')} | {eventTitle}
+                            {format(occurrence.date, 'EEE, MMM d')} • {format(occurrence.date, 'h:mm a')}
                           </Typography>
                         }
-                        secondary={secondaryText ? (
-                          <Typography
-                            component="span"
-                            variant="caption"
-                            color={occurrence.isRemoved ? 'text.disabled' : occurrence.isCanceled ? 'error.main' : 'text.secondary'}
-                          >
-                            {secondaryText}
-                          </Typography>
-                        ) : null}
                         sx={{ my: 0 }}
                       />
                     </ListItemButton>
                   </ListItem>
-                  {index < upcomingDates.length - 1 && <Divider component="li" />}
                 </React.Fragment>
               );
             })}
           </List>
         )}
-
-        {upcomingDates.length >= maxOccurrences && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 2 }}>
-            Showing next {maxOccurrences} occurrences
-          </Typography>
-        )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleConfirm}
-          variant="contained"
-          disabled={!selectedDate}
-        >
-          Select This Date
-        </Button>
+      <DialogActions sx={{ px: 2, py: 1.5, justifyContent: 'space-between' }}>
+        <Typography variant="caption" color="text.secondary">
+          {allDates.length} dates
+        </Typography>
+        <Box>
+          <Button onClick={onClose} size="small">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            variant="contained"
+            size="small"
+            disabled={!selectedDate}
+          >
+            Select
+          </Button>
+        </Box>
       </DialogActions>
     </Dialog>
   );
@@ -320,7 +346,11 @@ OccurrenceDatePicker.propTypes = {
   excludedDates: PropTypes.arrayOf(
     PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
   ),
-  maxOccurrences: PropTypes.number
+  maxOccurrences: PropTypes.number,
+  initialSelectedDate: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(Date)
+  ])
 };
 
 export default OccurrenceDatePicker;
