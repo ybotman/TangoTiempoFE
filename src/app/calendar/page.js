@@ -578,13 +578,34 @@ const CalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges on calendar view: Only show DJ for Practica events
-                // All other spotlights (orchestra, instructor, performer, etc.) only shown in detail view
-                if (featureData && !featureData.isCanceled) {
-                  const isPractica = event.extendedProps?.categoryFirst === 'Practica';
+                // TIEMPO-388: Spotlight visibility rules by category
+                // - Multi-day (>2 days) / Festival / Special: Show ALL spotlights
+                // - Canceled: ALWAYS show canceled badge (handled above)
+                // - Practica, Class: NO spotlights on calendar (except canceled)
+                const categoryFirst = event.extendedProps?.categoryFirst || '';
+                const isMultiDay = (() => {
+                  const start = event.start;
+                  const end = event.end || event.start;
+                  if (!start || !end) return false;
+                  const diffMs = new Date(end) - new Date(start);
+                  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+                  return diffDays > 2;
+                })();
+                const isFestivalOrSpecial = ['Festival', 'Special', 'Marathon', 'Weekend'].some(
+                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
+                );
+                const isPracticaOrClass = ['Practica', 'Class', 'Workshop', 'Lesson'].some(
+                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
+                );
 
-                  // Only show DJ badge, and only for Practica events
-                  if (isPractica && featureData.dj) {
+                // Show all spotlights for multi-day events or festivals
+                const showAllSpotlights = isMultiDay || isFestivalOrSpecial;
+                // Hide spotlights for practica/class (except canceled which is handled above)
+                const hideSpotlights = isPracticaOrClass && !showAllSpotlights;
+
+                if (featureData && !featureData.isCanceled && !hideSpotlights) {
+                  // DJ badge
+                  if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
                         fontSize: '0.6rem',
@@ -599,10 +620,74 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
+                  // Orchestra badge
+                  if (featureData.orchestra) {
+                    badges.push(
+                      <span key="orchestra" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#2e7d32',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        🎻 {featureData.orchestra.name}
+                      </span>
+                    );
+                  }
+                  // Instructor badge
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        👨‍🏫 {featureData.instructor.name}
+                      </span>
+                    );
+                  }
+                  // Performer badge
+                  if (featureData.performer) {
+                    badges.push(
+                      <span key="performer" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#c2185b',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        💃 {featureData.performer.name}
+                      </span>
+                    );
+                  }
+                  // Live badge
+                  if (featureData.live) {
+                    badges.push(
+                      <span key="live" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#d32f2f',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        🎵 LIVE
+                      </span>
+                    );
+                  }
                 }
 
-                // Orchestra NOT shown on calendar views - only in detail view
-                const hasOrchestra = false;
+                // Show orchestra row only for multi-day/festival events
+                const hasOrchestra = showAllSpotlights && featureData?.orchestra;
 
                 return (
                   <>
