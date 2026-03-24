@@ -385,7 +385,7 @@ const CalendarPage = () => {
   // Custom event content renderer with category circles
   const renderEventContent = (eventInfo) => {
     const { event } = eventInfo;
-    const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
+    const isMonthlyView = eventInfo.view.type === 'dayGridMonth' || eventInfo.view.type === 'dayGrid8Week';
     
     // Handle placeholder events specially
     if (event.extendedProps?.isPlaceholder) {
@@ -604,7 +604,7 @@ const CalendarPage = () => {
                 const hideSpotlights = isPracticaOrClass && !showAllSpotlights;
 
                 if (featureData && !featureData.isCanceled && !hideSpotlights) {
-                  // DJ badge
+                  // DJ badge (no icon, just abbreviation)
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -620,23 +620,8 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Orchestra badge
-                  if (featureData.orchestra) {
-                    badges.push(
-                      <span key="orchestra" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#2e7d32',
-                        backgroundColor: 'transparent',
-                        padding: '1px 4px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        🎻 {featureData.orchestra.name}
-                      </span>
-                    );
-                  }
-                  // Instructor badge
+                  // Orchestra shows as separate inverted row below (not as badge)
+                  // Instructor badge (no icon)
                   if (featureData.instructor) {
                     badges.push(
                       <span key="instructor" style={{
@@ -648,11 +633,11 @@ const CalendarPage = () => {
                         marginLeft: '4px',
                         whiteSpace: 'nowrap'
                       }}>
-                        👨‍🏫 {featureData.instructor.name}
+                        Inst: {featureData.instructor.name}
                       </span>
                     );
                   }
-                  // Performer badge
+                  // Performer badge (no icon)
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -664,30 +649,15 @@ const CalendarPage = () => {
                         marginLeft: '4px',
                         whiteSpace: 'nowrap'
                       }}>
-                        💃 {featureData.performer.name}
+                        Perf: {featureData.performer.name}
                       </span>
                     );
                   }
-                  // Live badge
-                  if (featureData.live) {
-                    badges.push(
-                      <span key="live" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#d32f2f',
-                        backgroundColor: 'transparent',
-                        padding: '1px 4px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        🎵 LIVE
-                      </span>
-                    );
-                  }
+                  // LIVE is not a separate type - it's implied by Orchestra presence
                 }
 
-                // Show orchestra row only for multi-day/festival events
-                const hasOrchestra = showAllSpotlights && featureData?.orchestra;
+                // Show orchestra as separate inverted row for non-practica/class events
+                const hasOrchestra = featureData?.orchestra && !hideSpotlights && !featureData?.isCanceled;
 
                 return (
                   <>
@@ -720,7 +690,7 @@ const CalendarPage = () => {
                         borderRadius: '2px',
                         marginTop: '1px'
                       }}>
-                        🎻 Orchestra: {featureData.orchestra.name}
+                        Orch: {featureData.orchestra.name}
                       </div>
                     )}
                   </>
@@ -891,13 +861,15 @@ const CalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges on calendar view: Only show DJ for Practica events
-                // All other spotlights (orchestra, instructor, performer, etc.) only shown in detail view
-                if (featureData && !featureData.isCanceled) {
-                  const isPractica = event.extendedProps?.categoryFirst === 'Practica';
+                // Spotlight badges on calendar view
+                const categoryFirst = event.extendedProps?.categoryFirst || '';
+                const isPracticaOrClass = ['Practica', 'Class', 'Workshop', 'Lesson'].some(
+                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
+                );
 
-                  // Only show DJ badge, and only for Practica events
-                  if (isPractica && featureData.dj) {
+                if (featureData && !featureData.isCanceled && !isPracticaOrClass) {
+                  // DJ badge (no icon)
+                  if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
                         fontSize: '0.65rem',
@@ -912,10 +884,43 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
+                  // Instructor badge (no icon)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
+                  }
+                  // Performer badge (no icon)
+                  if (featureData.performer) {
+                    badges.push(
+                      <span key="performer" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#c2185b',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Perf: {featureData.performer.name}
+                      </span>
+                    );
+                  }
+                  // LIVE is not a separate type - it's implied by Orchestra presence
                 }
 
-                // Orchestra NOT shown on calendar views - only in detail view
-                const hasOrchestra = false;
+                // Orchestra shows as separate inverted row for non-practica/class events
+                const hasOrchestra = featureData?.orchestra && !isPracticaOrClass && !featureData?.isCanceled;
 
                 return (
                   <>
@@ -946,7 +951,7 @@ const CalendarPage = () => {
                         borderRadius: '3px',
                         marginTop: '2px'
                       }}>
-                        🎻 Orchestra: {featureData.orchestra.name}
+                        Orch: {featureData.orchestra.name}
                       </div>
                     )}
                   </>

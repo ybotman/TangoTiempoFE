@@ -48,6 +48,7 @@ const OccurrenceDatePicker = ({
 }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const selectedRowRef = useRef(null);
+  const listContainerRef = useRef(null);
 
   // Scroll to selected date when modal opens
   useEffect(() => {
@@ -102,7 +103,7 @@ const OccurrenceDatePicker = ({
 
         // Determine what type of modification this is
         const patch = override?.patch;
-        const hasSpotlight = patch?.features?.length > 0 || patch?.djName || patch?.orchestraName || patch?.instructorName || patch?.performerName || patch?.isLive;
+        const hasSpotlight = patch?.features?.length > 0 || patch?.djName || patch?.orchestraName || patch?.instructorName || patch?.performerName || patch?.specialNote || patch?.isCanceled;
         const hasImageChange = !!patch?.eventImage;
         const hasSpecialNote = !!patch?.specialNote;
 
@@ -146,12 +147,17 @@ const OccurrenceDatePicker = ({
     return isSameDay(occurrence.date, new Date(initialSelectedDate));
   };
 
-  // Get spotlight summary text for display
+  // Get spotlight summary text for display (shows all spotlight types including Canceled and Note)
   const getSpotlightSummary = (occurrence) => {
-    if (!occurrence.hasSpotlight || !occurrence.override?.patch) return null;
+    if (!occurrence.override?.patch) return null;
 
     const patch = occurrence.override.patch;
     const parts = [];
+
+    // Check for canceled first
+    if (patch.isCanceled || occurrence.isCanceled) {
+      parts.push(`⚠️ CANCELED${patch.cancelReason ? `: ${patch.cancelReason.substring(0, 15)}` : ''}`);
+    }
 
     // New array format
     if (patch.features && Array.isArray(patch.features)) {
@@ -160,7 +166,7 @@ const OccurrenceDatePicker = ({
         else if (f.type === 'orchestra') parts.push(`Orch: ${f.name?.substring(0, 12) || '?'}`);
         else if (f.type === 'instructor') parts.push(`Inst: ${f.name?.substring(0, 12) || '?'}`);
         else if (f.type === 'performer') parts.push(`Perf: ${f.name?.substring(0, 12) || '?'}`);
-        else if (f.type === 'live') parts.push('🎵 LIVE');
+        else if (f.type === 'note') parts.push(`📝 ${f.name?.substring(0, 15) || 'Note'}`);
       });
     } else {
       // Legacy format
@@ -168,7 +174,7 @@ const OccurrenceDatePicker = ({
       if (patch.orchestraName) parts.push(`Orch: ${patch.orchestraName.substring(0, 12)}`);
       if (patch.instructorName) parts.push(`Inst: ${patch.instructorName.substring(0, 12)}`);
       if (patch.performerName) parts.push(`Perf: ${patch.performerName.substring(0, 12)}`);
-      if (patch.isLive) parts.push('🎵 LIVE');
+      if (patch.specialNote) parts.push(`📝 ${patch.specialNote.substring(0, 15)}`);
     }
 
     return parts.length > 0 ? parts.join(' | ') : null;
@@ -234,6 +240,15 @@ const OccurrenceDatePicker = ({
   // Find the index where "now" starts (for the visual divider)
   const nowIndex = allDates.findIndex(o => !o.isPast);
 
+  // Scroll navigation handlers
+  const scrollToTop = () => {
+    listContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToBottom = () => {
+    listContainerRef.current?.scrollTo({ top: listContainerRef.current.scrollHeight, behavior: 'smooth' });
+  };
+
   return (
     <Dialog
       open={open}
@@ -252,7 +267,7 @@ const OccurrenceDatePicker = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: 0 }}>
+      <DialogContent ref={listContainerRef} dividers sx={{ p: 0 }}>
         {allDates.length === 0 ? (
           <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
             No occurrences found
@@ -336,9 +351,27 @@ const OccurrenceDatePicker = ({
       </DialogContent>
 
       <DialogActions sx={{ px: 2, py: 1.5, justifyContent: 'space-between' }}>
-        <Typography variant="caption" color="text.secondary">
-          {allDates.length} dates
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton
+            onClick={scrollToTop}
+            size="small"
+            title="Scroll to earliest dates"
+            sx={{ border: '1px solid', borderColor: 'divider' }}
+          >
+            <KeyboardArrowUpIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            onClick={scrollToBottom}
+            size="small"
+            title="Scroll to latest dates"
+            sx={{ border: '1px solid', borderColor: 'divider' }}
+          >
+            <KeyboardArrowDownIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="caption" color="text.secondary">
+            {allDates.length} dates
+          </Typography>
+        </Box>
         <Box>
           <Button onClick={onClose} size="small">
             Cancel
