@@ -113,11 +113,13 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       }
       const rule = RRule.fromString(rruleStr);
 
-      // Get occurrences for next 6 months
+      // Get occurrences: from event's original start to 6 months from now
+      // TIEMPO-388: Use dtstart (not today) to include past dates for navigation
       const now = new Date();
+      const dtstart = new Date(dtstartSource);
       const endRange = addMonths(now, 6);
 
-      return rule.between(startOfDay(now), endRange, true).slice(0, 52); // Max 52 weeks
+      return rule.between(dtstart, endRange, true).slice(0, 52); // Max 52 weeks
     } catch {
       return [];
     }
@@ -165,6 +167,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     if (open) {
       setCurrentTab('Basic');
       setInitialActionHandled(false); // Reset when modal opens
+      // TIEMPO-388: Reset occurrence state to prevent stale date from previous edits
+      setSelectedOccurrenceDate(null);
+      setHasNavigatedDates(false);
+      setCurrentDateIndex(0);
     }
   }, [open]);
 
@@ -199,6 +205,11 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
     // TIEMPO-264: Clear image state when event changes to prevent carryover
     setImageSrc(null);
     setShowImageTab(false);
+
+    // TIEMPO-388: Also reset occurrence state when switching events
+    // This handles cases where user clicks different dates of same recurring series
+    setSelectedOccurrenceDate(null);
+    setHasNavigatedDates(false);
 
     // Try to use the event image if available
     if (eventDetails?.extendedProps?.eventImage) {

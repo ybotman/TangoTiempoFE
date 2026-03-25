@@ -204,13 +204,31 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 </Typography>
                 <FormControl component="fieldset">
                   <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
-                    {orderedUserRoles.map((role) => (
-                      <FormControlLabel
-                        key={role}
-                        value={role}
-                        control={<Radio />}
-                        label={roleDisplayMap[role] || role}
-                      />
+                    {orderedUserRoles.map((role, index) => (
+                      <React.Fragment key={role}>
+                        <FormControlLabel
+                          value={role}
+                          control={<Radio />}
+                          label={roleDisplayMap[role] || role}
+                        />
+                        {/* Spotlighter coming soon - appears after NamedUser (Milonger@) */}
+                        {role === 'NamedUser' && (
+                          <FormControlLabel
+                            value="Spotlighter"
+                            control={<Radio disabled />}
+                            label={
+                              <Typography
+                                component="span"
+                                sx={{ color: 'text.disabled', fontStyle: 'italic' }}
+                              >
+                                Spotlighter <Typography component="span" variant="caption" sx={{ color: 'text.disabled' }}>(coming soon)</Typography>
+                              </Typography>
+                            }
+                            disabled
+                            sx={{ opacity: 0.6 }}
+                          />
+                        )}
+                      </React.Fragment>
                     ))}
                   </RadioGroup>
                 </FormControl>
