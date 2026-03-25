@@ -240,7 +240,7 @@ export const GeoLocationProvider = ({ children }) => {
     const lat = currentLocation?.lat;
     const lng = currentLocation?.lng;
 
-    // Skip if no coords or API not ready
+    // Skip if no coords
     if (!lat || !lng) {
       return;
     }
