@@ -226,85 +226,58 @@ export const GeoLocationProvider = ({ children }) => {
     };
   }, []); // Empty deps array - only run on mount
 
-  // TIEMPO-388: Auto-fetch nearest city when currentLocation coords change
-  // This centralizes the city name fetch in context instead of SiteHeader local state
-  const lastFetchedCoordsRef = useRef(null);
-  const fetchNearestCityRef = useRef(null);
+  // TIEMPO-388: ROBUST city name fetcher - called directly, not via reactive useEffect
+  // This eliminates all race conditions from the previous reactive approach
+  const fetchCityNameForCoords = useCallback(async (lat, lng) => {
+    if (!lat || !lng) return null;
 
-  // Keep ref updated with latest fetchNearestCity function
-  useEffect(() => {
-    fetchNearestCityRef.current = locationAPI?.fetchNearestCity;
+    const fetchFn = locationAPI?.fetchNearestCity;
+    if (!fetchFn) {
+      console.warn('[GeoLocationContext] fetchNearestCity not available yet');
+      return null;
+    }
+
+    try {
+      const cityData = await fetchFn(lat, lng, 500000);
+      return cityData?.cityName || null;
+    } catch (error) {
+      console.error('[GeoLocationContext] Error fetching city name:', error);
+      return null;
+    }
   }, [locationAPI?.fetchNearestCity]);
 
-  useEffect(() => {
-    const lat = currentLocation?.lat;
-    const lng = currentLocation?.lng;
-
-    // Skip if no coords
-    if (!lat || !lng) {
-      return;
-    }
-
-    // Skip if already fetched for these coords
-    if (currentLocation.cityNameFetched) {
-      return;
-    }
-
-    const coordKey = `${parseFloat(lat).toFixed(4)},${parseFloat(lng).toFixed(4)}`;
-    if (lastFetchedCoordsRef.current === coordKey) {
-      return; // Already fetching/fetched for these coords
-    }
-
-    // Mark as in-progress to prevent duplicate fetches
-    lastFetchedCoordsRef.current = coordKey;
-
-    const fetchCity = async () => {
-      // Wait for API to be ready
-      if (!fetchNearestCityRef.current) {
-        // Reset coord key so we can retry when API is ready
-        lastFetchedCoordsRef.current = null;
-        return;
-      }
-
-      // Set loading state
-      setCurrentLocationState(prev => ({ ...prev, cityNameLoading: true }));
-
-      try {
-        const cityData = await fetchNearestCityRef.current(lat, lng, 500000);
-
-        if (cityData?.cityName) {
-          setCurrentLocationState(prev => {
-            const updated = {
-              ...prev,
-              cityName: cityData.cityName,
-              cityNameLoading: false,
-              cityNameFetched: true
-            };
-            // Persist to sessionStorage
-            sessionStorage.setItem('currentLocation', JSON.stringify(updated));
-            return updated;
-          });
-        } else {
-          // No city found - mark as fetched to prevent retry loop
-          setCurrentLocationState(prev => {
-            const updated = { ...prev, cityName: null, cityNameLoading: false, cityNameFetched: true };
-            sessionStorage.setItem('currentLocation', JSON.stringify(updated));
-            return updated;
-          });
-          console.warn('[GeoLocationContext] No city found for coords, pill will show coordinates');
-        }
-      } catch (error) {
-        console.error('[GeoLocationContext] Error fetching nearest city:', error);
-        // Reset coord key on error to allow retry
-        lastFetchedCoordsRef.current = null;
-        setCurrentLocationState(prev => ({ ...prev, cityNameLoading: false }));
-      }
+  // Helper to update location WITH city name fetch (call this instead of setCurrentLocationState directly)
+  const updateLocationWithCityName = useCallback(async (newLocation, skipCityFetch = false) => {
+    // Immediately set location with loading state
+    const locationWithLoading = {
+      ...newLocation,
+      cityName: skipCityFetch ? newLocation.cityName : null,
+      cityNameLoading: !skipCityFetch,
+      cityNameFetched: skipCityFetch
     };
 
-    fetchCity();
-    // TIEMPO-388: Added !!locationAPI?.fetchNearestCity to trigger retry when API becomes available
-    // This fixes race condition where coords are set before API is ready
-  }, [currentLocation?.lat, currentLocation?.lng, currentLocation?.cityNameFetched, !!locationAPI?.fetchNearestCity]);
+    setCurrentLocationState(locationWithLoading);
+    sessionStorage.setItem('currentLocation', JSON.stringify(locationWithLoading));
+
+    // Skip city fetch if requested (e.g., loading from cache with existing cityName)
+    if (skipCityFetch) return;
+
+    // Fetch city name
+    const cityName = await fetchCityNameForCoords(newLocation.lat, newLocation.lng);
+
+    // Update with fetched city name
+    const finalLocation = {
+      ...newLocation,
+      cityName: cityName,
+      cityNameLoading: false,
+      cityNameFetched: true
+    };
+
+    setCurrentLocationState(finalLocation);
+    sessionStorage.setItem('currentLocation', JSON.stringify(finalLocation));
+
+    return finalLocation;
+  }, [fetchCityNameForCoords]);
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {
@@ -457,30 +430,19 @@ export const GeoLocationProvider = ({ children }) => {
   }, []);
 
   // Set location for current session (used by MapCenterModal)
-  const setSessionLocation = useCallback((locationData) => {
-    // TIEMPO-276: Security cleanup - removed session logging
-
+  // TIEMPO-388: Now fetches city name synchronously instead of relying on reactive useEffect
+  const setSessionLocation = useCallback(async (locationData) => {
     const location = {
       lat: locationData.centerLocation?.lat || locationData.lat,
       lng: locationData.centerLocation?.lng || locationData.lng,
-      zoomRange: locationData.zoomRange || 50,
-      // TIEMPO-388: Reset city name state to trigger refetch for new coords
-      cityName: null,
-      cityNameLoading: false,
-      cityNameFetched: false
+      zoomRange: locationData.zoomRange || 50
     };
 
     // Only add source and locked if they exist (for Boston route)
     if (locationData.source) location.source = locationData.source;
     if (locationData.locked !== undefined) location.locked = locationData.locked;
 
-    setCurrentLocationState(location);
-
-    // Save to sessionStorage
-    sessionStorage.setItem('currentLocation', JSON.stringify(location));
-
     // TIEMPO-388: Also save to localStorage for WelcomeModal check on next visit
-    // This prevents the modal from showing again when user already has location
     saveLastMapCenter({
       lat: location.lat,
       lng: location.lng,
@@ -489,34 +451,31 @@ export const GeoLocationProvider = ({ children }) => {
 
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
-  }, []);
+
+    // Update location AND fetch city name (robust, no race conditions)
+    await updateLocationWithCityName(location);
+  }, [updateLocationWithCityName]);
 
   // Save location to backend and set as current (used by UserSettings)
+  // TIEMPO-388: Now fetches city name synchronously
   const saveAndSetLocation = useCallback(async (locationData, updateUserData) => {
-    // TIEMPO-276: Security cleanup - removed save logging
-
     const location = {
       lat: locationData.centerLocation?.lat || locationData.lat,
       lng: locationData.centerLocation?.lng || locationData.lng,
       zoomRange: locationData.zoomRange || 50
     };
 
-    // Update both saved and current
+    // Update saved location
     setSavedLocation(location);
-    setCurrentLocationState(location);
-
-    // Save to sessionStorage
-    sessionStorage.setItem('currentLocation', JSON.stringify(location));
 
     // Save to backend if updateUserData provided
     if (updateUserData) {
-      // Use nested structure that backend expects
       await updateUserData({
         localUserInfo: {
           userDefaults: {
             defaultCenterLocation: {
-              latitude: location.lat,    // Backend expects 'latitude', not 'lat'
-              longitude: location.lng    // Backend expects 'longitude', not 'lng'
+              latitude: location.lat,
+              longitude: location.lng
             },
             defaultZoomRange: location.zoomRange,
             useCenterLocation: true
@@ -527,63 +486,28 @@ export const GeoLocationProvider = ({ children }) => {
 
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
-  }, []);
+
+    // Update location AND fetch city name
+    await updateLocationWithCityName(location);
+  }, [updateLocationWithCityName]);
 
   // Save to Cloud Default via Azure Functions (TIEMPO-312 Phase 2)
+  // TIEMPO-388: Now fetches city name synchronously
   const saveToCloudDefault = useCallback(async (locationData, firebaseToken) => {
-    // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // Still update local state and sessionStorage for localhost testing
-      const location = {
-        lat: locationData.lat,
-        lng: locationData.lng,
-        radiusMiles: locationData.zoomRange || 50
-      };
-
-      setSavedLocation({
-        lat: location.lat,
-        lng: location.lng,
-        zoomRange: location.radiusMiles
-      });
-
-      // TIEMPO-388: Reset city name state to trigger refetch for new coords
-      setCurrentLocationState({
-        lat: location.lat,
-        lng: location.lng,
-        zoomRange: location.radiusMiles,
-        cityName: null,
-        cityNameLoading: false,
-        cityNameFetched: false
-      });
-
-      sessionStorage.setItem('currentLocation', JSON.stringify({
-        lat: location.lat,
-        lng: location.lng,
-        zoomRange: location.radiusMiles,
-        cityName: null,
-        cityNameLoading: false,
-        cityNameFetched: false
-      }));
-
-      // TIEMPO-388: Also save to localStorage for WelcomeModal check
-      saveLastMapCenter({
-        lat: location.lat,
-        lng: location.lng,
-        zoomRange: location.radiusMiles
-      });
-
-      locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
-
-      return { success: true, message: 'Saved locally (localhost mode)' };
-    }
-
-    // Backend accepts radiusMiles (5-200) for search distance
-    // and optional zoom (1-20) for visual map zoom level
-    const location = {
+    const locData = {
       lat: locationData.lat,
       lng: locationData.lng,
-      radiusMiles: locationData.zoomRange || 50  // Send distance in miles
+      zoomRange: locationData.zoomRange || 50
     };
+
+    // Skip API call on localhost
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      setSavedLocation(locData);
+      saveLastMapCenter(locData);
+      locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, locData);
+      await updateLocationWithCityName(locData);
+      return { success: true, message: 'Saved locally (localhost mode)' };
+    }
 
     // Call Azure Functions PUT /api/mapcenter
     const azureFunctionsURL = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
@@ -595,7 +519,7 @@ export const GeoLocationProvider = ({ children }) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${firebaseToken}`
       },
-      body: JSON.stringify({ ...location, appId })
+      body: JSON.stringify({ lat: locData.lat, lng: locData.lng, radiusMiles: locData.zoomRange, appId })
     });
 
     if (!response.ok) {
@@ -606,65 +530,42 @@ export const GeoLocationProvider = ({ children }) => {
     const result = await response.json();
 
     // Update saved location state
-    setSavedLocation({
-      lat: location.lat,
-      lng: location.lng,
-      zoomRange: location.radiusMiles
-    });
-
-    // TIEMPO-388: Reset city name state to trigger refetch for new coords
-    setCurrentLocationState({
-      lat: location.lat,
-      lng: location.lng,
-      zoomRange: location.radiusMiles,
-      cityName: null,
-      cityNameLoading: false,
-      cityNameFetched: false
-    });
-
-    // Save to sessionStorage
-    sessionStorage.setItem('currentLocation', JSON.stringify({
-      lat: location.lat,
-      lng: location.lng,
-      zoomRange: location.radiusMiles,
-      cityName: null,
-      cityNameLoading: false,
-      cityNameFetched: false
-    }));
-
-    // TIEMPO-388: Also save to localStorage for WelcomeModal check
-    saveLastMapCenter({
-      lat: location.lat,
-      lng: location.lng,
-      zoomRange: location.radiusMiles
-    });
+    setSavedLocation(locData);
+    saveLastMapCenter(locData);
 
     // Emit event to trigger refresh
-    locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+    locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, locData);
+
+    // Update location AND fetch city name
+    await updateLocationWithCityName(locData);
 
     return result;
-  }, []);
+  }, [updateLocationWithCityName]);
 
   // Fetch user's saved map center from Azure Functions Cloud Default (TIEMPO-312 Phase 2)
+  // TIEMPO-388: Now fetches city name synchronously instead of relying on reactive useEffect
   const fetchMapCenter = useCallback(async (firebaseToken) => {
     console.log('[fetchMapCenter] Starting fetch...');
 
-    // Skip on localhost to prevent 401 errors when Azure Functions not configured for PROD Firebase
+    // Skip on localhost
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // Check sessionStorage for locally saved location
       const savedLocal = sessionStorage.getItem('currentLocation');
       if (savedLocal) {
         try {
           const location = JSON.parse(savedLocal);
           setSavedLocation(location);
-          setCurrentLocationState(location);
+          // If already has cityName, skip refetch
+          if (location.cityName) {
+            setCurrentLocationState(location);
+          } else {
+            await updateLocationWithCityName(location);
+          }
           return location;
         } catch (err) {
-          console.warn('[GeoLocationContext] Failed to parse saved location from sessionStorage:', err);
+          console.warn('[GeoLocationContext] Failed to parse saved location:', err);
         }
       }
-
-      return null; // No saved location on localhost
+      return null;
     }
 
     const azureFunctionsURL = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
@@ -672,15 +573,11 @@ export const GeoLocationProvider = ({ children }) => {
 
     try {
       const response = await fetch(`${azureFunctionsURL}/api/mapcenter?appId=${appId}`, {
-        headers: {
-          'Authorization': `Bearer ${firebaseToken}`
-        }
+        headers: { 'Authorization': `Bearer ${firebaseToken}` }
       });
 
       console.log('[fetchMapCenter] Response status:', response.status);
 
-      // TIEMPO-381 fix: Check response status before parsing
-      // 401/403 errors should throw, not return null (which triggers onboarding)
       if (!response.ok) {
         const errorText = await response.text();
         console.log('[fetchMapCenter] API error, throwing:', response.status, errorText);
@@ -690,55 +587,33 @@ export const GeoLocationProvider = ({ children }) => {
       const result = await response.json();
       console.log('[fetchMapCenter] API result:', JSON.stringify(result));
 
-      // Check for successful response with data
       if (result.success && result.data) {
-        // TIEMPO-388: Include city name fields, reset to trigger refetch
         const location = {
           lat: result.data.lat,
           lng: result.data.lng,
-          zoomRange: result.data.radiusMiles,  // Map backend radiusMiles to FE zoomRange
-          cityName: null,
-          cityNameLoading: false,
-          cityNameFetched: false
-          // result.data.zoom also available if needed for map display
+          zoomRange: result.data.radiusMiles
         };
 
-        // Update saved location (always safe to update)
-        setSavedLocation({ lat: location.lat, lng: location.lng, zoomRange: location.zoomRange });
+        setSavedLocation(location);
 
-        // TIEMPO-381: Only update current location if it's not locked (e.g., Boston route)
-        setCurrentLocationState(prev => {
-          if (prev?.locked) {
-            console.log('[fetchMapCenter] Skipping update - location is locked');
-            return prev;
-          }
-          return location;
-        });
-
-        // TIEMPO-381: Only save to sessionStorage if not locked
-        // Check current sessionStorage to see if it has locked flag
+        // TIEMPO-381: Check if location is locked (Boston route)
         const currentSaved = sessionStorage.getItem('currentLocation');
         const currentParsed = currentSaved ? JSON.parse(currentSaved) : null;
-        if (!currentParsed?.locked) {
-          sessionStorage.setItem('currentLocation', JSON.stringify(location));
-
-          // TIEMPO-388: Also save to localStorage for WelcomeModal check on logout
-          saveLastMapCenter({
-            lat: location.lat,
-            lng: location.lng,
-            zoomRange: location.zoomRange
-          });
-
-          // Emit event to trigger refresh only if we actually updated
-          locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+        if (currentParsed?.locked) {
+          console.log('[fetchMapCenter] Skipping update - location is locked');
+          return location;
         }
+
+        saveLastMapCenter(location);
+        locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
+
+        // Update location AND fetch city name (robust, no race conditions)
+        await updateLocationWithCityName(location);
 
         return location;
       } else if (result.success && !result.data) {
-        // User has no saved location - use defaults
         return null;
       } else {
-        // Error response
         console.error('[GeoLocationContext] Failed to fetch map center:', result.error);
         return null;
       }
@@ -746,7 +621,7 @@ export const GeoLocationProvider = ({ children }) => {
       console.error('[GeoLocationContext] Error fetching map center:', error);
       return null;
     }
-  }, []);
+  }, [updateLocationWithCityName]);
 
   // Compute location display text
   const locationDisplayText = selectedLocation.city.name || 
