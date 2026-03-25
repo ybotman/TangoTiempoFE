@@ -302,7 +302,9 @@ export const GeoLocationProvider = ({ children }) => {
     };
 
     fetchCity();
-  }, [currentLocation?.lat, currentLocation?.lng, currentLocation?.cityNameFetched]);
+    // TIEMPO-388: Added !!locationAPI?.fetchNearestCity to trigger retry when API becomes available
+    // This fixes race condition where coords are set before API is ready
+  }, [currentLocation?.lat, currentLocation?.lng, currentLocation?.cityNameFetched, !!locationAPI?.fetchNearestCity]);
 
   // Function to select a location manually
   const selectLocation = useCallback((location) => {
