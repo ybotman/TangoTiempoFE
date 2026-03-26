@@ -10,11 +10,14 @@ import { RoleContext } from '@/contexts/RoleContext';
 const APP_ID = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
 
 // Map role names to short codes used in Firestore
+// Messages are filtered by role - when user switches role, different messages show
 const ROLE_CODE_MAP = {
   'RegionalOrganizer': 'RO',
   'RegionalAdmin': 'RA',
   'SystemAdmin': 'SA',
   'SystemOwner': 'SO',
+  'Spotlighter': 'SL',       // Upcoming role (TIEMPO-393)
+  // 'NamedUser' intentionally excluded - no admin messages for regular users
 };
 
 export const useMessages = () => {
