@@ -3,6 +3,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import ReactMarkdown from 'react-markdown';
 import {
   Dialog,
   DialogTitle,
@@ -127,16 +128,31 @@ const MessagesModal = ({
 
         <Divider sx={{ mb: 2 }} />
 
-        {/* Message body */}
-        <Typography
-          variant="body1"
+        {/* Message body - supports markdown */}
+        <Box
           sx={{
-            whiteSpace: 'pre-wrap',
+            '& p': { mt: 0, mb: 1.5 },
+            '& h1, & h2, & h3': { mt: 2, mb: 1 },
+            '& ul, & ol': { pl: 2, mb: 1.5 },
+            '& li': { mb: 0.5 },
+            '& a': { color: 'primary.main' },
+            '& code': {
+              backgroundColor: 'grey.100',
+              px: 0.5,
+              borderRadius: 0.5,
+              fontFamily: 'monospace',
+            },
+            '& pre': {
+              backgroundColor: 'grey.100',
+              p: 1.5,
+              borderRadius: 1,
+              overflow: 'auto',
+            },
             lineHeight: 1.7,
           }}
         >
-          {message.body}
-        </Typography>
+          <ReactMarkdown>{message.body}</ReactMarkdown>
+        </Box>
 
         <Divider sx={{ mt: 2, mb: 1 }} />
 
