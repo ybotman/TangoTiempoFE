@@ -163,8 +163,10 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           <Tooltip title={hasUnread ? `${unreadCount} unread message${unreadCount > 1 ? 's' : ''}` : "Messages"} arrow>
             <IconButton
               onClick={() => {
-                setCurrentMessageIndex(0);
-                setMessagesModalOpen(true);
+                if (unreadMessages.length > 0) {
+                  setCurrentMessageIndex(0);
+                  setMessagesModalOpen(true);
+                }
               }}
               sx={{
                 animation: hasUnread ? `${pulse} 2s ease-in-out infinite` : 'none',

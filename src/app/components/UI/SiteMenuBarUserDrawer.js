@@ -22,7 +22,10 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import MailIcon from '@mui/icons-material/Mail';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { AuthContext } from '@/contexts/AuthContext';
+import { useMessages } from '@/hooks/useMessages';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
@@ -36,6 +39,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const { logAuthEvent, logRoleChange, logActivity } = useActivityLogger();
+  const { messages, unreadCount, acknowledgeMessage, loading: messagesLoading } = useMessages();
   // Fetch roles using useRoles hook
   // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
@@ -256,39 +260,101 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
               </Box>
             )}
 
-            {/* Messages - Coming Soon */}
+            {/* Messages Section */}
             <Divider sx={{ my: 2 }} />
-            <Box sx={{
-              padding: 2,
-              backgroundColor: 'grey.100',
-              borderRadius: 1,
-              border: '1px dashed',
-              borderColor: 'grey.400',
-              opacity: 0.8
-            }}>
+            <Box sx={{ padding: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <MailOutlineIcon sx={{ color: 'grey.500', fontSize: 20 }} />
-                <Typography variant="subtitle2" color="text.secondary">
+                <MailOutlineIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                <Typography variant="subtitle2">
                   Messages
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    backgroundColor: 'grey.300',
-                    px: 1,
-                    borderRadius: 1,
-                    fontSize: '0.65rem'
-                  }}
-                >
-                  Coming Soon
-                </Typography>
+                {unreadCount > 0 && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      px: 1,
+                      borderRadius: 1,
+                      fontSize: '0.65rem'
+                    }}
+                  >
+                    {unreadCount} unread
+                  </Typography>
+                )}
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
                 Role: <strong>{roleDisplayMap[selectedRole] || selectedRole || 'None'}</strong>
               </Typography>
-              <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>
-                System announcements, organizer updates, and direct messages will appear here.
-              </Typography>
+
+              {/* Scrollable Message List */}
+              <Box sx={{
+                maxHeight: 200,
+                overflowY: 'auto',
+                backgroundColor: 'grey.50',
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'grey.200',
+              }}>
+                {messagesLoading ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ p: 2, display: 'block', textAlign: 'center' }}>
+                    Loading messages...
+                  </Typography>
+                ) : messages.length === 0 ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ p: 2, display: 'block', textAlign: 'center', fontStyle: 'italic' }}>
+                    No messages for this role
+                  </Typography>
+                ) : (
+                  messages.map((msg) => (
+                    <Box
+                      key={msg.id}
+                      sx={{
+                        p: 1.5,
+                        borderBottom: '1px solid',
+                        borderColor: 'grey.200',
+                        backgroundColor: msg.receipt?.acknowledgedAt ? 'transparent' : 'primary.50',
+                        '&:last-child': { borderBottom: 'none' },
+                        '&:hover': { backgroundColor: 'action.hover' },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        {msg.receipt?.acknowledgedAt ? (
+                          <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mt: 0.3 }} />
+                        ) : (
+                          <MailIcon sx={{ fontSize: 16, color: 'primary.main', mt: 0.3 }} />
+                        )}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" sx={{ fontWeight: msg.receipt?.acknowledgedAt ? 'normal' : 'bold' }}>
+                            {msg.title}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {msg.body}
+                          </Typography>
+                          {!msg.receipt?.acknowledgedAt && msg.requiresAck && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => acknowledgeMessage(msg.id)}
+                              sx={{ mt: 0.5, fontSize: '0.7rem', py: 0.25 }}
+                            >
+                              I Understand
+                            </Button>
+                          )}
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))
+                )}
+              </Box>
             </Box>
 
             <Dialog

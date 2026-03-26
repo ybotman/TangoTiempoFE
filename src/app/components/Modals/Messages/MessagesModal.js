@@ -43,12 +43,12 @@ const MessagesModal = ({
   onNext,
   onPrevious,
 }) => {
-  if (!messages || messages.length === 0) {
+  if (!messages || messages.length === 0 || !messages[currentIndex]) {
     return null;
   }
 
   const message = messages[currentIndex];
-  const priorityConfig = PRIORITY_CONFIG[message.priority] || PRIORITY_CONFIG.medium;
+  const priorityConfig = PRIORITY_CONFIG[message?.priority] || PRIORITY_CONFIG.medium;
   const PriorityIcon = priorityConfig.icon;
 
   const formatDate = (date) => {
