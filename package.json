@@ -1,6 +1,6 @@
 {
   "name": "tangotiempo",
-  "version": "1.20.42",
+  "version": "1.21.4",
   "private": true,
   "proxy": "http://localhost:3010",
   "type": "module",
@@ -51,6 +51,7 @@
     "@mui/x-date-pickers": "^7.28.3",
     "@vercel/analytics": "^1.5.0",
     "axios": "^1.7.7",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "debounce": "^2.2.0",
     "depcheck": "^1.4.7",
@@ -69,6 +70,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "react-leaflet": "^4.2.1",
+    "react-markdown": "^10.1.0",
     "rrule": "^2.8.1",
     "slugify": "^1.6.6",
     "uuid": "^11.0.2",
@@ -92,5 +94,9 @@
   },
   "resolutions": {
     "cross-spawn": "7.0.5"
+  },
+  "overrides": {
+    "diff": "^8.0.3",
+    "serialize-javascript": "^7.0.3"
   }
 }

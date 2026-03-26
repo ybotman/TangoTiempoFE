@@ -1,23 +1,36 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment } from '@mui/material';
+import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment, Badge, keyframes } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import MailIcon from '@mui/icons-material/Mail';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
+import { useMessages } from '@/hooks/useMessages';
 import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
+import MessagesModal from '@/components/Modals/Messages/MessagesModal';
+
+// Pulse animation for new messages
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+`;
 
 const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle, readOnly = false }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
+  const { unreadMessages, unreadCount, hasUnread, acknowledgeMessage } = useMessages();
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
   const [showSearchField, setShowSearchField] = useState(false);
-  
+  const [messagesModalOpen, setMessagesModalOpen] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
   // Snackbar state for role change message
   const [roleMessageOpen, setRoleMessageOpen] = useState(false);
   const [selectedRoleName, setSelectedRoleName] = useState('');
@@ -145,6 +158,29 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           </IconButton>
         </Tooltip>
 
+        {/* Messages Icon - only show when there are unread messages */}
+        {user && hasUnread && (
+          <Tooltip title={`${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`} arrow>
+            <IconButton
+              onClick={() => {
+                setCurrentMessageIndex(0);
+                setMessagesModalOpen(true);
+              }}
+              sx={{
+                animation: `${pulse} 2s ease-in-out infinite`,
+              }}
+            >
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                max={9}
+              >
+                <MailIcon color="primary" />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+        )}
+
         <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
@@ -173,6 +209,17 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           You have changed role to: {selectedRoleName}
         </Alert>
       </Snackbar>
+
+      {/* Messages Modal */}
+      <MessagesModal
+        open={messagesModalOpen}
+        onClose={() => setMessagesModalOpen(false)}
+        messages={unreadMessages}
+        onAcknowledge={acknowledgeMessage}
+        currentIndex={currentMessageIndex}
+        onNext={() => setCurrentMessageIndex(prev => Math.min(prev + 1, unreadMessages.length - 1))}
+        onPrevious={() => setCurrentMessageIndex(prev => Math.max(prev - 1, 0))}
+      />
     </Box>
   );
 };

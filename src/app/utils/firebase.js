@@ -2,6 +2,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, FacebookAuthProvider, GoogleAuthProvider, EmailAuthProvider, OAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 // Decode the Base64 encoded JSON string from the environment variable
 const decodedFirebaseConfig = JSON.parse(
@@ -15,6 +16,9 @@ const app = initializeApp(decodedFirebaseConfig);
 
 // Initialize Firebase Auth
 const auth = getAuth(app);
+
+// Initialize Firestore
+const db = getFirestore(app);
 
 // Initialize Auth Providers
 const googleProvider = new GoogleAuthProvider();
@@ -38,4 +42,4 @@ appleProvider.addScope('name');
 //   locale: 'en'
 // });
 
-export { auth, facebookProvider, googleProvider, emailProvider, appleProvider };
+export { auth, db, facebookProvider, googleProvider, emailProvider, appleProvider };

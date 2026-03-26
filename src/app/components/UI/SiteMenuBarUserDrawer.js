@@ -22,7 +22,12 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import MailIcon from '@mui/icons-material/Mail';
 import { AuthContext } from '@/contexts/AuthContext';
+import { useMessages } from '@/hooks/useMessages';
+import MessagesModal from '@/components/Modals/Messages/MessagesModal';
+import AddIcon from '@mui/icons-material/Add';
+import Tooltip from '@mui/material/Tooltip';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
@@ -36,9 +41,12 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   const { user, logOut } = useContext(AuthContext);
   const { roles, selectedRole, selectRole } = useContext(RoleContext);
   const { logAuthEvent, logRoleChange, logActivity } = useActivityLogger();
+  const { messages, unreadCount, acknowledgeMessage, loading: messagesLoading } = useMessages();
   // Fetch roles using useRoles hook
   // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [orderedUserRoles, setOrderedUserRoles] = useState([]);
 
   // Define role display mapping (backend role -> display name)
@@ -143,7 +151,12 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   };
 
   return (
-    <Drawer anchor="right" open={userDrawerOpen} onClose={handleUserDrawerClose}>
+    <Drawer
+      anchor="right"
+      open={userDrawerOpen}
+      onClose={handleUserDrawerClose}
+      disableRestoreFocus
+    >
       <Box sx={{ width: 300, padding: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
           <Typography variant="h6">User Management</Typography>
@@ -256,40 +269,109 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
               </Box>
             )}
 
-            {/* Messages - Coming Soon */}
+            {/* Messages Section - only show if there are messages */}
+            {messages.length > 0 && (
+            <>
             <Divider sx={{ my: 2 }} />
-            <Box sx={{
-              padding: 2,
-              backgroundColor: 'grey.100',
-              borderRadius: 1,
-              border: '1px dashed',
-              borderColor: 'grey.400',
-              opacity: 0.8
-            }}>
+            <Box sx={{ padding: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <MailOutlineIcon sx={{ color: 'grey.500', fontSize: 20 }} />
-                <Typography variant="subtitle2" color="text.secondary">
+                <MailOutlineIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                <Typography variant="subtitle2">
                   Messages
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    backgroundColor: 'grey.300',
-                    px: 1,
-                    borderRadius: 1,
-                    fontSize: '0.65rem'
-                  }}
-                >
-                  Coming Soon
-                </Typography>
+                {unreadCount > 0 && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      px: 1,
+                      borderRadius: 1,
+                      fontSize: '0.65rem'
+                    }}
+                  >
+                    {unreadCount} unread
+                  </Typography>
+                )}
+                <Box sx={{ flex: 1 }} />
+                {/* New Message button - SA/SO only, Coming Soon */}
+                {(selectedRole === 'SystemAdmin' || selectedRole === 'SystemOwner') && (
+                  <Tooltip title="Coming Soon - Voice & Text Compose" arrow>
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled
+                        sx={{ opacity: 0.5 }}
+                      >
+                        <AddIcon fontSize="small" />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
                 Role: <strong>{roleDisplayMap[selectedRole] || selectedRole || 'None'}</strong>
               </Typography>
-              <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>
-                System announcements, organizer updates, and direct messages will appear here.
-              </Typography>
+
+              {/* Scrollable Message List */}
+              <Box sx={{
+                maxHeight: 200,
+                overflowY: 'auto',
+                backgroundColor: 'grey.50',
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'grey.200',
+              }}>
+                {messagesLoading ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ p: 2, display: 'block', textAlign: 'center' }}>
+                    Loading messages...
+                  </Typography>
+                ) : messages.length === 0 ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ p: 2, display: 'block', textAlign: 'center', fontStyle: 'italic' }}>
+                    No messages for this role
+                  </Typography>
+                ) : (
+                  messages.map((msg, index) => (
+                    <Box
+                      key={msg.id}
+                      onClick={() => {
+                        setSelectedMessageIndex(index);
+                        setMessageModalOpen(true);
+                      }}
+                      sx={{
+                        px: 1.5,
+                        py: 1,
+                        borderBottom: '1px solid',
+                        borderColor: 'grey.200',
+                        backgroundColor: msg.receipt?.acknowledgedAt ? 'transparent' : 'primary.50',
+                        '&:last-child': { borderBottom: 'none' },
+                        '&:hover': { backgroundColor: 'action.hover' },
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {!msg.receipt?.acknowledgedAt && (
+                          <MailIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
+                        )}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: msg.receipt?.acknowledgedAt ? 'normal' : 'bold',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {msg.title}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))
+                )}
+              </Box>
             </Box>
+            </>
+            )}
 
             <Dialog
               open={logoutConfirmOpen}
@@ -346,6 +428,18 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
           </Box>
         )}
       </Box>
+
+      {/* Message Detail Modal */}
+      <MessagesModal
+        open={messageModalOpen}
+        onClose={() => setMessageModalOpen(false)}
+        messages={selectedMessageIndex !== null ? [messages[selectedMessageIndex]] : []}
+        onAcknowledge={(msgId) => {
+          acknowledgeMessage(msgId);
+          setMessageModalOpen(false);
+        }}
+        currentIndex={0}
+      />
     </Drawer>
   );
 };

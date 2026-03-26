@@ -281,8 +281,9 @@ const BostonCalendarPage = () => {
     const { event } = eventInfo;
     const isMonthlyView = eventInfo.view.type === 'dayGridMonth';
 
-    // Check for canceled events
-    const isCanceled = event.extendedProps?.eventStatus === 'canceled';
+    // Check for canceled events (check both eventStatus and isCanceled flag)
+    const isCanceled = event.extendedProps?.eventStatus === 'canceled' ||
+                       event.extendedProps?.isCanceled === true;
 
     // Check if this is an AI-discovered event
     const isAIDiscovered = event.extendedProps?.isDiscovered === true;
@@ -370,7 +371,7 @@ const BostonCalendarPage = () => {
                 marginBottom: '1px'
               }}>
                 {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
-                {isCanceled ? (
+                {isCanceled || getFeatureData(event)?.isCanceled ? (
                   <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>⚠️</span>
                 ) : startTime && (
                   <div style={{
@@ -384,7 +385,8 @@ const BostonCalendarPage = () => {
                     {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
                   </div>
                 )}
-                <CategoryCircles eventProps={event.extendedProps} />
+                {/* Hide category bubbles for canceled events */}
+                {!(isCanceled || getFeatureData(event)?.isCanceled) && <CategoryCircles eventProps={event.extendedProps} />}
                 {eventShortTitle && (
                   <>
                     <div style={{
@@ -533,10 +535,12 @@ const BostonCalendarPage = () => {
                       {event.extendedProps?.isRecurring && <span>🔄 </span>}
                       {/* Then spotlight badges */}
                       {badges}
-                      {/* Then full title (only if NOT canceled) */}
-                      {!(isCanceled || featureData?.isCanceled) && (
-                        <span>{event.title}</span>
-                      )}
+                      {/* Full title - strikethrough if canceled */}
+                      <span style={{
+                        textDecoration: (isCanceled || featureData?.isCanceled) ? 'line-through' : 'none'
+                      }}>
+                        {event.title}
+                      </span>
                     </div>
                     {/* Row 3: Orchestra - inverted style */}
                     {hasOrchestra && (
@@ -646,7 +650,7 @@ const BostonCalendarPage = () => {
                 flexWrap: isMobile ? 'wrap' : 'nowrap'
               }}>
                 {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
-                {isCanceled ? (
+                {isCanceled || getFeatureData(event)?.isCanceled ? (
                   <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
                 ) : startTime && (
                   <div style={{
@@ -663,7 +667,8 @@ const BostonCalendarPage = () => {
                     )}
                   </div>
                 )}
-                <CategoryCircles eventProps={event.extendedProps} />
+                {/* Hide category bubbles for canceled events */}
+                {!(isCanceled || getFeatureData(event)?.isCanceled) && <CategoryCircles eventProps={event.extendedProps} />}
                 {eventShortTitle && (
                   <>
                     <div style={{
@@ -811,10 +816,12 @@ const BostonCalendarPage = () => {
                       {event.extendedProps?.isRecurring && <span>🔄 </span>}
                       {/* Then spotlight badges */}
                       {badges}
-                      {/* Then full title (only if NOT canceled) */}
-                      {!(isCanceled || featureData?.isCanceled) && (
-                        <span>{event.title}</span>
-                      )}
+                      {/* Full title - strikethrough if canceled */}
+                      <span style={{
+                        textDecoration: (isCanceled || featureData?.isCanceled) ? 'line-through' : 'none'
+                      }}>
+                        {event.title}
+                      </span>
                     </div>
                     {/* Row 3: Orchestra - inverted style */}
                     {hasOrchestra && (

@@ -42,7 +42,8 @@
       "Bash(vercel project ls:*)",
       "WebFetch(domain:calendarbeaf-test.azurewebsites.net)",
       "mcp__claude_ai_Atlassian__addCommentToJiraIssue",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(brew list:*)"
     ],
     "deny": [],
     "ask": []
