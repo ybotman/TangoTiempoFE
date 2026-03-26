@@ -23,7 +23,6 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import MailIcon from '@mui/icons-material/Mail';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
 import MessagesModal from '@/components/Modals/Messages/MessagesModal';
@@ -346,9 +345,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {msg.receipt?.acknowledgedAt ? (
-                          <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', flexShrink: 0 }} />
-                        ) : (
+                        {!msg.receipt?.acknowledgedAt && (
                           <MailIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
                         )}
                         <Typography
