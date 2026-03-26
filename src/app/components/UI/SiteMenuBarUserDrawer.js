@@ -27,7 +27,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
 import MessagesModal from '@/components/Modals/Messages/MessagesModal';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import Tooltip from '@mui/material/Tooltip';
 import { RoleContext } from '@/contexts/RoleContext';
@@ -368,21 +367,6 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                             {msg.body}
                           </Typography>
                         </Box>
-                        {/* Dismiss button */}
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            acknowledgeMessage(msg.id);
-                          }}
-                          sx={{
-                            p: 0.5,
-                            opacity: msg.receipt?.acknowledgedAt ? 0.3 : 1,
-                          }}
-                          title={msg.receipt?.acknowledgedAt ? 'Already read' : 'Dismiss'}
-                        >
-                          <DeleteOutlineIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
                       </Box>
                     </Box>
                   ))
