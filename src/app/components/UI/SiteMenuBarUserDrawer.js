@@ -266,7 +266,9 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
               </Box>
             )}
 
-            {/* Messages Section */}
+            {/* Messages Section - only show if there are messages */}
+            {messages.length > 0 && (
+            <>
             <Divider sx={{ my: 2 }} />
             <Box sx={{ padding: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -387,6 +389,8 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 )}
               </Box>
             </Box>
+            </>
+            )}
 
             <Dialog
               open={logoutConfirmOpen}
