@@ -335,7 +335,8 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                         setMessageModalOpen(true);
                       }}
                       sx={{
-                        p: 1.5,
+                        px: 1.5,
+                        py: 1,
                         borderBottom: '1px solid',
                         borderColor: 'grey.200',
                         backgroundColor: msg.receipt?.acknowledgedAt ? 'transparent' : 'primary.50',
@@ -344,29 +345,23 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                         cursor: 'pointer',
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {msg.receipt?.acknowledgedAt ? (
-                          <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mt: 0.3 }} />
+                          <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', flexShrink: 0 }} />
                         ) : (
-                          <MailIcon sx={{ fontSize: 16, color: 'primary.main', mt: 0.3 }} />
+                          <MailIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
                         )}
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" sx={{ fontWeight: msg.receipt?.acknowledgedAt ? 'normal' : 'bold' }}>
-                            {msg.title}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {msg.body}
-                          </Typography>
-                        </Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: msg.receipt?.acknowledgedAt ? 'normal' : 'bold',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {msg.title}
+                        </Typography>
                       </Box>
                     </Box>
                   ))
