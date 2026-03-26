@@ -151,7 +151,12 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   };
 
   return (
-    <Drawer anchor="right" open={userDrawerOpen} onClose={handleUserDrawerClose}>
+    <Drawer
+      anchor="right"
+      open={userDrawerOpen}
+      onClose={handleUserDrawerClose}
+      disableRestoreFocus
+    >
       <Box sx={{ width: 300, padding: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
           <Typography variant="h6">User Management</Typography>
