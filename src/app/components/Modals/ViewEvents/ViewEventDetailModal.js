@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { Modal, Box, Typography, Tabs, Tab, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Chip, useTheme, useMediaQuery, Snackbar, IconButton } from '@mui/material';
 import NextImage from 'next/image';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -6,6 +6,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShareIcon from '@mui/icons-material/Share';
 import CloseIcon from '@mui/icons-material/Close';
+import RepeatIcon from '@mui/icons-material/Repeat';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useEventOperations } from '@/hooks/useEvents';
@@ -15,10 +18,17 @@ import ViewEventDetailsBasic from './ViewEventDetailsBasic';
 import ViewEventDetailsImage from './ViewEventDetailsImage';
 import ViewEventDetailsOrganizer from './ViewEventDetailsOrganizer';
 import ViewEventDetailsVenue from './ViewEventDetailsVenue';
-// Legacy component removed as part of transition
+// TIEMPO-362: Instance override components (OccurrenceActionMenu removed - now in calendar submenu)
+import CancelOccurrenceDialog from './CancelOccurrenceDialog';
+import EditOccurrenceModal from './EditOccurrenceModal';
+import OccurrenceDatePicker from './OccurrenceDatePicker';
+import { cancelOccurrence, createOverride, addExcludedDate } from '@/services/eventOverrides';
+import { uploadEventImage } from '@/utils/uploadEventImages';
 import PropTypes from 'prop-types';
 import { categoryColors } from '@/utils/categoryColors';
 import ModalHeader from '@/components/UI/ModalHeader';
+import { format, addMonths, startOfDay } from 'date-fns';
+import { RRule } from 'rrule';
 
 const getModalStyle = (isMobile) => ({
   position: isMobile ? 'fixed' : 'absolute',
@@ -42,7 +52,7 @@ const getModalStyle = (isMobile) => ({
   }),
 });
 
-const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) => {
+const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, initialAction }) => {
   const [currentTab, setCurrentTab] = useState('basic');
   const [imageSrc, setImageSrc] = useState(null);
   const [showImageTab, setShowImageTab] = useState(false);
@@ -50,27 +60,157 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   const [isDeleting, setIsDeleting] = useState(false);
   // TIEMPO-256: Share functionality state
   const [shareSnackbarOpen, setShareSnackbarOpen] = useState(false);
+
+  // TIEMPO-362: Instance override state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [editOccurrenceOpen, setEditOccurrenceOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [selectedOccurrenceDate, setSelectedOccurrenceDate] = useState(null);
+  const [isOverrideLoading, setIsOverrideLoading] = useState(false);
+  // Track if we've handled the initial action to prevent re-triggering
+  const [initialActionHandled, setInitialActionHandled] = useState(false);
+  // Track current date index for navigation arrows
+  const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  // Track if user has navigated via arrows (to know when to use index vs clicked date)
+  const [hasNavigatedDates, setHasNavigatedDates] = useState(false);
   
   // Mobile detection
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  // Get user context to check permissions
-  const { user } = useContext(AuthContext);
+  // Get user context to check permissions and get auth token
+  const { user, getIdToken } = useContext(AuthContext);
   const { selectedRole } = useContext(RoleContext);
   const { deleteEvent } = useEventOperations();
+
+  // TIEMPO-362: Extract recurrence info for navigation (must be before early return)
+  const recurrenceRule = eventDetails?.extendedProps?.recurrenceRule;
+  // Use displayStartTime (venue local time, no Z) to match how FullCalendar renders events
+  // This ensures instanceKeys match between save and display
+  const venueDisplayStartTime = eventDetails?.extendedProps?.displayStartTime;
+  const eventStartDate = eventDetails?.extendedProps?.originalStartDate || eventDetails?.start;
+
+  // Calculate all upcoming occurrence dates for navigation (must be before early return)
+  const occurrenceDates = useMemo(() => {
+    if (!recurrenceRule) return [];
+    // Prefer venue display time (same format FullCalendar uses), fallback to eventStartDate
+    const dtstartSource = venueDisplayStartTime || eventStartDate;
+    if (!dtstartSource) return [];
+
+    try {
+      // TIEMPO-362: Use the same DTSTART format as transformEvents.js
+      // If venueDisplayStartTime is available, it's already in "YYYY-MM-DDTHH:mm:ss" format (no Z)
+      // This matches how FullCalendar's rrule plugin generates occurrences
+      let rruleStr;
+      if (venueDisplayStartTime && typeof venueDisplayStartTime === 'string' && !venueDisplayStartTime.endsWith('Z')) {
+        // Use venue time directly - already in correct format
+        const dtStartFormatted = venueDisplayStartTime.replace(/[-:]/g, '').replace('T', 'T').substring(0, 15);
+        rruleStr = `DTSTART:${dtStartFormatted}\nRRULE:${recurrenceRule}`;
+      } else {
+        // Fallback: parse as Date and format
+        const dtstart = new Date(dtstartSource);
+        rruleStr = `DTSTART:${format(dtstart, "yyyyMMdd'T'HHmmss")}\nRRULE:${recurrenceRule}`;
+      }
+      const rule = RRule.fromString(rruleStr);
+
+      // Get occurrences: from event's original start to 6 months from now
+      // TIEMPO-388: Use dtstart (not today) to include past dates for navigation
+      const now = new Date();
+      const dtstart = new Date(dtstartSource);
+      const endRange = addMonths(now, 6);
+
+      return rule.between(dtstart, endRange, true).slice(0, 52); // Max 52 weeks
+    } catch {
+      return [];
+    }
+  }, [recurrenceRule, venueDisplayStartTime, eventStartDate]);
+
+  // TIEMPO-362: Look up override for the currently navigated date
+  // Must be before early return to satisfy Rules of Hooks
+  const currentOverrideValues = useMemo(() => {
+    // When user hasn't navigated via arrows, use clicked date; otherwise use index
+    const navDate = hasNavigatedDates
+      ? (occurrenceDates[currentDateIndex] || selectedOccurrenceDate || eventDetails?._instance?.range?.start || eventDetails?.start)
+      : (selectedOccurrenceDate || eventDetails?._instance?.range?.start || eventDetails?.start);
+
+    if (!navDate) return { _hasOverride: false, _overridePatch: null };
+
+    const overrides = eventDetails?.extendedProps?.instanceOverrides || [];
+    if (overrides.length === 0) return { _hasOverride: false, _overridePatch: null };
+
+    // Find override matching the current navigated date
+    const navDateStr = format(new Date(navDate), 'yyyy-MM-dd');
+    const matchingOverride = overrides.find(ov => {
+      if (!ov.instanceKey) return false;
+      const ovDateStr = format(new Date(ov.instanceKey), 'yyyy-MM-dd');
+      return ovDateStr === navDateStr;
+    });
+
+    if (matchingOverride) {
+      return {
+        _hasOverride: true,
+        _overrideType: matchingOverride.overrideType,
+        _overridePatch: matchingOverride.patch || {}
+      };
+    }
+
+    return { _hasOverride: false, _overridePatch: null };
+  }, [hasNavigatedDates, currentDateIndex, occurrenceDates, selectedOccurrenceDate, eventDetails]);
+
+  // TIEMPO-362: Define occurrenceDate early (before useEffects that depend on it)
+  // Get the specific occurrence date from FullCalendar's instance data or selected date
+  const occurrenceDate = selectedOccurrenceDate ||
+                        eventDetails?._instance?.range?.start ||
+                        eventDetails?.start;
 
   useEffect(() => {
     if (open) {
       setCurrentTab('Basic');
+      setInitialActionHandled(false); // Reset when modal opens
+      // TIEMPO-388: Reset occurrence state to prevent stale date from previous edits
+      setSelectedOccurrenceDate(null);
+      setHasNavigatedDates(false);
+      setCurrentDateIndex(0);
     }
   }, [open]);
+
+  // TIEMPO-362: Handle initial action from calendar submenu
+  useEffect(() => {
+    if (open && initialAction && !initialActionHandled && eventDetails) {
+      setInitialActionHandled(true);
+      setHasNavigatedDates(false); // Reset navigation state
+      // Trigger the appropriate action based on what was selected in the submenu
+      if (initialAction === 'editOccurrence') {
+        setEditOccurrenceOpen(true);
+      } else if (initialAction === 'cancelOccurrence') {
+        setCancelDialogOpen(true);
+      } else if (initialAction === 'seeAllDates') {
+        setDatePickerOpen(true);
+      }
+    }
+  }, [open, initialAction, initialActionHandled, eventDetails]);
+
+  // TIEMPO-362: Set current date index when modal opens with occurrence dates
+  useEffect(() => {
+    if (occurrenceDates.length > 0 && occurrenceDate) {
+      const clickedDateStr = format(new Date(occurrenceDate), 'yyyy-MM-dd');
+      const index = occurrenceDates.findIndex(d =>
+        format(d, 'yyyy-MM-dd') === clickedDateStr
+      );
+      setCurrentDateIndex(index >= 0 ? index : 0);
+    }
+  }, [occurrenceDates, occurrenceDate]);
 
   useEffect(() => {
     // TIEMPO-264: Clear image state when event changes to prevent carryover
     setImageSrc(null);
     setShowImageTab(false);
-    
+
+    // TIEMPO-388: Also reset occurrence state when switching events
+    // This handles cases where user clicks different dates of same recurring series
+    setSelectedOccurrenceDate(null);
+    setHasNavigatedDates(false);
+
     // Try to use the event image if available
     if (eventDetails?.extendedProps?.eventImage) {
       const img = new Image();
@@ -81,34 +221,27 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         setShowImageTab(true);
       };
 
-      // Handle image load error - try fallback image if available
       img.onerror = function() {
-// TIEMPO-276: Security cleanup - removed logging
-        
-        // Try event-specific fallback if available
+        // Try fallback if available
         if (eventDetails?.extendedProps?.fallbackImageUrl) {
           const fallbackImg = new Image();
           fallbackImg.src = eventDetails.extendedProps.fallbackImageUrl;
-          
+
           fallbackImg.onload = function() {
             setImageSrc(eventDetails.extendedProps.fallbackImageUrl);
             setShowImageTab(true);
           };
-          
+
           fallbackImg.onerror = function() {
-            // TIEMPO-264: If both primary and fallback fail, show no image
-// TIEMPO-276: Security cleanup - removed logging
             setImageSrc(null);
             setShowImageTab(false);
           };
         } else {
-          // TIEMPO-264: No fallback provided, show no image
           setImageSrc(null);
           setShowImageTab(false);
         }
       };
     } else {
-      // TIEMPO-264: No image provided at all, show no image
       setImageSrc(null);
       setShowImageTab(false);
     }
@@ -203,6 +336,17 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   // RA permission logging removed - was too noisy
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
+
+  // TIEMPO-362: Detect recurring event and capture occurrence date
+  const isRecurringEvent = eventDetails?.extendedProps?.isRecurring ||
+                          eventDetails?.extendedProps?.recurrenceRule;
+
+  // Note: occurrenceDate is defined earlier (before useEffects that depend on it)
+
+  // Format occurrence date for display
+  const formattedOccurrenceDate = occurrenceDate
+    ? format(new Date(occurrenceDate), 'EEEE, MMMM d, yyyy')
+    : null;
   
   // Get truncated description for the delete confirmation
   const truncatedDescription = eventDetails?.extendedProps?.description 
@@ -253,6 +397,121 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
     // Note: We no longer use the internal edit mode since we open the proper edit modal
   };
 
+  // TIEMPO-362: Handle date selection from picker (occurrence handlers removed - now triggered via initialAction)
+  const handleDateSelected = (date) => {
+    setSelectedOccurrenceDate(date);
+    setDatePickerOpen(false);
+    // After selecting a date, user can choose action from menu
+  };
+
+  // TIEMPO-362: Navigation handlers for EditOccurrenceModal arrows
+  const handlePrevDate = () => {
+    if (currentDateIndex > 0) {
+      const newIndex = currentDateIndex - 1;
+      setCurrentDateIndex(newIndex);
+      setSelectedOccurrenceDate(occurrenceDates[newIndex]);
+      setHasNavigatedDates(true);
+    }
+  };
+
+  const handleNextDate = () => {
+    if (currentDateIndex < occurrenceDates.length - 1) {
+      const newIndex = currentDateIndex + 1;
+      setCurrentDateIndex(newIndex);
+      setSelectedOccurrenceDate(occurrenceDates[newIndex]);
+      setHasNavigatedDates(true);
+    }
+  };
+
+  // Get the current navigated date (for EditOccurrenceModal)
+  // When user hasn't navigated via arrows, use the clicked date directly
+  // This fixes the issue where the first render shows wrong date
+  const currentNavigatedDate = hasNavigatedDates
+    ? (occurrenceDates[currentDateIndex] || occurrenceDate)
+    : (selectedOccurrenceDate || occurrenceDate);
+
+  const handleConfirmCancel = async (reason) => {
+    if (!eventDetails?.extendedProps?._id || !occurrenceDate) return;
+
+    try {
+      setIsOverrideLoading(true);
+      // Get Firebase auth token
+      const token = await getIdToken(true);
+      await cancelOccurrence(
+        eventDetails.extendedProps._id,
+        occurrenceDate,
+        token,
+        reason
+      );
+
+      // Refresh events and close
+      if (onEventUpdated) {
+        onEventUpdated('refresh');
+      }
+      setCancelDialogOpen(false);
+      onClose();
+    } catch (error) {
+      console.error('Failed to cancel occurrence:', error);
+      alert('Failed to cancel this date: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setIsOverrideLoading(false);
+    }
+  };
+
+  const handleSaveOccurrenceEdit = async (overrideData) => {
+    if (!eventDetails?.extendedProps?._id) return;
+
+    try {
+      setIsOverrideLoading(true);
+      // Get Firebase auth token
+      const token = await getIdToken(true);
+
+      // TIEMPO-362: Handle 'exclude' differently - add to excludedDates (RRULE EXDATE)
+      if (overrideData.overrideType === 'exclude') {
+        await addExcludedDate(
+          eventDetails.extendedProps._id,
+          overrideData.instanceKey,
+          token
+        );
+      } else {
+        // TIEMPO-362: Upload override image first if present (two-step KISS flow)
+        let patchToSave = { ...overrideData.patch };
+        if (patchToSave.overrideImageFile) {
+          const { imageUrl } = await uploadEventImage(patchToSave.overrideImageFile, token);
+          patchToSave.overrideImage = imageUrl;
+          delete patchToSave.overrideImageFile;
+        }
+
+        // Use createOverride for modify/cancel types
+        await createOverride(
+          eventDetails.extendedProps._id,
+          {
+            instanceKey: overrideData.instanceKey,
+            overrideType: overrideData.overrideType,
+            patch: patchToSave
+          },
+          token
+        );
+      }
+
+      // Close edit modal first, then trigger refresh
+      setEditOccurrenceOpen(false);
+
+      // Refresh events - slight delay to ensure backend has committed
+      setTimeout(() => {
+        if (onEventUpdated) {
+          onEventUpdated('refresh');
+        }
+        onClose();
+      }, 300);
+    } catch (error) {
+      console.error('Failed to save occurrence edit:', error);
+      alert('Failed to save changes: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setIsOverrideLoading(false);
+    }
+  };
+
   // TIEMPO-256: Handle share button click
   const handleShareClick = async () => {
     const eventId = eventDetails?.extendedProps?._id;
@@ -298,6 +557,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
   // No longer needed - editMode is handled by parent component
 
   // Create header actions - Share button for everyone, Edit/Delete for organizers
+  // TIEMPO-362: Show OccurrenceActionMenu for recurring events
   const headerActions = (
     <>
       {/* TIEMPO-256: Share button - visible to all users */}
@@ -309,7 +569,9 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
       >
         Share
       </Button>
-      {/* Edit/Delete buttons - only for event owners */}
+
+      {/* TIEMPO-362: Actions removed from modal - now in calendar submenu */}
+      {/* Edit/Delete buttons for users with permissions (non-recurring only) */}
       {canEditEvent && (
         <>
           <Button
@@ -331,6 +593,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           </Button>
         </>
       )}
+
       {/* Message for Regional Admins viewing events outside their cities */}
       {!canEditEvent && selectedRole === 'RegionalAdmin' && (
         <Typography
@@ -399,25 +662,27 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
               </Typography>
             )}
             
-            {/* Date Display */}
-            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {startDate && (hasVenueTimezone 
-                ? formatVenueDate(startDate)
-                : (() => {
-                    // TIEMPO-246: String-based fallback without Date() conversion
-                    // TIEMPO-239: Handle both Date objects and strings
-                    const dateString = typeof startDate === 'string' 
-                      ? startDate 
-                      : startDate?.toISOString?.() || '';
-                    const [datePart] = dateString.split('T');
-                    if (!datePart) return '';
-                    const [year, month, day] = datePart.split('-');
-                    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                                  'July', 'August', 'September', 'October', 'November', 'December'];
-                    return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
-                  })()
-              )}
-            </Typography>
+            {/* Date Display - only for non-recurring events (recurring shows date in the repeating bar) */}
+            {!isRecurringEvent && (
+              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                {startDate && (hasVenueTimezone
+                  ? formatVenueDate(startDate)
+                  : (() => {
+                      // TIEMPO-246: String-based fallback without Date() conversion
+                      // TIEMPO-239: Handle both Date objects and strings
+                      const dateString = typeof startDate === 'string'
+                        ? startDate
+                        : startDate?.toISOString?.() || '';
+                      const [datePart] = dateString.split('T');
+                      if (!datePart) return '';
+                      const [year, month, day] = datePart.split('-');
+                      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                    'July', 'August', 'September', 'October', 'November', 'December'];
+                      return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+                    })()
+                )}
+              </Typography>
+            )}
 
           {/* Category Display */}
           {renderCategoryChips()}
@@ -455,23 +720,100 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             </Box>
           )}
 
-          {/* Image */}
-          {imageSrc && showImageTab && (
+          {/* Image - TIEMPO-362: Override image takes priority over event image */}
+          {(() => {
+            const overrideImg = currentOverrideValues?._overridePatch?.overrideImage;
+            const displayImage = overrideImg || imageSrc;
+            const shouldShow = displayImage && (overrideImg || showImageTab);
+
+            return shouldShow ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                <NextImage
+                  src={displayImage}
+                  alt="Event"
+                  height={300}
+                  width={500}
+                  style={{ objectFit: 'contain' }}
+                />
+              </Box>
+            ) : null;
+          })()}
+
+          {/* TIEMPO-362: Recurring event indicator - below image, above tabs */}
+          {isRecurringEvent && (
             <Box
               sx={{
                 display: 'flex',
-                justifyContent: 'center',
                 alignItems: 'center',
-                marginBottom: '20px',
+                justifyContent: 'space-between',
+                bgcolor: 'info.50',
+                border: '1px solid',
+                borderColor: 'info.200',
+                borderRadius: 1,
+                px: { xs: 0.5, sm: 1.5 },
+                py: 0.75,
+                mb: 1
               }}
             >
-              <NextImage
-                src={imageSrc}
-                alt="Event"
-                height={300}
-                width={500} // Adjust as needed
-                style={{ objectFit: 'contain' }}
-              />
+              {/* Prev arrow */}
+              <IconButton
+                onClick={handlePrevDate}
+                disabled={currentDateIndex <= 0}
+                size="small"
+                sx={{
+                  color: 'info.main',
+                  '&.Mui-disabled': { color: 'grey.300' }
+                }}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+
+              {/* Center content */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, justifyContent: 'center', minWidth: 0 }}>
+                <RepeatIcon fontSize="small" color="info" sx={{ display: { xs: 'none', sm: 'block' } }} />
+                <Typography
+                  variant="body2"
+                  color="info.dark"
+                  sx={{
+                    textAlign: 'center',
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {isMobile ? (
+                    formattedOccurrenceDate ? format(new Date(currentNavigatedDate), 'EEE, MMM d') : 'Repeating'
+                  ) : (
+                    <>
+                      Repeating Event
+                      {formattedOccurrenceDate && (
+                        <> &mdash; <strong>{format(new Date(currentNavigatedDate), 'EEE, MMM d, yyyy')}</strong></>
+                      )}
+                    </>
+                  )}
+                </Typography>
+              </Box>
+
+              {/* Next arrow */}
+              <IconButton
+                onClick={handleNextDate}
+                disabled={currentDateIndex >= occurrenceDates.length - 1}
+                size="small"
+                sx={{
+                  color: 'info.main',
+                  '&.Mui-disabled': { color: 'grey.300' }
+                }}
+              >
+                <ChevronRightIcon />
+              </IconButton>
             </Box>
           )}
 
@@ -508,7 +850,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           </Tabs>
 
           {/* Tab Content */}
-          {currentTab === 'Basic' && <ViewEventDetailsBasic eventDetails={eventDetails} />}
+          {currentTab === 'Basic' && <ViewEventDetailsBasic eventDetails={eventDetails} overrideData={currentOverrideValues} />}
           {currentTab === 'Images' && <ViewEventDetailsImage eventDetails={eventDetails} />}
           {currentTab === 'Organizer' && <ViewEventDetailsOrganizer eventDetails={eventDetails} />}
           {currentTab === 'Venue' && <ViewEventDetailsVenue eventDetails={eventDetails} />}
@@ -521,22 +863,45 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>
+          {isRecurringEvent ? 'Delete Entire Series?' : 'Confirm Delete'}
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            You are about to delete the following event:
-            <br /><br />
-            <strong>Title:</strong> {eventTitle}
-            <br />
-            <strong>Date:</strong> {startDate && (hasVenueTimezone 
-              ? formatVenueDate(startDate)
-              : (typeof startDate === 'string' ? startDate : startDate?.toISOString?.() || '').split('T')[0])}
-            <br />
-            <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
-            <br />
-            <strong>Description:</strong> {truncatedDescription}
-            <br /><br />
-            This action cannot be undone. Are you sure you want to delete this event?
+          <DialogContentText component="div">
+            {isRecurringEvent ? (
+              <>
+                <strong style={{ color: '#d32f2f' }}>
+                  You are about to permanently delete this ENTIRE RECURRING SERIES.
+                </strong>
+                <br /><br />
+                <strong>Title:</strong> {eventTitle}
+                <br />
+                <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
+                <br /><br />
+                <strong style={{ color: '#d32f2f' }}>
+                  This will delete ALL past and future dates in this series.
+                  You cannot bring it back &mdash; it will be like it never existed.
+                </strong>
+                <br /><br />
+                <em>Tip: To cancel just one date, use &quot;Edit This Date&quot; and select &quot;Tonight: Canceled&quot; instead.</em>
+              </>
+            ) : (
+              <>
+                You are about to delete the following event:
+                <br /><br />
+                <strong>Title:</strong> {eventTitle}
+                <br />
+                <strong>Date:</strong> {startDate && (hasVenueTimezone
+                  ? formatVenueDate(startDate)
+                  : (typeof startDate === 'string' ? startDate : startDate?.toISOString?.() || '').split('T')[0])}
+                <br />
+                <strong>Category:</strong> {eventDetails?.extendedProps?.categoryFirst || 'Not specified'}
+                <br />
+                <strong>Description:</strong> {truncatedDescription}
+                <br /><br />
+                This action cannot be undone. Are you sure you want to delete this event?
+              </>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -544,7 +909,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
             Cancel
           </Button>
           <Button onClick={handleConfirmDelete} color="error" disabled={isDeleting} autoFocus>
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : (isRecurringEvent ? 'Delete Entire Series' : 'Delete')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -584,6 +949,50 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated }) =
           </IconButton>
         </Box>
       </Snackbar>
+
+      {/* TIEMPO-362: Cancel Occurrence Dialog */}
+      <CancelOccurrenceDialog
+        open={cancelDialogOpen}
+        onClose={() => setCancelDialogOpen(false)}
+        onConfirm={handleConfirmCancel}
+        eventTitle={eventTitle}
+        occurrenceDate={occurrenceDate}
+        isLoading={isOverrideLoading}
+      />
+
+      {/* TIEMPO-362: Edit Occurrence Modal */}
+      <EditOccurrenceModal
+        open={editOccurrenceOpen}
+        onClose={() => setEditOccurrenceOpen(false)}
+        onSave={handleSaveOccurrenceEdit}
+        eventTitle={eventTitle}
+        occurrenceDate={currentNavigatedDate}
+        currentValues={currentOverrideValues}
+        isLoading={isOverrideLoading}
+        // Date navigation props
+        onPrevDate={handlePrevDate}
+        onNextDate={handleNextDate}
+        hasPrevDate={currentDateIndex > 0}
+        hasNextDate={currentDateIndex < occurrenceDates.length - 1}
+      />
+
+      {/* TIEMPO-362: Date Picker for "See All Dates" */}
+      <OccurrenceDatePicker
+        open={datePickerOpen}
+        onClose={() => {
+          setDatePickerOpen(false);
+          // If opened via "See All Dates" from calendar submenu, close entire modal
+          if (initialAction === 'seeAllDates') {
+            onClose();
+          }
+        }}
+        onSelectDate={handleDateSelected}
+        eventTitle={eventTitle}
+        recurrenceRule={recurrenceRule}
+        startDate={eventDetails?.extendedProps?.originalStartDate || eventDetails?.start}
+        instanceOverrides={eventDetails?.extendedProps?.instanceOverrides || []}
+        excludedDates={eventDetails?.extendedProps?.excludedDates || []}
+      />
     </>
   );
 };
@@ -592,6 +1001,8 @@ ViewEventDetailModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onEventUpdated: PropTypes.func,
+  // TIEMPO-362: Initial action from calendar submenu (editOccurrence, cancelOccurrence, seeAllDates)
+  initialAction: PropTypes.oneOf(['editOccurrence', 'cancelOccurrence', 'seeAllDates', null]),
   eventDetails: PropTypes.shape({
     title: PropTypes.string,
     allDay: PropTypes.bool,
@@ -621,11 +1032,21 @@ ViewEventDetailModal.propTypes = {
       venueMasteredCityID: PropTypes.string,
       venueMasteredCityId: PropTypes.string,
       masteredCityName: PropTypes.string,
+      // TIEMPO-362: Recurring event props
+      isRecurring: PropTypes.bool,
+      recurrenceRule: PropTypes.string,
+      excludedDates: PropTypes.array,
+      instanceOverrides: PropTypes.array,
+      originalStartDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      _hasOverride: PropTypes.bool,
+      _overrideType: PropTypes.string,
+      _overridePatch: PropTypes.object,
+      djName: PropTypes.string,
     }),
     _instance: PropTypes.shape({
       range: PropTypes.shape({
-        start: PropTypes.string,
-        end: PropTypes.string,
+        start: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+        end: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
       }),
     }),
   }),

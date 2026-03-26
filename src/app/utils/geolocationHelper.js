@@ -43,9 +43,39 @@ export const getBrowserGeolocation = async () => {
 /**
  * Priority 2: Get Google Geolocation API coordinates (via AFA proxy)
  * No permission required, uses WiFi/cell towers
+ *
+ * PERFORMANCE FIX (2026-03-23): Added caching and rate-limit tracking
+ * to reduce 429 errors (was 150/day before fix)
+ *
  * @returns {Promise<object|null>} { lat, long } or null
  */
 export const getGoogleAPIGeolocation = async () => {
+  const CACHE_KEY = 'google_geo_cache';
+  const RATE_LIMIT_KEY = 'google_geo_rate_limited';
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+  // Check sessionStorage cache first
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    try {
+      // Check if rate limited (skip API entirely for this session)
+      if (sessionStorage.getItem(RATE_LIMIT_KEY)) {
+        console.warn('[Geolocation] Skipping Google API - rate limited this session');
+        return null;
+      }
+
+      // Check cache
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL_MS) {
+          return data;
+        }
+      }
+    } catch {
+      // sessionStorage errors (private browsing, etc.) - continue without cache
+    }
+  }
+
   const afaUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
   try {
@@ -60,6 +90,13 @@ export const getGoogleAPIGeolocation = async () => {
     );
 
     if (!response.ok) {
+      // Track rate limiting to avoid hammering the API
+      if (response.status === 429) {
+        console.warn('[Geolocation] Google API rate limited (429) - disabling for session');
+        try {
+          sessionStorage.setItem(RATE_LIMIT_KEY, 'true');
+        } catch { /* ignore */ }
+      }
       throw new Error(`AFA Google Geo API error: ${response.status}`);
     }
 
@@ -70,10 +107,22 @@ export const getGoogleAPIGeolocation = async () => {
       throw new Error('No location data in response');
     }
 
-    return {
+    const geoResult = {
       lat: data.location.lat,
       long: data.location.lng
     };
+
+    // Cache successful response
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: geoResult,
+          timestamp: Date.now()
+        }));
+      } catch { /* ignore */ }
+    }
+
+    return geoResult;
   } catch (error) {
     console.warn('[Geolocation] Google API failed:', error.message);
     return null;

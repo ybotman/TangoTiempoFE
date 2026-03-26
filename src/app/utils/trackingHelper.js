@@ -3,6 +3,8 @@
  * Fetches geolocation data from multiple sources and calculates distances
  *
  * TIEMPO-319: Added caching to prevent 429 rate limiting errors
+ * 2026-03-24: Added sessionStorage caching for cloudflare + rate-limit tracking
+ * 2026-03-24: Added shared cache with geolocationHelper.js to prevent duplicate Google API calls
  */
 
 // Cache for geolocation data to prevent excessive API calls
@@ -10,6 +12,14 @@ let geolocationCache = null;
 let cacheTimestamp = null;
 // TIEMPO-381: In-progress promise to prevent parallel fetches (React StrictMode)
 let fetchInProgress = null;
+
+// Session storage keys for rate limiting and shared caching
+const CF_CACHE_KEY = 'cloudflare_info_cache';
+const CF_RATE_LIMIT_KEY = 'cloudflare_info_rate_limited';
+const GOOGLE_RATE_LIMIT_KEY = 'google_geo_rate_limited';
+// SHARED with geolocationHelper.js - prevents duplicate Google API calls
+const GOOGLE_GEO_CACHE_KEY = 'google_geo_cache';
+const SESSION_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -83,23 +93,101 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
   const doFetch = async () => {
     const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
+    // Helper: Check sessionStorage cache
+    const getSessionCache = (key) => {
+      if (typeof window === 'undefined' || !window.sessionStorage) return null;
+      try {
+        const cached = sessionStorage.getItem(key);
+        if (!cached) return null;
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < SESSION_CACHE_TTL_MS) return data;
+      } catch { /* ignore */ }
+      return null;
+    };
+
+    // Helper: Set sessionStorage cache
+    const setSessionCache = (key, data) => {
+      if (typeof window === 'undefined' || !window.sessionStorage) return;
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+      } catch { /* ignore */ }
+    };
+
+    // Helper: Check if rate limited
+    const isRateLimited = (key) => {
+      if (typeof window === 'undefined' || !window.sessionStorage) return false;
+      try {
+        return sessionStorage.getItem(key) === 'true';
+      } catch { return false; }
+    };
+
+    // Helper: Mark as rate limited
+    const markRateLimited = (key) => {
+      if (typeof window === 'undefined' || !window.sessionStorage) return;
+      try {
+        sessionStorage.setItem(key, 'true');
+      } catch { /* ignore */ }
+    };
+
     // Fetch Cloudflare and Google in parallel using Promise.allSettled for graceful failures
     const [cloudflareResult, googleResult] = await Promise.allSettled([
-    // 1. Cloudflare API
-    fetch(`${afUrl}/api/cloudflare/info`, {
-      signal: AbortSignal.timeout(2000)
-    }).then(res => res.ok ? res.json() : null),
-
-    // 2. Google Geolocation API (via AFA proxy)
-    fetch(`${afUrl}/api/geo/google-geolocate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ considerIp: true }),
-      signal: AbortSignal.timeout(2000)
-    }).then(res => {
+    // 1. Cloudflare API (with caching + rate limit tracking)
+    (async () => {
+      // Check cache first
+      const cached = getSessionCache(CF_CACHE_KEY);
+      if (cached) return cached;
+      // Check rate limit
+      if (isRateLimited(CF_RATE_LIMIT_KEY)) {
+        console.warn('[Tracking] Cloudflare rate limited, skipping');
+        return null;
+      }
+      const res = await fetch(`${afUrl}/api/cloudflare/info`, {
+        signal: AbortSignal.timeout(3000) // Increased from 2s to 3s
+      });
+      if (res.status === 429) {
+        markRateLimited(CF_RATE_LIMIT_KEY);
+        return null;
+      }
       if (!res.ok) return null;
-      return res.json().then(result => result.data || result);
-    })
+      const data = await res.json();
+      setSessionCache(CF_CACHE_KEY, data);
+      return data;
+    })(),
+
+    // 2. Google Geolocation API (with shared cache + rate limit tracking)
+    // SHARED CACHE: Check geolocationHelper.js cache first to prevent duplicate API calls
+    (async () => {
+      // Check shared sessionStorage cache from geolocationHelper.js
+      const sharedCached = getSessionCache(GOOGLE_GEO_CACHE_KEY);
+      if (sharedCached) {
+        console.log('[Tracking] Using shared Google Geo cache from geolocationHelper');
+        // Convert from geolocationHelper format { lat, long } to expected format { location: { lat, lng } }
+        return { location: { lat: sharedCached.lat, lng: sharedCached.long } };
+      }
+      // Check rate limit (shared with geolocationHelper.js)
+      if (isRateLimited(GOOGLE_RATE_LIMIT_KEY)) {
+        console.warn('[Tracking] Google Geo rate limited, skipping');
+        return null;
+      }
+      const res = await fetch(`${afUrl}/api/geo/google-geolocate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ considerIp: true }),
+        signal: AbortSignal.timeout(3000)
+      });
+      if (res.status === 429) {
+        markRateLimited(GOOGLE_RATE_LIMIT_KEY);
+        return null;
+      }
+      if (!res.ok) return null;
+      const result = await res.json();
+      const data = result.data || result;
+      // Also populate shared cache so geolocationHelper.js benefits
+      if (data?.location?.lat && data?.location?.lng) {
+        setSessionCache(GOOGLE_GEO_CACHE_KEY, { lat: data.location.lat, long: data.location.lng });
+      }
+      return data;
+    })()
   ]);
 
   // Extract data from settled promises

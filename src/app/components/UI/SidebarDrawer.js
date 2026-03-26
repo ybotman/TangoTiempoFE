@@ -531,15 +531,41 @@ const SidebarDrawer = ({ open, onClose }) => {
           
           <Divider />
           
-          {/* Message Admin - Always Available */}
-          <Link href="/message-admin" passHref>
-            <ListItem button="true" onClick={() => onClose()}>
-              <ListItemIcon>
-                <MessageIcon sx={{ color: 'coral' }} />
-              </ListItemIcon>
-              <ListItemText primary="Message Admin" />
-            </ListItem>
-          </Link>
+          {/* Messages - Role-based (Coming Soon) */}
+          <ListItem
+            button="true"
+            onClick={() => onClose()}
+            disabled
+            sx={{ opacity: 0.7 }}
+          >
+            <ListItemIcon>
+              <MessageIcon sx={{ color: 'coral' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span>Messages</span>
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    sx={{
+                      backgroundColor: 'grey.300',
+                      px: 0.75,
+                      borderRadius: 0.5,
+                      fontSize: '0.6rem'
+                    }}
+                  >
+                    Soon
+                  </Typography>
+                </Box>
+              }
+              secondary={
+                user
+                  ? `${selectedRole === 'NamedUser' ? 'Milonger@' : selectedRole === 'RegionalOrganizer' ? 'Organizer' : selectedRole === 'RegionalAdmin' ? 'RA' : selectedRole === 'SystemAdmin' ? 'SA' : selectedRole || 'User'}`
+                  : 'Login to see messages'
+              }
+            />
+          </ListItem>
           
           {/* Debug Menu - visible in all environments */}
           {showDebugMenu && (

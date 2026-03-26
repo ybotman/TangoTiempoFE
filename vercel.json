@@ -1,10 +1,9 @@
 {
   "git": {
     "deploymentEnabled": {
-      "DEVL": false,
+      "DEVL": true,
       "TEST": true,
-      "PROD": true,
-      "cypress-enable-*": true
+      "PROD": false
     }
   },
   "headers": [

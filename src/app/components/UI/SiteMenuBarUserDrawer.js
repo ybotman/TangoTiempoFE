@@ -18,8 +18,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Divider,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
@@ -205,12 +207,30 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 <FormControl component="fieldset">
                   <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
                     {orderedUserRoles.map((role) => (
-                      <FormControlLabel
-                        key={role}
-                        value={role}
-                        control={<Radio />}
-                        label={roleDisplayMap[role] || role}
-                      />
+                      <React.Fragment key={role}>
+                        <FormControlLabel
+                          value={role}
+                          control={<Radio />}
+                          label={roleDisplayMap[role] || role}
+                        />
+                        {/* Spotlighter coming soon - appears after NamedUser (Milonger@) */}
+                        {role === 'NamedUser' && (
+                          <FormControlLabel
+                            value="Spotlighter"
+                            control={<Radio disabled />}
+                            label={
+                              <Typography
+                                component="span"
+                                sx={{ color: 'text.disabled', fontStyle: 'italic' }}
+                              >
+                                Spotlighter <Typography component="span" variant="caption" sx={{ color: 'text.disabled' }}>(coming soon)</Typography>
+                              </Typography>
+                            }
+                            disabled
+                            sx={{ opacity: 0.6 }}
+                          />
+                        )}
+                      </React.Fragment>
                     ))}
                   </RadioGroup>
                 </FormControl>
@@ -235,6 +255,41 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 </Typography>
               </Box>
             )}
+
+            {/* Messages - Coming Soon */}
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{
+              padding: 2,
+              backgroundColor: 'grey.100',
+              borderRadius: 1,
+              border: '1px dashed',
+              borderColor: 'grey.400',
+              opacity: 0.8
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <MailOutlineIcon sx={{ color: 'grey.500', fontSize: 20 }} />
+                <Typography variant="subtitle2" color="text.secondary">
+                  Messages
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    backgroundColor: 'grey.300',
+                    px: 1,
+                    borderRadius: 1,
+                    fontSize: '0.65rem'
+                  }}
+                >
+                  Coming Soon
+                </Typography>
+              </Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Role: <strong>{roleDisplayMap[selectedRole] || selectedRole || 'None'}</strong>
+              </Typography>
+              <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+                System announcements, organizer updates, and direct messages will appear here.
+              </Typography>
+            </Box>
 
             <Dialog
               open={logoutConfirmOpen}

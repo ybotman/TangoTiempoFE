@@ -306,18 +306,6 @@ export function useEvents({
         params.includeAiGenerated = true;
       }
 
-      // DEBUG: Log params being sent to API (TIEMPO-381 reconciliation debug)
-      console.log('[useEvents] Fetching with params:', {
-        lat: params.lat,
-        lng: params.lng,
-        radius: params.radius,
-        useGeoSearch: params.useGeoSearch,
-        start: params.start,
-        end: params.end,
-        currentLocationSource: currentLocation?.source || 'unknown'
-      });
-
-
       // Add user role and organizerId if user is a RegionalOrganizer
       if (userId && selectedRole === 'RegionalOrganizer' && userOrganizerId) {
         params.organizerId = userOrganizerId;
@@ -348,7 +336,7 @@ export function useEvents({
       // Store the response which includes events array and pagination info
       setEventsData(response.data);
 
-      // TIEMPO-382: Log event count and warn if approaching/hitting limit
+      // TIEMPO-382: Only warn if approaching/hitting limit (avoid noise)
       const returnedCount = response.data?.events?.length || 0;
       const requestedLimit = params.limit;
       const totalAvailable = response.data?.pagination?.total || returnedCount;
@@ -357,9 +345,8 @@ export function useEvents({
         console.error(`🚨 EVENT LIMIT HIT: Returned ${returnedCount}/${totalAvailable} events. Limit of ${requestedLimit} is truncating results!`);
       } else if (returnedCount >= requestedLimit * 0.9) {
         console.warn(`⚠️ EVENT LIMIT WARNING: Returned ${returnedCount}/${totalAvailable} events (${Math.round(returnedCount/requestedLimit*100)}% of ${requestedLimit} limit)`);
-      } else {
-        console.log(`[useEvents] Returned ${returnedCount} events (limit: ${requestedLimit}, total available: ${totalAvailable})`);
       }
+      // Normal fetches don't log to reduce console noise
     } catch (error) {
       console.error('Error fetching events:', error);
 
@@ -565,7 +552,10 @@ export function useEventOperations() {
           fallbackImageUrl: cleanedEventData.fallbackImageUrl,
           // Include recurring event fields if present
           recurrenceRule: cleanedEventData.recurrenceRule || undefined,
-          excludedDates: cleanedEventData.excludedDates || undefined
+          excludedDates: cleanedEventData.excludedDates || undefined,
+          // TIEMPO-388: Include spotlights/features for RA
+          features: cleanedEventData.features || cleanedEventData.spotlights || [],
+          spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       } else {
         // RO endpoint uses existing logic
@@ -600,9 +590,20 @@ export function useEventOperations() {
         venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
         locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
         locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
+        // TIEMPO-388: Explicitly include spotlights/features for non-repeating events
+        features: cleanedEventData.features || cleanedEventData.spotlights || [],
+        spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       }
-      
+
+      // TIEMPO-388: Debug logging for spotlights
+      if (preparedData.features?.length > 0 || preparedData.spotlights?.length > 0) {
+        console.log('🎯 TIEMPO-388: Creating event with spotlights:', {
+          features: preparedData.features,
+          spotlights: preparedData.spotlights
+        });
+      }
+
       // If venue has coordinates, include them in venueGeolocation
       if (eventData.venueLatitude && eventData.venueLongitude) {
         preparedData.venueGeolocation = {
@@ -793,7 +794,10 @@ export function useEventOperations() {
           // Include auth fields for RA validation
           selectedRole: 'RegionalAdmin',
           allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
-                                      user?.backendInfo?.localAdminInfo?.adminCities
+                                      user?.backendInfo?.localAdminInfo?.adminCities,
+          // TIEMPO-388: Include spotlights/features for RA
+          features: cleanedEventData.features || cleanedEventData.spotlights || [],
+          spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       } else {
         // RO endpoint uses full data structure
@@ -824,9 +828,20 @@ export function useEventOperations() {
           shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
           // Set expiresAt to 1 year after endDate
           expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
+          // TIEMPO-388: Explicitly include spotlights/features for non-repeating events
+          features: cleanedEventData.features || cleanedEventData.spotlights || [],
+          spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
       }
-      
+
+      // TIEMPO-388: Debug logging for spotlights
+      if (preparedData.features?.length > 0 || preparedData.spotlights?.length > 0) {
+        console.log('🎯 TIEMPO-388: Sending spotlights to backend:', {
+          features: preparedData.features,
+          spotlights: preparedData.spotlights
+        });
+      }
+
       // Clean up fields that shouldn't be sent to backend
       delete preparedData.excludeDates; // Remove the typo field (without 'd')
       delete preparedData.excludeDatesString; // Remove the UI-only string field

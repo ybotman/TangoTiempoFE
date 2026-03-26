@@ -32,6 +32,8 @@ export const useCalendarPage = () => {
   const [isViewDetailModalOpen, setViewDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
+  // TIEMPO-362: Track pending action for ViewEventDetailModal (editOccurrence, cancelOccurrence, seeAllDates)
+  const [pendingOccurrenceAction, setPendingOccurrenceAction] = useState(null);
   const [isAIDetailModalOpen, setAIDetailModalOpen] = useState(false);
   const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
   const categories = useCategories();
@@ -388,12 +390,17 @@ export const useCalendarPage = () => {
   };
 
   const handleDateClick = (arg) => {
-    // Check if clicked date is in the past
-    const clickedDate = new Date(arg.dateStr);
+    // TIEMPO-362: Fix timezone bug - compare dates as strings to avoid UTC conversion issues
+    // new Date("2026-03-17") interprets as UTC midnight, causing "today" to appear as "yesterday"
+    // in timezones behind UTC (e.g., EST, PST)
+    const clickedDateStr = arg.dateStr; // Format: "YYYY-MM-DD"
+
+    // Get today's date in LOCAL timezone as YYYY-MM-DD string
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (clickedDate < today) {
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // Compare as strings - this correctly handles "today" regardless of timezone/DST
+    if (clickedDateStr < todayStr) {
       // Don't allow creating events in the past
       return;
     }
@@ -450,14 +457,15 @@ export const useCalendarPage = () => {
     } else {
       // Regular event handling
       setSelectedEventDetails(arg.event);
-      
+
       // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
       // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
       if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
         setViewDetailModalOpen(true);
       } else {
         // For other roles, show the submenu
-        const items = getMenuItems('eventClick');
+        // TIEMPO-362: Pass event details for recurring event menu options
+        const items = getMenuItems('eventClick', arg.event);
         setMenuItems(items);
         setMenuAnchor({ mouseX: arg.jsEvent.clientX, mouseY: arg.jsEvent.clientY });
       }
@@ -498,6 +506,14 @@ export const useCalendarPage = () => {
       // Use the regional organizer event emitter to open the modal
       regionalOrganizerEvent.openModal();
     }
+
+    // TIEMPO-362: Handle recurring event occurrence actions
+    // These open ViewEventDetailModal which has the occurrence-specific UI
+    if (action === 'editOccurrence' || action === 'cancelOccurrence' || action === 'seeAllDates') {
+      // Store the action for ViewEventDetailModal to handle on open
+      setPendingOccurrenceAction(action);
+      setViewDetailModalOpen(true);
+    }
   };
 
   const handleMenuClose = () => {
@@ -528,7 +544,15 @@ export const useCalendarPage = () => {
       setCreateModalOpen(isOpen);
     },
     isViewDetailModalOpen,
-    setViewDetailModalOpen,
+    // TIEMPO-362: Enhanced modal control to clear pending action on close
+    setViewDetailModalOpen: (isOpen) => {
+      if (!isOpen) {
+        setPendingOccurrenceAction(null);
+      }
+      setViewDetailModalOpen(isOpen);
+    },
+    // TIEMPO-362: Pending occurrence action for ViewEventDetailModal
+    pendingOccurrenceAction,
     handleEventUpdated,
     handlePrev,
     handleNext,

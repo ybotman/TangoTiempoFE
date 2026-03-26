@@ -3,7 +3,7 @@ import { Box, Typography, Button } from '@mui/material';
 import DOMPurify from 'dompurify';
 import PropTypes from 'prop-types';
 
-const ViewEventDetailsBasic = ({ eventDetails }) => {
+const ViewEventDetailsBasic = ({ eventDetails, overrideData }) => {
   const [showMore, setShowMore] = useState(false);
   const [needsShowMore, setNeedsShowMore] = useState(false);
   const descriptionRef = useRef(null);
@@ -12,6 +12,40 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
   const description = eventDetails?.extendedProps?.description || 'No description available';
   const cost = eventDetails?.extendedProps?.cost || 'No cost available';
   const eventTitle = eventDetails?.title || '';
+
+  // TIEMPO-362/388: Merge series spotlights with override spotlights
+  // Rules:
+  // 1. Override of same type WINS over series
+  // 2. Series spotlights: DJ, Instructor, Performer, Canceled only
+  // 3. Override spotlights: All types (Orchestra, Note, Description, etc.)
+  const overrideFeatures = overrideData?._overridePatch?.features || [];
+  const seriesFeatures = eventDetails?.extendedProps?.features ||
+                         eventDetails?.extendedProps?.spotlights || [];
+
+  // Merge: start with override features, add series features that don't have an override
+  const overrideTypes = new Set(overrideFeatures.map(f => f.type));
+  const displayFeatures = [
+    ...overrideFeatures,
+    ...seriesFeatures.filter(f => !overrideTypes.has(f.type))
+  ];
+
+  const tonightsDescription = overrideData?._overridePatch?.tonightsDescription ||
+                              displayFeatures.find(f => f.type === 'description')?.name || null;
+  const isCanceled = overrideData?._overrideType === 'cancel' ||
+                     overrideData?._overridePatch?.isCanceled ||
+                     displayFeatures.some(f => f.type === 'canceled');
+  const cancelReason = overrideData?._overridePatch?.cancelReason ||
+                       displayFeatures.find(f => f.type === 'canceled')?.name || '';
+
+  // Feature type labels and colors
+  const featureStyles = {
+    dj: { label: 'DJ', bg: '#1976d2' },
+    orchestra: { label: 'Orchestra', bg: '#2e7d32' },
+    instructor: { label: 'Instructor', bg: '#ed6c02' },
+    performer: { label: 'Performer', bg: '#9c27b0' },
+    live: { label: 'LIVE', bg: '#ff9800' },
+    note: { label: 'Note', bg: '#757575' }
+  };
 
   // Get venue information - using both new venueID and legacy locationID fields for backward compatibility
   const venueName = eventDetails?.extendedProps?.venueName ||
@@ -62,6 +96,75 @@ const ViewEventDetailsBasic = ({ eventDetails }) => {
         <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 2 }}>
           {eventTitle}
         </Typography>
+      )}
+
+      {/* TIEMPO-362: Tonight's Canceled Banner */}
+      {isCanceled && (
+        <Box sx={{
+          bgcolor: 'error.main',
+          color: 'white',
+          p: 2,
+          borderRadius: 1,
+          mb: 2
+        }}>
+          <Typography variant="subtitle1" fontWeight="bold">
+            ❌ TONIGHT: CANCELED
+            {cancelReason && ` — ${cancelReason}`}
+          </Typography>
+        </Box>
+      )}
+
+      {/* TIEMPO-362/388: Spotlights - works for both recurring (override) and non-repeating (event-level) */}
+      {!isCanceled && displayFeatures.length > 0 && displayFeatures.some(f => f.type !== 'description' && f.type !== 'canceled') && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+            Spotlights
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {displayFeatures
+              .filter(f => f.type !== 'description' && f.type !== 'canceled')
+              .map((feature, idx) => {
+                const style = featureStyles[feature.type] || { label: feature.type, bg: '#757575' };
+                return (
+                  <Box
+                    key={idx}
+                    sx={{
+                      bgcolor: style.bg,
+                      color: 'white',
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1,
+                      fontSize: '0.875rem',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {feature.type === 'live' ? '🎵 LIVE' :
+                     feature.type === 'note' ? `📝 ${feature.name}` :
+                     `${style.label}: ${feature.name}`}
+                  </Box>
+                );
+              })}
+          </Box>
+        </Box>
+      )}
+
+      {/* TIEMPO-362: Tonight's Description (above series description) */}
+      {!isCanceled && tonightsDescription && (
+        <Box sx={{
+          bgcolor: 'info.50',
+          border: '1px solid',
+          borderColor: 'info.200',
+          borderRadius: 1,
+          p: 2,
+          mb: 2
+        }}>
+          <Typography variant="subtitle2" color="info.dark" gutterBottom>
+            Tonight&apos;s Description
+          </Typography>
+          <Typography variant="body1">
+            {tonightsDescription}
+          </Typography>
+        </Box>
       )}
 
       {/* Event Description - no header, just the content */}
@@ -132,6 +235,28 @@ ViewEventDetailsBasic.propTypes = {
       locationName: PropTypes.string, // Legacy field for backward compatibility
       venueID: PropTypes.string,
       locationID: PropTypes.string, // Legacy field for backward compatibility
+      // TIEMPO-388: Spotlights for non-repeating events
+      features: PropTypes.arrayOf(PropTypes.shape({
+        type: PropTypes.string,
+        name: PropTypes.string,
+      })),
+      spotlights: PropTypes.arrayOf(PropTypes.shape({
+        type: PropTypes.string,
+        name: PropTypes.string,
+      })),
+    }),
+  }),
+  overrideData: PropTypes.shape({
+    _hasOverride: PropTypes.bool,
+    _overrideType: PropTypes.string,
+    _overridePatch: PropTypes.shape({
+      features: PropTypes.arrayOf(PropTypes.shape({
+        type: PropTypes.string,
+        name: PropTypes.string,
+      })),
+      tonightsDescription: PropTypes.string,
+      isCanceled: PropTypes.bool,
+      cancelReason: PropTypes.string,
     }),
   }),
 };

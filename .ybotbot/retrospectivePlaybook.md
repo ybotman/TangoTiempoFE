@@ -1,5 +1,97 @@
 # Retrospective Playbook
 
+## Session: 2026-03-20 - TIEMPO-388 Location State Architecture Fix
+
+### Key Learnings
+
+#### Recurring Bug Root Cause: Component-Local State ⚠️
+**PROBLEM**: Pill city name bug kept recurring (v1.20.16, v1.20.17, v1.20.18) - shows coordinates instead of city name
+
+**Root Cause**:
+- SiteHeader maintained `nearestCityName` in component-local useState
+- State was lost on component remount, fast navigation, during fetch window
+- Each "fix" was a band-aid (adding deps, loading states) but didn't address architecture
+
+**Architectural Fix** (TIEMPO-388):
+1. Moved `cityName`, `cityNameLoading`, `cityNameFetched` to `currentLocation` in GeoLocationContext
+2. Context auto-fetches nearest city when coords change
+3. Persisted to sessionStorage alongside location coords
+4. SiteHeader reads from context instead of managing own state
+
+**CRITICAL DISCOVERY - useEffect Dependency Causing Infinite Loop** 🚨:
+- Original fix used `locationAPI` in useEffect dependency array
+- `locationAPI` object from `useLocationAPI()` hook changes on every render
+- This caused infinite re-render loop (500 errors, spinning "loading")
+- Fix: Use `useRef` to hold fetchNearestCity function, remove from deps
+
+**Correct Pattern**:
+```javascript
+// BAD - locationAPI changes every render, causes infinite loop
+useEffect(() => {
+  locationAPI.fetchNearestCity(...);
+}, [currentLocation?.lat, currentLocation?.lng, locationAPI]); // ❌
+
+// GOOD - use ref for function, stable deps only
+const fetchNearestCityRef = useRef(null);
+useEffect(() => {
+  fetchNearestCityRef.current = locationAPI?.fetchNearestCity;
+}, [locationAPI?.fetchNearestCity]);
+
+useEffect(() => {
+  fetchNearestCityRef.current?.(lat, lng);
+}, [currentLocation?.lat, currentLocation?.lng]); // ✅
+```
+
+#### Storage Location Mismatch Bug ⚠️
+**PROBLEM**: MapCenterModal kept reappearing even after user set location
+
+**Root Cause**:
+- `setSessionLocation()` saved to **sessionStorage** (`currentLocation` key)
+- `WelcomeModal.needsLocationSetup()` checked **localStorage** (`last_map_center` key)
+- Storage locations were out of sync
+
+**Fix**: Call `saveLastMapCenter()` whenever location is set/saved/fetched to keep both storage locations in sync.
+
+**CRITICAL INSTRUCTION FOR FUTURE**:
+When checking "does user have X saved?":
+1. Identify ALL storage locations (session, local, cloud)
+2. Ensure all writes update ALL relevant locations
+3. Check reads match the correct storage location
+
+#### Vercel Deployment for tangotiempo.com
+**DISCOVERY**: Auto-deploy doesn't always update domain aliases
+
+**What Happened**:
+- Pushed to TEST branch (auto-deploy enabled)
+- test.tangotiempo.com still showed old version (v1.20.17)
+- Had to manually run `vercel alias set` to update domain
+
+**Correct Pattern**:
+1. Push to TEST branch
+2. Verify deployment in Vercel dashboard
+3. If domain not updated, run: `vercel alias set <deployment-url> test.tangotiempo.com`
+4. TEST environment has Vercel auth protection - test in authenticated browser
+
+### What Worked Well
+1. Scout agents did thorough architectural research
+2. Found TWO bugs while investigating one
+3. Clean, isolated commits for each fix
+4. Proper version bumping
+
+### What Needs Improvement
+1. useEffect dependency arrays - avoid object references that change every render
+2. Verify deployment actually updated domain after push
+3. Test changes locally before pushing
+
+### Process Improvements for Future Sessions
+1. **When state must survive remounts → move to Context, not component**
+2. **useEffect deps should be primitives or stable refs, not objects**
+3. **Storage: identify ALL locations (session/local/cloud), keep in sync**
+4. **After push to TEST: verify domain shows new version before marking done**
+5. **For recurring bugs: do root cause analysis, not symptom patches**
+
+---
+
 ## Session: 2025-10-16 - Login Tracking Timezone Fix & Laptop/Desktop Sync Issue
 
 ### Key Learnings

@@ -123,8 +123,8 @@ const BostonCalendarPage = () => {
     openMapCenterModal
   } = useGeoLocation();
 
-  // Auth context - used to show read-only message for logged-in users
-  const { user } = useContext(AuthContext);
+  // Auth context - reserved for future use (read-only message for logged-in users)
+  const { user: _user } = useContext(AuthContext);
 
   // Local state for view type (not provided by hook)
   // Start with 8-week view for desktop, list for mobile
@@ -164,6 +164,117 @@ const BostonCalendarPage = () => {
     setAIDetailModalOpen: handleAIModalClose,  // AI modal close
     // Create event modal not used - Boston is read-only
   } = useCalendarPage();
+
+  // TIEMPO-362: Helper to find occurrence override for current date
+  const getOccurrenceOverride = (event) => {
+    const instanceOverrides = event.extendedProps?.instanceOverrides;
+    if (!instanceOverrides || instanceOverrides.length === 0) return null;
+
+    // Get the occurrence date from event.start
+    const occurrenceDate = event.start;
+    if (!occurrenceDate) return null;
+
+    // Format as YYYY-MM-DD for comparison
+    const occurrenceDateStr = occurrenceDate.toISOString().split('T')[0];
+
+    // Find matching override
+    const override = instanceOverrides.find(ov => {
+      const ovDate = new Date(ov.instanceKey);
+      const ovDateStr = ovDate.toISOString().split('T')[0];
+      return ovDateStr === occurrenceDateStr;
+    });
+
+    return override || null;
+  };
+
+  // TIEMPO-362: Helper to extract display data from override patch (handles both legacy and new formats)
+  const getOverrideDisplayData = (override) => {
+    if (!override?.patch) return null;
+    const patch = override.patch;
+
+    // Check for canceled status (new or legacy format)
+    const isCanceled = patch.isCanceled || override.overrideType === 'cancel';
+    const cancelReason = patch.cancelReason || '';
+
+    // Build features array from new format or legacy format
+    let features = [];
+
+    // New array format: patch.features = [{ type: 'dj', name: 'DJ Carlos' }, ...]
+    if (patch.features && Array.isArray(patch.features)) {
+      features = patch.features;
+    } else {
+      // Legacy single-feature format: patch.featureType, patch.featureName
+      if (patch.featureType && patch.featureName) {
+        features.push({ type: patch.featureType, name: patch.featureName });
+      }
+      // Legacy individual fields
+      if (patch.djName) features.push({ type: 'dj', name: patch.djName });
+      if (patch.orchestraName) features.push({ type: 'orchestra', name: patch.orchestraName });
+      if (patch.instructorName) features.push({ type: 'instructor', name: patch.instructorName });
+      if (patch.performerName) features.push({ type: 'performer', name: patch.performerName });
+      if (patch.isLive) features.push({ type: 'live', name: 'LIVE' });
+    }
+
+    // Extract by type for easy access
+    const dj = features.find(f => f.type === 'dj');
+    const orchestra = features.find(f => f.type === 'orchestra');
+    const instructor = features.find(f => f.type === 'instructor');
+    const performer = features.find(f => f.type === 'performer');
+    const live = features.find(f => f.type === 'live');
+    const notes = features.filter(f => f.type === 'note');
+
+    return {
+      isCanceled,
+      cancelReason,
+      features,
+      dj,
+      orchestra,
+      instructor,
+      performer,
+      live,
+      notes,
+      hasAnyFeature: features.length > 0 || isCanceled
+    };
+  };
+
+  // TIEMPO-388: Helper to get features for non-repeating events (direct event.features array)
+  const getEventFeatureData = (event) => {
+    const features = event.extendedProps?.features || event.extendedProps?.spotlights;
+    if (!features || !Array.isArray(features) || features.length === 0) return null;
+
+    const canceledFeature = features.find(f => f.type === 'canceled');
+    const isCanceled = !!canceledFeature;
+    const cancelReason = canceledFeature?.name || '';
+
+    const dj = features.find(f => f.type === 'dj');
+    const orchestra = features.find(f => f.type === 'orchestra');
+    const instructor = features.find(f => f.type === 'instructor');
+    const performer = features.find(f => f.type === 'performer');
+    const live = features.find(f => f.type === 'live');
+    const notes = features.filter(f => f.type === 'note');
+
+    return {
+      isCanceled,
+      cancelReason,
+      features: features.filter(f => f.type !== 'canceled'),
+      dj,
+      orchestra,
+      instructor,
+      performer,
+      live,
+      notes,
+      hasAnyFeature: features.length > 0
+    };
+  };
+
+  // TIEMPO-388: Unified helper to get feature data from either source
+  const getFeatureData = (event) => {
+    const override = getOccurrenceOverride(event);
+    if (override?.patch) {
+      return getOverrideDisplayData(override);
+    }
+    return getEventFeatureData(event);
+  };
 
   // Custom event content renderer (match main calendar exactly)
   const renderEventContent = (eventInfo) => {
@@ -258,7 +369,10 @@ const BostonCalendarPage = () => {
                 gap: '3px',
                 marginBottom: '1px'
               }}>
-                {startTime && (
+                {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
+                {isCanceled ? (
+                  <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>⚠️</span>
+                ) : startTime && (
                   <div style={{
                     fontSize: '0.8rem',
                     lineHeight: '1.0',
@@ -305,26 +419,129 @@ const BostonCalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2 */}
-              <div style={{
-                fontSize: '0.65rem',
-                fontWeight: 'normal',
-                lineHeight: '1.1',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                overflowWrap: 'break-word',
-                hyphens: 'auto',
-                flex: 1,
-                color: '#555',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-              </div>
+              {/* Regular Events Row 2: Full title + appended feature badges */}
+              {/* TIEMPO-388: Multi-spotlight support - matches main calendar */}
+              {(() => {
+                const featureData = getFeatureData(event);
+
+                // Build feature badges array
+                const badges = [];
+
+                // Canceled badge - inverted style
+                if (featureData?.isCanceled) {
+                  badges.push(
+                    <span key="canceled" style={{
+                      fontSize: '0.6rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#d32f2f',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      marginLeft: '4px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      TODAY Canceled{featureData.cancelReason ? ` ${featureData.cancelReason}` : ''}
+                    </span>
+                  );
+                }
+
+                // Spotlight badges (only if not canceled)
+                if (featureData && !featureData.isCanceled) {
+                  if (featureData.dj) {
+                    badges.push(
+                      <span key="dj" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#1976d2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        DJ: {featureData.dj.name}
+                      </span>
+                    );
+                  }
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
+                  }
+                  if (featureData.performer) {
+                    badges.push(
+                      <span key="performer" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#c2185b',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Perf: {featureData.performer.name}
+                      </span>
+                    );
+                  }
+                }
+
+                // Orchestra gets its own row
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
+
+                return (
+                  <>
+                    {/* Row 2: For canceled - just badge. Otherwise 🔄 + badges + title */}
+                    <div style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'normal',
+                      lineHeight: '1.1',
+                      flex: hasOrchestra ? 0 : 1,
+                      color: '#555',
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '2px'
+                    }}>
+                      {/* Repeating icon FIRST */}
+                      {event.extendedProps?.isRecurring && <span>🔄 </span>}
+                      {/* Then spotlight badges */}
+                      {badges}
+                      {/* Then full title (only if NOT canceled) */}
+                      {!(isCanceled || featureData?.isCanceled) && (
+                        <span>{event.title}</span>
+                      )}
+                    </div>
+                    {/* Row 3: Orchestra - inverted style */}
+                    {hasOrchestra && (
+                      <div style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        lineHeight: '1.1',
+                        color: '#fff',
+                        backgroundColor: '#2e7d32',
+                        padding: '1px 4px',
+                        borderRadius: '2px',
+                        marginTop: '1px'
+                      }}>
+                        LIVE! Orch: {featureData.orchestra.name}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 3/4: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '2px',
@@ -410,7 +627,10 @@ const BostonCalendarPage = () => {
                 gap: '8px',
                 flexWrap: isMobile ? 'wrap' : 'nowrap'
               }}>
-                {startTime && (
+                {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
+                {isCanceled ? (
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
+                ) : startTime && (
                   <div style={{
                     fontSize: '0.9rem',
                     lineHeight: '1.2',
@@ -460,25 +680,128 @@ const BostonCalendarPage = () => {
                   </>
                 )}
               </div>
-              {/* Regular Events Row 2 */}
-              <div style={{
-                fontSize: '0.7rem',
-                fontWeight: 'normal',
-                lineHeight: '1.2',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                overflowWrap: 'break-word',
-                hyphens: 'auto',
-                color: '#555',
-                textDecoration: isCanceled ? 'line-through' : 'none'
-              }}>
-                {event.extendedProps?.isRecurring && '🔄 '}{event.title}
-              </div>
+              {/* Regular Events Row 2: Full title + appended feature badges */}
+              {/* TIEMPO-388: Multi-spotlight support - matches main calendar */}
+              {(() => {
+                const featureData = getFeatureData(event);
+
+                // Build feature badges array
+                const badges = [];
+
+                // Canceled badge - inverted style
+                if (featureData?.isCanceled) {
+                  badges.push(
+                    <span key="canceled" style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: '#d32f2f',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      marginLeft: '6px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      TODAY Canceled{featureData.cancelReason ? ` ${featureData.cancelReason}` : ''}
+                    </span>
+                  );
+                }
+
+                // Spotlight badges (only if not canceled)
+                if (featureData && !featureData.isCanceled) {
+                  if (featureData.dj) {
+                    badges.push(
+                      <span key="dj" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#1976d2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        DJ: {featureData.dj.name}
+                      </span>
+                    );
+                  }
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
+                  }
+                  if (featureData.performer) {
+                    badges.push(
+                      <span key="performer" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#c2185b',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Perf: {featureData.performer.name}
+                      </span>
+                    );
+                  }
+                }
+
+                // Orchestra gets its own row
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
+
+                return (
+                  <>
+                    {/* Row 2: For canceled - just badge. Otherwise 🔄 + badges + title */}
+                    <div style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 'normal',
+                      lineHeight: '1.2',
+                      color: '#555',
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '2px'
+                    }}>
+                      {/* Repeating icon FIRST */}
+                      {event.extendedProps?.isRecurring && <span>🔄 </span>}
+                      {/* Then spotlight badges */}
+                      {badges}
+                      {/* Then full title (only if NOT canceled) */}
+                      {!(isCanceled || featureData?.isCanceled) && (
+                        <span>{event.title}</span>
+                      )}
+                    </div>
+                    {/* Row 3: Orchestra - inverted style */}
+                    {hasOrchestra && (
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        lineHeight: '1.2',
+                        color: '#fff',
+                        backgroundColor: '#2e7d32',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        marginTop: '2px'
+                      }}>
+                        LIVE! Orch: {featureData.orchestra.name}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
-          {/* Row 3: Featured image for isFeatured events */}
+          {/* Row 3/4: Featured image for isFeatured events */}
           {event.extendedProps?.isFeatured && event.extendedProps?.featuredImage && (
             <div style={{
               marginTop: '4px',
