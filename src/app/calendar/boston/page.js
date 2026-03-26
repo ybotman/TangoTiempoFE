@@ -384,7 +384,8 @@ const BostonCalendarPage = () => {
                     {endTime && `-`}<span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{endTime}</span>
                   </div>
                 )}
-                <CategoryCircles eventProps={event.extendedProps} />
+                {/* Hide category bubbles for canceled events */}
+                {!isCanceled && <CategoryCircles eventProps={event.extendedProps} />}
                 {eventShortTitle && (
                   <>
                     <div style={{
@@ -533,10 +534,12 @@ const BostonCalendarPage = () => {
                       {event.extendedProps?.isRecurring && <span>🔄 </span>}
                       {/* Then spotlight badges */}
                       {badges}
-                      {/* Then full title (only if NOT canceled) */}
-                      {!(isCanceled || featureData?.isCanceled) && (
-                        <span>{event.title}</span>
-                      )}
+                      {/* Full title - strikethrough if canceled */}
+                      <span style={{
+                        textDecoration: (isCanceled || featureData?.isCanceled) ? 'line-through' : 'none'
+                      }}>
+                        {event.title}
+                      </span>
                     </div>
                     {/* Row 3: Orchestra - inverted style */}
                     {hasOrchestra && (
@@ -663,7 +666,8 @@ const BostonCalendarPage = () => {
                     )}
                   </div>
                 )}
-                <CategoryCircles eventProps={event.extendedProps} />
+                {/* Hide category bubbles for canceled events */}
+                {!isCanceled && <CategoryCircles eventProps={event.extendedProps} />}
                 {eventShortTitle && (
                   <>
                     <div style={{
@@ -811,10 +815,12 @@ const BostonCalendarPage = () => {
                       {event.extendedProps?.isRecurring && <span>🔄 </span>}
                       {/* Then spotlight badges */}
                       {badges}
-                      {/* Then full title (only if NOT canceled) */}
-                      {!(isCanceled || featureData?.isCanceled) && (
-                        <span>{event.title}</span>
-                      )}
+                      {/* Full title - strikethrough if canceled */}
+                      <span style={{
+                        textDecoration: (isCanceled || featureData?.isCanceled) ? 'line-through' : 'none'
+                      }}>
+                        {event.title}
+                      </span>
                     </div>
                     {/* Row 3: Orchestra - inverted style */}
                     {hasOrchestra && (
