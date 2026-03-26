@@ -158,18 +158,16 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           </IconButton>
         </Tooltip>
 
-        {/* Messages Icon - only show for logged-in users */}
-        {user && (
-          <Tooltip title={hasUnread ? `${unreadCount} unread message${unreadCount > 1 ? 's' : ''}` : "Messages"} arrow>
+        {/* Messages Icon - only show when there are unread messages */}
+        {user && hasUnread && (
+          <Tooltip title={`${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`} arrow>
             <IconButton
               onClick={() => {
-                if (unreadMessages.length > 0) {
-                  setCurrentMessageIndex(0);
-                  setMessagesModalOpen(true);
-                }
+                setCurrentMessageIndex(0);
+                setMessagesModalOpen(true);
               }}
               sx={{
-                animation: hasUnread ? `${pulse} 2s ease-in-out infinite` : 'none',
+                animation: `${pulse} 2s ease-in-out infinite`,
               }}
             >
               <Badge
@@ -177,7 +175,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
                 color="error"
                 max={9}
               >
-                <MailIcon color={hasUnread ? 'primary' : 'inherit'} />
+                <MailIcon color="primary" />
               </Badge>
             </IconButton>
           </Tooltip>
