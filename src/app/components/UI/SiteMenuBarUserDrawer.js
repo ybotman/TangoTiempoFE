@@ -26,6 +26,8 @@ import MailIcon from '@mui/icons-material/Mail';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
+import MessagesModal from '@/components/Modals/Messages/MessagesModal';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
@@ -43,6 +45,8 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   // Fetch roles using useRoles hook
   // const { roles: availableRoles } = useRoles();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [selectedMessageIndex, setSelectedMessageIndex] = useState(null);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [orderedUserRoles, setOrderedUserRoles] = useState([]);
 
   // Define role display mapping (backend role -> display name)
@@ -305,9 +309,13 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                     No messages for this role
                   </Typography>
                 ) : (
-                  messages.map((msg) => (
+                  messages.map((msg, index) => (
                     <Box
                       key={msg.id}
+                      onClick={() => {
+                        setSelectedMessageIndex(index);
+                        setMessageModalOpen(true);
+                      }}
                       sx={{
                         p: 1.5,
                         borderBottom: '1px solid',
@@ -315,6 +323,7 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                         backgroundColor: msg.receipt?.acknowledgedAt ? 'transparent' : 'primary.50',
                         '&:last-child': { borderBottom: 'none' },
                         '&:hover': { backgroundColor: 'action.hover' },
+                        cursor: 'pointer',
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
@@ -339,17 +348,22 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                           >
                             {msg.body}
                           </Typography>
-                          {!msg.receipt?.acknowledgedAt && msg.requiresAck && (
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={() => acknowledgeMessage(msg.id)}
-                              sx={{ mt: 0.5, fontSize: '0.7rem', py: 0.25 }}
-                            >
-                              I Understand
-                            </Button>
-                          )}
                         </Box>
+                        {/* Dismiss button */}
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            acknowledgeMessage(msg.id);
+                          }}
+                          sx={{
+                            p: 0.5,
+                            opacity: msg.receipt?.acknowledgedAt ? 0.3 : 1,
+                          }}
+                          title={msg.receipt?.acknowledgedAt ? 'Already read' : 'Dismiss'}
+                        >
+                          <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
                       </Box>
                     </Box>
                   ))
@@ -412,6 +426,18 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
           </Box>
         )}
       </Box>
+
+      {/* Message Detail Modal */}
+      <MessagesModal
+        open={messageModalOpen}
+        onClose={() => setMessageModalOpen(false)}
+        messages={selectedMessageIndex !== null ? [messages[selectedMessageIndex]] : []}
+        onAcknowledge={(msgId) => {
+          acknowledgeMessage(msgId);
+          setMessageModalOpen(false);
+        }}
+        currentIndex={0}
+      />
     </Drawer>
   );
 };
