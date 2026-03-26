@@ -28,6 +28,8 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
 import MessagesModal from '@/components/Modals/Messages/MessagesModal';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
+import Tooltip from '@mui/material/Tooltip';
 import { RoleContext } from '@/contexts/RoleContext';
 // import { useRoles } from '@/hooks/useRoles';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
@@ -285,6 +287,21 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                   >
                     {unreadCount} unread
                   </Typography>
+                )}
+                <Box sx={{ flex: 1 }} />
+                {/* New Message button - SA/SO only, Coming Soon */}
+                {(selectedRole === 'SystemAdmin' || selectedRole === 'SystemOwner') && (
+                  <Tooltip title="Coming Soon - Voice & Text Compose" arrow>
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled
+                        sx={{ opacity: 0.5 }}
+                      >
+                        <AddIcon fontSize="small" />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
                 )}
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
