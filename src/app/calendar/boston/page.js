@@ -492,6 +492,24 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
+                  // Note badges (can have multiple)
+                  if (featureData.notes && featureData.notes.length > 0) {
+                    featureData.notes.forEach((note, idx) => {
+                      badges.push(
+                        <span key={`note-${idx}`} style={{
+                          fontSize: '0.6rem',
+                          fontWeight: 'bold',
+                          color: '#757575',
+                          backgroundColor: 'transparent',
+                          padding: '1px 4px',
+                          marginLeft: '4px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          📝 {note.name}
+                        </span>
+                      );
+                    });
+                  }
                 }
 
                 // Orchestra gets its own row
@@ -752,6 +770,24 @@ const BostonCalendarPage = () => {
                         Perf: {featureData.performer.name}
                       </span>
                     );
+                  }
+                  // Note badges (can have multiple)
+                  if (featureData.notes && featureData.notes.length > 0) {
+                    featureData.notes.forEach((note, idx) => {
+                      badges.push(
+                        <span key={`note-${idx}`} style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 'bold',
+                          color: '#757575',
+                          backgroundColor: 'transparent',
+                          padding: '2px 6px',
+                          marginLeft: '6px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          📝 {note.name}
+                        </span>
+                      );
+                    });
                   }
                 }
 

@@ -2,12 +2,12 @@
  * CreateEventDetailsSpotlights.js
  * TIEMPO-388: Spotlights tab for Edit Event Modal
  *
- * For ALL events (repeating and non-repeating):
+ * For REPEATING events (series):
  *   - DJ, Instructor, Performer only
+ *   - Use "Edit This Date" for per-occurrence overrides
  *
- * For per-occurrence overrides ("Edit This Date"):
- *   - Additional types available (Orchestra, Note, Description, Canceled)
- *   - Handled in ViewEventOccurrenceModal, not here
+ * For SINGLE (non-repeating) events:
+ *   - DJ, Instructor, Performer, Orchestra, Note, Canceled
  *
  * For multi-day events (>24hr), spotlights apply to ALL days.
  */
@@ -30,18 +30,27 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import InfoIcon from '@mui/icons-material/Info';
 
-// Event-level spotlight types (for both repeating series and non-repeating events)
-// Orchestra, Note, Description, Canceled are only available in per-occurrence overrides
-const SPOTLIGHT_OPTIONS = [
-  { value: 'dj', label: 'DJ', color: 'primary', maxLength: 19 },
-  { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19 },
-  { value: 'performer', label: 'Performer', color: 'info', maxLength: 19 }
+// Base spotlight types (for all events)
+const BASE_SPOTLIGHT_OPTIONS = [
+  { value: 'dj', label: 'DJ', color: 'primary', maxLength: 19, requiresName: true },
+  { value: 'instructor', label: 'Instructor', color: 'secondary', maxLength: 19, requiresName: true },
+  { value: 'performer', label: 'Performer', color: 'info', maxLength: 19, requiresName: true }
+];
+
+// Additional spotlight types (for single/non-repeating events only)
+const SINGLE_EVENT_SPOTLIGHT_OPTIONS = [
+  { value: 'orchestra', label: 'Orchestra', color: 'success', maxLength: 19, requiresName: true },
+  { value: 'note', label: 'Special Note', color: 'default', maxLength: 19, requiresName: true },
+  { value: 'canceled', label: 'Canceled', color: 'error', maxLength: 19, requiresName: false }
 ];
 
 const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = false, isRepeating = false }) => {
-  // SPOTLIGHT_OPTIONS is now a constant - same 3 options for all event types
-   
-  const _isRepeating = isRepeating; // Keep prop for future use if needed
+  // Determine available spotlight options based on event type
+  // Single (non-repeating) events get additional options: Orchestra, Note, Canceled
+  const SPOTLIGHT_OPTIONS = isRepeating
+    ? BASE_SPOTLIGHT_OPTIONS
+    : [...BASE_SPOTLIGHT_OPTIONS, ...SINGLE_EVENT_SPOTLIGHT_OPTIONS];
+
   // Local state for adding new spotlights
   const [newSpotlightType, setNewSpotlightType] = useState('');
   const [newSpotlightName, setNewSpotlightName] = useState('');
@@ -53,9 +62,10 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
   const handleAddSpotlight = () => {
     if (!newSpotlightType) return;
 
-    // Get the spotlight option for max length
+    // Get the spotlight option for max length and name requirement
     const spotlightOption = SPOTLIGHT_OPTIONS.find(s => s.value === newSpotlightType);
     const maxLength = spotlightOption?.maxLength || 19;
+    const requiresName = spotlightOption?.requiresName !== false;
 
     // Build the spotlight name
     let name = newSpotlightName.trim();
@@ -65,18 +75,34 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
       name = name.substring(0, maxLength);
     }
 
-    // Require name for DJ, Instructor, Performer
-    if (!name) {
+    // Require name only for types that need it
+    if (requiresName && !name) {
       alert('Please enter a name for the spotlight');
+      return;
+    }
+
+    // Prevent duplicate canceled entries
+    if (newSpotlightType === 'canceled' && spotlights.some(s => s.type === 'canceled')) {
+      alert('Event is already marked as canceled');
       return;
     }
 
     // Add the new spotlight
     const newSpotlights = [...spotlights, { type: newSpotlightType, name }];
-    setEventData(prevData => ({
-      ...prevData,
+
+    // For canceled spotlight, also set isCanceled flag for backward compatibility
+    const updates = {
       spotlights: newSpotlights,
       features: newSpotlights // Keep features for backward compatibility
+    };
+    if (newSpotlightType === 'canceled') {
+      updates.isCanceled = true;
+      updates.cancelReason = name || '';
+    }
+
+    setEventData(prevData => ({
+      ...prevData,
+      ...updates
     }));
 
     // Reset input fields
@@ -85,11 +111,23 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
   };
 
   const handleRemoveSpotlight = (index) => {
+    const removedSpotlight = spotlights[index];
     const newSpotlights = spotlights.filter((_, i) => i !== index);
-    setEventData(prevData => ({
-      ...prevData,
+
+    const updates = {
       spotlights: newSpotlights,
       features: newSpotlights // Keep features for backward compatibility
+    };
+
+    // If removing canceled spotlight, also clear isCanceled flag
+    if (removedSpotlight?.type === 'canceled') {
+      updates.isCanceled = false;
+      updates.cancelReason = '';
+    }
+
+    setEventData(prevData => ({
+      ...prevData,
+      ...updates
     }));
   };
 
@@ -119,7 +157,7 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {isRepeating
           ? 'Add DJ, Instructor, or Performer that apply to ALL dates. Use "Edit This Date" for per-date overrides.'
-          : 'Add DJ, Instructor, or Performer spotlights that will display on the calendar.'}
+          : 'Add spotlights to highlight special aspects of this event. You can also mark the event as canceled.'}
       </Typography>
 
       {/* Current Spotlights Display */}
@@ -131,9 +169,9 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
               <Chip
                 key={index}
                 label={
-                  spotlight.type === 'canceled' ? (spotlight.name ? `CANCELED: ${spotlight.name}` : 'CANCELED') :
-                  spotlight.type === 'note' ? `Note: ${spotlight.name}` :
-                  spotlight.type === 'description' ? `${spotlight.name.length > 30 ? spotlight.name.substring(0, 30) + '...' : spotlight.name}` :
+                  spotlight.type === 'canceled' ? (spotlight.name ? `❌ CANCELED: ${spotlight.name}` : '❌ CANCELED') :
+                  spotlight.type === 'note' ? `📝 ${spotlight.name}` :
+                  spotlight.type === 'orchestra' ? `🎵 Orch: ${spotlight.name}` :
                   `${option.label}: ${spotlight.name}`
                 }
                 color={option.color}
@@ -168,38 +206,59 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
           </Select>
         </FormControl>
 
-        {newSpotlightType && (
-          <TextField
-            value={newSpotlightName}
-            onChange={(e) => {
-              const value = e.target.value;
-              const maxLength = 19;
-              if (value.length <= maxLength) {
-                setNewSpotlightName(value);
-              } else {
-                setNewSpotlightName(value.substring(0, maxLength));
-              }
-            }}
-            label="Name"
-            placeholder="e.g., DJ Carlos"
-            size="small"
-            sx={{ flex: 1, minWidth: 200 }}
-            helperText={`${newSpotlightName.length}/19`}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleAddSpotlight();
-              }
-            }}
-          />
-        )}
+        {newSpotlightType && (() => {
+          const spotlightOption = SPOTLIGHT_OPTIONS.find(s => s.value === newSpotlightType);
+          const requiresName = spotlightOption?.requiresName !== false;
+          const maxLength = spotlightOption?.maxLength || 19;
+
+          // Get placeholder based on type
+          const getPlaceholder = () => {
+            switch (newSpotlightType) {
+              case 'dj': return 'e.g., DJ Carlos';
+              case 'instructor': return 'e.g., Pablo & Maria';
+              case 'performer': return 'e.g., Special Guest';
+              case 'orchestra': return 'e.g., Color Tango';
+              case 'note': return 'e.g., Starts 30 min early!';
+              case 'canceled': return 'Reason (optional)';
+              default: return 'Name';
+            }
+          };
+
+          return (
+            <TextField
+              value={newSpotlightName}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length <= maxLength) {
+                  setNewSpotlightName(value);
+                } else {
+                  setNewSpotlightName(value.substring(0, maxLength));
+                }
+              }}
+              label={requiresName ? 'Name' : 'Reason (optional)'}
+              placeholder={getPlaceholder()}
+              size="small"
+              sx={{ flex: 1, minWidth: 200 }}
+              helperText={`${newSpotlightName.length}/${maxLength}`}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddSpotlight();
+                }
+              }}
+            />
+          );
+        })()}
 
         <Tooltip title="Add spotlight">
           <span>
             <Button
               variant="outlined"
               onClick={handleAddSpotlight}
-              disabled={!newSpotlightType || !newSpotlightName.trim()}
+              disabled={!newSpotlightType || (
+                SPOTLIGHT_OPTIONS.find(s => s.value === newSpotlightType)?.requiresName !== false &&
+                !newSpotlightName.trim()
+              )}
               sx={{ height: 40, minWidth: 'auto', px: 2 }}
             >
               <AddIcon />
@@ -210,7 +269,9 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
 
       {/* Helpful info */}
       <Typography variant="caption" color="text.secondary">
-        Spotlights will display as &quot;DJ: Name&quot; on the calendar.
+        {isRepeating
+          ? 'Spotlights will display as "DJ: Name" on the calendar.'
+          : 'Spotlights display on the calendar. Canceled events show with a warning badge.'}
       </Typography>
     </Box>
   );

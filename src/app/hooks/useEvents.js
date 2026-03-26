@@ -100,8 +100,7 @@ function sanitizeObjectIdFields(data) {
     'ownerOrganizerID',
     'grantedOrganizerID',
     'alternateOrganizerID',
-    'venueId',
-    'locationID',
+    'venueID',
     '_id'
   ];
   
@@ -542,7 +541,7 @@ export function useEventOperations() {
           startDate: cleanedEventData.startDate,
           endDate: cleanedEventData.endDate,
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
-          venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
+          venueID: cleanedEventData.venueID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
           // Include image fields for RA image upload
@@ -580,16 +579,11 @@ export function useEventOperations() {
         // Set expiresAt to 1 year after endDate
         expiresAt: new Date(new Date(cleanedEventData.endDate).getTime() + 365 * 24 * 60 * 60 * 1000),
         // Include admin cities for RegionalAdmin validation
-        allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ? 
-          (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+        allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ?
+          (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
            user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
-        // Handle both venue and location fields for transitional compatibility
-        // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
-        // If we only have locationID/locationName, use those and add venueId/venueName fields
-        venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
-        venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
-        locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
-        locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
+        // Standardized venue field - use venueID only
+        venueID: cleanedEventData.venueID,
         // TIEMPO-388: Explicitly include spotlights/features for non-repeating events
         features: cleanedEventData.features || cleanedEventData.spotlights || [],
         spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
@@ -611,27 +605,19 @@ export function useEventOperations() {
           coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
         };
 // TIEMPO-276: Security cleanup - removed logging
-      } else if (eventData.venueId || eventData.locationID) {
+      } else if (eventData.venueID) {
         // We have a venue but no coordinates - need to fetch them
-// TIEMPO-276: Security cleanup - removed logging
         try {
-          // Import the venue service function directly
           const { getVenueById } = await import('@/services/venueService');
-
-          // Get venue data including coordinates
-          const venueId = eventData.venueId || eventData.locationID;
-          const venueData = await getVenueById(venueId);
+          const venueData = await getVenueById(eventData.venueID);
 
           if (venueData && venueData.latitude && venueData.longitude) {
             preparedData.venueGeolocation = {
               type: "Point",
               coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
             };
-// TIEMPO-276: Security cleanup - removed logging
           } else {
-            // TIEMPO-275: Keep console.warn for important warnings
-            console.warn('Could not retrieve venue coordinates for venue ID:', venueId);
-            // Fallback to empty coordinates array to prevent schema validation error
+            console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
             preparedData.venueGeolocation = {
               type: "Point",
               coordinates: [0, 0]
@@ -639,7 +625,6 @@ export function useEventOperations() {
           }
         } catch (venueError) {
           console.error('Error fetching venue data:', venueError);
-          // Fallback to empty coordinates array to prevent schema validation error
           preparedData.venueGeolocation = {
             type: "Point",
             coordinates: [0, 0]
@@ -783,7 +768,7 @@ export function useEventOperations() {
           startDate: cleanedEventData.startDate,
           endDate: cleanedEventData.endDate,
           ownerOrganizerID: cleanedEventData.ownerOrganizerID,
-          venueID: cleanedEventData.venueId || cleanedEventData.venueID || cleanedEventData.locationID,
+          venueID: cleanedEventData.venueID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
           // Include image fields for RA image upload/delete
@@ -806,16 +791,11 @@ export function useEventOperations() {
           appId: process.env.NEXT_PUBLIC_APPLICATION_ID,
           selectedRole: selectedRole, // Include the user's selected role for backend validation
           // Include admin cities for RegionalAdmin validation
-          allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ? 
-            (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds || 
+          allowedAdminMasteredCityIds: selectedRole === 'RegionalAdmin' ?
+            (user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
              user?.backendInfo?.localAdminInfo?.adminCities) : undefined,
-          // Handle both venue and location fields for transitional compatibility
-          // If we have venueId/venueName in the event data, use those and also add locationID/locationName for compatibility
-          // If we only have locationID/locationName, use those and add venueId/venueName fields
-          venueId: cleanedEventData.venueId || cleanedEventData.locationID || null,
-          venueName: cleanedEventData.venueName || cleanedEventData.locationName || null,
-          locationID: cleanedEventData.locationID || cleanedEventData.venueId || null,
-          locationName: cleanedEventData.locationName || cleanedEventData.venueName || null,
+          // Standardized venue field - use venueID only
+          venueID: cleanedEventData.venueID,
           // Add required fields that might be missing in update
           masteredRegionName: cleanedEventData.masteredRegionName || cleanedEventData.selectedRegion,
           // Set default ownerOrganizerName if not provided - use the user's organizer name if they're a Regional Organizer
@@ -855,28 +835,19 @@ export function useEventOperations() {
             type: "Point",
             coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
           };
-// TIEMPO-276: Security cleanup - removed logging
-        } else if (eventData.venueId || eventData.locationID) {
+        } else if (eventData.venueID) {
           // We have a venue but no coordinates - need to fetch them
-// TIEMPO-276: Security cleanup - removed logging
           try {
-            // Import the venue service function directly
             const { getVenueById } = await import('@/services/venueService');
-
-            // Get venue data including coordinates
-            const venueId = eventData.venueId || eventData.locationID;
-            const venueData = await getVenueById(venueId);
+            const venueData = await getVenueById(eventData.venueID);
 
             if (venueData && venueData.latitude && venueData.longitude) {
               preparedData.venueGeolocation = {
                 type: "Point",
                 coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
               };
-// TIEMPO-276: Security cleanup - removed logging
             } else {
-              // TIEMPO-275: Keep console.warn for important warnings
-              console.warn('Could not retrieve venue coordinates for update, venue ID:', venueId);
-              // Fallback to empty coordinates array to prevent schema validation error
+              console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
               preparedData.venueGeolocation = {
                 type: "Point",
                 coordinates: [0, 0]
@@ -884,14 +855,13 @@ export function useEventOperations() {
             }
           } catch (venueError) {
             console.error('Error fetching venue data for update:', venueError);
-            // Fallback to empty coordinates array to prevent schema validation error
             preparedData.venueGeolocation = {
               type: "Point",
               coordinates: [0, 0]
             };
           }
         }
-        
+
         // Ensure mastered location fields are included
         if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
           preparedData.masteredRegionName = preparedData.selectedRegion;

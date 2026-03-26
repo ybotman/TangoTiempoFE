@@ -42,8 +42,10 @@ const useMenuItems = () => {
         ];
       }
       
-      // RA users can always create events
-      if (selectedRole === listOfAllRoles.REGIONAL_ADMIN) {
+      // RA/SA/SO users can always create events
+      if (selectedRole === listOfAllRoles.REGIONAL_ADMIN ||
+          selectedRole === listOfAllRoles.SYSTEM_ADMIN ||
+          selectedRole === listOfAllRoles.SYSTEM_OWNER) {
         return [
           { label: 'Add Event', action: 'addSingleEvent' },
         ];
@@ -98,6 +100,26 @@ const useMenuItems = () => {
       } else if (selectedRole === listOfAllRoles.REGIONAL_ADMIN) {
         // RA users always have full menu
         // TIEMPO-362: Show occurrence-specific options for recurring events
+        if (isRecurring && formattedDate) {
+          menuOptions = [
+            ...menuOptions,
+            { label: 'Edit Series', action: 'editEvent' },
+            { label: `Edit This Date (${formattedDate})`, action: 'editOccurrence' },
+            { label: 'Delete Entire Series', action: 'deleteEvent' },
+            { label: 'See All Dates', action: 'seeAllDates' },
+          ];
+        } else {
+          menuOptions = [
+            ...menuOptions,
+            { label: 'Add Event', action: 'addSingleEvent' },
+            { label: 'Edit Event', action: 'editEvent' },
+            { label: 'Delete Event', action: 'deleteEvent' },
+            { label: 'Add Photos', action: 'addPhotos' },
+          ];
+        }
+      } else if (selectedRole === listOfAllRoles.SYSTEM_ADMIN ||
+                 selectedRole === listOfAllRoles.SYSTEM_OWNER) {
+        // SA/SO users have full menu access like RA
         if (isRecurring && formattedDate) {
           menuOptions = [
             ...menuOptions,

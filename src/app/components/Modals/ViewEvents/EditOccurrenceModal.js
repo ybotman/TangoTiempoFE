@@ -368,13 +368,6 @@ const EditOccurrenceModal = ({
           </Box>
         </Box>
 
-        {/* Show current override info if exists */}
-        {currentValues._hasOverride && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            This date has existing overrides. Edit below to update.
-          </Alert>
-        )}
-
         {/* Canceled warning */}
         {isCanceled && (
           <Alert severity="error" sx={{ mb: 2 }}>
