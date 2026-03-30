@@ -349,21 +349,29 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                         cursor: 'pointer',
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {!msg.receipt?.acknowledgedAt && (
-                          <MailIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
-                        )}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                         <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: msg.receipt?.acknowledgedAt ? 'normal' : 'bold',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
+                          variant="caption"
+                          sx={{ color: 'text.secondary', fontSize: '0.7rem' }}
                         >
-                          {msg.title}
+                          {msg.createdAt?.toLocaleDateString?.() || ''}
                         </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {!msg.receipt?.acknowledgedAt && (
+                            <MailIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
+                          )}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: msg.receipt?.acknowledgedAt ? 'normal' : 'bold',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {msg.title}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                   ))
