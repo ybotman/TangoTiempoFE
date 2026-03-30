@@ -1,7 +1,7 @@
 // @/components/Providers.js
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RoleProvider } from '@/contexts/RoleContext';
@@ -13,6 +13,7 @@ import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import UserLocationLoader from '@/components/UserLocationLoader';
 import { getCachedGeolocation } from '@/utils/trackingHelper';
 import { getCountryMapLocation } from '@/utils/countryCenter';
+import { initializeApiFailover, isUsingFailover } from '@/utils/apiUrlResolver';
 import dynamic from 'next/dynamic';
 
 // Dynamic import to avoid SSR issues with Leaflet
@@ -82,7 +83,55 @@ const MapCenterModalWrapper = () => {
 // MAINTENANCE MODE - blocks entire app when true
 const SHOW_EMERGENCY_ALERT = false;
 
+// Failover indicator component - shows when using backup backend
+const FailoverIndicator = () => {
+  const [showIndicator, setShowIndicator] = useState(false);
+
+  useEffect(() => {
+    // Check if using failover after a small delay to ensure sessionStorage is populated
+    const checkFailover = () => {
+      setShowIndicator(isUsingFailover());
+    };
+    checkFailover();
+    // Re-check periodically in case of runtime failover switch
+    const interval = setInterval(checkFailover, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!showIndicator) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      bottom: '10px',
+      right: '10px',
+      backgroundColor: '#ff9800',
+      color: 'black',
+      padding: '6px 12px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      fontWeight: 'bold',
+      zIndex: 9999,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+    }}>
+      ⚡ Failover Mode
+    </div>
+  );
+};
+
 const Providers = ({ children }) => {
+  const [apiReady, setApiReady] = useState(false);
+
+  // Initialize API failover on mount
+  useEffect(() => {
+    initializeApiFailover().then(({ url, isFailover }) => {
+      if (isFailover) {
+        console.warn('[Providers] App started in failover mode:', url);
+      }
+      setApiReady(true);
+    });
+  }, []);
+
   // MAINTENANCE MODE: Block entire app, no API calls
   if (SHOW_EMERGENCY_ALERT) {
     return (
@@ -112,6 +161,24 @@ const Providers = ({ children }) => {
     );
   }
 
+  // Show loading spinner while API failover initializes (fast, <2s max)
+  if (!apiReady) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#1a1a2e',
+      }}>
+        <div style={{ textAlign: 'center', color: 'white' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>💃</div>
+          <div style={{ fontSize: '14px', opacity: 0.7 }}>Connecting...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthProvider>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -126,6 +193,7 @@ const Providers = ({ children }) => {
               <EventDiscoveryProvider>
                 <UserLocationLoader />
                 <MapCenterModalWrapper />
+                <FailoverIndicator />
                 {children}
               </EventDiscoveryProvider>
             </GeoLocationProvider>
