@@ -35,6 +35,7 @@ const BOSTON_CONFIG = {
   lat: 42.3601,
   lng: -71.0589,
   zoomRange: 200, // 200 mile radius - covers all New England
+  cityName: 'Boston',
   source: 'legacy-boston',
   locked: true
 };
@@ -1153,6 +1154,7 @@ const BostonCalendarPage = () => {
             events={coloredFilteredEvents}
             eventsLoading={eventsLoading}
             onOpenMapCenter={openMapCenterModal}
+            currentLocation={BOSTON_CONFIG}
             sx={{ mx: 2 }}
           />
 
