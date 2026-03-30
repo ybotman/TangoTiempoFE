@@ -3,7 +3,7 @@
  *
  * Rules:
  * 1. SHORT events (Milonga, Practica, Class) must be >= 15 minutes and < 24 hours
- * 2. LONG events (Festival, Encuentro, Marathon, Workshop) must be >= 48 hours
+ * 2. LONG events (Festival, Encuentro, Marathon, Workshop) must be >= 24 hours
  * 3. SHORT and LONG categories cannot be mixed (mutual exclusion)
  * 4. SHORT and LONG events cannot exceed 7 days (168 hours)
  *
@@ -54,11 +54,11 @@ export const validateEventCategoryRules = (eventData, selectedRole) => {
     }
   }
 
-  // Rule 2: LONG events must be >= 48 hours
+  // Rule 2: LONG events must be >= 24 hours
   if (LONG_CATEGORIES.includes(categoryFirst)) {
-    if (durationHours < 48) {
+    if (durationHours < 24) {
       const categoryName = categoryFirst === 'Workshop' ? 'Workshops' : `${categoryFirst}s`;
-      errors.push(`${categoryName} must be 48 hours or longer. Current duration: ${Math.round(durationHours)} hours.`);
+      errors.push(`${categoryName} must be 24 hours or longer. Current duration: ${Math.round(durationHours)} hours.`);
     }
   }
 

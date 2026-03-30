@@ -61,7 +61,8 @@ const CalendarPage = () => {
     needsOnboarding,
     setNeedsOnboarding,
     saveToCloudDefault,
-    isInitialized: geoInitialized
+    isInitialized: geoInitialized,
+    currentLocation
   } = useGeoLocation();
 
   // Get auth context to check if user is logged in
@@ -1346,6 +1347,7 @@ const CalendarPage = () => {
             eventsLoading={eventsLoading}
             noLocationSelected={noLocationSelected}
             onOpenMapCenter={openMapCenterModal}
+            currentLocation={currentLocation}
             sx={{ mx: 2 }}
           />
 

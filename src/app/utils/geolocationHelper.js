@@ -47,24 +47,28 @@ export const getBrowserGeolocation = async () => {
  * PERFORMANCE FIX (2026-03-23): Added caching and rate-limit tracking
  * to reduce 429 errors (was 150/day before fix)
  *
+ * TIEMPO-XXX (2026-03-30): Changed cache from sessionStorage to localStorage
+ * with 24h TTL to further reduce 429 errors (was 87% of all API errors).
+ * Rate limit flag stays in sessionStorage (clears on new session = retry).
+ *
  * @returns {Promise<object|null>} { lat, long } or null
  */
 export const getGoogleAPIGeolocation = async () => {
   const CACHE_KEY = 'google_geo_cache';
   const RATE_LIMIT_KEY = 'google_geo_rate_limited';
-  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours (was 5 minutes)
 
-  // Check sessionStorage cache first
-  if (typeof window !== 'undefined' && window.sessionStorage) {
+  // Check localStorage cache first (persists across sessions)
+  if (typeof window !== 'undefined') {
     try {
-      // Check if rate limited (skip API entirely for this session)
-      if (sessionStorage.getItem(RATE_LIMIT_KEY)) {
+      // Check if rate limited this session (sessionStorage - clears on tab close)
+      if (window.sessionStorage?.getItem(RATE_LIMIT_KEY)) {
         console.warn('[Geolocation] Skipping Google API - rate limited this session');
         return null;
       }
 
-      // Check cache
-      const cached = sessionStorage.getItem(CACHE_KEY);
+      // Check cache (localStorage - persists across sessions)
+      const cached = window.localStorage?.getItem(CACHE_KEY);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_TTL_MS) {
@@ -72,7 +76,7 @@ export const getGoogleAPIGeolocation = async () => {
         }
       }
     } catch {
-      // sessionStorage errors (private browsing, etc.) - continue without cache
+      // Storage errors (private browsing, etc.) - continue without cache
     }
   }
 
@@ -112,10 +116,10 @@ export const getGoogleAPIGeolocation = async () => {
       long: data.location.lng
     };
 
-    // Cache successful response
-    if (typeof window !== 'undefined' && window.sessionStorage) {
+    // Cache successful response in localStorage (persists 24h)
+    if (typeof window !== 'undefined' && window.localStorage) {
       try {
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
           data: geoResult,
           timestamp: Date.now()
         }));
