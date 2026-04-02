@@ -31,6 +31,10 @@ import {
 } from '@/components/EventDensity';
 import 'leaflet/dist/leaflet.css';
 
+// Normalize longitude to -180 to +180 range (fixes dateline wrap issue)
+// When users pan past the antimeridian, Leaflet returns lng like -210 instead of 150
+const normalizeLongitude = (lng) => ((lng + 180) % 360 + 360) % 360 - 180;
+
 // TIEMPO-360: Helper to create pill marker HTML with level + name header
 function createPillMarkerHtml(item, _zoom) {
   const {
@@ -380,9 +384,11 @@ const MapCenterModal = ({
         // Handle map click — only set center if not clicking a density marker
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
-          updateMarker(lat, lng);
+          // Normalize longitude to -180 to +180 (fixes dateline wrap issue)
+          const normalizedLng = normalizeLongitude(lng);
+          updateMarker(lat, normalizedLng);
           setCenterLat(lat.toFixed(6));
-          setCenterLng(lng.toFixed(6));
+          setCenterLng(normalizedLng.toFixed(6));
         });
 
         // TIEMPO-360: Fetch density pills on zoom/pan (debounced)
@@ -694,9 +700,10 @@ const MapCenterModal = ({
     }
 
     setLoading(true);
+    // Normalize longitude as safety net before sending to backend
     const locationData = {
       lat: parseFloat(centerLat),
-      lng: parseFloat(centerLng),
+      lng: normalizeLongitude(parseFloat(centerLng)),
       zoomRange: zoomRange
     };
 
