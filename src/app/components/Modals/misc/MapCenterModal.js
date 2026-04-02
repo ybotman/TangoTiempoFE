@@ -16,8 +16,12 @@ import {
   FormControlLabel,
   useTheme,
   useMediaQuery,
-  CircularProgress
+  CircularProgress,
+  Autocomplete,
+  TextField
 } from '@mui/material';
+import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -296,6 +300,13 @@ const MapCenterModal = ({
   const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
   const [gettingLocation, setGettingLocation] = useState(false); // For "Use My Location" button
 
+  // City search typeahead state
+  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citySearchLoading, setCitySearchLoading] = useState(false);
+  const citySearchTimerRef = useRef(null);
+  const baseURL = getApiBaseUrl();
+
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
 
@@ -322,6 +333,60 @@ const MapCenterModal = ({
     // Prefetch only on modal open - other values read at call time
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, showDensityPills]);
+
+  // City search - debounced API call
+  useEffect(() => {
+    if (!citySearchQuery || citySearchQuery.length < 2) {
+      setCityOptions([]);
+      return;
+    }
+
+    // Debounce search
+    if (citySearchTimerRef.current) {
+      clearTimeout(citySearchTimerRef.current);
+    }
+
+    citySearchTimerRef.current = setTimeout(async () => {
+      setCitySearchLoading(true);
+      try {
+        const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
+          params: {
+            name: citySearchQuery,
+            limit: 10,
+            appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1'
+          },
+          timeout: 5000
+        });
+        const cities = response.data?.cities || response.data || [];
+        setCityOptions(cities);
+      } catch (err) {
+        console.warn('[MapCenterModal] City search error:', err.message);
+        setCityOptions([]);
+      } finally {
+        setCitySearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (citySearchTimerRef.current) {
+        clearTimeout(citySearchTimerRef.current);
+      }
+    };
+  }, [citySearchQuery, baseURL]);
+
+  // Handle city selection from typeahead
+  const handleCitySelect = (event, city) => {
+    if (!city || !city.latitude || !city.longitude) return;
+
+    const lat = city.latitude;
+    const lng = normalizeLongitude(city.longitude);
+
+    setCenterLat(lat.toFixed(6));
+    setCenterLng(lng.toFixed(6));
+    updateMarker(lat, lng);
+    setCitySearchQuery('');
+    setCityOptions([]);
+  };
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -876,7 +941,52 @@ const MapCenterModal = ({
             {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
           </IconButton>
         </Box>
-        
+
+        {/* City Search Typeahead */}
+        <Autocomplete
+          freeSolo
+          size="small"
+          options={cityOptions}
+          getOptionLabel={(option) =>
+            typeof option === 'string' ? option : `${option.cityName}, ${option.divisionName || option.regionName}`
+          }
+          loading={citySearchLoading}
+          inputValue={citySearchQuery}
+          onInputChange={(e, value) => setCitySearchQuery(value || '')}
+          onChange={handleCitySelect}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder="Search city (e.g., Los Angeles)"
+              variant="outlined"
+              size="small"
+              sx={{ mb: 1 }}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {citySearchLoading ? <CircularProgress size={16} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+          renderOption={(props, option) => (
+            <li {...props} key={option._id || option.cityName}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {option.cityName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {[option.divisionName, option.regionName, option.countryName].filter(Boolean).join(', ')}
+                </Typography>
+              </Box>
+            </li>
+          )}
+          noOptionsText={citySearchQuery.length < 2 ? "Type 2+ characters" : "No cities found"}
+        />
+
         {/* Search Range Slider */}
         <Box sx={{ mb: 1, px: isMobile ? 0 : 2 }}>
           <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
