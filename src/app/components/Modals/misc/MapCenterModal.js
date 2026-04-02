@@ -947,9 +947,11 @@ const MapCenterModal = ({
           freeSolo
           size="small"
           options={cityOptions}
-          getOptionLabel={(option) =>
-            typeof option === 'string' ? option : `${option.cityName}, ${option.divisionName || option.regionName}`
-          }
+          getOptionLabel={(option) => {
+            if (typeof option === 'string') return option;
+            const location = option.divisionName || option.regionName || option.countryName || '';
+            return location ? `${option.cityName}, ${location}` : option.cityName;
+          }}
           loading={citySearchLoading}
           inputValue={citySearchQuery}
           onInputChange={(e, value) => setCitySearchQuery(value || '')}
