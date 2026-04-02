@@ -16,8 +16,12 @@ import {
   FormControlLabel,
   useTheme,
   useMediaQuery,
-  CircularProgress
+  CircularProgress,
+  Autocomplete,
+  TextField
 } from '@mui/material';
+import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -30,6 +34,10 @@ import {
   getAggregationLevel,
 } from '@/components/EventDensity';
 import 'leaflet/dist/leaflet.css';
+
+// Normalize longitude to -180 to +180 range (fixes dateline wrap issue)
+// When users pan past the antimeridian, Leaflet returns lng like -210 instead of 150
+const normalizeLongitude = (lng) => ((lng + 180) % 360 + 360) % 360 - 180;
 
 // TIEMPO-360: Helper to create pill marker HTML with level + name header
 function createPillMarkerHtml(item, _zoom) {
@@ -289,8 +297,16 @@ const MapCenterModal = ({
   const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
+  const [showDensityPills, setShowDensityPills] = useState(true); // Show event density pills by default
   const [gettingLocation, setGettingLocation] = useState(false); // For "Use My Location" button
+  const [myLocationCity, setMyLocationCity] = useState(null); // City name for user's browser location
+
+  // City search typeahead state
+  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citySearchLoading, setCitySearchLoading] = useState(false);
+  const citySearchTimerRef = useRef(null);
+  const baseURL = getApiBaseUrl();
 
   // TIEMPO-360: Use new density pill system
   const { densityData, loading: densityLoading, metadata: densityMeta, fetchDensity } = useEventDensity();
@@ -318,6 +334,60 @@ const MapCenterModal = ({
     // Prefetch only on modal open - other values read at call time
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, showDensityPills]);
+
+  // City search - debounced API call
+  useEffect(() => {
+    if (!citySearchQuery || citySearchQuery.length < 2) {
+      setCityOptions([]);
+      return;
+    }
+
+    // Debounce search
+    if (citySearchTimerRef.current) {
+      clearTimeout(citySearchTimerRef.current);
+    }
+
+    citySearchTimerRef.current = setTimeout(async () => {
+      setCitySearchLoading(true);
+      try {
+        const response = await axios.get(`${baseURL}/api/masteredLocations/cities`, {
+          params: {
+            name: citySearchQuery,
+            limit: 10,
+            appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1'
+          },
+          timeout: 5000
+        });
+        const cities = response.data?.cities || response.data || [];
+        setCityOptions(cities);
+      } catch (err) {
+        console.warn('[MapCenterModal] City search error:', err.message);
+        setCityOptions([]);
+      } finally {
+        setCitySearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (citySearchTimerRef.current) {
+        clearTimeout(citySearchTimerRef.current);
+      }
+    };
+  }, [citySearchQuery, baseURL]);
+
+  // Handle city selection from typeahead
+  const handleCitySelect = (event, city) => {
+    if (!city || !city.latitude || !city.longitude) return;
+
+    const lat = city.latitude;
+    const lng = normalizeLongitude(city.longitude);
+
+    setCenterLat(lat.toFixed(6));
+    setCenterLng(lng.toFixed(6));
+    updateMarker(lat, lng);
+    setCitySearchQuery('');
+    setCityOptions([]);
+  };
 
   // Initialize map - with retry logic for ref attachment
   useEffect(() => {
@@ -380,9 +450,11 @@ const MapCenterModal = ({
         // Handle map click — only set center if not clicking a density marker
         map.on('click', (e) => {
           const { lat, lng } = e.latlng;
-          updateMarker(lat, lng);
+          // Normalize longitude to -180 to +180 (fixes dateline wrap issue)
+          const normalizedLng = normalizeLongitude(lng);
+          updateMarker(lat, normalizedLng);
           setCenterLat(lat.toFixed(6));
-          setCenterLng(lng.toFixed(6));
+          setCenterLng(normalizedLng.toFixed(6));
         });
 
         // TIEMPO-360: Fetch density pills on zoom/pan (debounced)
@@ -663,20 +735,33 @@ const MapCenterModal = ({
   }, [mapInitialized, centerLat, centerLng]);
   
   // "Use My Location" button handler - uses browser geolocation
-  const handleUseMyLocation = () => {
+  const handleUseMyLocation = async () => {
     if (!('geolocation' in navigator)) {
       setMessage({ type: 'error', text: 'Geolocation not supported by your browser' });
       return;
     }
 
     setGettingLocation(true);
+    setMyLocationCity(null);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
         setCenterLat(latitude.toFixed(6));
         setCenterLng(longitude.toFixed(6));
         updateMarker(latitude, longitude);
         setGettingLocation(false);
+
+        // Fetch nearest city name for display
+        try {
+          const response = await axios.get(`${baseURL}/api/masteredLocations/nearestMastered`, {
+            params: { latitude, longitude, maxDistance: 500000, appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1' },
+            timeout: 5000
+          });
+          const city = response.data?.cityName || response.data?.city?.cityName;
+          if (city) setMyLocationCity(city);
+        } catch {
+          // Silently fail - city label is optional
+        }
       },
       (error) => {
         setGettingLocation(false);
@@ -686,6 +771,21 @@ const MapCenterModal = ({
     );
   };
 
+  // Auto-get user location when modal opens (if no initial location set)
+  useEffect(() => {
+    if (!open) return;
+    if (initialLocation?.lat && initialLocation?.lng) return; // Already have location
+    if (centerLat && centerLng) return; // Already set this session
+
+    // Auto-trigger location fetch after small delay for map init
+    const timer = setTimeout(() => {
+      handleUseMyLocation();
+    }, 500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   // Unified save handler - saves to cloud (logged in) or session (anonymous)
   const handleSave = async () => {
     if (!centerLat || !centerLng) {
@@ -694,9 +794,10 @@ const MapCenterModal = ({
     }
 
     setLoading(true);
+    // Normalize longitude as safety net before sending to backend
     const locationData = {
       lat: parseFloat(centerLat),
-      lng: parseFloat(centerLng),
+      lng: normalizeLongitude(parseFloat(centerLng)),
       zoomRange: zoomRange
     };
 
@@ -783,24 +884,7 @@ const MapCenterModal = ({
               </>
             )}
           </Alert>
-        ) : (
-          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
-            {isMobile ? (
-              <Typography variant="caption">
-                Set center for <strong>Session</strong>. Sign up to save permanently!
-              </Typography>
-            ) : (
-              <>
-                <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  Set your map center for this <strong>Session</strong> (temporary only).
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
-                </Typography>
-              </>
-            )}
-          </Alert>
-        )}
+        ) : null}
 
         {message && (
           <Alert
@@ -812,93 +896,148 @@ const MapCenterModal = ({
           </Alert>
         )}
         
-        {/* Action Buttons - Compact on mobile */}
+        {/* Action Buttons - Compact layout */}
         <Box sx={{
           display: 'flex',
           gap: isMobile ? 0.5 : 1,
           mb: 1,
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          alignItems: 'center'
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
-          {/* Use My Location - browser geolocation */}
-          <Button
-            variant="outlined"
-            onClick={handleUseMyLocation}
-            disabled={gettingLocation}
-            size="small"
-            startIcon={gettingLocation ? <CircularProgress size={14} /> : <MyLocationIcon />}
-            sx={{
-              px: isMobile ? 1 : 2,
-              py: 0.5,
-              fontSize: isMobile ? '0.7rem' : '0.875rem'
-            }}
-          >
-            {gettingLocation ? 'Getting...' : (isMobile ? 'My Location' : 'Use My Location')}
-          </Button>
+          {/* Left side - Save, Events toggle, Login/Signup */}
+          <Box sx={{ display: 'flex', gap: isMobile ? 0.5 : 1, alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Save - saves to cloud (logged in) or session (anonymous) */}
+            {/* Pulses when location is set to draw attention */}
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={loading || !centerLat || !centerLng}
+              size="small"
+              startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
+              sx={centerLat && centerLng ? {
+                animation: 'pulse 1.5s ease-in-out 3',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)',
+                    transform: 'scale(1)'
+                  },
+                  '50%': {
+                    boxShadow: '0 0 0 8px rgba(25, 118, 210, 0)',
+                    transform: 'scale(1.05)'
+                  }
+                }
+              } : {}}
+            >
+              {loading ? 'Setting...' : 'SET'}
+            </Button>
 
-          {/* Show Events toggle */}
-          <FormControlLabel
-            control={
-              <Switch
-                size="small"
-                checked={showDensityPills}
-                onChange={(e) => setShowDensityPills(e.target.checked)}
-              />
-            }
-            label={
-              <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
-                {isMobile ? 'Events' : 'Show Events'}
+            {/* Show Events toggle */}
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={showDensityPills}
+                  onChange={(e) => setShowDensityPills(e.target.checked)}
+                />
+              }
+              label={
+                <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
+                  {isMobile ? 'Events' : 'Show Events'}
+                </Typography>
+              }
+              sx={{ m: 0 }}
+            />
+
+            {/* Login/Signup for anonymous users - stacked on mobile */}
+            {!user && (
+              <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 0.5 }}>
+                <Button
+                  variant="text"
+                  onClick={() => { window.location.href = '/auth/login'; }}
+                  size="small"
+                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
+                >
+                  Log In
+                </Button>
+                <Button
+                  variant="text"
+                  color="secondary"
+                  onClick={() => { window.location.href = '/auth/signup'; }}
+                  size="small"
+                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+          {/* Right side - My Location icon button with city label */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: 'auto' }}>
+            {myLocationCity && (
+              <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
+                {myLocationCity}
               </Typography>
-            }
-            sx={{ m: 0 }}
-          />
-
-          {/* Save - saves to cloud (logged in) or session (anonymous) */}
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={loading || !centerLat || !centerLng}
-            size="small"
-            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
-
-          {/* Login/Signup for anonymous users */}
-          {!user && (
-            <>
-              {/* For anonymous users: Login and Signup */}
-              <Button
-                variant="outlined"
-                onClick={() => { window.location.href = '/auth/login'; }}
-                size="small"
-                sx={{
-                  px: isMobile ? 1 : 2,
-                  py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem'
-                }}
-              >
-                Log In
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={() => { window.location.href = '/auth/signup'; }}
-                size="small"
-                sx={{
-                  px: isMobile ? 1 : 2,
-                  py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem'
-                }}
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
-
+            )}
+            <IconButton
+              onClick={handleUseMyLocation}
+              disabled={gettingLocation}
+              size="small"
+              color="primary"
+              title="Use my current location"
+            >
+              {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
+            </IconButton>
+          </Box>
         </Box>
-        
+
+        {/* City Search Typeahead */}
+        <Autocomplete
+          freeSolo
+          size="small"
+          options={cityOptions}
+          getOptionLabel={(option) => {
+            if (typeof option === 'string') return option;
+            const location = option.divisionName || option.regionName || option.countryName || '';
+            return location ? `${option.cityName}, ${location}` : option.cityName;
+          }}
+          loading={citySearchLoading}
+          inputValue={citySearchQuery}
+          onInputChange={(e, value) => setCitySearchQuery(value || '')}
+          onChange={handleCitySelect}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder="Search city (e.g., Los Angeles)"
+              variant="outlined"
+              size="small"
+              sx={{ mb: 1 }}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {citySearchLoading ? <CircularProgress size={16} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+          renderOption={(props, option) => (
+            <li {...props} key={option._id || option.cityName}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {option.cityName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {[option.divisionName, option.regionName, option.countryName].filter(Boolean).join(', ')}
+                </Typography>
+              </Box>
+            </li>
+          )}
+          noOptionsText={citySearchQuery.length < 2 ? "Type 2+ characters" : "No cities found"}
+        />
+
         {/* Search Range Slider */}
         <Box sx={{ mb: 1, px: isMobile ? 0 : 2 }}>
           <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

@@ -7,6 +7,12 @@ import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
 import { userSettingsEvent } from '@/utils/UserSettingsEvent';
 import { saveLastMapCenter } from '@/utils/visitorTracking';
 
+// Normalize longitude to -180 to +180 range (fixes dateline wrap issue)
+const normalizeLongitude = (lng) => {
+  if (lng === null || lng === undefined || isNaN(lng)) return lng;
+  return ((lng + 180) % 360 + 360) % 360 - 180;
+};
+
 // Create the GeoLocationContext
 const GeoLocationContext = createContext();
 
@@ -78,10 +84,12 @@ export const GeoLocationProvider = ({ children }) => {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
+          // Normalize longitude on load (fixes cached invalid coords from dateline wrap)
+          const normalizedLng = normalizeLongitude(parsed.lng);
           // Ensure new fields exist (backwards compatible)
           return {
             lat: parsed.lat ?? null,
-            lng: parsed.lng ?? null,
+            lng: normalizedLng ?? null,
             zoomRange: parsed.zoomRange ?? 50,
             cityName: parsed.cityName ?? null,
             cityNameLoading: false,
