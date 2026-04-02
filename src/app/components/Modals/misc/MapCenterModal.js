@@ -297,7 +297,7 @@ const MapCenterModal = ({
   const [currentZoom, setCurrentZoom] = useState(5); // TIEMPO-360: Track map zoom for pill rendering
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
+  const [showDensityPills, setShowDensityPills] = useState(true); // Show event density pills by default
   const [gettingLocation, setGettingLocation] = useState(false); // For "Use My Location" button
   const [myLocationCity, setMyLocationCity] = useState(null); // City name for user's browser location
 
