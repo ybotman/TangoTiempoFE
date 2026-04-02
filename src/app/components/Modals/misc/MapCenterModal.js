@@ -299,6 +299,7 @@ const MapCenterModal = ({
   const [message, setMessage] = useState(null);
   const [showDensityPills, setShowDensityPills] = useState(false); // TIEMPO-381: Toggle for event density pills (default off)
   const [gettingLocation, setGettingLocation] = useState(false); // For "Use My Location" button
+  const [myLocationCity, setMyLocationCity] = useState(null); // City name for user's browser location
 
   // City search typeahead state
   const [citySearchQuery, setCitySearchQuery] = useState('');
@@ -734,20 +735,33 @@ const MapCenterModal = ({
   }, [mapInitialized, centerLat, centerLng]);
   
   // "Use My Location" button handler - uses browser geolocation
-  const handleUseMyLocation = () => {
+  const handleUseMyLocation = async () => {
     if (!('geolocation' in navigator)) {
       setMessage({ type: 'error', text: 'Geolocation not supported by your browser' });
       return;
     }
 
     setGettingLocation(true);
+    setMyLocationCity(null);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
         setCenterLat(latitude.toFixed(6));
         setCenterLng(longitude.toFixed(6));
         updateMarker(latitude, longitude);
         setGettingLocation(false);
+
+        // Fetch nearest city name for display
+        try {
+          const response = await axios.get(`${baseURL}/api/masteredLocations/nearestMastered`, {
+            params: { latitude, longitude, maxDistance: 500000, appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1' },
+            timeout: 5000
+          });
+          const city = response.data?.cityName || response.data?.city?.cityName;
+          if (city) setMyLocationCity(city);
+        } catch {
+          // Silently fail - city label is optional
+        }
       },
       (error) => {
         setGettingLocation(false);
@@ -943,17 +957,23 @@ const MapCenterModal = ({
             )}
           </Box>
 
-          {/* Right side - My Location icon button */}
-          <IconButton
-            onClick={handleUseMyLocation}
-            disabled={gettingLocation}
-            size="small"
-            color="primary"
-            title="Use my current location"
-            sx={{ ml: 'auto' }}
-          >
-            {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
-          </IconButton>
+          {/* Right side - My Location icon button with city label */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: 'auto' }}>
+            {myLocationCity && (
+              <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
+                {myLocationCity}
+              </Typography>
+            )}
+            <IconButton
+              onClick={handleUseMyLocation}
+              disabled={gettingLocation}
+              size="small"
+              color="primary"
+              title="Use my current location"
+            >
+              {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
+            </IconButton>
+          </Box>
         </Box>
 
         {/* City Search Typeahead */}
