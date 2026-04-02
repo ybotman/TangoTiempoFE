@@ -878,12 +878,26 @@ const MapCenterModal = ({
           {/* Left side - Save, Events toggle, Login/Signup */}
           <Box sx={{ display: 'flex', gap: isMobile ? 0.5 : 1, alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Save - saves to cloud (logged in) or session (anonymous) */}
+            {/* Pulses when location is set to draw attention */}
             <Button
               variant="contained"
               onClick={handleSave}
               disabled={loading || !centerLat || !centerLng}
               size="small"
               startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
+              sx={centerLat && centerLng ? {
+                animation: 'pulse 1.5s ease-in-out 3',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)',
+                    transform: 'scale(1)'
+                  },
+                  '50%': {
+                    boxShadow: '0 0 0 8px rgba(25, 118, 210, 0)',
+                    transform: 'scale(1.05)'
+                  }
+                }
+              } : {}}
             >
               {loading ? 'Saving...' : 'Save'}
             </Button>
