@@ -790,24 +790,7 @@ const MapCenterModal = ({
               </>
             )}
           </Alert>
-        ) : (
-          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
-            {isMobile ? (
-              <Typography variant="caption">
-                Set center for <strong>Session</strong>. Sign up to save permanently!
-              </Typography>
-            ) : (
-              <>
-                <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  Set your map center for this <strong>Session</strong> (temporary only).
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Want to save permanently?</strong> Sign up to save as your Cloud Default!
-                </Typography>
-              </>
-            )}
-          </Alert>
-        )}
+        ) : null}
 
         {message && (
           <Alert
@@ -819,91 +802,79 @@ const MapCenterModal = ({
           </Alert>
         )}
         
-        {/* Action Buttons - Compact on mobile */}
+        {/* Action Buttons - Compact layout */}
         <Box sx={{
           display: 'flex',
           gap: isMobile ? 0.5 : 1,
           mb: 1,
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          alignItems: 'center'
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
-          {/* Use My Location - browser geolocation */}
-          <Button
-            variant="outlined"
+          {/* Left side - Save, Events toggle, Login/Signup */}
+          <Box sx={{ display: 'flex', gap: isMobile ? 0.5 : 1, alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Save - saves to cloud (logged in) or session (anonymous) */}
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={loading || !centerLat || !centerLng}
+              size="small"
+              startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+
+            {/* Show Events toggle */}
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={showDensityPills}
+                  onChange={(e) => setShowDensityPills(e.target.checked)}
+                />
+              }
+              label={
+                <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
+                  {isMobile ? 'Events' : 'Show Events'}
+                </Typography>
+              }
+              sx={{ m: 0 }}
+            />
+
+            {/* Login/Signup for anonymous users - stacked on mobile */}
+            {!user && (
+              <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 0.5 }}>
+                <Button
+                  variant="text"
+                  onClick={() => { window.location.href = '/auth/login'; }}
+                  size="small"
+                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
+                >
+                  Log In
+                </Button>
+                <Button
+                  variant="text"
+                  color="secondary"
+                  onClick={() => { window.location.href = '/auth/signup'; }}
+                  size="small"
+                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+          {/* Right side - My Location icon button */}
+          <IconButton
             onClick={handleUseMyLocation}
             disabled={gettingLocation}
             size="small"
-            startIcon={gettingLocation ? <CircularProgress size={14} /> : <MyLocationIcon />}
-            sx={{
-              px: isMobile ? 1 : 2,
-              py: 0.5,
-              fontSize: isMobile ? '0.7rem' : '0.875rem'
-            }}
+            color="primary"
+            title="Use my current location"
+            sx={{ ml: 'auto' }}
           >
-            {gettingLocation ? 'Getting...' : (isMobile ? 'My Location' : 'Use My Location')}
-          </Button>
-
-          {/* Show Events toggle */}
-          <FormControlLabel
-            control={
-              <Switch
-                size="small"
-                checked={showDensityPills}
-                onChange={(e) => setShowDensityPills(e.target.checked)}
-              />
-            }
-            label={
-              <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
-                {isMobile ? 'Events' : 'Show Events'}
-              </Typography>
-            }
-            sx={{ m: 0 }}
-          />
-
-          {/* Save - saves to cloud (logged in) or session (anonymous) */}
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={loading || !centerLat || !centerLng}
-            size="small"
-            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
-
-          {/* Login/Signup for anonymous users */}
-          {!user && (
-            <>
-              {/* For anonymous users: Login and Signup */}
-              <Button
-                variant="outlined"
-                onClick={() => { window.location.href = '/auth/login'; }}
-                size="small"
-                sx={{
-                  px: isMobile ? 1 : 2,
-                  py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem'
-                }}
-              >
-                Log In
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={() => { window.location.href = '/auth/signup'; }}
-                size="small"
-                sx={{
-                  px: isMobile ? 1 : 2,
-                  py: 0.5,
-                  fontSize: isMobile ? '0.7rem' : '0.875rem'
-                }}
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
-
+            {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
+          </IconButton>
         </Box>
         
         {/* Search Range Slider */}

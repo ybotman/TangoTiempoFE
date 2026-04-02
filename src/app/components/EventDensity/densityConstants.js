@@ -192,7 +192,8 @@ export const categorizeEvent = (event) => {
   const category = event.categoryFirst || 'Unknown';
   const isSocial = SOCIAL_CATEGORIES.includes(category);
   const isEvent = EVENT_CATEGORIES.includes(category);
-  const isDiscovered = event.isDiscovered === true && (isSocial || isEvent);
+  // Count ALL discovered events in BOT pill (not just social/event categories)
+  const isDiscovered = event.isDiscovered === true;
 
   return { isSocial, isEvent, isDiscovered, category };
 };
