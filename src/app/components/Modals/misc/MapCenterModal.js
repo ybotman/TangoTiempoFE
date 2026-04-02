@@ -928,7 +928,7 @@ const MapCenterModal = ({
                 }
               } : {}}
             >
-              {loading ? 'Saving...' : 'Save'}
+              {loading ? 'Setting...' : 'SET'}
             </Button>
 
             {/* Show Events toggle */}
