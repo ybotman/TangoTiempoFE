@@ -470,9 +470,9 @@ const CalendarPage = () => {
                 <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontSize: '0.7rem',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -486,10 +486,10 @@ const CalendarPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '3px',
-                fontSize: '0.65rem',
-                color: '#555'
+                fontSize: '0.6rem',
+                color: '#777'
               }}>
-                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
+                <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
                 {startTime && <span>· {startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
@@ -773,12 +773,12 @@ const CalendarPage = () => {
                 alignItems: 'center',
                 gap: '6px'
               }}>
-                <span style={{ color: '#C00', fontSize: '1rem' }}>🤖</span>
+                <span style={{ color: '#C00', fontSize: '0.9rem' }}>🤖</span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontSize: '0.8rem',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -792,10 +792,10 @@ const CalendarPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                fontSize: '0.75rem',
-                color: '#555'
+                fontSize: '0.7rem',
+                color: '#777'
               }}>
-                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
+                <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
                 {startTime && <span>· {startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
