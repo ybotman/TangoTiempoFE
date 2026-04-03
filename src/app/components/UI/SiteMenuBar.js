@@ -5,7 +5,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MailIcon from '@mui/icons-material/Mail';
 import { useSiteMenuBar } from '@/hooks/useSiteMenuBar';
 import { useMessages } from '@/hooks/useMessages';
@@ -151,10 +150,25 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           <IconButton
             onClick={onDiscoveredToggle}
             sx={{
-              color: showDiscovered ? 'primary.main' : 'action.disabled',
+              opacity: showDiscovered ? 1 : 0.4,
             }}
           >
-            <AutoAwesomeIcon />
+            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '1.3rem' }}>🤖</span>
+              <span style={{
+                position: 'absolute',
+                top: '-4px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '0.5rem',
+                fontWeight: 'bold',
+                color: '#fff',
+                background: showDiscovered ? '#1976d2' : '#999',
+                borderRadius: '3px',
+                padding: '0 3px',
+                lineHeight: 1.3
+              }}>AI</span>
+            </span>
           </IconButton>
         </Tooltip>
 
