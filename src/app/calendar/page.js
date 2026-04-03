@@ -493,7 +493,6 @@ const CalendarPage = () => {
                 color: '#777'
               }}>
                 <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
-                {startTime && <span>· {startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
@@ -802,7 +801,6 @@ const CalendarPage = () => {
                 color: '#777'
               }}>
                 <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
-                {startTime && <span>· {startTime}</span>}
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
