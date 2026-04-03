@@ -1021,7 +1021,7 @@ const BostonCalendarPage = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '10px',
-          margin: '10px 8px 10px 0',
+          margin: '20px 8px 20px 4px',
         }}
       >
         {/* Calendar Controls */}

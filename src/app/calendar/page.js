@@ -1212,7 +1212,7 @@ const CalendarPage = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '10px',
-          margin: '10px 8px 10px 0',
+          margin: '20px 8px 20px 4px',
         }}
       >
         {/* Calendar Controls */}
@@ -1282,7 +1282,7 @@ const CalendarPage = () => {
           padding: '60px 20px',
           backgroundColor: '#f5f5f5',
           borderRadius: '8px',
-          margin: '10px 8px 10px 0',
+          margin: '20px 8px 20px 4px',
         }}>
           <h2 style={{ marginBottom: '20px', color: '#666' }}>
             Loading Map Settings...
