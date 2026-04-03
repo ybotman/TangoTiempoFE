@@ -594,9 +594,6 @@ const BostonCalendarPage = () => {
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForListView(event.start, event.end);
 
-      // Detect mobile for wrapping behavior
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
       return (
         <div style={{
           padding: '4px 2px',
@@ -651,8 +648,7 @@ const BostonCalendarPage = () => {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                flexWrap: isMobile ? 'wrap' : 'nowrap'
+                gap: '8px'
               }}>
                 {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
                 {isCanceled || getFeatureData(event)?.isCanceled ? (
@@ -681,7 +677,7 @@ const BostonCalendarPage = () => {
                       fontWeight: 'bold',
                       color: '#333',
                       overflow: 'visible',
-                      whiteSpace: isMobile ? 'normal' : 'nowrap',
+                      whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
@@ -696,7 +692,7 @@ const BostonCalendarPage = () => {
                           fontWeight: 'normal',
                           color: '#666',
                           overflow: 'visible',
-                          whiteSpace: isMobile ? 'normal' : 'nowrap',
+                          whiteSpace: 'nowrap',
                           flexShrink: 1,
                           lineHeight: '1.2',
                           textDecoration: isCanceled ? 'line-through' : 'none'
