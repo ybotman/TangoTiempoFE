@@ -7,17 +7,23 @@
     width: 100% !important;
     max-width: 100% !important;
   }
-  
+
   .fc-list-event {
     max-height: 400px; /* Adjust as necessary */
     overflow-y: scroll;
     width: 100%;
   }
-  
+
   /* Prevent text overflow in list view */
   .fc-list-event-title,
   .fc-list-event-time {
     word-wrap: break-word;
     overflow-wrap: break-word;
+  }
+
+  /* Reduce left padding on mobile */
+  .fc-list-day-cushion,
+  .fc-list-event td {
+    padding-left: 4px !important;
   }
 }
