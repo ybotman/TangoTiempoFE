@@ -467,12 +467,15 @@ const CalendarPage = () => {
                 gap: '3px',
                 marginBottom: '1px'
               }}>
-                <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
+                  <span style={{ position: 'absolute', top: '-3px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.35rem', fontWeight: 'bold', color: '#fff', background: '#C00', borderRadius: '2px', padding: '0 2px', lineHeight: 1.2 }}>AI</span>
+                </span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontSize: '0.7rem',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -486,11 +489,10 @@ const CalendarPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '3px',
-                fontSize: '0.65rem',
-                color: '#555'
+                fontSize: '0.6rem',
+                color: '#777'
               }}>
-                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
-                {startTime && <span>· {startTime}</span>}
+                <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
@@ -773,12 +775,15 @@ const CalendarPage = () => {
                 alignItems: 'center',
                 gap: '6px'
               }}>
-                <span style={{ color: '#C00', fontSize: '1rem' }}>🤖</span>
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#C00', fontSize: '0.9rem' }}>🤖</span>
+                  <span style={{ position: 'absolute', top: '-3px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.4rem', fontWeight: 'bold', color: '#fff', background: '#C00', borderRadius: '2px', padding: '0 2px', lineHeight: 1.2 }}>AI</span>
+                </span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontSize: '0.8rem',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -792,11 +797,10 @@ const CalendarPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                fontSize: '0.75rem',
-                color: '#555'
+                fontSize: '0.7rem',
+                color: '#777'
               }}>
-                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
-                {startTime && <span>· {startTime}</span>}
+                <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
@@ -1359,6 +1363,12 @@ const CalendarPage = () => {
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
+          // Sort isDiscovered events after regular events (within same time)
+          eventOrder={(a, b) => {
+            const aDiscovered = a.extendedProps?.isDiscovered ? 1 : 0;
+            const bDiscovered = b.extendedProps?.isDiscovered ? 1 : 0;
+            return aDiscovered - bDiscovered;
+          }}
           // TIEMPO-288: Custom date cell content with month abbreviations
           dayCellContent={(arg) => {
             // Apply to both month view and 8-week view

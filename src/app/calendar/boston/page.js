@@ -333,12 +333,15 @@ const BostonCalendarPage = () => {
                 gap: '3px',
                 marginBottom: '1px'
               }}>
-                <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#C00', fontSize: '0.75rem' }}>🤖</span>
+                  <span style={{ position: 'absolute', top: '-3px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.35rem', fontWeight: 'bold', color: '#fff', background: '#C00', borderRadius: '2px', padding: '0 2px', lineHeight: 1.2 }}>AI</span>
+                </span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontSize: '0.7rem',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -352,11 +355,10 @@ const BostonCalendarPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '3px',
-                fontSize: '0.65rem',
-                color: '#555'
+                fontSize: '0.6rem',
+                color: '#777'
               }}>
-                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
-                {startTime && <span>· {startTime}</span>}
+                <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
@@ -592,9 +594,6 @@ const BostonCalendarPage = () => {
         ? formatVenueTimeForCalendar(event.extendedProps.venueStartDisplay, event.extendedProps.venueEndDisplay, event.extendedProps.venueAbbr)
         : formatTimeForListView(event.start, event.end);
 
-      // Detect mobile for wrapping behavior
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
       return (
         <div style={{
           padding: '4px 2px',
@@ -612,12 +611,15 @@ const BostonCalendarPage = () => {
                 alignItems: 'center',
                 gap: '6px'
               }}>
-                <span style={{ color: '#C00', fontSize: '1rem' }}>🤖</span>
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#C00', fontSize: '0.9rem' }}>🤖</span>
+                  <span style={{ position: 'absolute', top: '-3px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.4rem', fontWeight: 'bold', color: '#fff', background: '#C00', borderRadius: '2px', padding: '0 2px', lineHeight: 1.2 }}>AI</span>
+                </span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: '#333',
+                  fontSize: '0.8rem',
+                  fontWeight: 'normal',
+                  color: '#666',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -631,11 +633,10 @@ const BostonCalendarPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                fontSize: '0.75rem',
-                color: '#555'
+                fontSize: '0.7rem',
+                color: '#777'
               }}>
-                <span style={{ fontStyle: 'italic', color: '#888' }}>AI-found</span>
-                {startTime && <span>· {startTime}</span>}
+                <span style={{ fontStyle: 'italic', color: '#999' }}>AI-found</span>
                 {(event.extendedProps?.venueName || event.extendedProps?.venueCityName) && (
                   <span>· {event.extendedProps.venueName || event.extendedProps.venueCityName}</span>
                 )}
@@ -647,8 +648,7 @@ const BostonCalendarPage = () => {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                flexWrap: isMobile ? 'wrap' : 'nowrap'
+                gap: '8px'
               }}>
                 {/* TIEMPO-388: Show ⚠️ alert icon instead of time for canceled events */}
                 {isCanceled || getFeatureData(event)?.isCanceled ? (
@@ -677,7 +677,7 @@ const BostonCalendarPage = () => {
                       fontWeight: 'bold',
                       color: '#333',
                       overflow: 'visible',
-                      whiteSpace: isMobile ? 'normal' : 'nowrap',
+                      whiteSpace: 'nowrap',
                       flexShrink: 1,
                       lineHeight: '1.2',
                       textDecoration: isCanceled ? 'line-through' : 'none'
@@ -692,7 +692,7 @@ const BostonCalendarPage = () => {
                           fontWeight: 'normal',
                           color: '#666',
                           overflow: 'visible',
-                          whiteSpace: isMobile ? 'normal' : 'nowrap',
+                          whiteSpace: 'nowrap',
                           flexShrink: 1,
                           lineHeight: '1.2',
                           textDecoration: isCanceled ? 'line-through' : 'none'
@@ -1164,6 +1164,12 @@ const BostonCalendarPage = () => {
             initialView={currentViewType}
             events={coloredFilteredEvents}
             eventClick={handleEventClick}
+            // Sort isDiscovered events after regular events (within same time)
+            eventOrder={(a, b) => {
+              const aDiscovered = a.extendedProps?.isDiscovered ? 1 : 0;
+              const bDiscovered = b.extendedProps?.isDiscovered ? 1 : 0;
+              return aDiscovered - bDiscovered;
+            }}
             // Remove dateClick for read-only view
             headerToolbar={false}
             // TIEMPO-288: Custom date cell content with month abbreviations
