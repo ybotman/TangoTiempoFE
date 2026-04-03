@@ -467,7 +467,10 @@ const CalendarPage = () => {
                 gap: '3px',
                 marginBottom: '1px'
               }}>
-                <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#C00', fontSize: '0.8rem' }}>🤖</span>
+                  <span style={{ position: 'absolute', top: '-3px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.35rem', fontWeight: 'bold', color: '#fff', background: '#C00', borderRadius: '2px', padding: '0 2px', lineHeight: 1.2 }}>AI</span>
+                </span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
                   fontSize: '0.7rem',
@@ -773,7 +776,10 @@ const CalendarPage = () => {
                 alignItems: 'center',
                 gap: '6px'
               }}>
-                <span style={{ color: '#C00', fontSize: '0.9rem' }}>🤖</span>
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#C00', fontSize: '0.9rem' }}>🤖</span>
+                  <span style={{ position: 'absolute', top: '-3px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.4rem', fontWeight: 'bold', color: '#fff', background: '#C00', borderRadius: '2px', padding: '0 2px', lineHeight: 1.2 }}>AI</span>
+                </span>
                 <CategoryCircles eventProps={{...event.extendedProps, categorySecond: null, categoryThird: null}} />
                 <div style={{
                   fontSize: '0.8rem',
@@ -1359,6 +1365,12 @@ const CalendarPage = () => {
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
+          // Sort isDiscovered events after regular events (within same time)
+          eventOrder={(a, b) => {
+            const aDiscovered = a.extendedProps?.isDiscovered ? 1 : 0;
+            const bDiscovered = b.extendedProps?.isDiscovered ? 1 : 0;
+            return aDiscovered - bDiscovered;
+          }}
           // TIEMPO-288: Custom date cell content with month abbreviations
           dayCellContent={(arg) => {
             // Apply to both month view and 8-week view
