@@ -2,7 +2,7 @@
 
 **Created**: 2026-04-03
 **Author**: Sarah (TangoTiempo Frontend Agent)
-**Status**: DRAFT — Awaiting Fulton + AIDI sign-off
+**Status**: SIGNED OFF — All parties confirmed 2026-04-04
 **Related Tickets**: TIEMPO-TBD (frontend), CALBEAF-TBD (backend)
 
 ---
@@ -102,7 +102,9 @@ Auth: Service-to-service API key (X-Service-Key header)
 
 Request:
 {
+  "appId": 1,                                // required: 1=TangoTiempo, 2=HarmonyJunction
   "orgName": "Buenos Aires Milonga Club",
+  "contactName": "Maria Garcia",             // optional: contact person if differs from org name
   "contactEmail": "contact@bamilonga.com",
   "organizerType": "isEventOrganizer",
   "region": "South America",
@@ -436,7 +438,7 @@ if (savedToken) {
 
 | Agent | Status | Date |
 |-------|--------|------|
-| Sarah (Frontend) | DRAFTED | 2026-04-03 |
-| Fulton (Backend) | PENDING | — |
-| AIDI (Outreach) | PENDING | — |
-| Gotan (Overseer) | PENDING | — |
+| Sarah (Frontend) | ✅ SIGNED | 2026-04-03 |
+| Fulton (Backend) | ✅ SIGNED | 2026-04-04 (pending resolve-token contract fixes — committing today) |
+| AIDI (Outreach) | ✅ SIGNED | 2026-04-04 (via Quinn, coordinator; AIDI doc sync pending) |
+| Gotan (Overseer) | ✅ SIGNED | 2026-04-04 |

@@ -158,6 +158,7 @@ const OutreachApplyForm = () => {
   const [formData, setFormData] = useState({
     orgName: '',
     shortName: '',
+    contactName: '',
     contactEmail: '',
     organizerType: 'isEventOrganizer',
     description: '',
@@ -175,6 +176,7 @@ const OutreachApplyForm = () => {
       setFormData(prev => ({
         ...prev,
         orgName: prefillData.orgName || prev.orgName,
+        contactName: prefillData.contactName || prev.contactName,
         contactEmail: prefillData.contactEmail || user?.email || prev.contactEmail,
         organizerType: prefillData.organizerType || prev.organizerType,
         website: prefillData.website || prev.website,
@@ -282,7 +284,12 @@ const OutreachApplyForm = () => {
       }
 
       // Step 3: Create organizer record
-      const defaultRegionId = prefillData?.regionId || '66c4d99042ec462ea22484bd';
+      const resolvedRegionId = prefillData?.regionId || userData?.localUserInfo?.userDefaults?.region || null;
+      if (!resolvedRegionId) {
+        setSubmitError('Unable to determine your region. Please contact support or use the standard application.');
+        setSubmitting(false);
+        return;
+      }
 
       const organizerPayload = {
         linkedUserLogin: userData._id,
@@ -290,12 +297,13 @@ const OutreachApplyForm = () => {
         name: formData.orgName,
         fullName: formData.orgName,
         shortName: formData.shortName,
+        contactName: formData.contactName || '',
         contactEmail: formData.contactEmail,
         description: formData.description,
         website: formData.website || '',
-        organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
+        organizerRegion: resolvedRegionId,
         isActive: true,
-        isEnabled: false,
+        isEnabled: true,
         wantRender: false,
         organizerTypes,
         onboardingSource: 'outreach',
@@ -478,6 +486,14 @@ const OutreachApplyForm = () => {
           helperText="3-12 characters. Used in compact displays."
           inputProps={{ maxLength: 12 }}
           error={formData.shortName.length > 0 && (formData.shortName.length < 3 || formData.shortName.length > 12)}
+        />
+
+        <TextField
+          label="Contact Name (optional)"
+          value={formData.contactName}
+          onChange={handleChange('contactName')}
+          fullWidth
+          helperText="Your name or the primary contact person's name."
         />
 
         <TextField
