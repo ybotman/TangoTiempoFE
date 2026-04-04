@@ -2,7 +2,7 @@
 
 **Created**: 2026-04-03
 **Author**: Sarah (TangoTiempo Frontend Agent)
-**Status**: SIGNED OFF — All parties confirmed 2026-04-04
+**Status**: SIGNED OFF — All parties confirmed 2026-04-04. Decisions updated 2026-04-04 (Ybotman).
 **Related Tickets**: TIEMPO-TBD (frontend), CALBEAF-TBD (backend)
 
 ---
@@ -398,9 +398,13 @@ if (savedToken) {
 4. New `OutreachApplyForm` component — single-page, pre-filled, simple
 5. Inline ROE terms acceptance (checkbox, not modal)
 6. Submit flow: create organizer with pre-filled + user-entered data
+   - `isEnabled: true` (auto-approved, trust-first)
+   - `isVisible: true` (backend default — no explicit set needed)
+   - `wantRender: true` (explicit — backend defaults false if omitted)
 7. Track events at each step (click, auth, form open, submit, complete)
 8. Error state handling (expired, used, invalid tokens)
 9. Confirmation/welcome screen
+10. Auth gate: Google + Apple + Email/Password (sign in + sign up). Facebook deferred.
 
 ### Phase 3: AIDI (Outreach Integration)
 **Blocked on**: Fulton Phase 1 item 3 (generate-link endpoint)

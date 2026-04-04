@@ -24,6 +24,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AppleIcon from '@/components/AppleIcon';
+import EmailAuthForm from '@/components/EmailAuthForm';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import { useOrganizers } from '@/hooks/useOrganizers';
@@ -43,9 +44,10 @@ const ORGANIZER_TYPES = [
 
 // --- Auth Gate Section ---
 const AuthGateSection = ({ onAuthComplete }) => {
-  const { authenticateWithGoogle, authenticateWithApple, loading } = useContext(AuthContext);
+  const { authenticateWithGoogle, authenticateWithApple, login, signUp, loading } = useContext(AuthContext);
   const [authError, setAuthError] = useState('');
   const [authenticating, setAuthenticating] = useState(false);
+  const [emailMode, setEmailMode] = useState(null); // null | 'login' | 'signup'
 
   const handleGoogleAuth = async () => {
     setAuthenticating(true);
@@ -81,6 +83,20 @@ const AuthGateSection = ({ onAuthComplete }) => {
     }
   };
 
+  const handleEmailSubmit = async (formData) => {
+    setAuthError('');
+    try {
+      if (emailMode === 'signup') {
+        await signUp(formData);
+      } else {
+        await login(formData.email, formData.password);
+      }
+      onAuthComplete?.();
+    } catch (error) {
+      setAuthError(error.message || 'Authentication failed.');
+    }
+  };
+
   if (loading || authenticating) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -106,31 +122,64 @@ const AuthGateSection = ({ onAuthComplete }) => {
         <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>
       )}
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 320, mx: 'auto' }}>
-        <Button
-          variant="contained"
-          startIcon={<GoogleIcon />}
-          onClick={handleGoogleAuth}
-          size="large"
-          fullWidth
-        >
-          Continue with Google
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<AppleIcon />}
-          onClick={handleAppleAuth}
-          size="large"
-          fullWidth
-        >
-          Continue with Apple
-        </Button>
-        <Divider sx={{ my: 1 }}>or</Divider>
-        <Typography variant="body2" color="text.secondary">
-          Already have an account?{' '}
-          <MuiLink href="/auth/login" underline="hover">Sign in</MuiLink>
-        </Typography>
-      </Box>
+      {emailMode ? (
+        <Box sx={{ maxWidth: 400, mx: 'auto', textAlign: 'left' }}>
+          <EmailAuthForm
+            mode={emailMode}
+            onSubmit={handleEmailSubmit}
+            error={authError}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+            <Button size="small" onClick={() => setEmailMode(null)}>
+              ← Back to other options
+            </Button>
+            <Button
+              size="small"
+              onClick={() => setEmailMode(emailMode === 'login' ? 'signup' : 'login')}
+            >
+              {emailMode === 'login' ? 'Need an account? Sign up' : 'Have an account? Sign in'}
+            </Button>
+          </Box>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 320, mx: 'auto' }}>
+          <Button
+            variant="contained"
+            startIcon={<GoogleIcon />}
+            onClick={handleGoogleAuth}
+            size="large"
+            fullWidth
+          >
+            Continue with Google
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<AppleIcon />}
+            onClick={handleAppleAuth}
+            size="large"
+            fullWidth
+          >
+            Continue with Apple
+          </Button>
+          <Divider sx={{ my: 1 }}>or</Divider>
+          <Button
+            variant="outlined"
+            onClick={() => setEmailMode('signup')}
+            size="large"
+            fullWidth
+          >
+            Sign up with Email
+          </Button>
+          <Button
+            variant="text"
+            onClick={() => setEmailMode('login')}
+            size="small"
+            fullWidth
+          >
+            Already have an account? Sign in
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
@@ -315,7 +364,7 @@ const OutreachApplyForm = () => {
         organizerRegion: resolvedRegionId,
         isActive: true,
         isEnabled: true,
-        wantRender: false,
+        wantRender: true,
         organizerTypes,
         onboardingSource: 'outreach',
       };
