@@ -169,6 +169,7 @@ const OutreachApplyForm = () => {
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [prefillApplied, setPrefillApplied] = useState(false);
+  const [newOrganizerId, setNewOrganizerId] = useState(null);
 
   // Apply prefill data when it arrives from token resolution
   useEffect(() => {
@@ -198,6 +199,16 @@ const OutreachApplyForm = () => {
       trackEvent('form_opened', { firebaseUserId: user.uid });
     }
   }, [user, prefillData, trackEvent]);
+
+  // Track onboarding complete when success screen renders
+  useEffect(() => {
+    if (submitSuccess && newOrganizerId) {
+      trackEvent('onboarding_complete', {
+        firebaseUserId: user?.uid,
+        organizerId: newOrganizerId
+      });
+    }
+  }, [submitSuccess, newOrganizerId, user?.uid, trackEvent]);
 
   // Auto-generate shortName suggestion from orgName
   useEffect(() => {
@@ -337,10 +348,11 @@ const OutreachApplyForm = () => {
 
       await trackEvent('application_submitted', {
         firebaseUserId: user?.uid,
-        organizerId: newOrganizer._id
+        organizerId: newOrganizer._id.toString()
       });
 
       clearToken();
+      setNewOrganizerId(newOrganizer._id.toString());
       setSubmitSuccess(true);
 
     } catch (error) {
