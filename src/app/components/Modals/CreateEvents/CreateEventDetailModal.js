@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { Modal, Box, Typography, Button, Tabs, Tab, Switch, FormControlLabel, Alert, CircularProgress, Tooltip } from '@mui/material';
 import CreateEventDetailsBasic from './CreateEventDetailsBasic';
 import CreateEventDetailsImage from './CreateEventDetailsImage';
@@ -48,7 +48,8 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   const { user, getIdToken, selectedRole } = useContext(AuthContext);
   const { organizer, fetchOrganizerById } = useOrganizers();
   const [currentTab, setCurrentTab] = useState('basic');
-  
+  const spotlightsRef = useRef(null);
+
   // TIEMPO-246: Helper function to get default start time in VENUE timezone
   const getDefaultStartTime = (date, venueTimezone) => {
     // Use venue timezone if available, fallback to NYC
@@ -559,6 +560,9 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
   };
 
   const handleSave = async (skipValidation = false) => {
+    // Auto-add any pending spotlight the user typed but didn't click +
+    spotlightsRef.current?.flushPending();
+
     try {
       setSaving(true);
       setSaveError(null);
@@ -1045,6 +1049,7 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         {/* Spotlights tab content - works for both repeating and non-repeating */}
         {currentTab === 'spotlights' && (
           <CreateEventDetailsSpotlights
+            ref={spotlightsRef}
             eventData={eventData}
             setEventData={updateEventData}
             isMultiDay={isMultiDayEvent}

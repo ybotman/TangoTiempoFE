@@ -12,7 +12,7 @@
  * For multi-day events (>24hr), spotlights apply to ALL days.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -44,7 +44,7 @@ const SINGLE_EVENT_SPOTLIGHT_OPTIONS = [
   { value: 'canceled', label: 'Canceled', color: 'error', maxLength: 19, requiresName: false }
 ];
 
-const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = false, isRepeating = false }) => {
+const CreateEventDetailsSpotlights = forwardRef(({ eventData, setEventData, isMultiDay = false, isRepeating = false }, ref) => {
   // Determine available spotlight options based on event type
   // Single (non-repeating) events get additional options: Orchestra, Note, Canceled
   const SPOTLIGHT_OPTIONS = isRepeating
@@ -58,6 +58,29 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
   // Get current spotlights from eventData (default to empty array)
   // Support both 'spotlights' and legacy 'features' field
   const spotlights = eventData.spotlights || eventData.features || [];
+
+  // Expose flushPending so parent can auto-add unsaved spotlight on Save
+  useImperativeHandle(ref, () => ({
+    flushPending: () => {
+      if (!newSpotlightType) return;
+      const spotlightOption = SPOTLIGHT_OPTIONS.find(s => s.value === newSpotlightType);
+      const requiresName = spotlightOption?.requiresName !== false;
+      const maxLength = spotlightOption?.maxLength || 19;
+      let name = newSpotlightName.trim();
+      if (requiresName && !name) return;
+      if (maxLength > 0 && name.length > maxLength) name = name.substring(0, maxLength);
+      if (newSpotlightType === 'canceled' && spotlights.some(s => s.type === 'canceled')) return;
+      const newSpotlights = [...spotlights, { type: newSpotlightType, name }];
+      const updates = { spotlights: newSpotlights, features: newSpotlights };
+      if (newSpotlightType === 'canceled') {
+        updates.isCanceled = true;
+        updates.cancelReason = name || '';
+      }
+      setEventData(prevData => ({ ...prevData, ...updates }));
+      setNewSpotlightType('');
+      setNewSpotlightName('');
+    }
+  }));
 
   const handleAddSpotlight = () => {
     if (!newSpotlightType) return;
@@ -275,7 +298,9 @@ const CreateEventDetailsSpotlights = ({ eventData, setEventData, isMultiDay = fa
       </Typography>
     </Box>
   );
-};
+});
+
+CreateEventDetailsSpotlights.displayName = 'CreateEventDetailsSpotlights';
 
 CreateEventDetailsSpotlights.propTypes = {
   eventData: PropTypes.shape({
