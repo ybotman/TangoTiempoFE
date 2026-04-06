@@ -9,8 +9,9 @@
  */
 
 import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7071/api';
+const getApiUrl = () => `${getApiBaseUrl()}/api`;
 
 /**
  * Create or update an instance override for a recurring event
@@ -29,7 +30,7 @@ export async function createOverride(eventId, override, firebaseToken) {
   }
 
   const response = await axios.post(
-    `${API_BASE_URL}/events/${eventId}/override`,
+    `${getApiUrl()}/events/${eventId}/override`,
     override,
     {
       headers: {
@@ -101,7 +102,7 @@ export async function deleteOverride(eventId, instanceKey, firebaseToken) {
   );
 
   const response = await axios.delete(
-    `${API_BASE_URL}/events/${eventId}/override/${encodedKey}`,
+    `${getApiUrl()}/events/${eventId}/override/${encodedKey}`,
     {
       headers: {
         'Authorization': `Bearer ${firebaseToken}`
@@ -119,7 +120,7 @@ export async function deleteOverride(eventId, instanceKey, firebaseToken) {
  */
 export async function getOverrides(eventId) {
   const response = await axios.get(
-    `${API_BASE_URL}/events/${eventId}/overrides`
+    `${getApiUrl()}/events/${eventId}/overrides`
   );
   return response.data;
 }
@@ -177,7 +178,7 @@ export async function addExcludedDate(eventId, dateToExclude, firebaseToken) {
 
   // Step 1: Fetch current event to get existing excludedDates
   const getResponse = await axios.get(
-    `${API_BASE_URL}/events/${eventId}`
+    `${getApiUrl()}/events/${eventId}`
   );
   const currentEvent = getResponse.data;
   const existingExcludedDates = currentEvent.excludedDates || [];
@@ -190,7 +191,7 @@ export async function addExcludedDate(eventId, dateToExclude, firebaseToken) {
 
   // Step 3: PATCH the event with updated excludedDates
   const response = await axios.patch(
-    `${API_BASE_URL}/events/${eventId}`,
+    `${getApiUrl()}/events/${eventId}`,
     {
       excludedDates: newExcludedDates
     },
