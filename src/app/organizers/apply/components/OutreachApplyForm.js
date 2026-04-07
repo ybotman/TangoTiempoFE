@@ -18,7 +18,6 @@ import {
   FormControlLabel,
   Divider,
   MenuItem,
-  Link as MuiLink
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -517,6 +516,18 @@ const OutreachApplyForm = () => {
       {prefillData && (
         <Alert severity="info" sx={{ mb: 3 }}>
           We&apos;ve pre-filled some information from your invitation. Feel free to edit anything.
+          {Array.isArray(prefillData.sampleEventTitles) && prefillData.sampleEventTitles.length > 0 && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                We found your events:
+              </Typography>
+              <Typography variant="body2" component="ul" sx={{ m: 0, pl: 2 }}>
+                {prefillData.sampleEventTitles.slice(0, 5).map((title, idx) => (
+                  <li key={idx}>{title}</li>
+                ))}
+              </Typography>
+            </Box>
+          )}
         </Alert>
       )}
 
