@@ -1,17 +1,53 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, Link, Divider } from '@mui/material';
+import { Box, Typography, Link, Divider, Button, Snackbar, IconButton } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CategoryIcon from '@mui/icons-material/Category';
 import PeopleIcon from '@mui/icons-material/People';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import ShareIcon from '@mui/icons-material/Share';
+import CloseIcon from '@mui/icons-material/Close';
 
 const ViewAIEventDetailsTab = ({ eventDetails }) => {
   const [imageError, setImageError] = useState(false);
+  const [shareSnackbarOpen, setShareSnackbarOpen] = useState(false);
 
   if (!eventDetails) return null;
+
+  // Share button handler - mirrors ViewEventDetailModal pattern (TIEMPO-256)
+  const handleShareClick = async () => {
+    const eventId = eventDetails?.extendedProps?._id || eventDetails?.id;
+    if (!eventId) return;
+
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tangotiempo.com';
+    const shareUrl = `${baseUrl}/event/${eventId}`;
+    const shareTitle = eventDetails?.title || 'Tango Event';
+    const shareText = `Check out this tango event: ${shareTitle}`;
+
+    // Native share on mobile only (desktop Safari has poor UX)
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      typeof navigator !== 'undefined' ? navigator.userAgent : ''
+    );
+
+    if (isMobileDevice && navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    // Desktop / fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareSnackbarOpen(true);
+    } catch {
+      alert(`Share this link:\n${shareUrl}`);
+    }
+  };
 
   const formatDateRange = (start, end) => {
     // TIEMPO-246: Format dates without timezone conversion
@@ -294,6 +330,19 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
 
       <Divider sx={{ mb: 2 }} />
 
+      {/* Share button */}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          onClick={handleShareClick}
+          size="small"
+          variant="outlined"
+          startIcon={<ShareIcon fontSize="small" />}
+          sx={{ fontSize: '0.875rem' }}
+        >
+          Share Event
+        </Button>
+      </Box>
+
       {/* Links Section: Source + Host Links */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {/* Source Link */}
@@ -352,6 +401,28 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
           </Box>
         )}
       </Box>
+
+      {/* Share confirmation snackbar */}
+      <Snackbar
+        open={shareSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setShareSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        message={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShareIcon fontSize="small" />
+            Event link copied to clipboard!
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={() => setShareSnackbarOpen(false)}
+              sx={{ ml: 1 }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        }
+      />
     </Box>
   );
 };
