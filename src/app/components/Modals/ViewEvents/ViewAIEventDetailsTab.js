@@ -107,6 +107,49 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
         </Box>
       )}
 
+      {/* Title */}
+      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+        {eventDetails.title || 'Untitled Event'}
+      </Typography>
+
+      {/* Event Image - with error handling for broken images */}
+      {ext.eventImage && !imageError && (
+        <Box sx={{ mb: 3, textAlign: 'center' }}>
+          <Box
+            component="img"
+            src={ext.eventImage}
+            alt={eventDetails.title || 'Event image'}
+            sx={{
+              maxWidth: '100%',
+              maxHeight: 300,
+              borderRadius: 1,
+              objectFit: 'contain',
+            }}
+            onError={() => setImageError(true)}
+          />
+        </Box>
+      )}
+
+      {/* Description */}
+      {ext.eventDescription && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#666', mb: 1 }}>
+            Description
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              whiteSpace: 'pre-wrap',
+              lineHeight: 1.6,
+            }}
+          >
+            {ext.eventDescription}
+          </Typography>
+        </Box>
+      )}
+
+      <Divider sx={{ mb: 3 }} />
+
       {/* Category */}
       {ext.categoryFirst && (
         <Box sx={{ mb: 2 }}>
@@ -195,49 +238,6 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
           {formatDateRange(eventDetails.start, eventDetails.end)}
         </Typography>
       </Box>
-
-      {/* Title */}
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-        {eventDetails.title || 'Untitled Event'}
-      </Typography>
-
-      <Divider sx={{ mb: 3 }} />
-
-      {/* Event Image - with error handling for broken images */}
-      {ext.eventImage && !imageError && (
-        <Box sx={{ mb: 3, textAlign: 'center' }}>
-          <Box
-            component="img"
-            src={ext.eventImage}
-            alt={eventDetails.title || 'Event image'}
-            sx={{
-              maxWidth: '100%',
-              maxHeight: 300,
-              borderRadius: 1,
-              objectFit: 'contain',
-            }}
-            onError={() => setImageError(true)}
-          />
-        </Box>
-      )}
-
-      {/* Description */}
-      {ext.eventDescription && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#666', mb: 1 }}>
-            Description
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              whiteSpace: 'pre-wrap',
-              lineHeight: 1.6,
-            }}
-          >
-            {ext.eventDescription}
-          </Typography>
-        </Box>
-      )}
 
       {/* Meet the Hosts Section */}
       {hosts.length > 0 && (
