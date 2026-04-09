@@ -215,6 +215,7 @@ const OutreachApplyForm = () => {
   const [roeAccepted, setRoeAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [shortNameError, setShortNameError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [prefillApplied, setPrefillApplied] = useState(false);
   const [newOrganizerId, setNewOrganizerId] = useState(null);
@@ -225,6 +226,9 @@ const OutreachApplyForm = () => {
       setFormData(prev => ({
         ...prev,
         orgName: prefillData.orgName || prev.orgName,
+        shortName: prefillData.shortName
+          ? String(prefillData.shortName).toUpperCase().slice(0, 12)
+          : prev.shortName,
         contactName: prefillData.contactName || prev.contactName,
         contactEmail: prefillData.contactEmail || user?.email || prev.contactEmail,
         organizerType: prefillData.organizerType || prev.organizerType,
@@ -277,7 +281,14 @@ const OutreachApplyForm = () => {
   const isAlreadyOrganizer = userData?.regionalOrganizerInfo?.organizerId;
 
   const handleChange = (field) => (event) => {
-    setFormData(prev => ({ ...prev, [field]: event.target.value }));
+    const raw = event.target.value;
+    // shortName is stored uppercase in MongoDB — uppercase at input time so
+    // the user sees exactly what will be saved and can judge uniqueness.
+    const value = field === 'shortName' ? raw.toUpperCase() : raw;
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'shortName' && shortNameError) {
+      setShortNameError('');
+    }
   };
 
   const handleSubmit = async () => {
@@ -402,9 +413,18 @@ const OutreachApplyForm = () => {
 
     } catch (error) {
       console.error('Outreach application error:', error);
-      setSubmitError(
-        error.response?.data?.message || error.message || 'Something went wrong. Please try again.'
-      );
+      // Duplicate shortName — surface inline on the shortName field so the
+      // user can correct without losing the rest of the form. Keyed off the
+      // stable `error` field per BE contract, not the human-readable message.
+      const apiError = error.response?.data;
+      if (apiError?.error === 'DuplicateError') {
+        setShortNameError('That short name is taken. Please pick another.');
+        setSubmitError('');
+      } else {
+        setSubmitError(
+          apiError?.message || error.message || 'Something went wrong. Please try again.'
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -552,9 +572,13 @@ const OutreachApplyForm = () => {
           onChange={handleChange('shortName')}
           required
           fullWidth
-          helperText="3-12 characters. Used in compact displays."
-          inputProps={{ maxLength: 12 }}
-          error={formData.shortName.length > 0 && (formData.shortName.length < 3 || formData.shortName.length > 12)}
+          helperText={shortNameError || '3-12 characters, uppercase. Used in compact displays.'}
+          inputProps={{ maxLength: 12, style: { textTransform: 'uppercase' } }}
+          error={
+            Boolean(shortNameError) ||
+            (formData.shortName.length > 0 &&
+              (formData.shortName.length < 3 || formData.shortName.length > 12))
+          }
         />
 
         <TextField
