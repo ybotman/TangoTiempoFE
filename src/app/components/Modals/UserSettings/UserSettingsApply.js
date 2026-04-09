@@ -110,11 +110,12 @@ const UserSettingsApply = () => {
 
       // Create an organizer if needed
       if (!hasOrganizerId && userData._id) {
-        // Use a default region if user's region is not available
-        const defaultRegionId = '66c4d99042ec462ea22484bd'; // Fallback region ID
-
         const fullName = `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`;
         const shortName = `${userData?.localUserInfo?.firstName || 'New'}${userData?.localUserInfo?.lastName ? ' ' + userData?.localUserInfo?.lastName.charAt(0) : ''}`;
+
+        // organizerRegion is optional — backend writes null when omitted. Only pass
+        // through if the user has set a region default. No hardcoded fallback.
+        const userRegionId = userData?.localUserInfo?.userDefaults?.region;
 
         const organizerData = {
           linkedUserLogin: userData._id,
@@ -123,7 +124,7 @@ const UserSettingsApply = () => {
           fullName: fullName,
           shortName: shortName, // REQUIRED by backend - generated from user name
           contactEmail: user?.email || userData.firebaseUserId || '', // REQUIRED by backend API - from Firebase Auth
-          organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
+          ...(userRegionId && { organizerRegion: userRegionId }),
           isActive: true,
           isEnabled: false,  // Requires manual enable for safety
           wantRender: false, // Not searchable until enabled
