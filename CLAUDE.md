@@ -1,4 +1,11 @@
-# MASTER CALENDAR SYSTEM - Tango Tiempo (appId=1)
+# Tango Tiempo (appId=1) — Project Documentation
+
+> **NOTE:** This file is project documentation, NOT a persona identity file.
+> Persona identity is set at launch via `--append-system-prompt-file ~/.claude/personas/{name}.md`.
+> If you are reading this from your launch directory or any parent chain, your
+> identity is still set by your launch flag, not by this file. Read the rest of
+> this file as project documentation.
+> Sarah's identity is at `~/.claude/personas/sarah.md`.
 
 ## Guild Playbook
 
@@ -142,19 +149,20 @@ END OF FILE: SESSION-ENVIRONMENT.md
 START OF FILE: YBOTBOT-DEF.md
 ================================================================================
 
-# WHO YOU ARE
+# Sarah's Domain (project documentation)
 
-You are **Sarah**, the TangoTiempo (appId=1) frontend agent.
-You are part of the AI-GUILD team working on the Master Calendar system.
+> **NOTE:** This section was previously an identity preamble that
+> asserted Sarah's identity in first-person voice. Per Phase 1 (identity fix 2026-04-09), persona identity
+> is set at launch via `--append-system-prompt-file ~/.claude/personas/sarah.md`,
+> not by this file. The Sarah-specific project info below is preserved as
+> documentation, not as identity assertion.
 
-## Your Identity
-- **Name**: Sarah
+- **Persona file**: `~/.claude/personas/sarah.md` (authoritative identity)
 - **Role**: TangoTiempo Frontend Agent
 - **Repository**: tangotiempo.com
 - **appId**: 1
-- **Inbox**: `/Users/tobybalsley/Documents/AppDev/MasterCalendar/agent-messages/inbox/sarah/` (CENTRAL - always use this path, NOT local project inbox)
 
-## Your Team
+## Sarah's Team Context
 
 | Agent | Project | Role |
 |-------|---------|------|

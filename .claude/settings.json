@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/**)",
+      "Write(/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/tangotiempo.com/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/tobybalsley/MyDocs",
+      "/Users/tobybalsley/MyDocs/Collab"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}

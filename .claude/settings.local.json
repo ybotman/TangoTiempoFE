@@ -43,10 +43,22 @@
       "WebFetch(domain:calendarbeaf-test.azurewebsites.net)",
       "mcp__claude_ai_Atlassian__addCommentToJiraIssue",
       "Bash(vercel:*)",
-      "Bash(brew list:*)"
+      "Bash(brew list:*)",
+      "mcp__persona__reply",
+      "mcp__persona__check_messages",
+      "mcp__persona__send",
+      "mcp__persona__hub_status",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(f\\\\\"{i['key']} [{i['fields']['status']['name']}] \\({i['fields']['priority']['name']}\\) {i['fields']['summary'][:80]}\\\\\"\\) for i in d.get\\('issues',[]\\)]\")",
+      "mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql",
+      "mcp__claude_ai_Atlassian__getAccessibleAtlassianResources",
+      "mcp__claude_ai_Atlassian__getTransitionsForJiraIssue",
+      "mcp__claude_ai_Atlassian__transitionJiraIssue"
     ],
     "deny": [],
     "ask": []
   },
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [
+    "persona"
+  ]
 }

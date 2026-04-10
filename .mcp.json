@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "persona": {
+      "command": "node",
+      "args": ["--experimental-strip-types", "/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/channels/persona-channel/channel.ts"],
+      "env": {
+        "PERSONA_NAME": "sarah",
+        "PERSONA_PORT": "8802",
+        "HUB_URL": "http://localhost:8800"
+      }
+    }
+  }
+}
