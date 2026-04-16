@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState, useMemo } from 'react';
-import { Box, Typography, FormControl, TextField, Grid, CircularProgress, Alert, Autocomplete } from '@mui/material';
+import { Box, Typography, FormControl, TextField, Grid, CircularProgress, Alert, Autocomplete, FormControlLabel, Checkbox } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -600,14 +600,32 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
         {/* Cost Input */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <TextField 
-              label="Cost" 
-              value={eventData.cost || ''} 
+            <TextField
+              label="Cost"
+              value={eventData.cost || ''}
               onChange={(e) => setEventData(prevData => ({ ...prevData, cost: e.target.value }))}
               placeholder="e.g., Free, $20, Donation"
               helperText="Enter the cost or pricing information for the event"
               fullWidth
             />
+          </FormControl>
+        </Grid>
+
+        {/* TIEMPO-401: Beginner-friendly flag (gates Beginner UX mode) */}
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={Boolean(eventData.beginnerFriendly)}
+                  onChange={(e) => setEventData(prevData => ({ ...prevData, beginnerFriendly: e.target.checked }))}
+                />
+              }
+              label="Beginner-friendly event"
+            />
+            <Typography variant="caption" color="textSecondary" sx={{ ml: 4, mt: -0.5 }}>
+              Check if someone with zero tango experience can show up and feel welcome.
+            </Typography>
           </FormControl>
         </Grid>
       </Grid>
@@ -669,6 +687,7 @@ CreateEventDetailsBasic.propTypes = {
     authorOrganizerName: PropTypes.string,
     authorOrganizerShortName: PropTypes.string,
     cost: PropTypes.string,
+    beginnerFriendly: PropTypes.bool,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
   editMode: PropTypes.bool,
