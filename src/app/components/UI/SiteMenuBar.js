@@ -12,6 +12,7 @@ import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 import MessagesModal from '@/components/Modals/Messages/MessagesModal';
+import ModeToggle from '@/components/UI/ModeToggle'; // TIEMPO-402
 
 // Pulse animation for new messages
 const pulse = keyframes`
@@ -56,15 +57,19 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
     );
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        padding: '0 0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* TIEMPO-402: 3-mode segmented control (Beginner | Local | Explore) */}
+      <ModeToggle />
+
+      <Box
+        sx={{
+          width: '100%',
+          padding: '0 0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
       {/* Left Icons */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
@@ -198,6 +203,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
+      </Box>
       </Box>
 
       <SidebarDrawer open={sidebarDrawerOpen} onClose={() => setSidebarDrawerOpen(false)} />
