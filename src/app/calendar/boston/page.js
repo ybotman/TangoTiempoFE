@@ -34,7 +34,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 const BOSTON_CONFIG = {
   lat: 42.3601,
   lng: -71.0589,
-  zoomRange: 200, // 200 mile radius - covers all New England
+  zoomRange: 125, // 125 mile radius - covers New England core, excludes NYC metro
   cityName: 'Boston',
   source: 'legacy-boston',
   locked: true
@@ -999,7 +999,7 @@ const BostonCalendarPage = () => {
           title="Click to explore other regions at TangoTiempo.com"
         >
           <span style={{ fontSize: '12px' }}>📍</span>
-          <span>Boston ± 200mi</span>
+          <span>Boston ± 125mi</span>
         </a>
       </div>
 
@@ -1164,11 +1164,15 @@ const BostonCalendarPage = () => {
             initialView={currentViewType}
             events={coloredFilteredEvents}
             eventClick={handleEventClick}
-            // Sort isDiscovered events after regular events (within same time)
+            // Sort isDiscovered events after regular events, then by start time, then title
             eventOrder={(a, b) => {
               const aDiscovered = a.extendedProps?.isDiscovered ? 1 : 0;
               const bDiscovered = b.extendedProps?.isDiscovered ? 1 : 0;
-              return aDiscovered - bDiscovered;
+              if (aDiscovered !== bDiscovered) return aDiscovered - bDiscovered;
+              const aStart = a.start ? new Date(a.start).getTime() : 0;
+              const bStart = b.start ? new Date(b.start).getTime() : 0;
+              if (aStart !== bStart) return aStart - bStart;
+              return (a.title || '').localeCompare(b.title || '');
             }}
             // Remove dateClick for read-only view
             headerToolbar={false}
@@ -1329,7 +1333,7 @@ const BostonCalendarPage = () => {
         <ViewAIEventDetails
           open={isViewAIEventModalOpen}
           onClose={() => handleAIModalClose(false)}
-          aiEventDetails={selectedAIEvent}
+          eventDetails={selectedAIEvent}
         />
       )}
 
