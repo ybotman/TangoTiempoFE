@@ -1,6 +1,6 @@
 {
   "name": "tangotiempo",
-  "version": "1.22.15",
+  "version": "1.22.16",
   "private": true,
   "proxy": "http://localhost:3010",
   "type": "module",

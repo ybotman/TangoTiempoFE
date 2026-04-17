@@ -2,32 +2,22 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/navigation';
 import { Group } from '@visx/group';
 import { scaleTime, scaleBand } from '@visx/scale';
-import { Circle } from '@visx/shape';
 import { AxisBottom, AxisLeft } from '@visx/axis';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
 import dayjs from 'dayjs';
+import { CATEGORY_COLORS, categoryLabel, colorFor } from './exploreConstants';
 
-// TIEMPO-404 Milestone A: basic scatter plot on /explore.
-// No scroll, no filters, no density bar — proves the visx pipeline.
+// TIEMPO-404 Milestone B: date-range bars, horizontal scroll, click → /event/[id].
 
-const WIDTH = 1000;
-const HEIGHT = 520;
-const MARGIN = { top: 20, right: 40, bottom: 48, left: 160 };
-
-const CATEGORY_COLORS = {
-  Festival: '#e94560',
-  Marathon: '#f97316',
-  Encuentro: '#22c55e',
-  Workshop: '#ec4899',
-  Trip: '#3b82f6',
-  Class: '#8b5cf6',
-  Other: '#6b7280',
-};
-
-const categoryLabel = (c) => (c && c !== 'unknown' ? c : 'Other');
-const colorFor = (c) => CATEGORY_COLORS[categoryLabel(c)] || CATEGORY_COLORS.Other;
+const HEIGHT_BASE = 480;
+const MARGIN = { top: 16, right: 32, bottom: 44, left: 160 };
+const PX_PER_DAY = 4; // 4 → ~120px/month, readable without being giant
+const MIN_BAR_WIDTH = 6; // single-day events still clickable
+const MIN_CHART_WIDTH = 960;
+const ROW_PADDING = 0.35;
 
 const tooltipStyles = {
   ...defaultStyles,
@@ -39,31 +29,34 @@ const tooltipStyles = {
   maxWidth: 280,
 };
 
-export default function ExploreTimeline({ events }) {
+export default function ExploreTimeline({ events, countries, dateRange, onXScaleReady }) {
+  const router = useRouter();
   const { tooltipData, tooltipLeft, tooltipTop, tooltipOpen, showTooltip, hideTooltip } = useTooltip();
 
-  const countries = React.useMemo(
-    () => Array.from(new Set(events.map((e) => e.masteredCountryName))).sort(),
-    [events]
-  );
-
-  const { xScale, yScale, xMax, yMax } = React.useMemo(() => {
-    const allMs = events.flatMap((e) => [new Date(e.startDate).getTime(), new Date(e.endDate).getTime()]);
-    const minDate = allMs.length ? new Date(Math.min(...allMs)) : new Date();
-    const maxDate = allMs.length ? new Date(Math.max(...allMs)) : dayjs().add(6, 'month').toDate();
-    const paddedMin = dayjs(minDate).subtract(14, 'day').toDate();
-    const paddedMax = dayjs(maxDate).add(14, 'day').toDate();
-    const xMax = WIDTH - MARGIN.left - MARGIN.right;
-    const yMax = HEIGHT - MARGIN.top - MARGIN.bottom;
+  const { xScale, yScale, xMax, yMax, height, width } = React.useMemo(() => {
+    const totalDays = Math.max(1, dayjs(dateRange[1]).diff(dayjs(dateRange[0]), 'day'));
+    const width = Math.max(MIN_CHART_WIDTH, Math.ceil(totalDays * PX_PER_DAY) + MARGIN.left + MARGIN.right);
+    // Stretch chart vertically based on how many rows we have
+    const rowCount = Math.max(1, countries.length);
+    const height = Math.max(HEIGHT_BASE, MARGIN.top + MARGIN.bottom + rowCount * 44);
+    const xMax = width - MARGIN.left - MARGIN.right;
+    const yMax = height - MARGIN.top - MARGIN.bottom;
     return {
       xMax,
       yMax,
-      xScale: scaleTime({ domain: [paddedMin, paddedMax], range: [0, xMax] }),
-      yScale: scaleBand({ domain: countries, range: [0, yMax], padding: 0.3 }),
+      width,
+      height,
+      xScale: scaleTime({ domain: dateRange, range: [0, xMax] }),
+      yScale: scaleBand({ domain: countries, range: [0, yMax], padding: ROW_PADDING }),
     };
-  }, [events, countries]);
+  }, [countries, dateRange]);
 
-  const handleEnter = (event, datum) => {
+  // Expose xScale + width to parent so DensityBar can align
+  React.useEffect(() => {
+    if (onXScaleReady) onXScaleReady({ xScale, width, leftMargin: MARGIN.left, rightMargin: MARGIN.right });
+  }, [xScale, width, onXScaleReady]);
+
+  const handleMove = (event, datum) => {
     const svg = event.currentTarget.ownerSVGElement;
     const rect = svg.getBoundingClientRect();
     showTooltip({
@@ -74,19 +67,29 @@ export default function ExploreTimeline({ events }) {
   };
 
   const handleClick = (datum) => {
-    const q = encodeURIComponent(`${datum.title} ${datum.masteredCityName || ''} tango`.trim());
-    window.open(`https://www.google.com/search?q=${q}`, '_blank', 'noopener,noreferrer');
+    if (!datum?._id) return;
+    router.push(`/event/${datum._id}`);
   };
 
   return (
     <div style={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
-      <svg width={WIDTH} height={HEIGHT} role="img" aria-label="Travel-worthy events timeline">
-        <rect width={WIDTH} height={HEIGHT} fill="#fafafa" rx={6} />
+      <svg width={width} height={height} role="img" aria-label="Travel-worthy events timeline">
+        <rect width={width} height={height} fill="#fafafa" rx={6} />
         <Group left={MARGIN.left} top={MARGIN.top}>
           {/* Horizontal gridlines per country */}
           {countries.map((country) => {
             const y = yScale(country) + yScale.bandwidth() / 2;
-            return <line key={country} x1={0} x2={xMax} y1={y} y2={y} stroke="#e5e7eb" strokeDasharray="2 4" />;
+            return (
+              <line
+                key={country}
+                x1={0}
+                x2={xMax}
+                y1={y}
+                y2={y}
+                stroke="#e5e7eb"
+                strokeDasharray="2 4"
+              />
+            );
           })}
 
           <AxisBottom
@@ -104,19 +107,28 @@ export default function ExploreTimeline({ events }) {
           />
 
           {events.map((e) => {
-            const x = xScale(new Date(e.startDate));
-            const y = yScale(e.masteredCountryName) + yScale.bandwidth() / 2;
+            const start = new Date(e.startDate);
+            const end = new Date(e.endDate);
+            const x1 = xScale(start);
+            const x2 = xScale(end);
+            const barW = Math.max(MIN_BAR_WIDTH, x2 - x1);
+            const rowY = yScale(e.masteredCountryName);
+            if (rowY === undefined) return null; // country not in current filter
+            const barH = yScale.bandwidth();
             return (
-              <Circle
+              <rect
                 key={e._id}
-                cx={x}
-                cy={y}
-                r={8}
+                x={x1}
+                y={rowY}
+                width={barW}
+                height={barH}
+                rx={3}
+                ry={3}
                 fill={colorFor(e.categoryFirst)}
                 stroke="#fff"
-                strokeWidth={1.5}
+                strokeWidth={1}
                 style={{ cursor: 'pointer' }}
-                onMouseMove={(evt) => handleEnter(evt, e)}
+                onMouseMove={(evt) => handleMove(evt, e)}
                 onMouseLeave={hideTooltip}
                 onClick={() => handleClick(e)}
               />
@@ -139,7 +151,7 @@ export default function ExploreTimeline({ events }) {
             {tooltipData.cost ? ` · ${tooltipData.cost}` : ''}
           </div>
           <div style={{ color: '#93c5fd', fontSize: '0.7rem', marginTop: 6 }}>
-            Click to search organizer ↗
+            Click to open on TangoTiempo ↗
           </div>
         </TooltipWithBounds>
       )}
@@ -148,7 +160,7 @@ export default function ExploreTimeline({ events }) {
       <div style={{ display: 'flex', gap: 16, justifyContent: 'center', padding: 8, fontSize: '0.75rem', color: '#6b7280', flexWrap: 'wrap' }}>
         {Object.entries(CATEGORY_COLORS).map(([name, color]) => (
           <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, display: 'inline-block' }} />
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: color, display: 'inline-block' }} />
             {name}
           </span>
         ))}
@@ -170,4 +182,7 @@ ExploreTimeline.propTypes = {
       cost: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     })
   ).isRequired,
+  countries: PropTypes.arrayOf(PropTypes.string).isRequired,
+  dateRange: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
+  onXScaleReady: PropTypes.func,
 };
