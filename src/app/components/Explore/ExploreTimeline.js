@@ -8,16 +8,33 @@ import { scaleTime, scaleBand } from '@visx/scale';
 import { AxisBottom, AxisLeft } from '@visx/axis';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
 import dayjs from 'dayjs';
-import { CATEGORY_COLORS, categoryLabel, colorFor } from './exploreConstants';
+import { CATEGORY_COLORS, colorFor } from './exploreConstants';
 
 // TIEMPO-404 Milestone B: date-range bars, horizontal scroll, click → /event/[id].
 
 const HEIGHT_BASE = 480;
 const MARGIN = { top: 16, right: 32, bottom: 44, left: 160 };
 const PX_PER_DAY = 4; // 4 → ~120px/month, readable without being giant
-const MIN_BAR_WIDTH = 6; // single-day events still clickable
+const MIN_BAR_WIDTH = 10; // TIEMPO-404 C: larger hitbox for single-day events
 const MIN_CHART_WIDTH = 960;
 const ROW_PADDING = 0.35;
+
+// TIEMPO-404 C: compact date range formatter. Collapses repeated month/year.
+// "Mar 20 – 23, 2026" when same month, "Mar 30 – Apr 2, 2026" when span crosses month.
+function formatDateRange(start, end) {
+  const s = dayjs(start);
+  const e = dayjs(end);
+  if (s.year() !== e.year()) {
+    return `${s.format('MMM D, YYYY')} – ${e.format('MMM D, YYYY')}`;
+  }
+  if (s.month() === e.month() && s.date() !== e.date()) {
+    return `${s.format('MMM D')}–${e.format('D, YYYY')}`;
+  }
+  if (s.month() === e.month() && s.date() === e.date()) {
+    return s.format('MMM D, YYYY');
+  }
+  return `${s.format('MMM D')} – ${e.format('MMM D, YYYY')}`;
+}
 
 const tooltipStyles = {
   ...defaultStyles,
@@ -139,28 +156,21 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
 
       {tooltipOpen && tooltipData && (
         <TooltipWithBounds left={tooltipLeft} top={tooltipTop} style={tooltipStyles}>
-          <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{tooltipData.title}</div>
-          <div>
-            {dayjs(tooltipData.startDate).format('MMM D')} – {dayjs(tooltipData.endDate).format('MMM D, YYYY')}
+          <div style={{ fontWeight: 'bold', marginBottom: 4, color: colorFor(tooltipData.categoryFirst) }}>
+            {tooltipData.title}
           </div>
-          <div>
+          <div>{formatDateRange(tooltipData.startDate, tooltipData.endDate)}</div>
+          <div style={{ color: '#cbd5e1' }}>
             {[tooltipData.masteredCityName, tooltipData.masteredCountryName].filter(Boolean).join(', ')}
-          </div>
-          <div style={{ color: '#9ca3af', fontSize: '0.72rem', marginTop: 4 }}>
-            {categoryLabel(tooltipData.categoryFirst)}
-            {tooltipData.cost ? ` · ${tooltipData.cost}` : ''}
-          </div>
-          <div style={{ color: '#93c5fd', fontSize: '0.7rem', marginTop: 6 }}>
-            Click to open on TangoTiempo ↗
           </div>
         </TooltipWithBounds>
       )}
 
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, justifyContent: 'center', padding: 8, fontSize: '0.75rem', color: '#6b7280', flexWrap: 'wrap' }}>
+      {/* Legend — compact, colored swatches only */}
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', padding: 6, fontSize: '0.7rem', color: '#6b7280', flexWrap: 'wrap' }}>
         {Object.entries(CATEGORY_COLORS).map(([name, color]) => (
-          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: color, display: 'inline-block' }} />
+          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: color, display: 'inline-block' }} />
             {name}
           </span>
         ))}
