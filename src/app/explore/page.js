@@ -1,18 +1,40 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Box, Container, Typography, CircularProgress, Alert, Paper } from '@mui/material';
+import Cookies from 'js-cookie';
+import { Box, Container, Typography, CircularProgress, Alert, Paper, Divider } from '@mui/material';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
+import CountryFilter from '@/components/Explore/CountryFilter';
+import DensityBar from '@/components/Explore/DensityBar';
+import { COUNTRY_COOKIE } from '@/components/Explore/exploreConstants';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
+import dayjs from 'dayjs';
 
-// TIEMPO-404 Milestone A: Explore timeline POC
-// Fetches travelWorthy events with country, renders a visx scatter plot.
-// Scroll / filter / density bar / mobile come in Milestones B + C.
+// TIEMPO-404 Milestone B: filtered timeline + density bar + country persistence.
+
+const readCookieCountries = () => {
+  if (typeof window === 'undefined') return null;
+  const raw = Cookies.get(COUNTRY_COOKIE);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCookieCountries = (countries) => {
+  Cookies.set(COUNTRY_COOKIE, JSON.stringify(countries), { expires: 365, sameSite: 'Lax' });
+};
+
 export default function ExplorePage() {
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedCountries, setSelectedCountries] = useState(null); // null = not yet seeded
+  const [xInfo, setXInfo] = useState(null); // { xScale, width, leftMargin, rightMargin }
 
   useEffect(() => {
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
@@ -26,6 +48,51 @@ export default function ExplorePage() {
       })
       .catch((err) => setError(err.message || 'Failed to load events'));
   }, []);
+
+  const availableCountries = useMemo(() => {
+    if (!events) return [];
+    return Array.from(new Set(events.map((e) => e.masteredCountryName))).sort();
+  }, [events]);
+
+  // Seed selection from cookie once events load; default to all available
+  useEffect(() => {
+    if (!events || selectedCountries !== null) return;
+    const stored = readCookieCountries();
+    const seeded = stored && stored.length
+      ? stored.filter((c) => availableCountries.includes(c))
+      : availableCountries;
+    setSelectedCountries(seeded.length ? seeded : availableCountries);
+  }, [events, availableCountries, selectedCountries]);
+
+  const handleCountryChange = useCallback((next) => {
+    setSelectedCountries(next);
+    writeCookieCountries(next);
+  }, []);
+
+  const filteredEvents = useMemo(() => {
+    if (!events || !selectedCountries) return [];
+    const set = new Set(selectedCountries);
+    return events.filter((e) => set.has(e.masteredCountryName));
+  }, [events, selectedCountries]);
+
+  const sortedActiveCountries = useMemo(
+    () => Array.from(new Set(filteredEvents.map((e) => e.masteredCountryName))).sort(),
+    [filteredEvents]
+  );
+
+  const dateRange = useMemo(() => {
+    if (!filteredEvents.length) {
+      return [dayjs().toDate(), dayjs().add(6, 'month').toDate()];
+    }
+    const allMs = filteredEvents.flatMap((e) => [
+      new Date(e.startDate).getTime(),
+      new Date(e.endDate).getTime(),
+    ]);
+    return [
+      dayjs(Math.min(...allMs)).subtract(14, 'day').toDate(),
+      dayjs(Math.max(...allMs)).add(14, 'day').toDate(),
+    ];
+  }, [filteredEvents]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -43,7 +110,7 @@ export default function ExplorePage() {
           Explore — travel-worthy tango events
         </Typography>
         <Typography variant="body2" color="textSecondary" paragraph>
-          Festivals, marathons, and multi-day workshops worldwide. Hover for details. Click a dot to search for the organizer.
+          Festivals, marathons, and multi-day workshops worldwide. Hover for details. Click a bar to open the event on TangoTiempo.
         </Typography>
 
         {events === null && !error && (
@@ -55,13 +122,47 @@ export default function ExplorePage() {
         {events && events.length === 0 && (
           <Alert severity="info">No travel-worthy events found with a resolved country yet.</Alert>
         )}
-        {events && events.length > 0 && (
-          <Paper elevation={1} sx={{ p: 2, mt: 2 }}>
-            <ExploreTimeline events={events} />
-            <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
-              Showing {events.length} travel-worthy events. Scrollable time and country filters coming in next milestone.
-            </Typography>
-          </Paper>
+
+        {events && events.length > 0 && selectedCountries !== null && (
+          <>
+            <CountryFilter
+              availableCountries={availableCountries}
+              selected={selectedCountries}
+              onChange={handleCountryChange}
+            />
+
+            {filteredEvents.length === 0 ? (
+              <Alert severity="info">No events match the selected countries. Try a different filter.</Alert>
+            ) : (
+              <Paper elevation={1} sx={{ p: 2, mt: 1 }}>
+                <ExploreTimeline
+                  events={filteredEvents}
+                  countries={sortedActiveCountries}
+                  dateRange={dateRange}
+                  onXScaleReady={setXInfo}
+                />
+                {xInfo && (
+                  <>
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ overflowX: 'auto' }}>
+                      <DensityBar
+                        events={filteredEvents}
+                        xScale={xInfo.xScale}
+                        leftMargin={xInfo.leftMargin}
+                        width={xInfo.width}
+                      />
+                    </Box>
+                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.5, textAlign: 'center' }}>
+                      Density: events per week across selected countries
+                    </Typography>
+                  </>
+                )}
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+                  Showing {filteredEvents.length} of {events.length} travel-worthy events
+                </Typography>
+              </Paper>
+            )}
+          </>
         )}
       </Container>
     </Box>
