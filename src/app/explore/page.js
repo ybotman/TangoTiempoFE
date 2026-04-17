@@ -105,12 +105,9 @@ export default function ExplorePage() {
         showDiscovered={false}
         onDiscoveredToggle={() => {}}
       />
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
+      <Container maxWidth="lg" sx={{ mt: 3, mb: 6 }}>
         <Typography variant="h4" gutterBottom>
-          Explore — travel-worthy tango events
-        </Typography>
-        <Typography variant="body2" color="textSecondary" paragraph>
-          Festivals, marathons, and multi-day workshops worldwide. Hover for details. Click a bar to open the event on TangoTiempo.
+          Explore
         </Typography>
 
         {events === null && !error && (
@@ -152,14 +149,8 @@ export default function ExplorePage() {
                         width={xInfo.width}
                       />
                     </Box>
-                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.5, textAlign: 'center' }}>
-                      Density: events per week across selected countries
-                    </Typography>
                   </>
                 )}
-                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
-                  Showing {filteredEvents.length} of {events.length} travel-worthy events
-                </Typography>
               </Paper>
             )}
           </>
