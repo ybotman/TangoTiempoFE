@@ -8,8 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
 import ExploreCardList from '@/components/Explore/ExploreCardList';
-import CountryFilter from '@/components/Explore/CountryFilter';
-import CategoryFilter from '@/components/Explore/CategoryFilter';
+import ExploreFilters from '@/components/Explore/ExploreFilters';
 import DensityBar from '@/components/Explore/DensityBar';
 import { COUNTRY_COOKIE, categoryLabel } from '@/components/Explore/exploreConstants';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
@@ -151,12 +150,12 @@ export default function ExplorePage() {
 
         {events && events.length > 0 && selectedCountries !== null && (
           <>
-            <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
-            <CountryFilter
+            <ExploreFilters
+              category={selectedCategory}
+              onCategoryChange={setSelectedCategory}
               availableCountries={availableCountries}
-              selected={selectedCountries}
-              onChange={handleCountryChange}
-              compact={isMobile}
+              selectedCountries={selectedCountries}
+              onCountriesChange={handleCountryChange}
             />
 
             {isMobile ? (
