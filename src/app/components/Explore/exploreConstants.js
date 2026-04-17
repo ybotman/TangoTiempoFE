@@ -41,3 +41,14 @@ export const regionFor = (country) => {
 };
 
 export const COUNTRY_COOKIE = 'tt_explore_countries';
+
+// TIEMPO-404 D.1: continent/region colors for mobile card stripes.
+// Category stays in chip; continent becomes primary visual region signal.
+export const CONTINENT_COLORS = {
+  Americas: '#3b82f6',
+  Europe: '#a855f7',
+  'Asia-Pacific': '#14b8a6',
+  Other: '#6b7280',
+};
+
+export const continentColorFor = (country) => CONTINENT_COLORS[regionFor(country)] || CONTINENT_COLORS.Other;

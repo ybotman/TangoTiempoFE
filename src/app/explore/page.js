@@ -48,14 +48,17 @@ export default function ExplorePage() {
       })
       .then((res) => {
         const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
-        setEvents(list.filter((e) => e.masteredCountryName));
+        // TIEMPO-404 D.1: keep ALL travelWorthy events for mobile card list.
+        // Desktop scatter will still filter to country-resolved at render time.
+        setEvents(list);
       })
       .catch((err) => setError(err.message || 'Failed to load events'));
   }, []);
 
   const availableCountries = useMemo(() => {
     if (!events) return [];
-    return Array.from(new Set(events.map((e) => e.masteredCountryName))).sort();
+    // Exclude null/undefined — only countries-resolved events contribute to the desktop filter.
+    return Array.from(new Set(events.map((e) => e.masteredCountryName).filter(Boolean))).sort();
   }, [events]);
 
   // Seed selection from cookie once events load; default to all available
@@ -126,17 +129,20 @@ export default function ExplorePage() {
 
         {events && events.length > 0 && selectedCountries !== null && (
           <>
-            <CountryFilter
-              availableCountries={availableCountries}
-              selected={selectedCountries}
-              onChange={handleCountryChange}
-              compact={isMobile}
-            />
+            {/* Country filter is a desktop affordance (country-as-Y-axis). Hidden on mobile. */}
+            {!isMobile && (
+              <CountryFilter
+                availableCountries={availableCountries}
+                selected={selectedCountries}
+                onChange={handleCountryChange}
+              />
+            )}
 
-            {filteredEvents.length === 0 ? (
+            {isMobile ? (
+              // Mobile: show ALL travelWorthy events, ignore country filter, infinite scroll
+              <ExploreCardList events={events} />
+            ) : filteredEvents.length === 0 ? (
               <Alert severity="info">No events match the selected countries. Try a different filter.</Alert>
-            ) : isMobile ? (
-              <ExploreCardList events={filteredEvents} />
             ) : (
               <Paper elevation={1} sx={{ p: 2, mt: 1 }}>
                 <ExploreTimeline
