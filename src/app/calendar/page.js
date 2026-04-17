@@ -1363,11 +1363,15 @@ const CalendarPage = () => {
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
-          // Sort isDiscovered events after regular events (within same time)
+          // Sort isDiscovered events after regular events, then by start time, then title
           eventOrder={(a, b) => {
             const aDiscovered = a.extendedProps?.isDiscovered ? 1 : 0;
             const bDiscovered = b.extendedProps?.isDiscovered ? 1 : 0;
-            return aDiscovered - bDiscovered;
+            if (aDiscovered !== bDiscovered) return aDiscovered - bDiscovered;
+            const aStart = a.start ? new Date(a.start).getTime() : 0;
+            const bStart = b.start ? new Date(b.start).getTime() : 0;
+            if (aStart !== bStart) return aStart - bStart;
+            return (a.title || '').localeCompare(b.title || '');
           }}
           // TIEMPO-288: Custom date cell content with month abbreviations
           dayCellContent={(arg) => {
