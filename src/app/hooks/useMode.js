@@ -24,6 +24,7 @@ export function useMode() {
 
   const mode = useMemo(() => {
     if (pathname?.startsWith('/explore')) return 'explore';
+    if (pathname?.startsWith('/beginner')) return 'beginner';
     return urlMode || userMode || cookieMode || DEFAULT_MODE;
   }, [pathname, urlMode, userMode, cookieMode]);
 
@@ -42,14 +43,15 @@ export function useMode() {
       return;
     }
 
+    if (target === 'beginner') {
+      // TIEMPO-406: Beginner has its own route now.
+      router.push('/beginner');
+      return;
+    }
+
     const onBoston = pathname?.startsWith('/calendar/boston');
     const baseRoute = onBoston ? '/calendar/boston' : '/calendar';
-
-    if (target === 'local') {
-      router.push(baseRoute);
-    } else {
-      router.push(`${baseRoute}?mode=beginner`);
-    }
+    router.push(baseRoute);
   }, [pathname, router]);
 
   return { mode, setMode };
