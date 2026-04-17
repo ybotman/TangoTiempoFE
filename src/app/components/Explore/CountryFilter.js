@@ -9,7 +9,7 @@ import { REGIONS, regionFor } from './exploreConstants';
 // Selection state lives in parent (ExplorePage) so filtered events
 // can flow to both the timeline and the density bar.
 
-export default function CountryFilter({ availableCountries, selected, onChange }) {
+export default function CountryFilter({ availableCountries, selected, onChange, compact = false }) {
   const selectedSet = React.useMemo(() => new Set(selected), [selected]);
 
   const handleToggle = (country) => {
@@ -40,7 +40,7 @@ export default function CountryFilter({ availableCountries, selected, onChange }
 
   return (
     <Box sx={{ mb: 2 }}>
-      <ButtonGroup size="small" variant="outlined" sx={{ mb: 1 }}>
+      <ButtonGroup size="small" variant="outlined" sx={{ mb: 1, flexWrap: 'wrap' }}>
         {['Americas', 'Europe', 'Asia-Pacific', 'All'].map((preset) => (
           <Button key={preset} onClick={() => applyPreset(preset)}>
             {preset}
@@ -48,34 +48,41 @@ export default function CountryFilter({ availableCountries, selected, onChange }
         ))}
       </ButtonGroup>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-        {Object.entries(grouped).map(([region, list]) => {
-          if (list.length === 0) return null;
-          return (
-            <Box key={region} sx={{ minWidth: 180 }}>
-              <Typography variant="caption" color="textSecondary" sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}>
-                {region}
-              </Typography>
-              <FormGroup>
-                {list.map((country) => (
-                  <FormControlLabel
-                    key={country}
-                    control={
-                      <Checkbox
-                        size="small"
-                        checked={selectedSet.has(country)}
-                        onChange={() => handleToggle(country)}
-                      />
-                    }
-                    label={<Typography variant="body2">{country}</Typography>}
-                    sx={{ my: -0.5 }}
-                  />
-                ))}
-              </FormGroup>
-            </Box>
-          );
-        })}
-      </Box>
+      {/* TIEMPO-404 Milestone D: compact mode for mobile — skip per-country checkboxes */}
+      {compact ? (
+        <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+          {selected.length} of {availableCountries.length} countries selected
+        </Typography>
+      ) : (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+          {Object.entries(grouped).map(([region, list]) => {
+            if (list.length === 0) return null;
+            return (
+              <Box key={region} sx={{ minWidth: 180 }}>
+                <Typography variant="caption" color="textSecondary" sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}>
+                  {region}
+                </Typography>
+                <FormGroup>
+                  {list.map((country) => (
+                    <FormControlLabel
+                      key={country}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={selectedSet.has(country)}
+                          onChange={() => handleToggle(country)}
+                        />
+                      }
+                      label={<Typography variant="body2">{country}</Typography>}
+                      sx={{ my: -0.5 }}
+                    />
+                  ))}
+                </FormGroup>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
     </Box>
   );
 }
@@ -84,4 +91,5 @@ CountryFilter.propTypes = {
   availableCountries: PropTypes.arrayOf(PropTypes.string).isRequired,
   selected: PropTypes.arrayOf(PropTypes.string).isRequired,
   onChange: PropTypes.func.isRequired,
+  compact: PropTypes.bool,
 };

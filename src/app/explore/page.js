@@ -3,16 +3,18 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Box, Container, Typography, CircularProgress, Alert, Paper, Divider } from '@mui/material';
+import { Box, Container, Typography, CircularProgress, Alert, Paper, Divider, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
+import ExploreCardList from '@/components/Explore/ExploreCardList';
 import CountryFilter from '@/components/Explore/CountryFilter';
 import DensityBar from '@/components/Explore/DensityBar';
 import { COUNTRY_COOKIE } from '@/components/Explore/exploreConstants';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import dayjs from 'dayjs';
 
-// TIEMPO-404 Milestone B: filtered timeline + density bar + country persistence.
+// TIEMPO-404 Milestone D: responsive — scatter on desktop, card list on mobile portrait.
 
 const readCookieCountries = () => {
   if (typeof window === 'undefined') return null;
@@ -31,6 +33,8 @@ const writeCookieCountries = (countries) => {
 };
 
 export default function ExplorePage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // <900px → card list
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
   const [selectedCountries, setSelectedCountries] = useState(null); // null = not yet seeded
@@ -126,10 +130,13 @@ export default function ExplorePage() {
               availableCountries={availableCountries}
               selected={selectedCountries}
               onChange={handleCountryChange}
+              compact={isMobile}
             />
 
             {filteredEvents.length === 0 ? (
               <Alert severity="info">No events match the selected countries. Try a different filter.</Alert>
+            ) : isMobile ? (
+              <ExploreCardList events={filteredEvents} />
             ) : (
               <Paper elevation={1} sx={{ p: 2, mt: 1 }}>
                 <ExploreTimeline
