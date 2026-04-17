@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, ToggleButton, ToggleButtonGroup, Alert } from '@mui/material';
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useMode } from '@/hooks/useMode';
 
 const OPTIONS = [
@@ -33,11 +33,6 @@ export default function ModeToggle() {
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      {mode === 'beginner' && (
-        <Alert severity="info" sx={{ mt: 1, py: 0, fontSize: '0.8rem' }}>
-          Beginner mode coming soon — showing Local calendar for now.
-        </Alert>
-      )}
     </Box>
   );
 }
