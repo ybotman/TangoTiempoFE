@@ -68,7 +68,6 @@ export default function ExploreCardList({ events }) {
           const stripeColor = continentColorFor(e.masteredCountryName);
           const categoryColor = colorFor(e.categoryFirst);
           const cat = categoryLabel(e.categoryFirst);
-          const location = [e.masteredCityName, e.masteredCountryName].filter(Boolean).join(', ');
           return (
             <Paper
               key={e._id}
@@ -88,7 +87,7 @@ export default function ExploreCardList({ events }) {
                 </Typography>
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1.3 }}>
                   {formatDateRange(e.startDate, e.endDate)}
-                  {location && ` · ${location}`}
+                  {e.masteredCityName && ` · ${e.masteredCityName}`}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
                   <Chip
@@ -96,6 +95,14 @@ export default function ExploreCardList({ events }) {
                     size="small"
                     sx={{ bgcolor: categoryColor, color: '#fff', fontSize: '0.65rem', height: 18 }}
                   />
+                  {e.masteredCountryName && (
+                    <Chip
+                      label={e.masteredCountryName}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontSize: '0.65rem', height: 18, borderColor: stripeColor, color: stripeColor }}
+                    />
+                  )}
                   {e.cost && (
                     <Chip
                       label={e.cost}
