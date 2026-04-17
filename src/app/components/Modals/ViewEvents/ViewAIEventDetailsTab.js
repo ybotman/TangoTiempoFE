@@ -107,6 +107,29 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
         </Box>
       )}
 
+      {/* Title */}
+      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+        {eventDetails.title || 'Untitled Event'}
+      </Typography>
+
+      {/* Description */}
+      {ext.eventDescription && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#666', mb: 1 }}>
+            Description
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              whiteSpace: 'pre-wrap',
+              lineHeight: 1.6,
+            }}
+          >
+            {ext.eventDescription}
+          </Typography>
+        </Box>
+      )}
+
       {/* Category */}
       {ext.categoryFirst && (
         <Box sx={{ mb: 2 }}>
@@ -196,11 +219,6 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
         </Typography>
       </Box>
 
-      {/* Title */}
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-        {eventDetails.title || 'Untitled Event'}
-      </Typography>
-
       <Divider sx={{ mb: 3 }} />
 
       {/* Event Image - with error handling for broken images */}
@@ -218,24 +236,6 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
             }}
             onError={() => setImageError(true)}
           />
-        </Box>
-      )}
-
-      {/* Description */}
-      {ext.eventDescription && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#666', mb: 1 }}>
-            Description
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              whiteSpace: 'pre-wrap',
-              lineHeight: 1.6,
-            }}
-          >
-            {ext.eventDescription}
-          </Typography>
         </Box>
       )}
 
@@ -294,8 +294,35 @@ const ViewAIEventDetailsTab = ({ eventDetails }) => {
 
       <Divider sx={{ mb: 2 }} />
 
-      {/* Links Section: Source + Host Links */}
+      {/* Links Section: Event + Source + Host Links */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {/* Event Link (TangoTiempo event page) */}
+        {(ext._id || eventDetails.id) && (
+          <Box>
+            <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+              Permalink to this event on TangoTiempo:
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LinkIcon sx={{ color: '#1976d2', fontSize: 18 }} />
+              <Link
+                href={`/event/${ext._id || eventDetails.id}`}
+                rel="noopener noreferrer"
+                sx={{
+                  color: '#1976d2',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  fontWeight: 'medium',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                🔗 https://tangotiempo.com/event/{ext._id || eventDetails.id}
+              </Link>
+            </Box>
+          </Box>
+        )}
+
         {/* Source Link */}
         {ext.sourceLink && (
           <Box>
