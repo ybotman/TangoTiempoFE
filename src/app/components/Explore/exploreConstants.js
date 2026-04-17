@@ -2,13 +2,13 @@
 // Region-country mapping for Explore filter presets.
 // Countries not in any region fall through to "Other".
 
+// TIEMPO-404 D.4: Trip + Class removed per Toby. Class is already excluded
+// by the backend travelWorthy rule; Trip events now render as Other grey.
 export const CATEGORY_COLORS = {
   Festival: '#e94560',
   Marathon: '#f97316',
   Encuentro: '#22c55e',
   Workshop: '#ec4899',
-  Trip: '#3b82f6',
-  Class: '#8b5cf6',
   Other: '#6b7280',
 };
 
