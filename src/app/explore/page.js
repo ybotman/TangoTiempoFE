@@ -9,8 +9,9 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
 import ExploreCardList from '@/components/Explore/ExploreCardList';
 import CountryFilter from '@/components/Explore/CountryFilter';
+import CategoryFilter from '@/components/Explore/CategoryFilter';
 import DensityBar from '@/components/Explore/DensityBar';
-import { COUNTRY_COOKIE } from '@/components/Explore/exploreConstants';
+import { COUNTRY_COOKIE, categoryLabel } from '@/components/Explore/exploreConstants';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import dayjs from 'dayjs';
 
@@ -38,6 +39,7 @@ export default function ExplorePage() {
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
   const [selectedCountries, setSelectedCountries] = useState(null); // null = not yet seeded
+  const [selectedCategory, setSelectedCategory] = useState(null); // null = All
   const [xInfo, setXInfo] = useState(null); // { xScale, width, leftMargin, rightMargin }
 
   useEffect(() => {
@@ -76,11 +78,31 @@ export default function ExplorePage() {
     writeCookieCountries(next);
   }, []);
 
+  // Desktop filter: matches country selection + category
   const filteredEvents = useMemo(() => {
     if (!events || !selectedCountries) return [];
-    const set = new Set(selectedCountries);
-    return events.filter((e) => set.has(e.masteredCountryName));
-  }, [events, selectedCountries]);
+    const countrySet = new Set(selectedCountries);
+    return events.filter((e) => {
+      if (!countrySet.has(e.masteredCountryName)) return false;
+      if (selectedCategory && categoryLabel(e.categoryFirst) !== selectedCategory) return false;
+      return true;
+    });
+  }, [events, selectedCountries, selectedCategory]);
+
+  // Mobile filter: category only (country filter optional on mobile — presets still work)
+  const mobileFilteredEvents = useMemo(() => {
+    if (!events) return [];
+    let out = events;
+    if (selectedCountries && selectedCountries.length && selectedCountries.length < availableCountries.length) {
+      const countrySet = new Set(selectedCountries);
+      // Keep country-null events visible when any country filter is active only if user hasn't narrowed hard
+      out = out.filter((e) => !e.masteredCountryName || countrySet.has(e.masteredCountryName));
+    }
+    if (selectedCategory) {
+      out = out.filter((e) => categoryLabel(e.categoryFirst) === selectedCategory);
+    }
+    return out;
+  }, [events, selectedCountries, selectedCategory, availableCountries.length]);
 
   const sortedActiveCountries = useMemo(
     () => Array.from(new Set(filteredEvents.map((e) => e.masteredCountryName))).sort(),
@@ -129,18 +151,16 @@ export default function ExplorePage() {
 
         {events && events.length > 0 && selectedCountries !== null && (
           <>
-            {/* Country filter is a desktop affordance (country-as-Y-axis). Hidden on mobile. */}
-            {!isMobile && (
-              <CountryFilter
-                availableCountries={availableCountries}
-                selected={selectedCountries}
-                onChange={handleCountryChange}
-              />
-            )}
+            <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+            <CountryFilter
+              availableCountries={availableCountries}
+              selected={selectedCountries}
+              onChange={handleCountryChange}
+              compact={isMobile}
+            />
 
             {isMobile ? (
-              // Mobile: show ALL travelWorthy events, ignore country filter, infinite scroll
-              <ExploreCardList events={events} />
+              <ExploreCardList events={mobileFilteredEvents} />
             ) : filteredEvents.length === 0 ? (
               <Alert severity="info">No events match the selected countries. Try a different filter.</Alert>
             ) : (
