@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { usePathname } from 'next/navigation';
 import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment, Badge, keyframes } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -13,6 +14,8 @@ import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 import MessagesModal from '@/components/Modals/Messages/MessagesModal';
 import ModeToggle from '@/components/UI/ModeToggle'; // TIEMPO-402
+import BrandMark from '@/components/UI/BrandMark'; // TIEMPO-408
+import CityPill from '@/components/UI/CityPill'; // TIEMPO-408
 
 // Pulse animation for new messages
 const pulse = keyframes`
@@ -24,6 +27,9 @@ const pulse = keyframes`
 const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle, readOnly = false }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
   const { unreadMessages, unreadCount, hasUnread, acknowledgeMessage } = useMessages();
+  const pathname = usePathname();
+  // TIEMPO-408: /calendar/boston is a legacy iframe embed — keep its chrome as-is.
+  const isBoston = pathname?.startsWith('/calendar/boston');
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
@@ -70,8 +76,8 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           justifyContent: 'space-between',
         }}
       >
-      {/* Left Icons */}
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      {/* Left: menu + (non-Boston: BrandMark + CityPill) */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
         <IconButton
           edge="start"
           color="inherit"
@@ -80,6 +86,8 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         >
           <MenuIcon />
         </IconButton>
+        {!isBoston && <BrandMark size={36} />}
+        {!isBoston && <CityPill />}
       </Box>
 
       {/* Center: Search field when open */}
