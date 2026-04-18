@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/navigation';
-import { Box, Paper, Typography, Chip, Stack } from '@mui/material';
+import { Box, Paper, Typography, Chip, Stack, Tooltip } from '@mui/material';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import dayjs from 'dayjs';
 import { colorFor, categoryLabel, continentColorFor } from './exploreConstants';
 
@@ -83,27 +84,36 @@ export default function ExploreCardList({ events }) {
             >
               <Box sx={{ width: 5, flexShrink: 0, background: stripeColor }} />
               <Box sx={{ p: 1, flex: 1, minWidth: 0 }}>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', lineHeight: 1.25 }} noWrap>
-                  {e.title}
-                </Typography>
+                {/* Title row: title (wraps) + AI-Found icon on the right */}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold', lineHeight: 1.25, flex: 1, minWidth: 0 }} noWrap>
+                    {e.title}
+                  </Typography>
+                  {isAI && (
+                    <Tooltip title="AI-Found — discovered by AI; source may need verification" arrow>
+                      <SmartToyIcon
+                        sx={{
+                          fontSize: 18,
+                          color: '#d97706',
+                          flexShrink: 0,
+                          mt: '1px',
+                        }}
+                        aria-label="AI-Found"
+                      />
+                    </Tooltip>
+                  )}
+                </Box>
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1.3 }}>
                   {formatDateRange(e.startDate, e.endDate)}
                   {e.masteredCityName && ` · ${e.masteredCityName}`}
                 </Typography>
+                {/* Pills row: Category on LEFT, Country on RIGHT (Toby rule). Cost tucked to left. */}
                 <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
                   <Chip
                     label={cat}
                     size="small"
                     sx={{ bgcolor: categoryColor, color: '#fff', fontSize: '0.65rem', height: 18 }}
                   />
-                  {e.masteredCountryName && (
-                    <Chip
-                      label={e.masteredCountryName}
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontSize: '0.65rem', height: 18, borderColor: stripeColor, color: stripeColor }}
-                    />
-                  )}
                   {e.cost && (
                     <Chip
                       label={e.cost}
@@ -112,20 +122,13 @@ export default function ExploreCardList({ events }) {
                       sx={{ fontSize: '0.65rem', height: 18 }}
                     />
                   )}
-                  {isAI && (
+                  <Box sx={{ flex: 1 }} />
+                  {e.masteredCountryName && (
                     <Chip
-                      label="🤖 AI-Found"
+                      label={e.masteredCountryName}
                       size="small"
-                      title="Discovered by AI — source may need verification"
-                      sx={{
-                        fontSize: '0.65rem',
-                        height: 20,
-                        bgcolor: '#f59e0b',
-                        color: '#1f2937',
-                        fontWeight: 700,
-                        letterSpacing: 0.2,
-                        border: '1px solid #d97706',
-                      }}
+                      variant="outlined"
+                      sx={{ fontSize: '0.65rem', height: 18, borderColor: stripeColor, color: stripeColor }}
                     />
                   )}
                 </Box>
