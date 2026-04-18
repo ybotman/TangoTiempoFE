@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Box, Paper, Typography, Chip, Stack, Divider, Tooltip } from '@mui/material';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import dayjs from 'dayjs';
-import { RRule } from 'rrule';
+import { firstInstanceInWindow } from '@/utils/nextInstance';
 
 // TIEMPO-408 T2: Beginner tab grouped by organizer (see docs/BEGINNER-TAB-DESIGN.md §4).
 // Organizer = section header; events listed chronologically below.
@@ -42,31 +42,7 @@ function formatEventLine(displayDate, e) {
   return { date, time, title: e.title };
 }
 
-// TIEMPO-408 hotfix: recurring master events have a historical startDate
-// but recur into the future. Compute the next instance in [from, to] so
-// they aren't dropped by the window filter and so the card shows the right
-// next-meeting date.
-function firstInstanceInWindow(e, fromMs, toMs) {
-  const baseStart = new Date(e.startDate);
-  if (!e.isRepeating || !e.recurrenceRule) {
-    const t = baseStart.getTime();
-    return t >= fromMs && t <= toMs ? baseStart : null;
-  }
-  try {
-    // Backend stores the RRULE string; it may or may not include DTSTART.
-    // Ensure a DTSTART anchor so between() behaves deterministically.
-    const rruleStr = e.recurrenceRule.includes('DTSTART')
-      ? e.recurrenceRule
-      : `DTSTART:${dayjs(baseStart).utc().format('YYYYMMDDTHHmmss')}Z\nRRULE:${e.recurrenceRule.replace(/^RRULE:/, '')}`;
-    const rule = RRule.fromString(rruleStr);
-    const windows = rule.between(new Date(fromMs), new Date(toMs), true);
-    return windows.length ? windows[0] : null;
-  } catch (err) {
-    // RRULE unparseable — drop (don't show a stale past date). This avoids
-    // "ghost" rows for events whose recurrence metadata is malformed.
-    return null;
-  }
-}
+// Uses the shared nextInstance helper (src/app/utils/nextInstance.js).
 
 export default function BeginnerOrganizerList({ events }) {
   const router = useRouter();

@@ -14,6 +14,7 @@ import ExploreMonthScrubber from '@/components/Explore/ExploreMonthScrubber';
 import ExploreMap from '@/components/Explore/ExploreMap';
 import DensityBar from '@/components/Explore/DensityBar';
 import { categoryLabel } from '@/components/Explore/exploreConstants';
+import { expandToNextInstance } from '@/utils/nextInstance';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import dayjs from 'dayjs';
 
@@ -108,22 +109,29 @@ export default function ExplorePage() {
 
   const filteredEvents = useMemo(() => {
     if (!events) return [];
-    return events.filter((e) => {
-      const start = dayjs(e.startDate);
-      const end = dayjs(e.endDate);
-      if (end.isBefore(windowStart)) return false;
-      if (start.isAfter(windowEnd)) return false;
+    const fromMs = windowStart.valueOf();
+    const toMs = windowEnd.valueOf();
+    const out = [];
+    for (const e of events) {
+      // TIEMPO-408 refinement #2: expand recurring masters to their next
+      // in-window instance. Non-recurring pass through if in window. Expired
+      // / malformed recurrence → dropped.
+      const display = expandToNextInstance(e, fromMs, toMs);
+      if (!display) continue;
 
-      if (selectedCountry && e.masteredCountryName !== selectedCountry) return false;
-      if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(e.categoryFirst))) return false;
+      if (selectedCountry && display.masteredCountryName !== selectedCountry) continue;
+      if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(display.categoryFirst))) continue;
 
       if (selectedMonthKey) {
         const mStart = dayjs(`${selectedMonthKey}-01`).startOf('month');
         const mEnd = mStart.endOf('month');
-        if (end.isBefore(mStart) || start.isAfter(mEnd)) return false;
+        const s = dayjs(display.startDate);
+        const en = dayjs(display.endDate);
+        if (en.isBefore(mStart) || s.isAfter(mEnd)) continue;
       }
-      return true;
-    });
+      out.push(display);
+    }
+    return out;
   }, [events, selectedCountry, selectedCategories, selectedMonthKey, windowStart, windowEnd]);
 
   // Visx timeline needs country rows — derive from filtered set
