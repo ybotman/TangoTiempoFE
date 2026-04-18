@@ -6,14 +6,14 @@ import { useTheme } from '@mui/material/styles';
 import { useMode } from '@/hooks/useMode';
 
 // TIEMPO-408: custom pill segmented control with sliding indicator.
-// Mobile (<sm): hyper-compressed labels BEG / LOC / EXP so all three buttons
-// fit on the row without crowding the brand + city pill.
-// Desktop (>=sm): full labels.
+// Each mode has its own color; selected state uses the color prominently.
+// Mobile: bigger abbreviation + tiny full-word caption below.
+// Desktop: full label only.
 
 const OPTIONS = [
-  { value: 'beginner', label: 'Beginner', short: 'BEG' },
-  { value: 'local',    label: 'Local',    short: 'LOC' },
-  { value: 'explore',  label: 'Explore',  short: 'EXP' },
+  { value: 'beginner', label: 'Beginner', short: 'BEG', color: '#22c55e' }, // green — welcoming
+  { value: 'local',    label: 'Local',    short: 'LOC', color: '#3b82f6' }, // blue — home/familiar
+  { value: 'explore',  label: 'Explore',  short: 'EXP', color: '#f59e0b' }, // amber — travel/adventure
 ];
 
 export default function ModeToggle() {
@@ -22,6 +22,7 @@ export default function ModeToggle() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const activeIdx = Math.max(0, OPTIONS.findIndex((o) => o.value === mode));
   const count = OPTIONS.length;
+  const activeColor = OPTIONS[activeIdx]?.color || '#3b82f6';
 
   return (
     <Box
@@ -33,10 +34,11 @@ export default function ModeToggle() {
         p: '3px',
         borderRadius: 999,
         background: 'rgba(0, 0, 0, 0.06)',
-        height: 34,
-        minWidth: isMobile ? 168 : 260,
+        height: isMobile ? 44 : 34,
+        minWidth: isMobile ? 180 : 260,
       }}
     >
+      {/* Sliding white pill (with colored shadow) */}
       <Box
         aria-hidden
         sx={{
@@ -46,14 +48,14 @@ export default function ModeToggle() {
           left: 3,
           width: `calc((100% - 6px) / ${count})`,
           transform: `translateX(${activeIdx * 100}%)`,
-          transition: 'transform 220ms cubic-bezier(.2,.8,.2,1)',
+          transition: 'transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease',
           background: '#ffffff',
           borderRadius: 999,
-          boxShadow: '0 1px 2px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06)',
+          boxShadow: `0 1px 2px rgba(0,0,0,.08), 0 0 0 2px ${activeColor}`,
           zIndex: 0,
         }}
       />
-      {OPTIONS.map(({ value, label, short }, i) => {
+      {OPTIONS.map(({ value, label, short, color }, i) => {
         const selected = i === activeIdx;
         return (
           <Box
@@ -73,19 +75,17 @@ export default function ModeToggle() {
               position: 'relative',
               zIndex: 1,
               flex: 1,
-              minWidth: isMobile ? 52 : 80,
-              height: 28,
+              minWidth: isMobile ? 58 : 80,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: isMobile ? '0.72rem' : '0.82rem',
-              fontWeight: selected ? 700 : 500,
-              letterSpacing: isMobile ? 0.6 : 0.1,
-              color: selected ? '#111' : 'rgba(0,0,0,0.62)',
+              gap: isMobile ? 0 : 0,
               cursor: selected ? 'default' : 'pointer',
               userSelect: 'none',
-              transition: 'color 180ms ease',
-              '&:hover': { color: selected ? '#111' : 'rgba(0,0,0,0.82)' },
+              color: selected ? color : `${color}99`, // 60% alpha when unselected
+              transition: 'color 180ms ease, font-weight 180ms ease',
+              '&:hover': { color: selected ? color : color },
               outline: 'none',
               '&:focus-visible': {
                 boxShadow: '0 0 0 2px rgba(25,118,210,.5)',
@@ -93,7 +93,36 @@ export default function ModeToggle() {
               },
             }}
           >
-            {isMobile ? short : label}
+            {isMobile ? (
+              <>
+                <Box sx={{
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  letterSpacing: 0.8,
+                  lineHeight: 1,
+                }}>
+                  {short}
+                </Box>
+                <Box sx={{
+                  fontSize: '0.55rem',
+                  fontWeight: selected ? 600 : 400,
+                  letterSpacing: 0.3,
+                  opacity: 0.9,
+                  mt: '2px',
+                  lineHeight: 1,
+                }}>
+                  {label}
+                </Box>
+              </>
+            ) : (
+              <Box sx={{
+                fontSize: '0.82rem',
+                fontWeight: selected ? 700 : 500,
+                letterSpacing: 0.2,
+              }}>
+                {label}
+              </Box>
+            )}
           </Box>
         );
       })}

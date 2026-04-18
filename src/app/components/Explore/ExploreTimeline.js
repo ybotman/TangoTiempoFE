@@ -127,6 +127,12 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                   <clipPath id="tt-timeline-clip">
                     <rect x={0} y={0} width={xMax} height={yMax} />
                   </clipPath>
+                  {/* TIEMPO-408: AI-Found bar overlay — diagonal stripe pattern
+                      makes AI-sourced events visually distinguishable at a glance. */}
+                  <pattern id="tt-ai-stripes" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <rect width="6" height="6" fill="rgba(0,0,0,0)" />
+                    <rect width="2" height="6" fill="rgba(0,0,0,0.35)" />
+                  </pattern>
                 </defs>
                 <rect width={width} height={height} fill="#fafafa" rx={6} />
 
@@ -195,27 +201,47 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                     const barW = Math.max(MIN_BAR_WIDTH, x2 - x1);
                     const rowY = yScale(e.masteredCountryName);
                     if (rowY === undefined) return null;
-                    // Skip if completely off-screen horizontally (perf)
                     if (x1 + barW < -10 || x1 > xMax + 10) return null;
                     const barH = yScale.bandwidth();
+                    const isAI = Boolean(e.isAiGenerated || e.isDiscovered);
+                    const categoryColor = colorFor(e.categoryFirst);
+                    const commonProps = {
+                      x: x1,
+                      y: rowY,
+                      width: barW,
+                      height: barH,
+                      rx: 3,
+                      ry: 3,
+                      style: { cursor: 'pointer' },
+                      onMouseMove: (evt) => handleBarMove(evt, e),
+                      onMouseLeave: hideTooltip,
+                      onClick: (evt) => { evt.stopPropagation(); handleClick(e); },
+                      onMouseDown: (evt) => evt.stopPropagation(),
+                    };
                     return (
-                      <rect
-                        key={e._id}
-                        x={x1}
-                        y={rowY}
-                        width={barW}
-                        height={barH}
-                        rx={3}
-                        ry={3}
-                        fill={colorFor(e.categoryFirst)}
-                        stroke="#fff"
-                        strokeWidth={1}
-                        style={{ cursor: 'pointer' }}
-                        onMouseMove={(evt) => handleBarMove(evt, e)}
-                        onMouseLeave={hideTooltip}
-                        onClick={(evt) => { evt.stopPropagation(); handleClick(e); }}
-                        onMouseDown={(evt) => evt.stopPropagation()}
-                      />
+                      <g key={e._id}>
+                        {/* Category color base */}
+                        <rect
+                          {...commonProps}
+                          fill={categoryColor}
+                          stroke={isAI ? '#d97706' : '#fff'}
+                          strokeWidth={isAI ? 1.5 : 1}
+                          strokeDasharray={isAI ? '3 2' : undefined}
+                        />
+                        {/* AI-Found overlay: diagonal stripes make AI bars visually distinct */}
+                        {isAI && (
+                          <rect
+                            x={x1}
+                            y={rowY}
+                            width={barW}
+                            height={barH}
+                            rx={3}
+                            ry={3}
+                            fill="url(#tt-ai-stripes)"
+                            style={{ pointerEvents: 'none' }}
+                          />
+                        )}
+                      </g>
                     );
                   })}
                 </Group>
@@ -244,6 +270,11 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
           <div style={{ color: '#cbd5e1' }}>
             {[tooltipData.masteredCityName, tooltipData.masteredCountryName].filter(Boolean).join(', ')}
           </div>
+          {(tooltipData.isAiGenerated || tooltipData.isDiscovered) && (
+            <div style={{ marginTop: 4, color: '#fbbf24', fontWeight: 600 }}>
+              🤖 AI-Found
+            </div>
+          )}
         </TooltipWithBounds>
       )}
 
@@ -255,6 +286,13 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
             {name}
           </Box>
         ))}
+        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4 }}>
+          <svg width={10} height={10} style={{ display: 'inline-block' }}>
+            <rect width={10} height={10} fill="#9ca3af" />
+            <rect width={10} height={10} fill="url(#tt-ai-stripes)" />
+          </svg>
+          AI-Found
+        </Box>
       </Box>
     </Box>
   );

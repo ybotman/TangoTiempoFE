@@ -68,6 +68,7 @@ export default function ExploreCardList({ events }) {
           const stripeColor = continentColorFor(e.masteredCountryName);
           const categoryColor = colorFor(e.categoryFirst);
           const cat = categoryLabel(e.categoryFirst);
+          const isAI = Boolean(e.isAiGenerated || e.isDiscovered);
           return (
             <Paper
               key={e._id}
@@ -111,17 +112,19 @@ export default function ExploreCardList({ events }) {
                       sx={{ fontSize: '0.65rem', height: 18 }}
                     />
                   )}
-                  {e.isAiGenerated && (
+                  {isAI && (
                     <Chip
-                      label="AI"
+                      label="🤖 AI-Found"
                       size="small"
-                      title="AI-discovered event"
+                      title="Discovered by AI — source may need verification"
                       sx={{
-                        fontSize: '0.6rem',
-                        height: 18,
-                        bgcolor: '#f1f5f9',
-                        color: '#475569',
-                        border: '1px solid #cbd5e1',
+                        fontSize: '0.65rem',
+                        height: 20,
+                        bgcolor: '#f59e0b',
+                        color: '#1f2937',
+                        fontWeight: 700,
+                        letterSpacing: 0.2,
+                        border: '1px solid #d97706',
                       }}
                     />
                   )}
