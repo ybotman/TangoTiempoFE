@@ -134,10 +134,7 @@ export default function ExplorePage() {
         onDiscoveredToggle={() => {}}
       />
       <Container maxWidth="lg" sx={{ mt: 3, mb: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Explore
-        </Typography>
-
+        {/* TIEMPO-408: page title removed — mode toggle already labels this view */}
         {events === null && !error && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
             <CircularProgress />

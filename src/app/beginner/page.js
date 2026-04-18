@@ -40,10 +40,8 @@ export default function BeginnerPage() {
         onDiscoveredToggle={() => {}}
       />
       <Container maxWidth="md" sx={{ mt: 3, mb: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Beginner
-        </Typography>
-        <Typography variant="body2" color="textSecondary" paragraph>
+        {/* TIEMPO-408: page title removed — mode toggle already labels this view */}
+        <Typography variant="body2" color="textSecondary" paragraph sx={{ mt: 1 }}>
           Classes, practicas, and welcoming events for dancers new to tango.
         </Typography>
 
