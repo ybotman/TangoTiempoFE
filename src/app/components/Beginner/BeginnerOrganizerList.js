@@ -13,7 +13,7 @@ import { RRule } from 'rrule';
 // Non-AI events render full-strength; AI-discovered events render de-emphasized
 // AND sort below non-AI within each organizer group (matches Local's pattern).
 
-const WINDOW_DAYS = 60;
+const WINDOW_DAYS = 30;
 
 function isAIish(e) {
   return Boolean(e?.isDiscovered || e?.isAiGenerated);
@@ -62,9 +62,9 @@ function firstInstanceInWindow(e, fromMs, toMs) {
     const windows = rule.between(new Date(fromMs), new Date(toMs), true);
     return windows.length ? windows[0] : null;
   } catch (err) {
-    // rrule parse failed — trust the BE that it's in the window, use base startDate
-    // (best effort — keeps event visible rather than silently hiding it)
-    return baseStart;
+    // RRULE unparseable — drop (don't show a stale past date). This avoids
+    // "ghost" rows for events whose recurrence metadata is malformed.
+    return null;
   }
 }
 
