@@ -49,7 +49,8 @@ export default function ExplorePage() {
     const raw = Cookies.get(COOKIE_COUNTRY);
     return raw || null;
   });
-  const [selectedMonthKey, setSelectedMonthKey] = useState(null); // 'YYYY-MM' or null = all 12 months
+  const [selectedMonthKey, setSelectedMonthKey] = useState(null); // 'YYYY-MM' or null = all in window
+  const [offsetMonths, setOffsetMonths] = useState(0); // <<>> page offset, multiples of 6
   const [view, setViewState] = useState(() => {
     if (typeof window === 'undefined') return 'timeline';
     return Cookies.get(COOKIE_VIEW) === 'map' ? 'map' : 'timeline';
@@ -97,24 +98,25 @@ export default function ExplorePage() {
     }
   }, [events, availableCountries, selectedCountry, setSelectedCountry]);
 
-  // Next 12 months window — always applied (world-map UX rule, and reasonable
-  // planning horizon for the timeline too).
-  const twelveMonthEnd = useMemo(() => dayjs().add(12, 'month').endOf('day'), []);
+  // 12-month rolling window anchored to offsetMonths from today. Arrows on
+  // the scrubber shift this window forward/backward by 6-month increments.
+  const { windowStart, windowEnd } = useMemo(() => {
+    const ws = dayjs().startOf('day').add(offsetMonths, 'month');
+    const we = ws.add(12, 'month').endOf('day');
+    return { windowStart: ws, windowEnd: we };
+  }, [offsetMonths]);
 
   const filteredEvents = useMemo(() => {
     if (!events) return [];
-    const windowStart = dayjs().startOf('day');
     return events.filter((e) => {
-      // 12-month horizon: event must at least start before window end AND end after now.
       const start = dayjs(e.startDate);
       const end = dayjs(e.endDate);
       if (end.isBefore(windowStart)) return false;
-      if (start.isAfter(twelveMonthEnd)) return false;
+      if (start.isAfter(windowEnd)) return false;
 
       if (selectedCountry && e.masteredCountryName !== selectedCountry) return false;
       if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(e.categoryFirst))) return false;
 
-      // Month filter: if a specific month is selected, event must overlap it.
       if (selectedMonthKey) {
         const mStart = dayjs(`${selectedMonthKey}-01`).startOf('month');
         const mEnd = mStart.endOf('month');
@@ -122,7 +124,7 @@ export default function ExplorePage() {
       }
       return true;
     });
-  }, [events, selectedCountry, selectedCategories, selectedMonthKey, twelveMonthEnd]);
+  }, [events, selectedCountry, selectedCategories, selectedMonthKey, windowStart, windowEnd]);
 
   // Visx timeline needs country rows — derive from filtered set
   const sortedActiveCountries = useMemo(
@@ -180,7 +182,12 @@ export default function ExplorePage() {
             </Box>
 
             <Box sx={{ mb: 1.5 }}>
-              <ExploreMonthScrubber selectedMonthKey={selectedMonthKey} onChange={setSelectedMonthKey} />
+              <ExploreMonthScrubber
+                selectedMonthKey={selectedMonthKey}
+                onMonthChange={setSelectedMonthKey}
+                offsetMonths={offsetMonths}
+                onOffsetChange={setOffsetMonths}
+              />
             </Box>
 
             {isMobile ? (
