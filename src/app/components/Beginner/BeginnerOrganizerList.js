@@ -3,8 +3,10 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/navigation';
-import { Box, Paper, Typography, Chip, Stack, Divider } from '@mui/material';
+import { Box, Paper, Typography, Chip, Stack, Divider, Tooltip } from '@mui/material';
+import RepeatIcon from '@mui/icons-material/Repeat';
 import dayjs from 'dayjs';
+import { RRule } from 'rrule';
 
 // TIEMPO-408 T2: Beginner tab grouped by organizer (see docs/BEGINNER-TAB-DESIGN.md §4).
 // Organizer = section header; events listed chronologically below.
@@ -33,11 +35,37 @@ function groupKey(e) {
   );
 }
 
-function formatEventLine(e) {
-  const start = dayjs(e.startDate);
+function formatEventLine(displayDate, e) {
+  const start = dayjs(displayDate);
   const date = start.format('ddd MMM D');
   const time = start.format('h:mm A');
   return { date, time, title: e.title };
+}
+
+// TIEMPO-408 hotfix: recurring master events have a historical startDate
+// but recur into the future. Compute the next instance in [from, to] so
+// they aren't dropped by the window filter and so the card shows the right
+// next-meeting date.
+function firstInstanceInWindow(e, fromMs, toMs) {
+  const baseStart = new Date(e.startDate);
+  if (!e.isRepeating || !e.recurrenceRule) {
+    const t = baseStart.getTime();
+    return t >= fromMs && t <= toMs ? baseStart : null;
+  }
+  try {
+    // Backend stores the RRULE string; it may or may not include DTSTART.
+    // Ensure a DTSTART anchor so between() behaves deterministically.
+    const rruleStr = e.recurrenceRule.includes('DTSTART')
+      ? e.recurrenceRule
+      : `DTSTART:${dayjs(baseStart).utc().format('YYYYMMDDTHHmmss')}Z\nRRULE:${e.recurrenceRule.replace(/^RRULE:/, '')}`;
+    const rule = RRule.fromString(rruleStr);
+    const windows = rule.between(new Date(fromMs), new Date(toMs), true);
+    return windows.length ? windows[0] : null;
+  } catch (err) {
+    // rrule parse failed — trust the BE that it's in the window, use base startDate
+    // (best effort — keeps event visible rather than silently hiding it)
+    return baseStart;
+  }
 }
 
 export default function BeginnerOrganizerList({ events }) {
@@ -45,25 +73,29 @@ export default function BeginnerOrganizerList({ events }) {
 
   const groups = useMemo(() => {
     if (!events?.length) return [];
-    const cutoff = dayjs().add(WINDOW_DAYS, 'day');
     const now = dayjs().startOf('day');
+    const cutoff = dayjs().add(WINDOW_DAYS, 'day');
+    const fromMs = now.valueOf();
+    const toMs = cutoff.valueOf();
 
-    // Window filter: keep events from today through +60d
-    const windowed = events.filter((e) => {
-      const s = dayjs(e.startDate);
-      return s.isAfter(now.subtract(1, 'day')) && s.isBefore(cutoff);
-    });
+    // TIEMPO-408 hotfix: compute next-instance date per event. Recurring
+    // masters (isRepeating=true) have historical base startDates but recur;
+    // we expand to find the next instance in the 60-day window via rrule.
+    // Events with no instance in the window are dropped.
+    const windowed = [];
+    for (const e of events) {
+      const nextDate = firstInstanceInWindow(e, fromMs, toMs);
+      if (!nextDate) continue;
+      windowed.push({ ...e, _displayDate: nextDate });
+    }
 
-    // Group by organizer, drop groups with zero upcoming events (already
-    // filtered, but the bucket may be empty if all got filtered)
+    // Group by organizer
     const map = new Map();
     for (const e of windowed) {
       const k = groupKey(e);
       if (!map.has(k)) {
         const fullName = e.ownerOrganizerName || '';
         const shortName = e.ownerOrganizerShortName || '';
-        // Prefer short as the header label when both exist and differ;
-        // show the full name as secondary. Fall back sanely when either missing.
         const headerPrimary = shortName || fullName || 'Unknown organizer';
         const headerSecondary = shortName && fullName && fullName !== shortName ? fullName : null;
         map.set(k, {
@@ -77,15 +109,25 @@ export default function BeginnerOrganizerList({ events }) {
       map.get(k).events.push(e);
     }
 
-    // Sort events within group, then sort groups by soonest non-AI event date
+    // Sort within group by next-instance date (AI still after non-AI).
+    const byDisplayDate = (a, b) => {
+      const aAI = isAIish(a) ? 1 : 0;
+      const bAI = isAIish(b) ? 1 : 0;
+      if (aAI !== bAI) return aAI - bAI;
+      return a._displayDate.getTime() - b._displayDate.getTime();
+    };
+
     const arr = Array.from(map.values()).map((g) => {
-      const sorted = [...g.events].sort(eventSort);
+      const sorted = [...g.events].sort(byDisplayDate);
       const nonAiSoonest = sorted.find((e) => !isAIish(e)) || sorted[0];
-      return { ...g, events: sorted, soonestMs: new Date(nonAiSoonest.startDate).getTime() };
+      return { ...g, events: sorted, soonestMs: nonAiSoonest._displayDate.getTime() };
     });
     arr.sort((a, b) => a.soonestMs - b.soonestMs);
     return arr;
   }, [events]);
+
+  // Keep eventSort for backwards-compat / prop types (unused in main path now)
+  void eventSort;
 
   if (!groups.length) {
     return (
@@ -121,7 +163,7 @@ export default function BeginnerOrganizerList({ events }) {
           <Stack divider={<Divider flexItem />}>
             {g.events.map((e) => {
               const ai = isAIish(e);
-              const { date, time, title } = formatEventLine(e);
+              const { date, time, title } = formatEventLine(e._displayDate, e);
               return (
                 <Box
                   key={e._id}
@@ -140,8 +182,13 @@ export default function BeginnerOrganizerList({ events }) {
                   }}
                 >
                   <Box sx={{ minWidth: 92, flexShrink: 0 }}>
-                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, color: ai ? 'text.secondary' : 'text.primary' }}>
+                    <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.4, fontWeight: 600, color: ai ? 'text.secondary' : 'text.primary' }}>
                       {date}
+                      {e.isRepeating && (
+                        <Tooltip title="Recurring series — next upcoming session shown" arrow>
+                          <RepeatIcon sx={{ fontSize: 12, color: '#64748b' }} aria-label="recurring" />
+                        </Tooltip>
+                      )}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                       {time}
