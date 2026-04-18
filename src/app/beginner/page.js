@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Container, Typography, CircularProgress, Alert } from '@mui/material';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
-import ExploreCardList from '@/components/Explore/ExploreCardList';
+import BeginnerOrganizerList from '@/components/Beginner/BeginnerOrganizerList';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 // TIEMPO-406 (Phase 5 MVP pulled forward): Beginner mode.
@@ -54,7 +54,7 @@ export default function BeginnerPage() {
         {events && events.length === 0 && (
           <Alert severity="info">No beginner-friendly events found yet.</Alert>
         )}
-        {events && events.length > 0 && <ExploreCardList events={events} />}
+        {events && events.length > 0 && <BeginnerOrganizerList events={events} />}
       </Container>
     </Box>
   );
