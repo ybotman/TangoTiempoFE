@@ -3,43 +3,60 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Box, Container, Typography, CircularProgress, Alert, Paper, Divider, useMediaQuery } from '@mui/material';
+import { Box, Container, CircularProgress, Alert, Paper, Divider, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
 import ExploreCardList from '@/components/Explore/ExploreCardList';
 import ExploreFilters from '@/components/Explore/ExploreFilters';
 import DensityBar from '@/components/Explore/DensityBar';
-import { COUNTRY_COOKIE, categoryLabel } from '@/components/Explore/exploreConstants';
+import { categoryLabel } from '@/components/Explore/exploreConstants';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import dayjs from 'dayjs';
 
-// TIEMPO-404 Milestone D: responsive — scatter on desktop, card list on mobile portrait.
+// TIEMPO-408 Explore pass 2 (Toby guidance):
+// - Categories filter: multi-select (Set)
+// - Country filter: single-select (string | null)
+// - AI-Found visual: made prominent in card/list and visx bars
+// - Desktop fallback to card list when no country is resolved yet
 
-const readCookieCountries = () => {
+const COOKIE_CATS = 'tt_explore_categories';
+const COOKIE_COUNTRY = 'tt_explore_country';
+
+const readSetCookie = (name) => {
   if (typeof window === 'undefined') return null;
-  const raw = Cookies.get(COUNTRY_COOKIE);
+  const raw = Cookies.get(name);
   if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
+  try { const p = JSON.parse(raw); return Array.isArray(p) ? new Set(p) : null; }
+  catch { return null; }
 };
 
-const writeCookieCountries = (countries) => {
-  Cookies.set(COUNTRY_COOKIE, JSON.stringify(countries), { expires: 365, sameSite: 'Lax' });
-};
+const writeSetCookie = (name, set) =>
+  Cookies.set(name, JSON.stringify(Array.from(set)), { expires: 365, sameSite: 'Lax' });
 
 export default function ExplorePage() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // <900px → card list
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
-  const [selectedCountries, setSelectedCountries] = useState(null); // null = not yet seeded
-  const [selectedCategory, setSelectedCategory] = useState(null); // null = All
-  const [xInfo, setXInfo] = useState(null); // { xScale, width, leftMargin, rightMargin }
+  const [selectedCategories, setSelectedCategoriesState] = useState(() => readSetCookie(COOKIE_CATS) || new Set());
+  const [selectedCountry, setSelectedCountryState] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = Cookies.get(COOKIE_COUNTRY);
+    return raw || null;
+  });
+  const [xInfo, setXInfo] = useState(null);
+
+  const setSelectedCategories = useCallback((next) => {
+    setSelectedCategoriesState(next);
+    writeSetCookie(COOKIE_CATS, next);
+  }, []);
+
+  const setSelectedCountry = useCallback((next) => {
+    setSelectedCountryState(next);
+    if (next === null) Cookies.remove(COOKIE_COUNTRY);
+    else Cookies.set(COOKIE_COUNTRY, next, { expires: 365, sameSite: 'Lax' });
+  }, []);
 
   useEffect(() => {
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
@@ -49,8 +66,6 @@ export default function ExplorePage() {
       })
       .then((res) => {
         const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
-        // TIEMPO-404 D.1: keep ALL travelWorthy events for mobile card list.
-        // Desktop scatter will still filter to country-resolved at render time.
         setEvents(list);
       })
       .catch((err) => setError(err.message || 'Failed to load events'));
@@ -58,53 +73,28 @@ export default function ExplorePage() {
 
   const availableCountries = useMemo(() => {
     if (!events) return [];
-    // Exclude null/undefined — only countries-resolved events contribute to the desktop filter.
     return Array.from(new Set(events.map((e) => e.masteredCountryName).filter(Boolean))).sort();
   }, [events]);
 
-  // Seed selection from cookie once events load; default to all available
+  // If selectedCountry is no longer in the available set, clear it
   useEffect(() => {
-    if (!events || selectedCountries !== null) return;
-    const stored = readCookieCountries();
-    const seeded = stored && stored.length
-      ? stored.filter((c) => availableCountries.includes(c))
-      : availableCountries;
-    setSelectedCountries(seeded.length ? seeded : availableCountries);
-  }, [events, availableCountries, selectedCountries]);
+    if (selectedCountry && events && !availableCountries.includes(selectedCountry)) {
+      setSelectedCountry(null);
+    }
+  }, [events, availableCountries, selectedCountry, setSelectedCountry]);
 
-  const handleCountryChange = useCallback((next) => {
-    setSelectedCountries(next);
-    writeCookieCountries(next);
-  }, []);
-
-  // Desktop filter: matches country selection + category
   const filteredEvents = useMemo(() => {
-    if (!events || !selectedCountries) return [];
-    const countrySet = new Set(selectedCountries);
+    if (!events) return [];
     return events.filter((e) => {
-      if (!countrySet.has(e.masteredCountryName)) return false;
-      if (selectedCategory && categoryLabel(e.categoryFirst) !== selectedCategory) return false;
+      if (selectedCountry && e.masteredCountryName !== selectedCountry) return false;
+      if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(e.categoryFirst))) return false;
       return true;
     });
-  }, [events, selectedCountries, selectedCategory]);
+  }, [events, selectedCountry, selectedCategories]);
 
-  // Mobile filter: category only (country filter optional on mobile — presets still work)
-  const mobileFilteredEvents = useMemo(() => {
-    if (!events) return [];
-    let out = events;
-    if (selectedCountries && selectedCountries.length && selectedCountries.length < availableCountries.length) {
-      const countrySet = new Set(selectedCountries);
-      // Keep country-null events visible when any country filter is active only if user hasn't narrowed hard
-      out = out.filter((e) => !e.masteredCountryName || countrySet.has(e.masteredCountryName));
-    }
-    if (selectedCategory) {
-      out = out.filter((e) => categoryLabel(e.categoryFirst) === selectedCategory);
-    }
-    return out;
-  }, [events, selectedCountries, selectedCategory, availableCountries.length]);
-
+  // Visx timeline needs country rows — derive from filtered set
   const sortedActiveCountries = useMemo(
-    () => Array.from(new Set(filteredEvents.map((e) => e.masteredCountryName))).sort(),
+    () => Array.from(new Set(filteredEvents.map((e) => e.masteredCountryName).filter(Boolean))).sort(),
     [filteredEvents]
   );
 
@@ -134,7 +124,6 @@ export default function ExplorePage() {
         onDiscoveredToggle={() => {}}
       />
       <Container maxWidth="lg" sx={{ mt: 3, mb: 6 }}>
-        {/* TIEMPO-408: page title removed — mode toggle already labels this view */}
         {events === null && !error && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
             <CircularProgress />
@@ -142,33 +131,30 @@ export default function ExplorePage() {
         )}
         {error && <Alert severity="error">Failed to load events: {error}</Alert>}
         {events && events.length === 0 && (
-          <Alert severity="info">No travel-worthy events found with a resolved country yet.</Alert>
+          <Alert severity="info">No travel-worthy events found yet.</Alert>
         )}
 
-        {events && events.length > 0 && selectedCountries !== null && (
+        {events && events.length > 0 && (
           <>
             <ExploreFilters
-              category={selectedCategory}
-              onCategoryChange={setSelectedCategory}
+              selectedCategories={selectedCategories}
+              onCategoriesChange={setSelectedCategories}
               availableCountries={availableCountries}
-              selectedCountries={selectedCountries}
-              onCountriesChange={handleCountryChange}
+              selectedCountry={selectedCountry}
+              onCountryChange={setSelectedCountry}
             />
 
             {isMobile ? (
-              <ExploreCardList events={mobileFilteredEvents} />
+              <ExploreCardList events={filteredEvents} />
             ) : availableCountries.length === 0 ? (
-              // TIEMPO-408: desktop fallback — if no events have resolved country
-              // (backfill not yet run / backend hasn't denormalized), show the
-              // card list so events are still visible instead of an empty timeline.
               <>
                 <Alert severity="info" sx={{ mb: 1 }}>
-                  Geography data is still catching up — showing event list.
+                  Country data is still catching up — showing event list.
                 </Alert>
-                <ExploreCardList events={mobileFilteredEvents} />
+                <ExploreCardList events={filteredEvents} />
               </>
             ) : filteredEvents.length === 0 ? (
-              <Alert severity="info">No events match the selected countries. Try a different filter.</Alert>
+              <Alert severity="info">No events match the current filter. Try relaxing category or country.</Alert>
             ) : (
               <Paper elevation={1} sx={{ p: 2, mt: 1 }}>
                 <ExploreTimeline
