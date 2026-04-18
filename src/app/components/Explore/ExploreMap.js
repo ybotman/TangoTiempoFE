@@ -109,7 +109,7 @@ export default function ExploreMap({ events }) {
                   fillColor: color,
                   fillOpacity: 0.92,
                 }}
-                eventHandlers={{ click: () => router.push(`/event/${e._id}`) }}
+                eventHandlers={{ click: () => router.push(`/calendar?event=${e._id}`) }}
               >
                 <Popup>
                   <Box sx={{ minWidth: 180 }}>

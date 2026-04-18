@@ -98,7 +98,7 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
   };
 
   const handleClick = (datum) => {
-    if (datum?._id) router.push(`/event/${datum._id}`);
+    if (datum?._id) router.push(`/calendar?event=${datum._id}`);
   };
 
   return (
