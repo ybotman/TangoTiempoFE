@@ -2,37 +2,66 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+import { Box, IconButton, Tooltip } from '@mui/material';
+import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import dayjs from 'dayjs';
 
-// TIEMPO-408 item 6: rolling 12-month scrubber. "All" + next 12 months
-// starting from current. Clicking filters event set; re-click clears.
+// TIEMPO-408 item 6: rolling 12-month scrubber with paging arrows.
+// - Default window: now → +12mo (offset 0)
+// - << pages backward 6 months (floor at offset 0)
+// - >> pages forward 6 months (cap at 30 months — max horizon ~3.5 years)
+// - 'All' pill clears month-specific filter (keeps current window)
+// - Month pill click filters to that specific month; re-click clears
 
-export default function ExploreMonthScrubber({ selectedMonthKey, onChange }) {
+const STEP = 6;      // months per << or >> click
+const MAX_OFFSET = 30; // max forward offset
+const WINDOW_MONTHS = 12;
+
+export default function ExploreMonthScrubber({
+  selectedMonthKey,
+  onMonthChange,
+  offsetMonths = 0,
+  onOffsetChange,
+}) {
   const months = React.useMemo(() => {
     const out = [];
-    const base = dayjs().startOf('month');
-    for (let i = 0; i < 12; i += 1) {
+    const base = dayjs().startOf('month').add(offsetMonths, 'month');
+    for (let i = 0; i < WINDOW_MONTHS; i += 1) {
       const m = base.add(i, 'month');
       out.push({
         key: m.format('YYYY-MM'),
         short: m.format('MMM'),
-        year: m.format('YYYY'),
+        year: m.format('YY'),
         showYear: i === 0 || m.month() === 0,
       });
     }
     return out;
-  }, []);
+  }, [offsetMonths]);
 
-  const handleClick = (key) => {
-    onChange(selectedMonthKey === key ? null : key);
+  const handleMonthClick = (key) => {
+    onMonthChange(selectedMonthKey === key ? null : key);
+  };
+
+  const canGoBack = offsetMonths > 0;
+  const canGoForward = offsetMonths < MAX_OFFSET;
+
+  const shift = (delta) => {
+    const next = Math.max(0, Math.min(MAX_OFFSET, offsetMonths + delta));
+    if (next !== offsetMonths) {
+      onOffsetChange(next);
+      // Clear month-specific filter when paging (the selected month often
+      // falls out of the new window — avoid surprising empty states)
+      if (selectedMonthKey) onMonthChange(null);
+    }
   };
 
   return (
     <Box
       sx={{
         display: 'flex',
-        gap: 0.4,
+        alignItems: 'center',
+        gap: 0.25,
         overflowX: 'auto',
         px: 0.5,
         py: 0.75,
@@ -41,22 +70,50 @@ export default function ExploreMonthScrubber({ selectedMonthKey, onChange }) {
         background: 'rgba(0,0,0,0.015)',
       }}
     >
+      <Tooltip title={canGoBack ? 'Earlier months' : 'At start of window'} arrow>
+        <span>
+          <IconButton
+            size="small"
+            onClick={() => shift(-STEP)}
+            disabled={!canGoBack}
+            aria-label="earlier months"
+            sx={{ flexShrink: 0 }}
+          >
+            <KeyboardDoubleArrowLeftIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+
       <Pill
         selected={selectedMonthKey === null}
-        onClick={() => onChange(null)}
+        onClick={() => onMonthChange(null)}
         primary="All"
-        secondary="12 mo"
+        secondary={offsetMonths > 0 ? `+${offsetMonths}mo` : '12 mo'}
         wide
       />
       {months.map((m) => (
         <Pill
           key={m.key}
           selected={selectedMonthKey === m.key}
-          onClick={() => handleClick(m.key)}
+          onClick={() => handleMonthClick(m.key)}
           primary={m.short}
-          secondary={m.showYear ? m.year : null}
+          secondary={m.showYear ? `'${m.year}` : null}
         />
       ))}
+
+      <Tooltip title={canGoForward ? 'Later months' : 'At end of horizon'} arrow>
+        <span>
+          <IconButton
+            size="small"
+            onClick={() => shift(STEP)}
+            disabled={!canGoForward}
+            aria-label="later months"
+            sx={{ flexShrink: 0 }}
+          >
+            <KeyboardDoubleArrowRightIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
     </Box>
   );
 }
@@ -106,6 +163,8 @@ function Pill({ primary, secondary, selected, onClick, wide = false }) {
 }
 
 ExploreMonthScrubber.propTypes = {
-  selectedMonthKey: PropTypes.string, // 'YYYY-MM' or null for All
-  onChange: PropTypes.func.isRequired,
+  selectedMonthKey: PropTypes.string,
+  onMonthChange: PropTypes.func.isRequired,
+  offsetMonths: PropTypes.number,
+  onOffsetChange: PropTypes.func.isRequired,
 };
