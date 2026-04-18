@@ -1,20 +1,25 @@
 'use client';
 
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useMode } from '@/hooks/useMode';
 
-// TIEMPO-408: custom pill segmented control — less MUI-default, more modern.
-// Single rounded track, animated selected indicator, clean type.
+// TIEMPO-408: custom pill segmented control with sliding indicator.
+// Mobile (<sm): hyper-compressed labels BEG / LOC / EXP so all three buttons
+// fit on the row without crowding the brand + city pill.
+// Desktop (>=sm): full labels.
 
 const OPTIONS = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'local', label: 'Local' },
-  { value: 'explore', label: 'Explore' },
+  { value: 'beginner', label: 'Beginner', short: 'BEG' },
+  { value: 'local',    label: 'Local',    short: 'LOC' },
+  { value: 'explore',  label: 'Explore',  short: 'EXP' },
 ];
 
 export default function ModeToggle() {
   const { mode, setMode } = useMode();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const activeIdx = Math.max(0, OPTIONS.findIndex((o) => o.value === mode));
   const count = OPTIONS.length;
 
@@ -28,11 +33,10 @@ export default function ModeToggle() {
         p: '3px',
         borderRadius: 999,
         background: 'rgba(0, 0, 0, 0.06)',
-        height: 36,
-        minWidth: 260,
+        height: 34,
+        minWidth: isMobile ? 168 : 260,
       }}
     >
-      {/* Sliding selected indicator */}
       <Box
         aria-hidden
         sx={{
@@ -49,33 +53,34 @@ export default function ModeToggle() {
           zIndex: 0,
         }}
       />
-      {OPTIONS.map(({ value, label }, i) => {
+      {OPTIONS.map(({ value, label, short }, i) => {
         const selected = i === activeIdx;
         return (
           <Box
             key={value}
             role="tab"
             aria-selected={selected}
+            aria-label={label}
             tabIndex={0}
             onClick={() => !selected && setMode(value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+              if ((e.key === 'Enter' || e.key === ' ') && !selected) {
                 e.preventDefault();
-                if (!selected) setMode(value);
+                setMode(value);
               }
             }}
             sx={{
               position: 'relative',
               zIndex: 1,
               flex: 1,
-              minWidth: 80,
-              height: 30,
+              minWidth: isMobile ? 52 : 80,
+              height: 28,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '0.82rem',
-              fontWeight: selected ? 600 : 500,
-              letterSpacing: 0.1,
+              fontSize: isMobile ? '0.72rem' : '0.82rem',
+              fontWeight: selected ? 700 : 500,
+              letterSpacing: isMobile ? 0.6 : 0.1,
               color: selected ? '#111' : 'rgba(0,0,0,0.62)',
               cursor: selected ? 'default' : 'pointer',
               userSelect: 'none',
@@ -88,7 +93,7 @@ export default function ModeToggle() {
               },
             }}
           >
-            {label}
+            {isMobile ? short : label}
           </Box>
         );
       })}
