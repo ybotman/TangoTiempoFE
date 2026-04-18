@@ -60,13 +60,16 @@ export default function BeginnerOrganizerList({ events }) {
     for (const e of windowed) {
       const k = groupKey(e);
       if (!map.has(k)) {
+        const fullName = e.ownerOrganizerName || '';
+        const shortName = e.ownerOrganizerShortName || '';
+        // Prefer short as the header label when both exist and differ;
+        // show the full name as secondary. Fall back sanely when either missing.
+        const headerPrimary = shortName || fullName || 'Unknown organizer';
+        const headerSecondary = shortName && fullName && fullName !== shortName ? fullName : null;
         map.set(k, {
           key: k,
-          organizerName:
-            e.ownerOrganizerName ||
-            e.ownerOrganizerShortName ||
-            'Unknown organizer',
-          organizerShortName: e.ownerOrganizerShortName,
+          headerPrimary,
+          headerSecondary,
           organizerId: e.ownerOrganizerID,
           events: [],
         });
@@ -105,10 +108,15 @@ export default function BeginnerOrganizerList({ events }) {
             }}
           >
             <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-              {g.organizerName}
+              {g.headerPrimary}
             </Typography>
-            {/* Contact line placeholder — phone/email land in follow-up once
-                backend exposes them on the event response (see BEGINNER-TAB-DESIGN §7). */}
+            {g.headerSecondary && (
+              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1.25 }}>
+                {g.headerSecondary}
+              </Typography>
+            )}
+            {/* Contact line (phone/email) will land once backend exposes them
+                on event response — see BEGINNER-TAB-DESIGN.md §7. */}
           </Box>
           <Stack divider={<Divider flexItem />}>
             {g.events.map((e) => {
@@ -139,20 +147,64 @@ export default function BeginnerOrganizerList({ events }) {
                       {time}
                     </Typography>
                   </Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      flex: 1,
-                      minWidth: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      fontWeight: ai ? 400 : 500,
-                      color: ai ? 'text.secondary' : 'text.primary',
-                    }}
-                  >
-                    {title}
-                  </Typography>
+                  <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        fontWeight: ai ? 400 : 500,
+                        color: ai ? 'text.secondary' : 'text.primary',
+                      }}
+                    >
+                      {title}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+                      {e.masteredCityName && (
+                        <Chip
+                          label={e.masteredCityName}
+                          size="small"
+                          sx={{
+                            fontSize: '0.6rem',
+                            height: 18,
+                            bgcolor: ai ? '#f8fafc' : 'rgba(25,118,210,0.08)',
+                            color: ai ? '#94a3b8' : '#1976d2',
+                            border: '1px solid',
+                            borderColor: ai ? '#e2e8f0' : 'rgba(25,118,210,0.2)',
+                          }}
+                        />
+                      )}
+                      {e.forBeginners && (
+                        <Chip
+                          label="For Beginners"
+                          size="small"
+                          sx={{
+                            fontSize: '0.6rem',
+                            height: 18,
+                            bgcolor: ai ? '#f8fafc' : 'rgba(34,197,94,0.12)',
+                            color: ai ? '#94a3b8' : '#15803d',
+                            border: '1px solid',
+                            borderColor: ai ? '#e2e8f0' : 'rgba(34,197,94,0.25)',
+                            fontWeight: 600,
+                          }}
+                        />
+                      )}
+                      {e.beginnerFriendly && (
+                        <Chip
+                          label="Beginner friendly"
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontSize: '0.6rem',
+                            height: 18,
+                            color: ai ? '#94a3b8' : '#64748b',
+                            borderColor: ai ? '#e2e8f0' : '#cbd5e1',
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
                   {ai && (
                     <Chip
                       label="AI"
@@ -187,6 +239,9 @@ BeginnerOrganizerList.propTypes = {
       ownerOrganizerName: PropTypes.string,
       ownerOrganizerShortName: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
+      masteredCityName: PropTypes.string,
+      forBeginners: PropTypes.bool,
+      beginnerFriendly: PropTypes.bool,
       isDiscovered: PropTypes.bool,
       isAiGenerated: PropTypes.bool,
     })
