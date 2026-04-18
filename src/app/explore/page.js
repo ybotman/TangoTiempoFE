@@ -157,6 +157,16 @@ export default function ExplorePage() {
 
             {isMobile ? (
               <ExploreCardList events={mobileFilteredEvents} />
+            ) : availableCountries.length === 0 ? (
+              // TIEMPO-408: desktop fallback — if no events have resolved country
+              // (backfill not yet run / backend hasn't denormalized), show the
+              // card list so events are still visible instead of an empty timeline.
+              <>
+                <Alert severity="info" sx={{ mb: 1 }}>
+                  Geography data is still catching up — showing event list.
+                </Alert>
+                <ExploreCardList events={mobileFilteredEvents} />
+              </>
             ) : filteredEvents.length === 0 ? (
               <Alert severity="info">No events match the selected countries. Try a different filter.</Alert>
             ) : (
