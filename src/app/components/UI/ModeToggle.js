@@ -20,7 +20,9 @@ export default function ModeToggle() {
   const { mode, setMode } = useMode();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const activeIdx = Math.max(0, OPTIONS.findIndex((o) => o.value === mode));
+  const rawIdx = OPTIONS.findIndex((o) => o.value === mode);
+  const hasActive = rawIdx >= 0;
+  const activeIdx = hasActive ? rawIdx : 0;
   const count = OPTIONS.length;
   const activeColor = OPTIONS[activeIdx]?.color || '#3b82f6';
 
@@ -38,25 +40,27 @@ export default function ModeToggle() {
         minWidth: isMobile ? 180 : 260,
       }}
     >
-      {/* Sliding white pill (with colored shadow) */}
-      <Box
-        aria-hidden
-        sx={{
-          position: 'absolute',
-          top: 3,
-          bottom: 3,
-          left: 3,
-          width: `calc((100% - 6px) / ${count})`,
-          transform: `translateX(${activeIdx * 100}%)`,
-          transition: 'transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease',
-          background: '#ffffff',
-          borderRadius: 999,
-          boxShadow: `0 1px 2px rgba(0,0,0,.08), 0 0 0 2px ${activeColor}`,
-          zIndex: 0,
-        }}
-      />
+      {/* Sliding white pill. Hidden when no tab is active (non-mode route). */}
+      {hasActive && (
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            top: 3,
+            bottom: 3,
+            left: 3,
+            width: `calc((100% - 6px) / ${count})`,
+            transform: `translateX(${activeIdx * 100}%)`,
+            transition: 'transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease',
+            background: '#ffffff',
+            borderRadius: 999,
+            boxShadow: `0 1px 2px rgba(0,0,0,.08), 0 0 0 2px ${activeColor}`,
+            zIndex: 0,
+          }}
+        />
+      )}
       {OPTIONS.map(({ value, label, short, color }, i) => {
-        const selected = i === activeIdx;
+        const selected = hasActive && i === activeIdx;
         return (
           <Box
             key={value}
