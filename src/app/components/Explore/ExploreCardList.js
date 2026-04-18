@@ -74,7 +74,7 @@ export default function ExploreCardList({ events }) {
             <Paper
               key={e._id}
               elevation={1}
-              onClick={() => router.push(`/event/${e._id}`)}
+              onClick={() => router.push(`/calendar?event=${e._id}`)}
               sx={{
                 display: 'flex',
                 cursor: 'pointer',
