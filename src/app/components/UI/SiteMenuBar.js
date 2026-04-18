@@ -63,10 +63,34 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
     );
 
   return (
-    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* TIEMPO-402: 3-mode segmented control (Beginner | Local | Explore) */}
-      <ModeToggle />
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      {/* TIEMPO-408 Row 1 (primary chrome): brand · city · mode tabs.
+          Boston embed skips the new chrome and shows only ModeToggle as-was. */}
+      {!isBoston ? (
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+            px: 1,
+            py: 0.75,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flexShrink: 1 }}>
+            <BrandMark size={36} />
+            <CityPill />
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <ModeToggle />
+          </Box>
+        </Box>
+      ) : (
+        <ModeToggle />
+      )}
 
+      {/* TIEMPO-408 Row 2 (utility): menu · search · filter · ai · messages · user */}
       <Box
         sx={{
           width: '100%',
@@ -76,8 +100,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           justifyContent: 'space-between',
         }}
       >
-      {/* Left: menu + (non-Boston: BrandMark + CityPill) */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
           edge="start"
           color="inherit"
@@ -86,8 +109,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         >
           <MenuIcon />
         </IconButton>
-        {!isBoston && <BrandMark size={36} />}
-        {!isBoston && <CityPill />}
       </Box>
 
       {/* Center: Search field when open */}

@@ -114,3 +114,4 @@ cypress/videos/
 cypress/reports/
 cypress/reports/*.json
 cypress/reports/html/
+.mcp.json
