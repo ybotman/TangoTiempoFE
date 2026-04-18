@@ -1,5 +1,6 @@
 import React, { useEffect, useContext, useState, useMemo } from 'react';
-import { Box, Typography, FormControl, TextField, Grid, CircularProgress, Alert, Autocomplete, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, Typography, FormControl, TextField, Grid, CircularProgress, Alert, Autocomplete, FormControlLabel, Checkbox, Collapse, Tooltip } from '@mui/material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -11,6 +12,9 @@ import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
 import PropTypes from 'prop-types';
+
+// TIEMPO-408 / Thread 1 sign-off (2026-04-18): strict gate eligible categories.
+const FOR_BEGINNERS_ELIGIBLE = new Set(['Class', 'Workshop', 'DayWorkshop', 'Festival']);
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null, onTimeModified = null }) => {
   const allCategories = useCategories(); // Fetch categories
@@ -41,6 +45,14 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       setTimeout(() => setIsVenueReady(true), 100);
     }
   }, [venues, loadingVenues]);
+
+  // TIEMPO-408: Auto-clear forBeginners when category becomes ineligible.
+  // Prevents stale flag surviving a category change (e.g. Class -> Milonga).
+  useEffect(() => {
+    if (eventData.forBeginners && !FOR_BEGINNERS_ELIGIBLE.has(eventData.categoryFirst)) {
+      setEventData((prev) => ({ ...prev, forBeginners: false }));
+    }
+  }, [eventData.categoryFirst, eventData.forBeginners, setEventData]);
   
   // TIEMPO-302: Don't set venue input value - let Autocomplete handle display
   // Setting venueInputValue causes filtering which limits the dropdown to matching venues only
@@ -628,6 +640,36 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
             </Typography>
           </FormControl>
         </Grid>
+
+        {/* TIEMPO-408 (provisional pre-TIEMPO-405): forBeginners toggle with
+            strict client-side gate (Class/Workshop/DayWorkshop/Festival).
+            Server rejection path follows when Fulton's bulk-enrich endpoint ships. */}
+        <Grid item xs={12} md={6}>
+          <Collapse in={FOR_BEGINNERS_ELIGIBLE.has(eventData.categoryFirst)} timeout={150}>
+            <FormControl fullWidth>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={Boolean(eventData.forBeginners)}
+                      onChange={(e) => setEventData(prevData => ({ ...prevData, forBeginners: e.target.checked }))}
+                    />
+                  }
+                  label="This event is designed for beginners"
+                />
+                <Tooltip
+                  arrow
+                  title="Available for Classes, Workshops, and beginner-targeted Festivals. Switches off automatically if you change to a different category."
+                >
+                  <HelpOutlineIcon fontSize="small" sx={{ color: 'text.secondary', cursor: 'help' }} />
+                </Tooltip>
+              </Box>
+              <Typography variant="caption" color="textSecondary" sx={{ ml: 4, mt: -0.5 }}>
+                Shown on the Beginner tab. Removed from the main (Local) calendar.
+              </Typography>
+            </FormControl>
+          </Collapse>
+        </Grid>
       </Grid>
 
       {/* Description Input */}
@@ -688,6 +730,7 @@ CreateEventDetailsBasic.propTypes = {
     authorOrganizerShortName: PropTypes.string,
     cost: PropTypes.string,
     beginnerFriendly: PropTypes.bool,
+    forBeginners: PropTypes.bool,
   }).isRequired,
   setEventData: PropTypes.func.isRequired,
   editMode: PropTypes.bool,
