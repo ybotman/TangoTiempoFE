@@ -11,6 +11,7 @@ import { useVenues } from '@/hooks/useVenues'; // Use the new venue-specific hoo
 import { AuthContext } from '@/contexts/AuthContext'; // Import Auth context
 import { useGeoLocation } from '@/contexts/GeoLocationContext'; // TIEMPO-276: Import location context for debugging
 import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: Import full venue modal
+import SeriesDetectionHint from '@/components/Modals/CreateEvents/SeriesDetectionHint'; // TIEMPO-409: SAS-FTPNTD hint
 import PropTypes from 'prop-types';
 
 // TIEMPO-408 / Thread 1 sign-off (2026-04-18): strict gate eligible categories.
@@ -372,6 +373,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
       <Typography variant="h5" component="h2">
         Mandatory Event Details (Basic)
       </Typography>
+
+      {/* TIEMPO-409: SAS-FTPNTD Layer 2 hint — detects when organizer is
+          publishing the same class repeatedly as singletons instead of a
+          recurring master. Non-blocking, advisory only. */}
+      <SeriesDetectionHint eventData={eventData} />
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {/* Start Date/Time Picker */}
