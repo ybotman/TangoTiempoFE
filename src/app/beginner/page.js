@@ -76,7 +76,7 @@ export default function BeginnerPage() {
       <Container maxWidth="md" sx={{ mt: 3, mb: 6 }}>
         {/* TIEMPO-408: page title removed — mode toggle already labels this view */}
         <Typography variant="body2" color="textSecondary" paragraph sx={{ mt: 1 }}>
-          Beginner classes, practicas, and welcoming events in the next {WINDOW_DAYS} days — {radiusLabel}.
+          Beginner classes, workshops, and welcoming events in the next {WINDOW_DAYS} days — {radiusLabel}.
         </Typography>
 
         {!isInitialized || events === null ? (
