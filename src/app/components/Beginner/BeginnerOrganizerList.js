@@ -125,7 +125,7 @@ export default function BeginnerOrganizerList({ events }) {
               return (
                 <Box
                   key={e._id}
-                  onClick={() => router.push(`/event/${e._id}`)}
+                  onClick={() => router.push(`/calendar?event=${e._id}`)}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
