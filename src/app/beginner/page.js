@@ -14,7 +14,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 // MapCenter pill in chrome drives what shows here, matching how users
 // think of "my area." 60-day server-side window — beginners plan short-term.
 
-const WINDOW_DAYS = 60;
+const WINDOW_DAYS = 30;
 
 export default function BeginnerPage() {
   const [events, setEvents] = useState(null);
