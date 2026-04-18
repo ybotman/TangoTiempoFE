@@ -1,9 +1,19 @@
 'use client';
 
 import { useCallback, useContext, useEffect, useMemo } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { AuthContext } from '@/contexts/AuthContext';
+
+// TIEMPO-408 fix: path-first mode derivation. The toggle state must reflect
+// the ACTUAL route the user is on, never a stale cookie/userPref that
+// disagrees with what they're looking at.
+//
+// Previous bug: on /calendar, mode fell through to cookie || userPref ||
+// default — so a user whose last-visited mode was Beginner would see the
+// Beginner pill highlighted while actually on the Local calendar.
+// Fix: pathname is authoritative. Cookie/userPref only influence navigation
+// DECISIONS in setMode (where to land on fresh arrival), not current state.
 
 const MODES = ['beginner', 'local', 'explore'];
 const DEFAULT_MODE = 'local';
@@ -14,20 +24,22 @@ const normalize = (value) => (MODES.includes(value) ? value : null);
 export function useMode() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const auth = useContext(AuthContext);
   const user = auth?.user;
 
-  const urlMode = normalize(searchParams?.get('mode'));
-  const userMode = normalize(user?.backendInfo?.preferredMode);
-  const cookieMode = typeof window !== 'undefined' ? normalize(Cookies.get(COOKIE_NAME)) : null;
-
+  // Path-first derivation. Returns null on non-mode routes (root, /organizer/*,
+  // /venue/*, /event/*, etc.) so the toggle can render un-highlighted.
   const mode = useMemo(() => {
-    if (pathname?.startsWith('/explore')) return 'explore';
-    if (pathname?.startsWith('/beginner')) return 'beginner';
-    return urlMode || userMode || cookieMode || DEFAULT_MODE;
-  }, [pathname, urlMode, userMode, cookieMode]);
+    if (!pathname) return null;
+    if (pathname.startsWith('/explore')) return 'explore';
+    if (pathname.startsWith('/beginner')) return 'beginner';
+    if (pathname.startsWith('/calendar')) return 'local'; // includes /calendar/boston
+    return null;
+  }, [pathname]);
 
+  // Persist whatever the active route resolved to, so a first-visit user
+  // who browses around then lands on '/' can be routed to their last mode.
+  // (Note: this doesn't affect current-state — that's pathname-driven above.)
   useEffect(() => {
     if (typeof window !== 'undefined' && mode) {
       Cookies.set(COOKIE_NAME, mode, { expires: 365, sameSite: 'Lax' });
@@ -42,17 +54,18 @@ export function useMode() {
       router.push('/explore');
       return;
     }
-
     if (target === 'beginner') {
-      // TIEMPO-406: Beginner has its own route now.
       router.push('/beginner');
       return;
     }
-
+    // Local: if already on Boston variant, stay there; otherwise use /calendar.
     const onBoston = pathname?.startsWith('/calendar/boston');
-    const baseRoute = onBoston ? '/calendar/boston' : '/calendar';
-    router.push(baseRoute);
+    router.push(onBoston ? '/calendar/boston' : '/calendar');
   }, [pathname, router]);
 
-  return { mode, setMode };
+  // Expose userPref read for future landing-page logic (TIEMPO-403). Not
+  // consumed here — kept for downstream callers that want a landing hint.
+  const preferredMode = normalize(user?.backendInfo?.preferredMode);
+
+  return { mode, setMode, preferredMode };
 }
