@@ -9,6 +9,9 @@ import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
 import ExploreCardList from '@/components/Explore/ExploreCardList';
 import ExploreFilters from '@/components/Explore/ExploreFilters';
+import ExploreViewToggle from '@/components/Explore/ExploreViewToggle';
+import ExploreMonthScrubber from '@/components/Explore/ExploreMonthScrubber';
+import ExploreMap from '@/components/Explore/ExploreMap';
 import DensityBar from '@/components/Explore/DensityBar';
 import { categoryLabel } from '@/components/Explore/exploreConstants';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
@@ -22,6 +25,7 @@ import dayjs from 'dayjs';
 
 const COOKIE_CATS = 'tt_explore_categories';
 const COOKIE_COUNTRY = 'tt_explore_country';
+const COOKIE_VIEW = 'tt_explore_view';
 
 const readSetCookie = (name) => {
   if (typeof window === 'undefined') return null;
@@ -45,7 +49,17 @@ export default function ExplorePage() {
     const raw = Cookies.get(COOKIE_COUNTRY);
     return raw || null;
   });
+  const [selectedMonthKey, setSelectedMonthKey] = useState(null); // 'YYYY-MM' or null = all 12 months
+  const [view, setViewState] = useState(() => {
+    if (typeof window === 'undefined') return 'timeline';
+    return Cookies.get(COOKIE_VIEW) === 'map' ? 'map' : 'timeline';
+  });
   const [xInfo, setXInfo] = useState(null);
+
+  const setView = useCallback((next) => {
+    setViewState(next);
+    Cookies.set(COOKIE_VIEW, next, { expires: 365, sameSite: 'Lax' });
+  }, []);
 
   const setSelectedCategories = useCallback((next) => {
     setSelectedCategoriesState(next);
@@ -83,14 +97,32 @@ export default function ExplorePage() {
     }
   }, [events, availableCountries, selectedCountry, setSelectedCountry]);
 
+  // Next 12 months window — always applied (world-map UX rule, and reasonable
+  // planning horizon for the timeline too).
+  const twelveMonthEnd = useMemo(() => dayjs().add(12, 'month').endOf('day'), []);
+
   const filteredEvents = useMemo(() => {
     if (!events) return [];
+    const windowStart = dayjs().startOf('day');
     return events.filter((e) => {
+      // 12-month horizon: event must at least start before window end AND end after now.
+      const start = dayjs(e.startDate);
+      const end = dayjs(e.endDate);
+      if (end.isBefore(windowStart)) return false;
+      if (start.isAfter(twelveMonthEnd)) return false;
+
       if (selectedCountry && e.masteredCountryName !== selectedCountry) return false;
       if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(e.categoryFirst))) return false;
+
+      // Month filter: if a specific month is selected, event must overlap it.
+      if (selectedMonthKey) {
+        const mStart = dayjs(`${selectedMonthKey}-01`).startOf('month');
+        const mEnd = mStart.endOf('month');
+        if (end.isBefore(mStart) || start.isAfter(mEnd)) return false;
+      }
       return true;
     });
-  }, [events, selectedCountry, selectedCategories]);
+  }, [events, selectedCountry, selectedCategories, selectedMonthKey, twelveMonthEnd]);
 
   // Visx timeline needs country rows — derive from filtered set
   const sortedActiveCountries = useMemo(
@@ -136,13 +168,20 @@ export default function ExplorePage() {
 
         {events && events.length > 0 && (
           <>
-            <ExploreFilters
-              selectedCategories={selectedCategories}
-              onCategoriesChange={setSelectedCategories}
-              availableCountries={availableCountries}
-              selectedCountry={selectedCountry}
-              onCountryChange={setSelectedCountry}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+              <ExploreFilters
+                selectedCategories={selectedCategories}
+                onCategoriesChange={setSelectedCategories}
+                availableCountries={availableCountries}
+                selectedCountry={selectedCountry}
+                onCountryChange={setSelectedCountry}
+              />
+              {!isMobile && <ExploreViewToggle view={view} onChange={setView} />}
+            </Box>
+
+            <Box sx={{ mb: 1.5 }}>
+              <ExploreMonthScrubber selectedMonthKey={selectedMonthKey} onChange={setSelectedMonthKey} />
+            </Box>
 
             {isMobile ? (
               <ExploreCardList events={filteredEvents} />
@@ -153,8 +192,10 @@ export default function ExplorePage() {
                 </Alert>
                 <ExploreCardList events={filteredEvents} />
               </>
+            ) : view === 'map' ? (
+              <ExploreMap events={filteredEvents} />
             ) : filteredEvents.length === 0 ? (
-              <Alert severity="info">No events match the current filter. Try relaxing category or country.</Alert>
+              <Alert severity="info">No events match the current filter. Try relaxing category, country, or month.</Alert>
             ) : (
               <Paper elevation={1} sx={{ p: 2, mt: 1 }}>
                 <ExploreTimeline
