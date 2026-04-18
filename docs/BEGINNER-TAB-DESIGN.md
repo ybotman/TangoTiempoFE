@@ -34,6 +34,12 @@ Two related but **distinct** backend flags:
 
 **Rule for Beginner tab:** fetch `forBeginners=true` only. (Optional future: a "show also beginner-friendly" toggle that expands to include `beginnerFriendly=true`.)
 
+**Category eligibility for `forBeginners=true`** (Thread 1 sign-off 2026-04-18, Class/Workshop/DayWorkshop/Festival per Quinn proposal, strict gate both layers):
+- Eligible: Class, Workshop, DayWorkshop, Festival
+- Ineligible: Practica, Milonga, Marathon, Encuentro, Trip, Other
+- A beginner-focused practica should be categorized as Class (the instructional intent dominates)
+- Beginner page copy reflects this — mentions "classes, workshops" (not practicas)
+
 ---
 
 ## 3. What exists today (TIEMPO-406 MVP on TEST)
