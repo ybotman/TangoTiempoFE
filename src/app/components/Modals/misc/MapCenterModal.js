@@ -771,20 +771,11 @@ const MapCenterModal = ({
     );
   };
 
-  // Auto-get user location when modal opens (if no initial location set)
-  useEffect(() => {
-    if (!open) return;
-    if (initialLocation?.lat && initialLocation?.lng) return; // Already have location
-    if (centerLat && centerLng) return; // Already set this session
-
-    // Auto-trigger location fetch after small delay for map init
-    const timer = setTimeout(() => {
-      handleUseMyLocation();
-    }, 500);
-
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  // TIEMPO-411: Auto-trigger removed. iOS Safari treats setTimeout-delayed
+  // getCurrentPosition as non-gesture and rejects with PERMISSION_DENIED,
+  // which surfaced as a confusing "Could not get location" error even when
+  // OS permission was granted. Users now pick explicitly via the "Use My
+  // Location" button (gesture → works on mobile) or the crosshair map click.
 
   // Unified save handler - saves to cloud (logged in) or session (anonymous)
   const handleSave = async () => {
