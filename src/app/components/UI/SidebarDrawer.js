@@ -50,6 +50,7 @@ import RegionalOrganizersModal from '@/components/Modals/RegionalOrganizers/Regi
 import PrivacyPolicyModal from '@/components/Modals/misc/PrivacyPolicyModal';
 import FAQModal from '@/components/Modals/misc/FAQModal';
 import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
+import ComposeMessageModal from '@/components/Modals/Messages/ComposeMessageModal';
 import { RoleContext } from '@/contexts/RoleContext';
 import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
@@ -73,6 +74,7 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
   const [regionalOrganizerOpen, setRegionalOrganizerOpen] = useState(false);
   const [systemAdminOpen, setSystemAdminOpen] = useState(false);
+  const [composeMessageOpen, setComposeMessageOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
@@ -396,6 +398,19 @@ const SidebarDrawer = ({ open, onClose }) => {
                   <ListItemText primary="Geo-Diagnostics" />
                 </ListItem>
               </Link>
+
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setComposeMessageOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <MessageIcon sx={{ color: 'teal' }} />
+                </ListItemIcon>
+                <ListItemText primary="Compose Message" secondary="Send to users by role" />
+              </ListItem>
             </>
           )}
           {selectedRole === listOfAllRoles.SYSTEM_OWNER && (
@@ -431,9 +446,22 @@ const SidebarDrawer = ({ open, onClose }) => {
                   <ListItemText primary="Geo-Diagnostics" />
                 </ListItem>
               </Link>
+
+              <ListItem
+                button="true"
+                onClick={() => {
+                  setComposeMessageOpen(true);
+                  onClose();
+                }}
+              >
+                <ListItemIcon>
+                  <MessageIcon sx={{ color: 'teal' }} />
+                </ListItemIcon>
+                <ListItemText primary="Compose Message" secondary="Send to users by role" />
+              </ListItem>
             </>
           )}
-              
+
               {/* Close authentication section */}
             </>
           )}
@@ -601,6 +629,7 @@ const SidebarDrawer = ({ open, onClose }) => {
       />
       <RegionalOrganizersModal open={regionalOrganizerOpen} onClose={() => setRegionalOrganizerOpen(false)} />
       <SystemAdminModal open={systemAdminOpen} onClose={() => setSystemAdminOpen(false)} />
+      <ComposeMessageModal open={composeMessageOpen} onClose={() => setComposeMessageOpen(false)} />
       <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
