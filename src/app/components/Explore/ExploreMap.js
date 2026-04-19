@@ -3,7 +3,8 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
-import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Alert, CircularProgress, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { colorFor, categoryLabel, CATEGORY_COLORS } from './exploreConstants';
@@ -39,6 +40,10 @@ function resolveVenueGeo(e) {
 
 export default function ExploreMap({ events }) {
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const markerRadius = isMobile ? 11 : 7;
+  const popupMinWidth = isMobile ? 140 : 180;
 
   const { positioned, skipped } = useMemo(() => {
     const groupCounters = new Map();
@@ -67,12 +72,15 @@ export default function ExploreMap({ events }) {
     return { positioned: out, skipped: skip };
   }, [events]);
 
-  if (!events || events.length === 0) {
-    return <Alert severity="info">No events match the current filter.</Alert>;
-  }
+  const noEvents = !events || events.length === 0;
 
   return (
     <Box sx={{ position: 'relative' }}>
+      {noEvents && (
+        <Alert severity="info" sx={{ mb: 1 }}>
+          No events match the current filter.
+        </Alert>
+      )}
       <Box
         sx={{
           height: { xs: 420, md: 560 },
@@ -101,7 +109,7 @@ export default function ExploreMap({ events }) {
               <CircleMarker
                 key={e._id}
                 center={ll}
-                radius={7}
+                radius={markerRadius}
                 pathOptions={{
                   color: isAI ? '#d97706' : '#ffffff',
                   weight: isAI ? 2 : 1,
@@ -112,7 +120,7 @@ export default function ExploreMap({ events }) {
                 eventHandlers={{ click: () => router.push(`/calendar?event=${e._id}`) }}
               >
                 <Popup>
-                  <Box sx={{ minWidth: 180 }}>
+                  <Box sx={{ minWidth: popupMinWidth, maxWidth: isMobile ? 220 : 280 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color }}>
                       {e.title}
                     </Typography>
@@ -138,15 +146,36 @@ export default function ExploreMap({ events }) {
         </MapContainer>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1.25, justifyContent: 'center', p: 0.5, mt: 1, fontSize: '0.7rem', color: '#6b7280', flexWrap: 'wrap' }}>
+      <Box sx={{
+        display: 'flex',
+        gap: { xs: 0.75, sm: 1.25 },
+        justifyContent: 'center',
+        p: 0.5,
+        mt: 1,
+        fontSize: { xs: '0.62rem', sm: '0.7rem' },
+        color: '#6b7280',
+        flexWrap: 'wrap',
+      }}>
         {Object.entries(CATEGORY_COLORS).map(([name, color]) => (
           <Box key={name} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4 }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', background: color, border: '1px solid #fff' }} />
+            <Box sx={{
+              width: { xs: 8, sm: 10 },
+              height: { xs: 8, sm: 10 },
+              borderRadius: '50%',
+              background: color,
+              border: '1px solid #fff',
+            }} />
             {name}
           </Box>
         ))}
         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4 }}>
-          <Box sx={{ width: 10, height: 10, borderRadius: '50%', background: '#9ca3af', border: '2px dashed #d97706' }} />
+          <Box sx={{
+            width: { xs: 8, sm: 10 },
+            height: { xs: 8, sm: 10 },
+            borderRadius: '50%',
+            background: '#9ca3af',
+            border: '2px dashed #d97706',
+          }} />
           AI-Found
         </Box>
       </Box>
