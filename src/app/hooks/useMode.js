@@ -15,7 +15,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 // Fix: pathname is authoritative. Cookie/userPref only influence navigation
 // DECISIONS in setMode (where to land on fresh arrival), not current state.
 
-const MODES = ['beginner', 'local', 'explore'];
+const MODES = ['local', 'organizer', 'explore', 'beginner'];
 const DEFAULT_MODE = 'local';
 const COOKIE_NAME = 'tt_mode';
 
@@ -33,6 +33,7 @@ export function useMode() {
     if (!pathname) return null;
     if (pathname.startsWith('/explore')) return 'explore';
     if (pathname.startsWith('/beginner')) return 'beginner';
+    if (pathname.startsWith('/organizer')) return 'organizer';
     if (pathname.startsWith('/calendar')) return 'local'; // includes /calendar/boston
     return null;
   }, [pathname]);
@@ -56,6 +57,10 @@ export function useMode() {
     }
     if (target === 'beginner') {
       router.push('/beginner');
+      return;
+    }
+    if (target === 'organizer') {
+      router.push('/organizer');
       return;
     }
     // Local: if already on Boston variant, stay there; otherwise use /calendar.
