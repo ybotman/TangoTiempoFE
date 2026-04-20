@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Box, Typography, Chip, Stack, Divider, Tooltip, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RepeatIcon from '@mui/icons-material/Repeat';
+import SchoolIcon from '@mui/icons-material/School';
+import WavingHandIcon from '@mui/icons-material/WavingHand';
 import dayjs from 'dayjs';
 import { firstInstanceInWindow } from '@/utils/nextInstance';
 
@@ -16,6 +18,25 @@ import { firstInstanceInWindow } from '@/utils/nextInstance';
 // the top of the list — not in this scope.
 
 const WINDOW_DAYS = 90;
+
+// Broader category palette than Explore's 5-color filtered set — Local
+// events cover Milonga/Practica/Class that don't appear in Explore. Kept
+// local to this file so Explore's legend stays lean.
+const CATEGORY_COLORS = {
+  Milonga: '#ef4444',     // red
+  Practica: '#14b8a6',    // teal
+  Class: '#3b82f6',       // blue
+  Workshop: '#ec4899',    // pink
+  DayWorkshop: '#d946ef', // magenta
+  Festival: '#e94560',    // pink-red
+  Marathon: '#f97316',    // orange
+  Encuentro: '#22c55e',   // green
+  Concert: '#a855f7',     // purple
+  Show: '#f59e0b',        // amber
+  Trip: '#0ea5e9',        // sky
+  Other: '#6b7280',       // grey
+};
+const categoryColor = (c) => (c && CATEGORY_COLORS[c]) || CATEGORY_COLORS.Other;
 
 function isAIish(e) {
   return Boolean(e?.isDiscovered || e?.isAiGenerated);
@@ -200,34 +221,82 @@ export default function OrganizerGroupedList({ events }) {
                       >
                         {title}
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
-                        {e.categoryFirst && (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center', width: '100%' }}>
+                        {[e.categoryFirst, e.categorySecond, e.categoryThird]
+                          .filter(Boolean)
+                          .map((cat, idx) => (
+                            <Chip
+                              key={`cat-${idx}`}
+                              label={cat}
+                              size="small"
+                              sx={{
+                                fontSize: '0.6rem',
+                                height: 18,
+                                bgcolor: ai ? '#f8fafc' : categoryColor(cat),
+                                color: ai ? '#94a3b8' : '#fff',
+                                fontWeight: 600,
+                                border: ai ? '1px solid #e2e8f0' : 'none',
+                              }}
+                            />
+                          ))}
+                        {(e.venueAbbr || e.venueName) && (
                           <Chip
-                            label={e.categoryFirst}
+                            label={e.venueAbbr || e.venueName}
                             size="small"
+                            variant="outlined"
                             sx={{
                               fontSize: '0.6rem',
                               height: 18,
-                              bgcolor: ai ? '#f8fafc' : 'rgba(0,0,0,0.05)',
+                              maxWidth: 160,
                               color: ai ? '#94a3b8' : '#475569',
-                              border: '1px solid',
-                              borderColor: ai ? '#e2e8f0' : 'rgba(0,0,0,0.08)',
+                              borderColor: ai ? '#e2e8f0' : 'rgba(0,0,0,0.15)',
+                              '& .MuiChip-label': {
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              },
                             }}
                           />
                         )}
-                        {e.masteredCityName && (
-                          <Chip
-                            label={e.masteredCityName}
-                            size="small"
-                            sx={{
-                              fontSize: '0.6rem',
-                              height: 18,
-                              bgcolor: ai ? '#f8fafc' : 'rgba(25,118,210,0.08)',
-                              color: ai ? '#94a3b8' : '#1976d2',
-                              border: '1px solid',
-                              borderColor: ai ? '#e2e8f0' : 'rgba(25,118,210,0.2)',
-                            }}
-                          />
+                        {/* Right-side beginner markers — distinct square-ish shape, green palette */}
+                        <Box sx={{ flex: 1 }} />
+                        {e.forBeginners && (
+                          <Tooltip title="Organizer has flagged this as a dedicated beginner event" arrow>
+                            <Chip
+                              icon={<SchoolIcon sx={{ fontSize: 12, color: ai ? '#94a3b8' : '#15803d !important' }} />}
+                              label="For Beg"
+                              size="small"
+                              sx={{
+                                fontSize: '0.58rem',
+                                height: 18,
+                                borderRadius: '4px',
+                                bgcolor: ai ? '#f8fafc' : 'rgba(34,197,94,0.18)',
+                                color: ai ? '#94a3b8' : '#15803d',
+                                fontWeight: 700,
+                                border: '1px solid',
+                                borderColor: ai ? '#e2e8f0' : 'rgba(34,197,94,0.4)',
+                                '& .MuiChip-icon': { ml: '3px', mr: '-3px' },
+                              }}
+                            />
+                          </Tooltip>
+                        )}
+                        {e.beginnerFriendly && (
+                          <Tooltip title="Welcoming to beginners (not exclusively beginner)" arrow>
+                            <Chip
+                              icon={<WavingHandIcon sx={{ fontSize: 12, color: ai ? '#94a3b8' : '#64748b !important' }} />}
+                              label="Beg-friendly"
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                fontSize: '0.58rem',
+                                height: 18,
+                                borderRadius: '4px',
+                                color: ai ? '#94a3b8' : '#64748b',
+                                borderColor: ai ? '#e2e8f0' : '#cbd5e1',
+                                '& .MuiChip-icon': { ml: '3px', mr: '-3px' },
+                              }}
+                            />
+                          </Tooltip>
                         )}
                       </Box>
                     </Box>
@@ -266,8 +335,13 @@ OrganizerGroupedList.propTypes = {
       ownerOrganizerName: PropTypes.string,
       ownerOrganizerShortName: PropTypes.string,
       ownerOrganizerID: PropTypes.string,
-      masteredCityName: PropTypes.string,
+      venueName: PropTypes.string,
+      venueAbbr: PropTypes.string,
       categoryFirst: PropTypes.string,
+      categorySecond: PropTypes.string,
+      categoryThird: PropTypes.string,
+      forBeginners: PropTypes.bool,
+      beginnerFriendly: PropTypes.bool,
       isDiscovered: PropTypes.bool,
       isAiGenerated: PropTypes.bool,
     })
