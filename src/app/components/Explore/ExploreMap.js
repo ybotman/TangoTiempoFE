@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
-import { Box, Typography, Alert, CircularProgress, useMediaQuery } from '@mui/material';
+import { Box, Typography, Alert, CircularProgress, Button, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
@@ -29,13 +29,21 @@ const Popup = dynamic(() => import('react-leaflet').then((m) => m.Popup), { ssr:
 function resolveVenueGeo(e) {
   const vg = e.venueGeolocation;
   if (!vg) return null;
+  // TIEMPO-414: Number.isFinite catches NaN / Infinity / null / undefined that
+  // `typeof x === 'number'` silently lets through for `NaN`.
   // MongoDB GeoJSON: { type: 'Point', coordinates: [lng, lat] }
   if (Array.isArray(vg.coordinates) && vg.coordinates.length >= 2) {
     const [lng, lat] = vg.coordinates;
-    if (typeof lat === 'number' && typeof lng === 'number') return [lat, lng];
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
   }
-  if (typeof vg.lat === 'number' && typeof vg.lng === 'number') return [vg.lat, vg.lng];
+  if (Number.isFinite(vg.lat) && Number.isFinite(vg.lng)) return [vg.lat, vg.lng];
   return null;
+}
+
+function truncate(str, n) {
+  if (!str) return '';
+  const clean = String(str).replace(/\s+/g, ' ').trim();
+  return clean.length > n ? `${clean.slice(0, n).trim()}…` : clean;
 }
 
 export default function ExploreMap({ events }) {
@@ -112,32 +120,60 @@ export default function ExploreMap({ events }) {
                 radius={markerRadius}
                 pathOptions={{
                   color: isAI ? '#d97706' : '#ffffff',
-                  weight: isAI ? 2 : 1,
+                  weight: isAI ? 2 : 2,
                   dashArray: isAI ? '3 2' : undefined,
                   fillColor: color,
                   fillOpacity: 0.92,
                 }}
-                eventHandlers={{ click: () => router.push(`/calendar?event=${e._id}`) }}
               >
                 <Popup>
-                  <Box sx={{ minWidth: popupMinWidth, maxWidth: isMobile ? 220 : 280 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color }}>
+                  <Box sx={{ minWidth: popupMinWidth, maxWidth: isMobile ? 240 : 300 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color, lineHeight: 1.3, mb: 0.25 }}>
                       {e.title}
                     </Typography>
-                    <Typography variant="caption" sx={{ display: 'block' }}>
+                    <Typography variant="caption" sx={{ display: 'block', color: 'text.primary' }}>
                       {dayjs(e.startDate).format('MMM D')} – {dayjs(e.endDate).format('MMM D, YYYY')}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
-                      {[e.masteredCityName, e.masteredCountryName].filter(Boolean).join(', ')}
-                    </Typography>
-                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontWeight: 600, color }}>
-                      {categoryLabel(e.categoryFirst)}
-                    </Typography>
-                    {isAI && (
-                      <Typography variant="caption" sx={{ display: 'block', mt: 0.25, color: '#d97706', fontWeight: 700 }}>
-                        🤖 AI-Found
+                    {(e.masteredCityName || e.masteredCountryName) && (
+                      <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+                        {[e.masteredCityName, e.masteredCountryName].filter(Boolean).join(', ')}
                       </Typography>
                     )}
+                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontWeight: 600, color }}>
+                      {categoryLabel(e.categoryFirst)}
+                      {isAI && <span style={{ marginLeft: 6, color: '#d97706', fontWeight: 700 }}>🤖 AI-Found</span>}
+                    </Typography>
+                    {e.description && (
+                      <Typography
+                        variant="caption"
+                        color="textSecondary"
+                        sx={{
+                          display: 'block',
+                          mt: 0.75,
+                          lineHeight: 1.4,
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        {truncate(e.description, 180)}
+                      </Typography>
+                    )}
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => router.push(`/calendar?event=${e._id}`)}
+                      sx={{
+                        mt: 1,
+                        bgcolor: color,
+                        color: '#fff',
+                        fontSize: '0.7rem',
+                        textTransform: 'none',
+                        py: 0.25,
+                        '&:hover': { bgcolor: color, filter: 'brightness(0.9)' },
+                      }}
+                      fullWidth
+                    >
+                      View full event →
+                    </Button>
                   </Box>
                 </Popup>
               </CircleMarker>
