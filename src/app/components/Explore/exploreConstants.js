@@ -4,12 +4,15 @@
 
 // TIEMPO-404 D.4: Trip + Class removed per Toby. Class is already excluded
 // by the backend travelWorthy rule; Trip events now render as Other grey.
+// TIEMPO-414: Repalette for higher hue-distance — Festival was pink-red and
+// Workshop was pink, nearly indistinguishable on the map. Now red / orange /
+// green / purple / grey spans the hue wheel cleanly.
 export const CATEGORY_COLORS = {
-  Festival: '#e94560',
-  Marathon: '#f97316',
-  Encuentro: '#22c55e',
-  Workshop: '#ec4899',
-  Other: '#6b7280',
+  Festival: '#dc2626',  // red
+  Marathon: '#f97316',  // orange
+  Encuentro: '#22c55e', // green
+  Workshop: '#8b5cf6',  // purple
+  Other: '#6b7280',     // grey
 };
 
 export const categoryLabel = (c) => (c && c !== 'unknown' ? c : 'Other');
