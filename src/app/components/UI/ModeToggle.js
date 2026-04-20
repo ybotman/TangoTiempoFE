@@ -6,14 +6,16 @@ import { useTheme } from '@mui/material/styles';
 import { useMode } from '@/hooks/useMode';
 
 // TIEMPO-408: custom pill segmented control with sliding indicator.
+// TIEMPO-413: 4-wide — order is LOCAL -> ORG -> EXPLORE -> BEGINNER.
 // Each mode has its own color; selected state uses the color prominently.
 // Mobile: bigger abbreviation + tiny full-word caption below.
 // Desktop: full label only.
 
 const OPTIONS = [
-  { value: 'beginner', label: 'Beginner', short: 'BEG', color: '#22c55e' }, // green — welcoming
-  { value: 'local',    label: 'Local',    short: 'LOC', color: '#3b82f6' }, // blue — home/familiar
-  { value: 'explore',  label: 'Explore',  short: 'EXP', color: '#f59e0b' }, // amber — travel/adventure
+  { value: 'local',     label: 'Local',     short: 'LOC', color: '#3b82f6' }, // blue — home/familiar
+  { value: 'organizer', label: 'Organizer', short: 'ORG', color: '#8b5cf6' }, // purple — community/who
+  { value: 'explore',   label: 'Explore',   short: 'EXP', color: '#f59e0b' }, // amber — travel/adventure
+  { value: 'beginner',  label: 'Beginner',  short: 'BEG', color: '#22c55e' }, // green — welcoming
 ];
 
 export default function ModeToggle() {
@@ -37,7 +39,7 @@ export default function ModeToggle() {
         borderRadius: 999,
         background: 'rgba(0, 0, 0, 0.06)',
         height: isMobile ? 44 : 34,
-        minWidth: isMobile ? 180 : 260,
+        minWidth: isMobile ? 240 : 340,
       }}
     >
       {/* Sliding white pill. Hidden when no tab is active (non-mode route). */}
@@ -79,7 +81,7 @@ export default function ModeToggle() {
               position: 'relative',
               zIndex: 1,
               flex: 1,
-              minWidth: isMobile ? 58 : 80,
+              minWidth: isMobile ? 54 : 78,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
