@@ -24,6 +24,13 @@ import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 const NULL_TOKEN = '__NULL__'; // sentinel for "no country" / "no city"
 
+// TIEMPO-419 iteration: local-recurring categories are NEVER travelWorthy
+// candidates — exclude them at the pull to reduce noise while Toby hunts
+// for events that SHOULD be flagged TW but aren't.
+const LOCAL_CATEGORY_EXCLUDE = new Set(['Class', 'Practica', 'Milonga']);
+const PAGE_LIMIT = 1000;     // request size (BE currently silent-caps at 500)
+const MAX_PAGES = 20;        // safety valve — 20 pages × 1000 = 20k events
+
 function useHostnameGate() {
   const [allowed, setAllowed] = useState(null); // null = deciding, true/false = decided
   useEffect(() => {
@@ -45,6 +52,7 @@ export default function ExplorerXPage() {
   const allowed = useHostnameGate();
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
+  const [loadProgress, setLoadProgress] = useState({ pagesLoaded: 0, totalPages: 0, totalEvents: 0 });
 
   // Filter state
   const [countryPick, setCountryPick] = useState(''); // '' = all, NULL_TOKEN = null-only, else exact match
@@ -55,13 +63,51 @@ export default function ExplorerXPage() {
   useEffect(() => {
     if (allowed !== true) return;
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
-    axios
-      .get(`${getApiBaseUrl()}/api/events`, { params: { appId, limit: 1000 } })
-      .then((res) => {
-        const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
-        setEvents(list.filter((e) => !isUS(e)));
-      })
-      .catch((err) => setError(err.message || 'Failed to load events'));
+    const baseUrl = `${getApiBaseUrl()}/api/events`;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const accumulated = [];
+        let page = 1;
+        let totalPages = 1;
+        let totalEvents = 0;
+
+        while (page <= totalPages && page <= MAX_PAGES) {
+          const res = await axios.get(baseUrl, {
+            params: { appId, limit: PAGE_LIMIT, page },
+          });
+          if (cancelled) return;
+
+          const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
+          const pagination = res.data?.pagination || {};
+          totalPages = pagination.pages || 1;
+          totalEvents = pagination.total || accumulated.length + list.length;
+
+          accumulated.push(...list);
+          setLoadProgress({ pagesLoaded: page, totalPages, totalEvents });
+
+          if (list.length === 0) break;
+          page += 1;
+        }
+
+        if (cancelled) return;
+
+        // Filter pipeline:
+        // 1) exclude US events
+        // 2) exclude local-recurring categories (Class/Practica/Milonga)
+        //    — these are never TW candidates so remove noise
+        const filtered = accumulated.filter(
+          (e) => !isUS(e) && !LOCAL_CATEGORY_EXCLUDE.has(e.categoryFirst)
+        );
+        setEvents(filtered);
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Failed to load events');
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [allowed]);
 
   const availableCountries = useMemo(() => {
@@ -122,8 +168,15 @@ export default function ExplorerXPage() {
         Explorer-X
       </Typography>
       <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 2 }}>
-        TEST-only research view · non-US events (appId=1) · {filtered.length} shown
-        {events && ` of ${events.length} total`}
+        TEST-only research view · non-US events, Class/Practica/Milonga excluded (appId=1) ·{' '}
+        {filtered.length} shown
+        {events && ` of ${events.length} after filter`}
+        {loadProgress.totalPages > 1 && (
+          <>
+            {' '}· loaded {loadProgress.pagesLoaded}/{loadProgress.totalPages} pages
+            {' '}({loadProgress.totalEvents} total events in corpus)
+          </>
+        )}
       </Typography>
 
       <Paper elevation={0} sx={{ p: 2, mb: 2, border: '1px solid rgba(0,0,0,0.08)' }}>
