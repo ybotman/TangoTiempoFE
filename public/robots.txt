@@ -2,6 +2,11 @@
 User-agent: *
 Allow: /
 
+# TIEMPO-417: /explore is curated travel-worthy editorial data — not for
+# search-engine indexing. Polite bots obey; non-compliant ones are
+# handled BE-lane (rate limit + Referer check, separate ticket).
+Disallow: /explore
+
 # Host
 Host: https://www.tangotiempo.com
 
