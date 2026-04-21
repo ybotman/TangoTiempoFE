@@ -65,8 +65,10 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
   return (
     <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
       {/* TIEMPO-408 Row 1 (primary chrome): brand · city · mode tabs.
-          Boston embed skips the new chrome and shows only ModeToggle as-was. */}
-      {!isBoston ? (
+          TIEMPO-415: Boston embed hides Row 1 entirely — legacy audience
+          stays in their owned space; the TT email campaign pulls them
+          forward. They still have sidebar/search via Row 2. */}
+      {!isBoston && (
         <Box
           sx={{
             width: '100%',
@@ -86,8 +88,6 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             <ModeToggle />
           </Box>
         </Box>
-      ) : (
-        <ModeToggle />
       )}
 
       {/* TIEMPO-408 Row 2 (utility): menu · search · filter · ai · messages · user */}
