@@ -20,12 +20,12 @@ import dayjs from 'dayjs';
 
 // TIEMPO-408 Explore pass 2 (Toby guidance):
 // - Categories filter: multi-select (Set)
-// - Country filter: single-select (string | null)
+// - Country filter: multi-select (Set) — TIEMPO-416 symmetry with categories
 // - AI-Found visual: made prominent in card/list and visx bars
 // - Desktop fallback to card list when no country is resolved yet
 
 const COOKIE_CATS = 'tt_explore_categories';
-const COOKIE_COUNTRY = 'tt_explore_country';
+const COOKIE_COUNTRIES = 'tt_explore_countries';
 const COOKIE_VIEW = 'tt_explore_view';
 
 const readSetCookie = (name) => {
@@ -45,11 +45,7 @@ export default function ExplorePage() {
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
   const [selectedCategories, setSelectedCategoriesState] = useState(() => readSetCookie(COOKIE_CATS) || new Set());
-  const [selectedCountry, setSelectedCountryState] = useState(() => {
-    if (typeof window === 'undefined') return null;
-    const raw = Cookies.get(COOKIE_COUNTRY);
-    return raw || null;
-  });
+  const [selectedCountries, setSelectedCountriesState] = useState(() => readSetCookie(COOKIE_COUNTRIES) || new Set());
   const [selectedMonthKey, setSelectedMonthKey] = useState(null); // 'YYYY-MM' or null = all in window
   const [offsetMonths, setOffsetMonths] = useState(0); // <<>> page offset, multiples of 6
   const [view, setViewState] = useState(() => {
@@ -68,10 +64,9 @@ export default function ExplorePage() {
     writeSetCookie(COOKIE_CATS, next);
   }, []);
 
-  const setSelectedCountry = useCallback((next) => {
-    setSelectedCountryState(next);
-    if (next === null) Cookies.remove(COOKIE_COUNTRY);
-    else Cookies.set(COOKIE_COUNTRY, next, { expires: 365, sameSite: 'Lax' });
+  const setSelectedCountries = useCallback((next) => {
+    setSelectedCountriesState(next);
+    writeSetCookie(COOKIE_COUNTRIES, next);
   }, []);
 
   useEffect(() => {
@@ -92,12 +87,14 @@ export default function ExplorePage() {
     return Array.from(new Set(events.map((e) => e.masteredCountryName).filter(Boolean))).sort();
   }, [events]);
 
-  // If selectedCountry is no longer in the available set, clear it
+  // Drop any selected country that's no longer in the available set
   useEffect(() => {
-    if (selectedCountry && events && !availableCountries.includes(selectedCountry)) {
-      setSelectedCountry(null);
+    if (!events || selectedCountries.size === 0) return;
+    const pruned = new Set(Array.from(selectedCountries).filter((c) => availableCountries.includes(c)));
+    if (pruned.size !== selectedCountries.size) {
+      setSelectedCountries(pruned);
     }
-  }, [events, availableCountries, selectedCountry, setSelectedCountry]);
+  }, [events, availableCountries, selectedCountries, setSelectedCountries]);
 
   // 12-month rolling window anchored to offsetMonths from today. Arrows on
   // the scrubber shift this window forward/backward by 6-month increments.
@@ -119,7 +116,7 @@ export default function ExplorePage() {
       const display = expandToNextInstance(e, fromMs, toMs);
       if (!display) continue;
 
-      if (selectedCountry && display.masteredCountryName !== selectedCountry) continue;
+      if (selectedCountries.size > 0 && !selectedCountries.has(display.masteredCountryName)) continue;
       if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(display.categoryFirst))) continue;
 
       if (selectedMonthKey) {
@@ -132,7 +129,7 @@ export default function ExplorePage() {
       out.push(display);
     }
     return out;
-  }, [events, selectedCountry, selectedCategories, selectedMonthKey, windowStart, windowEnd]);
+  }, [events, selectedCountries, selectedCategories, selectedMonthKey, windowStart, windowEnd]);
 
   // Visx timeline needs country rows — derive from filtered set
   const sortedActiveCountries = useMemo(
@@ -183,8 +180,8 @@ export default function ExplorePage() {
                 selectedCategories={selectedCategories}
                 onCategoriesChange={setSelectedCategories}
                 availableCountries={availableCountries}
-                selectedCountry={selectedCountry}
-                onCountryChange={setSelectedCountry}
+                selectedCountries={selectedCountries}
+                onCountriesChange={setSelectedCountries}
               />
               {!isMobile && <ExploreViewToggle view={view} onChange={setView} />}
             </Box>
