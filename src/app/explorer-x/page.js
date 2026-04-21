@@ -251,7 +251,7 @@ export default function ExplorerXPage() {
                 <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>Category</TableCell>
                 <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>TW</TableCell>
                 <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>Start</TableCell>
-                <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>End</TableCell>
+                <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>Dur</TableCell>
                 <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>Venue city (raw)</TableCell>
                 <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>masteredCity</TableCell>
                 <TableCell sx={{ fontSize: '0.7rem', fontWeight: 700 }}>Venue ctry (raw)</TableCell>
@@ -285,7 +285,11 @@ export default function ExplorerXPage() {
                       {e.startDate ? dayjs(e.startDate).format('YYYY-MM-DD') : ''}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                      {e.endDate ? dayjs(e.endDate).format('YYYY-MM-DD') : ''}
+                      {(() => {
+                        if (!e.startDate || !e.endDate) return '';
+                        const days = Math.max(1, Math.ceil(dayjs(e.endDate).diff(dayjs(e.startDate), 'day', true)));
+                        return `${days}d`;
+                      })()}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', color: '#64748b' }}>
                       {e.venueCityName || ''}
