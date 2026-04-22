@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/navigation';
 import { Group } from '@visx/group';
-import { scaleTime, scaleBand } from '@visx/scale';
+import { scaleTime, scaleOrdinal } from '@visx/scale';
 import { AxisBottom, AxisLeft } from '@visx/axis';
 import { Zoom } from '@visx/zoom';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
@@ -17,9 +17,10 @@ import { CATEGORY_COLORS, colorFor } from './exploreConstants';
 
 const MARGIN = { top: 16, right: 32, bottom: 44, left: 160 };
 const MIN_BAR_WIDTH = 10;
-const ROW_PADDING = 0.3;
 const DEFAULT_WIDTH = 1100;
 const DEFAULT_HEIGHT_BASE = 480;
+const LANE_H = 24;   // px per sub-lane within a country band
+const LANE_GAP = 8;  // px gap between country bands
 
 const SCALE_X_MIN = 0.5;
 const SCALE_X_MAX = 8;
@@ -51,6 +52,40 @@ function formatDateRange(start, end) {
 
 const INITIAL_MATRIX = { scaleX: 1, scaleY: 1, translateX: 0, translateY: 0, skewX: 0, skewY: 0 };
 
+function assignEventLanes(events) {
+  const byCountry = new Map();
+  for (const e of events) {
+    const c = e.masteredCountryName || 'Other';
+    if (!byCountry.has(c)) byCountry.set(c, []);
+    byCountry.get(c).push(e);
+  }
+  const laneOf = new Map();   // _id → lane index (0-based)
+  const laneCount = new Map(); // country → number of lanes needed
+  for (const [country, evts] of byCountry) {
+    const sorted = [...evts].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    const laneEnd = []; // laneEnd[i] = end-ms of the last event placed in lane i
+    for (const e of sorted) {
+      const start = new Date(e.startDate).getTime();
+      const end   = new Date(e.endDate).getTime();
+      let placed = false;
+      for (let i = 0; i < laneEnd.length; i++) {
+        if (start >= laneEnd[i]) {
+          laneEnd[i] = end;
+          laneOf.set(e._id, i);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        laneOf.set(e._id, laneEnd.length);
+        laneEnd.push(end);
+      }
+    }
+    laneCount.set(country, Math.max(1, laneEnd.length));
+  }
+  return { laneOf, laneCount };
+}
+
 export default function ExploreTimeline({ events, countries, dateRange, onXScaleReady }) {
   const router = useRouter();
   const { tooltipData, tooltipLeft, tooltipTop, tooltipOpen, showTooltip, hideTooltip } = useTooltip();
@@ -68,18 +103,46 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
     return () => ro.disconnect();
   }, [width]);
 
-  const rowCount = Math.max(1, countries.length);
-  const height = Math.max(DEFAULT_HEIGHT_BASE, MARGIN.top + MARGIN.bottom + rowCount * 44);
   const xMax = width - MARGIN.left - MARGIN.right;
-  const yMax = height - MARGIN.top - MARGIN.bottom;
 
   const baseXScale = React.useMemo(
     () => scaleTime({ domain: dateRange, range: [0, xMax] }),
     [dateRange, xMax]
   );
-  const yScale = React.useMemo(
-    () => scaleBand({ domain: countries, range: [0, yMax], padding: ROW_PADDING }),
-    [countries, yMax]
+
+  const { laneOf, laneCount } = React.useMemo(() => assignEventLanes(events), [events]);
+
+  // yLayout[country] = { y: number (top of band), height: number, center: number }
+  const yLayout = React.useMemo(() => {
+    const layout = {};
+    let y = 0;
+    for (const country of countries) {
+      const lanes = laneCount.get(country) || 1;
+      const h = lanes * LANE_H;
+      layout[country] = { y, height: h, center: y + h / 2, lanes };
+      y += h + LANE_GAP;
+    }
+    return layout;
+  }, [countries, laneCount]);
+
+  const totalContentH = React.useMemo(() => {
+    if (!countries.length) return DEFAULT_HEIGHT_BASE - MARGIN.top - MARGIN.bottom;
+    const last = yLayout[countries[countries.length - 1]];
+    return last ? last.y + last.height : 200;
+  }, [countries, yLayout]);
+
+  const yMax = totalContentH;
+  const height = Math.max(DEFAULT_HEIGHT_BASE, MARGIN.top + yMax + MARGIN.bottom + 44);
+
+  // Y-axis scale: ordinal scale mapping country → center Y of its band
+  // Used by AxisLeft so labels appear centered in each (possibly expanded) band.
+  const yAxisScale = React.useMemo(
+    () =>
+      scaleOrdinal({
+        domain: countries,
+        range: countries.map((c) => yLayout[c]?.center ?? 0),
+      }),
+    [countries, yLayout]
   );
 
   // Parent gets the (un-transformed) xScale + width for DensityBar alignment
@@ -139,7 +202,7 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                 {/* Y-axis (fixed, outside zoom transform) */}
                 <Group left={MARGIN.left} top={MARGIN.top}>
                   <AxisLeft
-                    scale={yScale}
+                    scale={yAxisScale}
                     stroke="#9ca3af"
                     tickStroke="#9ca3af"
                     tickLabelProps={() => ({ fill: '#374151', fontSize: 12, textAnchor: 'end', dx: -4, dy: '0.33em' })}
@@ -158,6 +221,9 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                   onMouseMove={zoom.dragMove}
                   onMouseUp={zoom.dragEnd}
                   onMouseLeave={() => { if (zoom.isDragging) zoom.dragEnd(); }}
+                  onTouchStart={zoom.dragStart}
+                  onTouchMove={zoom.dragMove}
+                  onTouchEnd={zoom.dragEnd}
                   onDoubleClick={zoom.reset}
                   onWheel={(e) => {
                     e.preventDefault();
@@ -168,16 +234,16 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
 
                 {/* Zoomed content — gridlines, x-axis, bars — clipped to chart area */}
                 <Group left={MARGIN.left} top={MARGIN.top} clipPath="url(#tt-timeline-clip)">
-                  {/* Horizontal gridlines per country */}
+                  {/* Horizontal gridlines at bottom edge of each country band */}
                   {countries.map((country) => {
-                    const y = yScale(country) + yScale.bandwidth() / 2;
+                    const ly = yLayout[country];
+                    if (!ly) return null;
                     return (
                       <line
                         key={country}
-                        x1={0}
-                        x2={xMax}
-                        y1={y}
-                        y2={y}
+                        x1={0} x2={xMax}
+                        y1={ly.y + ly.height + LANE_GAP / 2}
+                        y2={ly.y + ly.height + LANE_GAP / 2}
                         stroke="#e5e7eb"
                         strokeDasharray="2 4"
                       />
@@ -195,51 +261,34 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
 
                   {events.map((e) => {
                     const start = new Date(e.startDate);
-                    const end = new Date(e.endDate);
+                    const end   = new Date(e.endDate);
                     const x1 = zoomedXScale(start);
                     const x2 = zoomedXScale(end);
                     const barW = Math.max(MIN_BAR_WIDTH, x2 - x1);
-                    const rowY = yScale(e.masteredCountryName);
-                    if (rowY === undefined) return null;
+                    const ly = yLayout[e.masteredCountryName];
+                    if (!ly) return null;
                     if (x1 + barW < -10 || x1 > xMax + 10) return null;
-                    const barH = yScale.bandwidth();
+                    const lane = laneOf.get(e._id) ?? 0;
+                    const barY = ly.y + lane * LANE_H + 1;   // 1px top padding within lane
+                    const barH = LANE_H - 2;                  // 2px bottom gap within lane
                     const isAI = Boolean(e.isAiGenerated || e.isDiscovered);
                     const categoryColor = colorFor(e.categoryFirst);
                     const commonProps = {
-                      x: x1,
-                      y: rowY,
-                      width: barW,
-                      height: barH,
-                      rx: 3,
-                      ry: 3,
+                      x: x1, y: barY, width: barW, height: barH, rx: 3, ry: 3,
                       style: { cursor: 'pointer' },
                       onMouseMove: (evt) => handleBarMove(evt, e),
                       onMouseLeave: hideTooltip,
                       onClick: (evt) => { evt.stopPropagation(); handleClick(e); },
                       onMouseDown: (evt) => evt.stopPropagation(),
+                      onTouchStart: zoom.dragStart,
+                      onTouchMove: zoom.dragMove,
+                      onTouchEnd: zoom.dragEnd,
                     };
                     return (
                       <g key={e._id}>
-                        {/* Category color base */}
-                        <rect
-                          {...commonProps}
-                          fill={categoryColor}
-                          stroke={isAI ? '#d97706' : '#fff'}
-                          strokeWidth={isAI ? 1.5 : 1}
-                          strokeDasharray={isAI ? '3 2' : undefined}
-                        />
-                        {/* AI-Found overlay: diagonal stripes make AI bars visually distinct */}
+                        <rect {...commonProps} fill={categoryColor} stroke={isAI ? '#d97706' : '#fff'} strokeWidth={isAI ? 1.5 : 1} strokeDasharray={isAI ? '3 2' : undefined} />
                         {isAI && (
-                          <rect
-                            x={x1}
-                            y={rowY}
-                            width={barW}
-                            height={barH}
-                            rx={3}
-                            ry={3}
-                            fill="url(#tt-ai-stripes)"
-                            style={{ pointerEvents: 'none' }}
-                          />
+                          <rect x={x1} y={barY} width={barW} height={barH} rx={3} ry={3} fill="url(#tt-ai-stripes)" style={{ pointerEvents: 'none' }} />
                         )}
                       </g>
                     );

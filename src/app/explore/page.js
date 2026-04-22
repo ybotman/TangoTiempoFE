@@ -13,19 +13,19 @@ import ExploreViewToggle from '@/components/Explore/ExploreViewToggle';
 import ExploreMonthScrubber from '@/components/Explore/ExploreMonthScrubber';
 import ExploreMap from '@/components/Explore/ExploreMap';
 import DensityBar from '@/components/Explore/DensityBar';
-import { categoryLabel } from '@/components/Explore/exploreConstants';
+import { categoryLabel, regionFor } from '@/components/Explore/exploreConstants';
 import { expandToNextInstance } from '@/utils/nextInstance';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import dayjs from 'dayjs';
 
 // TIEMPO-408 Explore pass 2 (Toby guidance):
 // - Categories filter: multi-select (Set)
-// - Country filter: multi-select (Set) — TIEMPO-416 symmetry with categories
+// - Region filter: multi-select (Set) — continent/region grouping replaces country filter
 // - AI-Found visual: made prominent in card/list and visx bars
 // - Desktop fallback to card list when no country is resolved yet
 
 const COOKIE_CATS = 'tt_explore_categories';
-const COOKIE_COUNTRIES = 'tt_explore_countries';
+const COOKIE_REGIONS = 'tt_explore_regions';
 const COOKIE_VIEW = 'tt_explore_view';
 
 const readSetCookie = (name) => {
@@ -45,13 +45,20 @@ export default function ExplorePage() {
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(null);
   const [selectedCategories, setSelectedCategoriesState] = useState(() => readSetCookie(COOKIE_CATS) || new Set());
-  const [selectedCountries, setSelectedCountriesState] = useState(() => readSetCookie(COOKIE_COUNTRIES) || new Set());
+  const [selectedRegions, setSelectedRegionsState] = useState(() => readSetCookie(COOKIE_REGIONS) || new Set());
   const [selectedMonthKey, setSelectedMonthKey] = useState(null); // 'YYYY-MM' or null = all in window
   const [offsetMonths, setOffsetMonths] = useState(0); // <<>> page offset, multiples of 6
   const [view, setViewState] = useState(() => {
-    if (typeof window === 'undefined') return 'timeline';
-    return Cookies.get(COOKIE_VIEW) === 'map' ? 'map' : 'timeline';
+    if (typeof window === 'undefined') return 'mobile-default';
+    const saved = Cookies.get(COOKIE_VIEW);
+    if (saved === 'map') return 'map';
+    if (saved === 'list') return 'list';
+    if (saved === 'timeline') return 'timeline';
+    return 'mobile-default';
   });
+  const effectiveView = view === 'mobile-default'
+    ? (isMobile ? 'list' : 'timeline')
+    : (view === 'list' && !isMobile ? 'timeline' : view);
   const [xInfo, setXInfo] = useState(null);
 
   const setView = useCallback((next) => {
@@ -64,9 +71,9 @@ export default function ExplorePage() {
     writeSetCookie(COOKIE_CATS, next);
   }, []);
 
-  const setSelectedCountries = useCallback((next) => {
-    setSelectedCountriesState(next);
-    writeSetCookie(COOKIE_COUNTRIES, next);
+  const setSelectedRegions = useCallback((next) => {
+    setSelectedRegionsState(next);
+    writeSetCookie(COOKIE_REGIONS, next);
   }, []);
 
   useEffect(() => {
@@ -82,19 +89,22 @@ export default function ExplorePage() {
       .catch((err) => setError(err.message || 'Failed to load events'));
   }, []);
 
-  const availableCountries = useMemo(() => {
+  const availableRegions = useMemo(() => {
     if (!events) return [];
-    return Array.from(new Set(events.map((e) => e.masteredCountryName).filter(Boolean))).sort();
+    return Array.from(new Set(events.map((e) => regionFor(e.masteredCountryName)).filter(Boolean))).sort();
   }, [events]);
 
-  // Drop any selected country that's no longer in the available set
+  const availableCategories = useMemo(() => {
+    if (!events) return [];
+    return Array.from(new Set(events.map((e) => categoryLabel(e.categoryFirst)).filter(Boolean))).sort();
+  }, [events]);
+
+  // Drop any selected region that's no longer in the available set
   useEffect(() => {
-    if (!events || selectedCountries.size === 0) return;
-    const pruned = new Set(Array.from(selectedCountries).filter((c) => availableCountries.includes(c)));
-    if (pruned.size !== selectedCountries.size) {
-      setSelectedCountries(pruned);
-    }
-  }, [events, availableCountries, selectedCountries, setSelectedCountries]);
+    if (!events || selectedRegions.size === 0) return;
+    const pruned = new Set(Array.from(selectedRegions).filter((r) => availableRegions.includes(r)));
+    if (pruned.size !== selectedRegions.size) setSelectedRegions(pruned);
+  }, [events, availableRegions, selectedRegions, setSelectedRegions]);
 
   // 12-month rolling window anchored to offsetMonths from today. Arrows on
   // the scrubber shift this window forward/backward by 6-month increments.
@@ -116,7 +126,7 @@ export default function ExplorePage() {
       const display = expandToNextInstance(e, fromMs, toMs);
       if (!display) continue;
 
-      if (selectedCountries.size > 0 && !selectedCountries.has(display.masteredCountryName)) continue;
+      if (selectedRegions.size > 0 && !selectedRegions.has(regionFor(display.masteredCountryName))) continue;
       if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(display.categoryFirst))) continue;
 
       if (selectedMonthKey) {
@@ -129,7 +139,7 @@ export default function ExplorePage() {
       out.push(display);
     }
     return out;
-  }, [events, selectedCountries, selectedCategories, selectedMonthKey, windowStart, windowEnd]);
+  }, [events, selectedRegions, selectedCategories, selectedMonthKey, windowStart, windowEnd]);
 
   // Visx timeline needs country rows — derive from filtered set
   const sortedActiveCountries = useMemo(
@@ -179,11 +189,15 @@ export default function ExplorePage() {
               <ExploreFilters
                 selectedCategories={selectedCategories}
                 onCategoriesChange={setSelectedCategories}
-                availableCountries={availableCountries}
-                selectedCountries={selectedCountries}
-                onCountriesChange={setSelectedCountries}
+                availableCategories={availableCategories}
+                availableRegions={availableRegions}
+                selectedRegions={selectedRegions}
+                onRegionsChange={setSelectedRegions}
               />
-              {!isMobile && <ExploreViewToggle view={view} onChange={setView} />}
+              {isMobile
+                ? <ExploreViewToggle view={effectiveView} onChange={setView} showList />
+                : <ExploreViewToggle view={effectiveView} onChange={setView} />
+              }
             </Box>
 
             <Box sx={{ mb: 1.5 }}>
@@ -196,15 +210,41 @@ export default function ExplorePage() {
             </Box>
 
             {isMobile ? (
-              <ExploreCardList events={filteredEvents} />
-            ) : availableCountries.length === 0 ? (
+              effectiveView === 'map' ? (
+                <ExploreMap events={filteredEvents} />
+              ) : effectiveView === 'timeline' ? (
+                <Paper elevation={1} sx={{ p: 2, mt: 1 }}>
+                  <ExploreTimeline
+                    events={filteredEvents}
+                    countries={sortedActiveCountries}
+                    dateRange={dateRange}
+                    onXScaleReady={setXInfo}
+                  />
+                  {xInfo && (
+                    <>
+                      <Divider sx={{ my: 1 }} />
+                      <Box sx={{ overflowX: 'auto' }}>
+                        <DensityBar
+                          events={filteredEvents}
+                          xScale={xInfo.xScale}
+                          leftMargin={xInfo.leftMargin}
+                          width={xInfo.width}
+                        />
+                      </Box>
+                    </>
+                  )}
+                </Paper>
+              ) : (
+                <ExploreCardList events={filteredEvents} />
+              )
+            ) : availableRegions.length === 0 ? (
               <>
                 <Alert severity="info" sx={{ mb: 1 }}>
                   Country data is still catching up — showing event list.
                 </Alert>
                 <ExploreCardList events={filteredEvents} />
               </>
-            ) : view === 'map' ? (
+            ) : effectiveView === 'map' ? (
               <ExploreMap events={filteredEvents} />
             ) : filteredEvents.length === 0 ? (
               <Alert severity="info">No events match the current filter. Try relaxing category, country, or month.</Alert>

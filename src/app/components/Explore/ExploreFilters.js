@@ -5,12 +5,10 @@ import PropTypes from 'prop-types';
 import { Box, IconButton, Tooltip, Popper, Paper, ClickAwayListener, Grow, Checkbox } from '@mui/material';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import PublicIcon from '@mui/icons-material/Public';
-import { CATEGORY_COLORS, continentColorFor } from './exploreConstants';
+import { CATEGORY_COLORS, CONTINENT_COLORS } from './exploreConstants';
 
-// TIEMPO-408 pass 2: Left filter = Category multi-select. Right filter = Country.
-// TIEMPO-416: Country is now multi-select too, symmetric with Category.
-
-const CATEGORY_PRESETS = ['Festival', 'Marathon', 'Encuentro', 'Workshop'];
+// TIEMPO-408 pass 2: Left filter = Category multi-select. Right filter = Region.
+// TIEMPO-416: Country was multi-select; now replaced with Continent/Region filter.
 
 function Dropdown({ icon: Icon, tooltip, active, children }) {
   const [open, setOpen] = useState(false);
@@ -97,14 +95,15 @@ Row.propTypes = {
 export default function ExploreFilters({
   selectedCategories,
   onCategoriesChange,
-  availableCountries,
-  selectedCountries,
-  onCountriesChange,
+  availableCategories,
+  availableRegions,
+  selectedRegions,
+  onRegionsChange,
 }) {
   const catCount = selectedCategories.size;
   const catActive = catCount > 0;
-  const countryCount = selectedCountries.size;
-  const countryActive = countryCount > 0;
+  const regionCount = selectedRegions.size;
+  const regionActive = regionCount > 0;
 
   const toggleCategory = (c) => {
     const next = new Set(selectedCategories);
@@ -112,10 +111,10 @@ export default function ExploreFilters({
     onCategoriesChange(next);
   };
 
-  const toggleCountry = (c) => {
-    const next = new Set(selectedCountries);
+  const toggleRegion = (c) => {
+    const next = new Set(selectedRegions);
     if (next.has(c)) next.delete(c); else next.add(c);
-    onCountriesChange(next);
+    onRegionsChange(next);
   };
 
   return (
@@ -124,7 +123,7 @@ export default function ExploreFilters({
         {() => (
           <>
             <Row onClick={() => onCategoriesChange(new Set())} selected={!catActive}>All categories</Row>
-            {CATEGORY_PRESETS.map((c) => (
+            {availableCategories.map((c) => (
               <Row
                 key={c}
                 selected={selectedCategories.has(c)}
@@ -138,21 +137,21 @@ export default function ExploreFilters({
         )}
       </Dropdown>
 
-      <Dropdown icon={PublicIcon} tooltip={countryActive ? `${countryCount} countr${countryCount === 1 ? 'y' : 'ies'} selected` : 'Country'} active={countryActive}>
+      <Dropdown icon={PublicIcon} tooltip={regionActive ? `${regionCount} region${regionCount === 1 ? '' : 's'} selected` : 'Continent / Region'} active={regionActive}>
         {() => (
           <>
             <Row
-              selected={!countryActive}
-              onClick={() => onCountriesChange(new Set())}
+              selected={!regionActive}
+              onClick={() => onRegionsChange(new Set())}
             >
-              All countries
+              All regions
             </Row>
-            {availableCountries.map((c) => (
+            {availableRegions.map((c) => (
               <Row
                 key={c}
-                selected={selectedCountries.has(c)}
-                color={continentColorFor(c)}
-                onClick={() => toggleCountry(c)}
+                selected={selectedRegions.has(c)}
+                color={CONTINENT_COLORS[c]}
+                onClick={() => toggleRegion(c)}
               >
                 {c}
               </Row>
@@ -162,7 +161,7 @@ export default function ExploreFilters({
       </Dropdown>
 
       {/* Active-chip summary to reinforce current filter state (desktop+mobile) */}
-      {(catActive || countryActive) && (
+      {(catActive || regionActive) && (
         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexWrap: 'wrap' }}>
           {catActive && (
             <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}>
@@ -182,16 +181,16 @@ export default function ExploreFilters({
               ))}
             </Box>
           )}
-          {countryActive && (
+          {regionActive && (
             <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}>
-              {Array.from(selectedCountries).map((c) => (
+              {Array.from(selectedRegions).map((c) => (
                 <Box
                   key={c}
                   sx={{
                     px: 0.75, py: 0.15, borderRadius: 999,
                     border: '1px solid',
-                    borderColor: continentColorFor(c),
-                    color: continentColorFor(c),
+                    borderColor: CONTINENT_COLORS[c] || '#6b7280',
+                    color: CONTINENT_COLORS[c] || '#6b7280',
                     fontSize: '0.65rem',
                     fontWeight: 600,
                   }}
@@ -210,7 +209,8 @@ export default function ExploreFilters({
 ExploreFilters.propTypes = {
   selectedCategories: PropTypes.instanceOf(Set).isRequired,
   onCategoriesChange: PropTypes.func.isRequired,
-  availableCountries: PropTypes.arrayOf(PropTypes.string).isRequired,
-  selectedCountries: PropTypes.instanceOf(Set).isRequired,
-  onCountriesChange: PropTypes.func.isRequired,
+  availableCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  availableRegions: PropTypes.arrayOf(PropTypes.string).isRequired,
+  selectedRegions: PropTypes.instanceOf(Set).isRequired,
+  onRegionsChange: PropTypes.func.isRequired,
 };

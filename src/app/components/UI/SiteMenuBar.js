@@ -30,6 +30,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
   const pathname = usePathname();
   // TIEMPO-408: /calendar/boston is a legacy iframe embed — keep its chrome as-is.
   const isBoston = pathname?.startsWith('/calendar/boston');
+  const isExplorePage = pathname === '/explore';
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
@@ -81,8 +82,8 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flexShrink: 1 }}>
-            <BrandMark size={36} />
-            <CityPill />
+            <BrandMark size={isExplorePage ? 44 : 36} />
+            {!isExplorePage && <CityPill />}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <ModeToggle />

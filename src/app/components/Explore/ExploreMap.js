@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { colorFor, categoryLabel, CATEGORY_COLORS } from './exploreConstants';
 import { centroidFor, jitterPosition } from './countryCentroids';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 // TIEMPO-408 item 6: world map of travelWorthy events — respects rules 1-5.
 // Category = marker fill color.
@@ -48,6 +49,7 @@ function truncate(str, n) {
 
 export default function ExploreMap({ events }) {
   const router = useRouter();
+  const { setSessionLocation } = useGeoLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const markerRadius = isMobile ? 11 : 7;
@@ -160,7 +162,11 @@ export default function ExploreMap({ events }) {
                     <Button
                       size="small"
                       variant="contained"
-                      onClick={() => router.push(`/calendar?event=${e._id}`)}
+                      onClick={() => {
+                        const ll = resolveVenueGeo(e) || (e.masteredCountryName && centroidFor(e.masteredCountryName));
+                        if (ll) setSessionLocation({ lat: ll[0], lng: ll[1], zoomRange: 50 });
+                        router.push(`/calendar?event=${e._id}`);
+                      }}
                       sx={{
                         mt: 1,
                         bgcolor: color,
