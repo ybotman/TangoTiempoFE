@@ -6,7 +6,19 @@ import { useRouter } from 'next/navigation';
 import { Box, Paper, Typography, Chip, Stack, Tooltip } from '@mui/material';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import dayjs from 'dayjs';
-import { colorFor, categoryLabel, continentColorFor } from './exploreConstants';
+import { colorFor, categoryLabel, continentColorFor, regionFor } from './exploreConstants';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
+
+function resolveVenueLL(e) {
+  const vg = e.venueGeolocation;
+  if (!vg) return null;
+  if (Array.isArray(vg.coordinates) && vg.coordinates.length >= 2) {
+    const [lng, lat] = vg.coordinates;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
+  }
+  if (Number.isFinite(vg.lat) && Number.isFinite(vg.lng)) return [vg.lat, vg.lng];
+  return null;
+}
 
 // TIEMPO-404 Milestone D.1: compact mobile cards with continent color stripe,
 // infinite scroll via IntersectionObserver.
@@ -30,6 +42,7 @@ function formatDateRange(start, end) {
 
 export default function ExploreCardList({ events }) {
   const router = useRouter();
+  const { setSessionLocation } = useGeoLocation();
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
   const sentinelRef = React.useRef(null);
 
@@ -74,7 +87,13 @@ export default function ExploreCardList({ events }) {
             <Paper
               key={e._id}
               elevation={1}
-              onClick={() => router.push(`/calendar?event=${e._id}`)}
+              onClick={() => {
+                if (e.venueGeolocation) {
+                  const ll = resolveVenueLL(e);
+                  if (ll) setSessionLocation({ lat: ll[0], lng: ll[1], zoomRange: 50 });
+                }
+                router.push(`/calendar?event=${e._id}`);
+              }}
               sx={{
                 display: 'flex',
                 cursor: 'pointer',
@@ -106,6 +125,7 @@ export default function ExploreCardList({ events }) {
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1.3 }}>
                   {formatDateRange(e.startDate, e.endDate)}
                   {e.masteredCityName && ` · ${e.masteredCityName}`}
+                  {e.masteredCountryName && ` · ${e.masteredCountryName}`}
                 </Typography>
                 {/* Pills row: Category on LEFT, Country on RIGHT (Toby rule). Cost tucked to left. */}
                 <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -125,7 +145,7 @@ export default function ExploreCardList({ events }) {
                   <Box sx={{ flex: 1 }} />
                   {e.masteredCountryName && (
                     <Chip
-                      label={e.masteredCountryName}
+                      label={regionFor(e.masteredCountryName)}
                       size="small"
                       variant="outlined"
                       sx={{ fontSize: '0.65rem', height: 18, borderColor: stripeColor, color: stripeColor }}
@@ -159,6 +179,7 @@ ExploreCardList.propTypes = {
       masteredCityName: PropTypes.string,
       cost: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       isAiGenerated: PropTypes.bool,
+      venueGeolocation: PropTypes.object,
     })
   ).isRequired,
 };
