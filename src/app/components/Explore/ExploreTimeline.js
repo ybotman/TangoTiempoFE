@@ -8,9 +8,10 @@ import { scaleTime, scaleOrdinal } from '@visx/scale';
 import { AxisBottom, AxisLeft } from '@visx/axis';
 import { Zoom } from '@visx/zoom';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Popover, Typography } from '@mui/material';
 import dayjs from 'dayjs';
-import { CATEGORY_COLORS, colorFor } from './exploreConstants';
+import { CATEGORY_COLORS, colorFor, categoryLabel } from './exploreConstants';
+import { useGeoLocation } from '@/contexts/GeoLocationContext';
 
 // TIEMPO-404 D.4: zoom + pan timeline. visx/zoom applies an X-only
 // transform; countries (Y axis) stay fixed.
@@ -34,6 +35,23 @@ const tooltipStyles = {
   fontSize: '0.8rem',
   maxWidth: 280,
 };
+
+function resolveVenueGeo(e) {
+  const vg = e.venueGeolocation;
+  if (!vg) return null;
+  if (Array.isArray(vg.coordinates) && vg.coordinates.length >= 2) {
+    const [lng, lat] = vg.coordinates;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
+  }
+  if (Number.isFinite(vg.lat) && Number.isFinite(vg.lng)) return [vg.lat, vg.lng];
+  return null;
+}
+
+function truncate(str, n) {
+  if (!str) return '';
+  const clean = String(str).replace(/\s+/g, ' ').trim();
+  return clean.length > n ? `${clean.slice(0, n).trim()}…` : clean;
+}
 
 function formatDateRange(start, end) {
   const s = dayjs(start);
@@ -88,9 +106,12 @@ function assignEventLanes(events) {
 
 export default function ExploreTimeline({ events, countries, dateRange, onXScaleReady }) {
   const router = useRouter();
+  const { setSessionLocation } = useGeoLocation();
   const { tooltipData, tooltipLeft, tooltipTop, tooltipOpen, showTooltip, hideTooltip } = useTooltip();
   const containerRef = React.useRef(null);
   const [width, setWidth] = React.useState(DEFAULT_WIDTH);
+  const [clickedEvent, setClickedEvent] = React.useState(null);
+  const [popoverAnchor, setPopoverAnchor] = React.useState(null);
 
   // Measure container width so SVG fits viewport
   React.useEffect(() => {
@@ -160,8 +181,23 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
     });
   };
 
-  const handleClick = (datum) => {
-    if (datum?._id) router.push(`/calendar?event=${datum._id}`);
+  const handleBarClick = (evt, datum) => {
+    evt.stopPropagation();
+    hideTooltip();
+    setClickedEvent(datum);
+    setPopoverAnchor({ left: evt.clientX, top: evt.clientY });
+  };
+
+  const handlePopoverClose = () => {
+    setClickedEvent(null);
+    setPopoverAnchor(null);
+  };
+
+  const handleDrillThrough = () => {
+    if (!clickedEvent) return;
+    const ll = resolveVenueGeo(clickedEvent);
+    if (ll) setSessionLocation({ lat: ll[0], lng: ll[1], zoomRange: 50 });
+    router.push(`/calendar?event=${clickedEvent._id}`);
   };
 
   return (
@@ -234,19 +270,27 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
 
                 {/* Zoomed content — gridlines, x-axis, bars — clipped to chart area */}
                 <Group left={MARGIN.left} top={MARGIN.top} clipPath="url(#tt-timeline-clip)">
-                  {/* Horizontal gridlines at bottom edge of each country band */}
-                  {countries.map((country) => {
+                  {/* Alternating band backgrounds + solid separator lines */}
+                  {countries.map((country, i) => {
                     const ly = yLayout[country];
                     if (!ly) return null;
                     return (
-                      <line
-                        key={country}
-                        x1={0} x2={xMax}
-                        y1={ly.y + ly.height + LANE_GAP / 2}
-                        y2={ly.y + ly.height + LANE_GAP / 2}
-                        stroke="#e5e7eb"
-                        strokeDasharray="2 4"
-                      />
+                      <g key={country}>
+                        {i % 2 === 1 && (
+                          <rect
+                            x={0} y={ly.y}
+                            width={xMax} height={ly.height}
+                            fill="rgba(0,0,0,0.03)"
+                          />
+                        )}
+                        <line
+                          x1={0} x2={xMax}
+                          y1={ly.y + ly.height + LANE_GAP / 2}
+                          y2={ly.y + ly.height + LANE_GAP / 2}
+                          stroke="#94a3b8"
+                          strokeWidth={1}
+                        />
+                      </g>
                     );
                   })}
 
@@ -278,7 +322,7 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                       style: { cursor: 'pointer' },
                       onMouseMove: (evt) => handleBarMove(evt, e),
                       onMouseLeave: hideTooltip,
-                      onClick: (evt) => { evt.stopPropagation(); handleClick(e); },
+                      onClick: (evt) => handleBarClick(evt, e),
                       onMouseDown: (evt) => evt.stopPropagation(),
                       onTouchStart: zoom.dragStart,
                       onTouchMove: zoom.dragMove,
@@ -309,6 +353,54 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
           );
         }}
       </Zoom>
+
+      {/* Click popup — same content as ExploreMap popup */}
+      <Popover
+        open={Boolean(clickedEvent)}
+        anchorReference="anchorPosition"
+        anchorPosition={popoverAnchor ?? { top: 0, left: 0 }}
+        onClose={handlePopoverClose}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        PaperProps={{ sx: { p: 1.5, maxWidth: 280, borderRadius: 2 } }}
+      >
+        {clickedEvent && (() => {
+          const color = colorFor(clickedEvent.categoryFirst);
+          const isAI = Boolean(clickedEvent.isAiGenerated || clickedEvent.isDiscovered);
+          return (
+            <>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color, lineHeight: 1.3, mb: 0.25 }}>
+                {clickedEvent.title}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.primary' }}>
+                {formatDateRange(clickedEvent.startDate, clickedEvent.endDate)}
+              </Typography>
+              {(clickedEvent.masteredCityName || clickedEvent.masteredCountryName) && (
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+                  {[clickedEvent.masteredCityName, clickedEvent.masteredCountryName].filter(Boolean).join(', ')}
+                </Typography>
+              )}
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontWeight: 600, color }}>
+                {categoryLabel(clickedEvent.categoryFirst)}
+                {isAI && <span style={{ marginLeft: 6, color: '#d97706', fontWeight: 700 }}>🤖 AI-Found</span>}
+              </Typography>
+              {clickedEvent.description && (
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.75, lineHeight: 1.4, fontStyle: 'italic' }}>
+                  {truncate(clickedEvent.description, 180)}
+                </Typography>
+              )}
+              <Button
+                size="small"
+                variant="contained"
+                onClick={handleDrillThrough}
+                fullWidth
+                sx={{ mt: 1, bgcolor: color, color: '#fff', fontSize: '0.7rem', textTransform: 'none', py: 0.25, '&:hover': { bgcolor: color, filter: 'brightness(0.9)' } }}
+              >
+                View full event →
+              </Button>
+            </>
+          );
+        })()}
+      </Popover>
 
       {tooltipOpen && tooltipData && (
         <TooltipWithBounds left={tooltipLeft} top={tooltipTop} style={tooltipStyles}>
@@ -358,6 +450,10 @@ ExploreTimeline.propTypes = {
       masteredCountryName: PropTypes.string,
       masteredCityName: PropTypes.string,
       cost: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      description: PropTypes.string,
+      venueGeolocation: PropTypes.object,
+      isAiGenerated: PropTypes.bool,
+      isDiscovered: PropTypes.bool,
     })
   ).isRequired,
   countries: PropTypes.arrayOf(PropTypes.string).isRequired,
