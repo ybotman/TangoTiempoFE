@@ -58,7 +58,7 @@ export default function ExplorePage() {
   });
   const effectiveView = view === 'mobile-default'
     ? (isMobile ? 'list' : 'timeline')
-    : (view === 'list' && !isMobile ? 'timeline' : view);
+    : view;
   const [xInfo, setXInfo] = useState(null);
 
   const setView = useCallback((next) => {
@@ -194,10 +194,7 @@ export default function ExplorePage() {
                 selectedRegions={selectedRegions}
                 onRegionsChange={setSelectedRegions}
               />
-              {isMobile
-                ? <ExploreViewToggle view={effectiveView} onChange={setView} showList />
-                : <ExploreViewToggle view={effectiveView} onChange={setView} />
-              }
+              <ExploreViewToggle view={effectiveView} onChange={setView} showList />
             </Box>
 
             <Box sx={{ mb: 1.5 }}>
@@ -246,6 +243,8 @@ export default function ExplorePage() {
               </>
             ) : effectiveView === 'map' ? (
               <ExploreMap events={filteredEvents} />
+            ) : effectiveView === 'list' ? (
+              <ExploreCardList events={filteredEvents} />
             ) : filteredEvents.length === 0 ? (
               <Alert severity="info">No events match the current filter. Try relaxing category, country, or month.</Alert>
             ) : (

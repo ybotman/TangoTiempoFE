@@ -4,8 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/navigation';
 import { Group } from '@visx/group';
-import { scaleTime, scaleOrdinal } from '@visx/scale';
-import { AxisBottom, AxisLeft } from '@visx/axis';
+import { scaleTime } from '@visx/scale';
 import { Zoom } from '@visx/zoom';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
 import { Box, Button, Popover, Typography } from '@mui/material';
@@ -16,7 +15,7 @@ import { useGeoLocation } from '@/contexts/GeoLocationContext';
 // TIEMPO-404 D.4: zoom + pan timeline. visx/zoom applies an X-only
 // transform; countries (Y axis) stay fixed.
 
-const MARGIN = { top: 16, right: 32, bottom: 44, left: 160 };
+const MARGIN = { top: 28, right: 32, bottom: 44, left: 160 };
 const MIN_BAR_WIDTH = 10;
 const DEFAULT_WIDTH = 1100;
 const DEFAULT_HEIGHT_BASE = 480;
@@ -155,17 +154,6 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
   const yMax = totalContentH;
   const height = Math.max(DEFAULT_HEIGHT_BASE, MARGIN.top + yMax + MARGIN.bottom + 44);
 
-  // Y-axis scale: ordinal scale mapping country → center Y of its band
-  // Used by AxisLeft so labels appear centered in each (possibly expanded) band.
-  const yAxisScale = React.useMemo(
-    () =>
-      scaleOrdinal({
-        domain: countries,
-        range: countries.map((c) => yLayout[c]?.center ?? 0),
-      }),
-    [countries, yLayout]
-  );
-
   // Parent gets the (un-transformed) xScale + width for DensityBar alignment
   React.useEffect(() => {
     if (onXScaleReady) onXScaleReady({ xScale: baseXScale, width, leftMargin: MARGIN.left, rightMargin: MARGIN.right });
@@ -235,14 +223,30 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                 </defs>
                 <rect width={width} height={height} fill="#fafafa" rx={6} />
 
-                {/* Y-axis (fixed, outside zoom transform) */}
+                {/* Y-axis — custom rendered so every country label is guaranteed visible */}
                 <Group left={MARGIN.left} top={MARGIN.top}>
-                  <AxisLeft
-                    scale={yAxisScale}
-                    stroke="#9ca3af"
-                    tickStroke="#9ca3af"
-                    tickLabelProps={() => ({ fill: '#374151', fontSize: 12, textAnchor: 'end', dx: -4, dy: '0.33em' })}
-                  />
+                  {/* Axis spine */}
+                  <line x1={0} y1={0} x2={0} y2={yMax} stroke="#9ca3af" strokeWidth={1} />
+                  {countries.map((country) => {
+                    const ly = yLayout[country];
+                    if (!ly) return null;
+                    return (
+                      <g key={country}>
+                        {/* Tick mark */}
+                        <line x1={-6} y1={ly.center} x2={0} y2={ly.center} stroke="#9ca3af" strokeWidth={1} />
+                        {/* Label */}
+                        <text
+                          x={-10}
+                          y={ly.center}
+                          textAnchor="end"
+                          dominantBaseline="middle"
+                          style={{ fill: '#374151', fontSize: 11, fontFamily: 'inherit' }}
+                        >
+                          {country}
+                        </text>
+                      </g>
+                    );
+                  })}
                 </Group>
 
                 {/* Drag/wheel capture surface — covers the chart area */}
@@ -262,9 +266,7 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                   onTouchEnd={zoom.dragEnd}
                   onDoubleClick={zoom.reset}
                   onWheel={(e) => {
-                    e.preventDefault();
-                    const point = { x: e.clientX, y: e.clientY };
-                    zoom.handleWheel({ ...e, deltaY: e.deltaY, clientX: e.clientX, clientY: e.clientY, point });
+                    zoom.handleWheel({ deltaY: e.deltaY, clientX: e.clientX, clientY: e.clientY });
                   }}
                 />
 
@@ -294,14 +296,55 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                     );
                   })}
 
-                  <AxisBottom
-                    top={yMax}
-                    scale={zoomedXScale}
-                    stroke="#9ca3af"
-                    tickStroke="#9ca3af"
-                    numTicks={Math.max(4, Math.floor(xMax / 100))}
-                    tickLabelProps={() => ({ fill: '#6b7280', fontSize: 11, textAnchor: 'middle' })}
-                  />
+                  {/* Time gridlines + dual top/bottom labels (quarters or months) */}
+                  {(() => {
+                    const [rangeStart, rangeEnd] = dateRange;
+                    const spanMonths = (rangeEnd - rangeStart) / (1000 * 60 * 60 * 24 * 30);
+                    // Use quarters when span ≥ 6 months, months otherwise
+                    const useQuarters = spanMonths >= 6;
+                    const ticks = [];
+                    const d = new Date(rangeStart);
+                    if (useQuarters) {
+                      // Advance to first quarter boundary (Jan/Apr/Jul/Oct)
+                      d.setDate(1); d.setHours(0, 0, 0, 0);
+                      const qMonth = Math.ceil(d.getMonth() / 3) * 3;
+                      if (qMonth > 11) { d.setFullYear(d.getFullYear() + 1); d.setMonth(0); }
+                      else d.setMonth(qMonth);
+                    } else {
+                      // Advance to first of next month
+                      d.setDate(1); d.setHours(0, 0, 0, 0);
+                      d.setMonth(d.getMonth() + 1);
+                    }
+                    while (d <= rangeEnd) {
+                      const label = useQuarters
+                        ? `Q${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}`
+                        : new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(d);
+                      ticks.push({ date: new Date(d), label });
+                      if (useQuarters) d.setMonth(d.getMonth() + 3);
+                      else d.setMonth(d.getMonth() + 1);
+                    }
+                    return ticks.map(({ date, label }) => {
+                      const x = zoomedXScale(date);
+                      if (x < 0 || x > xMax) return null;
+                      return (
+                        <g key={label}>
+                          {/* Vertical gridline full chart height */}
+                          <line x1={x} x2={x} y1={0} y2={yMax} stroke="#cbd5e1" strokeWidth={1} strokeDasharray="4 3" />
+                          {/* Top label */}
+                          <text x={x} y={-6} textAnchor="middle" style={{ fill: '#6b7280', fontSize: 10, fontFamily: 'inherit' }}>
+                            {label}
+                          </text>
+                          {/* Bottom label */}
+                          <text x={x} y={yMax + 14} textAnchor="middle" style={{ fill: '#6b7280', fontSize: 10, fontFamily: 'inherit' }}>
+                            {label}
+                          </text>
+                        </g>
+                      );
+                    });
+                  })()}
+                  {/* Axis spine lines at top and bottom */}
+                  <line x1={0} x2={xMax} y1={0} y2={0} stroke="#9ca3af" strokeWidth={1} />
+                  <line x1={0} x2={xMax} y1={yMax} y2={yMax} stroke="#9ca3af" strokeWidth={1} />
 
                   {events.map((e) => {
                     const start = new Date(e.startDate);
