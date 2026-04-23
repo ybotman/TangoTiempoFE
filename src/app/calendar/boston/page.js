@@ -34,7 +34,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 const BOSTON_CONFIG = {
   lat: 42.3601,
   lng: -71.0589,
-  zoomRange: 200, // 200 mile radius - covers all New England
+  zoomRange: 125, // 125 mile radius - covers New England core, excludes NYC metro
   cityName: 'Boston',
   source: 'legacy-boston',
   locked: true
@@ -999,7 +999,7 @@ const BostonCalendarPage = () => {
           title="Click to explore other regions at TangoTiempo.com"
         >
           <span style={{ fontSize: '12px' }}>📍</span>
-          <span>Boston ± 200mi</span>
+          <span>Boston ± 125mi</span>
         </a>
       </div>
 
