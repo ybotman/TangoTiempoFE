@@ -43,7 +43,8 @@
       "WebFetch(domain:calendarbeaf-test.azurewebsites.net)",
       "mcp__claude_ai_Atlassian__addCommentToJiraIssue",
       "Bash(vercel:*)",
-      "Bash(brew list:*)"
+      "Bash(brew list:*)",
+      "mcp__claude_ai_Atlassian__createJiraIssue"
     ],
     "deny": [],
     "ask": []

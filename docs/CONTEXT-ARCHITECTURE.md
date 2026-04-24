@@ -1,3 +1,16 @@
+---
+date: 2026-01-10
+persona: sarah
+type: architecture
+state: live
+feature: frontend-state
+keywords: [react-context]
+appid: 1
+app: "[[APP-01-TangoTiempo]]"
+audience: all
+permanence: long-term
+tags: [app/tangotiempo, type/architecture, type/architecture]
+---
 # React Context Architecture
 
 ## Context Hierarchy Diagram

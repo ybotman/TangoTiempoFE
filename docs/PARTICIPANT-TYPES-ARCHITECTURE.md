@@ -1,3 +1,16 @@
+---
+date: 2026-03-20
+persona: sarah
+type: architecture
+state: live
+feature: user-roles
+keywords: [auth, identity]
+appid: 1
+app: "[[APP-01-TangoTiempo]]"
+audience: all
+permanence: long-term
+tags: [app/tangotiempo, type/architecture, type/architecture]
+---
 # TangoTiempo Participant Types Architecture v2.0
 
 **Date**: 2025-01-28

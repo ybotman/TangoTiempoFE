@@ -1,11 +1,15 @@
-# Explore Tab — Feature & Vision Document
-
-> **Status:** Draft for design discussion
-> **Date:** 2026-04-17
-> **Ticket lineage:** TIEMPO-400 (epic) → TIEMPO-402 (toggle) → TIEMPO-404 (Explore POC, milestones A→D.4)
-> **Route:** `/explore`
-> **Data driver:** `travelWorthy = true` events (backend CALBEAF-109)
-
+---
+date: 2026-04-10
+persona: sarah
+type: architecture
+state: live
+feature: ui-design
+keywords: [explore, map]
+appid: 1
+app: "[[APP-01-TangoTiempo]]"
+audience: all
+permanence: long-term
+tags: [app/tangotiempo, type/architecture, type/architecture]
 ---
 
 ## 1. Purpose

@@ -1,11 +1,15 @@
-# Beginner Tab — Feature & Vision Document
-
-> **Status:** Draft for design discussion
-> **Date:** 2026-04-17
-> **Ticket lineage:** TIEMPO-400 (epic) → TIEMPO-406 (MVP, shipped to TEST)
-> **Route:** `/beginner`
-> **Data drivers:** `forBeginners = true` events, user `mapCenter` location
-
+---
+date: 2026-04-10
+persona: sarah
+type: architecture
+state: live
+feature: beginner-mode
+keywords: [design, ui]
+appid: 01
+app: "[[APP-01]]"
+audience: all
+permanence: long-term
+tags: [app/tangotiempo, type/architecture]
 ---
 
 ## 1. Purpose
