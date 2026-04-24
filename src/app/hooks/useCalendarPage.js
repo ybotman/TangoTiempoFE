@@ -222,14 +222,7 @@ export const useCalendarPage = () => {
     selectedRole // Pass selectedRole for RO filtering
   );
 
-  // TIEMPO-408 T2: Local tab excludes forBeginners=true events — they live
-  // exclusively on /beginner now. beginnerFriendly events STAY on Local (they
-  // welcome beginners but aren't exclusively for them).
-  const localOnlyEvents = (filteredEvents || []).filter(
-    (e) => !e?.extendedProps?.forBeginners
-  );
-
-  const coloredFilteredEvents = localOnlyEvents.map((event) => {
+  const coloredFilteredEvents = (filteredEvents || []).map((event) => {
     const categoryColor = categoryColors[event.extendedProps.categoryFirst] || 'lightGrey';
     return {
       ...event,

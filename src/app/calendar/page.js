@@ -89,7 +89,7 @@ const CalendarPage = () => {
     handleToday,
     handleDateClick,
     handleEventClick,
-    coloredFilteredEvents,
+    coloredFilteredEvents: allColoredEvents,
     refreshEvents,
     // datesSet,
     handleEventUpdated,
@@ -107,6 +107,12 @@ const CalendarPage = () => {
     // TIEMPO-362: Pending occurrence action from submenu
     pendingOccurrenceAction,
   } = useCalendarPage();
+
+  // TIEMPO-408 T2: Local tab excludes forBeginners=true events — they live
+  // exclusively on /beginner. Boston and other callers keep all events.
+  const coloredFilteredEvents = allColoredEvents.filter(
+    (e) => !e?.extendedProps?.forBeginners
+  );
 
   // Get selected role from context
   const { selectedRole } = useContext(RoleContext);

@@ -66,6 +66,13 @@ export default function ExplorePage() {
     Cookies.set(COOKIE_VIEW, next, { expires: 365, sameSite: 'Lax' });
   }, []);
 
+  // When a month is chosen (from scrubber or timeline label) switch to timeline
+  // so the user sees the month-framed window immediately.
+  const handleMonthChange = useCallback((mk) => {
+    setSelectedMonthKey(mk);
+    if (mk) setView('timeline');
+  }, [setView]);
+
   const setSelectedCategories = useCallback((next) => {
     setSelectedCategoriesState(next);
     writeSetCookie(COOKIE_CATS, next);
@@ -130,8 +137,9 @@ export default function ExplorePage() {
       if (selectedCategories.size > 0 && !selectedCategories.has(categoryLabel(display.categoryFirst))) continue;
 
       if (selectedMonthKey) {
-        const mStart = dayjs(`${selectedMonthKey}-01`).startOf('month');
-        const mEnd = mStart.endOf('month');
+        // 11-day buffer on each side so events crossing the month boundary are visible
+        const mStart = dayjs(`${selectedMonthKey}-01`).startOf('month').subtract(11, 'day');
+        const mEnd = dayjs(`${selectedMonthKey}-01`).endOf('month').add(11, 'day');
         const s = dayjs(display.startDate);
         const en = dayjs(display.endDate);
         if (en.isBefore(mStart) || s.isAfter(mEnd)) continue;
@@ -148,6 +156,15 @@ export default function ExplorePage() {
   );
 
   const dateRange = useMemo(() => {
+    // When a month is selected, pin the window to that month ± 11 days so the
+    // X-axis is predictable regardless of which events happen to be in the set.
+    if (selectedMonthKey) {
+      const mStart = dayjs(`${selectedMonthKey}-01`).startOf('month');
+      return [
+        mStart.subtract(11, 'day').toDate(),
+        mStart.endOf('month').add(11, 'day').toDate(),
+      ];
+    }
     if (!filteredEvents.length) {
       return [dayjs().toDate(), dayjs().add(6, 'month').toDate()];
     }
@@ -159,7 +176,7 @@ export default function ExplorePage() {
       dayjs(Math.min(...allMs)).subtract(14, 'day').toDate(),
       dayjs(Math.max(...allMs)).add(14, 'day').toDate(),
     ];
-  }, [filteredEvents]);
+  }, [filteredEvents, selectedMonthKey]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -200,7 +217,7 @@ export default function ExplorePage() {
             <Box sx={{ mb: 1.5 }}>
               <ExploreMonthScrubber
                 selectedMonthKey={selectedMonthKey}
-                onMonthChange={setSelectedMonthKey}
+                onMonthChange={handleMonthChange}
                 offsetMonths={offsetMonths}
                 onOffsetChange={setOffsetMonths}
               />
@@ -216,6 +233,8 @@ export default function ExplorePage() {
                     countries={sortedActiveCountries}
                     dateRange={dateRange}
                     onXScaleReady={setXInfo}
+                    selectedMonthKey={selectedMonthKey}
+                    onMonthChange={handleMonthChange}
                   />
                   {xInfo && (
                     <>
@@ -254,6 +273,8 @@ export default function ExplorePage() {
                   countries={sortedActiveCountries}
                   dateRange={dateRange}
                   onXScaleReady={setXInfo}
+                  selectedMonthKey={selectedMonthKey}
+                  onMonthChange={handleMonthChange}
                 />
                 {xInfo && (
                   <>

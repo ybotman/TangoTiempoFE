@@ -103,7 +103,7 @@ function assignEventLanes(events) {
   return { laneOf, laneCount };
 }
 
-export default function ExploreTimeline({ events, countries, dateRange, onXScaleReady }) {
+export default function ExploreTimeline({ events, countries, dateRange, onXScaleReady, selectedMonthKey, onMonthChange }) {
   const router = useRouter();
   const { setSessionLocation } = useGeoLocation();
   const { tooltipData, tooltipLeft, tooltipTop, tooltipOpen, showTooltip, hideTooltip } = useTooltip();
@@ -207,6 +207,30 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
             xMax * zoom.transformMatrix.scaleX + zoom.transformMatrix.translateX,
           ]);
 
+          // Monthly ticks — computed once, shared by gridlines (clipped) and labels (unclipped)
+          const MNAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          const [rangeStart, rangeEnd] = dateRange;
+          const spanMonths = (rangeEnd - rangeStart) / (1000 * 60 * 60 * 24 * 30);
+          const timeTicks = [];
+          {
+            const d = new Date(rangeStart);
+            d.setDate(1); d.setHours(0, 0, 0, 0);
+            d.setMonth(d.getMonth() + 1);
+            let idx = 0;
+            while (d <= rangeEnd) {
+              const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+              const showLabel = spanMonths < 9 || idx % 3 === 0;
+              const label = showLabel
+                ? (d.getMonth() === 0
+                    ? `${MNAMES[0]} '${String(d.getFullYear()).slice(2)}`
+                    : MNAMES[d.getMonth()])
+                : null;
+              timeTicks.push({ mk, label, x: zoomedXScale(d) });
+              d.setMonth(d.getMonth() + 1);
+              idx++;
+            }
+          }
+
           return (
             <>
               <svg width={width} height={height} role="img" aria-label="Travel-worthy events timeline">
@@ -296,52 +320,18 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                     );
                   })}
 
-                  {/* Time gridlines + dual top/bottom labels (quarters or months) */}
-                  {(() => {
-                    const [rangeStart, rangeEnd] = dateRange;
-                    const spanMonths = (rangeEnd - rangeStart) / (1000 * 60 * 60 * 24 * 30);
-                    // Use quarters when span ≥ 6 months, months otherwise
-                    const useQuarters = spanMonths >= 6;
-                    const ticks = [];
-                    const d = new Date(rangeStart);
-                    if (useQuarters) {
-                      // Advance to first quarter boundary (Jan/Apr/Jul/Oct)
-                      d.setDate(1); d.setHours(0, 0, 0, 0);
-                      const qMonth = Math.ceil(d.getMonth() / 3) * 3;
-                      if (qMonth > 11) { d.setFullYear(d.getFullYear() + 1); d.setMonth(0); }
-                      else d.setMonth(qMonth);
-                    } else {
-                      // Advance to first of next month
-                      d.setDate(1); d.setHours(0, 0, 0, 0);
-                      d.setMonth(d.getMonth() + 1);
-                    }
-                    while (d <= rangeEnd) {
-                      const label = useQuarters
-                        ? `Q${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}`
-                        : new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(d);
-                      ticks.push({ date: new Date(d), label });
-                      if (useQuarters) d.setMonth(d.getMonth() + 3);
-                      else d.setMonth(d.getMonth() + 1);
-                    }
-                    return ticks.map(({ date, label }) => {
-                      const x = zoomedXScale(date);
-                      if (x < 0 || x > xMax) return null;
-                      return (
-                        <g key={label}>
-                          {/* Vertical gridline full chart height */}
-                          <line x1={x} x2={x} y1={0} y2={yMax} stroke="#cbd5e1" strokeWidth={1} strokeDasharray="4 3" />
-                          {/* Top label */}
-                          <text x={x} y={-6} textAnchor="middle" style={{ fill: '#6b7280', fontSize: 10, fontFamily: 'inherit' }}>
-                            {label}
-                          </text>
-                          {/* Bottom label */}
-                          <text x={x} y={yMax + 14} textAnchor="middle" style={{ fill: '#6b7280', fontSize: 10, fontFamily: 'inherit' }}>
-                            {label}
-                          </text>
-                        </g>
-                      );
-                    });
-                  })()}
+                  {/* Vertical gridlines only — labels rendered in an unclipped group below */}
+                  {timeTicks.map(({ mk, x }) => {
+                    if (x < 0 || x > xMax) return null;
+                    const isSel = selectedMonthKey === mk;
+                    return (
+                      <line key={mk} x1={x} x2={x} y1={0} y2={yMax}
+                        stroke={isSel ? '#3b82f6' : '#cbd5e1'}
+                        strokeWidth={isSel ? 2 : 1}
+                        strokeDasharray={isSel ? undefined : '4 3'}
+                      />
+                    );
+                  })}
                   {/* Axis spine lines at top and bottom */}
                   <line x1={0} x2={xMax} y1={0} y2={0} stroke="#9ca3af" strokeWidth={1} />
                   <line x1={0} x2={xMax} y1={yMax} y2={yMax} stroke="#9ca3af" strokeWidth={1} />
@@ -377,6 +367,32 @@ export default function ExploreTimeline({ events, countries, dateRange, onXScale
                         {isAI && (
                           <rect x={x1} y={barY} width={barW} height={barH} rx={3} ry={3} fill="url(#tt-ai-stripes)" style={{ pointerEvents: 'none' }} />
                         )}
+                      </g>
+                    );
+                  })}
+                </Group>
+
+                {/* Month labels — unclipped, clickable — serve as X-axis filter */}
+                <Group left={MARGIN.left} top={MARGIN.top}>
+                  {timeTicks.map(({ mk, label, x }) => {
+                    if (!label || x < 0 || x > xMax) return null;
+                    const isSel = selectedMonthKey === mk;
+                    return (
+                      <g
+                        key={`lbl-${mk}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => onMonthChange && onMonthChange(selectedMonthKey === mk ? null : mk)}
+                      >
+                        <rect x={x - 16} y={-18} width={32} height={14} fill="transparent" />
+                        <text x={x} y={-6} textAnchor="middle"
+                          style={{ fill: isSel ? '#3b82f6' : '#6b7280', fontSize: 10, fontWeight: isSel ? 700 : 400, fontFamily: 'inherit', userSelect: 'none' }}>
+                          {label}
+                        </text>
+                        <rect x={x - 16} y={yMax + 4} width={32} height={14} fill="transparent" />
+                        <text x={x} y={yMax + 15} textAnchor="middle"
+                          style={{ fill: isSel ? '#3b82f6' : '#6b7280', fontSize: 10, fontWeight: isSel ? 700 : 400, fontFamily: 'inherit', userSelect: 'none' }}>
+                          {label}
+                        </text>
                       </g>
                     );
                   })}
@@ -502,4 +518,6 @@ ExploreTimeline.propTypes = {
   countries: PropTypes.arrayOf(PropTypes.string).isRequired,
   dateRange: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
   onXScaleReady: PropTypes.func,
+  selectedMonthKey: PropTypes.string,
+  onMonthChange: PropTypes.func,
 };
