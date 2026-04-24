@@ -84,6 +84,10 @@ export function transformEvents(events) {
         // Add shortTitle and ownerOrganizerShortName for calendar display
         shortTitle: event.shortTitle || event.shortName || '',
         ownerOrganizerShortName: event.ownerOrganizerShortName || event.shortName || '',
+        // TIEMPO-408 / CALBEAF-109: beginner classification fields
+        forBeginners: event.forBeginners === true,
+        beginnerFriendly: event.beginnerFriendly === true,
+        travelWorthy: event.travelWorthy === true,
         // Add AI event detection
         isDiscovered: event.isDiscovered || false,
         // AI discovery metadata - source URL and discovery date

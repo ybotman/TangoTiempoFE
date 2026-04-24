@@ -103,6 +103,12 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
       // Other fields
       isRepeating: false,
       isCanceled: false,
+      // TIEMPO-401: Beginner-friendly flag (gates Beginner UX mode)
+      beginnerFriendly: false,
+      // TIEMPO-408 (provisional pre-TIEMPO-405): organizer-set beginner flag.
+      // Strict gate enforced in UI; server rejection follows when Fulton's
+      // bulk-enrich endpoint ships (Thread 1 sign-off 2026-04-18).
+      forBeginners: false,
       // TIEMPO-388: Spotlights for non-repeating events
       spotlights: [],
       features: [],
@@ -219,6 +225,11 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
           
           // Cancellation status
           isCanceled: eventToEdit.isCanceled || false,
+
+          // TIEMPO-401: Beginner-friendly flag
+          beginnerFriendly: eventToEdit.beginnerFriendly || false,
+          // TIEMPO-408 (provisional): forBeginners flag
+          forBeginners: eventToEdit.forBeginners || false,
 
           // TIEMPO-388: Spotlights (features) for non-repeating events
           spotlights: eventToEdit.spotlights || eventToEdit.features || [],

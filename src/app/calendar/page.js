@@ -16,7 +16,6 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
 
-import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
@@ -90,7 +89,7 @@ const CalendarPage = () => {
     handleToday,
     handleDateClick,
     handleEventClick,
-    coloredFilteredEvents,
+    coloredFilteredEvents: allColoredEvents,
     refreshEvents,
     // datesSet,
     handleEventUpdated,
@@ -108,6 +107,12 @@ const CalendarPage = () => {
     // TIEMPO-362: Pending occurrence action from submenu
     pendingOccurrenceAction,
   } = useCalendarPage();
+
+  // TIEMPO-408 T2: Local tab excludes forBeginners=true events — they live
+  // exclusively on /beginner. Boston and other callers keep all events.
+  const coloredFilteredEvents = allColoredEvents.filter(
+    (e) => !e?.extendedProps?.forBeginners
+  );
 
   // Get selected role from context
   const { selectedRole } = useContext(RoleContext);
@@ -1197,7 +1202,6 @@ const CalendarPage = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
-      <SiteHeader />
       <SiteMenuBar
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
@@ -1363,11 +1367,15 @@ const CalendarPage = () => {
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
           events={eventsWithPlaceholders}
-          // Sort isDiscovered events after regular events (within same time)
+          // Sort isDiscovered events after regular events, then by start time, then title
           eventOrder={(a, b) => {
             const aDiscovered = a.extendedProps?.isDiscovered ? 1 : 0;
             const bDiscovered = b.extendedProps?.isDiscovered ? 1 : 0;
-            return aDiscovered - bDiscovered;
+            if (aDiscovered !== bDiscovered) return aDiscovered - bDiscovered;
+            const aStart = a.start ? new Date(a.start).getTime() : 0;
+            const bStart = b.start ? new Date(b.start).getTime() : 0;
+            if (aStart !== bStart) return aStart - bStart;
+            return (a.title || '').localeCompare(b.title || '');
           }}
           // TIEMPO-288: Custom date cell content with month abbreviations
           dayCellContent={(arg) => {
@@ -1644,42 +1652,7 @@ const CalendarPage = () => {
         }}
       />
 
-      {/* TIEMPO-311: Floating map icon button - shows when no modals are open */}
-      {!isCreateModalOpen && !isViewDetailModalOpen && !isAIDetailModalOpen && (
-        <div
-          className="map-icon-button"
-          onClick={() => openMapCenterModal()}
-          title="Click to explore other locations"
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            backgroundColor: 'white',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '50%',
-            width: '36px',
-            height: '36px',
-            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#f0f0f0';
-            e.currentTarget.style.boxShadow = '0px 3px 8px rgba(0, 0, 0, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'white';
-            e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
-          }}
-        >
-          <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
-        </div>
-      )}
+      {/* TIEMPO-408: floating map icon removed — CityPill in chrome replaces it. */}
     </div>
   );
 };
