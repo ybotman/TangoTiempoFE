@@ -67,6 +67,13 @@ export default function ExplorerXPage() {
 
     let cancelled = false;
 
+    // TIEMPO-426: Scope to next 18 months. Without a date window the page
+    // pulls the entire corpus on every mount (10k+ events as the BE grows),
+    // most of which are far-past or far-future events the operator isn't
+    // triaging right now. 18 months covers all realistic festival lookahead.
+    const start = dayjs().startOf('day').format('YYYY-MM-DD');
+    const end = dayjs().add(18, 'month').endOf('day').format('YYYY-MM-DD');
+
     (async () => {
       try {
         const accumulated = [];
@@ -76,7 +83,7 @@ export default function ExplorerXPage() {
 
         while (page <= totalPages && page <= MAX_PAGES) {
           const res = await axios.get(baseUrl, {
-            params: { appId, limit: PAGE_LIMIT, page },
+            params: { appId, limit: PAGE_LIMIT, page, start, end },
           });
           if (cancelled) return;
 
