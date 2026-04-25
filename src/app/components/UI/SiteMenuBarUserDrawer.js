@@ -34,7 +34,8 @@ import { useActivityLogger } from '@/hooks/useActivityLogger';
 // TIEMPO-319: Removed fetchAllGeolocationData import - no longer needed for logout
 
 // Define the standard role display order for consistency (static constant)
-const ROLE_DISPLAY_ORDER = ['NamedUser', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
+// TIEMPO-431: Spotlighter sits between NamedUser and RegionalOrganizer
+const ROLE_DISPLAY_ORDER = ['NamedUser', 'Spotlighter', 'RegionalOrganizer', 'RegionalAdmin', 'SystemAdmin', 'SystemOwner'];
 
 const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRoleMessage, readOnly = false }) => {
   const router = useRouter();
@@ -52,8 +53,9 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
   // Define role display mapping (backend role -> display name)
   const roleDisplayMap = {
     'NamedUser': 'Milonger@',
+    'Spotlighter': 'Spotlighter',
     'RegionalOrganizer': 'Organizer/Artist',
-    'RegionalAdmin': 'RegionalAdmin', 
+    'RegionalAdmin': 'RegionalAdmin',
     'SystemAdmin': 'SystemAdmin',
     'SystemOwner': 'SystemOwner'
   };
@@ -219,31 +221,16 @@ const SiteMenuBarUserDrawer = ({ userDrawerOpen, handleUserDrawerClose, showRole
                 </Typography>
                 <FormControl component="fieldset">
                   <RadioGroup value={selectedRole || 'NamedUser'} onChange={handleRoleChange}>
+                    {/* TIEMPO-431: Spotlighter is now real — render as a normal role
+                        when present in the user's roles array. The previous
+                        hardcoded "(coming soon)" disabled placeholder is removed. */}
                     {orderedUserRoles.map((role) => (
-                      <React.Fragment key={role}>
-                        <FormControlLabel
-                          value={role}
-                          control={<Radio />}
-                          label={roleDisplayMap[role] || role}
-                        />
-                        {/* Spotlighter coming soon - appears after NamedUser (Milonger@) */}
-                        {role === 'NamedUser' && (
-                          <FormControlLabel
-                            value="Spotlighter"
-                            control={<Radio disabled />}
-                            label={
-                              <Typography
-                                component="span"
-                                sx={{ color: 'text.disabled', fontStyle: 'italic' }}
-                              >
-                                Spotlighter <Typography component="span" variant="caption" sx={{ color: 'text.disabled' }}>(coming soon)</Typography>
-                              </Typography>
-                            }
-                            disabled
-                            sx={{ opacity: 0.6 }}
-                          />
-                        )}
-                      </React.Fragment>
+                      <FormControlLabel
+                        key={role}
+                        value={role}
+                        control={<Radio />}
+                        label={roleDisplayMap[role] || role}
+                      />
                     ))}
                   </RadioGroup>
                 </FormControl>
