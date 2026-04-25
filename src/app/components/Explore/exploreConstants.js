@@ -18,6 +18,12 @@ export const CATEGORY_COLORS = {
 export const categoryLabel = (c) => (c && c !== 'unknown' ? c : 'Other');
 export const colorFor = (c) => CATEGORY_COLORS[categoryLabel(c)] || CATEGORY_COLORS.Other;
 
+// TIEMPO-427: Whitelist of categoryFirst values we display in /explore.
+// Events whose categoryLabel resolves outside this set (e.g. SEMINAR,
+// UNKNOWN, Trip) are noise — no load rules exist yet for those types.
+// Filtering at the data source also clears the filter dropdown.
+export const VALID_EXPLORE_CATEGORIES = new Set(Object.keys(CATEGORY_COLORS));
+
 export const REGIONS = {
   Americas: [
     'United States', 'Canada', 'Argentina', 'Brazil', 'Mexico',

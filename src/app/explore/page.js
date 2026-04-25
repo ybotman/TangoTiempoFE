@@ -13,7 +13,7 @@ import ExploreViewToggle from '@/components/Explore/ExploreViewToggle';
 import ExploreMonthScrubber from '@/components/Explore/ExploreMonthScrubber';
 import ExploreMap from '@/components/Explore/ExploreMap';
 import DensityBar from '@/components/Explore/DensityBar';
-import { categoryLabel, regionFor } from '@/components/Explore/exploreConstants';
+import { categoryLabel, regionFor, VALID_EXPLORE_CATEGORIES } from '@/components/Explore/exploreConstants';
 import { expandToNextInstance } from '@/utils/nextInstance';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import dayjs from 'dayjs';
@@ -126,7 +126,11 @@ export default function ExplorePage() {
       .then((res) => {
         if (cancelled) return;
         const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
-        setEvents(list);
+        // TIEMPO-427: Drop events whose categoryFirst falls outside the
+        // explore whitelist (SEMINAR / UNKNOWN / Trip etc.) — no load
+        // rules for those types yet, so they're noise here.
+        const cleaned = list.filter((e) => VALID_EXPLORE_CATEGORIES.has(categoryLabel(e.categoryFirst)));
+        setEvents(cleaned);
       })
       .catch((err) => { if (!cancelled) setError(err.message || 'Failed to load events'); });
     return () => { cancelled = true; };
