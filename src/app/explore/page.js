@@ -66,12 +66,14 @@ export default function ExplorePage() {
     Cookies.set(COOKIE_VIEW, next, { expires: 365, sameSite: 'Lax' });
   }, []);
 
-  // When a month is chosen (from scrubber or timeline label) switch to timeline
-  // so the user sees the month-framed window immediately.
+  // TIEMPO-426: When a month is chosen, only auto-switch to timeline if the
+  // user is on a view that doesn't render time-axis filtering meaningfully
+  // (mobile-default or list). Map and timeline views both filter by
+  // selectedMonthKey, so don't yank the user away from map.
   const handleMonthChange = useCallback((mk) => {
     setSelectedMonthKey(mk);
-    if (mk) setView('timeline');
-  }, [setView]);
+    if (mk && view !== 'map' && view !== 'timeline') setView('timeline');
+  }, [setView, view]);
 
   const setSelectedCategories = useCallback((next) => {
     setSelectedCategoriesState(next);
@@ -81,19 +83,6 @@ export default function ExplorePage() {
   const setSelectedRegions = useCallback((next) => {
     setSelectedRegionsState(next);
     writeSetCookie(COOKIE_REGIONS, next);
-  }, []);
-
-  useEffect(() => {
-    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
-    axios
-      .get(`${getApiBaseUrl()}/api/events`, {
-        params: { travelWorthy: true, appId, limit: 500 },
-      })
-      .then((res) => {
-        const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
-        setEvents(list);
-      })
-      .catch((err) => setError(err.message || 'Failed to load events'));
   }, []);
 
   const availableRegions = useMemo(() => {
@@ -120,6 +109,28 @@ export default function ExplorePage() {
     const we = ws.add(12, 'month').endOf('day');
     return { windowStart: ws, windowEnd: we };
   }, [offsetMonths]);
+
+  // TIEMPO-426: Fetch only the visible 12-month window instead of all
+  // travel-worthy events forever. Refetch when the window changes
+  // (user pages with <</>>). Also bump limit to 1000 (was 500) — the
+  // curated TW set crossed 500 and we were silently truncating.
+  useEffect(() => {
+    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+    const start = windowStart.format('YYYY-MM-DD');
+    const end = windowEnd.format('YYYY-MM-DD');
+    let cancelled = false;
+    axios
+      .get(`${getApiBaseUrl()}/api/events`, {
+        params: { travelWorthy: true, appId, start, end, limit: 1000 },
+      })
+      .then((res) => {
+        if (cancelled) return;
+        const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
+        setEvents(list);
+      })
+      .catch((err) => { if (!cancelled) setError(err.message || 'Failed to load events'); });
+    return () => { cancelled = true; };
+  }, [windowStart, windowEnd]);
 
   const filteredEvents = useMemo(() => {
     if (!events) return [];
