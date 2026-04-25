@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
-import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LoginIcon from '@mui/icons-material/Login';
@@ -163,33 +162,11 @@ const LoginPage = () => {
             </Button>
           </Box>
 
-          {/* Title with clear SIGN IN label */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }} data-testid="login-page">
-            <LoginIcon sx={{ fontSize: 48, color: 'primary.main', mr: 2 }} />
-            <Typography component="h1" variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-              SIGN IN
-            </Typography>
-          </Box>
-
-          {/* Info about multiple sign-in methods */}
-          <Alert severity="info" sx={{ width: '100%', mb: 3 }}>
-            <Typography variant="body2" sx={{ mb: 0.5 }}>
-              <strong>Good to know:</strong> You can use the same email address with different sign-in methods (Google, Apple, Facebook, or Email).
-            </Typography>
-            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-              Your account stays the same, but some advanced features work best when you use Facebook, Google, or Apple sign-in.
-            </Typography>
-          </Alert>
-
-          {/* Signup prompt at the top */}
-          <Box sx={{ mb: 3, textAlign: 'center' }}>
-            <Typography variant="body1">
-              New user?{' '}
-              <Link href="/auth/signup" style={{ textDecoration: 'none', fontWeight: 'bold' }}>
-                <Typography component="span" color="secondary" sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>
-                  CREATE ACCOUNT
-                </Typography>
-              </Link>
+          {/* TIEMPO-432: Simplified header — title only, no verbose info alert */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }} data-testid="login-page">
+            <LoginIcon sx={{ fontSize: 40, color: 'primary.main', mr: 1.5 }} />
+            <Typography component="h1" variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+              Sign In
             </Typography>
           </Box>
 
@@ -241,25 +218,7 @@ const LoginPage = () => {
                 Continue with Apple
               </Button>
 
-              {/* Facebook Sign In - Coming Soon */}
-              <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled
-                startIcon={<FacebookIcon sx={{ fontSize: 30 }} />}
-                data-testid="facebook-login-button"
-                sx={{
-                  mb: 2,
-                  py: 2,
-                  backgroundColor: '#e4e6eb',
-                  color: '#65676b',
-                  textTransform: 'none',
-                  fontSize: '1.1rem',
-                }}
-              >
-                Coming Soon
-              </Button>
+              {/* TIEMPO-432: Facebook Coming Soon button removed — was clutter */}
 
               <Divider sx={{ my: 3 }}>OR</Divider>
 
@@ -281,6 +240,21 @@ const LoginPage = () => {
               >
                 Continue with Email
               </Button>
+
+              {/* TIEMPO-432: Compact sign-up + cross-method note as footnote, not banner */}
+              <Box sx={{ mt: 3, textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  New user?{' '}
+                  <Link href="/auth/signup" style={{ textDecoration: 'none' }}>
+                    <Typography component="span" color="primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+                      Create account
+                    </Typography>
+                  </Link>
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Same account works across Google, Apple, and Email.
+                </Typography>
+              </Box>
             </Box>
           ) : (
             <Box sx={{ width: '100%' }}>
