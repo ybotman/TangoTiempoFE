@@ -122,6 +122,15 @@ const CalendarPage = () => {
     return window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
   };
 
+  // TIEMPO-425: Anchor initial view to LOCAL today, not UTC today.
+  // FullCalendar runs timeZone="UTC", so after 8pm EDT (UTC midnight rollover)
+  // its default "today" is tomorrow local-time and the list-21-day view
+  // starts beyond tonight's events.
+  const getInitialDate = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
   // TIEMPO-246: Generate placeholder events without Date() conversions
   const generatePlaceholderEvents = (startDate, endDate) => {
     const placeholders = [];
@@ -1366,6 +1375,7 @@ const CalendarPage = () => {
           timeZone="UTC"
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
+          initialDate={getInitialDate()}
           events={eventsWithPlaceholders}
           // Sort isDiscovered events after regular events, then by start time, then title
           eventOrder={(a, b) => {

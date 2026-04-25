@@ -132,6 +132,14 @@ const BostonCalendarPage = () => {
   const getInitialView = () => {
     return typeof window !== 'undefined' && window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
   };
+  // TIEMPO-425: Anchor initial view to LOCAL today, not UTC today.
+  // FullCalendar runs timeZone="UTC", so after 8pm EDT (UTC midnight rollover)
+  // its default "today" is tomorrow Boston-time and the list-21-day view
+  // starts beyond tonight's events.
+  const getInitialDate = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
   const [currentViewType, setCurrentViewType] = useState(getInitialView());
 
   // Force Boston location on mount
@@ -1162,6 +1170,7 @@ const BostonCalendarPage = () => {
             ref={calendarRef}
             plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
             initialView={currentViewType}
+            initialDate={getInitialDate()}
             events={coloredFilteredEvents}
             eventClick={handleEventClick}
             // Sort isDiscovered events after regular events, then by start time, then title

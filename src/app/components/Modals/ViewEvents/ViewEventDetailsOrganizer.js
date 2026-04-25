@@ -26,6 +26,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useOrganizers } from '@/hooks/useOrganizers';
+import { expandToNextInstance } from '@/utils/nextInstance';
 import axios from 'axios';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
@@ -75,8 +76,15 @@ const ViewEventDetailsOrganizer = ({ eventDetails }) => {
       });
       
       if (response.data && response.data.events) {
-// TIEMPO-276: Security cleanup - removed logging
-        setUpcomingEvents(response.data.events);
+        // Recurring masters come back with a historical base startDate regardless
+        // of the start filter. Expand each to its next real occurrence so the
+        // "Upcoming Events" list actually shows upcoming dates.
+        const fromMs = now.getTime();
+        const toMs = endDate.getTime();
+        const expanded = response.data.events
+          .map((e) => expandToNextInstance(e, fromMs, toMs))
+          .filter(Boolean);
+        setUpcomingEvents(expanded);
       }
     } catch (err) {
       console.error('Error fetching upcoming events:', err);
