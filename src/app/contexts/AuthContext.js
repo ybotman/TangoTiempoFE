@@ -191,6 +191,26 @@ export const AuthProvider = ({ children }) => {
         (role) => typeof role === 'object' && roleMatchesCurrentApp(role)
       );
 
+      // TEMP DEBUG (TIEMPO-431 SL diagnosis 2026-04-25): print roleIds shape so we can
+      // see whether BE returns 5 (incl. Spotlighter) and FE drops one, or BE returns 4.
+      // Remove once Toby's account is confirmed working.
+      // eslint-disable-next-line no-console
+      console.log('[TIEMPO-431-debug] userlogins response', {
+        roleIdsLen: backendInfo.roleIds?.length,
+        appRoleObjectsLen: appRoleObjects.length,
+        currentAppId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
+        sample: (backendInfo.roleIds || []).slice(0, 12).map((r) => ({
+          _id: r?._id,
+          roleName: r?.roleName,
+          appId: r?.appId,
+          appIdType: typeof r?.appId,
+          type: typeof r,
+          isObject: typeof r === 'object',
+          matches: typeof r === 'object' ? roleMatchesCurrentApp(r) : 'n/a',
+        })),
+        finalRoles: appRoleObjects.map((r) => r.roleName),
+      });
+
       // Merge Firebase and backend user data
       const mergedUser = {
         ...firebaseUser, // Spread Firebase user properties directly
