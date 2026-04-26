@@ -22,6 +22,7 @@ import { useCalendarPage } from '@/hooks/useCalendarPage';
 // CalendarSubMenu removed for simplified Boston view
 // CreateEventDetailModal removed - Boston is read-only
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
+import SpotlightOnlyModal from '@/components/Modals/ViewEvents/SpotlightOnlyModal';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
 import NoEventsAlert from '@/components/UI/NoEventsAlert';
@@ -171,6 +172,9 @@ const BostonCalendarPage = () => {
     selectedAIEventDetails: selectedAIEvent,  // AI event details
     isAIDetailModalOpen: isViewAIEventModalOpen,  // AI modal state
     setAIDetailModalOpen: handleAIModalClose,  // AI modal close
+    // TIEMPO-433: Spotlight-only modal for Spotlighter role
+    isSpotlightOnlyModalOpen,
+    setSpotlightOnlyModalOpen,
     // Create event modal not used - Boston is read-only
   } = useCalendarPage();
 
@@ -1345,6 +1349,13 @@ const BostonCalendarPage = () => {
           eventDetails={selectedAIEvent}
         />
       )}
+
+      {/* TIEMPO-433: Spotlight-only modal — opened directly from event click in Spotlighter role */}
+      <SpotlightOnlyModal
+        open={isSpotlightOnlyModalOpen}
+        onClose={() => setSpotlightOnlyModalOpen(false)}
+        eventDetails={selectedEventDetails}
+      />
 
       {/* Create modal removed - read-only view */}
     </div>

@@ -72,7 +72,25 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
 
   const eventId = eventDetails?.extendedProps?._id;
   const eventTitle = eventDetails?.extendedProps?.shortTitle || eventDetails?.title || 'Event';
+  const eventFullTitle = eventDetails?.title || eventTitle;
   const isRepeating = !!(eventDetails?.extendedProps?.isRecurring || eventDetails?.extendedProps?.recurrenceRule);
+
+  // TIEMPO-433: Event summary for verification — SL skips View Event modal,
+  // so the spotlight modal is now the only confirmation they have.
+  const eventStart = eventDetails?.start;
+  const formattedDate = eventStart
+    ? new Date(eventStart).toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
+  const venueName =
+    eventDetails?.extendedProps?.venueName ||
+    eventDetails?.extendedProps?.venueShortName ||
+    '';
+  const venueCity = eventDetails?.extendedProps?.venueCityName || eventDetails?.extendedProps?.masteredCityName || '';
 
   // Existing spotlights surfaced for visibility/removal. Read both fields
   // (legacy `features` + canonical `spotlights`) to mirror BE behavior.
@@ -148,9 +166,30 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={getModalStyle(isMobile)}>
-        <ModalHeader title={`Spotlights · ${eventTitle}`} onClose={onClose} />
+        <ModalHeader title="Add Spotlight" onClose={onClose} />
 
         <Box sx={{ flex: 1, overflow: 'auto', p: isMobile ? 2 : 3 }}>
+          {/* TIEMPO-433: Event summary at top so SL can verify the right event */}
+          <Box
+            sx={{
+              mb: 2,
+              p: 1.5,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              bgcolor: 'grey.50',
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+              {eventFullTitle}
+            </Typography>
+            {(formattedDate || venueName || venueCity) && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                {[formattedDate, venueName, venueCity].filter(Boolean).join(' · ')}
+              </Typography>
+            )}
+          </Box>
+
           {isRepeating && (
             <Alert severity="info" sx={{ mb: 2 }}>
               This is a recurring event. Spotlights you add here apply to all occurrences.
