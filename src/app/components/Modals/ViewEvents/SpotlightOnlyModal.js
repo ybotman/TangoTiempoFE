@@ -1,12 +1,17 @@
 /**
  * SpotlightOnlyModal.js
- * TIEMPO-431: Stripped-down modal for the Spotlighter (SL) role to add/remove
- * spotlights on any event without going through the full event-edit form.
+ * TIEMPO-431 / TIEMPO-433: Stripped-down modal for the Spotlighter (SL) role
+ * to add/remove spotlights on any event.
  *
- * Each add/remove fires a direct PATCH /api/events/{eventId}/spotlights call.
- * For v1 we only operate on master spotlights (recurring events affect ALL
- * occurrences). Per-occurrence overrides via instanceKey are deferred to v2
- * per TIEMPO-393 spec.
+ * Each add/remove fires PATCH /api/events/{eventId}/spotlights. For recurring
+ * events the click event already targets a specific occurrence (mirrors the
+ * RO Edit-This-Date pattern), so we pass the occurrence's start as
+ * `instanceKey` and the BE writes via instanceOverrides — spotlight applies
+ * to that one night only, not the master series.
+ *
+ * All five spotlight types (DJ / Instructor / Performer / Orchestra / Note)
+ * are available regardless of recurrence — per-occurrence semantics make the
+ * old "repeating gets only 3" rule moot.
  */
 
 'use client';
@@ -37,13 +42,12 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ModalHeader from '@/components/UI/ModalHeader';
 
-const BASE_OPTIONS = [
+// TIEMPO-433: All five types always available — SL is per-occurrence so the
+// old "repeating limited to DJ/Instructor/Performer" rule no longer applies.
+const SPOTLIGHT_OPTIONS = [
   { value: 'dj', label: 'DJ', maxLength: 19 },
   { value: 'instructor', label: 'Instructor', maxLength: 19 },
   { value: 'performer', label: 'Performer', maxLength: 19 },
-];
-
-const SINGLE_EVENT_OPTIONS = [
   { value: 'orchestra', label: 'Orchestra', maxLength: 19 },
   { value: 'note', label: 'Special Note', maxLength: 19 },
 ];
@@ -92,12 +96,35 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
     '';
   const venueCity = eventDetails?.extendedProps?.venueCityName || eventDetails?.extendedProps?.masteredCityName || '';
 
-  // Existing spotlights surfaced for visibility/removal. Read both fields
-  // (legacy `features` + canonical `spotlights`) to mirror BE behavior.
-  const initialSpotlights =
+  // TIEMPO-433: For recurring events the click identifies a specific
+  // occurrence — pass that as `instanceKey` so BE writes via instanceOverrides
+  // (one night only). Mirrors how RO Edit-This-Date works.
+  const instanceKey = isRepeating && eventStart
+    ? (typeof eventStart === 'string' ? eventStart : new Date(eventStart).toISOString())
+    : null;
+
+  // Existing spotlights for THIS occurrence — for recurring events, prefer
+  // any instanceOverride matching the occurrence date over the master array.
+  const masterSpotlights =
     eventDetails?.extendedProps?.spotlights ||
     eventDetails?.extendedProps?.features ||
     [];
+  const initialSpotlights = (() => {
+    if (!isRepeating || !instanceKey) return masterSpotlights;
+    const overrides = eventDetails?.extendedProps?.instanceOverrides || [];
+    const occurrenceDateStr = new Date(instanceKey).toISOString().split('T')[0];
+    const match = overrides.find((ov) => {
+      try {
+        return new Date(ov.instanceKey).toISOString().split('T')[0] === occurrenceDateStr;
+      } catch {
+        return false;
+      }
+    });
+    if (match?.patch) {
+      return match.patch.spotlights || match.patch.features || [];
+    }
+    return [];
+  })();
 
   const [spotlights, setSpotlights] = useState(initialSpotlights);
   const [newType, setNewType] = useState('');
@@ -105,18 +132,14 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  const SPOTLIGHT_OPTIONS = isRepeating ? BASE_OPTIONS : [...BASE_OPTIONS, ...SINGLE_EVENT_OPTIONS];
   const selectedOption = SPOTLIGHT_OPTIONS.find((o) => o.value === newType);
   const maxLength = selectedOption?.maxLength || 19;
 
   const callSpotlightApi = async (action, spotlight) => {
     const token = await getIdToken();
     const url = `${getApiBaseUrl()}/api/events/${eventId}/spotlights`;
-    return axios.patch(
-      url,
-      { action, spotlight },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const body = instanceKey ? { action, spotlight, instanceKey } : { action, spotlight };
+    return axios.patch(url, body, { headers: { Authorization: `Bearer ${token}` } });
   };
 
   const handleAdd = async () => {
@@ -192,12 +215,12 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
 
           {isRepeating && (
             <Alert severity="info" sx={{ mb: 2 }}>
-              This is a recurring event. Spotlights you add here apply to all occurrences.
+              Recurring event — spotlights you add here apply to <strong>this date only</strong>, not the rest of the series.
             </Alert>
           )}
 
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Current spotlights
+            {isRepeating ? 'Spotlights for this date' : 'Current spotlights'}
           </Typography>
           {spotlights.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
