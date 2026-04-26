@@ -5,7 +5,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShareIcon from '@mui/icons-material/Share';
-import StarIcon from '@mui/icons-material/Star';
 import CloseIcon from '@mui/icons-material/Close';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -23,8 +22,6 @@ import ViewEventDetailsVenue from './ViewEventDetailsVenue';
 import CancelOccurrenceDialog from './CancelOccurrenceDialog';
 import EditOccurrenceModal from './EditOccurrenceModal';
 import OccurrenceDatePicker from './OccurrenceDatePicker';
-// TIEMPO-431: Spotlight-only modal for Spotlighter (SL) role
-import SpotlightOnlyModal from './SpotlightOnlyModal';
 import { cancelOccurrence, createOverride, addExcludedDate } from '@/services/eventOverrides';
 import { uploadEventImage } from '@/utils/uploadEventImages';
 import PropTypes from 'prop-types';
@@ -68,8 +65,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [editOccurrenceOpen, setEditOccurrenceOpen] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  // TIEMPO-431: Spotlight-only modal state for Spotlighter role
-  const [spotlightOnlyOpen, setSpotlightOnlyOpen] = useState(false);
   const [selectedOccurrenceDate, setSelectedOccurrenceDate] = useState(null);
   const [isOverrideLoading, setIsOverrideLoading] = useState(false);
   // Track if we've handled the initial action to prevent re-triggering
@@ -342,10 +337,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
   
   const canEditEvent = isRegionalOrganizer || isRegionalAdmin;
 
-  // TIEMPO-431: Spotlighter role — surfaces an "Add Spotlight" action.
-  // BE re-validates the role on the spotlight PATCH, so this is just a UI gate.
-  const isSpotlighter = !!user && selectedRole === 'Spotlighter';
-
   // TIEMPO-362: Detect recurring event and capture occurrence date
   const isRecurringEvent = eventDetails?.extendedProps?.isRecurring ||
                           eventDetails?.extendedProps?.recurrenceRule;
@@ -578,18 +569,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       >
         Share
       </Button>
-
-      {/* TIEMPO-431: Add Spotlight button when user is in Spotlighter role */}
-      {isSpotlighter && (
-        <Button
-          onClick={() => setSpotlightOnlyOpen(true)}
-          size="small"
-          startIcon={<StarIcon fontSize="small" />}
-          sx={{ fontSize: '0.875rem' }}
-        >
-          Add Spotlight
-        </Button>
-      )}
 
       {/* TIEMPO-362: Actions removed from modal - now in calendar submenu */}
       {/* Edit/Delete buttons for users with permissions (non-recurring only) */}
@@ -1015,15 +994,6 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         excludedDates={eventDetails?.extendedProps?.excludedDates || []}
       />
 
-      {/* TIEMPO-431: Spotlight-only modal for Spotlighter role */}
-      <SpotlightOnlyModal
-        open={spotlightOnlyOpen}
-        onClose={() => setSpotlightOnlyOpen(false)}
-        eventDetails={eventDetails}
-        onSpotlightsChanged={() => {
-          if (onEventUpdated) onEventUpdated();
-        }}
-      />
     </>
   );
 };

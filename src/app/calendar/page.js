@@ -21,6 +21,7 @@ import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
+import SpotlightOnlyModal from '@/components/Modals/ViewEvents/SpotlightOnlyModal';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
 import NoEventsAlert from '@/components/UI/NoEventsAlert';
@@ -82,6 +83,9 @@ const CalendarPage = () => {
     setCreateModalOpen,
     isViewDetailModalOpen,
     setViewDetailModalOpen,
+    // TIEMPO-433: Spotlight-only modal for Spotlighter role
+    isSpotlightOnlyModalOpen,
+    setSpotlightOnlyModalOpen,
     selectedEventDetails,
     handleDatesSet,
     handlePrev,
@@ -1639,6 +1643,14 @@ const CalendarPage = () => {
         eventDetails={selectedEventDetails}
         onEventUpdated={handleEventUpdated}
         initialAction={pendingOccurrenceAction}
+      />
+
+      {/* TIEMPO-433: Spotlight-only modal — opened directly from event click in Spotlighter role */}
+      <SpotlightOnlyModal
+        open={isSpotlightOnlyModalOpen}
+        onClose={() => setSpotlightOnlyModalOpen(false)}
+        eventDetails={selectedEventDetails}
+        onSpotlightsChanged={refreshEvents}
       />
 
       <ViewAIEventDetails

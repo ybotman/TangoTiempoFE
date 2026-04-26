@@ -36,6 +36,9 @@ export const useCalendarPage = () => {
   const [pendingOccurrenceAction, setPendingOccurrenceAction] = useState(null);
   const [isAIDetailModalOpen, setAIDetailModalOpen] = useState(false);
   const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
+  // TIEMPO-433: Spotlighter role opens SpotlightOnlyModal directly on event click
+  // (skipping ViewEventDetailModal entirely — pure spotlight-add intent)
+  const [isSpotlightOnlyModalOpen, setSpotlightOnlyModalOpen] = useState(false);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
   // No longer needed - using saved user preferences instead
@@ -458,6 +461,13 @@ export const useCalendarPage = () => {
       // Regular event handling
       setSelectedEventDetails(arg.event);
 
+      // TIEMPO-433: Spotlighter role — open SpotlightOnlyModal directly,
+      // no View Event modal, no context menu. Pure spotlight-add intent.
+      if (selectedRole === listOfAllRoles.SPOTLIGHTER) {
+        setSpotlightOnlyModalOpen(true);
+        return;
+      }
+
       // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
       // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
       if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
@@ -551,6 +561,9 @@ export const useCalendarPage = () => {
       }
       setViewDetailModalOpen(isOpen);
     },
+    // TIEMPO-433: Spotlight-only modal for Spotlighter role
+    isSpotlightOnlyModalOpen,
+    setSpotlightOnlyModalOpen,
     // TIEMPO-362: Pending occurrence action for ViewEventDetailModal
     pendingOccurrenceAction,
     handleEventUpdated,
