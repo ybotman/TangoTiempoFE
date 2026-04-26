@@ -111,28 +111,45 @@ export default function ExplorePage() {
   }, [offsetMonths]);
 
   // TIEMPO-426: Fetch only the visible 12-month window instead of all
-  // travel-worthy events forever. Refetch when the window changes
-  // (user pages with <</>>). Also bump limit to 1000 (was 500) — the
-  // curated TW set crossed 500 and we were silently truncating.
+  // travel-worthy events forever. Refetch when the window changes.
+  // TIEMPO-434: BE caps travelWorthy responses at 100 per page (CALBEAF-132
+  // scrape-guard). The window often holds 200-300 TW events, so we
+  // paginate through until exhausted (capped at MAX_PAGES for safety).
+  // Without this, June+ events get truncated due to startDate ASC sort.
   useEffect(() => {
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
     const start = windowStart.format('YYYY-MM-DD');
     const end = windowEnd.format('YYYY-MM-DD');
+    const PAGE_LIMIT = 100; // BE caps TW at 100 per request
+    const MAX_PAGES = 20;   // safety: 20 × 100 = 2000 events
     let cancelled = false;
-    axios
-      .get(`${getApiBaseUrl()}/api/events`, {
-        params: { travelWorthy: true, appId, start, end, limit: 1000 },
-      })
-      .then((res) => {
+
+    (async () => {
+      try {
+        const accumulated = [];
+        let page = 1;
+        let totalPages = 1;
+        while (page <= totalPages && page <= MAX_PAGES) {
+          const res = await axios.get(`${getApiBaseUrl()}/api/events`, {
+            params: { travelWorthy: true, appId, start, end, limit: PAGE_LIMIT, page },
+          });
+          if (cancelled) return;
+          const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
+          accumulated.push(...list);
+          totalPages = res.data?.pagination?.pages || 1;
+          if (list.length === 0) break;
+          page += 1;
+        }
         if (cancelled) return;
-        const list = res.data?.events || (Array.isArray(res.data) ? res.data : []);
         // TIEMPO-427: Drop events whose categoryFirst falls outside the
-        // explore whitelist (SEMINAR / UNKNOWN / Trip etc.) — no load
-        // rules for those types yet, so they're noise here.
-        const cleaned = list.filter((e) => VALID_EXPLORE_CATEGORIES.has(categoryLabel(e.categoryFirst)));
+        // explore whitelist (SEMINAR / UNKNOWN / Trip etc.) — noise.
+        const cleaned = accumulated.filter((e) => VALID_EXPLORE_CATEGORIES.has(categoryLabel(e.categoryFirst)));
         setEvents(cleaned);
-      })
-      .catch((err) => { if (!cancelled) setError(err.message || 'Failed to load events'); });
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Failed to load events');
+      }
+    })();
+
     return () => { cancelled = true; };
   }, [windowStart, windowEnd]);
 
