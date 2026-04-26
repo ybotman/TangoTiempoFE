@@ -303,6 +303,22 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
             </Alert>
           )}
         </Box>
+
+        {/* TIEMPO-433: Sticky footer with explicit Cancel — adds/removes commit
+            individually, so Cancel just closes the modal without a confirm step. */}
+        <Box
+          sx={{
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            p: isMobile ? 1.5 : 2,
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <Button onClick={onClose} variant="outlined" disabled={submitting}>
+            Cancel
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );
