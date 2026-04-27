@@ -14,12 +14,16 @@ import VenueModal from '@/components/Modals/Venues/VenueModal'; // TIEMPO-290: I
 import SeriesDetectionHint from '@/components/Modals/CreateEvents/SeriesDetectionHint'; // TIEMPO-409: SAS-FTPNTD hint
 import PropTypes from 'prop-types';
 
-// TIEMPO-408 / Thread 1 sign-off (2026-04-18): strict gate eligible categories.
-const FOR_BEGINNERS_ELIGIBLE = new Set(['Class', 'Workshop', 'DayWorkshop', 'Festival']);
+// TIEMPO-408 strict gate, aligned with BE TIEMPO-440 / CALBEAF-154.
+// BE BEGINNER_ELIGIBLE_CATEGORIES = ['Class', 'Workshop']. Festival dropped
+// (BE never had it); DayWorkshop dropped (deprecated — Workshop covers both
+// short and long durations now).
+const FOR_BEGINNERS_ELIGIBLE = new Set(['Class', 'Workshop']);
 
 const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, organizer = null, onTimeModified = null }) => {
   const allCategories = useCategories(); // Fetch categories
-  // TIEMPO-291: Filter out DayWorkshop (replaced by Encuentro), Trip, and Unknown
+  // TIEMPO-440: Filter out DayWorkshop (deprecated — Workshop covers both
+  // short and long durations), Trip, and Unknown.
   const categories = useMemo(() =>
     allCategories.filter(cat =>
       cat.categoryName !== 'DayWorkshop' &&
@@ -647,9 +651,9 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           </FormControl>
         </Grid>
 
-        {/* TIEMPO-408 (provisional pre-TIEMPO-405): forBeginners toggle with
-            strict client-side gate (Class/Workshop/DayWorkshop/Festival).
-            Server rejection path follows when Fulton's bulk-enrich endpoint ships. */}
+        {/* TIEMPO-408 + TIEMPO-440: forBeginners toggle with strict
+            client-side gate (Class/Workshop). Aligned with BE
+            BEGINNER_ELIGIBLE_CATEGORIES per CALBEAF-154. */}
         <Grid item xs={12} md={6}>
           <Collapse in={FOR_BEGINNERS_ELIGIBLE.has(eventData.categoryFirst)} timeout={150}>
             <FormControl fullWidth>
