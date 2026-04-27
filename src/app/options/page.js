@@ -3,7 +3,8 @@
 import React from 'react';
 import { Box, Typography, Grid, Switch, FormControlLabel, Paper } from '@mui/material';
 
-const eventTypes = ['Festivals', 'Workshops', 'DayWorkshops', 'Milongas', 'Practices', 'Classes', 'Concerts'];
+// TIEMPO-440: DayWorkshops dropped — Workshops covers both short and long durations.
+const eventTypes = ['Festivals', 'Workshops', 'Milongas', 'Practices', 'Classes', 'Concerts'];
 
 const eventLevels = [
   { level: 'Favorites', label: 'Favorites' },

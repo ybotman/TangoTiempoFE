@@ -22,12 +22,12 @@ const WINDOW_DAYS = 90;
 // Broader category palette than Explore's 5-color filtered set — Local
 // events cover Milonga/Practica/Class that don't appear in Explore. Kept
 // local to this file so Explore's legend stays lean.
+// TIEMPO-440: DayWorkshop entry dropped — Workshop covers both short and long durations.
 const CATEGORY_COLORS = {
   Milonga: '#ef4444',     // red
   Practica: '#14b8a6',    // teal
   Class: '#3b82f6',       // blue
   Workshop: '#ec4899',    // pink
-  DayWorkshop: '#d946ef', // magenta
   Festival: '#e94560',    // pink-red
   Marathon: '#f97316',    // orange
   Encuentro: '#22c55e',   // green
