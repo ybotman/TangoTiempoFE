@@ -30,7 +30,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import WelcomeModal from '@/components/Modals/Welcome/WelcomeModal'; // TIEMPO-329: Welcome modal
-import MapCenterOnboardingModal from '@/components/Modals/misc/MapCenterOnboardingModal'; // TIEMPO-381: Onboarding modal
+// TIEMPO-440: MapCenterOnboardingModal removed; onboarding now reuses MapCenterModal via openMapCenterModal()
 import { wasWelcomeShown } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor tracking
 
 const CalendarPage = () => {
@@ -59,8 +59,6 @@ const CalendarPage = () => {
     openLocationSettings,
     openMapCenterModal,
     needsOnboarding,
-    setNeedsOnboarding,
-    saveToCloudDefault,
     isInitialized: geoInitialized,
     currentLocation
   } = useGeoLocation();
@@ -1197,6 +1195,16 @@ const CalendarPage = () => {
     }
   }, []);
 
+  // TIEMPO-440: Logged-in users without a saved mapCenter — open the same
+  // MapCenterModal everyone else uses (replaces the legacy
+  // MapCenterOnboardingModal). saveToCloudDefault now clears
+  // needsOnboarding on success so the modal won't re-open in a loop.
+  useEffect(() => {
+    if (needsOnboarding && user) {
+      openMapCenterModal();
+    }
+  }, [needsOnboarding, user, openMapCenterModal]);
+
   // Auto-open location settings for LOGGED-IN users only if no location selected
   // TIEMPO-381: Wait for geoInitialized before making decision - prevents race condition
   // TIEMPO-388: Anonymous users are handled by WelcomeModal (tries browser geolocation first)
@@ -1665,14 +1673,9 @@ const CalendarPage = () => {
         onClose={() => setShowWelcomeModal(false)}
       />
 
-      {/* TIEMPO-381: MapCenter Onboarding Modal - Shows for logged-in users without mapCenter */}
-      <MapCenterOnboardingModal
-        open={needsOnboarding && !!user}
-        onSaveLocation={async (locationData, firebaseToken) => {
-          await saveToCloudDefault(locationData, firebaseToken);
-          setNeedsOnboarding(false);
-        }}
-      />
+      {/* TIEMPO-440: MapCenterOnboardingModal merged into MapCenterModal —
+          onboarding now triggers the same modal everyone else uses, opened
+          via openMapCenterModal(). saveToCloudDefault clears needsOnboarding. */}
 
       {/* TIEMPO-408: floating map icon removed — CityPill in chrome replaces it. */}
     </div>

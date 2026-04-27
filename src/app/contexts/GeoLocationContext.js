@@ -547,6 +547,10 @@ export const GeoLocationProvider = ({ children }) => {
     // Update location AND fetch city name
     await updateLocationWithCityName(locData);
 
+    // TIEMPO-440: Clear onboarding flag so the (now reused) MapCenterModal
+    // closes the onboarding loop the same way MapCenterOnboardingModal did.
+    setNeedsOnboarding(false);
+
     return result;
   }, [updateLocationWithCityName]);
 
