@@ -46,17 +46,16 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ModalHeader from '@/components/UI/ModalHeader';
 
-// TIEMPO-438: 6 spotlight types for SL one-off path. Recurring SL routes to
-// EditOccurrenceModal (which already handles all 6 incl. canceled). 'canceled'
-// requires BE v1.28.7+ (CALBEAF-153). For canceled the user enters a reason
-// in the name field; if blank, name is allowed empty.
+// TIEMPO-438 / TIEMPO-440: 6 spotlight types for SL one-off path. nameLabel
+// varies because the second field isn't always a "name" — for Note it's the
+// message, for Canceled it's an optional reason.
 const SPOTLIGHT_OPTIONS = [
-  { value: 'dj', label: 'DJ', maxLength: 19, requiresName: true },
-  { value: 'instructor', label: 'Instructor', maxLength: 19, requiresName: true },
-  { value: 'performer', label: 'Performer', maxLength: 19, requiresName: true },
-  { value: 'orchestra', label: 'Orchestra', maxLength: 19, requiresName: true },
-  { value: 'note', label: 'Special Note', maxLength: 19, requiresName: true },
-  { value: 'canceled', label: 'Canceled', maxLength: 30, requiresName: false },
+  { value: 'dj',         label: 'DJ',           nameLabel: 'DJ name',           maxLength: 19, requiresName: true  },
+  { value: 'instructor', label: 'Instructor',   nameLabel: 'Instructor name',   maxLength: 19, requiresName: true  },
+  { value: 'performer',  label: 'Performer',    nameLabel: 'Performer name',    maxLength: 19, requiresName: true  },
+  { value: 'orchestra',  label: 'Orchestra',    nameLabel: 'Orchestra name',    maxLength: 19, requiresName: true  },
+  { value: 'note',       label: 'Special Note', nameLabel: 'Note',              maxLength: 19, requiresName: true  },
+  { value: 'canceled',   label: 'Canceled',     nameLabel: 'Reason (optional)', maxLength: 30, requiresName: false },
 ];
 
 const getModalStyle = (isMobile) => ({
@@ -390,12 +389,12 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
             <TextField
               size="small"
               fullWidth
-              label="Name"
+              label={selectedOption?.nameLabel || 'Name'}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               inputProps={{ maxLength }}
               helperText={`Max ${maxLength} chars`}
-              disabled={submitting}
+              disabled={submitting || !newType}
             />
             <Button
               variant="contained"
