@@ -6,6 +6,7 @@ state: live
 feature: beginner-mode
 keywords: [design, ui]
 appid: 01
+niche: tango
 app: "[[APP-01]]"
 audience: all
 permanence: long-term

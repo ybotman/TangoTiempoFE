@@ -6,6 +6,7 @@ state: live
 feature: cloud-infra
 keywords: [google, free-tier]
 appid: global
+niche: tango
 app: "[[APP-GLOBAL]]"
 audience: all
 permanence: long-term

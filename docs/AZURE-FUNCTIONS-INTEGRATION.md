@@ -6,6 +6,7 @@ state: live
 feature: serverless-integration
 keywords: [azure, functions]
 appid: 1
+niche: tango
 app: "[[APP-01-TangoTiempo]]"
 audience: all
 permanence: long-term

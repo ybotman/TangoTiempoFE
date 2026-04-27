@@ -180,7 +180,10 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
       setInitialActionHandled(true);
       setHasNavigatedDates(false); // Reset navigation state
       // Trigger the appropriate action based on what was selected in the submenu
-      if (initialAction === 'editOccurrence') {
+      // TIEMPO-438: 'spotlightOccurrence' (SL recurring) reuses the same modal
+      // as 'editOccurrence'; the role prop on EditOccurrenceModal gates image
+      // upload + non-spotlight surfaces.
+      if (initialAction === 'editOccurrence' || initialAction === 'spotlightOccurrence') {
         setEditOccurrenceOpen(true);
       } else if (initialAction === 'cancelOccurrence') {
         setCancelDialogOpen(true);
@@ -960,7 +963,8 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         isLoading={isOverrideLoading}
       />
 
-      {/* TIEMPO-362: Edit Occurrence Modal */}
+      {/* TIEMPO-362 + TIEMPO-438: Edit Occurrence Modal — RO sees full edit,
+          SL gets the spotlight-only subset (image tab hidden) via role prop */}
       <EditOccurrenceModal
         open={editOccurrenceOpen}
         onClose={() => setEditOccurrenceOpen(false)}
@@ -969,6 +973,7 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
         occurrenceDate={currentNavigatedDate}
         currentValues={currentOverrideValues}
         isLoading={isOverrideLoading}
+        role={selectedRole}
         // Date navigation props
         onPrevDate={handlePrevDate}
         onNextDate={handleNextDate}
