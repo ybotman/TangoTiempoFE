@@ -16,7 +16,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Modal,
@@ -37,7 +37,11 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import axios from 'axios';
+import { format, addMonths } from 'date-fns';
+import { RRule } from 'rrule';
 import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ModalHeader from '@/components/UI/ModalHeader';
@@ -81,32 +85,78 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
   const eventFullTitle = eventDetails?.title || eventTitle;
   const isRepeating = !!(eventDetails?.extendedProps?.isRecurring || eventDetails?.extendedProps?.recurrenceRule);
 
-  // TIEMPO-433: Event summary for verification — SL skips View Event modal,
-  // so the spotlight modal is now the only confirmation they have.
-  const eventStart = eventDetails?.start;
-  const formattedDate = eventStart
-    ? new Date(eventStart).toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : '';
   const venueName =
     eventDetails?.extendedProps?.venueName ||
     eventDetails?.extendedProps?.venueShortName ||
     '';
   const venueCity = eventDetails?.extendedProps?.venueCityName || eventDetails?.extendedProps?.masteredCityName || '';
 
-  // TIEMPO-433: For recurring events the click identifies a specific
-  // occurrence — pass that as `instanceKey` so BE writes via instanceOverrides
-  // (one night only). Mirrors how RO Edit-This-Date works.
-  const instanceKey = isRepeating && eventStart
-    ? (typeof eventStart === 'string' ? eventStart : new Date(eventStart).toISOString())
+  // TIEMPO-436: Build the occurrence list for recurring events so SL can
+  // page << / >> through them inside the modal. Mirrors ViewEventDetailModal
+  // / EditOccurrenceModal pattern.
+  const recurrenceRule = eventDetails?.extendedProps?.recurrenceRule;
+  const venueDisplayStartTime = eventDetails?.extendedProps?.displayStartTime;
+  const eventStartDateRaw = eventDetails?.extendedProps?.originalStartDate || eventDetails?.start;
+
+  const occurrenceDates = useMemo(() => {
+    if (!isRepeating || !recurrenceRule) return [];
+    const dtstartSource = venueDisplayStartTime || eventStartDateRaw;
+    if (!dtstartSource) return [];
+    try {
+      let rruleStr;
+      if (typeof venueDisplayStartTime === 'string' && !venueDisplayStartTime.endsWith('Z')) {
+        const dtStartFormatted = venueDisplayStartTime.replace(/[-:]/g, '').replace('T', 'T').substring(0, 15);
+        rruleStr = `DTSTART:${dtStartFormatted}\nRRULE:${recurrenceRule}`;
+      } else {
+        const dtstart = new Date(dtstartSource);
+        rruleStr = `DTSTART:${format(dtstart, "yyyyMMdd'T'HHmmss")}\nRRULE:${recurrenceRule}`;
+      }
+      const rule = RRule.fromString(rruleStr);
+      const dtstart = new Date(dtstartSource);
+      const endRange = addMonths(new Date(), 6);
+      return rule.between(dtstart, endRange, true).slice(0, 52);
+    } catch {
+      return [];
+    }
+  }, [isRepeating, recurrenceRule, venueDisplayStartTime, eventStartDateRaw]);
+
+  // currentDateIndex tracks where the user has paged to. Initialize to the
+  // clicked occurrence; reset whenever the underlying event changes.
+  const initialIndex = useMemo(() => {
+    if (!isRepeating || !occurrenceDates.length || !eventDetails?.start) return 0;
+    const target = new Date(eventDetails.start).toISOString().split('T')[0];
+    const idx = occurrenceDates.findIndex(
+      (d) => new Date(d).toISOString().split('T')[0] === target
+    );
+    return idx >= 0 ? idx : 0;
+  }, [isRepeating, occurrenceDates, eventDetails?.start]);
+
+  const [currentDateIndex, setCurrentDateIndex] = useState(initialIndex);
+  useEffect(() => {
+    setCurrentDateIndex(initialIndex);
+  }, [initialIndex]);
+
+  // The "current" occurrence the SL is editing — either the rrule-derived
+  // navigated date (recurring) or the click's start (single).
+  const currentOccurrenceDate = isRepeating && occurrenceDates.length
+    ? occurrenceDates[currentDateIndex]
+    : eventDetails?.start;
+
+  const formattedDate = currentOccurrenceDate
+    ? new Date(currentOccurrenceDate).toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
+
+  const instanceKey = isRepeating && currentOccurrenceDate
+    ? (typeof currentOccurrenceDate === 'string'
+        ? currentOccurrenceDate
+        : new Date(currentOccurrenceDate).toISOString())
     : null;
 
-  // Existing spotlights for THIS occurrence — for recurring events, prefer
-  // any instanceOverride matching the occurrence date over the master array.
   const masterSpotlights =
     eventDetails?.extendedProps?.spotlights ||
     eventDetails?.extendedProps?.features ||
@@ -134,10 +184,8 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // TIEMPO-436: Modal is mounted once at the calendar page level and reused
-  // across event clicks. useState initializers only fire on first mount, so
-  // values from the previous event leak into the next. Reset whenever the
-  // event identity OR the selected occurrence changes.
+  // TIEMPO-436: Reset spotlights + form whenever the event OR the selected
+  // occurrence changes (covers both event-switching AND prev/next nav).
   useEffect(() => {
     setSpotlights(initialSpotlights);
     setNewType('');
@@ -146,6 +194,15 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
     setSubmitting(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, instanceKey]);
+
+  const handlePrevDate = () => {
+    if (currentDateIndex > 0) setCurrentDateIndex((i) => i - 1);
+  };
+  const handleNextDate = () => {
+    if (currentDateIndex < occurrenceDates.length - 1) setCurrentDateIndex((i) => i + 1);
+  };
+  const hasPrevDate = isRepeating && currentDateIndex > 0;
+  const hasNextDate = isRepeating && currentDateIndex < occurrenceDates.length - 1;
 
   const selectedOption = SPOTLIGHT_OPTIONS.find((o) => o.value === newType);
   const maxLength = selectedOption?.maxLength || 19;
@@ -207,6 +264,41 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
         <ModalHeader title="Add Spotlight" onClose={onClose} />
 
         <Box sx={{ flex: 1, overflow: 'auto', p: isMobile ? 2 : 3 }}>
+          {/* TIEMPO-436: Occurrence navigation arrows for recurring events.
+              Mirrors EditOccurrenceModal pattern — click prev/next to page
+              through the series without closing the modal. */}
+          {isRepeating && occurrenceDates.length > 1 && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 1.5,
+                px: 0.5,
+              }}
+            >
+              <IconButton
+                size="small"
+                onClick={handlePrevDate}
+                disabled={!hasPrevDate || submitting}
+                aria-label="previous occurrence"
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+              <Typography variant="caption" color="text.secondary">
+                Occurrence {currentDateIndex + 1} of {occurrenceDates.length}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={handleNextDate}
+                disabled={!hasNextDate || submitting}
+                aria-label="next occurrence"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+          )}
+
           {/* TIEMPO-433: Event summary at top so SL can verify the right event */}
           <Box
             sx={{
