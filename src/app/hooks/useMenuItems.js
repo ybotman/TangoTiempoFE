@@ -137,6 +137,21 @@ const useMenuItems = () => {
             { label: 'Add Photos', action: 'addPhotos' },
           ];
         }
+      } else if (selectedRole === listOfAllRoles.SPOTLIGHTER) {
+        // TIEMPO-436: Spotlighter mirrors RO menu structure but capabilities
+        // are subsetted — spotlight actions only, no edit/delete/add-event.
+        if (isRecurring && formattedDate) {
+          menuOptions = [
+            ...menuOptions,
+            { label: `Spotlight This Date (${formattedDate})`, action: 'spotlightOccurrence' },
+            { label: 'See All Dates', action: 'seeAllDates' },
+          ];
+        } else {
+          menuOptions = [
+            ...menuOptions,
+            { label: 'Spotlight This Event', action: 'spotlightEvent' },
+          ];
+        }
       } else if (selectedRole === listOfAllRoles.NAMED_USER) {
         menuOptions = [...menuOptions, { label: 'Add Comment/Photo', action: 'addCommentPhoto' }];
       }

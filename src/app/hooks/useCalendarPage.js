@@ -461,12 +461,10 @@ export const useCalendarPage = () => {
       // Regular event handling
       setSelectedEventDetails(arg.event);
 
-      // TIEMPO-433: Spotlighter role — open SpotlightOnlyModal directly,
-      // no View Event modal, no context menu. Pure spotlight-add intent.
-      if (selectedRole === listOfAllRoles.SPOTLIGHTER) {
-        setSpotlightOnlyModalOpen(true);
-        return;
-      }
+      // TIEMPO-436: Spotlighter mirrors RO process — show context menu so
+      // user can choose View Event vs Spotlight. (TIEMPO-433 originally
+      // skipped the menu; TIEMPO-436 reverts that for parity with RO UX.)
+      // Falls through to the elevated-role context-menu branch below.
 
       // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
       // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
@@ -523,6 +521,15 @@ export const useCalendarPage = () => {
       // Store the action for ViewEventDetailModal to handle on open
       setPendingOccurrenceAction(action);
       setViewDetailModalOpen(true);
+    }
+
+    // TIEMPO-436: Spotlighter actions — open the spotlight-only modal.
+    // 'spotlightOccurrence' (recurring) and 'spotlightEvent' (single) both
+    // funnel to the same modal; the click event already carries the date,
+    // so the modal extracts instanceKey from selectedEventDetails.start
+    // for recurring events.
+    if (action === 'spotlightEvent' || action === 'spotlightOccurrence') {
+      setSpotlightOnlyModalOpen(true);
     }
   };
 
