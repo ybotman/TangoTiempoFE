@@ -316,8 +316,12 @@ const CalendarPage = () => {
     // Build features array from new format or legacy format
     let features = [];
 
-    // New array format: patch.features = [{ type: 'dj', name: 'DJ Carlos' }, ...]
-    if (patch.features && Array.isArray(patch.features)) {
+    // TIEMPO-439: Read patch.spotlights (SL flow) OR patch.features (RO flow).
+    // Both shapes carry the same { type, name } objects; SL writes to spotlights,
+    // RO writes to features. Whichever exists wins.
+    if (patch.spotlights && Array.isArray(patch.spotlights)) {
+      features = patch.spotlights;
+    } else if (patch.features && Array.isArray(patch.features)) {
       features = patch.features;
     } else {
       // Legacy single-feature format: patch.featureType, patch.featureName
@@ -600,33 +604,12 @@ const CalendarPage = () => {
                   );
                 }
 
-                // TIEMPO-388: Spotlight visibility rules by category
-                // - Multi-day (>2 days) / Festival / Special: Show ALL spotlights
-                // - Canceled: ALWAYS show canceled badge (handled above)
-                // - Practica, Class: NO spotlights on calendar (except canceled)
-                const categoryFirst = event.extendedProps?.categoryFirst || '';
-                const isMultiDay = (() => {
-                  const start = event.start;
-                  const end = event.end || event.start;
-                  if (!start || !end) return false;
-                  const diffMs = new Date(end) - new Date(start);
-                  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-                  return diffDays > 2;
-                })();
-                const isFestivalOrSpecial = ['Festival', 'Special', 'Marathon', 'Weekend'].some(
-                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
-                );
-                const isPracticaOrClass = ['Practica', 'Class', 'Other'].some(
-                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
-                );
-
-                // Show all spotlights for multi-day events or festivals
-                const showAllSpotlights = isMultiDay || isFestivalOrSpecial;
-                // Hide spotlights for practica/class (except canceled which is handled above)
-                const hideSpotlights = isPracticaOrClass && !showAllSpotlights;
-
-                if (featureData && !featureData.isCanceled && !hideSpotlights) {
-                  // DJ badge (no icon, just abbreviation)
+                // TIEMPO-439: Cancel supersedes all (handled above as the only badge).
+                // Otherwise render in order: DJ → Performer → Teacher.
+                // Note is intentionally NOT rendered on calendar tiles (lives in description / View modal).
+                // Practica/Class hide rule removed for parity with Boston route.
+                if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -642,24 +625,7 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Orchestra shows as separate inverted row below (not as badge)
-                  // Instructor badge (no icon)
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '1px 4px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
-                  // Performer badge (no icon)
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -675,29 +641,28 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '1px 4px',
-                          marginLeft: '4px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
-                  // LIVE is not a separate type - it's implied by Orchestra presence
+                  // Note: not rendered on tiles by design (TIEMPO-439).
+                  // Orchestra: rendered below as its own row.
                 }
 
-                // Show orchestra as separate inverted row for non-practica/class events
-                const hasOrchestra = featureData?.orchestra && !hideSpotlights && !featureData?.isCanceled;
+                // Orchestra as separate inverted row when present + not canceled.
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
 
                 return (
                   <>
@@ -912,14 +877,12 @@ const CalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges on calendar view
-                const categoryFirst = event.extendedProps?.categoryFirst || '';
-                const isPracticaOrClass = ['Practica', 'Class', 'Other'].some(
-                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
-                );
-
-                if (featureData && !featureData.isCanceled && !isPracticaOrClass) {
-                  // DJ badge (no icon)
+                // TIEMPO-439: Cancel supersedes all (handled above as the only badge).
+                // Otherwise render in order: DJ → Performer → Teacher.
+                // Note is intentionally NOT rendered on calendar tiles.
+                // Practica/Class hide rule removed for parity with Boston route.
+                if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -935,23 +898,7 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Instructor badge (no icon)
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '2px 6px',
-                        marginLeft: '6px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
-                  // Performer badge (no icon)
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -967,29 +914,28 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '2px 6px',
-                          marginLeft: '6px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
-                  // LIVE is not a separate type - it's implied by Orchestra presence
+                  // Note: not rendered on tiles (TIEMPO-439).
+                  // Orchestra: rendered below as its own row.
                 }
 
-                // Orchestra shows as separate inverted row for non-practica/class events
-                const hasOrchestra = featureData?.orchestra && !isPracticaOrClass && !featureData?.isCanceled;
+                // Orchestra as separate inverted row when present + not canceled.
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
 
                 return (
                   <>

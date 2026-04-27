@@ -212,8 +212,10 @@ const BostonCalendarPage = () => {
     // Build features array from new format or legacy format
     let features = [];
 
-    // New array format: patch.features = [{ type: 'dj', name: 'DJ Carlos' }, ...]
-    if (patch.features && Array.isArray(patch.features)) {
+    // TIEMPO-439: Read patch.spotlights (SL flow) OR patch.features (RO flow).
+    if (patch.spotlights && Array.isArray(patch.spotlights)) {
+      features = patch.spotlights;
+    } else if (patch.features && Array.isArray(patch.features)) {
       features = patch.features;
     } else {
       // Legacy single-feature format: patch.featureType, patch.featureName
@@ -462,8 +464,9 @@ const BostonCalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges (only if not canceled)
+                // TIEMPO-439: Order DJ → Performer → Teacher. Note not on tiles.
                 if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -479,21 +482,7 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '1px 4px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -509,24 +498,23 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '1px 4px',
-                          marginLeft: '4px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
+                  // Note: not rendered on tiles by design (TIEMPO-439).
                 }
 
                 // Orchestra gets its own row
@@ -742,8 +730,9 @@ const BostonCalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges (only if not canceled)
+                // TIEMPO-439: Order DJ → Performer → Teacher. Note not on tiles.
                 if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -759,21 +748,7 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '2px 6px',
-                        marginLeft: '6px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -789,24 +764,23 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '2px 6px',
-                          marginLeft: '6px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
+                  // Note: not rendered on tiles by design (TIEMPO-439).
                 }
 
                 // Orchestra gets its own row
