@@ -16,7 +16,7 @@
 
 'use client';
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Modal,
@@ -42,14 +42,15 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ModalHeader from '@/components/UI/ModalHeader';
 
-// TIEMPO-433: All five types always available — SL is per-occurrence so the
-// old "repeating limited to DJ/Instructor/Performer" rule no longer applies.
+// TIEMPO-436: Limited to types BE's PATCH /events/{id}/spotlights validates.
+// BE Events_Spotlights.js validTypes = ['dj','instructor','performer','band'].
+// Orchestra and Special Note will re-enable here once BE expands validation
+// (CALBEAF ticket for Fulton). 'band' omitted because the FE event renderer
+// doesn't render that type yet — adding it would silently store but not show.
 const SPOTLIGHT_OPTIONS = [
   { value: 'dj', label: 'DJ', maxLength: 19 },
   { value: 'instructor', label: 'Instructor', maxLength: 19 },
   { value: 'performer', label: 'Performer', maxLength: 19 },
-  { value: 'orchestra', label: 'Orchestra', maxLength: 19 },
-  { value: 'note', label: 'Special Note', maxLength: 19 },
 ];
 
 const getModalStyle = (isMobile) => ({
@@ -131,6 +132,19 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
   const [newName, setNewName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  // TIEMPO-436: Modal is mounted once at the calendar page level and reused
+  // across event clicks. useState initializers only fire on first mount, so
+  // values from the previous event leak into the next. Reset whenever the
+  // event identity OR the selected occurrence changes.
+  useEffect(() => {
+    setSpotlights(initialSpotlights);
+    setNewType('');
+    setNewName('');
+    setError(null);
+    setSubmitting(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId, instanceKey]);
 
   const selectedOption = SPOTLIGHT_OPTIONS.find((o) => o.value === newType);
   const maxLength = selectedOption?.maxLength || 19;
