@@ -42,15 +42,16 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ModalHeader from '@/components/UI/ModalHeader';
 
-// TIEMPO-436: Limited to types BE's PATCH /events/{id}/spotlights validates.
-// BE Events_Spotlights.js validTypes = ['dj','instructor','performer','band'].
-// Orchestra and Special Note will re-enable here once BE expands validation
-// (CALBEAF ticket for Fulton). 'band' omitted because the FE event renderer
-// doesn't render that type yet — adding it would silently store but not show.
+// TIEMPO-437: Restored to all 5 types now that BE accepts them
+// (CALBEAF-148, BE v1.28.4 expanded validTypes). Per-occurrence semantics
+// from TIEMPO-433 still apply — these are all spotlight-shape fields,
+// stored against either the master event or instanceOverrides for one night.
 const SPOTLIGHT_OPTIONS = [
   { value: 'dj', label: 'DJ', maxLength: 19 },
   { value: 'instructor', label: 'Instructor', maxLength: 19 },
   { value: 'performer', label: 'Performer', maxLength: 19 },
+  { value: 'orchestra', label: 'Orchestra', maxLength: 19 },
+  { value: 'note', label: 'Special Note', maxLength: 19 },
 ];
 
 const getModalStyle = (isMobile) => ({
