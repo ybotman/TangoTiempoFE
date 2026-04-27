@@ -1,15 +1,16 @@
 ---
 date: 2025-11-20
 persona: sarah
-type: implementation
+type: design
 state: live
 feature: fe-modernization
 keywords: [react, nextjs]
 appid: 1
+niche: tango
 app: "[[APP-01-TangoTiempo]]"
 audience: all
 permanence: long-term
-tags: [type/implementation, app/tango]
+tags: [type/design, app/tango]
 ---
 
 ## FINAL ALIGNED BACKEND REQUIREMENTS:

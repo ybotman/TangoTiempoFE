@@ -62,8 +62,12 @@ const EditOccurrenceModal = ({
   onPrevDate,
   onNextDate,
   hasPrevDate = false,
-  hasNextDate = false
+  hasNextDate = false,
+  // TIEMPO-438: When role==='Spotlighter' the modal hides image controls and
+  // reads as "Spotlight This Date". RO (default) gets full per-occurrence edit.
+  role = 'RegionalOrganizer',
 }) => {
+  const isSpotlighterRole = role === 'Spotlighter';
   // Tab state
   const [currentTab, setCurrentTab] = useState('spotlights');
 
@@ -375,19 +379,21 @@ const EditOccurrenceModal = ({
           </Alert>
         )}
 
-        {/* Tabs */}
+        {/* TIEMPO-438: Tabs — Image tab hidden for SL (image override is RO-only) */}
         <Tabs
           value={currentTab}
           onChange={(_, v) => setCurrentTab(v)}
           sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
         >
           <Tab label="Spotlights" value="spotlights" />
-          <Tab
-            label="Image"
-            value="image"
-            icon={currentImageSrc ? <ImageIcon fontSize="small" color="success" /> : null}
-            iconPosition="end"
-          />
+          {!isSpotlighterRole && (
+            <Tab
+              label="Image"
+              value="image"
+              icon={currentImageSrc ? <ImageIcon fontSize="small" color="success" /> : null}
+              iconPosition="end"
+            />
+          )}
         </Tabs>
 
         {/* Spotlights Tab */}
@@ -506,8 +512,8 @@ const EditOccurrenceModal = ({
           </>
         )}
 
-        {/* Image Tab */}
-        {currentTab === 'image' && (
+        {/* Image Tab — TIEMPO-438: hidden for SL role */}
+        {currentTab === 'image' && !isSpotlighterRole && (
           <Box>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
               Override Image for This Date
@@ -607,7 +613,9 @@ EditOccurrenceModal.propTypes = {
   onPrevDate: PropTypes.func,
   onNextDate: PropTypes.func,
   hasPrevDate: PropTypes.bool,
-  hasNextDate: PropTypes.bool
+  hasNextDate: PropTypes.bool,
+  // TIEMPO-438: 'Spotlighter' hides image tab; default 'RegionalOrganizer' = full edit
+  role: PropTypes.oneOf(['RegionalOrganizer', 'Spotlighter']),
 };
 
 export default EditOccurrenceModal;

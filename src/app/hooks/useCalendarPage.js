@@ -523,12 +523,17 @@ export const useCalendarPage = () => {
       setViewDetailModalOpen(true);
     }
 
-    // TIEMPO-436: Spotlighter actions — open the spotlight-only modal.
-    // 'spotlightOccurrence' (recurring) and 'spotlightEvent' (single) both
-    // funnel to the same modal; the click event already carries the date,
-    // so the modal extracts instanceKey from selectedEventDetails.start
-    // for recurring events.
-    if (action === 'spotlightEvent' || action === 'spotlightOccurrence') {
+    // TIEMPO-438: SL routes split per event-type for parity with RO:
+    //   spotlightOccurrence (recurring) → ViewEventDetailModal which then opens
+    //     EditOccurrenceModal with role='Spotlighter' (image hidden, all 6
+    //     spotlight types incl. canceled). Mirrors RO 'editOccurrence' flow.
+    //   spotlightEvent (one-off) → simplified SpotlightOnlyModal — 6 types,
+    //     no image, no occurrence nav.
+    if (action === 'spotlightOccurrence') {
+      setPendingOccurrenceAction('spotlightOccurrence');
+      setViewDetailModalOpen(true);
+    }
+    if (action === 'spotlightEvent') {
       setSpotlightOnlyModalOpen(true);
     }
   };

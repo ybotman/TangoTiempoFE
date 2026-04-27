@@ -6,6 +6,7 @@ state: live
 feature: user-roles
 keywords: [auth, identity]
 appid: 1
+niche: tango
 app: "[[APP-01-TangoTiempo]]"
 audience: all
 permanence: long-term

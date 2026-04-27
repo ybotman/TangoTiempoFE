@@ -46,16 +46,17 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ModalHeader from '@/components/UI/ModalHeader';
 
-// TIEMPO-437: Restored to all 5 types now that BE accepts them
-// (CALBEAF-148, BE v1.28.4 expanded validTypes). Per-occurrence semantics
-// from TIEMPO-433 still apply — these are all spotlight-shape fields,
-// stored against either the master event or instanceOverrides for one night.
+// TIEMPO-438: 6 spotlight types for SL one-off path. Recurring SL routes to
+// EditOccurrenceModal (which already handles all 6 incl. canceled). 'canceled'
+// requires BE v1.28.7+ (CALBEAF-153). For canceled the user enters a reason
+// in the name field; if blank, name is allowed empty.
 const SPOTLIGHT_OPTIONS = [
-  { value: 'dj', label: 'DJ', maxLength: 19 },
-  { value: 'instructor', label: 'Instructor', maxLength: 19 },
-  { value: 'performer', label: 'Performer', maxLength: 19 },
-  { value: 'orchestra', label: 'Orchestra', maxLength: 19 },
-  { value: 'note', label: 'Special Note', maxLength: 19 },
+  { value: 'dj', label: 'DJ', maxLength: 19, requiresName: true },
+  { value: 'instructor', label: 'Instructor', maxLength: 19, requiresName: true },
+  { value: 'performer', label: 'Performer', maxLength: 19, requiresName: true },
+  { value: 'orchestra', label: 'Orchestra', maxLength: 19, requiresName: true },
+  { value: 'note', label: 'Special Note', maxLength: 19, requiresName: true },
+  { value: 'canceled', label: 'Canceled', maxLength: 30, requiresName: false },
 ];
 
 const getModalStyle = (isMobile) => ({
@@ -220,13 +221,15 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
       setError('Pick a spotlight type.');
       return;
     }
+    const requiresName = selectedOption?.requiresName !== false;
     const trimmed = newName.trim();
-    if (!trimmed) {
+    if (requiresName && !trimmed) {
       setError('Enter a name.');
       return;
     }
+    // TIEMPO-438: For 'canceled' the name is an optional reason — allow blank.
     if (spotlights.some((s) => s.type === newType && s.name === trimmed)) {
-      setError('That spotlight is already added.');
+      setError(newType === 'canceled' ? 'This date is already canceled.' : 'That spotlight is already added.');
       return;
     }
     const name = trimmed.length > maxLength ? trimmed.substring(0, maxLength) : trimmed;
@@ -398,7 +401,7 @@ const SpotlightOnlyModal = ({ open, onClose, eventDetails, onSpotlightsChanged }
               variant="contained"
               startIcon={submitting ? <CircularProgress size={16} /> : <AddIcon />}
               onClick={handleAdd}
-              disabled={submitting || !newType || !newName.trim()}
+              disabled={submitting || !newType || (selectedOption?.requiresName !== false && !newName.trim())}
             >
               Add Spotlight
             </Button>
