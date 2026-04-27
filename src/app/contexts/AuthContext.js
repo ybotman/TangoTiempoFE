@@ -515,7 +515,12 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        if (roleResponse.status !== 204) {
+        // TIEMPO-437: BE returns 201 (Created) on POST success — correct REST
+        // semantics for resource creation. Previous code expected 204 which
+        // never matched, so every new signup threw "Failed to assign role"
+        // even though the userlogin record was actually created server-side.
+        // Accept any 2xx as success.
+        if (roleResponse.status < 200 || roleResponse.status >= 300) {
           throw new Error('Failed to assign role in backend');
         }
       } else {
