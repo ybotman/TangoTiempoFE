@@ -125,7 +125,8 @@ export function useEvents({
   page = 1,
   limit = 100,
   useGeoLocationContext = true, // Flag to control whether to use GeoLocationContext
-  useLocationPreferences = false // Flag to use saved user preferences
+  useLocationPreferences = false, // Flag to use saved user preferences
+  view, // TIEMPO-446: 'main' | 'beginner' | undefined — passed to ?view= BE param
 } = {}) {
   const [eventsData, setEventsData] = useState({
     events: [],
@@ -255,6 +256,9 @@ export function useEvents({
         appId: process.env.NEXT_PUBLIC_APPLICATION_ID || '1',
         page,
         limit,
+        // TIEMPO-446: view=main excludes organizer-explicit forBeginner events;
+        // view=beginner returns only forBeginner events. Undefined = no filter.
+        ...(view && { view }),
       };
 
       // Format date parameters
@@ -384,7 +388,8 @@ export function useEvents({
     userRoles,
     selectedRole,
     includeAiGenerated,
-    currentLocation
+    currentLocation,
+    view, // TIEMPO-446
     // Removed config options and setState functions to prevent infinite loops
   ]);
 
