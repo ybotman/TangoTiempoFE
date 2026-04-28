@@ -3,7 +3,8 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Box, Container, CircularProgress, Alert, Paper, Divider, useMediaQuery } from '@mui/material';
+import { Box, Container, CircularProgress, Alert, Paper, Divider, useMediaQuery, Typography } from '@mui/material';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import { useTheme } from '@mui/material/styles';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import ExploreTimeline from '@/components/Explore/ExploreTimeline';
@@ -234,6 +235,17 @@ export default function ExplorePage() {
 
         {events && events.length > 0 && (
           <>
+            {/* Compact page identity — one tight line, no wasted row */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+              <FlightTakeoffIcon sx={{ fontSize: '1rem', color: 'primary.main' }} />
+              <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1 }}>
+                Events Worthy of Travel
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+                · {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+              </Typography>
+            </Box>
+
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', mb: 1 }}>
               <ExploreFilters
                 selectedCategories={selectedCategories}
