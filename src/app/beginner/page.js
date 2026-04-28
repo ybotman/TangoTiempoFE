@@ -30,8 +30,7 @@ export default function BeginnerPage() {
 
     const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
     const params = {
-      view: 'beginner',       // TIEMPO-446: BE returns all forBeginners=true events
-      forBeginners: true,     // fallback for BE versions before TIEMPO-446 lands
+      view: 'beginner', // TIEMPO-446: BE returns all forBeginners=true events
       appId,
       limit: 500,
       start: dayjs().startOf('day').toISOString(),
