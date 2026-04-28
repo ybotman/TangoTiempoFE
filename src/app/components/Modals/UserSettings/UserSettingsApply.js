@@ -41,6 +41,7 @@ const UserSettingsApply = () => {
   const { user } = useContext(AuthContext); // Get Firebase user for email
   const { userData, updateUserData, loading: userDataLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
+
   const { createOrganizer, fetchOrganizerById, organizer } = useOrganizers();
   const { logRoleChange, logActivity } = useActivityLogger();
 
@@ -429,6 +430,11 @@ const UserSettingsApply = () => {
             helperText={`${description.trim().length}/500 — at least 10 characters required`}
             disabled={applicationStatus === 'loading'}
           />
+          {!regionalOrganizerRole && !rolesLoading && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              Role data did not load. Please refresh the page and try again.
+            </Alert>
+          )}
           <Button
             variant="contained"
             color="primary"
@@ -448,6 +454,19 @@ const UserSettingsApply = () => {
             {applicationStatus === 'loading' ? 'Applying...' : 'Apply for Event Organizer'}
           </Button>
         </Box>
+      )}
+
+      {/* TIEMPO-443: already-applied success state — shown when all flags are set */}
+      {!isLoading && hasOrganizerId && isApproved && isEnabled && (
+        <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold">
+            You&apos;re set up as an Event Organizer
+          </Typography>
+          <Typography variant="body2">
+            Your organizer profile is active. Use the role switcher above to change to
+            &quot;Organizer/Artist&quot; and start creating events.
+          </Typography>
+        </Alert>
       )}
 
       {/* Only show Terms button if user has an organizer ID but hasn't approved terms */}
