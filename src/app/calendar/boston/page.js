@@ -254,7 +254,10 @@ const BostonCalendarPage = () => {
 
   // TIEMPO-388: Helper to get features for non-repeating events (direct event.features array)
   const getEventFeatureData = (event) => {
-    const features = event.extendedProps?.features || event.extendedProps?.spotlights;
+    // TIEMPO-445: length check — [] is truthy, would swallow populated spotlights
+    const rawF = event.extendedProps?.features;
+    const rawS = event.extendedProps?.spotlights;
+    const features = (rawF?.length ? rawF : rawS);
     if (!features || !Array.isArray(features) || features.length === 0) return null;
 
     const canceledFeature = features.find(f => f.type === 'canceled');

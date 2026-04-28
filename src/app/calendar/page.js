@@ -360,9 +360,10 @@ const CalendarPage = () => {
 
   // TIEMPO-388: Helper to get features for non-repeating events (direct event.features array)
   const getEventFeatureData = (event) => {
-    // Check for direct features on the event (for non-repeating events)
-    // Support both 'features' and 'spotlights' field names for backward compatibility
-    const features = event.extendedProps?.features || event.extendedProps?.spotlights;
+    // TIEMPO-445: use length check — [] is truthy, so plain || would swallow a populated spotlights array
+    const rawF = event.extendedProps?.features;
+    const rawS = event.extendedProps?.spotlights;
+    const features = (rawF?.length ? rawF : rawS);
     if (!features || !Array.isArray(features) || features.length === 0) return null;
 
     // Check for canceled in features
