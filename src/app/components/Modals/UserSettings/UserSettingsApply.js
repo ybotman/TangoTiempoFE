@@ -68,6 +68,17 @@ const UserSettingsApply = () => {
     return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
 
+  // TIEMPO-443 fix: UpdateRoles is exact-set ($set replaces array). Bundle
+  // NU + Spotlighter + RO so applying never orphans the user to RO-only.
+  const namedUserRole = useMemo(
+    () => Array.isArray(roles) ? roles.find((r) => r?.roleName === 'NamedUser') : null,
+    [roles]
+  );
+  const spotlighterRole = useMemo(
+    () => Array.isArray(roles) ? roles.find((r) => r?.roleName === 'Spotlighter') : null,
+    [roles]
+  );
+
   const hasRole = useMemo(() => {
     if (!userData || !regionalOrganizerRole) return false;
 
@@ -195,7 +206,12 @@ const UserSettingsApply = () => {
             }).filter(id => id) // Remove empty strings
           : [];
 
-        const updatedRoleIds = [...new Set([...existingRoleIds, String(regionalOrganizerRole._id)])];
+        // TIEMPO-443: include NU + Spotlighter in bundle — UpdateRoles is
+        // exact-set ($set), so omitting them would wipe them from the user doc.
+        const bundleIds = [namedUserRole?._id, spotlighterRole?._id]
+          .filter(Boolean)
+          .map(String);
+        const updatedRoleIds = [...new Set([...existingRoleIds, ...bundleIds, String(regionalOrganizerRole._id)])];
 
         // Log the role application
         await logActivity('ROLE_APPLICATION', 'user', userData._id, {
