@@ -84,6 +84,10 @@ export function transformEvents(events) {
         // Add shortTitle and ownerOrganizerShortName for calendar display
         shortTitle: event.shortTitle || event.shortName || '',
         ownerOrganizerShortName: event.ownerOrganizerShortName || event.shortName || '',
+        // TIEMPO-408 / CALBEAF-109: beginner classification fields
+        forBeginners: event.forBeginners === true,
+        beginnerFriendly: event.beginnerFriendly === true,
+        travelWorthy: event.travelWorthy === true,
         // Add AI event detection
         isDiscovered: event.isDiscovered || false,
         // AI discovery metadata - source URL and discovery date
@@ -114,9 +118,9 @@ export function transformEvents(events) {
         venueEndDisplay: event.venueEndDisplay || null,
         venueTZ: event.venueTZ || null,
         venueAbbr: event.venueAbbr || null,
-        // TIEMPO-388: Spotlights for non-repeating events
-        features: event.features || event.spotlights || [],
-        spotlights: event.spotlights || event.features || [],
+        // TIEMPO-445: use length check so an empty [] doesn't shadow a populated array
+        features:   (event.features?.length   ? event.features   : event.spotlights) || [],
+        spotlights: (event.spotlights?.length ? event.spotlights : event.features)   || [],
       },
     };
 

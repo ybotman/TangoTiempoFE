@@ -1,9 +1,16 @@
-# Google Cloud Free Tier Guide - Geolocation API
-
-**Updated:** 2025-11-01
-**Project:** TangoTiempoProd
-**Critical:** New pricing model as of March 1, 2025
-
+---
+date: 2025-09-01
+persona: fulton
+type: product
+state: live
+feature: cloud-infra
+keywords: [google, free-tier]
+appid: global
+niche: tango
+app: "[[APP-GLOBAL]]"
+audience: all
+permanence: long-term
+tags: [app/global, product/google, type/product]
 ---
 
 ## 🎯 Current Free Tier (As of March 2025)

@@ -343,12 +343,9 @@ const OutreachApplyForm = () => {
       }
 
       // Step 3: Create organizer record
+      // organizerRegion is optional — backend writes null when omitted. Only pass
+      // through if we have a real value from the orgToken prefill or user defaults.
       const resolvedRegionId = prefillData?.regionId || userData?.localUserInfo?.userDefaults?.region || null;
-      if (!resolvedRegionId) {
-        setSubmitError('Unable to determine your region. Please contact support or use the standard application.');
-        setSubmitting(false);
-        return;
-      }
 
       const organizerPayload = {
         linkedUserLogin: userData._id,
@@ -360,7 +357,7 @@ const OutreachApplyForm = () => {
         contactEmail: formData.contactEmail,
         description: formData.description,
         website: formData.website || '',
-        organizerRegion: resolvedRegionId,
+        ...(resolvedRegionId && { organizerRegion: resolvedRegionId }),
         isActive: true,
         isEnabled: true,
         wantRender: true,

@@ -29,6 +29,14 @@ import {
 import 'leaflet/dist/leaflet.css';
 
 /**
+ * @deprecated TIEMPO-440 — Replaced by MapCenterModal opened via
+ * `openMapCenterModal()` for the onboarding case. This file is retained for
+ * one merge cycle as a rollback fallback; if nothing renders it after soak
+ * on TEST, it will be deleted.
+ *
+ * If you see the console.warn below firing, something is still importing
+ * this component — please migrate to MapCenterModal and report back to Sarah.
+ *
  * MapCenterOnboardingModal - Blocking modal for new users without mapCenter
  *
  * TIEMPO-381: Forces user to set their location before accessing the calendar.
@@ -38,6 +46,12 @@ const MapCenterOnboardingModal = ({
   open,
   onSaveLocation,
 }) => {
+  // TIEMPO-440: Surface accidental rendering to error tracking. If you're
+  // seeing this fire, something still imports the deprecated modal — should
+  // route through openMapCenterModal() / MapCenterModal instead.
+  if (open && typeof window !== 'undefined') {
+    console.warn('[DEPRECATED] MapCenterOnboardingModal rendered — TIEMPO-440 replaced this with MapCenterModal. Please migrate.');
+  }
   const { user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

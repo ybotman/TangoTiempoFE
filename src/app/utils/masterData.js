@@ -2,6 +2,7 @@
 
 export const listOfAllRoles = {
   NAMED_USER: 'NamedUser',
+  SPOTLIGHTER: 'Spotlighter',
   REGIONAL_ORGANIZER: 'RegionalOrganizer',
   REGIONAL_ADMIN: 'RegionalAdmin',
   SYSTEM_OWNER: 'SystemOwner',

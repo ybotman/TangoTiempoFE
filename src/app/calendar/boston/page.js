@@ -22,6 +22,7 @@ import { useCalendarPage } from '@/hooks/useCalendarPage';
 // CalendarSubMenu removed for simplified Boston view
 // CreateEventDetailModal removed - Boston is read-only
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
+import SpotlightOnlyModal from '@/components/Modals/ViewEvents/SpotlightOnlyModal';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
 import NoEventsAlert from '@/components/UI/NoEventsAlert';
@@ -132,6 +133,14 @@ const BostonCalendarPage = () => {
   const getInitialView = () => {
     return typeof window !== 'undefined' && window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
   };
+  // TIEMPO-425: Anchor initial view to LOCAL today, not UTC today.
+  // FullCalendar runs timeZone="UTC", so after 8pm EDT (UTC midnight rollover)
+  // its default "today" is tomorrow Boston-time and the list-21-day view
+  // starts beyond tonight's events.
+  const getInitialDate = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
   const [currentViewType, setCurrentViewType] = useState(getInitialView());
 
   // Force Boston location on mount
@@ -163,6 +172,9 @@ const BostonCalendarPage = () => {
     selectedAIEventDetails: selectedAIEvent,  // AI event details
     isAIDetailModalOpen: isViewAIEventModalOpen,  // AI modal state
     setAIDetailModalOpen: handleAIModalClose,  // AI modal close
+    // TIEMPO-433: Spotlight-only modal for Spotlighter role
+    isSpotlightOnlyModalOpen,
+    setSpotlightOnlyModalOpen,
     // Create event modal not used - Boston is read-only
   } = useCalendarPage();
 
@@ -200,8 +212,10 @@ const BostonCalendarPage = () => {
     // Build features array from new format or legacy format
     let features = [];
 
-    // New array format: patch.features = [{ type: 'dj', name: 'DJ Carlos' }, ...]
-    if (patch.features && Array.isArray(patch.features)) {
+    // TIEMPO-439: Read patch.spotlights (SL flow) OR patch.features (RO flow).
+    if (patch.spotlights && Array.isArray(patch.spotlights)) {
+      features = patch.spotlights;
+    } else if (patch.features && Array.isArray(patch.features)) {
       features = patch.features;
     } else {
       // Legacy single-feature format: patch.featureType, patch.featureName
@@ -240,7 +254,10 @@ const BostonCalendarPage = () => {
 
   // TIEMPO-388: Helper to get features for non-repeating events (direct event.features array)
   const getEventFeatureData = (event) => {
-    const features = event.extendedProps?.features || event.extendedProps?.spotlights;
+    // TIEMPO-445: length check — [] is truthy, would swallow populated spotlights
+    const rawF = event.extendedProps?.features;
+    const rawS = event.extendedProps?.spotlights;
+    const features = (rawF?.length ? rawF : rawS);
     if (!features || !Array.isArray(features) || features.length === 0) return null;
 
     const canceledFeature = features.find(f => f.type === 'canceled');
@@ -450,8 +467,9 @@ const BostonCalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges (only if not canceled)
+                // TIEMPO-439: Order DJ → Performer → Teacher. Note not on tiles.
                 if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -467,21 +485,7 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '1px 4px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -497,24 +501,23 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '1px 4px',
-                          marginLeft: '4px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
+                  // Note: not rendered on tiles by design (TIEMPO-439).
                 }
 
                 // Orchestra gets its own row
@@ -730,8 +733,9 @@ const BostonCalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges (only if not canceled)
+                // TIEMPO-439: Order DJ → Performer → Teacher. Note not on tiles.
                 if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -747,21 +751,7 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '2px 6px',
-                        marginLeft: '6px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -777,24 +767,23 @@ const BostonCalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '2px 6px',
-                          marginLeft: '6px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
+                  // Note: not rendered on tiles by design (TIEMPO-439).
                 }
 
                 // Orchestra gets its own row
@@ -1162,6 +1151,7 @@ const BostonCalendarPage = () => {
             ref={calendarRef}
             plugins={[dayGridPlugin, listPlugin, interactionPlugin, rrulePlugin]}
             initialView={currentViewType}
+            initialDate={getInitialDate()}
             events={coloredFilteredEvents}
             eventClick={handleEventClick}
             // Sort isDiscovered events after regular events, then by start time, then title
@@ -1336,6 +1326,13 @@ const BostonCalendarPage = () => {
           eventDetails={selectedAIEvent}
         />
       )}
+
+      {/* TIEMPO-433: Spotlight-only modal — opened directly from event click in Spotlighter role */}
+      <SpotlightOnlyModal
+        open={isSpotlightOnlyModalOpen}
+        onClose={() => setSpotlightOnlyModalOpen(false)}
+        eventDetails={selectedEventDetails}
+      />
 
       {/* Create modal removed - read-only view */}
     </div>

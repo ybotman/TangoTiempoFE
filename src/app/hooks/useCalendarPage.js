@@ -21,7 +21,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
-export const useCalendarPage = () => {
+export const useCalendarPage = ({ view } = {}) => {
   // TIEMPO-256: URL params for deep linking
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -36,6 +36,9 @@ export const useCalendarPage = () => {
   const [pendingOccurrenceAction, setPendingOccurrenceAction] = useState(null);
   const [isAIDetailModalOpen, setAIDetailModalOpen] = useState(false);
   const [selectedAIEventDetails, setSelectedAIEventDetails] = useState(null);
+  // TIEMPO-433: Spotlighter role opens SpotlightOnlyModal directly on event click
+  // (skipping ViewEventDetailModal entirely — pure spotlight-add intent)
+  const [isSpotlightOnlyModalOpen, setSpotlightOnlyModalOpen] = useState(false);
   const categories = useCategories();
   const { getMenuItems } = useMenuItems();
   // No longer needed - using saved user preferences instead
@@ -82,11 +85,12 @@ export const useCalendarPage = () => {
   // Use the updated useEvents hook with location preferences
   // Enable GeoLocationContext to get temporaryLocation for SET operations
   const { events, loading: eventsLoading, error: eventsError, noLocationSelected, refreshEvents } = useEvents({
-    startDate: datesSet?.start, 
+    startDate: datesSet?.start,
     endDate: datesSet?.end,
-    limit: 500, // Increase the limit to ensure we get all events
-    useGeoLocationContext: true, // Enable GeoLocationContext to get temporaryLocation
-    useLocationPreferences: true // Enable saved user preferences
+    limit: 500,
+    useGeoLocationContext: true,
+    useLocationPreferences: true,
+    view, // TIEMPO-446: caller passes 'main' for main calendar; undefined = no filter
   });
   
   // Initialize event operations
@@ -458,6 +462,11 @@ export const useCalendarPage = () => {
       // Regular event handling
       setSelectedEventDetails(arg.event);
 
+      // TIEMPO-436: Spotlighter mirrors RO process — show context menu so
+      // user can choose View Event vs Spotlight. (TIEMPO-433 originally
+      // skipped the menu; TIEMPO-436 reverts that for parity with RO UX.)
+      // Falls through to the elevated-role context-menu branch below.
+
       // Feature_3019: For NamedUser (Milongerx) and Anonymous (not logged in) roles, directly open ViewEventDetailModal
       // Issue_1035: Also check for empty string which is set by AuthContext for anonymous users
       if (selectedRole === listOfAllRoles.NAMED_USER || selectedRole === '' || selectedRole === listOfAllRoles.ANONYMOUS) {
@@ -514,6 +523,20 @@ export const useCalendarPage = () => {
       setPendingOccurrenceAction(action);
       setViewDetailModalOpen(true);
     }
+
+    // TIEMPO-438: SL routes split per event-type for parity with RO:
+    //   spotlightOccurrence (recurring) → ViewEventDetailModal which then opens
+    //     EditOccurrenceModal with role='Spotlighter' (image hidden, all 6
+    //     spotlight types incl. canceled). Mirrors RO 'editOccurrence' flow.
+    //   spotlightEvent (one-off) → simplified SpotlightOnlyModal — 6 types,
+    //     no image, no occurrence nav.
+    if (action === 'spotlightOccurrence') {
+      setPendingOccurrenceAction('spotlightOccurrence');
+      setViewDetailModalOpen(true);
+    }
+    if (action === 'spotlightEvent') {
+      setSpotlightOnlyModalOpen(true);
+    }
   };
 
   const handleMenuClose = () => {
@@ -551,6 +574,9 @@ export const useCalendarPage = () => {
       }
       setViewDetailModalOpen(isOpen);
     },
+    // TIEMPO-433: Spotlight-only modal for Spotlighter role
+    isSpotlightOnlyModalOpen,
+    setSpotlightOnlyModalOpen,
     // TIEMPO-362: Pending occurrence action for ViewEventDetailModal
     pendingOccurrenceAction,
     handleEventUpdated,

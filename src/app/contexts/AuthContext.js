@@ -28,6 +28,17 @@ import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 // Create Auth Context
 export const AuthContext = createContext();
 
+// TIEMPO-430: A populated role document is "this app's role" if its appId
+// matches NEXT_PUBLIC_APPLICATION_ID. Roles without an appId (legacy /
+// global) are treated as belonging here so we don't accidentally strip
+// the AnonymousUser fallback or any pre-appId role docs.
+const roleMatchesCurrentApp = (role) => {
+  if (!role || typeof role !== 'object') return false;
+  if (role.appId == null) return true;
+  const currentAppId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+  return String(role.appId) === String(currentAppId);
+};
+
 // AuthProvider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Unified user state
@@ -165,18 +176,26 @@ export const AuthProvider = ({ children }) => {
             isApproved: backendInfo.regionalOrganizerInfo.isApproved
           });
         }
-      } else if (backendInfo.roleIds && backendInfo.roleIds.some(role => 
-        typeof role === 'object' && role.roleName === 'RegionalOrganizer'
+      } else if (backendInfo.roleIds && backendInfo.roleIds.some(role =>
+        typeof role === 'object' && role.roleName === 'RegionalOrganizer' && roleMatchesCurrentApp(role)
       )) {
         // TIEMPO-275: Keep console.warn for important warnings
         console.warn('User has RegionalOrganizer role but no organizerId in regionalOrganizerInfo!');
       }
 
+      // TIEMPO-430: Defensive filter — BE UserLogins.js populates roleIds
+      // by _id only without appId, so cross-app roles can leak in. Drop
+      // anything that isn't this app's role here. BE-side fix tracked
+      // separately as a CALBEAF follow-up.
+      const appRoleObjects = (backendInfo.roleIds || []).filter(
+        (role) => typeof role === 'object' && roleMatchesCurrentApp(role)
+      );
+
       // Merge Firebase and backend user data
       const mergedUser = {
         ...firebaseUser, // Spread Firebase user properties directly
         backendInfo,
-        roles: backendInfo.roleIds.map((role) => role.roleName) || [],
+        roles: appRoleObjects.map((role) => role.roleName),
         token: idToken, // Store the token for API calls
       };
 // TIEMPO-276: Security cleanup - removed logging
@@ -496,7 +515,12 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        if (roleResponse.status !== 204) {
+        // TIEMPO-437: BE returns 201 (Created) on POST success — correct REST
+        // semantics for resource creation. Previous code expected 204 which
+        // never matched, so every new signup threw "Failed to assign role"
+        // even though the userlogin record was actually created server-side.
+        // Accept any 2xx as success.
+        if (roleResponse.status < 200 || roleResponse.status >= 300) {
           throw new Error('Failed to assign role in backend');
         }
       } else {

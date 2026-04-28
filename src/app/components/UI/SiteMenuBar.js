@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { usePathname } from 'next/navigation';
 import { Box, IconButton, Avatar, Tooltip, Snackbar, Alert, TextField, InputAdornment, Badge, keyframes } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -12,6 +13,9 @@ import PostFilter from '@/components/UI/PostFilter';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import SiteMenuBarUserDrawer from './SiteMenuBarUserDrawer';
 import MessagesModal from '@/components/Modals/Messages/MessagesModal';
+import ModeToggle from '@/components/UI/ModeToggle'; // TIEMPO-402
+import BrandMark from '@/components/UI/BrandMark'; // TIEMPO-408
+import CityPill from '@/components/UI/CityPill'; // TIEMPO-408
 
 // Pulse animation for new messages
 const pulse = keyframes`
@@ -23,6 +27,10 @@ const pulse = keyframes`
 const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searchTerm, onSearchChange, showDiscovered, onDiscoveredToggle, readOnly = false }) => {
   const { selectedRole, user, roles, handleRoleChange, logOut } = useSiteMenuBar();
   const { unreadMessages, unreadCount, hasUnread, acknowledgeMessage } = useMessages();
+  const pathname = usePathname();
+  // TIEMPO-408: /calendar/boston is a legacy iframe embed — keep its chrome as-is.
+  const isBoston = pathname?.startsWith('/calendar/boston');
+  const isExplorePage = pathname === '/explore';
 
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
@@ -56,16 +64,43 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
     );
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        padding: '0 0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
-      {/* Left Icons */}
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      {/* TIEMPO-408 Row 1 (primary chrome): brand · city · mode tabs.
+          TIEMPO-415: Boston embed hides Row 1 entirely — legacy audience
+          stays in their owned space; the TT email campaign pulls them
+          forward. They still have sidebar/search via Row 2. */}
+      {!isBoston && (
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+            px: 1,
+            py: 0.75,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flexShrink: 1 }}>
+            <BrandMark size={isExplorePage ? 44 : 36} />
+            {!isExplorePage && <CityPill />}
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <ModeToggle />
+          </Box>
+        </Box>
+      )}
+
+      {/* TIEMPO-408 Row 2 (utility): menu · search · filter · ai · messages · user */}
+      <Box
+        sx={{
+          width: '100%',
+          padding: '0 0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton
           edge="start"
@@ -198,6 +233,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
         <Tooltip title={!user ? "Login here!" : ""} arrow placement="left">
           <IconButton onClick={() => setUserDrawerOpen(true)}>{renderUserIcon()}</IconButton>
         </Tooltip>
+      </Box>
       </Box>
 
       <SidebarDrawer open={sidebarDrawerOpen} onClose={() => setSidebarDrawerOpen(false)} />
