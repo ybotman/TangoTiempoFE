@@ -633,27 +633,8 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
           </FormControl>
         </Grid>
 
-        {/* TIEMPO-401: Beginner-friendly flag (gates Beginner UX mode) */}
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(eventData.beginnerFriendly)}
-                  onChange={(e) => setEventData(prevData => ({ ...prevData, beginnerFriendly: e.target.checked }))}
-                />
-              }
-              label="Beginner-friendly event"
-            />
-            <Typography variant="caption" color="textSecondary" sx={{ ml: 4, mt: -0.5 }}>
-              Check if someone with zero tango experience can show up and feel welcome.
-            </Typography>
-          </FormControl>
-        </Grid>
-
-        {/* TIEMPO-408 + TIEMPO-440: forBeginners toggle with strict
-            client-side gate (Class/Workshop). Aligned with BE
-            BEGINNER_ELIGIBLE_CATEGORIES per CALBEAF-154. */}
+        {/* TIEMPO-446: forBeginners — organizer-authoritative flag.
+            beginnerFriendly is classifier-only and no longer shown here. */}
         <Grid item xs={12} md={6}>
           <Collapse in={FOR_BEGINNERS_ELIGIBLE.has(eventData.categoryFirst)} timeout={150}>
             <FormControl fullWidth>
@@ -665,17 +646,17 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
                       onChange={(e) => setEventData(prevData => ({ ...prevData, forBeginners: e.target.checked }))}
                     />
                   }
-                  label="This event is designed for beginners"
+                  label="Beginner-only event"
                 />
                 <Tooltip
                   arrow
-                  title="Available for Classes, Workshops, and beginner-targeted Festivals. Switches off automatically if you change to a different category."
+                  title="Marks this event as beginner-only. It will appear in the Beginner tab and be excluded from the main calendar."
                 >
                   <HelpOutlineIcon fontSize="small" sx={{ color: 'text.secondary', cursor: 'help' }} />
                 </Tooltip>
               </Box>
               <Typography variant="caption" color="textSecondary" sx={{ ml: 4, mt: -0.5 }}>
-                Shown on the Beginner tab. Removed from the main (Local) calendar.
+                Appears in the Beginner tab only — not shown in the main calendar.
               </Typography>
             </FormControl>
           </Collapse>

@@ -85,11 +85,12 @@ export const useCalendarPage = () => {
   // Use the updated useEvents hook with location preferences
   // Enable GeoLocationContext to get temporaryLocation for SET operations
   const { events, loading: eventsLoading, error: eventsError, noLocationSelected, refreshEvents } = useEvents({
-    startDate: datesSet?.start, 
+    startDate: datesSet?.start,
     endDate: datesSet?.end,
-    limit: 500, // Increase the limit to ensure we get all events
-    useGeoLocationContext: true, // Enable GeoLocationContext to get temporaryLocation
-    useLocationPreferences: true // Enable saved user preferences
+    limit: 500,
+    useGeoLocationContext: true,
+    useLocationPreferences: true,
+    view: 'main', // TIEMPO-446: exclude organizer-explicit forBeginner events from main calendar
   });
   
   // Initialize event operations
