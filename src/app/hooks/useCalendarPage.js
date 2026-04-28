@@ -21,7 +21,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import { regionalOrganizerEvent } from '@/utils/RegionalOrganizerEvent';
 
-export const useCalendarPage = () => {
+export const useCalendarPage = ({ view } = {}) => {
   // TIEMPO-256: URL params for deep linking
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -90,7 +90,7 @@ export const useCalendarPage = () => {
     limit: 500,
     useGeoLocationContext: true,
     useLocationPreferences: true,
-    view: 'main', // TIEMPO-446: exclude organizer-explicit forBeginner events from main calendar
+    view, // TIEMPO-446: caller passes 'main' for main calendar; undefined = no filter
   });
   
   // Initialize event operations

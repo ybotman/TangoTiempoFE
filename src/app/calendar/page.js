@@ -108,7 +108,7 @@ const CalendarPage = () => {
     eventsLoading,
     // TIEMPO-362: Pending occurrence action from submenu
     pendingOccurrenceAction,
-  } = useCalendarPage();
+  } = useCalendarPage({ view: 'main' });
 
   // TIEMPO-408 T2: Local tab excludes forBeginners=true events — they live
   // exclusively on /beginner. Boston and other callers keep all events.
