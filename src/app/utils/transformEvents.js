@@ -118,9 +118,9 @@ export function transformEvents(events) {
         venueEndDisplay: event.venueEndDisplay || null,
         venueTZ: event.venueTZ || null,
         venueAbbr: event.venueAbbr || null,
-        // TIEMPO-388: Spotlights for non-repeating events
-        features: event.features || event.spotlights || [],
-        spotlights: event.spotlights || event.features || [],
+        // TIEMPO-445: use length check so an empty [] doesn't shadow a populated array
+        features:   (event.features?.length   ? event.features   : event.spotlights) || [],
+        spotlights: (event.spotlights?.length ? event.spotlights : event.features)   || [],
       },
     };
 

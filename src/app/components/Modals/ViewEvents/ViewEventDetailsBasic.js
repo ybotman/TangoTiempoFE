@@ -19,8 +19,10 @@ const ViewEventDetailsBasic = ({ eventDetails, overrideData }) => {
   // 2. Series spotlights: DJ, Instructor, Performer, Canceled only
   // 3. Override spotlights: All types (Orchestra, Note, Description, etc.)
   const overrideFeatures = overrideData?._overridePatch?.features || [];
-  const seriesFeatures = eventDetails?.extendedProps?.features ||
-                         eventDetails?.extendedProps?.spotlights || [];
+  // TIEMPO-445: length check — [] is truthy, so plain || hides a populated spotlights array
+  const rawF = eventDetails?.extendedProps?.features;
+  const rawS = eventDetails?.extendedProps?.spotlights;
+  const seriesFeatures = (rawF?.length ? rawF : rawS) || [];
 
   // Merge: start with override features, add series features that don't have an override
   const overrideTypes = new Set(overrideFeatures.map(f => f.type));
