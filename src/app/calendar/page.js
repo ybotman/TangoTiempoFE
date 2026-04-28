@@ -16,12 +16,12 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
 
-import SiteHeader from '@/components/UI/SiteHeader';
 import SiteMenuBar from '@/components/UI/SiteMenuBar';
 import { useCalendarPage } from '@/hooks/useCalendarPage';
 import CalendarSubMenu from '@/components/UI/CalendarSubMenu';
 import CreateEventDetailModal from '@/components/Modals/CreateEvents/CreateEventDetailModal';
 import ViewEventDetailModal from '@/components/Modals/ViewEvents/ViewEventDetailModal.js';
+import SpotlightOnlyModal from '@/components/Modals/ViewEvents/SpotlightOnlyModal';
 import ViewAIEventDetails from '@/components/Modals/ViewEvents/ViewAIEventDetails';
 import CategoryCircles from '@/components/UI/CategoryCircles';
 import NoEventsAlert from '@/components/UI/NoEventsAlert';
@@ -30,7 +30,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { RoleContext } from '@/contexts/RoleContext';
 import { listOfAllRoles } from '@/utils/masterData';
 import WelcomeModal from '@/components/Modals/Welcome/WelcomeModal'; // TIEMPO-329: Welcome modal
-import MapCenterOnboardingModal from '@/components/Modals/misc/MapCenterOnboardingModal'; // TIEMPO-381: Onboarding modal
+// TIEMPO-440: MapCenterOnboardingModal removed; onboarding now reuses MapCenterModal via openMapCenterModal()
 import { wasWelcomeShown } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor tracking
 
 const CalendarPage = () => {
@@ -59,8 +59,6 @@ const CalendarPage = () => {
     openLocationSettings,
     openMapCenterModal,
     needsOnboarding,
-    setNeedsOnboarding,
-    saveToCloudDefault,
     isInitialized: geoInitialized,
     currentLocation
   } = useGeoLocation();
@@ -83,6 +81,9 @@ const CalendarPage = () => {
     setCreateModalOpen,
     isViewDetailModalOpen,
     setViewDetailModalOpen,
+    // TIEMPO-433: Spotlight-only modal for Spotlighter role
+    isSpotlightOnlyModalOpen,
+    setSpotlightOnlyModalOpen,
     selectedEventDetails,
     handleDatesSet,
     handlePrev,
@@ -90,7 +91,7 @@ const CalendarPage = () => {
     handleToday,
     handleDateClick,
     handleEventClick,
-    coloredFilteredEvents,
+    coloredFilteredEvents: allColoredEvents,
     refreshEvents,
     // datesSet,
     handleEventUpdated,
@@ -107,7 +108,13 @@ const CalendarPage = () => {
     eventsLoading,
     // TIEMPO-362: Pending occurrence action from submenu
     pendingOccurrenceAction,
-  } = useCalendarPage();
+  } = useCalendarPage({ view: 'main' });
+
+  // TIEMPO-408 T2: Local tab excludes forBeginners=true events — they live
+  // exclusively on /beginner. Boston and other callers keep all events.
+  const coloredFilteredEvents = allColoredEvents.filter(
+    (e) => !e?.extendedProps?.forBeginners
+  );
 
   // Get selected role from context
   const { selectedRole } = useContext(RoleContext);
@@ -115,6 +122,15 @@ const CalendarPage = () => {
   // Function to determine the initial view based on screen size
   const getInitialView = () => {
     return window.innerWidth >= 768 ? 'dayGrid8Week' : 'list21Days';
+  };
+
+  // TIEMPO-425: Anchor initial view to LOCAL today, not UTC today.
+  // FullCalendar runs timeZone="UTC", so after 8pm EDT (UTC midnight rollover)
+  // its default "today" is tomorrow local-time and the list-21-day view
+  // starts beyond tonight's events.
+  const getInitialDate = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
   // TIEMPO-246: Generate placeholder events without Date() conversions
@@ -300,8 +316,12 @@ const CalendarPage = () => {
     // Build features array from new format or legacy format
     let features = [];
 
-    // New array format: patch.features = [{ type: 'dj', name: 'DJ Carlos' }, ...]
-    if (patch.features && Array.isArray(patch.features)) {
+    // TIEMPO-439: Read patch.spotlights (SL flow) OR patch.features (RO flow).
+    // Both shapes carry the same { type, name } objects; SL writes to spotlights,
+    // RO writes to features. Whichever exists wins.
+    if (patch.spotlights && Array.isArray(patch.spotlights)) {
+      features = patch.spotlights;
+    } else if (patch.features && Array.isArray(patch.features)) {
       features = patch.features;
     } else {
       // Legacy single-feature format: patch.featureType, patch.featureName
@@ -340,9 +360,10 @@ const CalendarPage = () => {
 
   // TIEMPO-388: Helper to get features for non-repeating events (direct event.features array)
   const getEventFeatureData = (event) => {
-    // Check for direct features on the event (for non-repeating events)
-    // Support both 'features' and 'spotlights' field names for backward compatibility
-    const features = event.extendedProps?.features || event.extendedProps?.spotlights;
+    // TIEMPO-445: use length check — [] is truthy, so plain || would swallow a populated spotlights array
+    const rawF = event.extendedProps?.features;
+    const rawS = event.extendedProps?.spotlights;
+    const features = (rawF?.length ? rawF : rawS);
     if (!features || !Array.isArray(features) || features.length === 0) return null;
 
     // Check for canceled in features
@@ -584,33 +605,12 @@ const CalendarPage = () => {
                   );
                 }
 
-                // TIEMPO-388: Spotlight visibility rules by category
-                // - Multi-day (>2 days) / Festival / Special: Show ALL spotlights
-                // - Canceled: ALWAYS show canceled badge (handled above)
-                // - Practica, Class: NO spotlights on calendar (except canceled)
-                const categoryFirst = event.extendedProps?.categoryFirst || '';
-                const isMultiDay = (() => {
-                  const start = event.start;
-                  const end = event.end || event.start;
-                  if (!start || !end) return false;
-                  const diffMs = new Date(end) - new Date(start);
-                  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-                  return diffDays > 2;
-                })();
-                const isFestivalOrSpecial = ['Festival', 'Special', 'Marathon', 'Weekend'].some(
-                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
-                );
-                const isPracticaOrClass = ['Practica', 'Class', 'Other'].some(
-                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
-                );
-
-                // Show all spotlights for multi-day events or festivals
-                const showAllSpotlights = isMultiDay || isFestivalOrSpecial;
-                // Hide spotlights for practica/class (except canceled which is handled above)
-                const hideSpotlights = isPracticaOrClass && !showAllSpotlights;
-
-                if (featureData && !featureData.isCanceled && !hideSpotlights) {
-                  // DJ badge (no icon, just abbreviation)
+                // TIEMPO-439: Cancel supersedes all (handled above as the only badge).
+                // Otherwise render in order: DJ → Performer → Teacher.
+                // Note is intentionally NOT rendered on calendar tiles (lives in description / View modal).
+                // Practica/Class hide rule removed for parity with Boston route.
+                if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -626,24 +626,7 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Orchestra shows as separate inverted row below (not as badge)
-                  // Instructor badge (no icon)
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '1px 4px',
-                        marginLeft: '4px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
-                  // Performer badge (no icon)
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -659,29 +642,28 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '1px 4px',
-                          marginLeft: '4px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '1px 4px',
+                        marginLeft: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
-                  // LIVE is not a separate type - it's implied by Orchestra presence
+                  // Note: not rendered on tiles by design (TIEMPO-439).
+                  // Orchestra: rendered below as its own row.
                 }
 
-                // Show orchestra as separate inverted row for non-practica/class events
-                const hasOrchestra = featureData?.orchestra && !hideSpotlights && !featureData?.isCanceled;
+                // Orchestra as separate inverted row when present + not canceled.
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
 
                 return (
                   <>
@@ -896,14 +878,12 @@ const CalendarPage = () => {
                   );
                 }
 
-                // Spotlight badges on calendar view
-                const categoryFirst = event.extendedProps?.categoryFirst || '';
-                const isPracticaOrClass = ['Practica', 'Class', 'Other'].some(
-                  cat => categoryFirst.toLowerCase().includes(cat.toLowerCase())
-                );
-
-                if (featureData && !featureData.isCanceled && !isPracticaOrClass) {
-                  // DJ badge (no icon)
+                // TIEMPO-439: Cancel supersedes all (handled above as the only badge).
+                // Otherwise render in order: DJ → Performer → Teacher.
+                // Note is intentionally NOT rendered on calendar tiles.
+                // Practica/Class hide rule removed for parity with Boston route.
+                if (featureData && !featureData.isCanceled) {
+                  // 1. DJ
                   if (featureData.dj) {
                     badges.push(
                       <span key="dj" style={{
@@ -919,23 +899,7 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Instructor badge (no icon)
-                  if (featureData.instructor) {
-                    badges.push(
-                      <span key="instructor" style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 'bold',
-                        color: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        padding: '2px 6px',
-                        marginLeft: '6px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        Inst: {featureData.instructor.name}
-                      </span>
-                    );
-                  }
-                  // Performer badge (no icon)
+                  // 2. Performer
                   if (featureData.performer) {
                     badges.push(
                       <span key="performer" style={{
@@ -951,29 +915,28 @@ const CalendarPage = () => {
                       </span>
                     );
                   }
-                  // Note badges (can have multiple)
-                  if (featureData.notes && featureData.notes.length > 0) {
-                    featureData.notes.forEach((note, idx) => {
-                      badges.push(
-                        <span key={`note-${idx}`} style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          color: '#757575',
-                          backgroundColor: 'transparent',
-                          padding: '2px 6px',
-                          marginLeft: '6px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          📝 {note.name}
-                        </span>
-                      );
-                    });
+                  // 3. Teacher (Instructor)
+                  if (featureData.instructor) {
+                    badges.push(
+                      <span key="instructor" style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        color: '#7b1fa2',
+                        backgroundColor: 'transparent',
+                        padding: '2px 6px',
+                        marginLeft: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Inst: {featureData.instructor.name}
+                      </span>
+                    );
                   }
-                  // LIVE is not a separate type - it's implied by Orchestra presence
+                  // Note: not rendered on tiles (TIEMPO-439).
+                  // Orchestra: rendered below as its own row.
                 }
 
-                // Orchestra shows as separate inverted row for non-practica/class events
-                const hasOrchestra = featureData?.orchestra && !isPracticaOrClass && !featureData?.isCanceled;
+                // Orchestra as separate inverted row when present + not canceled.
+                const hasOrchestra = featureData?.orchestra && !featureData?.isCanceled;
 
                 return (
                   <>
@@ -1179,6 +1142,16 @@ const CalendarPage = () => {
     }
   }, []);
 
+  // TIEMPO-440: Logged-in users without a saved mapCenter — open the same
+  // MapCenterModal everyone else uses (replaces the legacy
+  // MapCenterOnboardingModal). saveToCloudDefault now clears
+  // needsOnboarding on success so the modal won't re-open in a loop.
+  useEffect(() => {
+    if (needsOnboarding && user) {
+      openMapCenterModal();
+    }
+  }, [needsOnboarding, user, openMapCenterModal]);
+
   // Auto-open location settings for LOGGED-IN users only if no location selected
   // TIEMPO-381: Wait for geoInitialized before making decision - prevents race condition
   // TIEMPO-388: Anonymous users are handled by WelcomeModal (tries browser geolocation first)
@@ -1197,7 +1170,6 @@ const CalendarPage = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
-      <SiteHeader />
       <SiteMenuBar
         activeCategories={activeCategories}
         handleCategoryChange={handleCategoryChange}
@@ -1362,6 +1334,7 @@ const CalendarPage = () => {
           timeZone="UTC"
           //        initialView="dayGridMonth"
           initialView={getInitialView()}
+          initialDate={getInitialDate()}
           events={eventsWithPlaceholders}
           // Sort isDiscovered events after regular events, then by start time, then title
           eventOrder={(a, b) => {
@@ -1627,6 +1600,14 @@ const CalendarPage = () => {
         initialAction={pendingOccurrenceAction}
       />
 
+      {/* TIEMPO-433: Spotlight-only modal — opened directly from event click in Spotlighter role */}
+      <SpotlightOnlyModal
+        open={isSpotlightOnlyModalOpen}
+        onClose={() => setSpotlightOnlyModalOpen(false)}
+        eventDetails={selectedEventDetails}
+        onSpotlightsChanged={refreshEvents}
+      />
+
       <ViewAIEventDetails
         open={isAIDetailModalOpen}
         onClose={() => setAIDetailModalOpen(false)}
@@ -1639,51 +1620,11 @@ const CalendarPage = () => {
         onClose={() => setShowWelcomeModal(false)}
       />
 
-      {/* TIEMPO-381: MapCenter Onboarding Modal - Shows for logged-in users without mapCenter */}
-      <MapCenterOnboardingModal
-        open={needsOnboarding && !!user}
-        onSaveLocation={async (locationData, firebaseToken) => {
-          await saveToCloudDefault(locationData, firebaseToken);
-          setNeedsOnboarding(false);
-        }}
-      />
+      {/* TIEMPO-440: MapCenterOnboardingModal merged into MapCenterModal —
+          onboarding now triggers the same modal everyone else uses, opened
+          via openMapCenterModal(). saveToCloudDefault clears needsOnboarding. */}
 
-      {/* TIEMPO-311: Floating map icon button - shows when no modals are open */}
-      {!isCreateModalOpen && !isViewDetailModalOpen && !isAIDetailModalOpen && (
-        <div
-          className="map-icon-button"
-          onClick={() => openMapCenterModal()}
-          title="Click to explore other locations"
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            backgroundColor: 'white',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '50%',
-            width: '36px',
-            height: '36px',
-            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#f0f0f0';
-            e.currentTarget.style.boxShadow = '0px 3px 8px rgba(0, 0, 0, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'white';
-            e.currentTarget.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
-          }}
-        >
-          <MapIcon style={{ fontSize: '20px', color: '#1976d2' }} />
-        </div>
-      )}
+      {/* TIEMPO-408: floating map icon removed — CityPill in chrome replaces it. */}
     </div>
   );
 };

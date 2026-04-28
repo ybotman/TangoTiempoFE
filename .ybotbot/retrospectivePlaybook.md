@@ -1,5 +1,30 @@
 # Retrospective Playbook
 
+## Session: 2026-04-28 — Organizer Apply Flow + forBeginners + Spotlights
+
+### Lesson: Empty array [] is truthy — always use length check for fallback arrays (TIEMPO-445)
+
+`features || spotlights` silently returns `[]` when `features` is an empty array. Affected 4 files.
+Always: `(arr?.length ? arr : fallback) || []`
+
+### Lesson: UpdateRoles is exact-set — bundle all desired roles explicitly (TIEMPO-443)
+
+Sending `[RO]` to UpdateRoles wipes NamedUser and Spotlighter. The FE must always bundle
+`[NamedUser, Spotlighter, RO]` together. Look up from in-memory roles list, never hardcode IDs.
+
+### Lesson: BE query filter changes can silently affect sibling routes (TIEMPO-446)
+
+Adding `view: 'main'` to `useCalendarPage` silently applied to the Boston route too since
+both call the same hook. Always make shared hooks take explicit params rather than baking
+defaults into the hook itself. Caller declares intent.
+
+### Lesson: Double-check scope of shared hooks before adding new default behavior
+
+`useCalendarPage` is shared by main calendar and Boston. Any default added there applies everywhere.
+Pattern: make it a param with `undefined` default, let callers opt-in.
+
+---
+
 ## Session: 2026-03-20 - TIEMPO-388 Location State Architecture Fix
 
 ### Key Learnings

@@ -268,9 +268,86 @@ curl -s -X GET \
 
 ## Application-Specific Documentation
 
-No additional application-specific documentation has been added yet.
+---
 
-To add more documentation:
-1. Add file paths to your `.ybotbot/user-config.ini`
+## Beginner / forBeginners System (TIEMPO-446, 2026-04-28)
+
+### Two separate flags — do not conflate
+
+| Field | Owner | Set by | Purpose |
+|---|---|---|---|
+| `beginnerFriendly` | BE classifier | Algorithm only | "Someone with zero experience can show up" — computed, never shown in organizer form |
+| `forBeginners` | Organizer | Organizer toggle | "This event is beginner-ONLY" — authoritative, stored exactly as sent for user events |
+
+**Rule**: `forBeginners = true` means the event lives in the Beginner tab and is **excluded from the main calendar**. It is NOT the same as beginner-friendly. Never show `beginnerFriendly` in the organizer form.
+
+### ?view= query parameter on GET /api/events
+
+| Param | BE behavior |
+|---|---|
+| `?view=main` | Excludes `(forBeginners=true AND isDiscovered !== true)` — AI-found beginner events stay visible |
+| `?view=beginner` | Returns only `forBeginners=true` events |
+| omitted / `?view=all` | No view filter (current behavior) |
+
+### Who passes what
+
+- **Main calendar** (`useCalendarPage({ view: 'main' })`) → sends `?view=main`
+- **Boston route** (`useCalendarPage()`) → sends no view param — sees all events including forBeginner
+- **Beginner page** → sends `?view=beginner`
+
+### Boston rule
+
+Boston (`/calendar/boston`) does NOT apply the `forBeginners` filter. If a Boston-specific beginner tab is ever needed, pass `view: 'beginner'` to its own `useCalendarPage` call. Do not silently inherit `view: 'main'`.
+
+---
+
+## Organizer Apply Flow — Role Bundle Rule (TIEMPO-443, 2026-04-28)
+
+`UpdateRoles` on the BE is **exact-set** (`$set` replaces the entire `roleIds` array). Sending only `[RO]` wipes `NamedUser` and `Spotlighter`.
+
+**Rule**: When applying as organizer, always send `[NamedUser, Spotlighter, RegionalOrganizer]` together. Look up all three from the in-memory `roles` list — never hardcode IDs.
+
+```js
+// In handleApply:
+const bundleIds = [namedUserRole?._id, spotlighterRole?._id].filter(Boolean).map(String);
+const updatedRoleIds = [...new Set([...existingRoleIds, ...bundleIds, String(regionalOrganizerRole._id)])];
+```
+
+CALBEAF-155 atomic `/self-apply` will eventually replace this FE-side bundling entirely.
+
+---
+
+## Spotlight Rendering — Empty Array Truthy Bug (TIEMPO-445, 2026-04-28)
+
+**Rule**: Never use `features || spotlights` for spotlight arrays. `[]` is truthy in JS, so an empty `features` array silently swallows a populated `spotlights` array.
+
+**Always use a length check**:
+```js
+// WRONG — [] is truthy, hides populated spotlights:
+const features = event.features || event.spotlights;
+
+// CORRECT:
+const features = (event.features?.length ? event.features : event.spotlights) || [];
+```
+
+This applies in: `transformEvents.js`, `calendar/page.js`, `calendar/boston/page.js`, `ViewEventDetailsBasic.js`.
+
+---
+
+## Organizer Settings — 3-Tab Layout (TIEMPO-444, 2026-04-28)
+
+The `RegionalOrganizersModal` was redesigned from 4 fragmented tabs to 3:
+
+| Tab | Content |
+|---|---|
+| **Profile** (default) | fullName, shortName (lock/unlock/probe/suggest), description, contact, address, images placeholder |
+| **Settings** | Organizer types (checkboxes + ⓘ tooltips) + visibility switches (isEnabled / isVisible / wantRender) + delegation placeholder |
+| **Status** (last) | Read-only status chips + collapsible debug accordion (OrganizerID, UserID, Firebase UID) |
+
+**ShortName unlock flow**: field starts locked (🔒) → click to unlock → edit (alphanumeric mask, max 9) → blur fires `/shortname-check` → ✓/✗ inline + "Suggest" button → Save blocked until available confirmed → re-locks on successful save.
+
+**Save button** is always visible in the AppBar (disabled when clean or shortName unconfirmed). Save is **never at the bottom**.
+
+Old files (`RegionalOrganizersStatus.js`, `RegionalOrganizersSettings.js`, `RegionalOrganizersTypes.js`, `RegionalOrganizersName.js`, `RegionalOrganizersAddress.js`) are superseded — no longer imported.
 2. Run `ybot setup` and select files to include
 3. Run `ybot build` to generate this playbook

@@ -771,20 +771,11 @@ const MapCenterModal = ({
     );
   };
 
-  // Auto-get user location when modal opens (if no initial location set)
-  useEffect(() => {
-    if (!open) return;
-    if (initialLocation?.lat && initialLocation?.lng) return; // Already have location
-    if (centerLat && centerLng) return; // Already set this session
-
-    // Auto-trigger location fetch after small delay for map init
-    const timer = setTimeout(() => {
-      handleUseMyLocation();
-    }, 500);
-
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  // TIEMPO-411: Auto-trigger removed. iOS Safari treats setTimeout-delayed
+  // getCurrentPosition as non-gesture and rejects with PERMISSION_DENIED,
+  // which surfaced as a confusing "Could not get location" error even when
+  // OS permission was granted. Users now pick explicitly via the "Use My
+  // Location" button (gesture → works on mobile) or the crosshair map click.
 
   // Unified save handler - saves to cloud (logged in) or session (anonymous)
   const handleSave = async () => {
@@ -835,6 +826,7 @@ const MapCenterModal = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      data-testid="map-center-modal"
       PaperProps={{
         sx: {
           height: isMobile ? '95vh' : '90vh',
@@ -853,7 +845,7 @@ const MapCenterModal = ({
           <LocationOnIcon color="primary" />
           <Typography variant="h6">Map Center Settings</Typography>
         </Box>
-        <IconButton onClick={onClose} size="small">
+        <IconButton onClick={onClose} size="small" data-testid="map-center-close">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -913,6 +905,7 @@ const MapCenterModal = ({
               onClick={handleSave}
               disabled={loading || !centerLat || !centerLng}
               size="small"
+              data-testid="map-center-save"
               startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
               sx={centerLat && centerLng ? {
                 animation: 'pulse 1.5s ease-in-out 3',
@@ -985,6 +978,7 @@ const MapCenterModal = ({
               size="small"
               color="primary"
               title="Use my current location"
+              data-testid="map-center-use-my-location"
             >
               {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
             </IconButton>
@@ -1012,6 +1006,10 @@ const MapCenterModal = ({
               variant="outlined"
               size="small"
               sx={{ mb: 1 }}
+              inputProps={{
+                ...params.inputProps,
+                'data-testid': 'map-center-city-search',
+              }}
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
@@ -1024,7 +1022,11 @@ const MapCenterModal = ({
             />
           )}
           renderOption={(props, option) => (
-            <li {...props} key={option._id || option.cityName}>
+            <li
+              {...props}
+              key={option._id || option.cityName}
+              data-testid={`city-option-${String(option.cityName || '').toLowerCase().trim().replace(/\s+/g, '-')}`}
+            >
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {option.cityName}

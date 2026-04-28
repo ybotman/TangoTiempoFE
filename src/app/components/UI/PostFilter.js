@@ -15,7 +15,8 @@ import { categoryColors } from '@/utils/categoryColors';
 
 const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChange }) => {
   // Define the ordered categories
-  // TIEMPO-291: Removed DayWorkshop (replaced by Encuentro), removed Trip and Unknown
+  // TIEMPO-440: DayWorkshop deprecated — Workshop covers both short and long
+  // durations now. Trip and Unknown remain unbucketed and excluded from filter UI.
   const orderedCategories = [
     'Milonga',
     'Practica',
@@ -29,7 +30,7 @@ const PostFilter = ({ activeCategories = [], categories = [], handleCategoryChan
   // Make a safe copy of categories if it's an array, otherwise use an empty array
   const categoriesSafe = Array.isArray(categories) ? [...categories] : [];
 
-  // TIEMPO-291: Filter out DayWorkshop, Trip, and Unknown
+  // TIEMPO-440: Filter out DayWorkshop (deprecated), Trip, and Unknown
   // Sort the categories based on their order in orderedCategories
   const sortedCategories = categoriesSafe.filter(cat =>
     cat &&

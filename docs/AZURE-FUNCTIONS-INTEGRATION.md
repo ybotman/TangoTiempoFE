@@ -1,10 +1,16 @@
-# Azure Functions Integration Guide
-
-**For**: Frontend Developers
-**Purpose**: Integrate Azure Functions monitoring into service status grid
-**Created**: 2025-10-06
-**Branch**: `feature/af-prep-monitoring`
-
+---
+date: 2025-12-10
+persona: fulton
+type: product
+state: live
+feature: serverless-integration
+keywords: [azure, functions]
+appid: 1
+niche: tango
+app: "[[APP-01-TangoTiempo]]"
+audience: all
+permanence: long-term
+tags: [type/product, vendor/azure]
 ---
 
 ## Overview

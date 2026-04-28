@@ -1,7 +1,8 @@
 // UserSettingsApply.js
 'use client';
 import React, { useState, useMemo, useEffect, useContext } from 'react';
-import { Box, Typography, Button, Alert, useMediaQuery, useTheme, CircularProgress, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Alert, TextField, useMediaQuery, useTheme, CircularProgress, Paper, Divider, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import axios from 'axios';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -9,7 +10,29 @@ import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
+import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import ROTermsModal from './UserSettingApplyROTerms.js';
+
+// TIEMPO-442 stopgap: client-side helper to find a unique shortName via the
+// existing /api/organizers/shortname-check probe. Tries the candidate first;
+// suffix-retries up to 5 times; gives up after that and lets the user adjust.
+// Replaced when CALBEAF-150 /generate-candidate lands (TIEMPO-437/441).
+const probeShortNameUnique = async (candidate, appId) => {
+  const trim = (s) => (s || '').toString().trim().slice(0, 9);
+  const root = trim(candidate) || 'New';
+  for (let attempt = 0; attempt <= 5; attempt += 1) {
+    const tryName = attempt === 0 ? root : `${root}${attempt + 1}`.slice(0, 9);
+    try {
+      const url = `${getApiBaseUrl()}/api/organizers/shortname-check?appId=${appId}&candidate=${encodeURIComponent(tryName)}`;
+      const { data } = await axios.get(url);
+      if (data?.available) return tryName;
+    } catch {
+      // network blip — fall through; the /api/organizers POST will surface 409
+      return tryName;
+    }
+  }
+  return null; // exhausted — caller surfaces "please pick a different name"
+};
 
 const UserSettingsApply = () => {
   const theme = useTheme();
@@ -18,6 +41,7 @@ const UserSettingsApply = () => {
   const { user } = useContext(AuthContext); // Get Firebase user for email
   const { userData, updateUserData, loading: userDataLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
+
   const { createOrganizer, fetchOrganizerById, organizer } = useOrganizers();
   const { logRoleChange, logActivity } = useActivityLogger();
 
@@ -27,6 +51,13 @@ const UserSettingsApply = () => {
   const [restartMessage, setRestartMessage] = useState(false);
   // TIEMPO-253: Add states for proper next steps flow
   const [showNextStepsDialog, setShowNextStepsDialog] = useState(false);
+  // TIEMPO-442/443 stopgap: surface all minimums on the form (organizer name,
+  // short name with live availability check, description). Replaced when
+  // CALBEAF-155 atomic /self-apply lands (TIEMPO-441).
+  const [organizerName, setOrganizerName] = useState('');
+  const [shortName, setShortName] = useState('');
+  const [shortNameStatus, setShortNameStatus] = useState({ checking: false, available: null, message: '' });
+  const [description, setDescription] = useState('');
 
   // Handle missing data gracefully
   const regionalOrganizerRole = useMemo(() => {
@@ -37,6 +68,17 @@ const UserSettingsApply = () => {
 // TIEMPO-276: Security cleanup - removed logging
     return roles.find((role) => role && role.roleName === 'RegionalOrganizer');
   }, [roles]);
+
+  // TIEMPO-443 fix: UpdateRoles is exact-set ($set replaces array). Bundle
+  // NU + Spotlighter + RO so applying never orphans the user to RO-only.
+  const namedUserRole = useMemo(
+    () => Array.isArray(roles) ? roles.find((r) => r?.roleName === 'NamedUser') : null,
+    [roles]
+  );
+  const spotlighterRole = useMemo(
+    () => Array.isArray(roles) ? roles.find((r) => r?.roleName === 'Spotlighter') : null,
+    [roles]
+  );
 
   const hasRole = useMemo(() => {
     if (!userData || !regionalOrganizerRole) return false;
@@ -65,10 +107,86 @@ const UserSettingsApply = () => {
     }
   }, [organizerId, fetchOrganizerById]);
 
+  // TIEMPO-443: Seed Organizer Name + Short Name from user profile when the
+  // form first becomes available. Short name auto-suggests via probe-and-retry
+  // so the user sees a unique candidate; they can override and we re-probe on blur.
+  useEffect(() => {
+    if (hasOrganizerId || !userData) return;
+    const firstName = userData?.localUserInfo?.firstName || '';
+    const lastName = userData?.localUserInfo?.lastName || '';
+    const defaultName = `${firstName} ${lastName}`.trim();
+    if (defaultName && !organizerName) setOrganizerName(defaultName);
+
+    if (!shortName) {
+      const candidateRoot = `${firstName}${lastName ? lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '').slice(0, 9) || 'New';
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+      probeShortNameUnique(candidateRoot, appId).then((unique) => {
+        if (unique) {
+          setShortName(unique);
+          setShortNameStatus({ checking: false, available: true, message: 'Available' });
+        }
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.localUserInfo?.firstName, userData?.localUserInfo?.lastName, hasOrganizerId]);
+
+  // TIEMPO-443: Live probe on Short Name field blur — gives the user immediate
+  // feedback whether their chosen name is available before they click Apply.
+  const handleShortNameBlur = async () => {
+    const candidate = shortName.trim();
+    if (!candidate) {
+      setShortNameStatus({ checking: false, available: null, message: '' });
+      return;
+    }
+    if (candidate.length < 3 || candidate.length > 9) {
+      setShortNameStatus({ checking: false, available: false, message: 'Must be 3-9 characters' });
+      return;
+    }
+    if (/CHANGE|TANGO/i.test(candidate)) {
+      setShortNameStatus({ checking: false, available: false, message: 'Cannot contain "CHANGE" or "TANGO"' });
+      return;
+    }
+    setShortNameStatus({ checking: true, available: null, message: 'Checking…' });
+    try {
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+      const url = `${getApiBaseUrl()}/api/organizers/shortname-check?appId=${appId}&candidate=${encodeURIComponent(candidate)}`;
+      const { data } = await axios.get(url);
+      if (data?.available) {
+        setShortNameStatus({ checking: false, available: true, message: 'Available' });
+      } else {
+        setShortNameStatus({ checking: false, available: false, message: 'Already taken — try a variation' });
+      }
+    } catch {
+      // Network error — let the POST surface 409 if it's actually a collision
+      setShortNameStatus({ checking: false, available: null, message: '' });
+    }
+  };
+
   const handleApply = async () => {
     // Don't proceed if data is loading or missing
     if (userDataLoading || rolesLoading || !userData || !regionalOrganizerRole) {
       setErrorMessage('Application data is still loading. Please try again in a moment.');
+      return;
+    }
+
+    // TIEMPO-443: validate all minimums before submitting
+    const trimmedName = organizerName.trim();
+    if (trimmedName.length < 7) {
+      setErrorMessage('Organizer name must be at least 7 characters.');
+      return;
+    }
+    const trimmedShortName = shortName.trim();
+    if (trimmedShortName.length < 3 || trimmedShortName.length > 9) {
+      setErrorMessage('Short name must be 3–9 characters.');
+      return;
+    }
+    if (shortNameStatus.available === false) {
+      setErrorMessage('Short name is not available. Please choose a different one.');
+      return;
+    }
+    const trimmedDescription = description.trim();
+    if (trimmedDescription.length < 10) {
+      setErrorMessage('Please add a description of at least 10 characters so people can find you.');
       return;
     }
 
@@ -89,7 +207,12 @@ const UserSettingsApply = () => {
             }).filter(id => id) // Remove empty strings
           : [];
 
-        const updatedRoleIds = [...new Set([...existingRoleIds, String(regionalOrganizerRole._id)])];
+        // TIEMPO-443: include NU + Spotlighter in bundle — UpdateRoles is
+        // exact-set ($set), so omitting them would wipe them from the user doc.
+        const bundleIds = [namedUserRole?._id, spotlighterRole?._id]
+          .filter(Boolean)
+          .map(String);
+        const updatedRoleIds = [...new Set([...existingRoleIds, ...bundleIds, String(regionalOrganizerRole._id)])];
 
         // Log the role application
         await logActivity('ROLE_APPLICATION', 'user', userData._id, {
@@ -99,7 +222,7 @@ const UserSettingsApply = () => {
         });
 
         await updateUserData({ roleIds: updatedRoleIds });
-        
+
         // Log the role change from NU to RO
         await logRoleChange('NamedUser', 'RegionalOrganizer', {
           changedBy: 'user',
@@ -110,23 +233,38 @@ const UserSettingsApply = () => {
 
       // Create an organizer if needed
       if (!hasOrganizerId && userData._id) {
-        // Use a default region if user's region is not available
-        const defaultRegionId = '66c4d99042ec462ea22484bd'; // Fallback region ID
+        // TIEMPO-443: use what the user typed (already probed on blur); fall back
+        // to re-probe only if somehow still empty (shouldn't happen post-seeding).
+        const fullName = organizerName.trim() || `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`;
+        let finalShortName = shortName.trim();
+        if (!finalShortName) {
+          const candidateRoot = `${userData?.localUserInfo?.firstName || 'New'}${userData?.localUserInfo?.lastName ? userData.localUserInfo.lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '');
+          const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+          finalShortName = await probeShortNameUnique(candidateRoot, appId);
+        }
+        if (!finalShortName) {
+          throw new Error('Could not generate a unique short name. Please edit the Short Name field and try again.');
+        }
 
-        const fullName = `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`;
-        const shortName = `${userData?.localUserInfo?.firstName || 'New'}${userData?.localUserInfo?.lastName ? ' ' + userData?.localUserInfo?.lastName.charAt(0) : ''}`;
+        const userRegionId = userData?.localUserInfo?.userDefaults?.region;
 
         const organizerData = {
           linkedUserLogin: userData._id,
           firebaseUserId: userData.firebaseUserId || '',
           name: fullName,
           fullName: fullName,
-          shortName: shortName, // REQUIRED by backend - generated from user name
-          contactEmail: user?.email || userData.firebaseUserId || '', // REQUIRED by backend API - from Firebase Auth
-          organizerRegion: userData?.localUserInfo?.userDefaults?.region || defaultRegionId,
+          shortName: finalShortName,
+          // TIEMPO-442 stopgap: collect description upfront so save-event
+          // doesn't fail later with "Please complete the following: Description".
+          description: trimmedDescription,
+          contactEmail: user?.email || userData.firebaseUserId || '',
+          ...(userRegionId && { organizerRegion: userRegionId }),
           isActive: true,
-          isEnabled: false,  // Requires manual enable for safety
-          wantRender: false, // Not searchable until enabled
+          // TIEMPO-442 stopgap: minimums met at apply time → activate the
+          // organizer record directly. Skips the 4-step post-apply ceremony.
+          // CALBEAF-155 atomic /self-apply will replace this whole block.
+          isEnabled: true,
+          wantRender: true,
           organizerTypes: {
             isEventOrganizer: true,
             isVenue: false,
@@ -137,8 +275,6 @@ const UserSettingsApply = () => {
           },
         };
 
-        console.log('Creating organizer with data:', organizerData);
-
         const newOrganizer = await createOrganizer(organizerData);
 
         if (!newOrganizer || !newOrganizer._id) {
@@ -147,8 +283,8 @@ const UserSettingsApply = () => {
 
         const updatedRegionalInfo = {
           organizerId: newOrganizer._id,
-          isApproved: true,  // Auto-approved after ROE acceptance
-          isEnabled: true,   // Set true for future AI control (can be disabled later)
+          isApproved: true,
+          isEnabled: true,
           isActive: true,
           ApprovalDate: new Date(),
           allowedMasteredCityIds: [],
@@ -243,18 +379,94 @@ const UserSettingsApply = () => {
         </Box>
       )}
 
-      {/* Only show Apply button if not loading and user doesn't have an organizer ID */}
+      {/* TIEMPO-443: collect all required organizer fields at apply time */}
       {!isLoading && !hasOrganizerId && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleApply}
-          disabled={isLoading || !userData || !regionalOrganizerRole}
-          size="large"
-          fullWidth
-        >
-          {applicationStatus === 'loading' ? 'Applying...' : 'Apply for Event Organizer'}
-        </Button>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Organizer Name"
+            placeholder="Your name or group name (min 7 characters)"
+            value={organizerName}
+            onChange={(e) => setOrganizerName(e.target.value)}
+            fullWidth
+            inputProps={{ maxLength: 80 }}
+            helperText={`${organizerName.trim().length} characters — min 7 required`}
+            error={organizerName.trim().length > 0 && organizerName.trim().length < 7}
+            disabled={applicationStatus === 'loading'}
+          />
+          <TextField
+            label="Short Name"
+            placeholder="3–9 chars, no spaces (e.g. TobyB)"
+            value={shortName}
+            onChange={(e) => setShortName(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 9))}
+            onBlur={handleShortNameBlur}
+            fullWidth
+            inputProps={{ maxLength: 9 }}
+            helperText={
+              shortNameStatus.checking
+                ? 'Checking…'
+                : shortNameStatus.message || '3–9 alphanumeric characters'
+            }
+            error={shortNameStatus.available === false}
+            InputProps={{
+              endAdornment: shortNameStatus.checking ? (
+                <CircularProgress size={16} />
+              ) : shortNameStatus.available === true ? (
+                <CheckCircleIcon color="success" fontSize="small" />
+              ) : shortNameStatus.available === false ? (
+                <CancelIcon color="error" fontSize="small" />
+              ) : null,
+            }}
+            disabled={applicationStatus === 'loading'}
+          />
+          <TextField
+            label="Description"
+            placeholder="Tell people who you are and what you organize."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            fullWidth
+            multiline
+            minRows={2}
+            inputProps={{ maxLength: 500 }}
+            helperText={`${description.trim().length}/500 — at least 10 characters required`}
+            disabled={applicationStatus === 'loading'}
+          />
+          {!regionalOrganizerRole && !rolesLoading && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              Role data did not load. Please refresh the page and try again.
+            </Alert>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleApply}
+            disabled={
+              isLoading ||
+              !userData ||
+              !regionalOrganizerRole ||
+              organizerName.trim().length < 7 ||
+              shortName.trim().length < 3 ||
+              shortNameStatus.available === false ||
+              description.trim().length < 10
+            }
+            size="large"
+            fullWidth
+          >
+            {applicationStatus === 'loading' ? 'Applying...' : 'Apply for Event Organizer'}
+          </Button>
+        </Box>
+      )}
+
+      {/* TIEMPO-443: already-applied success state — shown when all flags are set */}
+      {!isLoading && hasOrganizerId && isApproved && isEnabled && (
+        <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold">
+            You&apos;re set up as an Event Organizer
+          </Typography>
+          <Typography variant="body2">
+            Your organizer profile is active. Use the role switcher above to change to
+            &quot;Organizer/Artist&quot; and start creating events.
+          </Typography>
+        </Alert>
       )}
 
       {/* Only show Terms button if user has an organizer ID but hasn't approved terms */}

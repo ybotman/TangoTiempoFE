@@ -42,11 +42,11 @@ const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { 
 const MapEventHandler = dynamic(() => import('@/components/EventDiscovery/MapEventHandler'), { ssr: false });
 
 // Event categories
+// TIEMPO-440: DayWorkshop dropped — Workshop covers both short and long durations.
 const EVENT_CATEGORIES = [
   'Milonga',
   'Festival',
   'Workshop',
-  'DayWorkshop',
   'Classes',
   'Practices',
   'Concerts',

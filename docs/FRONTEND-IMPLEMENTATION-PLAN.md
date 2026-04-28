@@ -1,7 +1,16 @@
-# Frontend Implementation Plan (REVISED)
-**Date:** September 23, 2025
-**Purpose:** Fix organizer profile validation + Handle unique shortName requirements
-
+---
+date: 2025-11-20
+persona: sarah
+type: design
+state: live
+feature: fe-modernization
+keywords: [react, nextjs]
+appid: 1
+niche: tango
+app: "[[APP-01-TangoTiempo]]"
+audience: all
+permanence: long-term
+tags: [type/design, app/tango]
 ---
 
 ## FINAL ALIGNED BACKEND REQUIREMENTS:
