@@ -50,8 +50,12 @@ const UserSettingsApply = () => {
   const [restartMessage, setRestartMessage] = useState(false);
   // TIEMPO-253: Add states for proper next steps flow
   const [showNextStepsDialog, setShowNextStepsDialog] = useState(false);
-  // TIEMPO-442 stopgap: collect description at apply time so save-event
-  // doesn't fail later with "Please complete the following: Description".
+  // TIEMPO-442/443 stopgap: surface all minimums on the form (organizer name,
+  // short name with live availability check, description). Replaced when
+  // CALBEAF-155 atomic /self-apply lands (TIEMPO-441).
+  const [organizerName, setOrganizerName] = useState('');
+  const [shortName, setShortName] = useState('');
+  const [shortNameStatus, setShortNameStatus] = useState({ checking: false, available: null, message: '' });
   const [description, setDescription] = useState('');
 
   // Handle missing data gracefully
@@ -91,6 +95,61 @@ const UserSettingsApply = () => {
     }
   }, [organizerId, fetchOrganizerById]);
 
+  // TIEMPO-443: Seed Organizer Name + Short Name from user profile when the
+  // form first becomes available. Short name auto-suggests via probe-and-retry
+  // so the user sees a unique candidate; they can override and we re-probe on blur.
+  useEffect(() => {
+    if (hasOrganizerId || !userData) return;
+    const firstName = userData?.localUserInfo?.firstName || '';
+    const lastName = userData?.localUserInfo?.lastName || '';
+    const defaultName = `${firstName} ${lastName}`.trim();
+    if (defaultName && !organizerName) setOrganizerName(defaultName);
+
+    if (!shortName) {
+      const candidateRoot = `${firstName}${lastName ? lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '').slice(0, 9) || 'New';
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+      probeShortNameUnique(candidateRoot, appId).then((unique) => {
+        if (unique) {
+          setShortName(unique);
+          setShortNameStatus({ checking: false, available: true, message: 'Available' });
+        }
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.localUserInfo?.firstName, userData?.localUserInfo?.lastName, hasOrganizerId]);
+
+  // TIEMPO-443: Live probe on Short Name field blur — gives the user immediate
+  // feedback whether their chosen name is available before they click Apply.
+  const handleShortNameBlur = async () => {
+    const candidate = shortName.trim();
+    if (!candidate) {
+      setShortNameStatus({ checking: false, available: null, message: '' });
+      return;
+    }
+    if (candidate.length < 3 || candidate.length > 9) {
+      setShortNameStatus({ checking: false, available: false, message: 'Must be 3-9 characters' });
+      return;
+    }
+    if (/CHANGE|TANGO/i.test(candidate)) {
+      setShortNameStatus({ checking: false, available: false, message: 'Cannot contain "CHANGE" or "TANGO"' });
+      return;
+    }
+    setShortNameStatus({ checking: true, available: null, message: 'Checking…' });
+    try {
+      const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+      const url = `${getApiBaseUrl()}/api/organizers/shortname-check?appId=${appId}&candidate=${encodeURIComponent(candidate)}`;
+      const { data } = await axios.get(url);
+      if (data?.available) {
+        setShortNameStatus({ checking: false, available: true, message: 'Available' });
+      } else {
+        setShortNameStatus({ checking: false, available: false, message: 'Already taken — try a variation' });
+      }
+    } catch {
+      // Network error — let the POST surface 409 if it's actually a collision
+      setShortNameStatus({ checking: false, available: null, message: '' });
+    }
+  };
+
   const handleApply = async () => {
     // Don't proceed if data is loading or missing
     if (userDataLoading || rolesLoading || !userData || !regionalOrganizerRole) {
@@ -98,9 +157,21 @@ const UserSettingsApply = () => {
       return;
     }
 
-    // TIEMPO-442: minimums collected at apply time, not later. Description
-    // ≥ a few chars so the wantRender/isEnabled gate at the BE doesn't reject
-    // the immediate save-event flow.
+    // TIEMPO-443: validate all minimums before submitting
+    const trimmedName = organizerName.trim();
+    if (trimmedName.length < 7) {
+      setErrorMessage('Organizer name must be at least 7 characters.');
+      return;
+    }
+    const trimmedShortName = shortName.trim();
+    if (trimmedShortName.length < 3 || trimmedShortName.length > 9) {
+      setErrorMessage('Short name must be 3–9 characters.');
+      return;
+    }
+    if (shortNameStatus.available === false) {
+      setErrorMessage('Short name is not available. Please choose a different one.');
+      return;
+    }
     const trimmedDescription = description.trim();
     if (trimmedDescription.length < 10) {
       setErrorMessage('Please add a description of at least 10 characters so people can find you.');
@@ -145,15 +216,17 @@ const UserSettingsApply = () => {
 
       // Create an organizer if needed
       if (!hasOrganizerId && userData._id) {
-        const fullName = `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`;
-        // TIEMPO-442 stopgap: replace naive firstName+lastInitial generation with
-        // probe-via-/shortname-check + suffix-retry. Eliminates the "NEW"-style
-        // collisions Toby hit. Replaced when CALBEAF-150 /generate-candidate lands.
-        const candidateRoot = `${userData?.localUserInfo?.firstName || 'New'}${userData?.localUserInfo?.lastName ? userData.localUserInfo.lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '');
-        const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
-        const uniqueShortName = await probeShortNameUnique(candidateRoot, appId);
-        if (!uniqueShortName) {
-          throw new Error('Could not auto-generate a unique short name. Please update your profile name and try again.');
+        // TIEMPO-443: use what the user typed (already probed on blur); fall back
+        // to re-probe only if somehow still empty (shouldn't happen post-seeding).
+        const fullName = organizerName.trim() || `${userData?.localUserInfo?.firstName || 'New'} ${userData?.localUserInfo?.lastName || 'Organizer'}`;
+        let finalShortName = shortName.trim();
+        if (!finalShortName) {
+          const candidateRoot = `${userData?.localUserInfo?.firstName || 'New'}${userData?.localUserInfo?.lastName ? userData.localUserInfo.lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '');
+          const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+          finalShortName = await probeShortNameUnique(candidateRoot, appId);
+        }
+        if (!finalShortName) {
+          throw new Error('Could not generate a unique short name. Please edit the Short Name field and try again.');
         }
 
         const userRegionId = userData?.localUserInfo?.userDefaults?.region;
@@ -163,7 +236,7 @@ const UserSettingsApply = () => {
           firebaseUserId: userData.firebaseUserId || '',
           name: fullName,
           fullName: fullName,
-          shortName: uniqueShortName,
+          shortName: finalShortName,
           // TIEMPO-442 stopgap: collect description upfront so save-event
           // doesn't fail later with "Please complete the following: Description".
           description: trimmedDescription,
@@ -289,11 +362,45 @@ const UserSettingsApply = () => {
         </Box>
       )}
 
-      {/* TIEMPO-442 stopgap: collect Description at apply time so the
-          immediate save-event flow doesn't fail later with
-          "Please complete the following: Description". */}
+      {/* TIEMPO-443: collect all required organizer fields at apply time */}
       {!isLoading && !hasOrganizerId && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Organizer Name"
+            placeholder="Your name or group name (min 7 characters)"
+            value={organizerName}
+            onChange={(e) => setOrganizerName(e.target.value)}
+            fullWidth
+            inputProps={{ maxLength: 80 }}
+            helperText={`${organizerName.trim().length} characters — min 7 required`}
+            error={organizerName.trim().length > 0 && organizerName.trim().length < 7}
+            disabled={applicationStatus === 'loading'}
+          />
+          <TextField
+            label="Short Name"
+            placeholder="3–9 chars, no spaces (e.g. TobyB)"
+            value={shortName}
+            onChange={(e) => setShortName(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 9))}
+            onBlur={handleShortNameBlur}
+            fullWidth
+            inputProps={{ maxLength: 9 }}
+            helperText={
+              shortNameStatus.checking
+                ? 'Checking…'
+                : shortNameStatus.message || '3–9 alphanumeric characters'
+            }
+            error={shortNameStatus.available === false}
+            InputProps={{
+              endAdornment: shortNameStatus.checking ? (
+                <CircularProgress size={16} />
+              ) : shortNameStatus.available === true ? (
+                <CheckCircleIcon color="success" fontSize="small" />
+              ) : shortNameStatus.available === false ? (
+                <CancelIcon color="error" fontSize="small" />
+              ) : null,
+            }}
+            disabled={applicationStatus === 'loading'}
+          />
           <TextField
             label="Description"
             placeholder="Tell people who you are and what you organize."
@@ -314,6 +421,9 @@ const UserSettingsApply = () => {
               isLoading ||
               !userData ||
               !regionalOrganizerRole ||
+              organizerName.trim().length < 7 ||
+              shortName.trim().length < 3 ||
+              shortNameStatus.available === false ||
               description.trim().length < 10
             }
             size="large"
