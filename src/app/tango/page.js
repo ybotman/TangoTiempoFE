@@ -76,14 +76,6 @@ export async function generateMetadata() {
       url: `${baseUrl}/tango`,
       siteName: 'TangoTiempo',
       type: 'website',
-      images: [
-        {
-          url: `${baseUrl}/images/TangoTiempo3.jpg`,
-          width: 1200,
-          height: 630,
-          alt: 'TangoTiempo - Argentine Tango Calendar',
-        },
-      ],
     },
 
     // Twitter
@@ -92,7 +84,6 @@ export async function generateMetadata() {
       title: 'Find Argentine Tango Events Near You | TangoTiempo',
       description:
         'Discover milongas, practicas, classes, and festivals across America. Free national tango calendar.',
-      images: [`${baseUrl}/images/TangoTiempo3.jpg`],
     },
 
     // Canonical URL

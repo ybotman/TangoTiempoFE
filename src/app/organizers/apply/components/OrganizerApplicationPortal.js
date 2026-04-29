@@ -14,6 +14,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PropTypes from 'prop-types';
 
@@ -76,42 +77,37 @@ const OrganizerApplicationPortalInner = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="md" sx={{ mt: 2, mb: 4 }}>
+      {/* Brand hero */}
+      <Box sx={{ mb: 2 }}>
+        <Image
+          src="/brand/Brand-MTGT-Orange-V-WIDE-1.png"
+          alt="TangoTiempo — Move Together. Grow Together."
+          width={900}
+          height={160}
+          style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+        />
+      </Box>
+
       {/* Back button */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <IconButton
           onClick={() => router.push('/calendar')}
-          sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            '&:hover': {
-              backgroundColor: 'action.hover'
-            }
-          }}
+          sx={{ border: '1px solid', borderColor: 'divider' }}
         >
           <ArrowBackIcon />
         </IconButton>
       </Box>
 
-      {/* SEO-friendly header */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          sx={{ fontWeight: 'bold' }}
-        >
+      {/* Header */}
+      <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography variant="h5" component="h1" gutterBottom fontWeight="bold">
           {isOutreachFlow ? 'Welcome to TangoTiempo' : 'Become a TangoTiempo Organizer'}
         </Typography>
-        <Typography
-          variant="h6"
-          component="h2"
-          color="text.secondary"
-          sx={{ maxWidth: '800px', mx: 'auto' }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
           {isOutreachFlow
-            ? 'You\'ve been invited to join our organizer community. Let\'s get you set up.'
-            : 'Join our community of tango event organizers, venues, DJs, teachers, maestros, orchestras, and musicians'
+            ? "You've been invited to join our organizer community. Let's get you set up."
+            : 'List your milongas, practicas, classes, or join as a venue, DJ, teacher, or maestro. Always free.'
           }
         </Typography>
       </Box>

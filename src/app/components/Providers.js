@@ -161,23 +161,8 @@ const Providers = ({ children }) => {
     );
   }
 
-  // Show loading spinner while API failover initializes (fast, <2s max)
-  if (!apiReady) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#1a1a2e',
-      }}>
-        <div style={{ textAlign: 'center', color: 'white' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>💃</div>
-          <div style={{ fontSize: '14px', opacity: 0.7 }}>Connecting...</div>
-        </div>
-      </div>
-    );
-  }
+  // SplashScreen in layout.js covers the apiReady delay (2s max for failover check)
+  if (!apiReady) return null;
 
   return (
     <AuthProvider>

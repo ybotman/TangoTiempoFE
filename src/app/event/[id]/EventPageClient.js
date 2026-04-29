@@ -13,7 +13,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import Image from 'next/image';
 
 // Default event image (header image) when no event image exists
-const DEFAULT_EVENT_IMAGE = '/images/TangoTiempo3.jpg';
+const DEFAULT_EVENT_IMAGE = '/brand/Brand-Simple-Light-WIDE-1.png';
 
 // TIEMPO-256: Inline category colors to avoid importing utils that may pull in leaflet
 const categoryColors = {

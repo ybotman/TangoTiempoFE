@@ -39,7 +39,7 @@ export default function ModeToggle() {
         borderRadius: 999,
         background: 'rgba(0, 0, 0, 0.06)',
         height: isMobile ? 44 : 34,
-        minWidth: isMobile ? 240 : 340,
+        minWidth: isMobile ? 200 : 340,
       }}
     >
       {/* Sliding white pill. Hidden when no tab is active (non-mode route). */}
