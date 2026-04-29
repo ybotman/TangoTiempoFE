@@ -77,12 +77,13 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 1,
-            px: 1,
-            py: 0.75,
+            pl: 0.5,
+            pr: 1,
+            py: 1.25,
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flexShrink: 1 }}>
-            <BrandMark size={isExplorePage ? 44 : 36} />
+            <BrandMark size={isExplorePage ? 64 : 56} />
             {!isExplorePage && <CityPill />}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -95,7 +96,7 @@ const SiteMenuBar = ({ activeCategories, handleCategoryChange, categories, searc
       <Box
         sx={{
           width: '100%',
-          padding: '0 0',
+          padding: '0',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

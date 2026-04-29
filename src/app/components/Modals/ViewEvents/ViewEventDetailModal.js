@@ -660,8 +660,23 @@ const ViewEventDetailModal = ({ open, onClose, eventDetails, onEventUpdated, ini
               </Typography>
             )}
 
-          {/* Category Display */}
-          {renderCategoryChips()}
+          {/* Category Display + brand mark */}
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box>{renderCategoryChips()}</Box>
+            <Box
+              component="img"
+              src="/brand/Brand-MCB-White-V-WIDE-1.png"
+              alt="TangoTiempo — Move. Connect. Belong."
+              sx={{
+                height: 28,
+                width: 'auto',
+                opacity: 0.85,
+                flexShrink: 0,
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+                maskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+              }}
+            />
+          </Box>
 
           {/* Time Range */}
           {!allDay && startDate && endDate && (

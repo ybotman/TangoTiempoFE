@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import Providers from '@/components/Providers';
 import SidebarDrawer from '@/components/UI/SidebarDrawer';
 import EmailVerificationBanner from '@/components/EmailVerificationBanner';
+import SplashScreen from '@/components/UI/SplashScreen';
 import Script from 'next/script';
 import './globals.css';
 import { Analytics } from "@vercel/analytics/react";
@@ -77,6 +78,7 @@ export default function RootLayout({ children }) {
         </Script>
       </head>
       <body style={{ display: 'flex', overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
+        <SplashScreen />
         {/* Wrap everything in Providers so that SidebarDrawer and its Modals have context */}
         <Providers>
           <SidebarDrawer />
