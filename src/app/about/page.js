@@ -112,6 +112,7 @@ export default function AboutPage() {
         </Typography>
       </Box>
 
+      <Divider sx={{ mb: 5 }} />
       {/* ── What we are ──────────────────────────────────────────────────── */}
       <Section
         icon={<PublicIcon color="primary" sx={{ fontSize: '2rem' }} />}
@@ -270,7 +271,6 @@ export default function AboutPage() {
           </Box>
         ))}
       </Box>
-
       <Divider sx={{ mb: 4 }} />
 
       {/* ── Footer CTAs ──────────────────────────────────────────────────── */}
