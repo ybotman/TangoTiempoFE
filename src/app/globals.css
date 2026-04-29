@@ -12,6 +12,7 @@
 
 body {
   font-family: var(--font-inter);
+  scrollbar-gutter: stable;
 }
 
 /* Global style override to ensure calendar event titles are not bold */

@@ -57,7 +57,7 @@ export default function SplashScreen() {
           width={256}
           height={564}
           priority
-          style={{ maxHeight: '65vh', width: 'auto' }}
+          style={{ maxHeight: '65dvh', width: 'auto' }}
         />
         <div
           style={{
