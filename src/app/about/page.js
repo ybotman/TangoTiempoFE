@@ -47,6 +47,20 @@ export default function AboutPage() {
   return (
     <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }}>
 
+      {/* ── Brand hero image ─────────────────────────────────────────────── */}
+      <Box
+        component="img"
+        src="/brand/Brand-MCB-Light-V-WIDE-1.png"
+        alt="TangoTiempo — Move. Connect. Belong."
+        sx={{
+          width: '100%',
+          maxHeight: { xs: 140, md: 200 },
+          objectFit: 'cover',
+          borderRadius: 2,
+          mb: 4,
+        }}
+      />
+
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <Box sx={{ textAlign: 'center', mb: 6 }}>
         <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
@@ -78,7 +92,25 @@ export default function AboutPage() {
         </Box>
       </Box>
 
-      <Divider sx={{ mb: 5 }} />
+      {/* ── Tagline callout ──────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          borderRadius: 2,
+          px: { xs: 3, md: 5 },
+          py: 3,
+          mb: 5,
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
+          We are Milongeros building things for the world of tango.
+        </Typography>
+        <Typography variant="body1" sx={{ opacity: 0.9 }}>
+          We never sell your data. Never.
+        </Typography>
+      </Box>
 
       {/* ── What we are ──────────────────────────────────────────────────── */}
       <Section
@@ -193,6 +225,51 @@ export default function AboutPage() {
           TangoTiempo is free for the world. Always.
         </Typography>
       </Section>
+
+      <Divider sx={{ mb: 5 }} />
+
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+      <Box sx={{ mb: 5 }}>
+        <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+          Frequently Asked Questions
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Everything you need to know about TangoTiempo
+        </Typography>
+        {[
+          ['Is TangoTiempo free to use?',
+            'Yes! TangoTiempo is completely free for dancers to search and find events. Organizers can also list their events for free.'],
+          ['How do I find tango events near me?',
+            'Visit our calendar page and allow location access, or select your region from the menu. Filter by event type (milonga, practica, class, workshop, festival) and date range.'],
+          ['How do I list my tango events on TangoTiempo?',
+            'Create a free account, then apply to become an organizer. Once approved (usually instant), you can add your events to the calendar.'],
+          ['What types of tango events are listed?',
+            'We list all types of Argentine tango events: milongas, practicas, classes, workshops, festivals, concerts, and shows.'],
+          ['Does TangoTiempo cover events nationwide?',
+            'Yes! TangoTiempo is the national calendar for Argentine tango in America. We have events listed from coast to coast.'],
+        ].map(([q, a]) => (
+          <Box
+            key={q}
+            component="details"
+            sx={{
+              mb: 1,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              px: 2,
+              py: 1,
+              '&[open]': { pb: 2 },
+            }}
+          >
+            <Box component="summary" sx={{ cursor: 'pointer', fontWeight: 'bold', py: 1 }}>
+              {q}
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              {a}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
 
       <Divider sx={{ mb: 4 }} />
 
