@@ -158,7 +158,7 @@ export async function generateMetadata({ params }) {
       description: organizer.description,
       images: [
         {
-          url: organizer.images && organizer.images.length > 0 ? organizer.images[0].imageUrl : '/default-image.jpg',
+          url: organizer.images && organizer.images.length > 0 ? organizer.images[0].imageUrl : '/brand/Brand-Simple-Light-WIDE-1.png',
         },
       ],
     },

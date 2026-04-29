@@ -116,7 +116,7 @@ export async function generateMetadata({ params }) {
       type: 'place',
       images: [
         {
-          url: `${baseUrl}/images/TangoTiempo3.jpg`,
+          url: `${baseUrl}/brand/Brand-Simple-Light-WIDE-1.png`,
           width: 1200,
           height: 630,
           alt: venueName,
@@ -129,7 +129,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: `${venueName} | TangoTiempo`,
       description,
-      images: [`${baseUrl}/images/TangoTiempo3.jpg`],
+      images: [`${baseUrl}/brand/Brand-Simple-Light-WIDE-1.png`],
     },
 
     // Canonical URL

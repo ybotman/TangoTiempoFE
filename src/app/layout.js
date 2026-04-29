@@ -20,9 +20,27 @@ const inter = Inter({
 export const metadata = {
   title: 'Tango Tiempo - The Premiere Argentine Tango Calendar',
   description:
-    "The United States' first fully dedicated Argentine Tango calendar. Open, easy, and free to use.",
+    "The free global Argentine tango calendar. Find milongas, practicas, workshops, and travel-worthy festivals near you or around the world.",
   keywords: 'Argentine Tango, Tango Events, Tango Calendar, Tango Tiempo, Community Calendar, Milonga, Tango Workshop',
   author: 'Toby Balsley of Tango Tiempo',
+  openGraph: {
+    title: 'TangoTiempo — The Free Global Argentine Tango Calendar',
+    description: 'Find milongas, practicas, workshops, and travel-worthy festivals. Free for dancers. Free for organizers.',
+    url: 'https://tangotiempo.com',
+    siteName: 'TangoTiempo',
+    images: [{
+      url: 'https://tangotiempo.com/brand/Brand-MCB-Light-V-WIDE-1.png',
+      width: 1200,
+      alt: 'TangoTiempo — Move. Connect. Belong.',
+    }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TangoTiempo — The Free Global Argentine Tango Calendar',
+    description: 'Find milongas, practicas, workshops, and travel-worthy festivals.',
+    images: ['https://tangotiempo.com/brand/Brand-MCB-Light-V-WIDE-1.png'],
+  },
 };
 
 // Separate viewport export

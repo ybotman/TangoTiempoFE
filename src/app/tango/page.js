@@ -78,10 +78,9 @@ export async function generateMetadata() {
       type: 'website',
       images: [
         {
-          url: `${baseUrl}/images/TangoTiempo3.jpg`,
+          url: `${baseUrl}/brand/Brand-MCB-Light-V-WIDE-1.png`,
           width: 1200,
-          height: 630,
-          alt: 'TangoTiempo - Argentine Tango Calendar',
+          alt: 'TangoTiempo — Move. Connect. Belong.',
         },
       ],
     },
