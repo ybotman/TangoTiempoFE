@@ -23,7 +23,7 @@ function getBaseUrl() {
 const API_URL = getApiBaseUrl();
 
 // Default event image (header image) when no event image exists
-const DEFAULT_EVENT_IMAGE = '/images/TangoTiempo3.jpg';
+const DEFAULT_EVENT_IMAGE = '/brand/Brand-Simple-Light-WIDE-1.png';
 
 // Fetch event data from backend
 async function getEventData(eventId) {

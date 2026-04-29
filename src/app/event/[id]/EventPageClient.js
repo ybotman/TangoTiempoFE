@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { Box, Typography, Button, Paper, Chip } from '@mui/material';
@@ -13,7 +13,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import Image from 'next/image';
 
 // Default event image (header image) when no event image exists
-const DEFAULT_EVENT_IMAGE = '/images/TangoTiempo3.jpg';
+const DEFAULT_EVENT_IMAGE = '/brand/Brand-Simple-Light-WIDE-1.png';
 
 // TIEMPO-256: Inline category colors to avoid importing utils that may pull in leaflet
 const categoryColors = {
@@ -57,6 +57,12 @@ function formatEventTime(startStr, endStr) {
 
 export default function EventPageClient({ eventId, eventData }) {
   const router = useRouter();
+
+  // Option A: immediately open the calendar with the event modal — no intermediate page for humans.
+  // Social scrapers (Facebook, iMessage, etc.) see the server-rendered OG tags before JS runs.
+  useEffect(() => {
+    router.replace(`/calendar?event=${eventId}`);
+  }, [router, eventId]);
 
   // Extract event image with fallback to default
   const initialImage = eventData?.eventImage || eventData?.imageUrl || DEFAULT_EVENT_IMAGE;

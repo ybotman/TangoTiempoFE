@@ -48,7 +48,6 @@ import Link from 'next/link';
 import UserSettingsModal from '@/components/Modals/UserSettings/UserSettingsModal';
 import RegionalOrganizersModal from '@/components/Modals/RegionalOrganizers/RegionalOrganizersModal';
 import PrivacyPolicyModal from '@/components/Modals/misc/PrivacyPolicyModal';
-import FAQModal from '@/components/Modals/misc/FAQModal';
 import SystemAdminModal from '@/components/Modals/SystemAdmin/SystemAdminModal';
 import ComposeMessageModal from '@/components/Modals/Messages/ComposeMessageModal';
 import { RoleContext } from '@/contexts/RoleContext';
@@ -76,7 +75,6 @@ const SidebarDrawer = ({ open, onClose }) => {
   const [systemAdminOpen, setSystemAdminOpen] = useState(false);
   const [composeMessageOpen, setComposeMessageOpen] = useState(false);
   const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
-  const [faqOpen, setFaqOpen] = useState(false);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
   // const [locationModalOpen, setLocationModalOpen] = useState(false); // Removed - using map center mode only
   const [venueSelectionModalOpen, setVenueSelectionModalOpen] = useState(false);
@@ -499,12 +497,6 @@ const SidebarDrawer = ({ open, onClose }) => {
             </AccordionSummary>
             <AccordionDetails sx={{ p: 0 }}>
               <List dense>
-                <ListItem button="true" onClick={() => { setFaqOpen(true); onClose(); }}>
-                  <ListItemIcon>
-                    <FormatIndentIncreaseIcon sx={{ color: 'royalBlue' }} />
-                  </ListItemIcon>
-                  <ListItemText primary="FAQ" />
-                </ListItem>
                 <Link href="/about" passHref>
                   <ListItem button="true" onClick={() => onClose()}>
                     <ListItemIcon>
@@ -630,7 +622,6 @@ const SidebarDrawer = ({ open, onClose }) => {
       <RegionalOrganizersModal open={regionalOrganizerOpen} onClose={() => setRegionalOrganizerOpen(false)} />
       <SystemAdminModal open={systemAdminOpen} onClose={() => setSystemAdminOpen(false)} />
       <ComposeMessageModal open={composeMessageOpen} onClose={() => setComposeMessageOpen(false)} />
-      <FAQModal open={faqOpen} onClose={() => setFaqOpen(false)} />
       <PrivacyPolicyModal open={privacyPolicyOpen} onClose={() => setPrivacyPolicyOpen(false)} />
       <VenueModal open={venueModalOpen} onClose={() => setVenueModalOpen(false)} />
       {/* LocationContextModal removed - using map center mode only */}

@@ -3,6 +3,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Container, Typography, Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
@@ -11,7 +12,16 @@ const PrivacyPolicyPage = () => {
 
   return (
     <Container component="main" maxWidth="md">
-      <Box sx={{ padding: 4, marginTop: 8 }}>
+      <Box sx={{ padding: 4, marginTop: 2 }}>
+        <Box sx={{ mb: 3 }}>
+          <Image
+            src="/brand/Brand-MCB-Light-V-WIDE-1.png"
+            alt="TangoTiempo"
+            width={900}
+            height={200}
+            style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+          />
+        </Box>
         <Typography variant="h4" component="h1" gutterBottom>
           Privacy Policy
         </Typography>

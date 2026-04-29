@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 // Must read clearly at 40px — the source PNG is a high-contrast
 // circular silhouette that works at that size.
 
-const SRC = '/brand/tangotiempo-mark.png';
+const SRC = '/brand/Brand-ICON-TT-Light-Invt-CRCL-2.png';
 
 export default function BrandMark({ size = 40, clickable = true, alt = 'TangoTiempo' }) {
   const router = useRouter();
