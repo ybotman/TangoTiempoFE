@@ -286,6 +286,8 @@ START OF FILE: YBOTBOT-BRANCH-AUTONOMY.md
 1. READ `/Users/tobybalsley/MyDocs/AppDev/MasterCalendar/docs/PROD-DEPLOY-PROTECTION.md`
 2. Follow DEPLOY-PROD confirmation protocol
 3. No exceptions - "yes" and "sure" are NOT valid confirmations
+4. NEVER run `gh pr merge` — ANY flags. DEPLOY-PROD only authorizes creating the PR. After creating it: post the URL, STOP, and wait for Toby to confirm "merged" in GitHub UI.
+5. `gh pr merge --admin` additionally requires `ADMIN-OVERRIDE` phrase (emergency only)
 
 **These reads are NOT optional.** Operations without reading the relevant documents first are prohibited.
 
