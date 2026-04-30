@@ -12,6 +12,7 @@ import { LocationAPIProvider } from '@/contexts/LocationAPIContext';
 import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationContext';
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import UserLocationLoader from '@/components/UserLocationLoader';
+import SeoCityLinkLoader from '@/components/SeoCityLinkLoader';
 import { getCachedGeolocation } from '@/utils/trackingHelper';
 import { getCountryMapLocation } from '@/utils/countryCenter';
 import { initializeApiFailover, isUsingFailover } from '@/utils/apiUrlResolver';
@@ -196,6 +197,7 @@ const Providers = ({ children }) => {
           <LocationAPIProvider>
             <GeoLocationProvider>
               <EventDiscoveryProvider>
+                <SeoCityLinkLoader />
                 <UserLocationLoader />
                 <MapCenterModalWrapper />
                 <FailoverIndicator />

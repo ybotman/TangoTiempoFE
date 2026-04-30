@@ -66,6 +66,13 @@ export default async function CityPage({ params }) {
   const { city, mode, summary, categories, topOrganizers, topEvents, cta, mapCenterUrl, nearbyCities, classifierLabels } = data;
   const isAcquisition = mode === 'organizer-acquisition';
 
+  // TIEMPO-449: compose calendar URL from city geo so the Browse button lands
+  // centered on the city. Falls back to API-supplied mapCenterUrl when geo missing.
+  // Will be superseded by CALBEAF-164 once BE composes mapCenterUrl with geo.
+  const calendarUrl = (typeof city.lat === 'number' && typeof city.lng === 'number')
+    ? `/calendar?lat=${city.lat.toFixed(4)}&lng=${city.lng.toFixed(4)}&radius=125&cityName=${encodeURIComponent(city.cityName)}`
+    : mapCenterUrl;
+
   // Event structured data
   const allTopEvents = [...(topEvents.travelWorthy || []), ...(topEvents.forBeginners || [])];
   const eventSchema = {
@@ -173,7 +180,7 @@ export default async function CityPage({ params }) {
             </Typography>
             <Button
               component={Link}
-              href={mapCenterUrl}
+              href={calendarUrl}
               variant="contained"
               size="large"
               sx={{
