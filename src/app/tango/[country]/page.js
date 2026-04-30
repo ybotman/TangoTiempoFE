@@ -92,13 +92,9 @@ export default async function CountryPage({ params }) {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': eventSchema }) }} />
 
-      {/* Brand hero */}
-      <Box
-        component="img"
-        src="/brand/Brand-MCB-Light-V-WIDE-1.png"
-        alt="TangoTiempo — Move. Connect. Belong."
-        sx={{ width: '100%', maxHeight: { xs: 100, md: 140 }, objectFit: 'cover', borderRadius: 2, mb: 3 }}
-      />
+      {/* Brand hero — full-width banner */}
+      <Box component="img" src="/brand/Brand-MCB-Light-FlowingWIDE-2.png" alt="TangoTiempo"
+        sx={{ width: '100%', maxHeight: { xs: 160, md: 280 }, objectFit: 'contain', borderRadius: 2, mb: 3, display: 'block' }} />
 
       <Box sx={{ mb: 4 }}>
         <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
