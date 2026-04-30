@@ -211,13 +211,21 @@ export default async function OrganizerProfile({ params }) {
 
       {/* Organizer Content */}
       <div>
-        {organizer.images && organizer.images.length > 0 && (
+        {organizer.images && organizer.images.length > 0 && organizer.images[0]?.imageUrl && (
           <Image
             src={organizer.images[0].imageUrl}
             alt={organizer.name}
-            width={800}
-            height={600}
-            style={{ maxWidth: '100%', height: 'auto' }}
+            width={120}
+            height={120}
+            style={{
+              width: 120,
+              height: 120,
+              objectFit: 'cover',
+              borderRadius: '50%',
+              border: '2px solid #8B1538',
+              display: 'block',
+              marginBottom: 16,
+            }}
           />
         )}
         <p>A Tango professional/organizer/studio/teacher registered on TangoTiempo.com:</p>
