@@ -1,4 +1,5 @@
-// /tango/[country] — State-level tango SEO landing page
+// /tango/[parent] — Parent-level tango SEO landing page
+// parent = state slug for US (e.g. "oregon", "massachusetts"), country slug for international (e.g. "australia")
 // Server Component, ISR 1hr, pre-rendered via generateStaticParams
 // Slugs are server-computed by Fulton's geo-summary — never roll your own
 
@@ -41,36 +42,37 @@ export async function generateStaticParams() {
   if (!summary?.cities?.length) return [];
   const seen = new Set();
   return summary.cities
-    .filter((c) => { if (seen.has(c.countrySlug)) return false; seen.add(c.countrySlug); return true; })
-    .map((c) => ({ country: c.countrySlug }));
+    .filter((c) => { if (seen.has(c.parentSlug)) return false; seen.add(c.parentSlug); return true; })
+    .map((c) => ({ parent: c.parentSlug }));
 }
 
 export async function generateMetadata({ params }) {
-  const summary = await getGeoSummary(`&countrySlug=${params.country}`);
+  const summary = await getGeoSummary(`&parentSlug=${params.parent}`);
   if (!summary?.cities?.length) return {};
-  const countryName = summary.cities[0].countryName;
+  const parentName = summary.cities[0].parentName || summary.cities[0].countryName;
   const totalEvents = summary.cities.reduce((n, c) => n + c.futureEventCount, 0);
   return {
-    title: `Argentine Tango Events in ${countryName} | TangoTiempo`,
-    description: `Find milongas, practicas, workshops, and tango festivals across ${countryName}. ${totalEvents}+ upcoming events. Free tango calendar.`,
+    title: `Argentine Tango Events in ${parentName} | TangoTiempo`,
+    description: `Find milongas, practicas, workshops, and tango festivals across ${parentName}. ${totalEvents}+ upcoming events. Free tango calendar.`,
     openGraph: {
-      title: `Tango Events in ${countryName} | TangoTiempo`,
-      description: `Discover Argentine tango in ${countryName} — milongas, practicas, classes, and festivals.`,
-      url: `${BASE_URL}/tango/${params.country}`,
+      title: `Tango Events in ${parentName} | TangoTiempo`,
+      description: `Discover Argentine tango in ${parentName} — milongas, practicas, classes, and festivals.`,
+      url: `${BASE_URL}/tango/${params.parent}`,
       siteName: 'TangoTiempo',
       type: 'website',
       images: [{ url: `${BASE_URL}/brand/Brand-MCB-Light-V-WIDE-1.png`, width: 1200 }],
     },
-    alternates: { canonical: `${BASE_URL}/tango/${params.country}` },
+    alternates: { canonical: `${BASE_URL}/tango/${params.parent}` },
     robots: { index: true, follow: true },
   };
 }
 
-export default async function CountryPage({ params }) {
-  const summary = await getGeoSummary(`&countrySlug=${params.country}`);
+export default async function ParentPage({ params }) {
+  const summary = await getGeoSummary(`&parentSlug=${params.parent}`);
   if (!summary?.cities?.length) notFound();
 
   const cities = summary.cities;
+  const parentName = cities[0].parentName || cities[0].countryName;
   const countryName = cities[0].countryName;
   const totalEvents = cities.reduce((n, c) => n + c.futureEventCount, 0);
   const events = await getCountryEvents(cities[0].countryId);
@@ -98,10 +100,10 @@ export default async function CountryPage({ params }) {
 
       <Box sx={{ mb: 4 }}>
         <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
-          Argentine Tango Events in {countryName}
+          Argentine Tango Events in {parentName}
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          {totalEvents} upcoming events across {cities.length} cities
+          {totalEvents} upcoming events across {cities.length} {cities.length === 1 ? 'city' : 'cities'}
         </Typography>
         <Button component={Link} href="/calendar" variant="contained" startIcon={<CalendarMonthIcon />} size="large">
           Browse Full Calendar
@@ -109,12 +111,12 @@ export default async function CountryPage({ params }) {
       </Box>
 
       <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 2 }}>
-        Tango Cities in {countryName}
+        Tango Cities in {parentName}
       </Typography>
       <Grid container spacing={2} sx={{ mb: 5 }}>
         {cities.sort((a, b) => b.futureEventCount - a.futureEventCount).map((city) => (
           <Grid item xs={6} sm={4} md={3} key={city.cityId}>
-            <Card component={Link} href={`/tango/${params.country}/${city.citySlug}`}
+            <Card component={Link} href={`/tango/${params.parent}/${city.citySlug}`}
               sx={{ textDecoration: 'none', '&:hover': { boxShadow: 3 } }}>
               <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
@@ -131,7 +133,7 @@ export default async function CountryPage({ params }) {
       {events.length > 0 && (
         <>
           <Typography variant="h5" fontWeight="bold" gutterBottom>
-            Upcoming Tango Events in {countryName}
+            Upcoming Tango Events in {parentName}
           </Typography>
           <Box sx={{ mb: 4 }}>
             {events.map((event) => (
@@ -145,7 +147,7 @@ export default async function CountryPage({ params }) {
             ))}
           </Box>
           <Button component={Link} href="/calendar" variant="outlined">
-            See all {countryName} tango events →
+            See all {parentName} tango events →
           </Button>
         </>
       )}
@@ -154,6 +156,7 @@ export default async function CountryPage({ params }) {
         <Typography variant="body2" color="text.secondary">
           <Link href="/tango" style={{ color: 'inherit' }}>Argentine Tango Events Worldwide</Link>
           {' → '}{countryName}
+          {parentName !== countryName && ` → ${parentName}`}
         </Typography>
       </Box>
     </Container>
