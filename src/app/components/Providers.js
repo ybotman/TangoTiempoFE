@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -79,6 +80,24 @@ const MapCenterModalWrapper = () => {
     />
   );
 };
+
+// Brand theme — maroon primary from TangoTiempo brand identity
+const brandTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#8B1538',
+      light: '#B5476A',
+      dark: '#5C0D24',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#E8654A',
+      light: '#FF9070',
+      dark: '#B33A25',
+      contrastText: '#ffffff',
+    },
+  },
+});
 
 // MAINTENANCE MODE - blocks entire app when true
 const SHOW_EMERGENCY_ALERT = false;
@@ -165,6 +184,7 @@ const Providers = ({ children }) => {
   if (!apiReady) return null;
 
   return (
+    <ThemeProvider theme={brandTheme}>
     <AuthProvider>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <RoleProvider>
@@ -186,6 +206,7 @@ const Providers = ({ children }) => {
         </RoleProvider>
       </LocalizationProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 };
 

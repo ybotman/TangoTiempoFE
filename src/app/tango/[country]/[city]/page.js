@@ -91,13 +91,9 @@ export default async function CityPage({ params }) {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />
 
-      {/* Brand hero */}
-      <Box
-        component="img"
-        src="/brand/Brand-MCB-Light-V-WIDE-1.png"
-        alt="TangoTiempo — Move. Connect. Belong."
-        sx={{ width: '100%', maxHeight: { xs: 100, md: 140 }, objectFit: 'cover', borderRadius: 2, mb: 3 }}
-      />
+      {/* Brand hero — full-width banner, shown on all viewports */}
+      <Box component="img" src="/brand/Brand-MCB-Light-FlowingWIDE-2.png" alt="TangoTiempo"
+        sx={{ width: '100%', maxHeight: { xs: 160, md: 280 }, objectFit: 'contain', borderRadius: 2, mb: 3, display: 'block' }} />
 
       <Grid container spacing={4}>
         {/* Main column */}
@@ -111,8 +107,55 @@ export default async function CityPage({ params }) {
             <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
               {summary.futureEventCount} upcoming events · {city.cityName}, {city.countryName}
             </Typography>
-            <Button component={Link} href={mapCenterUrl} variant="contained" startIcon={<CalendarMonthIcon />} size="large">
-              Browse {city.cityName} Events
+          </Box>
+
+          {/* Upcoming events CTA box */}
+          <Box sx={{
+            border: '3px solid',
+            borderColor: 'primary.main',
+            borderRadius: 3,
+            p: 4,
+            mb: 4,
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, #fff 60%, #fdf0f3 100%)',
+            boxShadow: '0 4px 20px rgba(139,21,56,0.12)',
+          }}>
+            <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
+              {summary.futureEventCount} Upcoming Events in {city.cityName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Milongas, practicas, classes and more — updated daily
+            </Typography>
+            <Button
+              component={Link}
+              href={mapCenterUrl}
+              variant="contained"
+              size="large"
+              sx={{
+                px: 5,
+                py: 1.5,
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                borderRadius: 99,
+                boxShadow: '0 6px 24px rgba(139,21,56,0.5), 0 2px 8px rgba(0,0,0,0.2)',
+                '&:hover': { boxShadow: '0 10px 32px rgba(139,21,56,0.6), 0 4px 12px rgba(0,0,0,0.25)', transform: 'translateY(-2px)' },
+                transition: 'all 0.2s ease',
+              }}
+              startIcon={
+                <Box component="img" src="/brand/Brand-ICON-TT-Light-CRCL-1.png"
+                  sx={{ width: 44, height: 44, borderRadius: '50%' }} />
+              }
+              endIcon={
+                <Box component="img" src="/brand/Brand-ICON-TT-Light-CRCL-1.png"
+                  sx={{ width: 44, height: 44, borderRadius: '50%' }} />
+              }
+            >
+              <Box sx={{ textAlign: 'center', lineHeight: 1.2 }}>
+                <Box sx={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Browse Events</Box>
+                <Box sx={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: 1.5, opacity: 0.85 }}>
+                  IN {city.cityName.toUpperCase()}
+                </Box>
+              </Box>
             </Button>
           </Box>
 
@@ -133,6 +176,31 @@ export default async function CityPage({ params }) {
             )}
           </Box>
 
+          {/* Featured events — paid placements */}
+          {data.featuredEvents?.length > 0 && (
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <Typography variant="h5" fontWeight="bold">Featured Events</Typography>
+                <Chip label="★ Featured" size="small" color="secondary" />
+              </Box>
+              {data.featuredEvents.map((e) => (
+                <Box key={e.eventId} component={Link} href={e.url}
+                  sx={{ display: 'flex', gap: 2, py: 2, borderBottom: '1px solid', borderColor: 'divider',
+                    textDecoration: 'none', color: 'inherit', '&:hover': { bgcolor: 'action.hover' }, borderRadius: 1, px: 1 }}>
+                  {e.featuredImage && (
+                    <Box component="img" src={e.featuredImage} alt={e.title}
+                      sx={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 1, flexShrink: 0 }} />
+                  )}
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">{e.title}</Typography>
+                    <Typography variant="body2" color="text.secondary">{e.venueName}</Typography>
+                    {e.categoryFirst && <Chip label={e.categoryFirst} size="small" sx={{ mt: 0.5 }} />}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+
           {/* Event counts by category */}
           {categories?.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 4 }}>
@@ -148,8 +216,8 @@ export default async function CityPage({ params }) {
               <Typography variant="h5" fontWeight="bold" gutterBottom>
                 {classifierLabels.travelWorthy} in {city.cityName}
               </Typography>
-              {topEvents.travelWorthy.map((e) => (
-                <Box key={e._id || e.name} sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {topEvents.travelWorthy.map((e, i) => (
+                <Box key={e.eventId || e._id || `tw-${i}`} sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
                   <Typography variant="subtitle1" fontWeight="bold">{e.title || e.name}</Typography>
                   <Typography variant="body2" color="text.secondary">{e.venueName}</Typography>
                 </Box>
@@ -157,14 +225,14 @@ export default async function CityPage({ params }) {
             </Box>
           )}
 
-          {/* Beginner-friendly events */}
-          {topEvents.forBeginners?.length > 0 && (
+          {/* Featured events (paid feature — events with isFeatured=true) */}
+          {topEvents.featured?.length > 0 && (
             <Box sx={{ mb: 4 }}>
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {classifierLabels.forBeginners} in {city.cityName}
+                Featured Events in {city.cityName}
               </Typography>
-              {topEvents.forBeginners.map((e) => (
-                <Box key={e._id || e.name} sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {topEvents.featured.map((e, i) => (
+                <Box key={e.eventId || e._id || `ft-${i}`} sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
                   <Typography variant="subtitle1" fontWeight="bold">{e.title || e.name}</Typography>
                   <Typography variant="body2" color="text.secondary">{e.venueName}</Typography>
                 </Box>
@@ -172,7 +240,7 @@ export default async function CityPage({ params }) {
             </Box>
           )}
 
-          {/* Organizers */}
+          {/* Organizers — sorted by event count desc */}
           {topOrganizers?.length > 0 && (
             <Box sx={{ mb: 4 }}>
               <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -181,10 +249,18 @@ export default async function CityPage({ params }) {
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                 {topOrganizers.map((org) => (
                   <Box key={org.organizerId} component={Link} href={`/organizers/${org.shortName}`}
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'inherit',
-                      p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, '&:hover': { bgcolor: 'action.hover' } }}>
-                    <Avatar sx={{ width: 28, height: 28 }}><PersonIcon fontSize="small" /></Avatar>
-                    <Typography variant="body2" fontWeight="bold">{org.name}</Typography>
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1.5, textDecoration: 'none', color: 'inherit',
+                      p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1,
+                      '&:hover': { bgcolor: 'action.hover' } }}>
+                    <Avatar src={org.imageUrl} sx={{ width: 36, height: 36 }}>
+                      <PersonIcon fontSize="small" />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight="bold">{org.name}</Typography>
+                      {org.eventCount > 0 && (
+                        <Typography variant="caption" color="text.secondary">{org.eventCount} events</Typography>
+                      )}
+                    </Box>
                   </Box>
                 ))}
               </Box>
