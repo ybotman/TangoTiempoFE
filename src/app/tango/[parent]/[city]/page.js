@@ -261,7 +261,7 @@ export default async function CityPage({ params }) {
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                 {topOrganizers.map((org) => (
-                  <Box key={org.organizerId} component={Link} href={`/organizers/${org.shortName}`}
+                  <Box key={org.organizerId} component={Link} href={`/organizers/${(org.shortName || '').toLowerCase()}`}
                     sx={{ display: 'flex', alignItems: 'center', gap: 1.5, textDecoration: 'none', color: 'inherit',
                       p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1,
                       '&:hover': { bgcolor: 'action.hover' } }}>

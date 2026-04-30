@@ -125,6 +125,8 @@ export async function generateStaticParams() {
 }
 
 // Function to get organizer data based on slug
+// Accepts either the compound slug (shortname-region-division-city, pre-rendered)
+// OR a bare shortName (case-insensitive) — used by city-page topOrganizers links.
 async function getOrganizerData(slug) {
   logger.info(`Fetching organizer data for slug: ${slug}`);
   try {
@@ -132,7 +134,15 @@ async function getOrganizerData(slug) {
     const data = fs.readFileSync(filePath, 'utf-8');
     const organizersDataList = JSON.parse(data);
 
-    const organizer = organizersDataList.find((org) => org.slug === slug);
+    // 1. Exact compound-slug match (existing pre-rendered URLs)
+    let organizer = organizersDataList.find((org) => org.slug === slug);
+    if (organizer) return organizer;
+
+    // 2. Fallback: bare shortName match (case-insensitive) — used by SEO city pages
+    const slugLower = slug.toLowerCase();
+    organizer = organizersDataList.find(
+      (org) => (org.shortName || '').toLowerCase() === slugLower
+    );
 
     return organizer || null;
   } catch (error) {
