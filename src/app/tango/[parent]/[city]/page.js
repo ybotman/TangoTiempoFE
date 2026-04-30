@@ -1,4 +1,5 @@
-// /tango/[country]/[city] — City-level tango SEO landing page
+// /tango/[parent]/[city] — City-level tango SEO landing page
+// parent = state slug for US (e.g. "oregon", "massachusetts"), country slug for international (e.g. "australia")
 // Adaptive: "organizer-acquisition" mode (<7 organizers) vs "user-acquisition" (≥7)
 // Data: Fulton's /api/seo/city-page endpoint (single fetch, pre-assembled)
 // Server Component, ISR 1hr, generateStaticParams from geo-summary
@@ -22,10 +23,10 @@ async function getGeoSummary() {
   } catch { return null; }
 }
 
-async function getCityPage(countrySlug, citySlug) {
+async function getCityPage(parentSlug, citySlug) {
   try {
     const res = await fetch(
-      `${API_URL}/api/seo/city-page?appId=1&regionSlug=${countrySlug}&citySlug=${citySlug}`,
+      `${API_URL}/api/seo/city-page?appId=1&parentSlug=${parentSlug}&citySlug=${citySlug}`,
       { next: { revalidate: 3600 } }
     );
     if (!res.ok) return null;
@@ -36,11 +37,11 @@ async function getCityPage(countrySlug, citySlug) {
 export async function generateStaticParams() {
   const summary = await getGeoSummary();
   if (!summary) return [];
-  return summary.cities.map((c) => ({ country: c.countrySlug, city: c.citySlug }));
+  return summary.cities.map((c) => ({ parent: c.parentSlug, city: c.citySlug }));
 }
 
 export async function generateMetadata({ params }) {
-  const data = await getCityPage(params.country, params.city);
+  const data = await getCityPage(params.parent, params.city);
   if (!data) return {};
   const { city, summary } = data;
   return {
@@ -49,18 +50,18 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `Tango Events in ${city.cityName}, ${city.countryName} | TangoTiempo`,
       description: `Discover Argentine tango in ${city.cityName} — milongas, practicas, classes, and workshops near you.`,
-      url: `${BASE_URL}/tango/${params.country}/${params.city}`,
+      url: `${BASE_URL}/tango/${params.parent}/${params.city}`,
       siteName: 'TangoTiempo',
       type: 'website',
       images: [{ url: `${BASE_URL}/brand/Brand-MCB-Light-V-WIDE-1.png`, width: 1200 }],
     },
-    alternates: { canonical: `${BASE_URL}/tango/${params.country}/${params.city}` },
+    alternates: { canonical: `${BASE_URL}/tango/${params.parent}/${params.city}` },
     robots: { index: true, follow: true },
   };
 }
 
 export default async function CityPage({ params }) {
-  const data = await getCityPage(params.country, params.city);
+  const data = await getCityPage(params.parent, params.city);
   if (!data) notFound();
 
   const { city, mode, summary, categories, topOrganizers, topEvents, cta, mapCenterUrl, nearbyCities, classifierLabels } = data;
@@ -303,7 +304,7 @@ export default async function CityPage({ params }) {
                 <Typography variant="h6" fontWeight="bold" gutterBottom>Tango Nearby</Typography>
                 {nearbyCities.map((nc) => (
                   <Box key={nc.cityId} component={Link}
-                    href={`/tango/${params.country}/${nc.citySlug}`}
+                    href={`/tango/${nc.parentSlug || params.parent}/${nc.citySlug}`}
                     sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       py: 1, textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -333,9 +334,11 @@ export default async function CityPage({ params }) {
       {/* Breadcrumb */}
       <Box sx={{ mt: 5, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography variant="body2" color="text.secondary">
-          <Link href="/tango" style={{ color: 'inherit' }}>Tango Events USA</Link>
+          <Link href="/tango" style={{ color: 'inherit' }}>Argentine Tango Events Worldwide</Link>
           {' → '}
-          <Link href={`/tango/${params.country}`} style={{ color: 'inherit' }}>{city.countryName}</Link>
+          <Link href={`/tango/${params.parent}`} style={{ color: 'inherit', textTransform: 'capitalize' }}>
+            {params.parent.replace(/-/g, ' ')}
+          </Link>
           {' → '}{city.cityName}
         </Typography>
       </Box>
