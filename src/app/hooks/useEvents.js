@@ -553,26 +553,18 @@ export function useEventOperations() {
       let preparedData;
       
       if (selectedRole === 'RegionalAdmin') {
-        // RA endpoint has different requirements - prepare minimal data
+        // RA payload — spread cleanedEventData (same pattern as RO) so categories,
+        // isRepeating, recurrence config, forBeginners, etc. ALL propagate. The
+        // earlier hand-listed "minimal" payload silently dropped categoryFirst/Id
+        // and isRepeating, which caused PROD events to save without category and
+        // recurring rules to be ignored (PROD bug 2026-05-01).
         preparedData = {
-          title: cleanedEventData.title,
-          // TIEMPO-245: Include shortTitle field (21 chars max)
+          ...cleanedEventData,
+          // Required RA fields with safe fallbacks
           shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
-          startDate: cleanedEventData.startDate,
-          endDate: cleanedEventData.endDate,
-          ownerOrganizerID: cleanedEventData.ownerOrganizerID,
-          venueID: cleanedEventData.venueID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
-          // Include image fields for RA image upload
-          imageFile: cleanedEventData.imageFile,
-          imagePreviewUrl: cleanedEventData.imagePreviewUrl,
-          eventImage: cleanedEventData.eventImage,
-          fallbackImageUrl: cleanedEventData.fallbackImageUrl,
-          // Include recurring event fields if present
-          recurrenceRule: cleanedEventData.recurrenceRule || undefined,
-          excludedDates: cleanedEventData.excludedDates || undefined,
-          // TIEMPO-388: Include spotlights/features for RA
+          // RA-specific spotlight/features normalization (TIEMPO-388)
           features: cleanedEventData.features || cleanedEventData.spotlights || [],
           spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
@@ -791,27 +783,20 @@ export function useEventOperations() {
       let preparedData;
       
       if (selectedRole === 'RegionalAdmin') {
-        // RA endpoint has different requirements - prepare minimal data
+        // RA payload — spread cleanedEventData (same pattern as RO) so categories,
+        // isRepeating, recurrence config, forBeginners, etc. propagate on UPDATE.
+        // Hand-listed minimal payload was silently dropping fields user edited
+        // (PROD bug 2026-05-01: category + RRULE not saving on RA event update).
         preparedData = {
-          title: cleanedEventData.title,
-          // TIEMPO-245: Include shortTitle field (21 chars max)
+          ...cleanedEventData,
           shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
-          startDate: cleanedEventData.startDate,
-          endDate: cleanedEventData.endDate,
-          ownerOrganizerID: cleanedEventData.ownerOrganizerID,
-          venueID: cleanedEventData.venueID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
-          // Include image fields for RA image upload/delete
-          imageFile: cleanedEventData.imageFile,
-          imagePreviewUrl: cleanedEventData.imagePreviewUrl,
-          eventImage: cleanedEventData.eventImage,
-          fallbackImageUrl: cleanedEventData.fallbackImageUrl,
-          // Include auth fields for RA validation
+          // Auth fields for RA BE validation
           selectedRole: 'RegionalAdmin',
           allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
                                       user?.backendInfo?.localAdminInfo?.adminCities,
-          // TIEMPO-388: Include spotlights/features for RA
+          // RA-specific spotlight/features normalization (TIEMPO-388)
           features: cleanedEventData.features || cleanedEventData.spotlights || [],
           spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
