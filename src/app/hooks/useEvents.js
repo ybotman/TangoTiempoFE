@@ -513,6 +513,21 @@ export function useEventOperations() {
       if (!user) {
         throw new Error('You must be logged in to create events');
       }
+
+      // FIELD-NAMING-HYGIENE Phase A Entity #1 — Venue normalization
+      // Form state has both venueId (canonical) and locationID (legacy WP-era).
+      // BE response/validator paths use venueID (uppercase, mongoose-style).
+      // Normalize all three at the boundary so downstream consumers don't trip
+      // on case-mismatch (RegionalAdmin event-create bug 2026-05-01).
+      // See MasterCalendar/docs/FIELD-NAMING-HYGIENE.md
+      if (eventData) {
+        const _vid = eventData.venueID || eventData.venueId || eventData.locationID;
+        if (_vid) {
+          eventData.venueID = _vid;
+          eventData.venueId = _vid;
+          eventData.locationID = _vid;
+        }
+      }
       
       // Get a fresh token for the request
       let token;
@@ -741,6 +756,17 @@ export function useEventOperations() {
       // Check if user is authenticated
       if (!user) {
         throw new Error('You must be logged in to update events');
+      }
+
+      // FIELD-NAMING-HYGIENE Phase A Entity #1 — Venue normalization (mirrors createEvent).
+      // See MasterCalendar/docs/FIELD-NAMING-HYGIENE.md
+      if (eventData) {
+        const _vid = eventData.venueID || eventData.venueId || eventData.locationID;
+        if (_vid) {
+          eventData.venueID = _vid;
+          eventData.venueId = _vid;
+          eventData.locationID = _vid;
+        }
       }
       
       // Get a fresh token for the request
