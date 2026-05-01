@@ -83,7 +83,13 @@ export default async function ParentPage({ params }) {
   const parentName = cities[0].parentName || cities[0].countryName;
   const countryName = cities[0].countryName;
   const totalEvents = cities.reduce((n, c) => n + c.futureEventCount, 0);
-  const events = await getCountryEvents(cities[0].countryId);
+  // Defensive: only fetch country-wide events when this parent has multiple cities.
+  // Single-city parents (Massachusetts→Boston, Colorado→Denver, Oregon→Portland, etc.)
+  // would otherwise show country-wide events (often Boston-spillover) which misrepresents
+  // the parent's actual scene. CALBEAF-171 will normalize parents[] coverage; until then
+  // this prevents user-visible "Boston events on /tango/colorado" leakage.
+  const isSingleCity = cities.length === 1;
+  const events = isSingleCity ? [] : await getCountryEvents(cities[0].countryId);
 
   const eventSchema = events.slice(0, 5).map((e) => ({
     '@type': 'Event',

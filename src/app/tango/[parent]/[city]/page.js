@@ -298,7 +298,16 @@ export default async function CityPage({ params }) {
                 <Typography variant="body2">{summary.futureEventCount} upcoming events</Typography>
                 {summary.travelWorthyCount > 0 && <Typography variant="body2">{summary.travelWorthyCount} travel-worthy</Typography>}
                 {summary.forBeginnersCount > 0 && <Typography variant="body2">{summary.forBeginnersCount} beginner-friendly</Typography>}
-                <Typography variant="body2">{summary.organizerCount} local organizers</Typography>
+                {summary.organizerCount > 0 ? (
+                  <Typography variant="body2">{summary.organizerCount} TangoTiempo registered organizers</Typography>
+                ) : (
+                  <Typography variant="body2">
+                    0 TangoTiempo registered organizers —{' '}
+                    <Link href="/organizers/apply" style={{ color: '#8B1538', fontWeight: 600 }}>
+                      be the first to apply free!
+                    </Link>
+                  </Typography>
+                )}
               </Box>
             </CardContent>
           </Card>
