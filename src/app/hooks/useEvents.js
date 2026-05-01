@@ -843,45 +843,47 @@ export function useEventOperations() {
       delete preparedData.excludeDatesString; // Remove the UI-only string field
       // Ensure we only have excludedDates (with 'd')
       
-      // Only add venue geolocation and mastered location fields for RO updates
-      if (selectedRole !== 'RegionalAdmin') {
-        // If venue has coordinates, include them in venueGeolocation
-        if (eventData.venueLatitude && eventData.venueLongitude) {
-          preparedData.venueGeolocation = {
-            type: "Point",
-            coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
-          };
-        } else if (eventData.venueID) {
-          // We have a venue but no coordinates - need to fetch them
-          try {
-            const { getVenueById } = await import('@/services/venueService');
-            const venueData = await getVenueById(eventData.venueID);
+      // Venue geolocation + masteredRegionName enrichment — runs for BOTH RA and RO.
+      // Previously wrapped in `if (selectedRole !== 'RegionalAdmin')` which meant RA
+      // event updates that changed venue didn't propagate venueGeolocation, breaking
+      // map filters / geo-radius on /calendar. Per architecture intent (RA = RO + bells,
+      // not RA = stripped-down RO), this should always run. Mirrors createEvent which
+      // already does it unconditionally for both roles.
+      if (eventData.venueLatitude && eventData.venueLongitude) {
+        preparedData.venueGeolocation = {
+          type: "Point",
+          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+        };
+      } else if (eventData.venueID) {
+        // We have a venue but no coordinates - need to fetch them
+        try {
+          const { getVenueById } = await import('@/services/venueService');
+          const venueData = await getVenueById(eventData.venueID);
 
-            if (venueData && venueData.latitude && venueData.longitude) {
-              preparedData.venueGeolocation = {
-                type: "Point",
-                coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
-              };
-            } else {
-              console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
-              preparedData.venueGeolocation = {
-                type: "Point",
-                coordinates: [0, 0]
-              };
-            }
-          } catch (venueError) {
-            console.error('Error fetching venue data for update:', venueError);
+          if (venueData && venueData.latitude && venueData.longitude) {
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+            };
+          } else {
+            console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
             preparedData.venueGeolocation = {
               type: "Point",
               coordinates: [0, 0]
             };
           }
+        } catch (venueError) {
+          console.error('Error fetching venue data for update:', venueError);
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [0, 0]
+          };
         }
+      }
 
-        // Ensure mastered location fields are included
-        if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
-          preparedData.masteredRegionName = preparedData.selectedRegion;
-        }
+      // Ensure mastered location fields are included (both RA and RO)
+      if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
+        preparedData.masteredRegionName = preparedData.selectedRegion;
       }
       
       // Handle image upload if an image file is present
