@@ -37,7 +37,13 @@ async function getCityPage(parentSlug, citySlug) {
 export async function generateStaticParams() {
   const summary = await getGeoSummary();
   if (!summary) return [];
-  return summary.cities.map((c) => ({ parent: c.parentSlug, city: c.citySlug }));
+  // Defensive: skip cities missing parentSlug or citySlug. Empty parent produces
+  // /tango//city which trips Next.js NormalizeError. PROD has ~14 international
+  // city-states (Berlin, Rome, etc.) without parentSlug populated yet — pending
+  // CALBEAF backfill ticket. They render via dynamic ISR if hit by URL.
+  return summary.cities
+    .filter((c) => c.parentSlug && c.citySlug)
+    .map((c) => ({ parent: c.parentSlug, city: c.citySlug }));
 }
 
 export async function generateMetadata({ params }) {

@@ -42,7 +42,15 @@ export async function generateStaticParams() {
   if (!summary?.cities?.length) return [];
   const seen = new Set();
   return summary.cities
-    .filter((c) => { if (seen.has(c.parentSlug)) return false; seen.add(c.parentSlug); return true; })
+    // Defensive: skip cities with empty parentSlug (PROD has ~14 international
+    // city-states pending CALBEAF backfill). Empty parent produces /tango/ which
+    // trips Next.js NormalizeError.
+    .filter((c) => {
+      if (!c.parentSlug) return false;
+      if (seen.has(c.parentSlug)) return false;
+      seen.add(c.parentSlug);
+      return true;
+    })
     .map((c) => ({ parent: c.parentSlug }));
 }
 
