@@ -125,16 +125,90 @@ export async function generateStaticParams() {
 }
 
 // Function to get organizer data based on slug
+// Accepts either the compound slug (shortname-region-division-city, pre-rendered)
+// OR a bare shortName (case-insensitive) — used by city-page topOrganizers links.
+//
+// Fetches from API at runtime (not from a build-time file write — that pattern
+// was unreliable on Vercel; the file wasn't always bundled into the deploy).
+// Cached via Next.js fetch revalidate so we don't hammer the BE.
 async function getOrganizerData(slug) {
   logger.info(`Fetching organizer data for slug: ${slug}`);
   try {
-    const filePath = path.join(process.cwd(), 'public', 'organizersList.json');
-    const data = fs.readFileSync(filePath, 'utf-8');
-    const organizersDataList = JSON.parse(data);
+    const beUrl = getApiBaseUrl();
 
-    const organizer = organizersDataList.find((org) => org.slug === slug);
+    // Fetch active+enabled+wantRender organizers
+    // BE returns { organizers: [...], pagination, timestamp } — must unwrap.
+    const orgsRes = await fetch(
+      `${beUrl}/api/organizers?isActive=true&isEnabled=true&wantRender=true`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!orgsRes.ok) {
+      logger.warn(`organizers API returned ${orgsRes.status}`);
+      return null;
+    }
+    const orgsData = await orgsRes.json();
+    const organizers = Array.isArray(orgsData)
+      ? orgsData
+      : (Array.isArray(orgsData?.organizers) ? orgsData.organizers : []);
+    if (organizers.length === 0) return null;
 
-    return organizer || null;
+    // Fetch regions for compound-slug computation (used to build the canonical slug)
+    // BE returns { regions: [...], pagination } — must unwrap.
+    let regions = [];
+    try {
+      const regionsRes = await fetch(`${beUrl}/api/regions/activeRegions`, {
+        next: { revalidate: 3600 },
+      });
+      if (regionsRes.ok) {
+        const regionsData = await regionsRes.json();
+        regions = Array.isArray(regionsData)
+          ? regionsData
+          : (Array.isArray(regionsData?.regions) ? regionsData.regions : []);
+      }
+    } catch { /* regions optional — fallback slug just uses shortName */ }
+
+    const slugLower = slug.toLowerCase();
+
+    // Helper: enrich an org with its region/division/city + computed compound slug
+    const enrich = (org) => {
+      const region = regions.find((r) => r._id === org.organizerRegion) || {};
+      const division = (region.divisions || []).find((d) => d._id === org.organizerDivision) || {};
+      const city = (division.majorCities || []).find((c) => c._id === org.organizerCity) || {};
+      const compoundSlug = [
+        slugify(org.shortName || '', { lower: true }),
+        slugify(region.regionName || 'unknown-region', { lower: true }),
+        slugify(division.divisionName || 'unknown-division', { lower: true }),
+        slugify(city.cityName || 'unknown-city', { lower: true }),
+      ].join('-');
+      return {
+        id: org._id,
+        slug: compoundSlug,
+        name: org.name || org.organizerName || org.shortName,
+        shortName: org.shortName,
+        description: org.description,
+        images: org.images,
+        phone: org.phone,
+        publicEmail: org.publicEmail,
+        url: org.url,
+        regionName: region.regionName || 'Unknown Region',
+        divisionName: division.divisionName || 'Unknown Division',
+        cityName: city.cityName || 'Unknown City',
+      };
+    };
+
+    // 1. Exact compound-slug match — match by computing each org's compound slug
+    for (const org of organizers) {
+      const enriched = enrich(org);
+      if (enriched.slug === slug) return enriched;
+    }
+
+    // 2. Fallback: bare shortName match (case-insensitive) — used by SEO city pages
+    const byShortName = organizers.find(
+      (o) => (o.shortName || '').toLowerCase() === slugLower
+    );
+    if (byShortName) return enrich(byShortName);
+
+    return null;
   } catch (error) {
     logger.error('Error in getOrganizerData', { error: error.message });
     return null;
@@ -201,13 +275,21 @@ export default async function OrganizerProfile({ params }) {
 
       {/* Organizer Content */}
       <div>
-        {organizer.images && organizer.images.length > 0 && (
+        {organizer.images && organizer.images.length > 0 && organizer.images[0]?.imageUrl && (
           <Image
             src={organizer.images[0].imageUrl}
             alt={organizer.name}
-            width={800}
-            height={600}
-            style={{ maxWidth: '100%', height: 'auto' }}
+            width={120}
+            height={120}
+            style={{
+              width: 120,
+              height: 120,
+              objectFit: 'cover',
+              borderRadius: '50%',
+              border: '2px solid #8B1538',
+              display: 'block',
+              marginBottom: 16,
+            }}
           />
         )}
         <p>A Tango professional/organizer/studio/teacher registered on TangoTiempo.com:</p>

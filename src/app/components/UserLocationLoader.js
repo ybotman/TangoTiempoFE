@@ -45,6 +45,16 @@ const UserLocationLoader = () => {
       return;
     }
 
+    // TIEMPO-449: Skip when URL carries SEO city-link geo params — SeoCityLinkLoader
+    // owns this navigation and we must not overwrite its session location.
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.has('lat') && sp.has('lng')) {
+        console.log('[UserLocationLoader] Skipping mapCenter fetch — URL has SEO geo params');
+        return;
+      }
+    }
+
     const loadMapCenter = async () => {
       try {
 

@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RoleProvider } from '@/contexts/RoleContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -11,6 +12,7 @@ import { LocationAPIProvider } from '@/contexts/LocationAPIContext';
 import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationContext';
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import UserLocationLoader from '@/components/UserLocationLoader';
+import SeoCityLinkLoader from '@/components/SeoCityLinkLoader';
 import { getCachedGeolocation } from '@/utils/trackingHelper';
 import { getCountryMapLocation } from '@/utils/countryCenter';
 import { initializeApiFailover, isUsingFailover } from '@/utils/apiUrlResolver';
@@ -79,6 +81,24 @@ const MapCenterModalWrapper = () => {
     />
   );
 };
+
+// Brand theme — maroon primary from TangoTiempo brand identity
+const brandTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#8B1538',
+      light: '#B5476A',
+      dark: '#5C0D24',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#E8654A',
+      light: '#FF9070',
+      dark: '#B33A25',
+      contrastText: '#ffffff',
+    },
+  },
+});
 
 // MAINTENANCE MODE - blocks entire app when true
 const SHOW_EMERGENCY_ALERT = false;
@@ -165,6 +185,7 @@ const Providers = ({ children }) => {
   if (!apiReady) return null;
 
   return (
+    <ThemeProvider theme={brandTheme}>
     <AuthProvider>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <RoleProvider>
@@ -176,6 +197,7 @@ const Providers = ({ children }) => {
           <LocationAPIProvider>
             <GeoLocationProvider>
               <EventDiscoveryProvider>
+                <SeoCityLinkLoader />
                 <UserLocationLoader />
                 <MapCenterModalWrapper />
                 <FailoverIndicator />
@@ -186,6 +208,7 @@ const Providers = ({ children }) => {
         </RoleProvider>
       </LocalizationProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 };
 
