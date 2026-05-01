@@ -94,24 +94,6 @@ const NotFoundPage = () => {
           </CardContent>
         </Card>
 
-        {/* BostonTangoCalendar.com Login */}
-        <Card sx={{ width: '100%', maxWidth: 500 }}>
-          <CardContent>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-              <LoginIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-              BostonTangoCalendar.com Login
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-              Sign in to your Boston Tango Calendar account to manage your local event listings and preferences.
-            </Typography>
-            <Link href="https://bostontangocalendar.com/auth/signin" passHref>
-              <Button variant="outlined" color="secondary" fullWidth>
-                Login to BostonTangoCalendar
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
       </Box>
 
       {/* Fallback Calendar Link */}
