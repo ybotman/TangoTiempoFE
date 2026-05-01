@@ -583,15 +583,19 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         throw new Error('You must be logged in to create events');
       }
       
-      // Validate fields unless skipping (for "Save Without Image")
-      if (!skipValidation) {
-        const errors = validateEventData();
-        if (errors.length > 0) {
-          setValidationErrors(errors);
-          setValidationDialogOpen(true);
-          setSaving(false);
-          return;
-        }
+      // Validate fields. "Save Anyway" (skipValidation=true) bypasses recommended-only
+      // errors (e.g. missing image), but REQUIRED errors (categoryFirstId, venueId,
+      // description, recurrence config) ALWAYS block. PROD bug 2026-05-01: an event
+      // saved with no categoryFirst because Save Anyway bypassed required validation.
+      const errors = validateEventData();
+      const blockingErrors = skipValidation
+        ? errors.filter((e) => e.required === true)
+        : errors;
+      if (blockingErrors.length > 0) {
+        setValidationErrors(blockingErrors);
+        setValidationDialogOpen(true);
+        setSaving(false);
+        return;
       }
       
       // Check if user can create events (RegionalOrganizer or RegionalAdmin)
