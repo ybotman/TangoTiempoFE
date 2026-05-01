@@ -24,7 +24,7 @@ const NotFoundPage = () => {
     <Container maxWidth="md" style={{ textAlign: 'center', marginTop: '50px', marginBottom: '50px' }}>
       {/* Hero Image */}
       <Image
-        src="/brand/Brand-Dark-404.png"
+        src="/brand/Brand-Dark-Wide-404.png"
         alt="Tango Tiempo 404"
         width={1536}
         height={1024}
