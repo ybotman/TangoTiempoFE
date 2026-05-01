@@ -137,6 +137,7 @@ async function getOrganizerData(slug) {
     const beUrl = getApiBaseUrl();
 
     // Fetch active+enabled+wantRender organizers
+    // BE returns { organizers: [...], pagination, timestamp } — must unwrap.
     const orgsRes = await fetch(
       `${beUrl}/api/organizers?isActive=true&isEnabled=true&wantRender=true`,
       { next: { revalidate: 3600 } }
@@ -145,16 +146,25 @@ async function getOrganizerData(slug) {
       logger.warn(`organizers API returned ${orgsRes.status}`);
       return null;
     }
-    const organizers = await orgsRes.json();
-    if (!Array.isArray(organizers) || organizers.length === 0) return null;
+    const orgsData = await orgsRes.json();
+    const organizers = Array.isArray(orgsData)
+      ? orgsData
+      : (Array.isArray(orgsData?.organizers) ? orgsData.organizers : []);
+    if (organizers.length === 0) return null;
 
     // Fetch regions for compound-slug computation (used to build the canonical slug)
+    // BE returns { regions: [...], pagination } — must unwrap.
     let regions = [];
     try {
       const regionsRes = await fetch(`${beUrl}/api/regions/activeRegions`, {
         next: { revalidate: 3600 },
       });
-      if (regionsRes.ok) regions = await regionsRes.json();
+      if (regionsRes.ok) {
+        const regionsData = await regionsRes.json();
+        regions = Array.isArray(regionsData)
+          ? regionsData
+          : (Array.isArray(regionsData?.regions) ? regionsData.regions : []);
+      }
     } catch { /* regions optional — fallback slug just uses shortName */ }
 
     const slugLower = slug.toLowerCase();
