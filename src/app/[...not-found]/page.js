@@ -24,10 +24,10 @@ const NotFoundPage = () => {
     <Container maxWidth="md" style={{ textAlign: 'center', marginTop: '50px', marginBottom: '50px' }}>
       {/* Hero Image */}
       <Image
-        src="/404-tangotiempo.png"
+        src="/brand/Brand-Dark-404.png"
         alt="Tango Tiempo 404"
-        width={800}
-        height={533}
+        width={1536}
+        height={1024}
         priority
         style={{ maxWidth: '100%', height: 'auto', marginBottom: '30px' }}
       />
@@ -89,24 +89,6 @@ const NotFoundPage = () => {
             <Link href="https://tangotiempo.com/auth/signin" passHref>
               <Button variant="outlined" color="primary" fullWidth>
                 Login to TangoTiempo
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* BostonTangoCalendar.com Login */}
-        <Card sx={{ width: '100%', maxWidth: 500 }}>
-          <CardContent>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-              <LoginIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-              BostonTangoCalendar.com Login
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-              Sign in to your Boston Tango Calendar account to manage your local event listings and preferences.
-            </Typography>
-            <Link href="https://bostontangocalendar.com/auth/signin" passHref>
-              <Button variant="outlined" color="secondary" fullWidth>
-                Login to BostonTangoCalendar
               </Button>
             </Link>
           </CardContent>
