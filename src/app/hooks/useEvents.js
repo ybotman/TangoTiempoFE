@@ -698,14 +698,13 @@ export function useEventOperations() {
         }
       }
 
-      // Validate required fields for RA endpoint
-      if (selectedRole === 'RegionalAdmin') {
-        if (!preparedData.ownerOrganizerID) {
-          throw new Error('RegionalAdmin must specify an ownerOrganizerID for the event');
-        }
-        if (!preparedData.venueID) {
-          throw new Error('RegionalAdmin must specify a venueID for the event');
-        }
+      // RA-specific assertion: ownerOrganizerID must be explicit on submit.
+      // RO has owner implicit (= self, auto-filled), but RA picks an owner from
+      // a dropdown — this catches an empty selection with a clear FE error.
+      // Venue is required for ALL events and validated at form-submit time
+      // (CreateEventDetailModal:519), so no role-specific venue check needed.
+      if (selectedRole === 'RegionalAdmin' && !preparedData.ownerOrganizerID) {
+        throw new Error('RegionalAdmin must specify an ownerOrganizerID for the event');
       }
 
 // TIEMPO-276: Security cleanup - removed logging
