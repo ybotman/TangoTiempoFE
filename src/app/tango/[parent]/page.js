@@ -23,20 +23,6 @@ async function getGeoSummary(params = '') {
   } catch { return null; }
 }
 
-async function getCountryEvents(countryId) {
-  try {
-    const now = new Date().toISOString();
-    const end = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await fetch(
-      `${API_URL}/api/events?appId=1&masteredCountryId=${countryId}&start=${now}&end=${end}&limit=6`,
-      { next: { revalidate: 3600 } }
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.events || [];
-  } catch { return []; }
-}
-
 export async function generateStaticParams() {
   const summary = await getGeoSummary();
   if (!summary?.cities?.length) return [];
@@ -83,13 +69,12 @@ export default async function ParentPage({ params }) {
   const parentName = cities[0].parentName || cities[0].countryName;
   const countryName = cities[0].countryName;
   const totalEvents = cities.reduce((n, c) => n + c.futureEventCount, 0);
-  // Defensive: only fetch country-wide events when this parent has multiple cities.
-  // Single-city parents (Massachusetts→Boston, Colorado→Denver, Oregon→Portland, etc.)
-  // would otherwise show country-wide events (often Boston-spillover) which misrepresents
-  // the parent's actual scene. CALBEAF-171 will normalize parents[] coverage; until then
-  // this prevents user-visible "Boston events on /tango/colorado" leakage.
-  const isSingleCity = cities.length === 1;
-  const events = isSingleCity ? [] : await getCountryEvents(cities[0].countryId);
+  // TIEMPO-451 hotfix for CALBEAF-173: country-wide event fetch was leaking
+  // Boston/MA events into multi-city parents (e.g. /tango/california). PR #334
+  // fixed only the single-city case; multi-city kept calling getCountryEvents
+  // and rendered wrong-region events SSR. Disabled entirely until CALBEAF-173
+  // ships a parent-scoped events query.
+  const events = [];
 
   const eventSchema = events.slice(0, 5).map((e) => ({
     '@type': 'Event',
