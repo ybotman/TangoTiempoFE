@@ -23,6 +23,20 @@ async function getGeoSummary(params = '') {
   } catch { return null; }
 }
 
+async function getParentEvents(parentSlug) {
+  try {
+    const now = new Date().toISOString();
+    const end = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    const res = await fetch(
+      `${API_URL}/api/events?appId=1&parentSlug=${encodeURIComponent(parentSlug)}&start=${now}&end=${end}&limit=6`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.events || [];
+  } catch { return []; }
+}
+
 export async function generateStaticParams() {
   const summary = await getGeoSummary();
   if (!summary?.cities?.length) return [];
@@ -69,12 +83,11 @@ export default async function ParentPage({ params }) {
   const parentName = cities[0].parentName || cities[0].countryName;
   const countryName = cities[0].countryName;
   const totalEvents = cities.reduce((n, c) => n + c.futureEventCount, 0);
-  // TIEMPO-451 hotfix for CALBEAF-173: country-wide event fetch was leaking
-  // Boston/MA events into multi-city parents (e.g. /tango/california). PR #334
-  // fixed only the single-city case; multi-city kept calling getCountryEvents
-  // and rendered wrong-region events SSR. Disabled entirely until CALBEAF-173
-  // ships a parent-scoped events query.
-  const events = [];
+  // CALBEAF-173: parent-scoped events query. BE resolves parentSlug → cityIds
+  // via masteredcities, then events.find({ masteredCityId: { $in: cityIds } }).
+  // Fail-closed: orphan/empty parent returns { events: [] }, never falls
+  // through to country-wide. Supersedes Track A's `events = []` (TIEMPO-451).
+  const events = await getParentEvents(params.parent);
 
   const eventSchema = events.slice(0, 5).map((e) => ({
     '@type': 'Event',
