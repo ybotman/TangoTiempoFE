@@ -69,12 +69,11 @@ export default async function ParentPage({ params }) {
   const parentName = cities[0].parentName || cities[0].countryName;
   const countryName = cities[0].countryName;
   const totalEvents = cities.reduce((n, c) => n + c.futureEventCount, 0);
-  // TIEMPO-451 hotfix: country-wide event fetch leaks Boston/MA events into
-  // multi-city parents (e.g. /tango/california). PR #334 fixed only the
-  // single-city case; multi-city kept calling getCountryEvents and showed
-  // wrong-region events SSR. Disabled entirely until BE parent-scoped events
-  // query lands (Track C, new CALBEAF ticket — note: existing CALBEAF-171 is
-  // unrelated despite earlier comment here).
+  // TIEMPO-451 hotfix for CALBEAF-173: country-wide event fetch was leaking
+  // Boston/MA events into multi-city parents (e.g. /tango/california). PR #334
+  // fixed only the single-city case; multi-city kept calling getCountryEvents
+  // and rendered wrong-region events SSR. Disabled entirely until CALBEAF-173
+  // ships a parent-scoped events query.
   const events = [];
 
   const eventSchema = events.slice(0, 5).map((e) => ({
