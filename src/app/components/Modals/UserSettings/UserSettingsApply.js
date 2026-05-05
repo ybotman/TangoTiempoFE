@@ -12,6 +12,7 @@ import { useOrganizers } from '@/hooks/useOrganizers';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import { validateShortName } from '@/utils/shortnameRules';
+import ShortnameRulesHint from '@/components/UI/ShortnameRulesHint';
 import ROTermsModal from './UserSettingApplyROTerms.js';
 
 // TIEMPO-442 stopgap: client-side helper to find a unique shortName via the
@@ -428,8 +429,7 @@ const UserSettingsApply = () => {
             helperText={
               shortNameStatus.checking
                 ? 'Checking…'
-                : shortNameStatus.message ||
-                  '3–12 characters. Must start with 3 letters. Letters, numbers, and hyphens after that.'
+                : shortNameStatus.message || ' '
             }
             error={shortNameStatus.available === false}
             InputProps={{
@@ -443,6 +443,9 @@ const UserSettingsApply = () => {
             }}
             disabled={applicationStatus === 'loading'}
           />
+          {/* TIEMPO-456: always-visible naming rules so users see all 7
+              constraints at once instead of one-at-a-time on validation error. */}
+          <ShortnameRulesHint />
           <TextField
             label="Description"
             placeholder="Tell people who you are and what you organize."
