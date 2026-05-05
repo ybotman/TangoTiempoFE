@@ -450,7 +450,8 @@ const OutreachApplyForm = () => {
     return <AuthGateSection />;
   }
 
-  // --- Render: Already an organizer ---
+  // --- Render: Already an organizer (TIEMPO-454: short excerpt + CTA to
+  // /organizers/welcome instead of static terminal panel) ---
   if (isAlreadyOrganizer) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -459,11 +460,17 @@ const OutreachApplyForm = () => {
           You&apos;re already an organizer!
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Your organizer profile is set up. You can start adding events right away.
+          Visit your Organizer Welcome page for orientation, guidelines, and
+          (soon) videos &amp; tips.
         </Typography>
-        <Button variant="contained" href="/calendar">
-          Go to Calendar
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Button variant="contained" href="/organizers/welcome">
+            Visit your Organizer Welcome →
+          </Button>
+          <Button variant="outlined" href="/calendar">
+            Go to Calendar
+          </Button>
+        </Box>
       </Box>
     );
   }

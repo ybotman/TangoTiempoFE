@@ -351,10 +351,10 @@ const SidebarDrawer = ({ open, onClose }) => {
               <Divider />
               
               {/* Only show Apply as Organizer if user is not already an approved and enabled organizer */}
-              {selectedRole !== listOfAllRoles.REGIONAL_ORGANIZER && 
-               selectedRole !== listOfAllRoles.SYSTEM_ADMIN && 
-               selectedRole !== listOfAllRoles.SYSTEM_OWNER && 
-               !(user?.backendInfo?.regionalOrganizerInfo?.isApproved && 
+              {selectedRole !== listOfAllRoles.REGIONAL_ORGANIZER &&
+               selectedRole !== listOfAllRoles.SYSTEM_ADMIN &&
+               selectedRole !== listOfAllRoles.SYSTEM_OWNER &&
+               !(user?.backendInfo?.regionalOrganizerInfo?.isApproved &&
                  user?.backendInfo?.regionalOrganizerInfo?.isEnabled) && (
                 <Link href="/organizers/apply" passHref>
                   <ListItem
@@ -365,6 +365,23 @@ const SidebarDrawer = ({ open, onClose }) => {
                       <GroupIcon sx={{ color: 'indigo' }} />
                     </ListItemIcon>
                     <ListItemText primary="Apply as Organizer" />
+                  </ListItem>
+                </Link>
+              )}
+
+              {/* TIEMPO-454: Permanent Organizer Welcome entry for approved
+                  organizers — gives a revisit path to onboarding content
+                  the post-approval Apply link no longer offers. */}
+              {user?.backendInfo?.regionalOrganizerInfo?.isApproved && (
+                <Link href="/organizers/welcome" passHref>
+                  <ListItem
+                    button="true"
+                    onClick={() => onClose()}
+                  >
+                    <ListItemIcon>
+                      <GroupIcon sx={{ color: 'indigo' }} />
+                    </ListItemIcon>
+                    <ListItemText primary="Organizer Welcome" />
                   </ListItem>
                 </Link>
               )}
