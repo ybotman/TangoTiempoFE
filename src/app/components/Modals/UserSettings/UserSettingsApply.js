@@ -11,17 +11,21 @@ import { useRoles } from '@/hooks/useRoles';
 import { useOrganizers } from '@/hooks/useOrganizers';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
+import { validateShortName } from '@/utils/shortnameRules';
 import ROTermsModal from './UserSettingApplyROTerms.js';
 
 // TIEMPO-442 stopgap: client-side helper to find a unique shortName via the
 // existing /api/organizers/shortname-check probe. Tries the candidate first;
 // suffix-retries up to 5 times; gives up after that and lets the user adjust.
 // Replaced when CALBEAF-150 /generate-candidate lands (TIEMPO-437/441).
+//
+// TIEMPO-455: maxLen bumped 9→12 to match BE shortname rules
+// (calendar-be-af/src/lib/organizerShortNameRules.js).
 const probeShortNameUnique = async (candidate, appId) => {
-  const trim = (s) => (s || '').toString().trim().slice(0, 9);
+  const trim = (s) => (s || '').toString().trim().slice(0, 12);
   const root = trim(candidate) || 'New';
   for (let attempt = 0; attempt <= 5; attempt += 1) {
-    const tryName = attempt === 0 ? root : `${root}${attempt + 1}`.slice(0, 9);
+    const tryName = attempt === 0 ? root : `${root}${attempt + 1}`.slice(0, 12);
     try {
       const url = `${getApiBaseUrl()}/api/organizers/shortname-check?appId=${appId}&candidate=${encodeURIComponent(tryName)}`;
       const { data } = await axios.get(url);
@@ -118,7 +122,8 @@ const UserSettingsApply = () => {
     if (defaultName && !organizerName) setOrganizerName(defaultName);
 
     if (!shortName) {
-      const candidateRoot = `${firstName}${lastName ? lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '').slice(0, 9) || 'New';
+      // TIEMPO-455: slice(0,12) to match BE max length (was 9).
+      const candidateRoot = `${firstName}${lastName ? lastName.charAt(0) : ''}`.replace(/[^A-Za-z0-9]/g, '').slice(0, 12) || 'New';
       const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
       probeShortNameUnique(candidateRoot, appId).then((unique) => {
         if (unique) {
@@ -132,18 +137,27 @@ const UserSettingsApply = () => {
 
   // TIEMPO-443: Live probe on Short Name field blur — gives the user immediate
   // feedback whether their chosen name is available before they click Apply.
+  // TIEMPO-455: validation lifted to shared utility mirroring BE rules
+  // (calendar-be-af/src/lib/organizerShortNameRules.js — CALBEAF-107). Length,
+  // letters-first-3, hyphen rules, and reserved-word check all enforced here
+  // BEFORE the availability probe so the FE rejects invalid input the BE would
+  // 4xx anyway.
   const handleShortNameBlur = async () => {
     const candidate = shortName.trim();
     if (!candidate) {
       setShortNameStatus({ checking: false, available: null, message: '' });
       return;
     }
-    if (candidate.length < 3 || candidate.length > 9) {
-      setShortNameStatus({ checking: false, available: false, message: 'Must be 3-9 characters' });
+    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+    const ruleCheck = validateShortName(candidate, appId);
+    if (!ruleCheck.valid) {
+      setShortNameStatus({ checking: false, available: false, message: ruleCheck.message });
       return;
     }
-    if (/CHANGE|TANGO/i.test(candidate)) {
-      setShortNameStatus({ checking: false, available: false, message: 'Cannot contain "CHANGE" or "TANGO"' });
+    // FE-stricter overlay: TANGO is also blocked even though BE only reserves
+    // CHANGE. Keep the UX courtesy from TIEMPO-443.
+    if (/TANGO/i.test(candidate)) {
+      setShortNameStatus({ checking: false, available: false, message: 'Cannot contain "TANGO"' });
       return;
     }
     setShortNameStatus({ checking: true, available: null, message: 'Checking…' });
@@ -176,8 +190,13 @@ const UserSettingsApply = () => {
       return;
     }
     const trimmedShortName = shortName.trim();
-    if (trimmedShortName.length < 3 || trimmedShortName.length > 9) {
-      setErrorMessage('Short name must be 3–9 characters.');
+    // TIEMPO-455: full BE-rule validation at apply time — length, pattern,
+    // reserved word. Fail-closed BEFORE the POST so the user gets clear
+    // feedback rather than a generic 4xx.
+    const appId = process.env.NEXT_PUBLIC_APPLICATION_ID || '1';
+    const ruleCheck = validateShortName(trimmedShortName, appId);
+    if (!ruleCheck.valid) {
+      setErrorMessage(ruleCheck.message);
       return;
     }
     if (shortNameStatus.available === false) {
@@ -395,16 +414,22 @@ const UserSettingsApply = () => {
           />
           <TextField
             label="Short Name"
-            placeholder="3–9 chars, no spaces (e.g. TobyB)"
+            placeholder="3–12 chars, e.g. TOBY or TOBY-DJ"
             value={shortName}
-            onChange={(e) => setShortName(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 9))}
+            // TIEMPO-455: keep onChange-time normalization broad enough to
+            // accept the BE-allowed character set (letters/digits/hyphens),
+            // bumped slice to 12. BE rule details (first-3-letters, no
+            // trailing/consecutive hyphens) are enforced on blur + at apply
+            // time so the user sees the real reason, not a stripped char.
+            onChange={(e) => setShortName(e.target.value.replace(/[^A-Za-z0-9-]/g, '').slice(0, 12))}
             onBlur={handleShortNameBlur}
             fullWidth
-            inputProps={{ maxLength: 9 }}
+            inputProps={{ maxLength: 12 }}
             helperText={
               shortNameStatus.checking
                 ? 'Checking…'
-                : shortNameStatus.message || '3–9 alphanumeric characters'
+                : shortNameStatus.message ||
+                  '3–12 characters. Must start with 3 letters. Letters, numbers, and hyphens after that.'
             }
             error={shortNameStatus.available === false}
             InputProps={{
