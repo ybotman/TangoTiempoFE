@@ -39,6 +39,10 @@ export function transformEvents(events) {
     // For FullCalendar RRULE plugin, we need to handle recurring events differently
     const baseEvent = {
       title: event.title, // Use the 'title' field from the API
+      // TIEMPO-351: Map isAllDay to FullCalendar's allDay so multi-day events render as
+      // a single spanning bar instead of N separate per-day tiles. Default false for
+      // single-day timed events (which is the vast majority).
+      allDay: event.isAllDay || false,
       extendedProps: {
         // Any additional data
         _id: event._id,
