@@ -79,6 +79,32 @@ Why: catches "bypass silently no-op'd" on first run. Without this assertion, a b
 
 **Field-test evidence:** UC-0009 spawn 1 RED on first run because gemini-CLI-authored `bypassModal()` had `isVisible()` race (omitted pre-wait). Self-heal v1 added the pre-wait (1-retry); landed GREEN. Twice-proven pattern (UC-0008 §0.1 traps + UC-0009 §0.4 modal-bypass).
 
+### 0.5 Input-method standard for MUI Autocomplete / controlled combobox inputs (REQUIRED)
+
+A single REQUIRED rule for any test interacting with a MUI `Autocomplete` or React-controlled `combobox` input. Field-tested via UC-0001 batch (verdict FLAKE @ 0.91 confidence — classifier verdict, third qualitatively distinct trap class).
+
+**REQUIRED rule:**
+```typescript
+// WRONG — silently no-op under parallel-worker CPU load
+await page.locator('[data-testid="map-center-city-search"]').fill('Boston');
+
+// CORRECT
+await page.locator('[data-testid="map-center-city-search"]').pressSequentially('Boston', { delay: 50 });
+```
+
+**Why:** Playwright `.fill()` sets the DOM `value` attribute but does NOT fire the React synthetic `onInputChange` event reliably on MUI Autocomplete's controlled `combobox` under parallel-worker CPU load. The result is silent: the input shows the text in DevTools, but React state (`citySearchQuery`) never updates → the debounced API call never fires → the dropdown stays empty → `city-option-{kebab}` never renders → downstream selectors fail with confusing "element not found" errors. `pressSequentially` fires character-by-character keyboard events that React intercepts reliably.
+
+**Selectors this rule applies to:**
+- `[data-testid="map-center-city-search"]` (MapCenterModal — confirmed batch-affected)
+- Any `data-testid` matching `*-city-search` / `*-autocomplete-input` / `*-combobox` patterns
+- Any MUI `<Autocomplete>` / `<TextField>` whose state binding flows through `onInputChange` rather than `onChange`
+
+**Application:** When authoring or self-healing a test that types into a search/autocomplete field, default to `pressSequentially({ delay: 50 })`. Reserve `.fill()` for plain `<input>` / `<textarea>` elements where DOM-value-only is sufficient.
+
+**Field-test evidence:** UC-0001 spawn batch RED with confusing "city-option-boston not found" errors. TRIAGE classifier verdict FLAKE @ 0.91 confidence (NOT code-fault — TT FE/BE healthy). Root cause: `.fill()` on MUI Autocomplete city-search. Self-heal pattern (`pressSequentially`) batch-applied to 8 UCs (UC-0001/0002/0006/0007/0008/0009/0010/0011/0012); regression re-run GREEN.
+
+**Three-class trap signal:** §0.1 (selector-doesn't-exist) + §0.4 (async-race on modal) + §0.5 (input-method on controlled combobox) are three qualitatively distinct trap classes empirically surfaced in three consecutive Sprint 4 spawns. ADR-0014 §Empirical evidence absorbs.
+
 ---
 
 ## 1. Glossary
@@ -774,6 +800,7 @@ Per Sprint 4 charter directive (FTPNTD-on-self), TT custom-view selector diverge
 
 ## 19. Change Log
 
+- **v0.4** (2026-05-07T17:20 UTC) — Sarah added §0.5 Input-method standard for MUI Autocomplete / controlled combobox inputs (REQUIRED rule: `pressSequentially({ delay: 50 })` instead of `.fill()`). Field-tested via UC-0001 batch (verdict FLAKE @ 0.91 confidence; 8-UC self-heal batch GREEN). Third qualitatively distinct trap class (§0.1 selector-doesn't-exist + §0.4 async-race + §0.5 input-method-on-controlled-combobox). Pattern proposed by Quinn 2026-05-07T17:17Z under same-day-turnaround protocol; landed within unilateral canonical-author authority per ADR-0014 Decision #7 (shape-preserving additive content; same REQUIRED-rule format as §0.4). Stacked on v0.2/v0.3 PR #355.
 - **v0.3** (2026-05-07T17:08 UTC) — Sarah added §0.4 Modal-bypass standard pattern with two REQUIRED rules (pre-wait `waitForSelector` before visibility check; post-bypass `toBeHidden` assertion). Field-tested via UC-0009 self-heal v1 (Phase C Exit DoD data point #2 GREEN). Pattern proposed by Quinn 2026-05-07T17:04Z under same-day-turnaround protocol established in v0.2. Twice-proven §0 cross-app template signal: UC-0008 §0.1 (traps) + UC-0009 §0.4 (modal-bypass). Stacked on v0.2 PR #355.
 - **v0.2** (2026-05-07T16:45 UTC) — Sarah added §0 Selector Quick Reference + §0.1 Known Selector Traps + §0.2 Selector cheat-sheet by surface + §0.3 Pattern A vs B selector note. Audit code-process fix for TT custom-view selector divergence (Sprint 4 motion 5 per Number2 broadcast 16:30Z; framework-as-product / scale-readiness framing). Added §18.1 FTPNTD self-application + standing maintenance rule. No content removed; existing sections untouched.
 - **v0.1** (2026-05-06T23:55 UTC) — Sarah initial draft per Toby directive 23:50 via Number2. Comprehensive scout of TT FE form/modal/role surface; covers signup / login / apply-as-organizer / event-creation / event-view / RegionalOrganizers admin / role taxonomy / RRULE / modal taxonomy / auto-seed race conditions / bootstrap self-heal / API endpoints / test-mutator companion reference / common UC patterns / wait-for-auth-ready proposal. Phase B Exit retrospective material; living doc.
