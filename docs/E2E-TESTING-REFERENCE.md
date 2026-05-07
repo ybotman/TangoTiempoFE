@@ -12,6 +12,51 @@
 
 ---
 
+## 0. Selector Quick Reference (READ FIRST)
+
+**Audience:** Gauge (and any spawn-author) before authoring or healing a UC. 30-second scan before writing the first selector. Full context for each row is in the section cited.
+
+### 0.1 Known selector traps (do NOT use these on TT)
+
+| You might try… | Why it fails on TT | Use instead | Ref |
+|---|---|---|---|
+| `.fc-toolbar-title` | TT uses **custom views** (`dayGrid8Week` / `list21Days`); no FullCalendar toolbar title rendered | `[data-date="YYYY-MM-DD"]` on `.fc-daygrid-day` cells; or scan visible event rows | §3.5 |
+| `[data-testid="calendar-title"]` | Doesn't exist | same as above | §3.5 |
+| Standard FullCalendar prev/next buttons (`.fc-prev-button` / `.fc-next-button`) | TT uses custom `ModeToggle` + `CalendarSubMenu` for nav, not FC default toolbar | Drive `ModeToggle.js` / `CalendarSubMenu.js` selectors (TBD — file Sarah-update if you hit this) | §3.3 |
+| `getByPlaceholder("Email")` on auth form | Field uses `<TextField label="Email Address">` — placeholder is empty | `getByLabel("Email Address")` or `input[name="email"]` | §4.1 |
+| `text=Apply` to find apply button | "Apply" appears as tab label AND button label; ambiguous | `getByRole('button', { name: 'Apply for Event Organizer' })` | §6.3 |
+| Querying for `selectedRole === 'Organizer/Artist'` | That's the **display map** (`Milonger@`, `Organizer/Artist`, etc.) — internal state uses `roleName` strings | Use canonical `roleName` (`RegionalOrganizer`, `NamedUser`, …) for state assertions; use display string only for visible-text lookups | §2.1 |
+| `data-testid="user-settings-modal"` | Doesn't exist on the modal root | Open via avatar → drawer "User Settings"; tab via `button[role="tab"]:has-text("Apply")` | §5, §6.5 |
+| Filling Description and expecting auto-seed | Description has **NO auto-seed** (TIEMPO-442 stopgap requires explicit fill ≥10 chars) | Always fill Description manually | §6.2 |
+| Expecting submit-disable on shortName `available: null` | `null` and `true` both allow submit; only `false` blocks | Wait for `text=Available` after blur, OR proceed if no error message | §6.4 |
+
+### 0.2 Selector cheat-sheet by surface
+
+| Surface | Open path | Root selector | Key inner selectors | Section |
+|---|---|---|---|---|
+| **MapCenterModal** (cold-nav blocker) | Auto-opens on cold-nav | `[data-testid="map-center-modal"]` | `[data-testid="map-center-city-search"]`, `[data-testid="city-option-{kebab}"]`, `[data-testid="map-center-save"]`, `[data-testid="map-center-close"]` | §3.2 |
+| **Signup page** | `/auth/signup` | `[data-testid="signup-page"]` | `[data-testid="email-signup-button"]`, `[data-testid="google-signup-button"]` | §4.1 |
+| **EmailAuthForm** (signup/login) | After `email-signup-button` click, or `/auth/login` | `[data-testid="email-auth-form"]` | `getByLabel("First Name" / "Last Name" / "Email Address" / "Password" / "Confirm Password")`, `button[type="submit"]` | §4.1 |
+| **Calendar (desktop)** | `/calendar` after MapCenter dismissal | `.fc-view-harness` | `.fc-daygrid-day[data-date="YYYY-MM-DD"]`, `.fc-daygrid-event` | §3.5 |
+| **Calendar (mobile <768px)** | same | `.fc-list` | `.fc-list-day` (header), `.fc-list-event` (rows) | §3.5 |
+| **Top nav** | always rendered | `SiteHeader` / `SiteMenuBar` | `CityPill` (re-opens MapCenter), `ModeToggle`, `CalendarSubMenu`, avatar (right) | §3.3 |
+| **User drawer** | click avatar | (no testid; drawer opens right) | "Sign In" / "Create Account" (logged-out) ; "User Settings" / "Logout" / role selector / "Messages" (logged-in) | §3.4 |
+| **UserSettingsModal** | drawer → "User Settings" | (no testid on root) | `button[role="tab"]:has-text("Name" / "Bookmarks" / "Apply" / …)` | §5 |
+| **Apply tab (UserSettingsApply)** | UserSettings → Apply | tab content area | `getByLabel("Organizer Name" / "Short Name" / "Description")`, `getByRole('button', { name: 'Apply for Event Organizer' })` | §6 |
+| **CreateEventDetailModal** | RO/RA "+" or menu "Create Event" | `[data-testid="create-event-modal"]` | tabs `basic` / `repeating` / `image` / `spotlights` / `overrideImages` / `grants` / `other`; Save = `disabled={!isFormValid()}` | §7 |
+| **ViewEventDetailModal** | click event in calendar (RO/RA/NU) | `[data-testid="event-modal"]` | `[data-testid="event-modal-content"]`; tabs Basic / Venue / Organizer / Images | §8 |
+| **SpotlightOnlyModal** | Spotlighter clicks event (TIEMPO-433) | (separate modal; no testid) | stripped-down view; image controls hidden | §8 |
+| **EditOccurrenceModal** | edit single occurrence of recurring event | (no testid) | role-aware; Spotlighter mode hides image tab (TIEMPO-438) | §8 |
+| **RegionalOrganizersModal** (admin) | RA/SA org-management menu | (no testid on root) | `<Tab label="Profile" / "Settings" / "Status">`; `handleSaveAll` save | §9 |
+
+### 0.3 Pattern A vs Pattern B selector differences
+
+Pattern A (persistent E2EUSER at `appId="99"`) and Pattern B (ephemeral aliased Gmail at `appId="1"` with markers) hit the **same FE selectors** — divergence is at the data/test-mutator layer, not the DOM layer. See §16 for setup/cleanup; selectors above apply to both patterns.
+
+**Cross-reference:** Pattern A vs B partition asymmetry memory at `~/.claude/projects/.../memory/project_e2e_pattern_a_vs_b_partition_asymmetry.md`.
+
+---
+
 ## 1. Glossary
 
 | Term | Meaning |
@@ -689,8 +734,21 @@ Sarah-side persistent memories (`~/.claude/projects/.../memory/`):
 
 **Discovery protocol:** when Gauge spawns surface POM gaps OR forms misbehave, root-cause via this doc first; if doc is incomplete or stale, file a Sarah-update + commit fix here adjacent to the code change.
 
+### 18.1 FTPNTD self-application (Sarah maintenance commitment)
+
+Per Sprint 4 charter directive (FTPNTD-on-self), TT custom-view selector divergence has been three-layer-fixed:
+
+| Layer | Fix |
+|---|---|
+| **Data** | Memory entry `project_tt_custom_calendar_views.md` records `dayGrid8Week` / `list21Days` and the absent-`.fc-toolbar-title` trap |
+| **Code-process** | §0 Selector Quick Reference + §0.1 Known Selector Traps (this doc, v0.2) — fast-lookup so Gauge sees the trap before authoring, not after a heal cycle |
+| **Team-human** | **Standing maintenance rule:** any TT FE PR that adds/removes/renames a `data-testid`, label-based form field, or modal surface MUST update §0 (Quick Reference) + §11 (Modal Taxonomy) in the same commit. Discovery via Gauge spawn = file a Sarah-update issue + same-PR fix. Reviewer enforces. |
+
+**Cross-app template signal:** other app personas (Cord/Compás/Dash) can copy this doc's §0 pattern as a fast-lookup template — selector trap surface is per-app but the format scales.
+
 ---
 
 ## 19. Change Log
 
+- **v0.2** (2026-05-07T16:45 UTC) — Sarah added §0 Selector Quick Reference + §0.1 Known Selector Traps + §0.2 Selector cheat-sheet by surface + §0.3 Pattern A vs B selector note. Audit code-process fix for TT custom-view selector divergence (Sprint 4 motion 5 per Number2 broadcast 16:30Z; framework-as-product / scale-readiness framing). Added §18.1 FTPNTD self-application + standing maintenance rule. No content removed; existing sections untouched.
 - **v0.1** (2026-05-06T23:55 UTC) — Sarah initial draft per Toby directive 23:50 via Number2. Comprehensive scout of TT FE form/modal/role surface; covers signup / login / apply-as-organizer / event-creation / event-view / RegionalOrganizers admin / role taxonomy / RRULE / modal taxonomy / auto-seed race conditions / bootstrap self-heal / API endpoints / test-mutator companion reference / common UC patterns / wait-for-auth-ready proposal. Phase B Exit retrospective material; living doc.
