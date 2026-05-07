@@ -114,6 +114,59 @@ Pattern A E2EUSER + role-elevation-matrix mutators cover all 3 Tier-1 candidates
 
 ---
 
+## ⚠️ CRITICAL PRE-SPAWN CORRECTION (added 2026-05-07T20:30Z)
+
+During light pre-stage on TIEMPO-364 (Sarah's Tier-1 #1 candidate; UC-0018 spawn-target), I discovered the ticket's actual fix surface is **BACKEND**, not FE. **My recommender-side pre-flight rule missed this lane-attribution error.**
+
+### Lane-attribution verification (all 3 Tier-1 + drop-in candidates)
+
+| TIEMPO | Stated FE-surface | JIRA "Affected Component" / "Fix Required" | Verdict |
+|---|---|---|---|
+| TIEMPO-364 | calendar filter pipeline | "**Backend: calendar-be-af - /api/events endpoint**. Backend should apply $geoWithin filter to AI-discovered events. Frontend is correctly sending location AND AI filter params." | ❌ **BE-only fix surface; FE has no code to fix** |
+| TIEMPO-351 | calendar tile multi-day spanning | "Assignee: Sarah (TangoTiempo FE) \| May also touch: Fulton (AF backend). Fix A `transformEvents.js`. Fix B `CreateEventDetailModal.js`. Fix C optional toggle. Backend: Already Wired (Mostly)." | ✅ **Primarily FE (Sarah lane); minor BE/data dependency** |
+| TIEMPO-301 | event edit modal RO venue lock | "Venue field should be disabled (read-only) in edit mode for RegionalOrganizer role." | ✅ **Pure FE (Sarah lane)** |
+| TIEMPO-359 (Tier-2 backup) | event detail click data-shape | "BEAF Organizers.js handler line 192-207 queries with both _id AND appId; type-mismatch. Fix options: (1) BEAF coerce appId types — **BE**. (2) Verify test DB. (3) FE handle 404 gracefully — **FE-defensive**." | ⚠️ **Hybrid; BE-primary with FE-defensive layer** |
+
+### Disposition
+
+**TIEMPO-364 reclassified out of FE Discovery corpus → recommended into BE Discovery corpus** (Fulton's lane — alongside CALBEAF-172/166/131). Bug is real, reproducible, pre-flight-clean for git-log/JIRA/bundle-PR — only the lane attribution was wrong.
+
+**TIEMPO-351 + TIEMPO-301 lane attribution confirmed clean.** UC-0019 (TIEMPO-351) + UC-0020 (TIEMPO-301) remain Sarah-lane Tier-1.
+
+**Drop-in selection for TIEMPO-364's slot in the FE corpus:**
+- TIEMPO-359 is BE-primary (option 3 FE-defensive only) — not a clean FE drop-in
+- Need further Tier-2 verification (TIEMPO-345 venue-management viewport — FE-state question; likely clean) OR re-pull BACKLOG for genuine FE-only filter-class candidates
+- **Pending Sarah next pass + Quinn arbitration on Sprint 5 first-batch impact**
+
+### Sprint 5 first-batch revised (pending Quinn disposition)
+
+Original (Quinn 20:24Z): UC-0013 + UC-0015 (BE) + UC-0018 (TIEMPO-364, FE) + UC-0019 (TIEMPO-351, FE).
+
+**Pending Quinn UC-0018 disposition path** (Sarah surfaced 20:30Z):
+- **Option A:** Halt UC-0018; re-route TIEMPO-364 to BE-corpus; FE first-batch picks new candidate (TIEMPO-345 verified or other)
+- **Option B:** Let UC-0018 fire as-is; classifier should ideally route `ask_persona:fulton` if verdict is `code-bug` and signals match BE-side. Empirical evidence for the lane-attribution-check rule (similar to UC-0014 → recommender-side JIRA-vs-HEAD rule)
+- **Option C:** Halt UC-0018; verify all FE Tier-1 + Tier-2 lane attributions first; refire on full clean
+
+Sarah recommendation: Option B (let the classifier prove cross-lane self-correction at the routing layer; same shape of empirical-evidence-becomes-rule as UC-0014 did for me).
+
+### New pre-flight rule (4th rule — lane-attribution-check)
+
+Added to `feedback_e2e_doc_maintenance.md` companion-rule set as 4th required check:
+
+> Before classifying a BACKLOG JIRA ticket as `expected-RED` for any persona's spawn target, scan the JIRA description's **"Affected Component" / "Fix Required" / "Root Cause"** sections to verify the actual fix surface aligns with the recommending persona's lane. Tickets filed in one project (e.g., TIEMPO) may have fix surface in another project (e.g., calendar-be-af). Lane-attribution mismatch = ticket misrouted; reclassify to correct persona's corpus or split into hybrid (FE + BE simultaneous fixes).
+
+**Empirical evidence** for the rule: TIEMPO-364 surfaced the gap at 20:30Z; classifier may demonstrate the same finding at routing layer if Option B chosen.
+
+**Pre-flight rule set is now 4-rule:**
+1. Git-log grep for fix-commit
+2. JIRA description file-path scan
+3. Bundle-PR check
+4. **Lane-attribution check (Affected Component / Fix Required sections)** ← new
+
+Cumulative miss-rate baseline (2026-05-07): 4 of 15 candidates I screened over 2 days had pre-flight failures (3 stale-BACKLOG + 1 lane-attribution) = ~27%. The pre-flight rule set is paying for itself empirically; the 4th rule extension prevents the next class of misroute.
+
+---
+
 ## Pre-committed-fix-in-same-arc folded into Story 4.1 Acceptance
 
 Per Quinn 20:24Z arbitration: my 17:20Z standing offer (Phase D Routing v0 textbook pattern) folds into Story 4.1 Acceptance criteria explicitly. Any Tier-1 candidate that classifier returns `code-bug` ≥85% conf with `ask_persona:sarah` routing → I land actual code fix on separate sandbox PR after the UC drives the test, same-arc.
