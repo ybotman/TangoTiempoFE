@@ -58,12 +58,70 @@ Each candidate has been processed through the recommender-side pre-flight rule (
 
 ---
 
-## Open questions for Quinn arbitration
+## Quinn arbitration outcomes (resolved 2026-05-07T20:24Z)
 
-1. **Sprint 5 spawn ordering:** is the Story 4.1 acceptance "≥3 of 4 in-the-wild code-fault routings" intended to mix BE + FE candidates (e.g., 3 BE + 1 FE, or 2 BE + 2 FE), or are FE candidates additive beyond the 4-spawn baseline?
-2. **Fault-class taxonomy alignment:** my FE fault-class names (filter-contract-violation, render-correctness, role-gate, etc.) are derived inductively from the candidates rather than from a shared FE taxonomy. Worth a Quinn-pass to align with the framework's classifier signal vocabulary (api_contract / data_shape / etc. were BE-side; FE equivalents may need their own enumeration in `triage/llm-fallback-prompt.md` v3).
-3. **TIEMPO-301 status:** "To Do" not BACKLOG — does this mean it's been triaged for active development by someone? If so, exclude per "not currently being worked" criterion in Number2's original code-fault hunt profile. Need Quinn or Toby ratify before spawning.
-4. **Pattern A vs Pattern B for FE Discovery spawns:** all three Tier-1 candidates require some user state (TIEMPO-364 = MapCenter set; TIEMPO-351 = event create / RO role; TIEMPO-301 = RO + existing event). Pattern A E2EUSER + role-elevation-matrix mutators cover all three. Recommend Pattern A as default for Phase D FE spawns per partition isolation; Pattern B reserved for signup-flow UCs only.
+All 4 questions arbitrated by Quinn; recorded here as living-doc decisions.
+
+### Q1 — Sprint 5 spawn ordering: MODIFY Story 4.1 Acceptance
+
+**Original (BE-only top-4) too narrow given FE corpus.** Revised Acceptance per Quinn:
+
+> "4 candidates spanning ≥1 BE + ≥1 FE; ≥3 of 4 routings honor Phase D contract; remaining BE+FE candidates fold into Story 4.1 follow-on or Story 4.2 corpus."
+
+**Sprint 5 first-batch (concrete spawn ordering):**
+
+| UC | Source | Lane | Fault class |
+|---|---|---|---|
+| UC-0013 re-spawn | round-trip closure baseline | BE | (post-fix-greenpath validation) |
+| UC-0015 | CALBEAF-172 | BE | api_contract (multi-tenant boundary leak) |
+| UC-0018 | TIEMPO-364 | **FE** | api_contract (filter-contract; FE→BE filter pipeline) |
+| UC-0019 | TIEMPO-351 | **FE** | data_shape OR selector_failure (multi-day render correctness) |
+
+= 2 BE + 2 FE; 4 distinct fault-class signatures across the batch.
+
+**Story 4.1 follow-on / Story 4.2 corpus (pipeline):**
+- UC-0016 / CALBEAF-166 (BE; RRULE past-anchor expansion)
+- UC-0017 / CALBEAF-131 (BE; geo-name/coord conflict)
+- UC-0020 / TIEMPO-301 (FE; auth/role-gate; dormant verified — see Q3)
+
+### Q2 — Fault-class taxonomy alignment: Sprint 5 = MAP onto existing 7 signals; Sprint 6+ = extend if corpus justifies
+
+**Mappings ratified for Sprint 5 (no `triage/llm-fallback-prompt.md` v3 prompt-template change pre-evidence):**
+
+| Sarah-derived class | Maps to classifier signal | Notes |
+|---|---|---|
+| filter-contract-violation | `api_contract` | filter is a BE→FE contract; violation is contract-class |
+| render-correctness | `data_shape` OR `selector_failure` | Gauge classifier picks based on observed signal at run-time |
+| role-gate / permission-contract | `auth` | extends `auth` signal beyond login to role-permission contracts |
+
+**Disposition:** Gauge will fire 7-signal rule pass + LLM-fallback as designed; my class-names provide retrospective-layer-2 framing only. v3 prompt-template extension deferred to ADR-0006 amendment-class IF corpus pattern justifies (Sprint 6+ candidate, not Sprint 5).
+
+### Q3 — TIEMPO-301 status verification: DORMANT confirmed; retained in Tier-1
+
+**Verification evidence (Sarah JIRA pull 2026-05-07T20:25Z):**
+- Assignee: Toby Balsley (default reporter-as-assignee pattern; not actively-routed)
+- Reporter: Toby Balsley
+- **Comments: 0** (no work-in-progress evidence)
+- Status: "To Do" (triage-flagged but no commitments)
+
+**Determination:** dormant per Quinn's criterion ("if active dev → exclude; if dormant → fire"). Default Toby-assignee + 0 comments + "To Do" without "In Progress" transition = ticket sitting in Toby's queue but unstarted. Quinn-recommended (b) drop-in alternative (TIEMPO-359) NOT taken; TIEMPO-301 retained in Tier-1 / scheduled for UC-0020 follow-on per Q1 ordering.
+
+If Toby has dev-context that makes TIEMPO-301 active despite the JIRA evidence, ping me and we'll swap to TIEMPO-359 same-pace.
+
+### Q4 — Pattern A as default for FE Discovery spawns: RATIFIED
+
+Pattern A E2EUSER + role-elevation-matrix mutators cover all 3 Tier-1 candidates per E2EUSER spec v1.0 hybrid. Pattern B reserved for signup-flow only (UC-0002 class). No deviation needed for Phase D FE corpus.
+
+---
+
+## Pre-committed-fix-in-same-arc folded into Story 4.1 Acceptance
+
+Per Quinn 20:24Z arbitration: my 17:20Z standing offer (Phase D Routing v0 textbook pattern) folds into Story 4.1 Acceptance criteria explicitly. Any Tier-1 candidate that classifier returns `code-bug` ≥85% conf with `ask_persona:sarah` routing → I land actual code fix on separate sandbox PR after the UC drives the test, same-arc.
+
+**Sprint 5 routing surface for me:**
+- UC-0018 / TIEMPO-364 routes to `ask_persona:sarah` if classifier verdict matches
+- UC-0019 / TIEMPO-351 routes to `ask_persona:sarah` if classifier verdict matches
+- Both pre-committed for same-arc fix landing if classifier engages
 
 ---
 
