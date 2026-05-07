@@ -735,6 +735,78 @@ For full reference see `calendar-be-af-test-mutators/` repo. Quick summary:
 
 ---
 
+## 15.5. Merge Mechanisms + Per-App Guard Rails
+
+Per-app guard-rail enumeration for the merge mechanism. Discovered empirically through Sprint 5 round-trip-closure work (2026-05-07T21:00Z arc). Cross-persona reference for Quinn / Gauge / future-Sarah / cross-app adopters.
+
+**Quinn Charter §B.X candidate:** each per-app E2E-TESTING-REFERENCE.md should include this section type so adopters (Cord/Compás/Dash/Fulton) can enumerate their own per-repo guard rails and reduce discover-by-empirical-failure cycles for cross-persona arcs.
+
+### 15.5.1 The three-layer guard-rail cake
+
+| Layer | Source | Scope | What it does |
+|---|---|---|---|
+| **Layer 1** | Project CLAUDE.md "Before ANY PROD operation" §4-6 | PROD only | Bans `gh pr merge` ANY flags (auth-bypass concern); requires Toby UI merge after PR creation; admin-override needs `ADMIN-OVERRIDE` phrase |
+| **Layer 2** | Local VM pre-push hook | All tiers | Bars direct pushes to TEST (and presumably DEVL/PROD). Only `sandbox/*` branches accepted from this VM. `git push origin TEST` rejects with `Branch: TEST (PROTECTED) — Only sandbox/* branches allowed in VM` |
+| **Layer 3** | `MasterCalendar/docs/GIT-BRANCHING-STRATEGY.md` | Tier-aware | DEVL autonomous; TEST CR for risky changes (T3 docs autonomous push allowed announce-only); PROD locked + DEPLOY-PROD authorization |
+
+### 15.5.2 Layer-1 scoping note (rule-text vs context)
+
+Project CLAUDE.md rule 4 reads "NEVER use `gh pr merge` — ANY flags. ..." The "ANY flags" language can be misread as tier-absolute. **It is not.** The rule is structurally listed under "Before ANY PROD operation" preamble; rules 4-6 inherit PROD-context.
+
+For TEST-tier sandbox merges, the gh-pr-merge ban is spirit-strict-prudence (Toby's CLI auth still binds), not rule-strict. Different question: VM hook (Layer 2) blocks gh-pr-merge anyway via the underlying push.
+
+### 15.5.3 Layer-2 hook is asymmetric across repos
+
+| Repo | VM hook present? | Direct git push to TEST |
+|---|---|---|
+| `tangotiempo.com` (TT FE; Sarah) | **YES** (sandbox/* only) | ❌ blocked |
+| `calendar-be-af` (Fulton) | **NO** (per Fulton precedent 2026-05-07T20:54Z DEVL→TEST direct push) | ✅ allowed |
+| `harmonyjunction.org` (Cord, offline) | TBD when re-engaged | TBD |
+| `calops` (Dash, offline) | TBD when re-engaged | TBD |
+| `NTTT` (Compás, offline) | TBD when re-engaged | TBD |
+
+**Per-repo Toby-discipline choice;** not a project-wide policy. New adopters of this doc-type should investigate their own repo's hook state and enumerate here.
+
+### 15.5.4 Path-table for sandbox/* → TEST merge from Sarah-side
+
+| Path | Mechanism | Auth | Bypasses Layer 1 (gh-pr-merge ban)? | Bypasses Layer 2 (VM hook)? | Verdict |
+|---|---|---|---|---|---|
+| **Toby UI merge** | GitHub web UI click | Toby (human) | N/A (no gh CLI involved) | ✓ (server-side merge) | ✅ Always clean — recommended |
+| **Sarah `git merge` + `git push`** | local git + git push | Sarah's git auth | ✓ (no gh CLI involved) | ❌ (VM hook blocks at push) | ❌ Blocked at Layer 2 |
+| **Sarah `gh pr merge`** | gh CLI → GitHub API | Toby's gh auth (via Sarah's CLI login) | ❌ Banned per "ANY flags" PROD-rule (spirit-strict at TEST) | ✓ (server-side) | ❌ Banned per Layer 1 spirit |
+| **Sarah `gh pr merge --auto`** | gh CLI auto-merge | Toby's gh auth | ❌ Same as above | ✓ | ❌ Same |
+| **Quinn UI merge** | GitHub web UI | Quinn (human) | N/A | ✓ | ⚠ Unavailable (Quinn is Claude Code CLI; no browser) |
+| **Auto-merge config (set via UI)** | GitHub server-side auto-merge on checks-pass | server-side | ✓ | ✓ | ⚠ Requires repo permission to configure |
+
+**Operational rule:** when sandbox/* → TEST merge is needed, default path is **Toby UI merge via Number2 surface**. Latency: minutes-to-hours depending on Toby availability.
+
+### 15.5.5 What Sarah does on merge-block
+
+1. Surface to Number2 with: PR URL + Quinn-arbiter green-light citation + bounded-reversible threshold + pre-merge clearance checklist
+2. Number2 surfaces to Toby via DAG-anchor channel (Telegram or hub)
+3. Toby clicks merge in GitHub UI; auto-deploy fires
+4. Sarah runs post-deploy actions (mongosh data-patches, etc.)
+5. Sarah signals Quinn ready for downstream actions (Gauge re-spawn, etc.)
+
+### 15.5.6 Cross-persona pre-flight rule transfer
+
+Per `feedback_e2e_doc_maintenance.md` 4-rule recommender-side pre-flight (rules 1-3 + lane-attribution-check), Sarah and Fulton both applied independently in this Sprint 5 day:
+- **Sarah lane:** 4/15 candidates screened pre-flight failures = ~27% miss rate (3 stale-BACKLOG + 1 lane-attribution caught at TIEMPO-364)
+- **Fulton lane:** 2/3 candidates screened pre-flight failures = ~67% miss rate at small N (CALBEAF-172 + CALBEAF-166 stale; CALBEAF-131 lane-ambiguous Discovery-pipeline)
+- **Combined cross-persona:** ~5/17 (~29%) miss rate — pre-flight rule pays for itself across both recommender lanes
+
+Cross-persona protocol-norm inheritance demonstrated: Fulton adopted 4-rule pre-flight + cadence-norms + standby-gap-codification within same Sprint 5 day after Sarah codified them.
+
+### 15.5.7 Discovery-discipline meta-lesson (Charter §B.X anchor)
+
+Three observations from the 2026-05-07 arc that compose into a discipline anchor for cross-persona / future-arc reference:
+
+1. **Project-CLAUDE.md context-scoping (under-which-preamble a rule lives) matters as much as rule text.** Rules listed under "Before ANY PROD operation" inherit PROD-context even if their stated language sounds absolute. Always check the section header before applying.
+2. **VM hooks add stricter constraints than project rules.** When mechanism is policy-clean per Layer 1, Layer 2 may still block. Discover-by-empirical-failure is the canonical mode until Layer 2 status is enumerated for the repo+branch combo.
+3. **Merge mechanism may have multiple layers (rule + hook + policy).** Mechanism must be clean at ALL layers OR use a path that bypasses the layers (Toby UI merge bypasses Layers 1+2 simultaneously).
+
+---
+
 ## 16. Common UC Patterns
 
 ### 16.1 Pattern A persistent test user (E2EUSER)
@@ -845,6 +917,7 @@ Per Sprint 4 charter directive (FTPNTD-on-self), TT custom-view selector diverge
 
 ## 19. Change Log
 
+- **v0.8** (2026-05-07T21:08 UTC) — Sarah added §15.5 "Merge Mechanisms + Per-App Guard Rails" (3-layer guard-rail cake + Layer-1 scoping note + per-repo asymmetry table + path-table for sandbox/*→TEST merges + cross-persona pre-flight stats + discovery-discipline meta-lesson). Triggered by 2026-05-07T21:00Z arc: VM hook on TT FE blocked Sarah/Quinn-direct merge mechanism; Quinn ratified Path 1 (Toby UI merge via Number2 surface); Quinn Charter §B.X candidate fold for cross-persona / cross-app reference. Cross-persona empirical baseline cited (Sarah 4/15 + Fulton 2/3 = combined ~29% miss rate on 4-rule pre-flight). Doc-section addition is canonical-shape for adopters: Cord/Compás/Dash/Fulton can enumerate their own per-repo guard rails using same shape. Stacked on v0.2-v0.7 PR #355.
 - **v0.7** (2026-05-07T19:46 UTC) — Sarah added §18.1 codification-cadence note ("memory promotion + maintenance-rule codification happens at standby-gap windows during sprint execution, not deferred to sprint retro"). Patch-class addition (no §0 content change); codifies the meta-pattern that today's `feedback_state_transition_broadcast_discipline.md` promotion (during Phase D entry standby gap) self-evidenced. Triggered by Quinn 2026-05-07T19:44Z optional-fold suggestion. Stacked on v0.2-v0.6 PR #355.
 - **v0.6** (2026-05-07T18:24 UTC) — Sarah added §0.6 FE-side BE-contract-drift handling with two REQUIRED rules (assert response-shape before consuming; never silently fall back on missing/null fields — generalizes `feedback_no_location_fallback.md` HARD RULE to test-assertion layer). Field-tested via UC-0013 (CALBEAF-83 spawn): code-bug @ 0.97 confidence, rule-lane, signals `api_contract` + `data_shape` both ≥95%; root cause = POST `/api/userlogins` missing email-uniqueness dedup at `calendar-be-af/src/functions/UserLogins.js:348-361`. UC-0013 was an API-level BE test, not FE — cited here as detection-layer evidence; FE-side angle is the hypothetical-impact rationale (had a TT FE signup test exercised the endpoint, selector-not-found would have masked the api_contract violation). FOURTH qualitatively distinct trap class; demonstrates §0 canonical-shape absorbing across test-author-domain boundaries (BE-test detection → FE-test discipline). Triggered by Number2 broadcast 18:16Z + Quinn scope-call A 18:19Z + Quinn fill-ins 18:21Z. Same-day-turnaround per cadence-norm. Stacked on v0.2/v0.3/v0.4/v0.5 PR #355.
 - **v0.5** (2026-05-07T17:24 UTC) — Sarah added §18.1 maintenance-cadence note ("when active spawn evidence is available, prefer same-day turnaround on §0 amendments; without that pairing, normal review cadence applies"). Patch-class addition (no §0 content change); codifies the same-day-turnaround norm before adopters fan out so cadence-as-protocol is visible alongside the maintenance rule itself. Triggered by Quinn 2026-05-07T17:22Z protocol-compounding observation (3-min v0.4 turnaround beat 4-min v0.3). Stacked on v0.2/v0.3/v0.4 PR #355.
