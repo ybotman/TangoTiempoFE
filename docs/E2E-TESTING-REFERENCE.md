@@ -55,6 +55,30 @@ Pattern A (persistent E2EUSER at `appId="99"`) and Pattern B (ephemeral aliased 
 
 **Cross-reference:** Pattern A vs B partition asymmetry memory at `~/.claude/projects/.../memory/project_e2e_pattern_a_vs_b_partition_asymmetry.md`.
 
+### 0.4 Modal-bypass standard pattern (REQUIRED)
+
+Two rules that any modal-bypass helper (MapCenterModal, future similar) MUST follow. Both rules are field-tested via UC-0009 self-heal v1 (landed GREEN; the gemini-CLI-authored `bypassModal()` failed on first run by violating rule 1).
+
+**Rule 1 — pre-wait BEFORE visibility check:**
+```typescript
+// REQUIRED: pre-wait
+await page.waitForSelector('[data-testid="<modal-testid>"]', { timeout: 5000 });
+// only THEN check visibility
+const isOpen = await page.locator('[data-testid="<modal-testid>"]').isVisible();
+```
+Why: async modals open after Next.js hydration completes. `isVisible()` / `toBeVisible()` against a not-yet-mounted node silently returns `false` and the helper proceeds as if no modal needs dismissal — but the modal then renders mid-test and blocks downstream interaction. The 5s pre-wait closes the race.
+
+**Rule 2 — post-bypass hidden assertion (REQUIRED end-of-bypass):**
+```typescript
+// after dismissal click(s) complete:
+await expect(page.locator('[data-testid="<modal-testid>"]')).toBeHidden();
+```
+Why: catches "bypass silently no-op'd" on first run. Without this assertion, a bypass helper that fails to actually dismiss the modal (wrong selector, wrong click target, race) appears successful — defect surfaces later as a confusing downstream selector failure. The post-assert makes bypass success/failure binary and obvious.
+
+**Application:** The §3.2 5-step MapCenterModal dismissal recipe is the canonical worked example of these rules — step 1 is the pre-wait, step 5 is the post-assert. Any new modal-bypass helper inherits the same shape: pre-wait → interact → post-assert-hidden.
+
+**Field-test evidence:** UC-0009 spawn 1 RED on first run because gemini-CLI-authored `bypassModal()` had `isVisible()` race (omitted pre-wait). Self-heal v1 added the pre-wait (1-retry); landed GREEN. Twice-proven pattern (UC-0008 §0.1 traps + UC-0009 §0.4 modal-bypass).
+
 ---
 
 ## 1. Glossary
@@ -750,5 +774,6 @@ Per Sprint 4 charter directive (FTPNTD-on-self), TT custom-view selector diverge
 
 ## 19. Change Log
 
+- **v0.3** (2026-05-07T17:08 UTC) — Sarah added §0.4 Modal-bypass standard pattern with two REQUIRED rules (pre-wait `waitForSelector` before visibility check; post-bypass `toBeHidden` assertion). Field-tested via UC-0009 self-heal v1 (Phase C Exit DoD data point #2 GREEN). Pattern proposed by Quinn 2026-05-07T17:04Z under same-day-turnaround protocol established in v0.2. Twice-proven §0 cross-app template signal: UC-0008 §0.1 (traps) + UC-0009 §0.4 (modal-bypass). Stacked on v0.2 PR #355.
 - **v0.2** (2026-05-07T16:45 UTC) — Sarah added §0 Selector Quick Reference + §0.1 Known Selector Traps + §0.2 Selector cheat-sheet by surface + §0.3 Pattern A vs B selector note. Audit code-process fix for TT custom-view selector divergence (Sprint 4 motion 5 per Number2 broadcast 16:30Z; framework-as-product / scale-readiness framing). Added §18.1 FTPNTD self-application + standing maintenance rule. No content removed; existing sections untouched.
 - **v0.1** (2026-05-06T23:55 UTC) — Sarah initial draft per Toby directive 23:50 via Number2. Comprehensive scout of TT FE form/modal/role surface; covers signup / login / apply-as-organizer / event-creation / event-view / RegionalOrganizers admin / role taxonomy / RRULE / modal taxonomy / auto-seed race conditions / bootstrap self-heal / API endpoints / test-mutator companion reference / common UC patterns / wait-for-auth-ready proposal. Phase B Exit retrospective material; living doc.
