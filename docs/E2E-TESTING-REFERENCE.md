@@ -105,6 +105,47 @@ await page.locator('[data-testid="map-center-city-search"]').pressSequentially('
 
 **Three-class trap signal:** §0.1 (selector-doesn't-exist) + §0.4 (async-race on modal) + §0.5 (input-method on controlled combobox) are three qualitatively distinct trap classes empirically surfaced in three consecutive Sprint 4 spawns. ADR-0014 §Empirical evidence absorbs.
 
+### 0.6 FE-side BE-contract-drift handling (REQUIRED)
+
+Two REQUIRED rules for any TT FE test that exercises a BE-call path (Pattern A or Pattern B; live BE always per partition strategy — no mocks).
+
+**Framing note:** UC-0013 itself was an API-level BE test (`tests/be/UC-0013.spec.ts`), not a FE-driven test. UC-0013 is cited here as the **detection-layer evidence** that the api_contract / data_shape failure mode is real and reproducible. The rules below are the **FE-side discipline** that prevents the same class of BE-contract-drift from masking as confusing downstream selector-not-found errors when a TT FE test happens to exercise a contract-violating endpoint.
+
+**Rule 1 — assert response-shape at FE-test layer BEFORE consuming the body:**
+```typescript
+const res = await fetch(`/api/userlogins/firebase/${uid}?appId=1`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
+expect(res.ok).toBe(true);
+const body = await res.json();
+// REQUIRED: assert shape before consuming
+expect(body).toMatchObject({
+  firebaseUserId: expect.any(String),
+  roleIds: expect.any(Array),
+  // ... other expected fields
+});
+// only THEN consume / drive downstream selectors
+```
+Why: when BE contract drifts (missing field, renamed key, type change, or an invariant like dedup-uniqueness silently fails), `body.someField` becomes `undefined` and downstream selectors fail with confusing "element not found" errors. The pre-consume shape assertion makes the failure mode binary and obvious — `api_contract violation at /api/userlogins` instead of `[data-testid="user-display-name"] not found in 30s`.
+
+**Rule 2 — never silently fall back when BE returns unexpected shape (HARD RULE):**
+
+When expected fields are missing/null in a BE response, the test MUST fail rather than defaulting / substituting / proceeding-with-partial-data. Test silence on missing data hides BE contract regressions from the test layer.
+
+This is a generalization of memory `feedback_no_location_fallback.md` (Toby 2026-04-19, "no fallback for location / city / country / region fields") — same never-guess rail, applied to test-assertion layer rather than render layer. If the canonical rule is "render nothing when mastered* is null," the test-layer corollary is "fail the test when mastered* is null and the test depends on it." Substituting from `venue.country` or geocoder fallback hides the data drift at the render layer; substituting in test fixtures hides it at the test layer.
+
+**Field-test evidence (UC-0013 = detection-layer):**
+
+UC-0013 spawned against CALBEAF-83. Classifier verdict: **`code-bug` at 0.97 confidence**, rule-lane (LLM-fallback NOT invoked but converged on agree). Signals fired: `api_contract` + `data_shape`, both ≥95% rule-pass. Audit: `triage/decisions/run-20260507-UC0013.jsonl`.
+
+Root cause (CALBEAF-83): `POST /api/userlogins` dedup gate at `calendar-be-af/src/functions/UserLogins.js:348-361` is `findOne({firebaseUserId, appId})` — **missing the `findOne({'firebaseUserInfo.email': <email>, appId})` email-uniqueness check**. POST-2 with same email + new firebaseUserId returns HTTP 201 (should be 409 or 200-update preserving original UID per spec). Real-world manifestation: Elena Getmanova (2 records same email; Sep-2025 orphan + Feb-2026 active per Fulton intel).
+
+**FE-side hypothetical impact (why this rule matters for TT FE tests):** had a TT FE signup flow test exercised this endpoint and a downstream selector depended on UID-bound profile lookup (user's display name, role badge, settings link), the duplicate-record race would surface as (a) wrong profile rendered (display name from orphan record), or (b) selector-not-found if the FE app's UID resolver picked the orphan record without expected fields. Either way the underlying `api_contract` violation (dedup-not-enforced) gets diagnosed as a confusing downstream selector/render error. Rule 1 catches it at the assertion layer instead.
+
+**Why no Rule 3 in v0.6:** Schema-snapshot tests and runtime-response-validation libraries (Zod / yup / TS runtime validators) are candidate framework-architecture additions for Phase E or later when self-heal needs schema-aware diff. Those are ADR-class decisions, not §0-content additions. Two-rule shape ships clean.
+
+**Four-class trap signal:** §0.1 (selector-doesn't-exist) + §0.4 (async-race on modal) + §0.5 (input-method on controlled combobox) + §0.6 (BE-contract-drift handling) are four qualitatively distinct trap classes empirically surfaced in four consecutive Sprint 4 spawns. The §0 canonical-shape continues absorbing novel fault patterns rather than overfitting; §0.6 specifically demonstrates absorption ACROSS test-author-domain boundaries (BE-test detection → FE-test discipline). ADR-0014 §Empirical evidence absorbs.
+
 ---
 
 ## 1. Glossary
@@ -802,6 +843,7 @@ Per Sprint 4 charter directive (FTPNTD-on-self), TT custom-view selector diverge
 
 ## 19. Change Log
 
+- **v0.6** (2026-05-07T18:24 UTC) — Sarah added §0.6 FE-side BE-contract-drift handling with two REQUIRED rules (assert response-shape before consuming; never silently fall back on missing/null fields — generalizes `feedback_no_location_fallback.md` HARD RULE to test-assertion layer). Field-tested via UC-0013 (CALBEAF-83 spawn): code-bug @ 0.97 confidence, rule-lane, signals `api_contract` + `data_shape` both ≥95%; root cause = POST `/api/userlogins` missing email-uniqueness dedup at `calendar-be-af/src/functions/UserLogins.js:348-361`. UC-0013 was an API-level BE test, not FE — cited here as detection-layer evidence; FE-side angle is the hypothetical-impact rationale (had a TT FE signup test exercised the endpoint, selector-not-found would have masked the api_contract violation). FOURTH qualitatively distinct trap class; demonstrates §0 canonical-shape absorbing across test-author-domain boundaries (BE-test detection → FE-test discipline). Triggered by Number2 broadcast 18:16Z + Quinn scope-call A 18:19Z + Quinn fill-ins 18:21Z. Same-day-turnaround per cadence-norm. Stacked on v0.2/v0.3/v0.4/v0.5 PR #355.
 - **v0.5** (2026-05-07T17:24 UTC) — Sarah added §18.1 maintenance-cadence note ("when active spawn evidence is available, prefer same-day turnaround on §0 amendments; without that pairing, normal review cadence applies"). Patch-class addition (no §0 content change); codifies the same-day-turnaround norm before adopters fan out so cadence-as-protocol is visible alongside the maintenance rule itself. Triggered by Quinn 2026-05-07T17:22Z protocol-compounding observation (3-min v0.4 turnaround beat 4-min v0.3). Stacked on v0.2/v0.3/v0.4 PR #355.
 - **v0.4** (2026-05-07T17:20 UTC) — Sarah added §0.5 Input-method standard for MUI Autocomplete / controlled combobox inputs (REQUIRED rule: `pressSequentially({ delay: 50 })` instead of `.fill()`). Field-tested via UC-0001 batch (verdict FLAKE @ 0.91 confidence; 8-UC self-heal batch GREEN). Third qualitatively distinct trap class (§0.1 selector-doesn't-exist + §0.4 async-race + §0.5 input-method-on-controlled-combobox). Pattern proposed by Quinn 2026-05-07T17:17Z under same-day-turnaround protocol; landed within unilateral canonical-author authority per ADR-0014 Decision #7 (shape-preserving additive content; same REQUIRED-rule format as §0.4). Stacked on v0.2/v0.3 PR #355.
 - **v0.3** (2026-05-07T17:08 UTC) — Sarah added §0.4 Modal-bypass standard pattern with two REQUIRED rules (pre-wait `waitForSelector` before visibility check; post-bypass `toBeHidden` assertion). Field-tested via UC-0009 self-heal v1 (Phase C Exit DoD data point #2 GREEN). Pattern proposed by Quinn 2026-05-07T17:04Z under same-day-turnaround protocol established in v0.2. Twice-proven §0 cross-app template signal: UC-0008 §0.1 (traps) + UC-0009 §0.4 (modal-bypass). Stacked on v0.2 PR #355.
