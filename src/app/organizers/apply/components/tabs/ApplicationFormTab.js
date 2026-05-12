@@ -1,24 +1,21 @@
 'use client';
 
 import React, { useContext } from 'react';
+import Link from 'next/link';
 import {
   Box,
   Typography,
   Paper,
   Alert,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Stepper,
   Step,
   StepLabel,
-  StepContent
+  StepContent,
+  Button,
 } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUsers } from '@/hooks/useUsers';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UserSettingsApply from '@/components/Modals/UserSettings/UserSettingsApply';
 
 const ApplicationFormTab = () => {
@@ -88,45 +85,28 @@ const ApplicationFormTab = () => {
     );
   }
 
-  // If user is already an approved organizer
+  // If user is already an approved organizer (TIEMPO-454: short excerpt + CTA
+  // to /organizers/welcome instead of static "you're done" terminal panel).
   if (userData?.regionalOrganizerInfo?.isApproved) {
     return (
       <Box>
         <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-          You&apos;re Already an Organizer!
+          You&apos;re an Organizer!
         </Typography>
-        
         <Alert severity="success" sx={{ mb: 3 }}>
           <Typography variant="body1">
-            Congratulations! You are an approved TangoTiempo organizer.
+            Your application is approved. Visit your Organizer Welcome page
+            for orientation, guidelines, and (soon) videos &amp; tips.
           </Typography>
         </Alert>
-
-        <Paper elevation={1} sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Your Organizer Status
-          </Typography>
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Application Approved" 
-                secondary="You can now create and manage events"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Organizer ID" 
-                secondary={userData.regionalOrganizerInfo.organizerId || 'Assigned'}
-              />
-            </ListItem>
-          </List>
-        </Paper>
+        <Button
+          component={Link}
+          href="/organizers/welcome"
+          variant="contained"
+          size="large"
+        >
+          Visit your Organizer Welcome →
+        </Button>
       </Box>
     );
   }

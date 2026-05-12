@@ -553,26 +553,18 @@ export function useEventOperations() {
       let preparedData;
       
       if (selectedRole === 'RegionalAdmin') {
-        // RA endpoint has different requirements - prepare minimal data
+        // RA payload — spread cleanedEventData (same pattern as RO) so categories,
+        // isRepeating, recurrence config, forBeginners, etc. ALL propagate. The
+        // earlier hand-listed "minimal" payload silently dropped categoryFirst/Id
+        // and isRepeating, which caused PROD events to save without category and
+        // recurring rules to be ignored (PROD bug 2026-05-01).
         preparedData = {
-          title: cleanedEventData.title,
-          // TIEMPO-245: Include shortTitle field (21 chars max)
+          ...cleanedEventData,
+          // Required RA fields with safe fallbacks
           shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
-          startDate: cleanedEventData.startDate,
-          endDate: cleanedEventData.endDate,
-          ownerOrganizerID: cleanedEventData.ownerOrganizerID,
-          venueID: cleanedEventData.venueID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
-          // Include image fields for RA image upload
-          imageFile: cleanedEventData.imageFile,
-          imagePreviewUrl: cleanedEventData.imagePreviewUrl,
-          eventImage: cleanedEventData.eventImage,
-          fallbackImageUrl: cleanedEventData.fallbackImageUrl,
-          // Include recurring event fields if present
-          recurrenceRule: cleanedEventData.recurrenceRule || undefined,
-          excludedDates: cleanedEventData.excludedDates || undefined,
-          // TIEMPO-388: Include spotlights/features for RA
+          // RA-specific spotlight/features normalization (TIEMPO-388)
           features: cleanedEventData.features || cleanedEventData.spotlights || [],
           spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
@@ -706,14 +698,13 @@ export function useEventOperations() {
         }
       }
 
-      // Validate required fields for RA endpoint
-      if (selectedRole === 'RegionalAdmin') {
-        if (!preparedData.ownerOrganizerID) {
-          throw new Error('RegionalAdmin must specify an ownerOrganizerID for the event');
-        }
-        if (!preparedData.venueID) {
-          throw new Error('RegionalAdmin must specify a venueID for the event');
-        }
+      // RA-specific assertion: ownerOrganizerID must be explicit on submit.
+      // RO has owner implicit (= self, auto-filled), but RA picks an owner from
+      // a dropdown — this catches an empty selection with a clear FE error.
+      // Venue is required for ALL events and validated at form-submit time
+      // (CreateEventDetailModal:519), so no role-specific venue check needed.
+      if (selectedRole === 'RegionalAdmin' && !preparedData.ownerOrganizerID) {
+        throw new Error('RegionalAdmin must specify an ownerOrganizerID for the event');
       }
 
 // TIEMPO-276: Security cleanup - removed logging
@@ -791,27 +782,20 @@ export function useEventOperations() {
       let preparedData;
       
       if (selectedRole === 'RegionalAdmin') {
-        // RA endpoint has different requirements - prepare minimal data
+        // RA payload — spread cleanedEventData (same pattern as RO) so categories,
+        // isRepeating, recurrence config, forBeginners, etc. propagate on UPDATE.
+        // Hand-listed minimal payload was silently dropping fields user edited
+        // (PROD bug 2026-05-01: category + RRULE not saving on RA event update).
         preparedData = {
-          title: cleanedEventData.title,
-          // TIEMPO-245: Include shortTitle field (21 chars max)
+          ...cleanedEventData,
           shortTitle: cleanedEventData.shortTitle || cleanedEventData.shortName || '',
-          startDate: cleanedEventData.startDate,
-          endDate: cleanedEventData.endDate,
-          ownerOrganizerID: cleanedEventData.ownerOrganizerID,
-          venueID: cleanedEventData.venueID,
           description: cleanedEventData.description || '',
           cost: cleanedEventData.cost || '',
-          // Include image fields for RA image upload/delete
-          imageFile: cleanedEventData.imageFile,
-          imagePreviewUrl: cleanedEventData.imagePreviewUrl,
-          eventImage: cleanedEventData.eventImage,
-          fallbackImageUrl: cleanedEventData.fallbackImageUrl,
-          // Include auth fields for RA validation
+          // Auth fields for RA BE validation
           selectedRole: 'RegionalAdmin',
           allowedAdminMasteredCityIds: user?.backendInfo?.localAdminInfo?.allowedAdminMasteredCityIds ||
                                       user?.backendInfo?.localAdminInfo?.adminCities,
-          // TIEMPO-388: Include spotlights/features for RA
+          // RA-specific spotlight/features normalization (TIEMPO-388)
           features: cleanedEventData.features || cleanedEventData.spotlights || [],
           spotlights: cleanedEventData.spotlights || cleanedEventData.features || [],
         };
@@ -858,45 +842,47 @@ export function useEventOperations() {
       delete preparedData.excludeDatesString; // Remove the UI-only string field
       // Ensure we only have excludedDates (with 'd')
       
-      // Only add venue geolocation and mastered location fields for RO updates
-      if (selectedRole !== 'RegionalAdmin') {
-        // If venue has coordinates, include them in venueGeolocation
-        if (eventData.venueLatitude && eventData.venueLongitude) {
-          preparedData.venueGeolocation = {
-            type: "Point",
-            coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
-          };
-        } else if (eventData.venueID) {
-          // We have a venue but no coordinates - need to fetch them
-          try {
-            const { getVenueById } = await import('@/services/venueService');
-            const venueData = await getVenueById(eventData.venueID);
+      // Venue geolocation + masteredRegionName enrichment — runs for BOTH RA and RO.
+      // Previously wrapped in `if (selectedRole !== 'RegionalAdmin')` which meant RA
+      // event updates that changed venue didn't propagate venueGeolocation, breaking
+      // map filters / geo-radius on /calendar. Per architecture intent (RA = RO + bells,
+      // not RA = stripped-down RO), this should always run. Mirrors createEvent which
+      // already does it unconditionally for both roles.
+      if (eventData.venueLatitude && eventData.venueLongitude) {
+        preparedData.venueGeolocation = {
+          type: "Point",
+          coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
+        };
+      } else if (eventData.venueID) {
+        // We have a venue but no coordinates - need to fetch them
+        try {
+          const { getVenueById } = await import('@/services/venueService');
+          const venueData = await getVenueById(eventData.venueID);
 
-            if (venueData && venueData.latitude && venueData.longitude) {
-              preparedData.venueGeolocation = {
-                type: "Point",
-                coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
-              };
-            } else {
-              console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
-              preparedData.venueGeolocation = {
-                type: "Point",
-                coordinates: [0, 0]
-              };
-            }
-          } catch (venueError) {
-            console.error('Error fetching venue data for update:', venueError);
+          if (venueData && venueData.latitude && venueData.longitude) {
+            preparedData.venueGeolocation = {
+              type: "Point",
+              coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
+            };
+          } else {
+            console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
             preparedData.venueGeolocation = {
               type: "Point",
               coordinates: [0, 0]
             };
           }
+        } catch (venueError) {
+          console.error('Error fetching venue data for update:', venueError);
+          preparedData.venueGeolocation = {
+            type: "Point",
+            coordinates: [0, 0]
+          };
         }
+      }
 
-        // Ensure mastered location fields are included
-        if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
-          preparedData.masteredRegionName = preparedData.selectedRegion;
-        }
+      // Ensure mastered location fields are included (both RA and RO)
+      if (!preparedData.masteredRegionName && preparedData.selectedRegion) {
+        preparedData.masteredRegionName = preparedData.selectedRegion;
       }
       
       // Handle image upload if an image file is present

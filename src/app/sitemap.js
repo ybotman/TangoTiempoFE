@@ -114,6 +114,49 @@ async function fetchVenueUrls() {
   }
 }
 
+// Fetch /tango/[parent]/[city] + /tango/[parent] SEO landing pages
+// Pulls from geo-summary which returns 89 cities + 44 parents (post CALBEAF-171).
+// Mirrors the defensive filter from generateStaticParams: skip cities with empty
+// parentSlug (international city-states pending CALBEAF-170 backfill).
+async function fetchTangoSeoUrls() {
+  try {
+    const res = await fetch(`${API_URL}/api/seo/geo-summary?appId=1`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const cities = (data.cities || []).filter((c) => c.parentSlug && c.citySlug);
+
+    const cityUrls = cities.map((c) => ({
+      url: `${BASE_URL}/tango/${c.parentSlug}/${c.citySlug}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    }));
+
+    // Dedupe parents from cities (BE-side parents[] only includes 2+ city
+    // groupings; we need per-parent sitemap entries for ALL parents that have
+    // at least one city, including singletons)
+    const seenParents = new Set();
+    const parentUrls = [];
+    for (const c of cities) {
+      if (seenParents.has(c.parentSlug)) continue;
+      seenParents.add(c.parentSlug);
+      parentUrls.push({
+        url: `${BASE_URL}/tango/${c.parentSlug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.85,
+      });
+    }
+
+    return [...cityUrls, ...parentUrls];
+  } catch (error) {
+    console.error('Error fetching /tango/* SEO URLs for sitemap:', error);
+    return [];
+  }
+}
+
 // Fetch organizers for sitemap (using existing organizersList.json if available)
 async function fetchOrganizerUrls() {
   try {
@@ -160,10 +203,11 @@ async function fetchOrganizerUrls() {
 // Main sitemap function - required export for Next.js App Router
 export default async function sitemap() {
   // Fetch all dynamic URLs in parallel
-  const [eventUrls, venueUrls, organizerUrls] = await Promise.all([
+  const [eventUrls, venueUrls, organizerUrls, tangoSeoUrls] = await Promise.all([
     fetchEventUrls(),
     fetchVenueUrls(),
     fetchOrganizerUrls(),
+    fetchTangoSeoUrls(),
   ]);
 
   // Build static page entries
@@ -177,6 +221,7 @@ export default async function sitemap() {
   // Combine all URLs
   const allUrls = [
     ...staticUrls,
+    ...tangoSeoUrls,    // /tango/[parent] + /tango/[parent]/[city] SEO landings
     ...organizerUrls,
     ...eventUrls,
     ...venueUrls,
@@ -184,6 +229,7 @@ export default async function sitemap() {
 
   console.log(`[Sitemap] Generated ${allUrls.length} URLs:`, {
     static: staticUrls.length,
+    tangoSeo: tangoSeoUrls.length,
     organizers: organizerUrls.length,
     events: eventUrls.length,
     venues: venueUrls.length,

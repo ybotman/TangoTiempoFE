@@ -13,6 +13,9 @@ import { GeoLocationProvider, useGeoLocation } from '@/contexts/GeoLocationConte
 import { EventDiscoveryProvider } from '@/contexts/EventDiscoveryContext';
 import UserLocationLoader from '@/components/UserLocationLoader';
 import SeoCityLinkLoader from '@/components/SeoCityLinkLoader';
+// TIEMPO-454: Auto-redirect to /organizers/welcome on first isEnabled
+// transition (one-time, sessionStorage-gated).
+import OrganizerWelcomeRedirect from '@/components/UI/OrganizerWelcomeRedirect';
 import { getCachedGeolocation } from '@/utils/trackingHelper';
 import { getCountryMapLocation } from '@/utils/countryCenter';
 import { initializeApiFailover, isUsingFailover } from '@/utils/apiUrlResolver';
@@ -201,6 +204,7 @@ const Providers = ({ children }) => {
                 <UserLocationLoader />
                 <MapCenterModalWrapper />
                 <FailoverIndicator />
+                <OrganizerWelcomeRedirect />
                 {children}
               </EventDiscoveryProvider>
             </GeoLocationProvider>

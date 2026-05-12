@@ -28,7 +28,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import SettingsIcon from '@mui/icons-material/Settings';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import CelebrationIcon from '@mui/icons-material/Celebration';
 import { useUsers } from '@/hooks/useUsers';
 import { AuthContext } from '@/contexts/AuthContext';
 import ROTermsModal from '@/components/Modals/UserSettings/UserSettingApplyROTerms';
@@ -58,11 +57,12 @@ const YourStatusTab = () => {
     // Check if restart is needed
     const needsRestart = sessionStorage.getItem('organizerRestartNeeded') === 'true';
     if (needsRestart) return 'restartRequired';
-    
-    // Check if welcome should be shown
-    const hasSeenWelcome = sessionStorage.getItem('organizerWelcomeShown') === 'true';
-    if (isEnabled && !hasSeenWelcome) return 'showWelcome';
-    
+
+    // TIEMPO-454: Welcome celebration moved to dedicated /organizers/welcome
+    // page. Auto-redirect on first isEnabled transition is handled by
+    // <OrganizerWelcomeRedirect /> mounted in Providers; this tab no longer
+    // renders an inline welcome card.
+
     return 'fullyActive';
   };
 
@@ -96,12 +96,6 @@ const YourStatusTab = () => {
 
   const handleRestartComplete = () => {
     sessionStorage.removeItem('organizerRestartNeeded');
-    window.location.reload();
-  };
-
-  const handleWelcomeDismiss = () => {
-    sessionStorage.setItem('organizerWelcomeShown', 'true');
-    // Force re-render
     window.location.reload();
   };
 
@@ -277,31 +271,7 @@ const YourStatusTab = () => {
       </Card>
     ),
 
-    showWelcome: (
-      <Card elevation={3} sx={{ background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' }}>
-        <CardContent sx={{ textAlign: 'center', p: 4, color: 'white' }}>
-          <CelebrationIcon sx={{ fontSize: 80, mb: 2 }} />
-          <Typography variant="h4" gutterBottom>
-            Welcome, Regional Organizer!
-          </Typography>
-          <Typography variant="h6" paragraph>
-            You&apos;re all set to create Argentine Tango events.
-          </Typography>
-          <Button 
-            variant="contained" 
-            sx={{ 
-              bgcolor: 'white', 
-              color: 'primary.main',
-              '&:hover': { bgcolor: 'grey.100' }
-            }}
-            size="large"
-            onClick={handleWelcomeDismiss}
-          >
-            Get Started
-          </Button>
-        </CardContent>
-      </Card>
-    ),
+    // TIEMPO-454: showWelcome renderer removed — superseded by /organizers/welcome page.
 
     fullyActive: (
       <Card elevation={2}>

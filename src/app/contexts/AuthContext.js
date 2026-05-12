@@ -145,17 +145,36 @@ export const AuthProvider = ({ children }) => {
 
 // TIEMPO-276: Security cleanup - removed logging
 
-      // TIEMPO-257: Use dedupeFetch to prevent duplicate calls
-      const response = await dedupeFetch(
-        `${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-          params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID },
-          timeout: 10000 // 10 second timeout
-        }
-      );
+      // TIEMPO-257: Use dedupeFetch to prevent duplicate calls.
+      // TIEMPO-453: Self-heal — if BE returns 404 (Firebase session restored
+      // but no userlogin record exists), fall back to handleBackendUser POST
+      // and re-GET. BE intentionally does not auto-create on 404 (that path
+      // is reserved for cross-app provisioning); FE must create on first
+      // bootstrap. handleBackendUser already runs from explicit sign-ins;
+      // this covers onAuthStateChanged auto-restore too.
+      let response;
+      try {
+        response = await dedupeFetch(
+          `${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`,
+          {
+            headers: { Authorization: `Bearer ${idToken}` },
+            params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID },
+            timeout: 10000,
+          }
+        );
+      } catch (err) {
+        if (err?.response?.status !== 404) throw err;
+        // TIEMPO-453: GET 404 — create the record, then re-GET.
+        await handleBackendUser(firebaseUser);
+        response = await dedupeFetch(
+          `${getApiBaseUrl()}/api/userlogins/firebase/${firebaseUser.uid}`,
+          {
+            headers: { Authorization: `Bearer ${idToken}` },
+            params: { appId: process.env.NEXT_PUBLIC_APPLICATION_ID },
+            timeout: 10000,
+          }
+        );
+      }
 // TIEMPO-276: Security cleanup - removed logging
 
       const backendInfo = response.data;
