@@ -94,6 +94,16 @@ const RootLayout = ({ children }) => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
+        // TIEMPO-324 backfill (Geolocation cycle Phase 6, beat-65): 3-tier
+        // geolocation flat fields (browser GPS → Google API → ipinfo fallback)
+        // — matches the existing VisitorTrack + UserLoginTrack writers so BE
+        // source-attribution chain (GoogleBrowser > GoogleGeolocation > IPInfoIO)
+        // can stamp the canonical source per Invariant 8. Without this call,
+        // MapCenterTrack POSTs only the nested {cloudflare, google, ipapi}
+        // shape, which fails the BE's flat-field priority chain and falls
+        // through to 100% IPInfoIO attribution.
+        const browserGeoData = await getGeolocationData();
+
         // PHASE 1.2: Use 1-hour cache for map center changes
         const geoData = await fetchAllGeolocationData(60);
 
@@ -112,7 +122,13 @@ const RootLayout = ({ children }) => {
             timezoneOffset: -new Date().getTimezoneOffset(),
             cloudflare: geoData.cloudflare,
             google: geoData.google,
-            ipapi: geoData.ipapi
+            ipapi: geoData.ipapi,
+            // TIEMPO-324 backfill: 3-tier flat fields (Invariant 8 contract)
+            google_browser_lat: browserGeoData.google_browser_lat,
+            google_browser_long: browserGeoData.google_browser_long,
+            google_browser_accuracy: browserGeoData.google_browser_accuracy,
+            google_api_lat: browserGeoData.google_api_lat,
+            google_api_long: browserGeoData.google_api_long
           })
         });
       } catch (error) {
