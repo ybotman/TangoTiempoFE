@@ -280,6 +280,22 @@ const MapCenterModal = ({
   headerOverride = null,
   autoFocusCitySearch = false,
 }) => {
+  // TIEMPO-457 v1.27.3: programmatic focus fallback for the prompt-driven open
+  // path. The TextField's `autoFocus` prop is mount-time-only and won't fire if
+  // autoFocusCitySearch flips from false→true while the modal is already open
+  // (race-condition path: WelcomeModal opens cold, L4 sets prompt later).
+  // This effect fires .focus() whenever (open && autoFocusCitySearch) becomes
+  // true, with a 100ms delay to give MUI Autocomplete + leaflet enough time
+  // to settle before we steal focus.
+  const citySearchInputRef = useRef(null);
+  useEffect(() => {
+    if (open && autoFocusCitySearch && citySearchInputRef.current) {
+      const t = setTimeout(() => {
+        citySearchInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(t);
+    }
+  }, [open, autoFocusCitySearch]);
   const { user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -1008,7 +1024,26 @@ const MapCenterModal = ({
               variant="outlined"
               size="small"
               autoFocus={autoFocusCitySearch}
-              sx={{ mb: 1 }}
+              inputRef={citySearchInputRef}
+              helperText={autoFocusCitySearch ? '↓ Pick a major city to start' : undefined}
+              sx={autoFocusCitySearch ? {
+                mb: 1,
+                // TIEMPO-457 v1.27.3 visual cue: subtle pulse on the
+                // typeahead when the prompt-driven open path is active
+                '@keyframes citySearchPulse': {
+                  '0%, 100%': { boxShadow: '0 0 0 0 rgba(139, 21, 56, 0.4)' },
+                  '50%':      { boxShadow: '0 0 0 6px rgba(139, 21, 56, 0)' },
+                },
+                '& .MuiOutlinedInput-root': {
+                  animation: 'citySearchPulse 1.8s ease-in-out infinite',
+                  '& fieldset': { borderColor: 'primary.main', borderWidth: 2 },
+                },
+                '& .MuiFormHelperText-root': {
+                  color: 'primary.main',
+                  fontWeight: 500,
+                  mt: 0.5,
+                },
+              } : { mb: 1 }}
               inputProps={{
                 ...params.inputProps,
                 'data-testid': 'map-center-city-search',

@@ -35,7 +35,7 @@ const needsLocationSetup = () => {
 
 const WelcomeModal = () => {
   const { user } = useContext(AuthContext);
-  const { openMapCenterModal } = useGeoLocation();
+  const { openMapCenterModal, setMapCenterModalPrompt } = useGeoLocation();
   const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
@@ -53,9 +53,14 @@ const WelcomeModal = () => {
       return;
     }
 
+    // TIEMPO-457 v1.27.3: set the prompt BEFORE opening so MapCenterModal
+    // mounts with headerOverride + autoFocusCitySearch already active. Without
+    // this WelcomeModal opens cold (t≈800ms) and the L4 cascade only sets the
+    // prompt later (t≈1-5s), by which point autoFocus is dead (mount-time only).
+    setMapCenterModalPrompt('What major city would you like to see?');
     openMapCenterModal();
     setHasChecked(true);
-  }, [hasChecked, openMapCenterModal, user]);
+  }, [hasChecked, openMapCenterModal, setMapCenterModalPrompt, user]);
 
   return null;
 };
