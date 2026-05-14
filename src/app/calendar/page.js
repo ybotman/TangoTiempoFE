@@ -1248,24 +1248,9 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      {noLocationSelected ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 20px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px',
-          margin: '20px',
-        }}>
-          <h2 style={{ marginBottom: '20px', color: '#666' }}>
-            Loading Map Settings...
-          </h2>
-          <p style={{ fontSize: '16px', color: '#777' }}>
-            Opening location selector
-          </p>
-        </div>
-      ) : (
-        <div
-          onTouchStart={onTouchStart}
+      {/* TIEMPO-457: removed noLocationSelected conditional render gate (audit Defect 2). FullCalendar mounts immediately; useEvents short-circuits its fetch when no location is set; default-location fallback chain is supplied by Providers.getInitialLocation. */}
+      <div
+        onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
           style={{
@@ -1568,9 +1553,8 @@ const CalendarPage = () => {
           // Future days: default styling (no background color override)
         }}
       />
-        </div>
-      )}
-      
+      </div>
+
       {/* SubMenu */}
       <CalendarSubMenu
         menuAnchor={menuAnchor}

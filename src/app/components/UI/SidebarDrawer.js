@@ -653,8 +653,9 @@ const SidebarDrawer = ({ open, onClose }) => {
           setSelectedOrganizers(selected);
         }}
       />
-      <DebugMenu open={debugMenuOpen} onClose={() => setDebugMenuOpen(false)} /> {/* DEBUG MENU */}
-      <ServiceStatusModal open={serviceStatusOpen} onClose={() => setServiceStatusOpen(false)} />
+      {/* TIEMPO-457: parent-conditional guard prevents always-mounted side-effecting modals from firing health-check hooks on every page load (audit Defect 1) */}
+      {debugMenuOpen && <DebugMenu open={debugMenuOpen} onClose={() => setDebugMenuOpen(false)} />}
+      {serviceStatusOpen && <ServiceStatusModal open={serviceStatusOpen} onClose={() => setServiceStatusOpen(false)} />}
     </>
   );
 };
