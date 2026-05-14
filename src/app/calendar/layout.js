@@ -1,29 +1,24 @@
 //@/calendar/layout.js
 'use client'; // Enable client-side rendering
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Snackbar, Alert, Button } from '@mui/material';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
 import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
 import { getOrCreateVisitorId, getLastMapCenter } from '@/utils/visitorTracking';
-import { getCountryCenter, getCountryMapLocation } from '@/utils/countryCenter';
-
-// TIEMPO-457: Country-size split for Level-4 fallback nudge. Big countries get a
-// "Select your city" CTA in the Snackbar because the country center is far from
-// most users; small countries omit the CTA because the center is effectively the
-// main metro.
-const BIG_COUNTRIES = new Set(['US', 'CA', 'AR', 'BR', 'AU', 'DE', 'ES', 'FR', 'IT', 'GB']);
+import { getCountryMapLocation } from '@/utils/countryCenter';
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { currentLocation, setSessionLocation, openMapCenterModal } = useGeoLocation();
-
-  // TIEMPO-457: Level-4 soft popup state. Null when not needed.
-  const [countryHint, setCountryHint] = useState(null);
+  const {
+    currentLocation,
+    setSessionLocation,
+    openMapCenterModal,
+    setMapCenterModalPrompt,
+  } = useGeoLocation();
 
   // TIEMPO-313 / TIEMPO-329 / TIEMPO-457: Calendar bootstrap.
   // Runs once on /calendar mount. Two responsibilities:
@@ -98,26 +93,28 @@ const RootLayout = ({ children }) => {
         // calculation. PHASE 1.2: 24-hour cache for visitor tracking.
         const geoData = await fetchAllGeolocationData(1440);
 
-        // Level 4 — Cloudflare country fallback (soft popup).
-        // fetchAllGeolocationData populates the CF cache, so we read its result
-        // directly rather than re-reading via getCachedGeolocation.
+        // Level 4 — Cloudflare country fallback. v1.27.2: replaces the prior
+        // Snackbar UX with an auto-opened MapCenterModal carrying a custom
+        // header copy + autoFocused typeahead. Per Quinn's storage-rule
+        // arbitration, this session-only context MUST NOT overwrite a prior
+        // user-explicit pick — so the setSessionLocation call passes
+        // skipPersist:true. A subsequent user typeahead pick inside the modal
+        // goes through setSessionLocation without skipPersist and IS persisted
+        // (Level 2 reuse on next visit).
         if (!resolved && geoData?.cloudflare?.country) {
           const country = String(geoData.cloudflare.country).toUpperCase();
-          const center = getCountryCenter(country);
           const mapLoc = getCountryMapLocation(country);
-          if (center && mapLoc) {
+          if (mapLoc) {
             await setSessionLocation({
               lat: mapLoc.lat,
               lng: mapLoc.lng,
               zoomRange: mapLoc.zoomRange || 200,
               source: 'cloudflare-country',
+              skipPersist: true,
             });
             try { sessionStorage.setItem('locationCascadeSource', 'cloudflare-country'); } catch { /* sessionStorage unavailable */ }
-            setCountryHint({
-              countryCode: country,
-              countryName: center.name,
-              isBig: BIG_COUNTRIES.has(country),
-            });
+            setMapCenterModalPrompt('What major city would you like to see?');
+            openMapCenterModal();
             resolved = true;
           }
         }
@@ -239,45 +236,7 @@ const RootLayout = ({ children }) => {
     return () => { unsubscribe(); };
   }, [user]);
 
-  return (
-    <>
-      {children}
-      {/* TIEMPO-457 Level-4 soft popup: CF country fallback notice */}
-      <Snackbar
-        open={!!countryHint}
-        autoHideDuration={countryHint?.isBig ? null : 8000}
-        onClose={(_event, reason) => {
-          if (reason === 'clickaway') return;
-          setCountryHint(null);
-        }}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity="info"
-          onClose={() => setCountryHint(null)}
-          action={
-            countryHint?.isBig ? (
-              <Button
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  openMapCenterModal();
-                  setCountryHint(null);
-                }}
-              >
-                Select your city
-              </Button>
-            ) : null
-          }
-          sx={{ width: '100%' }}
-        >
-          {countryHint
-            ? `No good location found — centering on ${countryHint.countryName}`
-            : ''}
-        </Alert>
-      </Snackbar>
-    </>
-  );
+  return <>{children}</>;
 };
 
 // Define prop types for validation
@@ -286,3 +245,6 @@ RootLayout.propTypes = {
 };
 
 export default RootLayout;
+/* v1.27.2 typeahead-prompt: prior Snackbar UX removed in favor of
+   auto-opened MapCenterModal with header override "What major city would
+   you like to see?" + autoFocused typeahead (per Quinn 19:49Z arbitration). */

@@ -276,7 +276,9 @@ const MapCenterModal = ({
   onSetLocation,
   onSaveLocation,
   initialLocation = null, // No hardcoded default - use smart fallback from Providers
-
+  // TIEMPO-457 v1.27.2: prompt-driven open path (L4 cascade fallback).
+  headerOverride = null,
+  autoFocusCitySearch = false,
 }) => {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -843,7 +845,7 @@ const MapCenterModal = ({
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocationOnIcon color="primary" />
-          <Typography variant="h6">Map Center Settings</Typography>
+          <Typography variant="h6">{headerOverride || 'Map Center Settings'}</Typography>
         </Box>
         <IconButton onClick={onClose} size="small" data-testid="map-center-close">
           <CloseIcon />
@@ -1005,6 +1007,7 @@ const MapCenterModal = ({
               placeholder="Search city (e.g., Los Angeles)"
               variant="outlined"
               size="small"
+              autoFocus={autoFocusCitySearch}
               sx={{ mb: 1 }}
               inputProps={{
                 ...params.inputProps,
@@ -1177,4 +1180,6 @@ MapCenterModal.propTypes = {
     }),
     PropTypes.oneOf([null])
   ]),
+  headerOverride: PropTypes.string,
+  autoFocusCitySearch: PropTypes.bool,
 };
