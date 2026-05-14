@@ -15,7 +15,7 @@ const COOKIE_EXPIRY_DAYS = 365; // 1 year as per TIEMPO-329 spec
 const WELCOME_SHOWN_KEY = 'welcome_shown';
 const WELCOME_SHOWN_AT_KEY = 'welcome_shown_at';
 const VISITOR_FIRST_VISIT_KEY = 'visitor_first_visit';
-const LAST_MAP_CENTER_KEY = 'last_map_center';
+const LAST_MAP_CENTER_KEY = 'tt_geo_v2_pick';
 const VISIT_COUNT_KEY = 'visit_count'; // TIEMPO-329: Track visit number for onboarding flow
 
 /**
@@ -208,6 +208,11 @@ export const saveLastMapCenter = (mapCenter) => {
  */
 export const getLastMapCenter = () => {
   if (typeof localStorage === 'undefined') return null;
+
+  // TIEMPO-458: one-shot eviction of pre-v2 keys (broken Google-era cache)
+  if (localStorage.getItem('last_map_center') !== null) {
+    localStorage.removeItem('last_map_center');
+  }
 
   const stored = localStorage.getItem(LAST_MAP_CENTER_KEY);
   if (!stored) return null;
