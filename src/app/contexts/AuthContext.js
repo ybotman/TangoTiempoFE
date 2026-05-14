@@ -22,7 +22,6 @@ import { auth, facebookProvider, googleProvider, appleProvider } from '@/utils/f
 import axios from 'axios';
 import { dedupeFetch } from '@/utils/dedupeFetch';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
-import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 
 // Create Auth Context
@@ -109,38 +108,30 @@ export const AuthProvider = ({ children }) => {
       } else {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
-        // TIEMPO-324: Get 3-tier geolocation data (browser GPS → Google API → ipinfo fallback)
-        getGeolocationData().then(browserGeoData => {
-          // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-          // TIEMPO-319: Use 8-hour cache for login tracking (480 minutes)
-          fetchAllGeolocationData(480).then(geoData => {
-            fetch(`${afUrl}/api/user/login-track`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${idToken}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                loginType: loginType, // 'auto' or 'manual'
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timezoneOffset: -new Date().getTimezoneOffset(),
+        // TIEMPO-459: login-track POST. TIEMPO-458 removed google-geolocate;
+        // userLocation is now the CF-inferred location captured at session start.
+        fetchAllGeolocationData(480).then(geoData => {
+          let userLocation = null;
+          try { userLocation = JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { /* ignore */ }
 
-                // Existing geolocation data
-                cloudflare: geoData.cloudflare,
-                google: geoData.google,
-                ipapi: geoData.ipapi,
-                distance: geoData.distance,
-
-                // TIEMPO-324: 3-tier geolocation (browser GPS, Google API)
-                google_browser_lat: browserGeoData.google_browser_lat,
-                google_browser_long: browserGeoData.google_browser_long,
-                google_browser_accuracy: browserGeoData.google_browser_accuracy,
-                google_api_lat: browserGeoData.google_api_lat,
-                google_api_long: browserGeoData.google_api_long
-              })
-            }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
-          }).catch(err => console.warn('[Login Tracking] Geo fetch failed:', err.message));
-        }).catch(err => console.warn('[Login Tracking] Browser geo failed:', err.message));
+          fetch(`${afUrl}/api/user/login-track`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${idToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              loginType: loginType,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              timezoneOffset: -new Date().getTimezoneOffset(),
+              cloudflare: geoData.cloudflare,
+              google: geoData.google,
+              ipapi: geoData.ipapi,
+              distance: geoData.distance,
+              userLocation,
+            })
+          }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
+        }).catch(err => console.warn('[Login Tracking] Geo fetch failed:', err.message));
       }
 
 // TIEMPO-276: Security cleanup - removed logging

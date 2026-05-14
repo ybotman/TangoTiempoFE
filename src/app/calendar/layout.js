@@ -59,6 +59,23 @@ const RootLayout = ({ children }) => {
           cfGeo = cfRes.ok ? await cfRes.json() : null;
         } catch { /* network error — fall to L4 */ }
 
+        // TIEMPO-459: persist userLocation (where user IS) once per session.
+        // Separate from mapCenter. Does not drive localStorage.
+        if (cfGeo) {
+          try {
+            sessionStorage.setItem('cf_user_location', JSON.stringify({
+              city: cfGeo.city, country: cfGeo.country,
+              lat: cfGeo.lat, lng: cfGeo.lng,
+            }));
+          } catch { /* sessionStorage unavailable */ }
+        }
+
+        // TIEMPO-459: capture entryDomain (?src= param) once per session.
+        try {
+          const src = new URLSearchParams(window.location.search).get('src');
+          if (src) sessionStorage.setItem('entry_domain', src);
+        } catch { /* sessionStorage unavailable */ }
+
         if (!resolved && cfGeo?.city && cfGeo.lat !== null && cfGeo.lng !== null) {
           await setSessionLocation({
             lat: cfGeo.lat,
@@ -177,7 +194,10 @@ const RootLayout = ({ children }) => {
             google: geoData.google,
             ipapi: geoData.ipapi,
                 // TIEMPO-457: telemetry — which cascade level resolved this location
-            cascadeSource
+            cascadeSource,
+            // TIEMPO-459: where the user IS (CF-inferred, session-start only)
+            userLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
+            entryDomain: (() => { try { return sessionStorage.getItem('entry_domain') || null; } catch { return null; } })()
           })
         });
       } catch (error) {
