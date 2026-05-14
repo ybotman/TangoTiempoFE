@@ -55,22 +55,16 @@ const RootLayout = ({ children }) => {
         // and for Level-3 resolution.
         const browserGeoData = await getGeolocationData();
 
-        // Level 3 — browser GPS (Tier 1). Silent.
+        // Level 3 — browser GPS (Tier 1) or Google API / ipinfo proxy (Tier 2).
+        // Silent.
         //
-        // TIEMPO-457 v1.27.1: Tier 2 (Google API / `google_api_*`) is DISABLED
-        // pending Fulton's BE fix. The `/api/geo/google-geolocate` BE proxy
-        // calls Google from the server side, so Google sees Azure's egress IP
-        // and returns Northern Virginia (38.9847, -77.5619) for every user
-        // regardless of who they are — confirmed via Fulton's log pull
-        // (two different user IPs, identical google_api coordinates). The
-        // unblock condition is Fulton passing `CF-Connecting-IP` to Google's
-        // API call with `considerIp: false`. Re-enable the `else if` branch
-        // once BE returns user-specific google_api coords.
-        //
-        // Flat-field forwarding of `google_api_lat`/`google_api_long` in the
-        // tracking POST is preserved — the BE source-attribution chain still
-        // consumes those fields per Invariant 8, and incorrect coords land
-        // in the analytics history rather than the user-facing cascade.
+        // TIEMPO-457 v1.27.3: Tier 2 re-enabled. CALBEAF-189 swapped the
+        // `/api/geo/google-geolocate` backing impl from Google API
+        // (server-side, returned Azure egress 38.98/-77.56 for every user)
+        // to ipinfo.io with CF-Connecting-IP forwarding. Smoke verified
+        // 3 distinct IPs return 3 distinct correct locations (Mountain View
+        // / Brisbane / Ashburn — none Azure egress). FE consumes the same
+        // response shape; the endpoint name retained for future ADR.
         if (!resolved) {
           if (browserGeoData?.google_browser_lat && browserGeoData?.google_browser_long) {
             await setSessionLocation({
@@ -80,6 +74,15 @@ const RootLayout = ({ children }) => {
               source: 'browser-gps',
             });
             try { sessionStorage.setItem('locationCascadeSource', 'browser-gps'); } catch { /* sessionStorage unavailable */ }
+            resolved = true;
+          } else if (browserGeoData?.google_api_lat && browserGeoData?.google_api_long) {
+            await setSessionLocation({
+              lat: browserGeoData.google_api_lat,
+              lng: browserGeoData.google_api_long,
+              zoomRange: 75,
+              source: 'google-api',
+            });
+            try { sessionStorage.setItem('locationCascadeSource', 'google-api'); } catch { /* sessionStorage unavailable */ }
             resolved = true;
           }
         }
