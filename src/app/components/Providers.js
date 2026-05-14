@@ -31,6 +31,7 @@ const MapCenterModal = dynamic(
 const MapCenterModalWrapper = () => {
   const {
     mapCenterModalOpen,
+    mapCenterModalPrompt,
     closeMapCenterModal,
     setSessionLocation,
     saveToCloudDefault,
@@ -81,6 +82,8 @@ const MapCenterModalWrapper = () => {
       onSaveLocation={saveToCloudDefault}
       initialLocation={getInitialLocation()}
       savedLocation={savedLocation}
+      headerOverride={mapCenterModalPrompt}
+      autoFocusCitySearch={!!mapCenterModalPrompt}
     />
   );
 };
