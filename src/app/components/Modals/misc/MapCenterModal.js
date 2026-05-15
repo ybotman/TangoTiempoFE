@@ -1108,8 +1108,8 @@ const MapCenterModal = ({
 
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, pt: 0.5 }}>
               <Typography variant="caption" color="text.secondary"
-                sx={{ textAlign: 'right', lineHeight: 1.4, fontSize: '0.65rem', userSelect: 'none' }}>
-                ↑ major city<br />or ↓ map
+                sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
+                ↑ major city
               </Typography>
               <Button
                 variant="contained"
@@ -1121,6 +1121,10 @@ const MapCenterModal = ({
               >
                 {loading ? 'Saving...' : 'Save'}
               </Button>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
+                ↓ map
+              </Typography>
             </Box>
 
           </Box>{/* end left column */}
