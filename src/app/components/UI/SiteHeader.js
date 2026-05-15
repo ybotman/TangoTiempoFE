@@ -4,14 +4,12 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { RoleContext } from '@/contexts/RoleContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
-import { useBackendHealth } from '@/hooks/useBackendHealth';
 import packageJson from '../../../../package.json';
 
 const SiteHeader = () => {
   const { selectedRole } = useContext(RoleContext);
   // TIEMPO-388: Read cityName from context instead of local state
   const { currentLocation, openMapCenterModal } = useGeoLocation();
-  useBackendHealth();
   const appVersion = `v${packageJson.version}`; // Dynamically read from package.json
 
   // Pulse animation state - triggers on mount and location changes

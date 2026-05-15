@@ -108,6 +108,10 @@ export const GeoLocationProvider = ({ children }) => {
 
   // State for MapCenterModal
   const [mapCenterModalOpen, setMapCenterModalOpen] = useState(false);
+  // TIEMPO-457 v1.27.2: optional header copy + autofocus signal driven by the
+  // L4 cascade ("What major city would you like to see?"). Null when the modal
+  // is opened via the normal UI path.
+  const [mapCenterModalPrompt, setMapCenterModalPrompt] = useState(null);
 
   // TIEMPO-381: State for onboarding modal (new users without mapCenter)
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
@@ -435,10 +439,17 @@ export const GeoLocationProvider = ({ children }) => {
   const closeMapCenterModal = useCallback(() => {
     // TIEMPO-276: Security cleanup - removed modal logging
     setMapCenterModalOpen(false);
+    // TIEMPO-457 v1.27.2: clear cascade-prompt so a subsequent normal-flow open
+    // (e.g., user-tap from header) shows the default "Map Center Settings" header.
+    setMapCenterModalPrompt(null);
   }, []);
 
   // Set location for current session (used by MapCenterModal)
   // TIEMPO-388: Now fetches city name synchronously instead of relying on reactive useEffect
+  // TIEMPO-457 v1.27.2: Accepts `skipPersist: true` to avoid downgrading the
+  // saved `last_map_center` localStorage entry with a low-confidence cascade
+  // result (L4 CF country / L5 default). Only user-explicit picks (typeahead,
+  // map-click, saved-pref restore) should overwrite the stored location.
   const setSessionLocation = useCallback(async (locationData) => {
     const location = {
       lat: locationData.centerLocation?.lat || locationData.lat,
@@ -450,12 +461,17 @@ export const GeoLocationProvider = ({ children }) => {
     if (locationData.source) location.source = locationData.source;
     if (locationData.locked !== undefined) location.locked = locationData.locked;
 
-    // TIEMPO-388: Also save to localStorage for WelcomeModal check on next visit
-    saveLastMapCenter({
-      lat: location.lat,
-      lng: location.lng,
-      zoomRange: location.zoomRange
-    });
+    // TIEMPO-457 v1.27.2: skipPersist=true bypasses localStorage write so a
+    // session-only context (e.g. CF-country fallback) never overwrites a
+    // user-explicit prior pick.
+    if (!locationData.skipPersist) {
+      // TIEMPO-388: Also save to localStorage for WelcomeModal check on next visit
+      saveLastMapCenter({
+        lat: location.lat,
+        lng: location.lng,
+        zoomRange: location.zoomRange
+      });
+    }
 
     // Emit event to trigger refresh
     locationEventBus.emit(LOCATION_EVENTS.LOCATION_CHANGED, location);
@@ -675,6 +691,7 @@ export const GeoLocationProvider = ({ children }) => {
     savedLocation,
     currentLocation,
     mapCenterModalOpen,
+    mapCenterModalPrompt,
     needsOnboarding,
 
     // Functions
@@ -688,6 +705,7 @@ export const GeoLocationProvider = ({ children }) => {
     closeLocationSettings,
     openMapCenterModal,
     closeMapCenterModal,
+    setMapCenterModalPrompt,
     setSessionLocation,
     saveAndSetLocation,
     saveToCloudDefault,

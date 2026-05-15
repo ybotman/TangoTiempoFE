@@ -2,41 +2,90 @@
 'use client'; // Enable client-side rendering
 
 import React, { useContext, useEffect } from 'react';
-import PropTypes from 'prop-types'; // Import prop-types
+import PropTypes from 'prop-types';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useGeoLocation } from '@/contexts/GeoLocationContext';
 import { fetchAllGeolocationData } from '@/utils/trackingHelper';
-import { getGeolocationData } from '@/utils/geolocationHelper'; // TIEMPO-324: 3-tier geolocation
 import { locationEventBus, LOCATION_EVENTS } from '@/utils/LocationEventBus';
-import { getOrCreateVisitorId } from '@/utils/visitorTracking'; // TIEMPO-329: Visitor ID tracking
+import { getOrCreateVisitorId, getLastMapCenter } from '@/utils/visitorTracking';
+import { getCountryMapLocation } from '@/utils/countryCenter';
 
 const RootLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { currentLocation, setSessionLocation } = useGeoLocation();
+  const {
+    currentLocation,
+    setSessionLocation,
+    openMapCenterModal,
+    setMapCenterModalPrompt,
+  } = useGeoLocation();
 
-  // TIEMPO-313: Visitor tracking on calendar page load (fire and forget)
-  // TIEMPO-329: Now includes visitor_id cookie for persistent identity
+  // TIEMPO-313 / TIEMPO-329 / TIEMPO-457: Calendar bootstrap.
+  // Runs once on /calendar mount. Two responsibilities:
+  //   (1) Resolve the user's location for the calendar view if not already set.
+  //       Priority cascade Level 2 → 3 → 4 (Level 1 logged-in saved is upstream).
+  //   (2) Fire visitor-tracking POST.
   useEffect(() => {
-    const trackVisitor = async () => {
+    const init = async () => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
-
-        // TIEMPO-329: Get or create persistent visitor_id (UUID cookie)
         const visitorId = getOrCreateVisitorId();
 
-        // TIEMPO-324: Get 3-tier geolocation data (browser GPS -> Google API -> ipinfo fallback)
-        const browserGeoData = await getGeolocationData();
+        // Skip the cascade if any prior layer already set a location.
+        const hasCurrentLocation = currentLocation?.lat && currentLocation?.lng;
+        let resolved = !!hasCurrentLocation;
 
-        // TIEMPO-329 Phase 1.1: Auto-center map from GPS if no location selected
-        if ((!currentLocation?.lat && !currentLocation?.lng) &&
-            browserGeoData?.google_browser_lat &&
-            browserGeoData?.google_browser_long) {
+        // Level 2 — anonymous previously-set location restored from localStorage (silent).
+        if (!resolved) {
+          const lastCenter = getLastMapCenter();
+          if (lastCenter?.lat && lastCenter?.lng) {
+            await setSessionLocation({
+              lat: lastCenter.lat,
+              lng: lastCenter.lng,
+              zoomRange: lastCenter.zoomRange || 50,
+              source: 'anon-cookie',
+            });
+            try { sessionStorage.setItem('locationCascadeSource', 'anon-cookie'); } catch { /* sessionStorage unavailable */ }
+            resolved = true;
+          }
+        }
 
-          setSessionLocation({
-            lat: browserGeoData.google_browser_lat,
-            lng: browserGeoData.google_browser_long,
-            zoomRange: 75  // 75-mile radius as requested
+        // TIEMPO-458: Level 3 — Cloudflare edge city (silent, no prompt, no pill).
+        // Reads CF Managed Transform headers via /api/geo/cf-location route handler.
+        // On TEST (CNAME/O2O), CF headers don't flow → miss is expected, falls to L4.
+        // On PROD (A-record, full CF proxy), city resolves silently as mapCenter.
+        let cfGeo = null;
+        try {
+          const cfRes = await fetch('/api/geo/cf-location');
+          cfGeo = cfRes.ok ? await cfRes.json() : null;
+        } catch { /* network error — fall to L4 */ }
+
+        // TIEMPO-459: persist userLocation (where user IS) once per session.
+        // Separate from mapCenter. Does not drive localStorage.
+        if (cfGeo) {
+          try {
+            sessionStorage.setItem('cf_user_location', JSON.stringify({
+              city: cfGeo.city, country: cfGeo.country,
+              lat: cfGeo.lat, lng: cfGeo.lng,
+            }));
+          } catch { /* sessionStorage unavailable */ }
+        }
+
+        // TIEMPO-459: capture entryDomain (?src= param) once per session.
+        try {
+          const src = new URLSearchParams(window.location.search).get('src');
+          if (src) sessionStorage.setItem('entry_domain', src);
+        } catch { /* sessionStorage unavailable */ }
+
+        if (!resolved && cfGeo?.city && cfGeo.lat !== null && cfGeo.lng !== null) {
+          await setSessionLocation({
+            lat: cfGeo.lat,
+            lng: cfGeo.lng,
+            zoomRange: 75,
+            source: 'cf-city',
+            skipPersist: true,
           });
+          try { sessionStorage.setItem('locationCascadeSource', 'cf-city'); } catch { /* sessionStorage unavailable */ }
+          resolved = true;
         }
 
         // Skip AF tracking calls on localhost
@@ -44,9 +93,37 @@ const RootLayout = ({ children }) => {
           return;
         }
 
-        // Fetch all geolocation data (Cloudflare, Google, IP API) with distance calculation
-        // PHASE 1.2: Use 24-hour cache for visitor tracking
-        const geoData = await fetchAllGeolocationData(1440); // 1440 minutes = 24 hours
+        // Fetch all geolocation data (Cloudflare, Google, IP API) with distance
+        // calculation. PHASE 1.2: 24-hour cache for visitor tracking.
+        const geoData = await fetchAllGeolocationData(1440);
+
+        // Level 4 — Cloudflare country fallback (modal). CF city was null at L3
+        // (country-only resolution). Per storage-rule: skipPersist:true so a
+        // session-only country-center never overwrites a prior explicit pick.
+        if (!resolved && cfGeo?.country) {
+          const country = String(cfGeo.country).toUpperCase();
+          const mapLoc = getCountryMapLocation(country);
+          if (mapLoc) {
+            await setSessionLocation({
+              lat: mapLoc.lat,
+              lng: mapLoc.lng,
+              zoomRange: mapLoc.zoomRange || 200,
+              source: 'cloudflare-country',
+              skipPersist: true,
+            });
+            try { sessionStorage.setItem('locationCascadeSource', 'cloudflare-country'); } catch { /* sessionStorage unavailable */ }
+            setMapCenterModalPrompt('What major city would you like to see?');
+            openMapCenterModal();
+            resolved = true;
+          }
+        }
+
+        // Level 5 — no action. Toby confirmed browser provides something 99%+ of
+        // the time; if everything fails, the existing default map center applies
+        // and the header location selector remains available on-demand.
+        if (!resolved) {
+          try { sessionStorage.setItem('locationCascadeSource', 'default-fallback'); } catch { /* sessionStorage unavailable */ }
+        }
 
         await fetch(`${afUrl}/api/visitor/track`, {
           method: 'POST',
@@ -65,12 +142,7 @@ const RootLayout = ({ children }) => {
             cloudflare: geoData.cloudflare,
             google: geoData.google,
             ipapi: geoData.ipapi,
-            distance: geoData.distance,
-            google_browser_lat: browserGeoData.google_browser_lat,
-            google_browser_long: browserGeoData.google_browser_long,
-            google_browser_accuracy: browserGeoData.google_browser_accuracy,
-            google_api_lat: browserGeoData.google_api_lat,
-            google_api_long: browserGeoData.google_api_long
+            distance: geoData.distance
           })
         });
       } catch (error) {
@@ -79,7 +151,7 @@ const RootLayout = ({ children }) => {
       }
     };
 
-    trackVisitor();
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only fire once on mount
 
@@ -94,22 +166,20 @@ const RootLayout = ({ children }) => {
       try {
         const afUrl = process.env.NEXT_PUBLIC_AF_URL || 'http://localhost:7071';
 
-        // TIEMPO-324 backfill (Geolocation cycle Phase 6, beat-65): 3-tier
-        // geolocation flat fields (browser GPS → Google API → ipinfo fallback)
-        // — matches the existing VisitorTrack + UserLoginTrack writers so BE
-        // source-attribution chain (GoogleBrowser > GoogleGeolocation > IPInfoIO)
-        // can stamp the canonical source per Invariant 8. Without this call,
-        // MapCenterTrack POSTs only the nested {cloudflare, google, ipapi}
-        // shape, which fails the BE's flat-field priority chain and falls
-        // through to 100% IPInfoIO attribution.
-        const browserGeoData = await getGeolocationData();
-
         // PHASE 1.2: Use 1-hour cache for map center changes
         const geoData = await fetchAllGeolocationData(60);
 
         const headers = { 'Content-Type': 'application/json' };
         if (user?.token) {
           headers['Authorization'] = `Bearer ${user.token}`;
+        }
+
+        // TIEMPO-457: cascadeSource = which level of the priority chain provided
+        // this location. Falls back to sessionStorage when the emit didn't carry
+        // it (e.g., LOCATION_CHANGED fired from a non-cascade caller).
+        let cascadeSource = location.source || null;
+        if (!cascadeSource && typeof sessionStorage !== 'undefined') {
+          cascadeSource = sessionStorage.getItem('locationCascadeSource') || null;
         }
 
         await fetch(`${afUrl}/api/user/mapcenter-track`, {
@@ -123,12 +193,11 @@ const RootLayout = ({ children }) => {
             cloudflare: geoData.cloudflare,
             google: geoData.google,
             ipapi: geoData.ipapi,
-            // TIEMPO-324 backfill: 3-tier flat fields (Invariant 8 contract)
-            google_browser_lat: browserGeoData.google_browser_lat,
-            google_browser_long: browserGeoData.google_browser_long,
-            google_browser_accuracy: browserGeoData.google_browser_accuracy,
-            google_api_lat: browserGeoData.google_api_lat,
-            google_api_long: browserGeoData.google_api_long
+                // TIEMPO-457: telemetry — which cascade level resolved this location
+            cascadeSource,
+            // TIEMPO-459: where the user IS (CF-inferred, session-start only)
+            userLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
+            entryDomain: (() => { try { return sessionStorage.getItem('entry_domain') || null; } catch { return null; } })()
           })
         });
       } catch (error) {
@@ -157,3 +226,6 @@ RootLayout.propTypes = {
 };
 
 export default RootLayout;
+/* v1.27.2 typeahead-prompt: prior Snackbar UX removed in favor of
+   auto-opened MapCenterModal with header override "What major city would
+   you like to see?" + autoFocused typeahead (per Quinn 19:49Z arbitration). */

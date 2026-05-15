@@ -14,6 +14,7 @@ import {
   Slider,
   Switch,
   FormControlLabel,
+  Divider,
   useTheme,
   useMediaQuery,
   CircularProgress,
@@ -24,7 +25,6 @@ import axios from 'axios';
 import { getApiBaseUrl } from '@/utils/apiUrlResolver';
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AuthContext } from '@/contexts/AuthContext';
 import {
   useEventDensity,
@@ -52,10 +52,20 @@ function createPillMarkerHtml(item, _zoom) {
   } = item;
 
   const isVenue = level === 'venue';
+  const displayName = name.length > 18 ? name.slice(0, 17) + '…' : name;
+  const header = displayName
+    ? `<div style="font-size:9px;font-weight:600;color:#555;text-align:center;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${displayName}</div>`
+    : '';
 
-  // Build pills HTML
+  // County / City levels: single total count bubble — simpler, less noise
+  if (!isVenue) {
+    const total = socialCount + eventCount + discoveredCount;
+    if (total === 0) return '<div style="display:none;"></div>';
+    return `<div style="display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.95);padding:4px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;">${header}<div style="display:flex;align-items:center;gap:2px;"><span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.social};color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${total}</span></div></div>`;
+  }
+
+  // Venue level: keep full 3-pill breakdown (social / events / discovered + class / other)
   const pills = [];
-
   if (socialCount > 0) {
     pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.social};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${socialCount}</span>`);
   }
@@ -65,29 +75,14 @@ function createPillMarkerHtml(item, _zoom) {
   if (discoveredCount > 0) {
     pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:${PILL_COLORS.discovered};color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${discoveredCount}</span>`);
   }
-
-  // Venue level: show Class (yellow) and Other (grey) pills
-  if (isVenue) {
-    if (classCount > 0) {
-      pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:#FFFF00;color:#333;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${classCount}</span>`);
-    }
-    if (otherCount > 0) {
-      pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:#999;color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${otherCount}</span>`);
-    }
+  if (classCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:#FFFF00;color:#333;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${classCount}</span>`);
+  }
+  if (otherCount > 0) {
+    pills.push(`<span style="display:inline-flex;align-items:center;justify-content:center;background-color:#999;color:#fff;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:600;margin:0 1px;box-shadow:0 1px 2px rgba(0,0,0,0.2);">${otherCount}</span>`);
   }
 
-  // If no counts, show placeholder
-  if (pills.length === 0) {
-    return '<div style="display:none;"></div>';
-  }
-
-  // Truncate name if too long (no level prefix - just the name)
-  const displayName = name.length > 18 ? name.slice(0, 17) + '…' : name;
-
-  // Header with just name (no level prefix)
-  const header = displayName
-    ? `<div style="font-size:9px;font-weight:600;color:#555;text-align:center;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${displayName}</div>`
-    : '';
+  if (pills.length === 0) return '<div style="display:none;"></div>';
 
   return `<div style="display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.95);padding:4px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;">${header}<div style="display:flex;align-items:center;gap:2px;">${pills.join('')}</div></div>`;
 }
@@ -276,8 +271,26 @@ const MapCenterModal = ({
   onSetLocation,
   onSaveLocation,
   initialLocation = null, // No hardcoded default - use smart fallback from Providers
-
+  // TIEMPO-457 v1.27.2: prompt-driven open path (L4 cascade fallback).
+  headerOverride = null,
+  autoFocusCitySearch = false,
 }) => {
+  // TIEMPO-457 v1.27.3: programmatic focus fallback for the prompt-driven open
+  // path. The TextField's `autoFocus` prop is mount-time-only and won't fire if
+  // autoFocusCitySearch flips from false→true while the modal is already open
+  // (race-condition path: WelcomeModal opens cold, L4 sets prompt later).
+  // This effect fires .focus() whenever (open && autoFocusCitySearch) becomes
+  // true, with a 100ms delay to give MUI Autocomplete + leaflet enough time
+  // to settle before we steal focus.
+  const citySearchInputRef = useRef(null);
+  useEffect(() => {
+    if (open && autoFocusCitySearch && citySearchInputRef.current) {
+      const t = setTimeout(() => {
+        citySearchInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(t);
+    }
+  }, [open, autoFocusCitySearch]);
   const { user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -765,7 +778,10 @@ const MapCenterModal = ({
       },
       (error) => {
         setGettingLocation(false);
-        setMessage({ type: 'error', text: `Could not get location: ${error.message}` });
+        const msg = error.code === 1
+          ? 'Location blocked — enable in browser settings'
+          : `Could not get location: ${error.message}`;
+        setMessage({ type: 'warning', text: msg });
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     );
@@ -820,6 +836,142 @@ const MapCenterModal = ({
     }
   };
   
+  // TIEMPO-460: Simplified prompt-mode layout (L4 cascade — headerOverride set).
+  // Type city → pick → Save activates → tap Save → closes + writes tt_geo_v2_pick.
+  if (headerOverride) {
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="xs"
+        fullWidth
+        data-testid="map-center-modal"
+      >
+        <DialogContent sx={{ pt: 4, pb: 3, px: 3, position: 'relative' }}>
+          <IconButton
+            onClick={onClose}
+            size="small"
+            data-testid="map-center-close"
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+
+          <Typography variant="h6" align="center" sx={{ mb: 3, lineHeight: 1.4 }}>
+            {headerOverride}
+          </Typography>
+
+          <Autocomplete
+            freeSolo
+            size="small"
+            options={cityOptions}
+            getOptionLabel={(option) => {
+              if (typeof option === 'string') return option;
+              const location = option.divisionName || option.regionName || option.countryName || '';
+              return location ? `${option.cityName}, ${location}` : option.cityName;
+            }}
+            loading={citySearchLoading}
+            inputValue={citySearchQuery}
+            onInputChange={(e, value) => setCitySearchQuery(value || '')}
+            onChange={handleCitySelect}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Search city (e.g., Buenos Aires)"
+                variant="outlined"
+                size="small"
+                autoFocus={autoFocusCitySearch}
+                inputRef={citySearchInputRef}
+                helperText="↓ Pick a major city to start"
+                sx={{
+                  '@keyframes citySearchPulse': {
+                    '0%, 100%': { boxShadow: '0 0 0 0 rgba(139, 21, 56, 0.4)' },
+                    '50%':      { boxShadow: '0 0 0 6px rgba(139, 21, 56, 0)' },
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    animation: 'citySearchPulse 1.8s ease-in-out infinite',
+                    '& fieldset': { borderColor: 'primary.main', borderWidth: 2 },
+                  },
+                  '& .MuiFormHelperText-root': {
+                    color: 'primary.main',
+                    fontWeight: 500,
+                    mt: 0.5,
+                  },
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  'data-testid': 'map-center-city-search',
+                }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {citySearchLoading ? <CircularProgress size={16} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            renderOption={(props, option) => (
+              <li
+                {...props}
+                key={option._id || option.cityName}
+                data-testid={`city-option-${String(option.cityName || '').toLowerCase().trim().replace(/\s+/g, '-')}`}
+              >
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{option.cityName}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {[option.divisionName, option.regionName, option.countryName].filter(Boolean).join(', ')}
+                  </Typography>
+                </Box>
+              </li>
+            )}
+            noOptionsText={citySearchQuery.length < 2 ? 'Type 2+ characters' : 'No cities found'}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: !user ? 0 : 1 }}>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={loading || !centerLat || !centerLng}
+              data-testid="map-center-save"
+              startIcon={loading ? <CircularProgress size={14} color="inherit" /> : null}
+              sx={{ minWidth: 120 }}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </Box>
+
+          {!user && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => { window.location.href = '/auth/login'; }}
+                  data-testid="prompt-login"
+                >
+                  Log In
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="secondary"
+                  onClick={() => { window.location.href = '/auth/signup'; }}
+                  data-testid="prompt-signup"
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog
       open={open}
@@ -834,158 +986,33 @@ const MapCenterModal = ({
         }
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <DialogTitle sx={{
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: 1,
-        borderColor: 'divider'
+        borderColor: 'divider',
+        pb: 1
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LocationOnIcon color="primary" />
-          <Typography variant="h6">Map Center Settings</Typography>
-        </Box>
+        <Typography variant="h6">What major city would you like to see?</Typography>
         <IconButton onClick={onClose} size="small" data-testid="map-center-close">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      
+
       <DialogContent sx={{ p: isMobile ? 1 : 2 }}>
-        {/* Compact instruction - hidden on mobile */}
-        {!isMobile && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Click anywhere on the map to set your center point
-          </Typography>
-        )}
-
-        {/* Alert - compact on mobile */}
-        {user ? (
-          <Alert severity="info" sx={{ mb: 1, py: isMobile ? 0.5 : 1 }}>
-            {isMobile ? (
-              <Typography variant="caption">
-                Save for <strong>Session</strong> or <strong>Cloud Default</strong>
-              </Typography>
-            ) : (
-              <>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                  Welcome {user.displayName || user.email}!
-                </Typography>
-                <Typography variant="body2">
-                  You can save this location for your <strong>Session</strong> (temporary) or as your <strong>Cloud Default</strong> (permanent across devices).
-                </Typography>
-              </>
-            )}
-          </Alert>
-        ) : null}
-
+        {/* Save feedback */}
         {message && (
-          <Alert
-            severity={message.type}
-            sx={{ mb: 2 }}
-            onClose={() => setMessage(null)}
-          >
+          <Alert severity={message.type} sx={{ mb: 1 }} onClose={() => setMessage(null)}>
             {message.text}
           </Alert>
         )}
-        
-        {/* Action Buttons - Compact layout */}
-        <Box sx={{
-          display: 'flex',
-          gap: isMobile ? 0.5 : 1,
-          mb: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          {/* Left side - Save, Events toggle, Login/Signup */}
-          <Box sx={{ display: 'flex', gap: isMobile ? 0.5 : 1, alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Save - saves to cloud (logged in) or session (anonymous) */}
-            {/* Pulses when location is set to draw attention */}
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={loading || !centerLat || !centerLng}
-              size="small"
-              data-testid="map-center-save"
-              startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
-              sx={centerLat && centerLng ? {
-                animation: 'pulse 1.5s ease-in-out 3',
-                '@keyframes pulse': {
-                  '0%, 100%': {
-                    boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)',
-                    transform: 'scale(1)'
-                  },
-                  '50%': {
-                    boxShadow: '0 0 0 8px rgba(25, 118, 210, 0)',
-                    transform: 'scale(1.05)'
-                  }
-                }
-              } : {}}
-            >
-              {loading ? 'Setting...' : 'SET'}
-            </Button>
 
-            {/* Show Events toggle */}
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  checked={showDensityPills}
-                  onChange={(e) => setShowDensityPills(e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
-                  {isMobile ? 'Events' : 'Show Events'}
-                </Typography>
-              }
-              sx={{ m: 0 }}
-            />
+        {/* Controls row: typeahead LEFT, crosshair + login RIGHT */}
+        <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'flex-start' }}>
 
-            {/* Login/Signup for anonymous users - stacked on mobile */}
-            {!user && (
-              <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 0.5 }}>
-                <Button
-                  variant="text"
-                  onClick={() => { window.location.href = '/auth/login'; }}
-                  size="small"
-                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
-                >
-                  Log In
-                </Button>
-                <Button
-                  variant="text"
-                  color="secondary"
-                  onClick={() => { window.location.href = '/auth/signup'; }}
-                  size="small"
-                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
-                >
-                  Sign Up
-                </Button>
-              </Box>
-            )}
-          </Box>
-
-          {/* Right side - My Location icon button with city label */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: 'auto' }}>
-            {myLocationCity && (
-              <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
-                {myLocationCity}
-              </Typography>
-            )}
-            <IconButton
-              onClick={handleUseMyLocation}
-              disabled={gettingLocation}
-              size="small"
-              color="primary"
-              title="Use my current location"
-              data-testid="map-center-use-my-location"
-            >
-              {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
-            </IconButton>
-          </Box>
-        </Box>
-
-        {/* City Search Typeahead */}
+          {/* City typeahead — takes remaining width */}
+          <Box sx={{ flex: 1 }}>
         <Autocomplete
           freeSolo
           size="small"
@@ -1005,7 +1032,27 @@ const MapCenterModal = ({
               placeholder="Search city (e.g., Los Angeles)"
               variant="outlined"
               size="small"
-              sx={{ mb: 1 }}
+              autoFocus={autoFocusCitySearch}
+              inputRef={citySearchInputRef}
+              helperText={autoFocusCitySearch ? '↓ Pick a major city to start' : undefined}
+              sx={autoFocusCitySearch ? {
+                mb: 1,
+                // TIEMPO-457 v1.27.3 visual cue: subtle pulse on the
+                // typeahead when the prompt-driven open path is active
+                '@keyframes citySearchPulse': {
+                  '0%, 100%': { boxShadow: '0 0 0 0 rgba(139, 21, 56, 0.4)' },
+                  '50%':      { boxShadow: '0 0 0 6px rgba(139, 21, 56, 0)' },
+                },
+                '& .MuiOutlinedInput-root': {
+                  animation: 'citySearchPulse 1.8s ease-in-out infinite',
+                  '& fieldset': { borderColor: 'primary.main', borderWidth: 2 },
+                },
+                '& .MuiFormHelperText-root': {
+                  color: 'primary.main',
+                  fontWeight: 500,
+                  mt: 0.5,
+                },
+              } : { mb: 1 }}
               inputProps={{
                 ...params.inputProps,
                 'data-testid': 'map-center-city-search',
@@ -1039,37 +1086,114 @@ const MapCenterModal = ({
           )}
           noOptionsText={citySearchQuery.length < 2 ? "Type 2+ characters" : "No cities found"}
         />
+            {/* Range slider + Save — inside left column, below typeahead */}
+            <Box sx={{ px: isMobile ? 0 : 1, pt: 1 }}>
+              <Slider
+                value={zoomRange}
+                onChange={(e, newValue) => setZoomRange(newValue)}
+                min={5}
+                max={200}
+                step={5}
+                marks={[
+                  { value: 5, label: '5mi' },
+                  { value: 100, label: '100mi' },
+                  { value: 200, label: '200mi' },
+                ]}
+                valueLabelDisplay="auto"
+                sx={{
+                  '& .MuiSlider-track': { height: 5 },
+                  '& .MuiSlider-rail': { height: 5 },
+                  '& .MuiSlider-thumb': { width: 18, height: 18 },
+                  '& .MuiSlider-markLabel': { fontSize: '0.65rem' },
+                }}
+              />
+            </Box>
 
-        {/* Search Range Slider */}
-        <Box sx={{ mb: 1, px: isMobile ? 0 : 2 }}>
-          <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <MyLocationIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
-            {isMobile ? `${zoomRange}mi` : `Search Range: ${zoomRange} miles`}
-          </Typography>
-          <Slider
-            value={zoomRange}
-            onChange={(e, newValue) => setZoomRange(newValue)}
-            min={5}
-            max={200}
-            step={5}
-            marks={isMobile ? [
-              { value: 5, label: '5' },
-              { value: 100, label: '100' },
-              { value: 200, label: '200' }
-            ] : [
-              { value: 5, label: '5mi' },
-              { value: 50, label: '50mi' },
-              { value: 100, label: '100mi' },
-              { value: 200, label: '200mi' }
-            ]}
-            valueLabelDisplay="auto"
-            size="small"
-            sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
-          />
-        </Box>
-        
-        {/* Map Container with density overlay */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, pt: 0.5 }}>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
+                ↑ select a major city
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={loading || !centerLat || !centerLng}
+                data-testid="map-center-save"
+                startIcon={loading ? <CircularProgress size={14} color="inherit" /> : null}
+                sx={{ minWidth: 120 }}
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
+                and/or click with map ↓
+              </Typography>
+            </Box>
+
+          </Box>{/* end left column */}
+
+          {/* RIGHT: narrow 3-tier block — crosshair / divider / login+signup, centered in column */}
+          <Box sx={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: 1,
+            width: 64, flexShrink: 0,
+            borderLeft: 1, borderColor: 'divider', pl: 1,
+          }}>
+            {/* Tier 1 — crosshair */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {myLocationCity && (
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1, textAlign: 'center', mb: 0.25 }}>
+                  {myLocationCity}
+                </Typography>
+              )}
+              <IconButton
+                onClick={handleUseMyLocation}
+                disabled={gettingLocation}
+                size="small"
+                color="primary"
+                title="Use my current location"
+                data-testid="map-center-use-my-location"
+              >
+                {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
+              </IconButton>
+            </Box>
+
+            {/* Tier 2+3 — login/signup (anon only) */}
+            {!user && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, width: '100%' }}>
+                <Divider flexItem sx={{ width: '100%', mb: 0.5 }} />
+                <Button variant="text" size="small"
+                  sx={{ px: 0.5, py: 0.25, fontSize: '0.65rem', minWidth: 'auto', lineHeight: 1.2 }}
+                  onClick={() => { window.location.href = '/auth/login'; }}>
+                  Log In
+                </Button>
+                <Button variant="text" color="secondary" size="small"
+                  sx={{ px: 0.5, py: 0.25, fontSize: '0.65rem', minWidth: 'auto', lineHeight: 1.2 }}
+                  onClick={() => { window.location.href = '/auth/signup'; }}>
+                  Sign Up
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+        </Box>{/* end controls row */}
+
+        {/* Map Container */}
         <Box sx={{ position: 'relative' }}>
+          {/* Show Events toggle — overlaid top-right of map */}
+          <Box sx={{
+            position: 'absolute', top: 8, right: 8, zIndex: 1000,
+            bgcolor: 'rgba(255,255,255,0.92)', borderRadius: 1, px: 1, py: 0.25,
+            boxShadow: 1,
+          }}>
+            <FormControlLabel
+              control={
+                <Switch size="small" checked={showDensityPills} onChange={(e) => setShowDensityPills(e.target.checked)} />
+              }
+              label={<Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Events</Typography>}
+              sx={{ m: 0 }}
+            />
+          </Box>
           <Box
             ref={mapRef}
             sx={{
@@ -1100,43 +1224,6 @@ const MapCenterModal = ({
             )}
           </Box>
 
-          {/* TIEMPO-381: Legend for event density pills - only show when enabled */}
-          {mapInitialized && showDensityPills && (
-            <Box sx={{
-              position: 'absolute',
-              bottom: 8,
-              right: 8,
-              bgcolor: 'rgba(255,255,255,0.95)',
-              borderRadius: 1,
-              px: 1,
-              py: 0.5,
-              boxShadow: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              zIndex: 1000,
-              pointerEvents: 'none',
-            }}>
-              {densityLoading && <CircularProgress size={12} />}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.social }} />
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Mil/Pra</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.events }} />
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>Festival+</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: PILL_COLORS.discovered }} />
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>BOT</Typography>
-              </Box>
-              {densityMeta && (
-                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1 }}>
-                  {densityMeta.totalEvents || 0} events
-                </Typography>
-              )}
-            </Box>
-          )}
         </Box>
         
         {/* Coordinates Display */}
@@ -1177,4 +1264,6 @@ MapCenterModal.propTypes = {
     }),
     PropTypes.oneOf([null])
   ]),
+  headerOverride: PropTypes.string,
+  autoFocusCitySearch: PropTypes.bool,
 };
