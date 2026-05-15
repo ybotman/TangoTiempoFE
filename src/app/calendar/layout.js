@@ -140,9 +140,10 @@ const RootLayout = ({ children }) => {
           try { sessionStorage.setItem('locationCascadeSource', 'default-fallback'); } catch { /* sessionStorage unavailable */ }
         }
 
-        // TIEMPO-465: include session geo fields in visitor-track POST, rate-limited to 1x/day via sessionStorage flag.
-        const sessionGeoFlagKey = `sessiongeo_logged_${new Date().toISOString().slice(0, 10)}`;
-        const alreadyLoggedToday = (() => { try { return sessionStorage.getItem(sessionGeoFlagKey) === 'true'; } catch { return false; } })();
+        // TIEMPO-465: include session geo fields in visitor-track POST, rate-limited to 1x/day via localStorage flag.
+        // localStorage (not sessionStorage) so the flag survives tab close — true UTC-day dedup.
+        const sessionGeoFlagKey = `geo_logged_${new Date().toISOString().slice(0, 10)}`;
+        const alreadyLoggedToday = (() => { try { return localStorage.getItem(sessionGeoFlagKey) === 'true'; } catch { return false; } })();
         const sessionGeoPayload = alreadyLoggedToday ? {} : {
           geoSource: sessionGeoSource,
           cascadeLevel: sessionCascadeLevel,
@@ -172,7 +173,7 @@ const RootLayout = ({ children }) => {
         });
 
         if (!alreadyLoggedToday) {
-          try { sessionStorage.setItem(sessionGeoFlagKey, 'true'); } catch { /* sessionStorage unavailable */ }
+          try { localStorage.setItem(sessionGeoFlagKey, 'true'); } catch { /* localStorage unavailable */ }
         }
       } catch (error) {
         // Silent failure - don't break user experience
