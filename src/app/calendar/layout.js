@@ -148,6 +148,8 @@ const RootLayout = ({ children }) => {
           geoSource: sessionGeoSource,
           cascadeLevel: sessionCascadeLevel,
           userLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
+          // TIEMPO-465 addendum: pass CF-derived isPrivateRelay via POST body — Azure BE is not behind CF so header read would always be false
+          isPrivateRelay: cfGeo?.isPrivateRelay ?? false,
         };
 
         await fetch(`${afUrl}/api/visitor/track`, {
