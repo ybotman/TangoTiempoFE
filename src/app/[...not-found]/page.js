@@ -22,15 +22,62 @@ const NotFoundPage = () => {
 
   return (
     <Container maxWidth="md" style={{ textAlign: 'center', marginTop: '50px', marginBottom: '50px' }}>
-      {/* Hero Image */}
-      <Image
-        src="/404-tangotiempo.png"
-        alt="Tango Tiempo 404"
-        width={800}
-        height={533}
-        priority
-        style={{ maxWidth: '100%', height: 'auto', marginBottom: '30px' }}
-      />
+      {/* Hero Image with overlaid calendar button matching the placeholder box */}
+      <Box sx={{ position: 'relative', display: 'block', mb: '30px' }}>
+        <Image
+          src="/brand/Brand-404-Wide-Dark.png"
+          alt="Tango Tiempo 404"
+          width={1536}
+          height={1024}
+          priority
+          style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+        />
+        <Button
+          component={Link}
+          href="/calendar"
+          sx={{
+            position: 'absolute',
+            left: '2%',
+            top: '83.5%',
+            width: '22%',
+            height: '7%',
+            backgroundColor: 'rgba(80, 8, 30, 0.88)',
+            border: '1px solid rgba(255,255,255,0.35)',
+            borderRadius: '6px',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: '8px',
+            px: '8px',
+            minWidth: 0,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: 'rgba(120, 15, 50, 0.95)',
+              border: '1px solid rgba(255,255,255,0.6)',
+            },
+          }}
+        >
+          <Image
+            src="/brand/Brand-ICON-Light-SQ-1.png"
+            alt=""
+            width={28}
+            height={28}
+            style={{ flexShrink: 0, borderRadius: '4px' }}
+          />
+          <Typography
+            sx={{
+              fontSize: 'clamp(9px, 1.3vw, 15px)',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.02em',
+              lineHeight: 1,
+            }}
+          >
+            Back to Calendar
+          </Typography>
+        </Button>
+      </Box>
 
       {/* Subtext */}
       <Typography variant="h6" style={{ margin: '20px 0 40px 0', color: 'text.secondary' }}>
