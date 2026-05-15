@@ -14,6 +14,7 @@ import {
   Slider,
   Switch,
   FormControlLabel,
+  Divider,
   useTheme,
   useMediaQuery,
   CircularProgress,
@@ -838,6 +839,142 @@ const MapCenterModal = ({
     }
   };
   
+  // TIEMPO-460: Simplified prompt-mode layout (L4 cascade — headerOverride set).
+  // Type city → pick → Save activates → tap Save → closes + writes tt_geo_v2_pick.
+  if (headerOverride) {
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="xs"
+        fullWidth
+        data-testid="map-center-modal"
+      >
+        <DialogContent sx={{ pt: 4, pb: 3, px: 3, position: 'relative' }}>
+          <IconButton
+            onClick={onClose}
+            size="small"
+            data-testid="map-center-close"
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+
+          <Typography variant="h6" align="center" sx={{ mb: 3, lineHeight: 1.4 }}>
+            {headerOverride}
+          </Typography>
+
+          <Autocomplete
+            freeSolo
+            size="small"
+            options={cityOptions}
+            getOptionLabel={(option) => {
+              if (typeof option === 'string') return option;
+              const location = option.divisionName || option.regionName || option.countryName || '';
+              return location ? `${option.cityName}, ${location}` : option.cityName;
+            }}
+            loading={citySearchLoading}
+            inputValue={citySearchQuery}
+            onInputChange={(e, value) => setCitySearchQuery(value || '')}
+            onChange={handleCitySelect}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Search city (e.g., Buenos Aires)"
+                variant="outlined"
+                size="small"
+                autoFocus={autoFocusCitySearch}
+                inputRef={citySearchInputRef}
+                helperText="↓ Pick a major city to start"
+                sx={{
+                  '@keyframes citySearchPulse': {
+                    '0%, 100%': { boxShadow: '0 0 0 0 rgba(139, 21, 56, 0.4)' },
+                    '50%':      { boxShadow: '0 0 0 6px rgba(139, 21, 56, 0)' },
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    animation: 'citySearchPulse 1.8s ease-in-out infinite',
+                    '& fieldset': { borderColor: 'primary.main', borderWidth: 2 },
+                  },
+                  '& .MuiFormHelperText-root': {
+                    color: 'primary.main',
+                    fontWeight: 500,
+                    mt: 0.5,
+                  },
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  'data-testid': 'map-center-city-search',
+                }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {citySearchLoading ? <CircularProgress size={16} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            renderOption={(props, option) => (
+              <li
+                {...props}
+                key={option._id || option.cityName}
+                data-testid={`city-option-${String(option.cityName || '').toLowerCase().trim().replace(/\s+/g, '-')}`}
+              >
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{option.cityName}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {[option.divisionName, option.regionName, option.countryName].filter(Boolean).join(', ')}
+                  </Typography>
+                </Box>
+              </li>
+            )}
+            noOptionsText={citySearchQuery.length < 2 ? 'Type 2+ characters' : 'No cities found'}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: !user ? 0 : 1 }}>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={loading || !centerLat || !centerLng}
+              data-testid="map-center-save"
+              startIcon={loading ? <CircularProgress size={14} color="inherit" /> : null}
+              sx={{ minWidth: 120 }}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </Box>
+
+          {!user && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => { window.location.href = '/auth/login'; }}
+                  data-testid="prompt-login"
+                >
+                  Log In
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="secondary"
+                  onClick={() => { window.location.href = '/auth/signup'; }}
+                  data-testid="prompt-signup"
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog
       open={open}
@@ -852,16 +989,16 @@ const MapCenterModal = ({
         }
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <DialogTitle sx={{
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: 1,
         borderColor: 'divider'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocationOnIcon color="primary" />
-          <Typography variant="h6">{headerOverride || 'Map Center Settings'}</Typography>
+          <Typography variant="h6">Map Center Settings</Typography>
         </Box>
         <IconButton onClick={onClose} size="small" data-testid="map-center-close">
           <CloseIcon />
