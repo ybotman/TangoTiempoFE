@@ -16,6 +16,9 @@ export async function GET(request) {
   const validCoords    = lat !== null && lng !== null && isFinite(lat) && isFinite(lng);
   const unknownCountry = country === 'XX' || country === 'T1' || !country;
 
+  // TIEMPO-465: log Private Relay presence for analytics (do not bypass — CF already maps relay IPs to metro)
+  const isPrivateRelay = (h.get('cf-ip-organization') ?? '').toLowerCase().includes('icloud private relay');
+
   let confidence = 0.0;
   let source = 'default';
 
@@ -30,7 +33,7 @@ export async function GET(request) {
   }
 
   return Response.json(
-    { city, country, region, timezone, lat, lng, confidence, source, resolvedAt: Date.now() },
+    { city, country, region, timezone, lat, lng, confidence, source, isPrivateRelay, resolvedAt: Date.now() },
     { headers: { 'cache-control': 'private, max-age=0, no-store' } }
   );
 }
