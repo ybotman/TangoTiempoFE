@@ -778,7 +778,10 @@ const MapCenterModal = ({
       },
       (error) => {
         setGettingLocation(false);
-        setMessage({ type: 'error', text: `Could not get location: ${error.message}` });
+        const msg = error.code === 1
+          ? 'Location blocked — enable in browser settings'
+          : `Could not get location: ${error.message}`;
+        setMessage({ type: 'warning', text: msg });
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     );
@@ -1109,7 +1112,7 @@ const MapCenterModal = ({
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, pt: 0.5 }}>
               <Typography variant="caption" color="text.secondary"
                 sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
-                ↑ major city
+                ↑ select a major city
               </Typography>
               <Button
                 variant="contained"
@@ -1123,16 +1126,16 @@ const MapCenterModal = ({
               </Button>
               <Typography variant="caption" color="text.secondary"
                 sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
-                ↓ map
+                and/or click with map ↓
               </Typography>
             </Box>
 
           </Box>{/* end left column */}
 
-          {/* RIGHT: narrow 3-tier block — crosshair / divider / login+signup */}
+          {/* RIGHT: narrow 3-tier block — crosshair / divider / login+signup, centered in column */}
           <Box sx={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center', gap: 1,
             width: 64, flexShrink: 0,
             borderLeft: 1, borderColor: 'divider', pl: 1,
           }}>
