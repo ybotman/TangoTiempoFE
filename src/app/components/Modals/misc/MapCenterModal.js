@@ -1083,83 +1083,97 @@ const MapCenterModal = ({
           )}
           noOptionsText={citySearchQuery.length < 2 ? "Type 2+ characters" : "No cities found"}
         />
-          </Box>{/* end typeahead flex-item */}
+            {/* Range slider + Save — inside left column, below typeahead */}
+            <Box sx={{ px: isMobile ? 0 : 1, pt: 1 }}>
+              <Slider
+                value={zoomRange}
+                onChange={(e, newValue) => setZoomRange(newValue)}
+                min={5}
+                max={200}
+                step={5}
+                marks={[
+                  { value: 5, label: '5mi' },
+                  { value: 100, label: '100mi' },
+                  { value: 200, label: '200mi' },
+                ]}
+                valueLabelDisplay="auto"
+                sx={{
+                  '& .MuiSlider-track': { height: 5 },
+                  '& .MuiSlider-rail': { height: 5 },
+                  '& .MuiSlider-thumb': { width: 18, height: 18 },
+                  '& .MuiSlider-markLabel': { fontSize: '0.65rem' },
+                }}
+              />
+            </Box>
 
-          {/* RIGHT: crosshair + login/signup stack */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, pt: 0.5 }}>
-            {myLocationCity && (
-              <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1, textAlign: 'center' }}>
-                {myLocationCity}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, pt: 0.5 }}>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
+                ↑ major city
               </Typography>
-            )}
-            <IconButton
-              onClick={handleUseMyLocation}
-              disabled={gettingLocation}
-              size="small"
-              color="primary"
-              title="Use my current location"
-              data-testid="map-center-use-my-location"
-            >
-              {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
-            </IconButton>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={loading || !centerLat || !centerLng}
+                data-testid="map-center-save"
+                startIcon={loading ? <CircularProgress size={14} color="inherit" /> : null}
+                sx={{ minWidth: 120 }}
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ fontSize: '0.65rem', userSelect: 'none' }}>
+                ↓ map
+              </Typography>
+            </Box>
+
+          </Box>{/* end left column */}
+
+          {/* RIGHT: narrow 3-tier block — crosshair / divider / login+signup */}
+          <Box sx={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'space-between',
+            width: 64, flexShrink: 0,
+            borderLeft: 1, borderColor: 'divider', pl: 1,
+          }}>
+            {/* Tier 1 — crosshair */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {myLocationCity && (
+                <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.secondary', lineHeight: 1, textAlign: 'center', mb: 0.25 }}>
+                  {myLocationCity}
+                </Typography>
+              )}
+              <IconButton
+                onClick={handleUseMyLocation}
+                disabled={gettingLocation}
+                size="small"
+                color="primary"
+                title="Use my current location"
+                data-testid="map-center-use-my-location"
+              >
+                {gettingLocation ? <CircularProgress size={18} /> : <MyLocationIcon />}
+              </IconButton>
+            </Box>
+
+            {/* Tier 2+3 — login/signup (anon only) */}
             {!user && (
-              <>
-                <Divider flexItem sx={{ width: '100%', my: 0.5 }} />
-                <Button variant="text" size="small" sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, width: '100%' }}>
+                <Divider flexItem sx={{ width: '100%', mb: 0.5 }} />
+                <Button variant="text" size="small"
+                  sx={{ px: 0.5, py: 0.25, fontSize: '0.65rem', minWidth: 'auto', lineHeight: 1.2 }}
                   onClick={() => { window.location.href = '/auth/login'; }}>
                   Log In
                 </Button>
-                <Button variant="text" color="secondary" size="small" sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
+                <Button variant="text" color="secondary" size="small"
+                  sx={{ px: 0.5, py: 0.25, fontSize: '0.65rem', minWidth: 'auto', lineHeight: 1.2 }}
                   onClick={() => { window.location.href = '/auth/signup'; }}>
                   Sign Up
                 </Button>
-              </>
+              </Box>
             )}
           </Box>
 
         </Box>{/* end controls row */}
-
-        {/* Search Range Slider */}
-        <Box sx={{ mb: 1, px: isMobile ? 0 : 2 }}>
-          <Typography variant={isMobile ? 'caption' : 'body2'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <MyLocationIcon sx={{ fontSize: isMobile ? 12 : 16 }} />
-            {isMobile ? `${zoomRange}mi` : `Search Range: ${zoomRange} miles`}
-          </Typography>
-          <Slider
-            value={zoomRange}
-            onChange={(e, newValue) => setZoomRange(newValue)}
-            min={5}
-            max={200}
-            step={5}
-            marks={isMobile ? [
-              { value: 5, label: '5' },
-              { value: 100, label: '100' },
-              { value: 200, label: '200' }
-            ] : [
-              { value: 5, label: '5mi' },
-              { value: 50, label: '50mi' },
-              { value: 100, label: '100mi' },
-              { value: 200, label: '200mi' }
-            ]}
-            valueLabelDisplay="auto"
-            size="small"
-            sx={{ '& .MuiSlider-markLabel': { fontSize: isMobile ? '0.6rem' : '0.75rem' } }}
-          />
-        </Box>
-        
-        {/* Save — centered primary CTA */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={loading || !centerLat || !centerLng}
-            data-testid="map-center-save"
-            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : null}
-            sx={{ minWidth: 120 }}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
-        </Box>
 
         {/* Map Container */}
         <Box sx={{ position: 'relative' }}>
