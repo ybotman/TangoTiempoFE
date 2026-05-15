@@ -1043,85 +1043,38 @@ const MapCenterModal = ({
           </Alert>
         )}
         
-        {/* Action Buttons - Compact layout */}
-        <Box sx={{
-          display: 'flex',
-          gap: isMobile ? 0.5 : 1,
-          mb: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          {/* Left side - Save, Events toggle, Login/Signup */}
-          <Box sx={{ display: 'flex', gap: isMobile ? 0.5 : 1, alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Save - saves to cloud (logged in) or session (anonymous) */}
-            {/* Pulses when location is set to draw attention */}
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={loading || !centerLat || !centerLng}
-              size="small"
-              data-testid="map-center-save"
-              startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <LocationOnIcon />}
-              sx={centerLat && centerLng ? {
-                animation: 'pulse 1.5s ease-in-out 3',
-                '@keyframes pulse': {
-                  '0%, 100%': {
-                    boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)',
-                    transform: 'scale(1)'
-                  },
-                  '50%': {
-                    boxShadow: '0 0 0 8px rgba(25, 118, 210, 0)',
-                    transform: 'scale(1.05)'
-                  }
-                }
-              } : {}}
-            >
-              {loading ? 'Saving...' : 'Save'}
-            </Button>
+        {/* Primary action — centered, matches compact prompt-mode hierarchy */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={loading || !centerLat || !centerLng}
+            data-testid="map-center-save"
+            startIcon={loading ? <CircularProgress size={14} color="inherit" /> : null}
+            sx={{ minWidth: 120 }}
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </Button>
+        </Box>
 
-            {/* Show Events toggle */}
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  checked={showDensityPills}
-                  onChange={(e) => setShowDensityPills(e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
-                  {isMobile ? 'Events' : 'Show Events'}
-                </Typography>
-              }
-              sx={{ m: 0 }}
-            />
-
-            {/* Login/Signup for anonymous users - stacked on mobile */}
-            {!user && (
-              <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 0.5 }}>
-                <Button
-                  variant="text"
-                  onClick={() => { window.location.href = '/auth/login'; }}
-                  size="small"
-                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
-                >
-                  Log In
-                </Button>
-                <Button
-                  variant="text"
-                  color="secondary"
-                  onClick={() => { window.location.href = '/auth/signup'; }}
-                  size="small"
-                  sx={{ px: 1, py: 0.25, fontSize: '0.7rem', minWidth: 'auto' }}
-                >
-                  Sign Up
-                </Button>
-              </Box>
-            )}
-          </Box>
-
-          {/* Right side - My Location icon button with city label */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: 'auto' }}>
+        {/* Secondary controls — Events toggle left, My Location right */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={showDensityPills}
+                onChange={(e) => setShowDensityPills(e.target.checked)}
+              />
+            }
+            label={
+              <Typography variant="caption" sx={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
+                {isMobile ? 'Events' : 'Show Events'}
+              </Typography>
+            }
+            sx={{ m: 0 }}
+          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {myLocationCity && (
               <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1 }}>
                 {myLocationCity}
@@ -1139,6 +1092,30 @@ const MapCenterModal = ({
             </IconButton>
           </Box>
         </Box>
+
+        {/* Login/Signup — anonymous users only, centered below divider */}
+        {!user && (
+          <>
+            <Divider sx={{ my: 1 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => { window.location.href = '/auth/login'; }}
+              >
+                Log In
+              </Button>
+              <Button
+                variant="text"
+                color="secondary"
+                size="small"
+                onClick={() => { window.location.href = '/auth/signup'; }}
+              >
+                Sign Up
+              </Button>
+            </Box>
+          </>
+        )}
 
         {/* City Search Typeahead */}
         <Autocomplete
