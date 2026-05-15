@@ -1106,7 +1106,11 @@ const MapCenterModal = ({
               />
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', pt: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, pt: 0.5 }}>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ textAlign: 'right', lineHeight: 1.4, fontSize: '0.65rem', userSelect: 'none' }}>
+                ↑ major city<br />or ↓ map
+              </Typography>
               <Button
                 variant="contained"
                 onClick={handleSave}
