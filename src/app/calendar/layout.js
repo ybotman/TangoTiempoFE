@@ -97,6 +97,21 @@ const RootLayout = ({ children }) => {
         // calculation. PHASE 1.2: 24-hour cache for visitor tracking.
         const geoData = await fetchAllGeolocationData(1440);
 
+        // TIEMPO-465: translate internal cascade source strings → PascalCase GeoSourceEnum + numeric level.
+        // Internal sessionStorage strings stay unchanged; translation only at POST time.
+        const cascadeSrcRaw = (() => { try { return sessionStorage.getItem('locationCascadeSource'); } catch { return null; } })();
+        const GEO_SOURCE_MAP = {
+          'anon-cookie':        { geoSource: 'ModalPick',      cascadeLevel: 1 },
+          'cf-city':            { geoSource: 'CloudflareEdge', cascadeLevel: 3 },
+          'cloudflare-country': { geoSource: 'CloudflareEdge', cascadeLevel: 4 },
+          'default-fallback':   { geoSource: 'Unknown',        cascadeLevel: 5 },
+        };
+        const geoResolved = GEO_SOURCE_MAP[cascadeSrcRaw] ?? { geoSource: 'Unknown', cascadeLevel: 5 };
+        // L0: logged-in, cascade level=0. geoSource='Unknown' because the FE doesn't
+        // know which method originally resolved the saved profile location.
+        const sessionGeoSource    = user?.uid ? 'Unknown' : geoResolved.geoSource;
+        const sessionCascadeLevel = user?.uid ? 0 : geoResolved.cascadeLevel;
+
         // Level 4 — Cloudflare country fallback (modal). CF city was null at L3
         // (country-only resolution). Per storage-rule: skipPersist:true so a
         // session-only country-center never overwrites a prior explicit pick.
@@ -125,6 +140,15 @@ const RootLayout = ({ children }) => {
           try { sessionStorage.setItem('locationCascadeSource', 'default-fallback'); } catch { /* sessionStorage unavailable */ }
         }
 
+        // TIEMPO-465: include session geo fields in visitor-track POST, rate-limited to 1x/day via sessionStorage flag.
+        const sessionGeoFlagKey = `sessiongeo_logged_${new Date().toISOString().slice(0, 10)}`;
+        const alreadyLoggedToday = (() => { try { return sessionStorage.getItem(sessionGeoFlagKey) === 'true'; } catch { return false; } })();
+        const sessionGeoPayload = alreadyLoggedToday ? {} : {
+          geoSource: sessionGeoSource,
+          cascadeLevel: sessionCascadeLevel,
+          userLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
+        };
+
         await fetch(`${afUrl}/api/visitor/track`, {
           method: 'POST',
           headers: {
@@ -142,9 +166,14 @@ const RootLayout = ({ children }) => {
             cloudflare: geoData.cloudflare,
             google: geoData.google,
             ipapi: geoData.ipapi,
-            distance: geoData.distance
+            distance: geoData.distance,
+            ...sessionGeoPayload,
           })
         });
+
+        if (!alreadyLoggedToday) {
+          try { sessionStorage.setItem(sessionGeoFlagKey, 'true'); } catch { /* sessionStorage unavailable */ }
+        }
       } catch (error) {
         // Silent failure - don't break user experience
         console.warn('[Visitor Tracking] Failed:', error.message);
