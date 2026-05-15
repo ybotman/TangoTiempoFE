@@ -1129,10 +1129,10 @@ const MapCenterModal = ({
 
           </Box>{/* end left column */}
 
-          {/* RIGHT: narrow 3-tier block — crosshair / divider / login+signup */}
+          {/* RIGHT: narrow 3-tier block — crosshair / divider / login+signup, centered in column */}
           <Box sx={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center', gap: 1,
             width: 64, flexShrink: 0,
             borderLeft: 1, borderColor: 'divider', pl: 1,
           }}>
