@@ -1,10 +1,8 @@
 /**
  * Tracking Helper - Shared utilities for visitor and user login/logout tracking
- * Fetches geolocation data from multiple sources and calculates distances
- *
+ * TIEMPO-466: Google IP geo + Mapbox removed. CF edge is the sole geo source.
  * TIEMPO-319: Added caching to prevent 429 rate limiting errors
  * 2026-03-24: Added sessionStorage caching for cloudflare + rate-limit tracking
- * 2026-03-24: Added shared cache with geolocationHelper.js to prevent duplicate Google API calls
  */
 
 // Cache for geolocation data to prevent excessive API calls
@@ -16,9 +14,6 @@ let fetchInProgress = null;
 // Session storage keys for rate limiting and shared caching
 const CF_CACHE_KEY = 'cloudflare_info_cache';
 const CF_RATE_LIMIT_KEY = 'cloudflare_info_rate_limited';
-const GOOGLE_RATE_LIMIT_KEY = 'google_geo_rate_limited';
-// SHARED with geolocationHelper.js - prevents duplicate Google API calls
-const GOOGLE_GEO_CACHE_KEY = 'google_geo_cache';
 const SESSION_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -50,11 +45,13 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 };
 
 /**
- * Fetch all geolocation data from multiple sources in parallel
- * Returns Cloudflare, Google Geolocation API, and IP API data with distance calculation
+ * Fetch Cloudflare visitor info (ip, country, ray) for tracking POST bodies.
+ * TIEMPO-466: Google IP geo + Mapbox calls removed — CF edge headers are the
+ * canonical geo source. City/lat/lng come from /api/geo/cf-location (Next.js
+ * route handler) and are forwarded as cfLocation in each POST body by the caller.
  * TIEMPO-319: Added configurable caching to prevent 429 rate limiting
  * @param {number} cacheMinutes - Cache duration in minutes (default 5, use 480 for login, 1440 for visitor)
- * @returns {Promise<object>} - { cloudflare, google, ipapi, distance }
+ * @returns {Promise<object>} - { cloudflare }
  */
 export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
   const CACHE_DURATION = cacheMinutes * 60 * 1000; // Convert minutes to milliseconds
@@ -62,12 +59,7 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
   // Skip Azure Functions calls on localhost (prevents 403 errors when AF not running)
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     console.log('[Tracking] Skipping geolocation fetch on localhost - Azure Functions not running');
-    return {
-      cloudflare: null,
-      google: null,
-      mapbox: null,
-      distance: null
-    };
+    return { cloudflare: null };
   }
 
   // Check cache first
@@ -129,127 +121,38 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
       } catch { /* ignore */ }
     };
 
-    // Fetch Cloudflare and Google in parallel using Promise.allSettled for graceful failures
-    const [cloudflareResult, googleResult] = await Promise.allSettled([
-    // 1. Cloudflare API (with caching + rate limit tracking)
-    (async () => {
-      // Check cache first
-      const cached = getSessionCache(CF_CACHE_KEY);
-      if (cached) return cached;
-      // Check rate limit
-      if (isRateLimited(CF_RATE_LIMIT_KEY)) {
-        console.warn('[Tracking] Cloudflare rate limited, skipping');
-        return null;
-      }
-      const res = await fetch(`${afUrl}/api/cloudflare/info`, {
-        signal: AbortSignal.timeout(3000) // Increased from 2s to 3s
-      });
-      if (res.status === 429) {
-        markRateLimited(CF_RATE_LIMIT_KEY);
-        return null;
-      }
-      if (!res.ok) return null;
-      const data = await res.json();
-      setSessionCache(CF_CACHE_KEY, data);
-      return data;
-    })(),
-
-    // 2. Google Geolocation API (with shared cache + rate limit tracking)
-    // SHARED CACHE: Check geolocationHelper.js cache first to prevent duplicate API calls
-    (async () => {
-      // Check shared sessionStorage cache from geolocationHelper.js
-      const sharedCached = getSessionCache(GOOGLE_GEO_CACHE_KEY);
-      if (sharedCached) {
-        console.log('[Tracking] Using shared Google Geo cache from geolocationHelper');
-        // Convert from geolocationHelper format { lat, long } to expected format { location: { lat, lng } }
-        return { location: { lat: sharedCached.lat, lng: sharedCached.long } };
-      }
-      // Check rate limit (shared with geolocationHelper.js)
-      if (isRateLimited(GOOGLE_RATE_LIMIT_KEY)) {
-        console.warn('[Tracking] Google Geo rate limited, skipping');
-        return null;
-      }
-      const res = await fetch(`${afUrl}/api/geo/google-geolocate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ considerIp: true }),
-        signal: AbortSignal.timeout(3000)
-      });
-      if (res.status === 429) {
-        markRateLimited(GOOGLE_RATE_LIMIT_KEY);
-        return null;
-      }
-      if (!res.ok) return null;
-      const result = await res.json();
-      const data = result.data || result;
-      // Also populate shared cache so geolocationHelper.js benefits
-      if (data?.location?.lat && data?.location?.lng) {
-        setSessionCache(GOOGLE_GEO_CACHE_KEY, { lat: data.location.lat, long: data.location.lng });
-      }
-      return data;
-    })()
-  ]);
-
-  // Extract data from settled promises
-  const cloudflareData = cloudflareResult.status === 'fulfilled' ? cloudflareResult.value : null;
-  const googleData = googleResult.status === 'fulfilled' ? googleResult.value : null;
-
-  // 3. If Google succeeded, use Mapbox to get city/region/country from coordinates
-  let mapboxData = null;
-  if (googleData?.location?.lat && googleData?.location?.lng) {
-    try {
-      const mapboxResponse = await fetch(`${afUrl}/api/geo/mapbox/reverse`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          latitude: googleData.location.lat,
-          longitude: googleData.location.lng
-        }),
-        signal: AbortSignal.timeout(2000)
-      });
-      const mapboxJson = await mapboxResponse.json();
-      mapboxData = mapboxJson.success ? mapboxJson.data : null;
-    } catch (err) {
-      console.warn('[Tracking] Mapbox reverse geocoding failed:', err.message);
+    // TIEMPO-466: Fetch Cloudflare visitor info only (Google IP geo retired).
+    // CF city/lat/lng come from /api/geo/cf-location (Next.js route handler)
+    // and are forwarded as cfLocation by each caller's POST body.
+    let cloudflareData = null;
+    const cfCached = getSessionCache(CF_CACHE_KEY);
+    if (cfCached) {
+      cloudflareData = cfCached;
+    } else if (!isRateLimited(CF_RATE_LIMIT_KEY)) {
+      try {
+        const res = await fetch(`${afUrl}/api/cloudflare/info`, {
+          signal: AbortSignal.timeout(3000)
+        });
+        if (res.status === 429) {
+          markRateLimited(CF_RATE_LIMIT_KEY);
+        } else if (res.ok) {
+          cloudflareData = await res.json();
+          setSessionCache(CF_CACHE_KEY, cloudflareData);
+        }
+      } catch { /* network error — non-blocking */ }
     }
-  }
 
-  // Format Cloudflare data
-  const cloudflare = cloudflareData?.data ? {
-    ip: cloudflareData.data.ip || null,
-    country: cloudflareData.data.country || null,
-    ray: cloudflareData.data.ray || null
-  } : (cloudflareData ? {
-    ip: cloudflareData.ip || null,
-    country: cloudflareData.country || null,
-    ray: cloudflareData.ray || null
-  } : null);
+    const cloudflare = cloudflareData?.data ? {
+      ip: cloudflareData.data.ip || null,
+      country: cloudflareData.data.country || null,
+      ray: cloudflareData.data.ray || null
+    } : (cloudflareData ? {
+      ip: cloudflareData.ip || null,
+      country: cloudflareData.country || null,
+      ray: cloudflareData.ray || null
+    } : null);
 
-  // Format Google data (primary source for coordinates)
-  const google = googleData?.location ? {
-    latitude: googleData.location.lat || null,
-    longitude: googleData.location.lng || null,
-    accuracy: googleData.accuracy || null
-  } : null;
-
-  // Format Mapbox data (address details from Google coordinates)
-  const mapbox = mapboxData ? {
-    latitude: mapboxData.latitude || google?.latitude || null,
-    longitude: mapboxData.longitude || google?.longitude || null,
-    city: mapboxData.city || null,
-    region: mapboxData.region || null,
-    postal: mapboxData.postal || null,
-    country: mapboxData.country || null,
-    formatted_address: mapboxData.formatted_address || null
-  } : null;
-
-  // No distance calculation needed (Mapbox uses Google's coordinates)
-  const result = {
-    cloudflare,
-    google,
-    mapbox, // Replaced ipapi with mapbox
-    distance: null // No longer calculating distance between two different sources
-  };
+    const result = { cloudflare };
 
     // Cache the result
     geolocationCache = result;
@@ -267,13 +170,8 @@ export const fetchAllGeolocationData = async (cacheMinutes = 5) => {
 };
 
 /**
- * Get cached geolocation data without making new API calls
- * Used by MapCenterModal to set intelligent default location
- *
- * @returns {object|null} Cached geolocation data or null if no cache
- * @returns {object.cloudflare} Cloudflare data (ip, country, ray)
- * @returns {object.google} Google Geolocation API data (latitude, longitude, accuracy)
- * @returns {object.mapbox} Mapbox reverse geocode data (city, region, country)
+ * Get cached geolocation data without making new API calls.
+ * @returns {object|null} Cached data ({ cloudflare }) or null if no cache
  */
 export const getCachedGeolocation = () => {
   return geolocationCache;
