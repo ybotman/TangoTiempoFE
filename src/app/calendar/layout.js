@@ -93,8 +93,8 @@ const RootLayout = ({ children }) => {
           return;
         }
 
-        // Fetch all geolocation data (Cloudflare, Google, IP API) with distance
-        // calculation. PHASE 1.2: 24-hour cache for visitor tracking.
+        // TIEMPO-466: Fetch Cloudflare visitor info only (Google IP geo + Mapbox removed).
+        // CF city/lat/lng forwarded as cfLocation from sessionStorage. 24-hour cache.
         const geoData = await fetchAllGeolocationData(1440);
 
         // TIEMPO-465: translate internal cascade source strings → PascalCase GeoSourceEnum + numeric level.
@@ -144,10 +144,14 @@ const RootLayout = ({ children }) => {
         // localStorage (not sessionStorage) so the flag survives tab close — true UTC-day dedup.
         const sessionGeoFlagKey = `geo_logged_${new Date().toISOString().slice(0, 10)}`;
         const alreadyLoggedToday = (() => { try { return localStorage.getItem(sessionGeoFlagKey) === 'true'; } catch { return false; } })();
-        const sessionGeoPayload = alreadyLoggedToday ? {} : {
+        // TIEMPO-466: cfLocation forwarded in every POST body (not just 1x/day) so BE always
+        // has the user's physical location for the MapCenterHistory chain. Azure BE is not
+        // behind CF so it cannot read CF headers directly — FE must forward.
+        const cfLocation = (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })();
+        const sessionGeoPayload = alreadyLoggedToday ? { cfLocation } : {
           geoSource: sessionGeoSource,
           cascadeLevel: sessionCascadeLevel,
-          userLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
+          cfLocation,
           // TIEMPO-465 addendum: pass CF-derived isPrivateRelay via POST body — Azure BE is not behind CF so header read would always be false
           isPrivateRelay: cfGeo?.isPrivateRelay ?? false,
         };
@@ -158,6 +162,7 @@ const RootLayout = ({ children }) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            schemaVersion: 1,
             appId: parseInt(process.env.NEXT_PUBLIC_APPLICATION_ID, 10) || 1,
             visitor_id: visitorId,
             pathname: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
@@ -167,9 +172,6 @@ const RootLayout = ({ children }) => {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timezoneOffset: -new Date().getTimezoneOffset(),
             cloudflare: geoData.cloudflare,
-            google: geoData.google,
-            ipapi: geoData.ipapi,
-            distance: geoData.distance,
             ...sessionGeoPayload,
           })
         });
@@ -206,29 +208,29 @@ const RootLayout = ({ children }) => {
           headers['Authorization'] = `Bearer ${user.token}`;
         }
 
-        // TIEMPO-457: cascadeSource = which level of the priority chain provided
-        // this location. Falls back to sessionStorage when the emit didn't carry
-        // it (e.g., LOCATION_CHANGED fired from a non-cascade caller).
-        let cascadeSource = location.source || null;
-        if (!cascadeSource && typeof sessionStorage !== 'undefined') {
-          cascadeSource = sessionStorage.getItem('locationCascadeSource') || null;
-        }
+        // TIEMPO-457: cascadeSource = which level of the priority chain resolved this location.
+        // TIEMPO-466: translated to PascalCase GeoSourceEnum (aligned with visitor-track).
+        const CASCADE_SOURCE_MAP = {
+          'anon-cookie':        'ModalPick',
+          'cf-city':            'CloudflareEdge',
+          'cloudflare-country': 'CloudflareEdge',
+          'default-fallback':   'Unknown',
+        };
+        const rawCascadeSrc = location.source || (() => { try { return sessionStorage.getItem('locationCascadeSource'); } catch { return null; } })() || null;
+        const cascadeSource = CASCADE_SOURCE_MAP[rawCascadeSrc] ?? rawCascadeSrc ?? null;
 
         await fetch(`${afUrl}/api/user/mapcenter-track`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
+            schemaVersion: 1,
             mapCenter: { lat: location.lat, lng: location.lng },
             page: typeof window !== 'undefined' ? window.location.pathname : '/calendar',
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timezoneOffset: -new Date().getTimezoneOffset(),
             cloudflare: geoData.cloudflare,
-            google: geoData.google,
-            ipapi: geoData.ipapi,
-                // TIEMPO-457: telemetry — which cascade level resolved this location
             cascadeSource,
-            // TIEMPO-459: where the user IS (CF-inferred, session-start only)
-            userLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
+            cfLocation: (() => { try { return JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { return null; } })(),
             entryDomain: (() => { try { return sessionStorage.getItem('entry_domain') || null; } catch { return null; } })()
           })
         });

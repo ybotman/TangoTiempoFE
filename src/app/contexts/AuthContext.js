@@ -110,9 +110,11 @@ export const AuthProvider = ({ children }) => {
 
         // TIEMPO-459: login-track POST. TIEMPO-458 removed google-geolocate;
         // userLocation is now the CF-inferred location captured at session start.
+        // TIEMPO-466: Google IP geo removed. CF city forwarded as cfLocation from
+        // sessionStorage (populated at session start by /api/geo/cf-location).
         fetchAllGeolocationData(480).then(geoData => {
-          let userLocation = null;
-          try { userLocation = JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { /* ignore */ }
+          let cfLocation = null;
+          try { cfLocation = JSON.parse(sessionStorage.getItem('cf_user_location')); } catch { /* ignore */ }
 
           fetch(`${afUrl}/api/user/login-track`, {
             method: 'POST',
@@ -121,14 +123,12 @@ export const AuthProvider = ({ children }) => {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+              schemaVersion: 1,
               loginType: loginType,
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               timezoneOffset: -new Date().getTimezoneOffset(),
               cloudflare: geoData.cloudflare,
-              google: geoData.google,
-              ipapi: geoData.ipapi,
-              distance: geoData.distance,
-              userLocation,
+              cfLocation,
             })
           }).catch(err => console.warn('[Login Tracking] Failed:', err.message));
         }).catch(err => console.warn('[Login Tracking] Geo fetch failed:', err.message));
