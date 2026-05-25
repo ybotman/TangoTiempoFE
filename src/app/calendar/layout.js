@@ -1,6 +1,21 @@
 //@/calendar/layout.js
 'use client'; // Enable client-side rendering
 
+/**
+ * @typedef {Object} UserLocation
+ * Canonical FE→BE contract for userLocation field in mapcenter-track and login-track POSTs.
+ * Written to sessionStorage key 'cf_user_location' once per session in this file.
+ * Read by AuthContext.js (login-track) and layout.js mapcenter-track.
+ *
+ * v1.28.3 shape (PROD today):
+ * @property {number} lat
+ * @property {number} lng
+ * @property {string} city
+ * @property {string} country
+ *
+ * TIEMPO-462 will extend with: source (string), confidence (number), cascadeLevel (number), region (string)
+ */
+
 import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { AuthContext } from '@/contexts/AuthContext';
