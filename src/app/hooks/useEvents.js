@@ -618,7 +618,18 @@ export function useEventOperations() {
         };
 // TIEMPO-276: Security cleanup - removed logging
       } else if (eventData.venueID) {
-        // We have a venue but no coordinates - need to fetch them
+        // We have a venue but no coordinates - need to fetch them.
+        //
+        // FAIL-CLOSED on missing venue geo (per `feedback_no_location_fallback.md`
+        // HARD RULE generalized to write-side). Previous behavior silently wrote
+        // `coordinates: [0, 0]` (null island, off the African coast) when the
+        // venue lookup failed or returned malformed data. That made the event
+        // invisible to every legitimate geo-radius filter and was indistinguishable
+        // from "missing event" in user-facing reports.
+        //
+        // Refusing to save loudly is the right discipline: the user immediately
+        // knows the venue record is broken and can either pick a different venue
+        // or escalate to admin to fix the venue's geocoding.
         try {
           const { getVenueById } = await import('@/services/venueService');
           const venueData = await getVenueById(eventData.venueID);
@@ -629,18 +640,25 @@ export function useEventOperations() {
               coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
             };
           } else {
-            console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
-            preparedData.venueGeolocation = {
-              type: "Point",
-              coordinates: [0, 0]
-            };
+            // Venue exists but lacks coordinates — data-shape problem on venue record
+            const venueLabel = venueData?.name || eventData.venueName || eventData.venueID;
+            throw new Error(
+              `Venue "${venueLabel}" is missing geolocation coordinates. ` +
+              `Please pick a different venue, or contact an admin to fix the venue record.`
+            );
           }
         } catch (venueError) {
+          // Re-throw with our own framed message if it's a fetch failure (network/server)
+          // to avoid leaking implementation detail to the user. Pass through our own
+          // thrown error from the inner branch unchanged.
+          if (venueError instanceof Error && venueError.message?.startsWith('Venue "')) {
+            throw venueError;
+          }
           console.error('Error fetching venue data:', venueError);
-          preparedData.venueGeolocation = {
-            type: "Point",
-            coordinates: [0, 0]
-          };
+          throw new Error(
+            `Could not verify venue coordinates (network or server error). ` +
+            `Please retry, or contact an admin if the problem persists.`
+          );
         }
       }
 
@@ -854,7 +872,10 @@ export function useEventOperations() {
           coordinates: [parseFloat(eventData.venueLongitude), parseFloat(eventData.venueLatitude)]
         };
       } else if (eventData.venueID) {
-        // We have a venue but no coordinates - need to fetch them
+        // We have a venue but no coordinates - need to fetch them.
+        // FAIL-CLOSED on missing venue geo (mirrors createEvent above; see header
+        // comment there for rationale: `feedback_no_location_fallback.md` HARD RULE
+        // generalized to write-side; refuse to save rather than write [0, 0]).
         try {
           const { getVenueById } = await import('@/services/venueService');
           const venueData = await getVenueById(eventData.venueID);
@@ -865,18 +886,21 @@ export function useEventOperations() {
               coordinates: [parseFloat(venueData.longitude), parseFloat(venueData.latitude)]
             };
           } else {
-            console.warn('Could not retrieve venue coordinates for venueID:', eventData.venueID);
-            preparedData.venueGeolocation = {
-              type: "Point",
-              coordinates: [0, 0]
-            };
+            const venueLabel = venueData?.name || eventData.venueName || eventData.venueID;
+            throw new Error(
+              `Venue "${venueLabel}" is missing geolocation coordinates. ` +
+              `Please pick a different venue, or contact an admin to fix the venue record.`
+            );
           }
         } catch (venueError) {
+          if (venueError instanceof Error && venueError.message?.startsWith('Venue "')) {
+            throw venueError;
+          }
           console.error('Error fetching venue data for update:', venueError);
-          preparedData.venueGeolocation = {
-            type: "Point",
-            coordinates: [0, 0]
-          };
+          throw new Error(
+            `Could not verify venue coordinates (network or server error). ` +
+            `Please retry, or contact an admin if the problem persists.`
+          );
         }
       }
 
