@@ -495,6 +495,11 @@ const CreateEventDetailsBasic = ({ eventData, setEventData, editMode = false, or
               id="venue-autocomplete"
               options={venueOptions}
               loading={loadingVenues}
+              // TIEMPO-301: lock venue field for RO in edit mode — venue changes affect
+              // event location/timezone/venue-specific data and break the
+              // organizer↔venue association invariant. Higher-privilege roles
+              // (RegionalAdmin / SystemAdmin) retain edit capability for admin overrides.
+              disabled={editMode && selectedRole === 'RegionalOrganizer'}
               value={selectedVenue}
               onChange={handleVenueChange}
               onInputChange={handleVenueInputChange}
