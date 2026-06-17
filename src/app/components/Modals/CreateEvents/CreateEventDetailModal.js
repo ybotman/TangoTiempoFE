@@ -779,6 +779,10 @@ const CreateEventModal = ({ open, onClose, selectedDate, editMode = false, event
         // TIEMPO-362: Force isRepeating=false for multi-day events (festivals, marathons)
         isRepeating: isMultiDay ? false : eventData.isRepeating,
         recurrenceRule: isMultiDay ? null : eventData.recurrenceRule,
+        // TIEMPO-351: Set isAllDay=true for multi-day events (>24hr duration) so they
+        // render as a single spanning bar in the calendar instead of N per-day tiles.
+        // Single-day timed events keep isAllDay=false (preserves existing behavior).
+        isAllDay: isMultiDay ? true : (eventData.isAllDay || false),
         masteredRegionName: eventData.masteredRegionName || (user?.backendInfo?.localUserInfo?.userDefaults?.region?.name || 'Default Region'),
         categoryFirst: eventData.categoryFirst || 'Other',
         selectedRole: selectedRole, // Add selectedRole for backend validation
