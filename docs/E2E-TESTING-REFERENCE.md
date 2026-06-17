@@ -12,6 +12,142 @@
 
 ---
 
+## 0. Selector Quick Reference (READ FIRST)
+
+**Audience:** Gauge (and any spawn-author) before authoring or healing a UC. 30-second scan before writing the first selector. Full context for each row is in the section cited.
+
+### 0.1 Known selector traps (do NOT use these on TT)
+
+| You might try… | Why it fails on TT | Use instead | Ref |
+|---|---|---|---|
+| `.fc-toolbar-title` | TT uses **custom views** (`dayGrid8Week` / `list21Days`); no FullCalendar toolbar title rendered | `[data-date="YYYY-MM-DD"]` on `.fc-daygrid-day` cells; or scan visible event rows | §3.5 |
+| `[data-testid="calendar-title"]` | Doesn't exist | same as above | §3.5 |
+| Standard FullCalendar prev/next buttons (`.fc-prev-button` / `.fc-next-button`) | TT uses custom `ModeToggle` + `CalendarSubMenu` for nav, not FC default toolbar | Drive `ModeToggle.js` / `CalendarSubMenu.js` selectors (TBD — file Sarah-update if you hit this) | §3.3 |
+| `getByPlaceholder("Email")` on auth form | Field uses `<TextField label="Email Address">` — placeholder is empty | `getByLabel("Email Address")` or `input[name="email"]` | §4.1 |
+| `text=Apply` to find apply button | "Apply" appears as tab label AND button label; ambiguous | `getByRole('button', { name: 'Apply for Event Organizer' })` | §6.3 |
+| Querying for `selectedRole === 'Organizer/Artist'` | That's the **display map** (`Milonger@`, `Organizer/Artist`, etc.) — internal state uses `roleName` strings | Use canonical `roleName` (`RegionalOrganizer`, `NamedUser`, …) for state assertions; use display string only for visible-text lookups | §2.1 |
+| `data-testid="user-settings-modal"` | Doesn't exist on the modal root | Open via avatar → drawer "User Settings"; tab via `button[role="tab"]:has-text("Apply")` | §5, §6.5 |
+| Filling Description and expecting auto-seed | Description has **NO auto-seed** (TIEMPO-442 stopgap requires explicit fill ≥10 chars) | Always fill Description manually | §6.2 |
+| Expecting submit-disable on shortName `available: null` | `null` and `true` both allow submit; only `false` blocks | Wait for `text=Available` after blur, OR proceed if no error message | §6.4 |
+
+### 0.2 Selector cheat-sheet by surface
+
+| Surface | Open path | Root selector | Key inner selectors | Section |
+|---|---|---|---|---|
+| **MapCenterModal** (cold-nav blocker) | Auto-opens on cold-nav | `[data-testid="map-center-modal"]` | `[data-testid="map-center-city-search"]`, `[data-testid="city-option-{kebab}"]`, `[data-testid="map-center-save"]`, `[data-testid="map-center-close"]` | §3.2 |
+| **Signup page** | `/auth/signup` | `[data-testid="signup-page"]` | `[data-testid="email-signup-button"]`, `[data-testid="google-signup-button"]` | §4.1 |
+| **EmailAuthForm** (signup/login) | After `email-signup-button` click, or `/auth/login` | `[data-testid="email-auth-form"]` | `getByLabel("First Name" / "Last Name" / "Email Address" / "Password" / "Confirm Password")`, `button[type="submit"]` | §4.1 |
+| **Calendar (desktop)** | `/calendar` after MapCenter dismissal | `.fc-view-harness` | `.fc-daygrid-day[data-date="YYYY-MM-DD"]`, `.fc-daygrid-event` | §3.5 |
+| **Calendar (mobile <768px)** | same | `.fc-list` | `.fc-list-day` (header), `.fc-list-event` (rows) | §3.5 |
+| **Top nav** | always rendered | `SiteHeader` / `SiteMenuBar` | `CityPill` (re-opens MapCenter), `ModeToggle`, `CalendarSubMenu`, avatar (right) | §3.3 |
+| **User drawer** | click avatar | (no testid; drawer opens right) | "Sign In" / "Create Account" (logged-out) ; "User Settings" / "Logout" / role selector / "Messages" (logged-in) | §3.4 |
+| **UserSettingsModal** | drawer → "User Settings" | (no testid on root) | `button[role="tab"]:has-text("Name" / "Bookmarks" / "Apply" / …)` | §5 |
+| **Apply tab (UserSettingsApply)** | UserSettings → Apply | tab content area | `getByLabel("Organizer Name" / "Short Name" / "Description")`, `getByRole('button', { name: 'Apply for Event Organizer' })` | §6 |
+| **CreateEventDetailModal** | RO/RA "+" or menu "Create Event" | `[data-testid="create-event-modal"]` | tabs `basic` / `repeating` / `image` / `spotlights` / `overrideImages` / `grants` / `other`; Save = `disabled={!isFormValid()}` | §7 |
+| **ViewEventDetailModal** | click event in calendar (RO/RA/NU) | `[data-testid="event-modal"]` | `[data-testid="event-modal-content"]`; tabs Basic / Venue / Organizer / Images | §8 |
+| **SpotlightOnlyModal** | Spotlighter clicks event (TIEMPO-433) | (separate modal; no testid) | stripped-down view; image controls hidden | §8 |
+| **EditOccurrenceModal** | edit single occurrence of recurring event | (no testid) | role-aware; Spotlighter mode hides image tab (TIEMPO-438) | §8 |
+| **RegionalOrganizersModal** (admin) | RA/SA org-management menu | (no testid on root) | `<Tab label="Profile" / "Settings" / "Status">`; `handleSaveAll` save | §9 |
+
+### 0.3 Pattern A vs Pattern B selector differences
+
+Pattern A (persistent E2EUSER at `appId="99"`) and Pattern B (ephemeral aliased Gmail at `appId="1"` with markers) hit the **same FE selectors** — divergence is at the data/test-mutator layer, not the DOM layer. See §16 for setup/cleanup; selectors above apply to both patterns.
+
+**Cross-reference:** Pattern A vs B partition asymmetry memory at `~/.claude/projects/.../memory/project_e2e_pattern_a_vs_b_partition_asymmetry.md`.
+
+### 0.4 Modal-bypass standard pattern (REQUIRED)
+
+Two rules that any modal-bypass helper (MapCenterModal, future similar) MUST follow. Both rules are field-tested via UC-0009 self-heal v1 (landed GREEN; the gemini-CLI-authored `bypassModal()` failed on first run by violating rule 1).
+
+**Rule 1 — pre-wait BEFORE visibility check:**
+```typescript
+// REQUIRED: pre-wait
+await page.waitForSelector('[data-testid="<modal-testid>"]', { timeout: 5000 });
+// only THEN check visibility
+const isOpen = await page.locator('[data-testid="<modal-testid>"]').isVisible();
+```
+Why: async modals open after Next.js hydration completes. `isVisible()` / `toBeVisible()` against a not-yet-mounted node silently returns `false` and the helper proceeds as if no modal needs dismissal — but the modal then renders mid-test and blocks downstream interaction. The 5s pre-wait closes the race.
+
+**Rule 2 — post-bypass hidden assertion (REQUIRED end-of-bypass):**
+```typescript
+// after dismissal click(s) complete:
+await expect(page.locator('[data-testid="<modal-testid>"]')).toBeHidden();
+```
+Why: catches "bypass silently no-op'd" on first run. Without this assertion, a bypass helper that fails to actually dismiss the modal (wrong selector, wrong click target, race) appears successful — defect surfaces later as a confusing downstream selector failure. The post-assert makes bypass success/failure binary and obvious.
+
+**Application:** The §3.2 5-step MapCenterModal dismissal recipe is the canonical worked example of these rules — step 1 is the pre-wait, step 5 is the post-assert. Any new modal-bypass helper inherits the same shape: pre-wait → interact → post-assert-hidden.
+
+**Field-test evidence:** UC-0009 spawn 1 RED on first run because gemini-CLI-authored `bypassModal()` had `isVisible()` race (omitted pre-wait). Self-heal v1 added the pre-wait (1-retry); landed GREEN. Twice-proven pattern (UC-0008 §0.1 traps + UC-0009 §0.4 modal-bypass).
+
+### 0.5 Input-method standard for MUI Autocomplete / controlled combobox inputs (REQUIRED)
+
+A single REQUIRED rule for any test interacting with a MUI `Autocomplete` or React-controlled `combobox` input. Field-tested via UC-0001 batch (verdict FLAKE @ 0.91 confidence — classifier verdict, third qualitatively distinct trap class).
+
+**REQUIRED rule:**
+```typescript
+// WRONG — silently no-op under parallel-worker CPU load
+await page.locator('[data-testid="map-center-city-search"]').fill('Boston');
+
+// CORRECT
+await page.locator('[data-testid="map-center-city-search"]').pressSequentially('Boston', { delay: 50 });
+```
+
+**Why:** Playwright `.fill()` sets the DOM `value` attribute but does NOT fire the React synthetic `onInputChange` event reliably on MUI Autocomplete's controlled `combobox` under parallel-worker CPU load. The result is silent: the input shows the text in DevTools, but React state (`citySearchQuery`) never updates → the debounced API call never fires → the dropdown stays empty → `city-option-{kebab}` never renders → downstream selectors fail with confusing "element not found" errors. `pressSequentially` fires character-by-character keyboard events that React intercepts reliably.
+
+**Selectors this rule applies to:**
+- `[data-testid="map-center-city-search"]` (MapCenterModal — confirmed batch-affected)
+- Any `data-testid` matching `*-city-search` / `*-autocomplete-input` / `*-combobox` patterns
+- Any MUI `<Autocomplete>` / `<TextField>` whose state binding flows through `onInputChange` rather than `onChange`
+
+**Application:** When authoring or self-healing a test that types into a search/autocomplete field, default to `pressSequentially({ delay: 50 })`. Reserve `.fill()` for plain `<input>` / `<textarea>` elements where DOM-value-only is sufficient.
+
+**Field-test evidence:** UC-0001 spawn batch RED with confusing "city-option-boston not found" errors. TRIAGE classifier verdict FLAKE @ 0.91 confidence (NOT code-fault — TT FE/BE healthy). Root cause: `.fill()` on MUI Autocomplete city-search. Self-heal pattern (`pressSequentially`) batch-applied to 8 UCs (UC-0001/0002/0006/0007/0008/0009/0010/0011/0012); regression re-run GREEN.
+
+**Three-class trap signal:** §0.1 (selector-doesn't-exist) + §0.4 (async-race on modal) + §0.5 (input-method on controlled combobox) are three qualitatively distinct trap classes empirically surfaced in three consecutive Sprint 4 spawns. ADR-0014 §Empirical evidence absorbs.
+
+### 0.6 FE-side BE-contract-drift handling (REQUIRED)
+
+Two REQUIRED rules for any TT FE test that exercises a BE-call path (Pattern A or Pattern B; live BE always per partition strategy — no mocks).
+
+**Framing note:** UC-0013 itself was an API-level BE test (`tests/be/UC-0013.spec.ts`), not a FE-driven test. UC-0013 is cited here as the **detection-layer evidence** that the api_contract / data_shape failure mode is real and reproducible. The rules below are the **FE-side discipline** that prevents the same class of BE-contract-drift from masking as confusing downstream selector-not-found errors when a TT FE test happens to exercise a contract-violating endpoint.
+
+**Rule 1 — assert response-shape at FE-test layer BEFORE consuming the body:**
+```typescript
+const res = await fetch(`/api/userlogins/firebase/${uid}?appId=1`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
+expect(res.ok).toBe(true);
+const body = await res.json();
+// REQUIRED: assert shape before consuming
+expect(body).toMatchObject({
+  firebaseUserId: expect.any(String),
+  roleIds: expect.any(Array),
+  // ... other expected fields
+});
+// only THEN consume / drive downstream selectors
+```
+Why: when BE contract drifts (missing field, renamed key, type change, or an invariant like dedup-uniqueness silently fails), `body.someField` becomes `undefined` and downstream selectors fail with confusing "element not found" errors. The pre-consume shape assertion makes the failure mode binary and obvious — `api_contract violation at /api/userlogins` instead of `[data-testid="user-display-name"] not found in 30s`.
+
+**Rule 2 — never silently fall back when BE returns unexpected shape (HARD RULE):**
+
+When expected fields are missing/null in a BE response, the test MUST fail rather than defaulting / substituting / proceeding-with-partial-data. Test silence on missing data hides BE contract regressions from the test layer.
+
+This is a generalization of memory `feedback_no_location_fallback.md` (Toby 2026-04-19, "no fallback for location / city / country / region fields") — same never-guess rail, applied to test-assertion layer rather than render layer. If the canonical rule is "render nothing when mastered* is null," the test-layer corollary is "fail the test when mastered* is null and the test depends on it." Substituting from `venue.country` or geocoder fallback hides the data drift at the render layer; substituting in test fixtures hides it at the test layer.
+
+**Field-test evidence (UC-0013 = detection-layer):**
+
+UC-0013 spawned against CALBEAF-83. Classifier verdict: **`code-bug` at 0.97 confidence**, rule-lane (LLM-fallback NOT invoked but converged on agree). Signals fired: `api_contract` + `data_shape`, both ≥95% rule-pass. Audit: `triage/decisions/run-20260507-UC0013.jsonl`.
+
+Root cause (CALBEAF-83): `POST /api/userlogins` dedup gate at `calendar-be-af/src/functions/UserLogins.js:348-361` is `findOne({firebaseUserId, appId})` — **missing the `findOne({'firebaseUserInfo.email': <email>, appId})` email-uniqueness check**. POST-2 with same email + new firebaseUserId returns HTTP 201 (should be 409 or 200-update preserving original UID per spec). Real-world manifestation: Elena Getmanova (2 records same email; Sep-2025 orphan + Feb-2026 active per Fulton intel).
+
+**FE-side hypothetical impact (why this rule matters for TT FE tests):** had a TT FE signup flow test exercised this endpoint and a downstream selector depended on UID-bound profile lookup (user's display name, role badge, settings link), the duplicate-record race would surface as (a) wrong profile rendered (display name from orphan record), or (b) selector-not-found if the FE app's UID resolver picked the orphan record without expected fields. Either way the underlying `api_contract` violation (dedup-not-enforced) gets diagnosed as a confusing downstream selector/render error. Rule 1 catches it at the assertion layer instead.
+
+**Why no Rule 3 in v0.6:** Schema-snapshot tests and runtime-response-validation libraries (Zod / yup / TS runtime validators) are candidate framework-architecture additions for Phase E or later when self-heal needs schema-aware diff. Those are ADR-class decisions, not §0-content additions. Two-rule shape ships clean.
+
+**Four-class trap signal:** §0.1 (selector-doesn't-exist) + §0.4 (async-race on modal) + §0.5 (input-method on controlled combobox) + §0.6 (BE-contract-drift handling) are four qualitatively distinct trap classes empirically surfaced in four consecutive Sprint 4 spawns. The §0 canonical-shape continues absorbing novel fault patterns rather than overfitting; §0.6 specifically demonstrates absorption ACROSS test-author-domain boundaries (BE-test detection → FE-test discipline). ADR-0014 §Empirical evidence absorbs.
+
+---
+
 ## 1. Glossary
 
 | Term | Meaning |
@@ -599,6 +735,80 @@ For full reference see `calendar-be-af-test-mutators/` repo. Quick summary:
 
 ---
 
+## 15.5. Merge Mechanisms + Per-App Guard Rails
+
+> **Numbering convention (per ADR-0014 v1.2 Constraint C):** §15.5 is a **sibling-shaped insertion** between §15-Test-Mutators and §16-Common UC Patterns, **NOT a sub-section of §15**. The §N.5 numbering preserves stable §0-§19 baseline IDs (Decision #7 Constraint C: insertions permitted as §N.5 / §N.M sub-numbers; readers and tooling MUST treat as siblings of §N). This section is the worked-example codified in ADR-0014 v1.2.
+
+Per-app guard-rail enumeration for the merge mechanism. Discovered empirically through Sprint 5 round-trip-closure work (2026-05-07T21:00Z arc). Cross-persona reference for Quinn / Gauge / future-Sarah / cross-app adopters.
+
+**Quinn Charter §B.X candidate:** each per-app E2E-TESTING-REFERENCE.md should include this section type so adopters (Cord/Compás/Dash/Fulton) can enumerate their own per-repo guard rails and reduce discover-by-empirical-failure cycles for cross-persona arcs.
+
+### 15.5.1 The three-layer guard-rail cake
+
+| Layer | Source | Scope | What it does |
+|---|---|---|---|
+| **Layer 1** | Project CLAUDE.md "Before ANY PROD operation" §4-6 | PROD only | Bans `gh pr merge` ANY flags (auth-bypass concern); requires Toby UI merge after PR creation; admin-override needs `ADMIN-OVERRIDE` phrase |
+| **Layer 2** | Local VM pre-push hook | All tiers | Bars direct pushes to TEST (and presumably DEVL/PROD). Only `sandbox/*` branches accepted from this VM. `git push origin TEST` rejects with `Branch: TEST (PROTECTED) — Only sandbox/* branches allowed in VM` |
+| **Layer 3** | `MasterCalendar/docs/GIT-BRANCHING-STRATEGY.md` | Tier-aware | DEVL autonomous; TEST CR for risky changes (T3 docs autonomous push allowed announce-only); PROD locked + DEPLOY-PROD authorization |
+
+### 15.5.2 Layer-1 scoping note (rule-text vs context)
+
+Project CLAUDE.md rule 4 reads "NEVER use `gh pr merge` — ANY flags. ..." The "ANY flags" language can be misread as tier-absolute. **It is not.** The rule is structurally listed under "Before ANY PROD operation" preamble; rules 4-6 inherit PROD-context.
+
+For TEST-tier sandbox merges, the gh-pr-merge ban is spirit-strict-prudence (Toby's CLI auth still binds), not rule-strict. Different question: VM hook (Layer 2) blocks gh-pr-merge anyway via the underlying push.
+
+### 15.5.3 Layer-2 hook is asymmetric across repos
+
+| Repo | VM hook present? | Direct git push to TEST |
+|---|---|---|
+| `tangotiempo.com` (TT FE; Sarah) | **YES** (sandbox/* only) | ❌ blocked |
+| `calendar-be-af` (Fulton) | **NO** (per Fulton precedent 2026-05-07T20:54Z DEVL→TEST direct push) | ✅ allowed |
+| `harmonyjunction.org` (Cord, offline) | TBD when re-engaged | TBD |
+| `calops` (Dash, offline) | TBD when re-engaged | TBD |
+| `NTTT` (Compás, offline) | TBD when re-engaged | TBD |
+
+**Per-repo Toby-discipline choice;** not a project-wide policy. New adopters of this doc-type should investigate their own repo's hook state and enumerate here.
+
+### 15.5.4 Path-table for sandbox/* → TEST merge from Sarah-side
+
+| Path | Mechanism | Auth | Bypasses Layer 1 (gh-pr-merge ban)? | Bypasses Layer 2 (VM hook)? | Verdict |
+|---|---|---|---|---|---|
+| **Toby UI merge** | GitHub web UI click | Toby (human) | N/A (no gh CLI involved) | ✓ (server-side merge) | ✅ Always clean — recommended |
+| **Sarah `git merge` + `git push`** | local git + git push | Sarah's git auth | ✓ (no gh CLI involved) | ❌ (VM hook blocks at push) | ❌ Blocked at Layer 2 |
+| **Sarah `gh pr merge`** | gh CLI → GitHub API | Toby's gh auth (via Sarah's CLI login) | ❌ Banned per "ANY flags" PROD-rule (spirit-strict at TEST) | ✓ (server-side) | ❌ Banned per Layer 1 spirit |
+| **Sarah `gh pr merge --auto`** | gh CLI auto-merge | Toby's gh auth | ❌ Same as above | ✓ | ❌ Same |
+| **Quinn UI merge** | GitHub web UI | Quinn (human) | N/A | ✓ | ⚠ Unavailable (Quinn is Claude Code CLI; no browser) |
+| **Auto-merge config (set via UI)** | GitHub server-side auto-merge on checks-pass | server-side | ✓ | ✓ | ⚠ Requires repo permission to configure |
+
+**Operational rule:** when sandbox/* → TEST merge is needed, default path is **Toby UI merge via Number2 surface**. Latency: minutes-to-hours depending on Toby availability.
+
+### 15.5.5 What Sarah does on merge-block
+
+1. Surface to Number2 with: PR URL + Quinn-arbiter green-light citation + bounded-reversible threshold + pre-merge clearance checklist
+2. Number2 surfaces to Toby via DAG-anchor channel (Telegram or hub)
+3. Toby clicks merge in GitHub UI; auto-deploy fires
+4. Sarah runs post-deploy actions (mongosh data-patches, etc.)
+5. Sarah signals Quinn ready for downstream actions (Gauge re-spawn, etc.)
+
+### 15.5.6 Cross-persona pre-flight rule transfer
+
+Per `feedback_e2e_doc_maintenance.md` 4-rule recommender-side pre-flight (rules 1-3 + lane-attribution-check), Sarah and Fulton both applied independently in this Sprint 5 day:
+- **Sarah lane:** 4/15 candidates screened pre-flight failures = ~27% miss rate (3 stale-BACKLOG + 1 lane-attribution caught at TIEMPO-364)
+- **Fulton lane:** 2/3 candidates screened pre-flight failures = ~67% miss rate at small N (CALBEAF-172 + CALBEAF-166 stale; CALBEAF-131 lane-ambiguous Discovery-pipeline)
+- **Combined cross-persona:** ~5/17 (~29%) miss rate — pre-flight rule pays for itself across both recommender lanes
+
+Cross-persona protocol-norm inheritance demonstrated: Fulton adopted 4-rule pre-flight + cadence-norms + standby-gap-codification within same Sprint 5 day after Sarah codified them.
+
+### 15.5.7 Discovery-discipline meta-lesson (Charter §B.X anchor)
+
+Three observations from the 2026-05-07 arc that compose into a discipline anchor for cross-persona / future-arc reference:
+
+1. **Project-CLAUDE.md context-scoping (under-which-preamble a rule lives) matters as much as rule text.** Rules listed under "Before ANY PROD operation" inherit PROD-context even if their stated language sounds absolute. Always check the section header before applying.
+2. **VM hooks add stricter constraints than project rules.** When mechanism is policy-clean per Layer 1, Layer 2 may still block. Discover-by-empirical-failure is the canonical mode until Layer 2 status is enumerated for the repo+branch combo.
+3. **Merge mechanism may have multiple layers (rule + hook + policy).** Mechanism must be clean at ALL layers OR use a path that bypasses the layers (Toby UI merge bypasses Layers 1+2 simultaneously).
+
+---
+
 ## 16. Common UC Patterns
 
 ### 16.1 Pattern A persistent test user (E2EUSER)
@@ -689,8 +899,32 @@ Sarah-side persistent memories (`~/.claude/projects/.../memory/`):
 
 **Discovery protocol:** when Gauge spawns surface POM gaps OR forms misbehave, root-cause via this doc first; if doc is incomplete or stale, file a Sarah-update + commit fix here adjacent to the code change.
 
+### 18.1 FTPNTD self-application (Sarah maintenance commitment)
+
+Per Sprint 4 charter directive (FTPNTD-on-self), TT custom-view selector divergence has been three-layer-fixed:
+
+| Layer | Fix |
+|---|---|
+| **Data** | Memory entry `project_tt_custom_calendar_views.md` records `dayGrid8Week` / `list21Days` and the absent-`.fc-toolbar-title` trap |
+| **Code-process** | §0 Selector Quick Reference + §0.1 Known Selector Traps (this doc, v0.2) — fast-lookup so Gauge sees the trap before authoring, not after a heal cycle |
+| **Team-human** | **Standing maintenance rule:** any TT FE PR that adds/removes/renames a `data-testid`, label-based form field, or modal surface MUST update §0 (Quick Reference) + §11 (Modal Taxonomy) in the same commit. Discovery via Gauge spawn = file a Sarah-update issue + same-PR fix. Reviewer enforces. |
+
+**Cross-app template signal:** other app personas (Cord/Compás/Dash) can copy this doc's §0 pattern as a fast-lookup template — selector trap surface is per-app but the format scales.
+
+**Maintenance cadence (added v0.5):** when active spawn evidence is available (e.g., a Gauge run surfaces a new trap class mid-sprint), prefer **same-day turnaround** on §0 amendments — minutes-to-hours, not days. Today's evidence: three §0 amendments (v0.2 → v0.3 → v0.4) landed in <1 hour from spawn-evidence to PR push, each backed by a GREEN UC verdict. Cadence-as-norm framing for adopters: same-day turnaround is the canonical maintenance pace **when paired with active spawn evidence**; without that pairing (e.g., refactors or speculative additions), normal review cadence applies. Goal is to keep the doc trailing reality by minutes, not weeks.
+
+**Codification cadence (added v0.7):** memory promotion + maintenance-rule codification happens **at standby-gap windows during sprint execution**, not deferred to sprint retro. Standby gaps (post-milestone, pre-next-charter, awaiting upstream signal) are the lowest-cost codification windows — arc context is fresh, specific incidents are still vivid, and the fix is cheap to author while still on-cadence. Deferred codification decays: lessons forgotten, specifics lost, generalizations softened. This applies to both doc-side amendments and persona-memory promotions; both have higher fidelity at standby-gap-time than at retro-time.
+
 ---
 
 ## 19. Change Log
 
+- **v0.9** (2026-05-07T21:16 UTC) — Sarah added loose-numbering convention header to §15.5 per ADR-0014 v1.2 Constraint C (Archie arbiter call 21:06Z + Gotan structural surface 21:04Z). NO renumber: §15.5 stays at §15.5; §16/§17/§18/§19 unchanged. **Initial Sarah call was Option 1 (renumber to §17); reverted same-pace after Archie's arbiter Option 2 ratify** because: (a) Decision #7's whole point is additive-growth-without-amendment — renumber-on-add would compound across all future heterogeneous absorptions, undermining the principle; (b) section IDs are part of shape (Decision #1) — renumber-on-add forces shape changes per insertion; (c) cost-asymmetry: Option 1 = per-insertion renumber-ripple (compounds); Option 2 = one-time learning cost (bounded); (d) Fulton already mirrored §15.5 verbatim in BE-E2E-ref v0.2 — cross-app number-mirror preserved. Worked example: §15.5 is sibling-shaped insertion between §15-Test-Mutators and §16-Common UC Patterns, NOT child of §15. ADR-0014 v1.2 Constraint C cites §15.5 as the canonical worked example; Herald HDTS-DOCS-STANDARD §6.1+§6.2 templates encode the convention.
+- **v0.8** (2026-05-07T21:08 UTC) — Sarah added §15.5 "Merge Mechanisms + Per-App Guard Rails" (3-layer guard-rail cake + Layer-1 scoping note + per-repo asymmetry table + path-table for sandbox/*→TEST merges + cross-persona pre-flight stats + discovery-discipline meta-lesson). Triggered by 2026-05-07T21:00Z arc: VM hook on TT FE blocked Sarah/Quinn-direct merge mechanism; Quinn ratified Path 1 (Toby UI merge via Number2 surface); Quinn Charter §B.X candidate fold for cross-persona / cross-app reference. Cross-persona empirical baseline cited (Sarah 4/15 + Fulton 2/3 = combined ~29% miss rate on 4-rule pre-flight). Doc-section addition is canonical-shape for adopters: Cord/Compás/Dash/Fulton can enumerate their own per-repo guard rails using same shape. Stacked on v0.2-v0.7 PR #355.
+- **v0.7** (2026-05-07T19:46 UTC) — Sarah added §18.1 codification-cadence note ("memory promotion + maintenance-rule codification happens at standby-gap windows during sprint execution, not deferred to sprint retro"). Patch-class addition (no §0 content change); codifies the meta-pattern that today's `feedback_state_transition_broadcast_discipline.md` promotion (during Phase D entry standby gap) self-evidenced. Triggered by Quinn 2026-05-07T19:44Z optional-fold suggestion. Stacked on v0.2-v0.6 PR #355.
+- **v0.6** (2026-05-07T18:24 UTC) — Sarah added §0.6 FE-side BE-contract-drift handling with two REQUIRED rules (assert response-shape before consuming; never silently fall back on missing/null fields — generalizes `feedback_no_location_fallback.md` HARD RULE to test-assertion layer). Field-tested via UC-0013 (CALBEAF-83 spawn): code-bug @ 0.97 confidence, rule-lane, signals `api_contract` + `data_shape` both ≥95%; root cause = POST `/api/userlogins` missing email-uniqueness dedup at `calendar-be-af/src/functions/UserLogins.js:348-361`. UC-0013 was an API-level BE test, not FE — cited here as detection-layer evidence; FE-side angle is the hypothetical-impact rationale (had a TT FE signup test exercised the endpoint, selector-not-found would have masked the api_contract violation). FOURTH qualitatively distinct trap class; demonstrates §0 canonical-shape absorbing across test-author-domain boundaries (BE-test detection → FE-test discipline). Triggered by Number2 broadcast 18:16Z + Quinn scope-call A 18:19Z + Quinn fill-ins 18:21Z. Same-day-turnaround per cadence-norm. Stacked on v0.2/v0.3/v0.4/v0.5 PR #355.
+- **v0.5** (2026-05-07T17:24 UTC) — Sarah added §18.1 maintenance-cadence note ("when active spawn evidence is available, prefer same-day turnaround on §0 amendments; without that pairing, normal review cadence applies"). Patch-class addition (no §0 content change); codifies the same-day-turnaround norm before adopters fan out so cadence-as-protocol is visible alongside the maintenance rule itself. Triggered by Quinn 2026-05-07T17:22Z protocol-compounding observation (3-min v0.4 turnaround beat 4-min v0.3). Stacked on v0.2/v0.3/v0.4 PR #355.
+- **v0.4** (2026-05-07T17:20 UTC) — Sarah added §0.5 Input-method standard for MUI Autocomplete / controlled combobox inputs (REQUIRED rule: `pressSequentially({ delay: 50 })` instead of `.fill()`). Field-tested via UC-0001 batch (verdict FLAKE @ 0.91 confidence; 8-UC self-heal batch GREEN). Third qualitatively distinct trap class (§0.1 selector-doesn't-exist + §0.4 async-race + §0.5 input-method-on-controlled-combobox). Pattern proposed by Quinn 2026-05-07T17:17Z under same-day-turnaround protocol; landed within unilateral canonical-author authority per ADR-0014 Decision #7 (shape-preserving additive content; same REQUIRED-rule format as §0.4). Stacked on v0.2/v0.3 PR #355.
+- **v0.3** (2026-05-07T17:08 UTC) — Sarah added §0.4 Modal-bypass standard pattern with two REQUIRED rules (pre-wait `waitForSelector` before visibility check; post-bypass `toBeHidden` assertion). Field-tested via UC-0009 self-heal v1 (Phase C Exit DoD data point #2 GREEN). Pattern proposed by Quinn 2026-05-07T17:04Z under same-day-turnaround protocol established in v0.2. Twice-proven §0 cross-app template signal: UC-0008 §0.1 (traps) + UC-0009 §0.4 (modal-bypass). Stacked on v0.2 PR #355.
+- **v0.2** (2026-05-07T16:45 UTC) — Sarah added §0 Selector Quick Reference + §0.1 Known Selector Traps + §0.2 Selector cheat-sheet by surface + §0.3 Pattern A vs B selector note. Audit code-process fix for TT custom-view selector divergence (Sprint 4 motion 5 per Number2 broadcast 16:30Z; framework-as-product / scale-readiness framing). Added §18.1 FTPNTD self-application + standing maintenance rule. No content removed; existing sections untouched.
 - **v0.1** (2026-05-06T23:55 UTC) — Sarah initial draft per Toby directive 23:50 via Number2. Comprehensive scout of TT FE form/modal/role surface; covers signup / login / apply-as-organizer / event-creation / event-view / RegionalOrganizers admin / role taxonomy / RRULE / modal taxonomy / auto-seed race conditions / bootstrap self-heal / API endpoints / test-mutator companion reference / common UC patterns / wait-for-auth-ready proposal. Phase B Exit retrospective material; living doc.
